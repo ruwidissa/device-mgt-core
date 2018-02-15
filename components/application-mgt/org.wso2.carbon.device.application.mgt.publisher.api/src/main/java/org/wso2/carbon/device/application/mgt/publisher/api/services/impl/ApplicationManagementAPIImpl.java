@@ -22,16 +22,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+import org.wso2.carbon.device.application.mgt.common.*;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.publisher.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
-import org.wso2.carbon.device.application.mgt.common.Application;
-import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationReleaseManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 
@@ -125,7 +122,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @Multipart("banner") Attachment bannerFile,
             @Multipart("screenshot") List<Attachment> attachmentList) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationReleaseManager applicationReleaseManager = APIUtil.getApplicationReleaseManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         InputStream iconFileStream;
         InputStream bannerFileStream;
@@ -204,14 +200,14 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Path("/image-artifacts/{appId}/{uuid}")
     public Response updateApplicationImageArtifacts(
             @PathParam("appId") int appId,
-            @PathParam("uuid") String applicationUUID,
+            @PathParam("uuid") String applicationUuid,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
             @Multipart("screenshot") List<Attachment> attachmentList) {
 
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        ApplicationReleaseManager applicationReleaseManager = APIUtil.getApplicationReleaseManager();
-        ApplicationRelease applicationRelease = null;
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        ApplicationRelease applicationRelease;
 
         try {
             InputStream iconFileStream = null;
@@ -229,11 +225,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     attachments.add(screenshot.getDataHandler().getInputStream());
                 }
             }
+            applicationRelease = applicationManager.validateApplicationRelease(applicationUuid);
             applicationRelease = applicationStorageManager
-                    .updateImageArtifacts(appId, applicationUUID, iconFileStream, bannerFileStream, attachments);
-            applicationReleaseManager.updateRelease(appId, applicationRelease);
+                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
+            applicationManager.updateRelease(appId, applicationRelease);
             return Response.status(Response.Status.OK)
-                    .entity("Successfully uploaded artifacts for the application " + applicationUUID).build();
+                    .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
         } catch (NotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
@@ -241,13 +238,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error(msg, e);
             return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         } catch (IOException e) {
-            log.error("Exception while trying to read icon, banner files for the application " + applicationUUID);
+            log.error("Exception while trying to read icon, banner files for the application " + applicationUuid);
             return APIUtil.getResponse(new ApplicationManagementException(
-                            "Exception while trying to read icon, " + "banner files for the application " + applicationUUID, e),
+                            "Exception while trying to read icon, " + "banner files for the application " + applicationUuid, e),
                     Response.Status.BAD_REQUEST);
         } catch (ResourceManagementException e) {
             log.error("Error occurred while uploading the image artifacts of the application with the uuid "
-                    + applicationUUID, e);
+                    + applicationUuid, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
@@ -260,14 +257,17 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @PathParam("uuid") String applicationUuuid,
             @Multipart("binaryFile") Attachment binaryFile) {
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        ApplicationReleaseManager applicationReleaseManager = APIUtil.getApplicationReleaseManager();
-        ApplicationRelease applicationRelease = null;
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+
+
+        ApplicationRelease applicationRelease;
         try {
 
             if (binaryFile != null) {
-                applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationId, applicationUuuid,
+                applicationRelease = applicationManager.validateApplicationRelease(applicationUuuid);
+                applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease,
                         binaryFile.getDataHandler().getInputStream());
-                applicationReleaseManager.updateRelease(applicationId, applicationRelease);
+                applicationManager.updateRelease(applicationId, applicationRelease);
                 return Response.status(Response.Status.OK)
                         .entity("Successfully uploaded artifacts for the application " + applicationUuuid).build();
 
@@ -291,13 +291,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     }
 
 
-    //Todo Not complete
     @PUT
     @Consumes("application/json")
-    public Response editApplication(@Valid Application application) {
+    public Response updateApplication(@Valid Application application) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            application = applicationManager.editApplication(application);
+            application = applicationManager.updateApplication(application);
         } catch (NotFoundException e) {
             return APIUtil.getResponse(e, Response.Status.NOT_FOUND);
         } catch (ApplicationManagementException e) {
@@ -306,42 +305,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         }
         return Response.status(Response.Status.OK).entity(application).build();
-    }
-
-    @DELETE
-    @Path("/{appid}")
-    public Response deleteApplication(@PathParam("appid") int applicationId) {
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        try {
-            applicationManager.deleteApplication(applicationId);
-//            todo delete storage details
-//            applicationStorageManager.deleteApplicationArtifacts(uuid);
-            String responseMsg = "Successfully deleted the application: " + applicationId;
-            return Response.status(Response.Status.OK).entity(responseMsg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while deleting the application: " + applicationId;
-            log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @DELETE
-    @Path("/{appid}/{uuid}")
-    public Response deleteApplicationRelease(@PathParam("appid") int applicationId, @PathParam("uuid") String releaseUuid) {
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        try {
-            applicationManager.deleteApplication(applicationId);
-//            todo delete release storage details
-//            applicationStorageManager.deleteApplicationArtifacts(uuid);
-            String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
-            return Response.status(Response.Status.OK).entity(responseMsg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while deleting the application: " + applicationId;
-            log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @Override
@@ -355,7 +318,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
             @Multipart("screenshot") List<Attachment> attachmentList) {
-        ApplicationReleaseManager applicationReleaseManager = APIUtil.getApplicationReleaseManager();
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         InputStream iconFileStream = null;
         InputStream bannerFileStream = null;
@@ -363,11 +326,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
         try {
 
-            if (binaryFile != null) {
+            applicationRelease = applicationManager.validateApplicationRelease(applicationUUID);
 
-                //todo add binary file validation
-                applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationId, applicationUUID,
-                        binaryFile.getDataHandler().getInputStream());
+            if (binaryFile != null) {
+                applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease, binaryFile.getDataHandler().getInputStream());
             }
 
             if (iconFile != null) {
@@ -385,10 +347,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
 
             applicationRelease = applicationStorageManager
-                    .updateImageArtifacts(applicationId, applicationUUID, iconFileStream, bannerFileStream,
-                            attachments);
+                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
 
-            applicationRelease = applicationReleaseManager.updateRelease(applicationId, applicationRelease);
+            applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
 
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (NotFoundException e) {
@@ -408,27 +369,80 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
-
-    // todo I think we must remove this
-    @Override
-    @PUT
-    @Consumes("application/json")
-    @Path("/{uuid}/{version}/{channel}")
-    public Response updateDefaultVersion(@PathParam("uuid") String applicationUUID, @PathParam("version") String
-            version, @PathParam("channel") String channel, @QueryParam("isDefault") boolean isDefault) {
-        ApplicationReleaseManager applicationReleaseManager = APIUtil.getApplicationReleaseManager();
+    @DELETE
+    @Path("/{appid}")
+    public Response deleteApplication(@PathParam("appid") int applicationId) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
-            applicationReleaseManager.changeDefaultRelease(applicationUUID, version, isDefault, channel);
-            return Response.status(Response.Status.OK)
-                    .entity("Successfully changed the default version for the " + "release channel " + channel
-                            + " for the application UUID " + applicationUUID).build();
-        } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            List<String> storedLocations = applicationManager.deleteApplication(applicationId);
+            applicationStorageManager.deleteAllApplicationReleaseArtifacts(storedLocations);
+            String responseMsg = "Successfully deleted the application and application releases: " + applicationId;
+            return Response.status(Response.Status.OK).entity(responseMsg).build();
         } catch (ApplicationManagementException e) {
-            log.error("Application Release Management Exception while changing the default release for the release "
-                    + "channel " + channel + " for the application with UUID " + applicationUUID + " for the version "
-                    + version);
+            String msg = "Error occurred while deleting the application: " + applicationId;
+            log.error(msg, e);
+            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred while deleting the application storage: " + applicationId;
+            log.error(msg, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @DELETE
+    @Path("/{appid}/{uuid}")
+    public Response deleteApplicationRelease(@PathParam("appid") int applicationId, @PathParam("uuid") String releaseUuid) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
+        try {
+            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
+            applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
+            String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
+            return Response.status(Response.Status.OK).entity(responseMsg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while deleting the application: " + applicationId;
+            log.error(msg, e);
+            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred while deleting the application storage: " + applicationId;
+            log.error(msg, e);
+            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GET
+    @Path("/lifecycle/{appId}/{uuid}")
+    public Response getLifecycleState(
+            @PathParam("appId") int applicationId,
+            @PathParam("uuid") String applicationUuid) {
+        LifecycleState lifecycleState;
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting lifecycle state.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return Response.status(Response.Status.OK).entity(lifecycleState).build();
+    }
+
+    @POST
+    @Path("/lifecycle/{appId}/{uuid}")
+    public Response addLifecycleState(
+            @PathParam("appId") int applicationId,
+            @PathParam("uuid") String applicationUuid,
+            LifecycleState state) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.addLifecycleState(applicationId, applicationUuid, state);
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while adding lifecycle state.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        return Response.status(Response.Status.CREATED).entity("Lifecycle state added successfully.").build();
+    }
+
 }

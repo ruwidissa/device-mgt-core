@@ -66,7 +66,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private static final Log log = LogFactory.getLog(ApplicationManagerImpl.class);
     private DeviceTypeDAO deviceTypeDAO;
     private VisibilityDAO visibilityDAO;
-    private LifecycleStateDAO lifecycleStateDAO;
     private ApplicationDAO applicationDAO;
 
     public ApplicationManagerImpl() {
@@ -76,7 +75,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private void initDataAccessObjects() {
         this.deviceTypeDAO = ApplicationManagementDAOFactory.getDeviceTypeDAO();
         this.visibilityDAO = ApplicationManagementDAOFactory.getVisibilityDAO();
-        this.lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
     }
 
@@ -276,7 +274,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return application;
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
-                    "User-store exception while getting application with the " + "application id " + applicationId);
+                    "User-store exception while getting application with the " + "application id " + applicationId, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -322,7 +320,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return isRoleExists(unrestrictedRoles, userName);
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
-                    "User-store exception while verifying whether user have assigned" + "unrestricted roles or not");
+                    "User-store exception while verifying whether user have assigned" + "unrestricted roles or not", e);
         }
     }
 
@@ -354,7 +352,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void deleteApplication(int applicationId) throws ApplicationManagementException {
+    public List<String> deleteApplication(int applicationId) throws ApplicationManagementException {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
@@ -362,6 +360,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException("Invalid Application");
         }
         List<ApplicationRelease> applicationReleases = getReleases(applicationId);
+        List<String> storedLocations = new ArrayList<>();
         if (log.isDebugEnabled()) {
             log.debug("Request is received to delete applications which are related with the application id " +
                     applicationId);
@@ -374,12 +373,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             newAppLifecycleState.setTenantId(tenantId);
             newAppLifecycleState.setUpdatedBy(userName);
             addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+            storedLocations.add(applicationRelease.getAppHashValue());
         }
         //todo add column into application and move application into removed state
+        return storedLocations;
     }
 
     @Override
-    public void deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException {
+    public String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application application = validateApplication(applicationId);
@@ -399,6 +400,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         newAppLifecycleState.setTenantId(tenantId);
         newAppLifecycleState.setUpdatedBy(userName);
         addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+        return applicationRelease.getAppHashValue();
     }
 
     /**
@@ -459,7 +461,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationList applicationList = getApplications(filter);
         if (applicationList != null && applicationList.getApplications() != null && !applicationList.getApplications()
                 .isEmpty()) {
-            throw new ValidationException(
+            throw new ApplicationManagementException(
                     "Already an application registered with same name - " + applicationList.getApplications().get(0)
                             .getName());
         }
@@ -471,7 +473,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param applicationID ID of the Application.
      * @return Application related with the UUID
      */
-    private Application validateApplication(int applicationID) throws ApplicationManagementException {
+    public Application validateApplication(int applicationID) throws ApplicationManagementException {
         if (applicationID <= 0) {
             throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
                     + "parameter to get the relevant application.");
@@ -489,7 +491,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param applicationUuid UUID of the Application.
      * @return Application related with the UUID
      */
-    private ApplicationRelease validateApplicationRelease(String applicationUuid) throws ApplicationManagementException {
+    public ApplicationRelease validateApplicationRelease(String applicationUuid) throws ApplicationManagementException {
         if (applicationUuid == null) {
             throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
                     + "parameter to get the relevant application.");
@@ -501,6 +503,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     "Application with UUID " + applicationUuid + " does not exist.");
         }
         return applicationRelease;
+    }
+
+    @Override
+    public ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease) throws ApplicationManagementException {
+        return null;
     }
 
     /**
@@ -559,7 +566,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public LifecycleState getLifecycleState(int applicationId, String applicationUuid) throws LifecycleManagementException {
+    public LifecycleState getLifecycleState(int applicationId, String applicationUuid) throws
+            ApplicationManagementException {
         LifecycleState lifecycleState;
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -570,11 +578,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             lifecycleState = lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
             lifecycleState.setNextStates(getNextLifecycleStates(lifecycleState.getCurrentState()));
         } catch (ApplicationManagementDAOException e) {
-            throw new LifecycleManagementException("Failed to get lifecycle state", e);
-        } catch (DBConnectionException e) {
-            throw new LifecycleManagementException("Failed to connect with Database", e);
+            throw new ApplicationManagementException("Failed to get lifecycle state", e);
         } catch (ApplicationManagementException e) {
-            throw new LifecycleManagementException("Failed to get application and application management", e);
+            throw new ApplicationManagementException("Failed to get application and application management", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -582,7 +588,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws LifecycleManagementException {
+    public void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws
+            ApplicationManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
             Application application = validateApplication(applicationId);
@@ -602,9 +609,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 lifecycleStateDAO.addLifecycleState(state);
             }
         } catch (LifeCycleManagementDAOException | DBConnectionException e) {
-            throw new LifecycleManagementException("Failed to add lifecycle state", e);
+            throw new ApplicationManagementException("Failed to add lifecycle state", e);
         } catch (ApplicationManagementException e) {
-            throw new LifecycleManagementException("Lifecycle State Validation failed", e);
+            throw new ApplicationManagementException("Lifecycle State Validation failed", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -697,186 +704,47 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public Application editApplication(Application application) throws ApplicationManagementException {
-        //        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        //        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        //        if (application.getUuid() == null) {
-        //            throw new ValidationException("Application UUID cannot be empty");
-        //        }
-        //
-        //        if (!isApplicationOwnerOrAdmin(application.getUuid(), userName, tenantId)) {
-        //            throw new ApplicationManagementException(
-        //                    "User " + userName + " does not have permissions to edit the " + "application with the UUID "
-        //                            + application.getUuid());
-        //        }
-        //        if (this.getApplication(application.getUuid()) != null) {
-        //            if (application.getPlatform() == null || application.getPlatform().getIdentifier() == null) {
-        //                throw new NotFoundException("Platform information not available with the application!");
-        //            }
-        //            Platform platform = DataHolder.getInstance().getPlatformManager()
-        //                    .getPlatform(tenantId, application.getPlatform().getIdentifier());
-        //            if (platform == null) {
-        //                throw new NotFoundException(
-        //                        "Platform specified by identifier " + application.getPlatform().getIdentifier()
-        //                                + " is not found. Please give a valid platform identifier.");
-        //            }
-        //            application.setPlatform(platform);
-        //            if (application.getCategory() != null) {
-        //                String applicationCategoryName = application.getCategory().getName();
-        //                if (applicationCategoryName == null || applicationCategoryName.isEmpty()) {
-        //                    throw new ApplicationManagementException(
-        //                            "Application category name cannot be null or " + "empty. Cannot edit the application.");
-        //                }
-        //                Category category = DataHolder.getInstance().getCategoryManager()
-        //                        .getCategory(application.getCategory().getName());
-        //                if (category == null) {
-        //                    throw new NotFoundException(
-        //                            "Invalid Category is provided for the application " + application.getUuid() + ". "
-        //                                    + "Cannot edit application");
-        //                }
-        //                application.setCategory(category);
-        //            }
-        //            try {
-        //                ConnectionManagerUtil.beginDBTransaction();
-        //                ApplicationDAO applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
-        //                application.setModifiedAt(new Date());
-        //                Application modifiedApplication = applicationDAO.editApplication(application, tenantId);
-        //                Visibility visibility = DataHolder.getInstance().getVisibilityManager()
-        //                        .put(application.getId(), application.getVisibility());
-        //                modifiedApplication.setVisibility(visibility);
-        //                ConnectionManagerUtil.commitDBTransaction();
-        //                return modifiedApplication;
-        //            } catch (ApplicationManagementDAOException e) {
-        //                ConnectionManagerUtil.rollbackDBTransaction();
-        //                throw e;
-        //            } finally {
-        //                ConnectionManagerUtil.closeDBConnection();
-        //            }
-        //        } else {
-        //            throw new NotFoundException("No applications found with application UUID - " + application.getUuid());
-        //        }
+    public Application updateApplication(Application application) throws ApplicationManagementException {
+        Application existingApplication = validateApplication(application.getId());
+        if (existingApplication == null) {
+            throw new NotFoundException("Tried to update Application which is not in the publisher, " +
+                    "Please verify application details");
+        }
+        if (!existingApplication.getType().equals(application.getType())) {
+            throw new ApplicationManagementException("You are trying to change the application type and it is not " +
+                    "possible after you create an application. Therefore please remove this application and publish " +
+                    "new application with type: " + application.getType());
+        }
+        if (existingApplication.getIsFree() != application.getIsFree()) {
+            if (existingApplication.getIsFree() == 1) {
+                if (application.getPaymentCurrency() != null || !application.getPaymentCurrency().equals("")) {
+                    throw new ApplicationManagementException("If you are going to change Non-Free app as Free app, " +
+                            "currency attribute in the application updating payload should be null or \"\"");
+                }
+            } else if (existingApplication.getIsFree() == 0) {
+                if (application.getPaymentCurrency() == null || application.getPaymentCurrency().equals("")) {
+                    throw new ApplicationManagementException("If you are going to change Free app as Non-Free app, " +
+                            "currency attribute in the application payload should not be null or \"\"");
+                }
+            }
+        }
+        //todo get restricted roles and assign for application
+        if (existingApplication.getIsRestricted() != application.getIsRestricted()) {
+            if (existingApplication.getIsRestricted() == 1) {
+                if (application.getUnrestrictedRoles() == null || application.getUnrestrictedRoles().isEmpty()) {
+                    throw new ApplicationManagementException("If you are going to add role restriction for non role " +
+                            "restricted Application, Unrestricted role list won't be empty or null");
+                }
+            } else if (existingApplication.getIsRestricted() == 0) {
+                if (application.getUnrestrictedRoles() != null || !application.getUnrestrictedRoles().isEmpty()) {
+                    throw new ApplicationManagementException("If you are going to remove role restriction from role " +
+                            "restricted Application, Unrestricted role list should be empty or null");
+                }
+            }
+            //todo update role restriction
+        }
+        //todo get tags and assign for application verify
+        //todo update application
         return application;
-    }
-
-    @Override
-    public void changeLifecycle(String applicationUuid, String lifecycleIdentifier)
-            throws ApplicationManagementException {
-        //        boolean isAvailableNextState = false;
-        //        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        //        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        //        List<LifecycleStateTransition> nextLifeCycles = getLifeCycleStates(applicationUuid);
-        //
-        //        for (LifecycleStateTransition lifecycleStateTransition : nextLifeCycles) {
-        //            if (log.isDebugEnabled()) {
-        //                log.debug("Lifecycle state of the application " + applicationUuid + " can be changed to"
-        //                        + lifecycleStateTransition.getNextState());
-        //            }
-        //            if (lifecycleStateTransition.getNextState().equalsIgnoreCase(lifecycleIdentifier)) {
-        //                isAvailableNextState = true;
-        //                break;
-        //            }
-        //        }
-        //        if (!isAvailableNextState) {
-        //            throw new ApplicationManagementException("User " + userName + " does not have the permission to change "
-        //                    + "the lifecycle state of the application " + applicationUuid + " to lifecycle state "
-        //                    + lifecycleIdentifier);
-        //        }
-        //        try {
-        //            ConnectionManagerUtil.beginDBTransaction();
-        //            ApplicationDAO applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
-        //            applicationDAO.changeLifecycle(applicationUuid, lifecycleIdentifier, userName, tenantId);
-        //            ConnectionManagerUtil.commitDBTransaction();
-        //        } catch (ApplicationManagementDAOException e) {
-        //            ConnectionManagerUtil.rollbackDBTransaction();
-        //            throw e;
-        //        } finally {
-        //            ConnectionManagerUtil.closeDBConnection();
-        //        }
-    }
-
-    @Override
-    public List<LifecycleStateTransition> getLifeCycleStates(String applicationUUID)
-            throws ApplicationManagementException {
-        //        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        //        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        //        boolean isAdminOrApplicationOwner = isApplicationOwnerOrAdmin(applicationUUID, userName, tenantId);
-        //
-        //        if (log.isDebugEnabled()) {
-        //            log.debug("User " + userName + " in tenant " + tenantId + " is an Admin or Application owner of the "
-        //                    + "application " + applicationUUID);
-        //        }
-        //        try {
-        //            ConnectionManagerUtil.openDBConnection();
-        //            List<LifecycleStateTransition> transitions = ApplicationManagementDAOFactory.getApplicationDAO()
-        //                    .getNextLifeCycleStates(applicationUUID, tenantId);
-        //            List<LifecycleStateTransition> filteredTransitions = new ArrayList<>();
-        //
-        //            if (log.isDebugEnabled()) {
-        //                log.debug("Lifecycle of the application with UUID : " + applicationUUID + " can be changed to "
-        //                        + transitions.size() + ". The number may vary according to the permission level of user : "
-        //                        + userName + " of tenant " + tenantId);
-        //            }
-        //            for (LifecycleStateTransition transition : transitions) {
-        //                String permission = transition.getPermission();
-        //                if (permission != null) {
-        //                    if (log.isDebugEnabled()) {
-        //                        log.debug("In order to make the state change to " + transition.getNextState() + " permission "
-        //                                + permission + "  is required");
-        //                    }
-        //                    if (isAdminUser(userName, tenantId, permission)) {
-        //                        filteredTransitions.add(transition);
-        //                    } else {
-        //                        if (log.isDebugEnabled()) {
-        //                            log.debug("User " + userName + " does not have the permission " + permission + " to "
-        //                                    + "change the life-cycle state to " + transition.getNextState() + "  of the "
-        //                                    + "application " + applicationUUID);
-        //                        }
-        //                    }
-        //                } else if (isAdminOrApplicationOwner) {
-        //                    filteredTransitions.add(transition);
-        //                }
-        //            }
-        //            if (log.isDebugEnabled()) {
-        //                log.debug("User " + userName + " can do " + filteredTransitions.size() + " life-cyle state changes "
-        //                        + "currently on application with the UUID " + applicationUUID);
-        //            }
-        //            return filteredTransitions;
-        //        } catch (UserStoreException e) {
-        //            throw new ApplicationManagementException(
-        //                    "Userstore exception while checking whether user " + userName + " from tenant " + tenantId
-        //                            + " is authorized to do a life-cycle status change in an application ", e);
-        //        } finally {
-        //            ConnectionManagerUtil.closeDBConnection();
-        //        }
-        return null;
-    }
-
-
-    /**
-     * To check whether current user is application owner or admin.
-     *
-     * @param applicationUUID UUID of the Application.
-     * @return true if the current user is application owner or admin, unless false.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    private boolean isApplicationOwnerOrAdmin(String applicationUUID, String userName, int tenantId)
-            throws ApplicationManagementException {
-//                try {
-//                    if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-//                        return true;
-//                    }
-//                } catch (UserStoreException e) {
-//                    throw new ApplicationManagementException("Userstore exception while checking whether user is an admin", e);
-//                }
-//                try {
-//                    ConnectionManagerUtil.openDBConnection();
-//                    Application application = ApplicationManagementDAOFactory.getApplicationDAO()
-//                            .getApplication(applicationUUID, tenantId, userName);
-//                    return application.getUser().getUserName().equals(userName)
-//                            && application.getUser().getTenantId() == tenantId;
-//                } finally {
-//                    ConnectionManagerUtil.closeDBConnection();
-//                }
-        return false;
     }
 }

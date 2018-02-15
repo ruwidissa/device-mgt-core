@@ -32,6 +32,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
@@ -229,7 +230,7 @@ public interface ApplicationManagementAPI {
                             message = "Internal Server Error. \n Error occurred while editing the application.",
                             response = ErrorResponse.class)
             })
-    Response editApplication(
+    Response updateApplication(
             @ApiParam(
                     name = "application",
                     value = "The application that need to be edited.",
@@ -333,55 +334,6 @@ public interface ApplicationManagementAPI {
                     required = true)
             @PathParam("appid") int applicationId);
 
-    @PUT
-    @Consumes("application/json")
-    @Path("/{uuid}/{version}/{channel}")
-    @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "PUT",
-            value = "Make the particular application release as default or not",
-            notes = "Make the particular application release as default or not",
-            tags = "Application Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application-mgt:login")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully retrieved the lifecycle states.",
-                            response = List.class),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Error occurred while getting the life-cycle states.",
-                            response = ErrorResponse.class)
-            })
-    Response updateDefaultVersion(
-            @ApiParam(
-                    name = "UUID",
-                    value = "Unique identifier of the Application",
-                    required = true)
-            @PathParam("uuid") String applicationUUID,
-            @ApiParam(
-                    name = "Version",
-                    value = "Version of the Application Release",
-                    required = true)
-            @PathParam("version") String version,
-            @ApiParam(
-                    name = "Release Channel",
-                    value = "Release Channel",
-                    required = true)
-            @PathParam("channel") String channel,
-            @ApiParam(
-                    name = "isDefault",
-                    value = "Whether to make it default or not",
-                    required = false)
-            @QueryParam("isDefault") boolean isDefault);
-
     @POST
     @Path("/image-artifacts/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -483,4 +435,71 @@ public interface ApplicationManagementAPI {
             @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart(value = "screenshot", required = false) List<Attachment> attachmentList);
+
+    @GET
+    @Path("/lifecycle/{appId}/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get lifecycle states",
+            notes = "Get all lifecycle states",
+            tags = "Lifecycle Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:lifecycle:get")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved lifecycle states.",
+                            response = List.class,
+                            responseContainer = "List"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting the lifecycle list.",
+                            response = ErrorResponse.class)
+            })
+    Response getLifecycleState(@PathParam("appId") int applicationId,
+                               @PathParam("uuid") String applicationUuid);
+
+    @POST
+    @Path("/lifecycle/{appId}/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add a lifecycle state",
+            notes = "This will add a new lifecycle state",
+            tags = "Lifecycle Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:lifecycle:add")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully add a lifecycle state.",
+                            response = Application.class),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. \n " +
+                                    "Empty body because the client already has the latest version of the requested "
+                                    + "resource."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred adding a lifecycle state.",
+                            response = ErrorResponse.class)
+            })
+    Response addLifecycleState(@PathParam("appId") int applicationId,
+                               @PathParam("uuid") String applicationUuid,
+                               LifecycleState state);
 }

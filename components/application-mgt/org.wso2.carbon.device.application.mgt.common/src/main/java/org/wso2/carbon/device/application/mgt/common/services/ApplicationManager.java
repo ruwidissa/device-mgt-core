@@ -51,7 +51,7 @@ public interface ApplicationManager {
      * @return Updated Application
      * @throws ApplicationManagementException Application Management Exception
      */
-    Application editApplication(Application application) throws ApplicationManagementException;
+    Application updateApplication(Application application) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
@@ -59,7 +59,7 @@ public interface ApplicationManager {
      * @param applicationId ID for tha application
      * @throws ApplicationManagementException Application Management Exception
      */
-    void deleteApplication(int applicationId) throws ApplicationManagementException;
+    List<String> deleteApplication(int applicationId) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
@@ -68,7 +68,7 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of tha application release
      * @throws ApplicationManagementException Application Management Exception
      */
-    void deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
+    String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.
@@ -87,27 +87,6 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException Application Management Exception
      */
     String getUuidOfLatestRelease(int appId) throws ApplicationManagementException;
-
-
-    /**
-     * To change the lifecycle of the Application.
-     *
-     * @param applicationUuid     UUID of the Application
-     * @param lifecycleIdentifier New life-cycle that need to be changed.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    void changeLifecycle(String applicationUuid, String lifecycleIdentifier) throws
-            ApplicationManagementException;
-
-    /**
-     * To get the next possible life-cycle states for the application.
-     *
-     * @param applicationUUID UUID of the application.
-     * @return the List of possible states
-     * @throws ApplicationManagementException Application Management Exception
-     */
-    List<LifecycleStateTransition> getLifeCycleStates(String applicationUUID)
-            throws ApplicationManagementException;
 
     /**
      * To get Application with the given UUID.
@@ -163,9 +142,49 @@ public interface ApplicationManager {
      */
     List<ApplicationRelease> getReleases(int applicationId) throws ApplicationManagementException;
 
-    LifecycleState getLifecycleState(int appReleaseId, String applicationUuid) throws LifecycleManagementException;
+    /**
+     * To get all the releases of a particular Application.
+     *
+     * @param applicationId ID of the Application .
+     * @param applicationUuid UUID of the Application Release.
+     * @return the LifecycleState of the Application releases related with the particular Application.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    LifecycleState getLifecycleState(int applicationId, String applicationUuid) throws ApplicationManagementException;
 
-    void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws LifecycleManagementException;
+    /**
+     * To get all the releases of a particular Application.
+     *
+     * @param applicationId ID of the Application.
+     * @param applicationUuid UUID of the Application Release.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws ApplicationManagementException;
 
+    /**
+     * To validate the application existence for given application id
+     *
+     * @param applicationId ID of the Application.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    Application validateApplication(int applicationId) throws ApplicationManagementException;
 
+    /**
+     * To validate the application release existence for given application release UUID
+     *
+     * @param releaseUuid UUID of the Application Release.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    ApplicationRelease validateApplicationRelease(String releaseUuid) throws ApplicationManagementException;
+
+    /**
+     * To update with a new release for an Application.
+     *
+     * @param appId    ID of the Application
+     * @param applicationRelease ApplicationRelease
+     * @return Updated Application Release.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease)
+            throws ApplicationManagementException;
 }
