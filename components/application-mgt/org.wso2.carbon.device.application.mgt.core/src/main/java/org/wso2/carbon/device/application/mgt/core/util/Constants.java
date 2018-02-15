@@ -60,4 +60,9 @@ public class Constants {
      * Name of the image artifacts that are saved in the file system.
      */
     public static final String[] IMAGE_ARTIFACTS = {"icon", "banner", "screenshot"};
+
+    /**
+     * Directory name of the release artifacts that are saved in the file system.
+     */
+    public static final String RELEASE_ARTIFACT = "artifact";
 }

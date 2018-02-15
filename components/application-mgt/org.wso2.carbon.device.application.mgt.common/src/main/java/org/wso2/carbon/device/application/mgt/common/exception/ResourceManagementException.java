@@ -23,7 +23,7 @@ package org.wso2.carbon.device.application.mgt.common.exception;
  * Represents the exception that will be thrown when there is an issue while managing the resources.
  */
 public class ResourceManagementException extends Exception {
-    ResourceManagementException(String message, Throwable ex) {
+    public ResourceManagementException(String message, Throwable ex) {
         super(message, ex);
     }
 
