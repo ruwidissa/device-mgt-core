@@ -84,8 +84,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 String uuId = applicationManager.getUuidOfLatestRelease(application.getId());
                 if (uuId != null){
                     application.setUuidOfLatestRelease(uuId);
-                    ImageArtifact imageArtifact = applicationStorageManager.getImageArtifact(uuId, Constants.IMAGE_ARTIFACTS[0], 0);
-                    application.setIconOfLatestRelease(imageArtifact);
+//                    ImageArtifact imageArtifact = applicationStorageManager.getImageArtifact(uuId, Constants.IMAGE_ARTIFACTS[0], 0);
+//                    application.setIconOfLatestRelease(imageArtifact);
                 }else{
 //                    ToDo set default icon
                 }
@@ -97,9 +97,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             String msg = "Error occurred while getting the application list";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (ApplicationStorageManagementException e) {
-            log.error("Error occurred while getting the image artifacts of the application", e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -120,8 +117,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             String uuId = applicationManager.getUuidOfLatestRelease(application.getId());
             if (uuId != null){
                 application.setUuidOfLatestRelease(uuId);
-                ImageArtifact imageArtifact = applicationStorageManager.getImageArtifact(uuId, Constants.IMAGE_ARTIFACTS[0], 0);
-                application.setIconOfLatestRelease(imageArtifact);
+//                ImageArtifact imageArtifact = applicationStorageManager.getImageArtifact(uuId, Constants.IMAGE_ARTIFACTS[0], 0);
+//                application.setIconOfLatestRelease(imageArtifact);
             }else{
                 //                    ToDo set default icon
             }
@@ -131,9 +128,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
             log.error("Error occurred while getting application with the uuid " + appType, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
-        } catch (ApplicationStorageManagementException e) {
-            log.error("Error occurred while getting the image artifacts of the application with the uuid " + appType, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
