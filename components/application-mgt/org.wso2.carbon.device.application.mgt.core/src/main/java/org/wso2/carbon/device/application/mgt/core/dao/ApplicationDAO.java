@@ -137,10 +137,11 @@ public interface ApplicationDAO {
      * To get the application count that satisfies gives search query.
      *
      * @param filter Application Filter.
+     * @param tenantId Id of the tenant
      * @return count of the applications
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    int getApplicationCount(Filter filter) throws ApplicationManagementDAOException;
+    int getApplicationCount(Filter filter, int tenantId) throws ApplicationManagementDAOException;
 
 
     /**

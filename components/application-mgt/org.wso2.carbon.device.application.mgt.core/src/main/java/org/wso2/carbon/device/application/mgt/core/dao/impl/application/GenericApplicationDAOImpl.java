@@ -61,20 +61,19 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int index = 0;
         int applicationId = -1;
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, "
                     + "IS_FREE, PAYMENT_CURRENCY, RESTRICTED, TENANT_ID) VALUES "
                     + "(?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(++index, application.getName());
-            stmt.setString(++index, application.getType());
-            stmt.setString(++index, application.getAppCategory());
-            stmt.setInt(++index, application.getIsFree());
-            stmt.setString(++index, application.getPaymentCurrency());
-            stmt.setInt(++index, application.getIsRestricted());
-            stmt.setInt(++index, application.getUser().getTenantId());
+            stmt.setString(1, application.getName());
+            stmt.setString(2, application.getType());
+            stmt.setString(3, application.getAppCategory());
+            stmt.setInt(4, application.getIsFree());
+            stmt.setString(5, application.getPaymentCurrency());
+            stmt.setInt(6, application.getIsRestricted());
+            stmt.setInt(7, application.getUser().getTenantId());
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
@@ -99,17 +98,15 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         Connection conn;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
-        int index = 0;
         String sql = "INSERT INTO AP_APP_TAG (TAG, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
         try {
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
             for (Tag tag : tags) {
-                stmt.setString(++index, tag.getTagName());
-                stmt.setInt(++index, tenantId);
-                stmt.setInt(++index, applicationId);
+                stmt.setString(1, tag.getTagName());
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, applicationId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -119,7 +116,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            Util.cleanupResources(stmt, null);
         }
     }
 
@@ -132,15 +129,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int isExist = 0;
-        int index = 0;
         String sql = "SELECT * FROM AP_APP WHERE NAME = ? AND TYPE = ? AND TENANT_ID = ?";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
-            stmt.setString(++index, appName);
-            stmt.setString(++index, type);
-            stmt.setInt(++index, tenantId);
+            stmt.setString(1, appName);
+            stmt.setString(2, type);
+            stmt.setInt(3, tenantId);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 isExist = 1;
@@ -169,7 +165,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ResultSet rs = null;
         ApplicationList applicationList = new ApplicationList();
         Pagination pagination = new Pagination();
-        int index = 0;
         String sql = "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY"
                 + " AS APP_CATEGORY, AP_APP.IS_FREE, AP_APP.RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
                 + "AS APP_UNRESTRICTED_ROLES FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
@@ -194,7 +189,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         }
 
-        sql += " LIMIT ? OFFSET ? ORDER BY DESC APP_ID";
+        sql += " LIMIT ? OFFSET ? ORDER BY " + filter.getSortBy() + " APP_ID";
 
         pagination.setLimit(filter.getLimit());
         pagination.setOffset(filter.getOffset());
@@ -202,21 +197,21 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(++index, tenantId);
+            stmt.setInt(1, tenantId);
 
             if (filter.getAppType() != null) {
-                stmt.setString(++index, filter.getAppType());
+                stmt.setString(2, filter.getAppType());
             }
             if (filter.getAppName() != null) {
                 if (filter.isFullMatch()) {
-                    stmt.setString(++index, filter.getAppName().toLowerCase());
+                    stmt.setString(3, filter.getAppName().toLowerCase());
                 } else {
-                    stmt.setString(++index, "%" + filter.getAppName().toLowerCase() + "%");
+                    stmt.setString(3, "%" + filter.getAppName().toLowerCase() + "%");
                 }
             }
 
-            stmt.setInt(++index, filter.getLimit());
-            stmt.setInt(++index, filter.getOffset());
+            stmt.setInt(4, filter.getLimit());
+            stmt.setInt(5, filter.getOffset());
             rs = stmt.executeQuery();
             applicationList.setApplications(Util.loadApplications(rs));
             applicationList.setPagination(pagination);
@@ -247,7 +242,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String sql = "";
-        int index = 0;
         String uuId = null;
         try {
             conn = this.getDBConnection();
@@ -256,8 +250,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + "AND LIFECYCLE.CURRENT_STATE = ? order by APP_RELEASE.ID DESC;";
 
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(++index, appId);
-            stmt.setString(++index, "PUBLISHED");
+            stmt.setInt(1, appId);
+            stmt.setString(2, AppLifecycleState.PUBLISHED.toString());
             rs = stmt.executeQuery();
             if (rs.next()) {
                 uuId = rs.getString("UUID");
@@ -274,7 +268,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public int getApplicationCount(Filter filter) throws ApplicationManagementDAOException {
+    public int getApplicationCount(Filter filter, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application count from the database");
             log.debug(String.format("Filter: limit=%s, offset=%s", filter.getLimit(), filter.getOffset()));
@@ -300,9 +294,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += ";";
 
             stmt = conn.prepareStatement(sql);
-            int index = 0;
+            stmt.setInt(1, tenantId);
             if (filter.getAppName() != null) {
-                stmt.setString(++index, "%" + filter.getAppName().toLowerCase() + "%");
+                stmt.setString(2, "%" + filter.getAppName().toLowerCase() + "%");
             }
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -450,7 +444,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
         try {
             conn = this.getDBConnection();
-            int index = 0;
             String sql = "UPDATE AP_APP SET ";
 
 
@@ -474,22 +467,22 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
             stmt = conn.prepareStatement(sql);
             if (application.getName() != null && !application.getName().equals(existingApplication.getName())) {
-                stmt.setString(++index, application.getName());
+                stmt.setString(1, application.getName());
             }
             if (application.getType() != null && !application.getType().equals(existingApplication.getType())) {
-                stmt.setString(++index, application.getType());
+                stmt.setString(2, application.getType());
             }
             if (application.getAppCategory() != null && !application.getAppCategory().equals(existingApplication.getAppCategory())) {
-                stmt.setString(++index, application.getAppCategory());
+                stmt.setString(3, application.getAppCategory());
             }
             if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-                stmt.setInt(++index, application.getIsRestricted());
+                stmt.setInt(4, application.getIsRestricted());
             }
             if (application.getIsFree() != existingApplication.getIsFree()) {
-                stmt.setInt(++index, application.getIsFree());
+                stmt.setInt(5, application.getIsFree());
             }
 
-            stmt.setInt(++index, application.getId());
+            stmt.setInt(6, application.getId());
             stmt.executeUpdate();
             return application;
         } catch (DBConnectionException e) {
