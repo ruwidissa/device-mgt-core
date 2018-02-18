@@ -32,11 +32,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.application.mgt.common.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.Application;
-import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 
 import java.util.List;
 import javax.validation.Valid;
@@ -146,17 +143,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
-                    name = "offset",
-                    value = "Provide from which position apps should return", defaultValue = "20")
-            @QueryParam("offset") int offset,
-            @ApiParam(
-                    name = "limit",
-                    value = "Provide how many apps it should return", defaultValue = "0")
-            @QueryParam("limit") int limit,
-            @ApiParam(
-                    name = "searchQuery",
-                    value = "Relevant search query to search on", defaultValue = "*")
-            @QueryParam("searchQuery") String searchQuery
+                    name = "filter",
+                    value = "Filter to get application list",
+                    required = true)
+            @Valid Filter filter
     );
 
     @GET
@@ -395,8 +385,12 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationArtifact(
-            @ApiParam(name = "id", value = "Id of the application", required = true) @PathParam("uuid") int applicationId,
-            @ApiParam(name = "uuid", value = "UUID of the application", required = true) @PathParam("uuid") String applicationUUID,
+            @ApiParam(name = "appType", value = "Type of the application i.e Android, iOS etc", required = true)
+            @PathParam("appType") String appType,
+            @ApiParam(name = "id", value = "Id of the application", required = true)
+            @PathParam("uuid") int applicationId,
+            @ApiParam(name = "uuid", value = "UUID of the application", required = true)
+            @PathParam("uuid") String applicationUUID,
             @Multipart("binaryFile") Attachment binaryFile);
 
     @PUT

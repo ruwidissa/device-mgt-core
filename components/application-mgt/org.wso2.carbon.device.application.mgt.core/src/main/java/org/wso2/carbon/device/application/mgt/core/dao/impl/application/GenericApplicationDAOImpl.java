@@ -181,7 +181,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException("Filter need to be instantiated");
         }
 
-        if (filter.getSearchQuery() != null && !filter.getSearchQuery().isEmpty()) {
+        if (filter.getAppType() != null) {
+            sql += " AND AP_APP.TYPE ";
+            sql += "= ?";
+        }
+        if (filter.getAppName() != null) {
             sql += " AND LOWER (AP_APP.NAME) ";
             if (filter.isFullMatch()) {
                 sql += "= ?";
@@ -200,11 +204,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             stmt = conn.prepareStatement(sql);
             stmt.setInt(++index, tenantId);
 
-            if (filter.getSearchQuery() != null && !filter.getSearchQuery().isEmpty()) {
+            if (filter.getAppType() != null) {
+                stmt.setString(++index, filter.getAppType());
+            }
+            if (filter.getAppName() != null) {
                 if (filter.isFullMatch()) {
-                    stmt.setString(++index, filter.getSearchQuery().toLowerCase());
+                    stmt.setString(++index, filter.getAppName().toLowerCase());
                 } else {
-                    stmt.setString(++index, "%" + filter.getSearchQuery().toLowerCase() + "%");
+                    stmt.setString(++index, "%" + filter.getAppName().toLowerCase() + "%");
                 }
             }
 
@@ -212,9 +219,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             stmt.setInt(++index, filter.getOffset());
             rs = stmt.executeQuery();
             applicationList.setApplications(Util.loadApplications(rs));
-            pagination.setSize(filter.getOffset());
-            pagination.setCount(this.getApplicationCount(filter));
             applicationList.setPagination(pagination);
+            applicationList.getPagination().setSize(filter.getOffset());
+            applicationList.getPagination().setCount(applicationList.getApplications().size());
 
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while getting application list for the tenant"
@@ -287,15 +294,15 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             sql += "SELECT count(APP.ID) AS APP_COUNT FROM AP_APP AS APP WHERE TENANT_ID = ?";
 
-            if (filter.getSearchQuery() != null && !filter.getSearchQuery().isEmpty()) {
+            if (filter.getAppName() != null) {
                 sql += " AND LOWER (APP.NAME) LIKE ? ";
             }
             sql += ";";
 
             stmt = conn.prepareStatement(sql);
             int index = 0;
-            if (filter.getSearchQuery() != null && !filter.getSearchQuery().isEmpty()) {
-                stmt.setString(++index, "%" + filter.getSearchQuery().toLowerCase() + "%");
+            if (filter.getAppName() != null) {
+                stmt.setString(++index, "%" + filter.getAppName().toLowerCase() + "%");
             }
             rs = stmt.executeQuery();
             if (rs.next()) {

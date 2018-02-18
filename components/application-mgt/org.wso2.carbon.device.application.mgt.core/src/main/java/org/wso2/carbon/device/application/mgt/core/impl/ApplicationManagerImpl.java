@@ -27,9 +27,11 @@ import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.LifecycleStateTransition;
+import org.wso2.carbon.device.application.mgt.common.SortingOrder;
 import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -53,10 +55,11 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.sql.Timestamp;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Default Concrete implementation of Application Management related implementations.
@@ -64,6 +67,8 @@ import java.util.List;
 public class ApplicationManagerImpl implements ApplicationManager {
 
     private static final Log log = LogFactory.getLog(ApplicationManagerImpl.class);
+    private static final int DEFAULT_LIMIT = 20;
+    private static final int DEFAULT_OFFSET = 10;
     private DeviceTypeDAO deviceTypeDAO;
     private VisibilityDAO visibilityDAO;
     private ApplicationDAO applicationDAO;
@@ -90,7 +95,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         validateAppCreatingRequest(application);
-        validateReleaseCreateRequest(application.getApplicationReleases());
+        validateReleaseCreatingRequest(application.getApplicationReleases());
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
         try {
@@ -149,8 +154,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationList applicationList;
         List<ApplicationRelease> applicationReleases;
 
+        filter = validateFilter(filter);
+        if (filter == null) {
+            throw new ApplicationManagementException("Filter validation failed, Please verify the request payload");
+        }
+
         try {
-            filter.setUserName(userName);
             ConnectionManagerUtil.openDBConnection();
             applicationList = applicationDAO.getApplications(filter, tenantId);
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
@@ -427,22 +436,40 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private void validateAppCreatingRequest(Application application) throws ValidationException {
 
-        if (application.getName() == null) {
-            throw new ValidationException("Application name cannot be empty");
-        }
-        if (application.getUser() == null || application.getUser().getUserName() == null
-                || application.getUser().getTenantId() == 0) {
-            throw new ValidationException("Username and tenant Id cannot be empty");
-        }
-        if (application.getAppCategory() == null) {
-            throw new ValidationException("Username and tenant Id cannot be empty");
-        }
+        Boolean isValidApplicationType;
         try {
+            if (application.getName() == null) {
+                throw new ValidationException("Application name cannot be empty");
+            }
+            if (application.getUser() == null || application.getUser().getUserName() == null
+                    || application.getUser().getTenantId() == -1) {
+                throw new ValidationException("Username and tenant Id cannot be empty");
+            }
+            if (application.getAppCategory() == null) {
+                throw new ValidationException("Username and tenant Id cannot be empty");
+            }
+
+            isValidApplicationType = isValidAppType(application);
+
+            if (!isValidApplicationType) {
+                throw new ValidationException("App Type contains in the application creating payload doesn't match with " +
+                        "supported app types");
+            }
+
             validateApplicationExistence(application);
         } catch (ApplicationManagementException e) {
             throw new ValidationException("Error occured while validating whether there is already an application "
                     + "registered with same name.", e);
         }
+    }
+
+    private Boolean isValidAppType(Application application) {
+        for (ApplicationType applicationType : ApplicationType.values()) {
+            if (applicationType.toString().equals(application.getType())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -454,7 +481,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private void validateApplicationExistence(Application application) throws ApplicationManagementException {
         Filter filter = new Filter();
         filter.setFullMatch(true);
-        filter.setSearchQuery(application.getName().trim());
+        filter.setAppName(application.getName().trim());
         filter.setOffset(0);
         filter.setLimit(1);
 
@@ -544,7 +571,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param applicationReleases ApplicationRelease that need to be created.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    private void validateReleaseCreateRequest(List<ApplicationRelease> applicationReleases)
+    private void validateReleaseCreatingRequest(List<ApplicationRelease> applicationReleases)
             throws ApplicationManagementException {
 
         if (applicationReleases.isEmpty() || applicationReleases.size() > 1) {
@@ -746,5 +773,35 @@ public class ApplicationManagerImpl implements ApplicationManager {
         //todo get tags and assign for application verify
         //todo update application
         return application;
+    }
+
+    private Filter validateFilter(Filter filter) {
+        if (filter != null) {
+            if (filter.getLimit() == 0) {
+                filter.setLimit(DEFAULT_LIMIT);
+            }
+            if (filter.getOffset() == 0) {
+                filter.setOffset(DEFAULT_OFFSET);
+            }
+            if (!SortingOrder.ASC.toString().equals(filter.getSortBy()) &&
+                    !SortingOrder.DESC.toString().equals(filter.getSortBy())) {
+                return null;
+            }
+
+
+            if (filter.getAppType() != null) {
+                Boolean isValidRequest = false;
+                for (ApplicationType applicationType: ApplicationType.values()){
+                    if(applicationType.toString().equals(filter.getAppType())){
+                        isValidRequest = true;
+                        break;
+                    }
+                }
+                if (!isValidRequest){
+                    return null;
+                }
+            }
+        }
+        return filter;
     }
 }

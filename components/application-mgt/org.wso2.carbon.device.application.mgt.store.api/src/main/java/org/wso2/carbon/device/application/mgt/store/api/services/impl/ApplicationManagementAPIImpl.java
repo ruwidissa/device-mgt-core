@@ -75,7 +75,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             Filter filter = new Filter();
             filter.setOffset(offset);
             filter.setLimit(limit);
-            filter.setSearchQuery(searchQuery);
+            filter.setAppName(searchQuery);
 
             ApplicationList applications = applicationManager.getApplications(filter);
 

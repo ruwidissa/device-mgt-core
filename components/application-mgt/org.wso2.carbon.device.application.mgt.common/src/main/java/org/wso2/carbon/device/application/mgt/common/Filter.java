@@ -23,26 +23,17 @@ package org.wso2.carbon.device.application.mgt.common;
  */
 public class Filter {
 
-    /**
-     * Order which the search results should be shown. Ascending or Descending.
-     */
-    public enum SortingOrder {
-        ASC, DESC
-    }
+    private String appName;
+
+    private String appType;
+
+    private boolean isFullMatch;
 
     private int limit;
 
     private int offset;
 
-    private String searchQuery;
-
-    private boolean isFullMatch;
-
-    private SortingOrder sortingOrder;
-
     private String sortBy;
-
-    private String userName;
 
     public int getLimit() {
         return limit;
@@ -60,20 +51,12 @@ public class Filter {
         this.offset = offset;
     }
 
-    public String getSearchQuery() {
-        return searchQuery;
+    public String getAppName() {
+        return appName;
     }
 
-    public void setSearchQuery(String searchQuery) {
-        this.searchQuery = searchQuery;
-    }
-
-    public SortingOrder getSortingOrder() {
-        return sortingOrder;
-    }
-
-    public void setSortingOrder(SortingOrder sortingOrder) {
-        this.sortingOrder = sortingOrder;
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public String getSortBy() {
@@ -84,14 +67,6 @@ public class Filter {
         this.sortBy = sortBy;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public boolean isFullMatch() {
         return isFullMatch;
     }
@@ -100,8 +75,11 @@ public class Filter {
         isFullMatch = fullMatch;
     }
 
-    public boolean hasCondition() {
-        return searchQuery != null;
+    public String getAppType() {
+        return appType;
     }
 
+    public void setAppType(String appType) {
+        this.appType = appType;
+    }
 }

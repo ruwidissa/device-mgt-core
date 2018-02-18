@@ -60,7 +60,7 @@ public class ApplicationRelease {
 
     private Timestamp publishedAt;
 
-    private  String modifiedBy;
+    private String modifiedBy;
 
     private Timestamp modifiedAt;
 
@@ -132,13 +132,17 @@ public class ApplicationRelease {
         this.appHashValue = appHashValue;
     }
 
-    public void setIsSharedWithAllTenants(int isSharedWithAllTenants) { this.isSharedWithAllTenants = isSharedWithAllTenants; }
+    public void setIsSharedWithAllTenants(int isSharedWithAllTenants) {
+        this.isSharedWithAllTenants = isSharedWithAllTenants;
+    }
 
     public void setMetaData(String metaData) {
         this.metaData = metaData;
     }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
     public String getVersion() {
         return version;
