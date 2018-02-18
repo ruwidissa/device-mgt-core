@@ -19,12 +19,15 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import net.dongliu.apk.parser.ApkFile;
+import net.dongliu.apk.parser.bean.ApkMeta;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -33,6 +36,7 @@ import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -155,45 +159,76 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationRelease uploadReleaseArtifacts(ApplicationRelease applicationRelease, InputStream binaryFile)
+    public ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
             throws ResourceManagementException {
 
         String artifactDirectoryPath;
         String md5OfApp;
         md5OfApp = getMD5(binaryFile);
-        //todo validate binary file.
 
-        if (md5OfApp != null) {
-            artifactDirectoryPath = storagePath + md5OfApp;
-            StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            if (log.isDebugEnabled()) {
-                log.debug("Artifact Directory Path for saving the application release related artifacts related with "
-                        + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
+        try {
+
+            if (ApplicationType.ANDROID.toString().equals(appType)){
+                String prefix = "stream2file";
+                String suffix = ".apk";
+                Boolean isTempDelete;
+
+                File tempFile = File.createTempFile(prefix, suffix);
+                FileOutputStream out = new FileOutputStream(tempFile);
+                IOUtils.copy(binaryFile, out);
+                ApkFile apkFile = new ApkFile(tempFile);
+                ApkMeta apkMeta = apkFile.getApkMeta();
+                applicationRelease.setVersion(apkMeta.getVersionName());
+                isTempDelete = tempFile.delete();
+                if (!isTempDelete) {
+                    log.error("Temporary created APK file deletion failed");
+                }
+            }else if (ApplicationType.iOS.toString().equals(appType)){
+             //todo iOS ipa validate
+            }else if (ApplicationType.WEB_CLIP.toString().equals(appType)){
+             //todo Web Clip validate
+            }else{
+                throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
+                        "application types " + applicationRelease.getUuid());
             }
-            try {
-                saveFile(binaryFile, artifactDirectoryPath + Constants.RELEASE_ARTIFACT);
-                applicationRelease.setAppStoredLoc(artifactDirectoryPath);
+
+
+
+
+            if (md5OfApp != null) {
+                artifactDirectoryPath = storagePath + md5OfApp;
+                StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
+                if (log.isDebugEnabled()) {
+                    log.debug("Artifact Directory Path for saving the application release related artifacts related with "
+                            + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
+                }
+
+                String artifactPath = artifactDirectoryPath + Constants.RELEASE_ARTIFACT;
+                saveFile(binaryFile, artifactPath);
+                applicationRelease.setAppStoredLoc(artifactPath);
                 applicationRelease.setAppHashValue(md5OfApp);
-            } catch (IOException e) {
-                throw new ApplicationStorageManagementException(
-                        "IO Exception while saving the release artifacts in the server for the application UUID "
-                                + applicationRelease.getUuid(), e);
+            } else {
+                throw new ApplicationStorageManagementException("Error occurred while md5sum value retrieving process: " +
+                        "application UUID " + applicationRelease.getUuid());
             }
-
-        } else {
-            log.error("Verify application existence and md5sum value retrieving process");
+        } catch (IOException e) {
+            throw new ApplicationStorageManagementException(
+                    "IO Exception while saving the release artifacts in the server for the application UUID "
+                            + applicationRelease.getUuid(), e);
         }
+
+
         return applicationRelease;
     }
 
     @Override
-    public ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, InputStream binaryFile)
-            throws ApplicationStorageManagementException {
+    public ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType,
+                                                     InputStream binaryFile) throws ApplicationStorageManagementException {
 
         if (binaryFile != null) {
             try {
                 deleteApplicationReleaseArtifacts(applicationRelease.getAppStoredLoc());
-                applicationRelease = uploadReleaseArtifacts(applicationRelease, binaryFile);
+                applicationRelease = uploadReleaseArtifact(applicationRelease, appType, binaryFile);
             } catch (ApplicationStorageManagementException e) {
                 throw new ApplicationStorageManagementException("Application Artifact doesn't contains in the System", e);
             } catch (ResourceManagementException e) {

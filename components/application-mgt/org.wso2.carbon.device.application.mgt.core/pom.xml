@@ -76,13 +76,25 @@
                             org.wso2.carbon.user.api.*,
                             org.wso2.carbon.ndatasource.core,
                             org.wso2.carbon,
+                            javax.annotation,
+                            org.bouncycastle.cert,
+                            org.bouncycastle.cert.jcajce,
+                            org.bouncycastle.cms,
+                            org.bouncycastle.jce.provider,
+                            org.bouncycastle.util,
+                            org.xml.sax,
+                            org.xml.sax.helpers,
                             org.apache.commons.io,
                             org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
                             org.apache.commons.codec.digest;version="${commons-codec.wso2.osgi.version.range}",
                             org.wso2.carbon.base,
                             org.wso2.carbon.device.mgt.core.dto.*;version="${carbon.device.mgt.version}",
-                            org.wso2.carbon.device.mgt.core.dao.*;version="${carbon.device.mgt.version}"
+                            org.wso2.carbon.device.mgt.core.dao.*;version="${carbon.device.mgt.version}",
+                            net.dongliu.*
                         </Import-Package>
+                        <Embed-Dependency>apk-parser;scope=compile|runtime;inline=false</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
+                        <Embed-StripGroup>true</Embed-StripGroup>
                         <Export-Package>
                             !org.wso2.carbon.device.application.mgt.core.internal.*,
                             org.wso2.carbon.device.application.mgt.core.*
@@ -168,6 +180,11 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.dongliu</groupId>
+            <artifactId>apk-parser</artifactId>
+            <version>2.5.2</version>
         </dependency>
     </dependencies>
 </project>

@@ -61,20 +61,22 @@ public interface ApplicationStorageManager {
      * To upload release artifacts for an Application.
      *
      * @param applicationRelease Application Release Object.
+     * @param appType Application Type.
      * @param binaryFile      Binary File for the release.
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationRelease uploadReleaseArtifacts(ApplicationRelease applicationRelease, InputStream binaryFile)
+    ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
             throws ResourceManagementException;
 
     /**
      * To upload release artifacts for an Application.
      *
      * @param applicationRelease applicationRelease Application release of a particular application.
+     * @param appType   Type of the application
      * @param binaryFile      Binary File for the release.
      * @throws ApplicationStorageManagementException Resource Management Exception.
      */
-    ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, InputStream binaryFile)
+    ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
             throws ApplicationStorageManagementException;
 
     /**
