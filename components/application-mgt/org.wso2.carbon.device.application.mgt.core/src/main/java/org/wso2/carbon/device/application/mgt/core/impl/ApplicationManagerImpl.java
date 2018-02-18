@@ -175,7 +175,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
-                            + " has the publisher permission");
+                            + " has the publisher permission", e);
+        } catch (ApplicationManagementDAOException e) {
+            throw new ApplicationManagementException(
+                    "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -526,14 +529,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationRelease applicationRelease = DataHolder.getInstance().getApplicationReleaseManager()
                 .getReleaseByUuid(applicationUuid);
         if (applicationRelease == null) {
-            throw new NotFoundException(
+            throw new ApplicationManagementException(
                     "Application with UUID " + applicationUuid + " does not exist.");
         }
         return applicationRelease;
     }
 
     @Override
-    public ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease) throws ApplicationManagementException {
+    public ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease) throws
+            ApplicationManagementException {
         return null;
     }
 
@@ -787,17 +791,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     !SortingOrder.DESC.toString().equals(filter.getSortBy())) {
                 return null;
             }
-
-
             if (filter.getAppType() != null) {
                 Boolean isValidRequest = false;
-                for (ApplicationType applicationType: ApplicationType.values()){
-                    if(applicationType.toString().equals(filter.getAppType())){
+                for (ApplicationType applicationType : ApplicationType.values()) {
+                    if (applicationType.toString().equals(filter.getAppType())) {
                         isValidRequest = true;
                         break;
                     }
                 }
-                if (!isValidRequest){
+                if (!isValidRequest) {
                     return null;
                 }
             }

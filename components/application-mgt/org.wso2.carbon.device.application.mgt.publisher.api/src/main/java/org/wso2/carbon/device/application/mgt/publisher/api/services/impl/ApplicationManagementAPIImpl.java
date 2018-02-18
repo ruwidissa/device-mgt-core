@@ -24,6 +24,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.publisher.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -58,12 +59,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
 
-
     @GET
     @Override
     @Consumes("application/json")
-    public Response getApplications(
-            @Valid Filter filter) {
+    public Response getApplications(@Valid Filter filter) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
@@ -73,9 +72,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                         ("Couldn't find any application for requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
-        } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } catch (ApplicationManagementException e) {
+        }  catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting the application list for publisher ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
