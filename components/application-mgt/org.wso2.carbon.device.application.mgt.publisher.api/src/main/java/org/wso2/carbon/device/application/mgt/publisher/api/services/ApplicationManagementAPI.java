@@ -352,9 +352,12 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationImageArtifacts(
-            @ApiParam(name = "appId", value = "ID of the application", required = true) @PathParam("appId") int applicatioId,
-            @ApiParam(name = "uuid", value = "UUID of the application", required = true) @PathParam("uuid") String applicationUUID,
-            @Multipart(value = "icon") Attachment iconFile, @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(name = "appId", value = "ID of the application", required = true)
+            @PathParam("appId") int applicatioId,
+            @ApiParam(name = "uuid", value = "UUID of the application", required = true)
+            @PathParam("uuid") String applicationUUID,
+            @Multipart(value = "icon") Attachment iconFile,
+            @Multipart(value = "banner") Attachment bannerFile,
             @Multipart(value = "screenshot") List<Attachment> screenshots);
 
     @PUT

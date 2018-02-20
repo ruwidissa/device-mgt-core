@@ -105,6 +105,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
+                ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
             }
             application.setDevicetype(deviceType);
@@ -113,6 +114,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (appId != -1) {
                 log.error("Application creation Failed");
                 ConnectionManagerUtil.rollbackDBTransaction();
+                return null;
             } else {
                 if (!application.getTags().isEmpty()) {
                     this.applicationDAO.addTags(application.getTags(), appId, tenantId);
@@ -127,7 +129,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationRelease.setCreatedAt((Timestamp) new Date());
                 applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
                         createRelease(applicationRelease, application.getId());
-                //todo add lifecycle and add this into application
+                LifecycleState lifecycleState = new LifecycleState();
+                lifecycleState.setAppId(application.getId());
+                lifecycleState.setReleaseId(applicationRelease.getId());
+                lifecycleState.setUpdatedBy(loggedInUser.getUserName());
+                lifecycleState.setTenantId(loggedInUser.getTenantId());
+                lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
+                lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
+                addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
             }
 
             return application;
@@ -232,6 +241,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             application = ApplicationManagementDAOFactory.getApplicationDAO()
                     .getApplication(appType, appName, tenantId);
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
+                applicationReleases = getReleases(application.getId());
+                application.setApplicationReleases(applicationReleases);
                 return application;
             }
 
@@ -538,6 +549,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease) throws
             ApplicationManagementException {
+        LifecycleState lifecycleState = getLifecycleState(appId, applicationRelease.getUuid());
+
         return null;
     }
 

@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -168,7 +169,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
         try {
 
-            if (ApplicationType.ANDROID.toString().equals(appType)){
+            if (ApplicationType.ANDROID.toString().equals(appType)) {
                 String prefix = "stream2file";
                 String suffix = ".apk";
                 Boolean isTempDelete;
@@ -183,17 +184,14 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 if (!isTempDelete) {
                     log.error("Temporary created APK file deletion failed");
                 }
-            }else if (ApplicationType.iOS.toString().equals(appType)){
-             //todo iOS ipa validate
-            }else if (ApplicationType.WEB_CLIP.toString().equals(appType)){
-             //todo Web Clip validate
-            }else{
+            } else if (ApplicationType.iOS.toString().equals(appType)) {
+                //todo iOS ipa validate
+            } else if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
+                //todo Web Clip validate
+            } else {
                 throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
                         "application types " + applicationRelease.getUuid());
             }
-
-
-
 
             if (md5OfApp != null) {
                 artifactDirectoryPath = storagePath + md5OfApp;
@@ -225,15 +223,13 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     public ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType,
                                                      InputStream binaryFile) throws ApplicationStorageManagementException {
 
-        if (binaryFile != null) {
-            try {
-                deleteApplicationReleaseArtifacts(applicationRelease.getAppStoredLoc());
-                applicationRelease = uploadReleaseArtifact(applicationRelease, appType, binaryFile);
-            } catch (ApplicationStorageManagementException e) {
-                throw new ApplicationStorageManagementException("Application Artifact doesn't contains in the System", e);
-            } catch (ResourceManagementException e) {
-                throw new ApplicationStorageManagementException("Application Artifact Updating failed", e);
-            }
+        try {
+            deleteApplicationReleaseArtifacts(applicationRelease.getAppStoredLoc());
+            applicationRelease = uploadReleaseArtifact(applicationRelease, appType, binaryFile);
+        } catch (ApplicationStorageManagementException e) {
+            throw new ApplicationStorageManagementException("Application Artifact doesn't contains in the System", e);
+        } catch (ResourceManagementException e) {
+            throw new ApplicationStorageManagementException("Application Artifact Updating failed", e);
         }
 
         return applicationRelease;

@@ -24,7 +24,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
-import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.publisher.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -72,7 +71,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                         ("Couldn't find any application for requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
-        }  catch (ApplicationManagementException e) {
+        } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting the application list for publisher ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -187,7 +186,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     }
 
     @Override
-    @POST
+    @PUT
     @Path("/image-artifacts/{appId}/{uuid}")
     public Response updateApplicationImageArtifacts(
             @PathParam("appId") int appId,
@@ -217,8 +216,16 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 }
             }
             applicationRelease = applicationManager.validateApplicationRelease(applicationUuid);
+            LifecycleState lifecycleState = applicationManager.getLifecycleState(appId, applicationRelease.getUuid());
+            if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState()) ||
+                    AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
+                return Response.status(Response.Status.FORBIDDEN).entity("Can't Update the application release in " +
+                        "PUBLISHED or DEPRECATED state. Hence please demote the application and update the application " +
+                        "release").build();
+            }
             applicationRelease = applicationStorageManager
                     .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
+            //todo need to implement updateRelease method
             applicationManager.updateRelease(appId, applicationRelease);
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
@@ -263,6 +270,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationRelease = applicationManager.validateApplicationRelease(applicationUuuid);
             applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease, appType,
                     binaryFile.getDataHandler().getInputStream());
+            //todo
             applicationManager.updateRelease(applicationId, applicationRelease);
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationUuuid).build();
@@ -338,11 +346,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationRelease = applicationStorageManager
                     .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
 
+            //todo
             applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
 
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
-        } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
             log.error("Error while updating the application release of the application with UUID " + applicationUUID);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
