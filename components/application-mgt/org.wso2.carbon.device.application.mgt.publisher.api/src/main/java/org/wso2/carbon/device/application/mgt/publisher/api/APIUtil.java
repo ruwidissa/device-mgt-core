@@ -35,7 +35,6 @@ public class APIUtil {
     private static Log log = LogFactory.getLog(APIUtil.class);
 
     private static ApplicationManager applicationManager;
-    private static ApplicationReleaseManager applicationReleaseManager;
     private static ApplicationStorageManager applicationStorageManager;
     private static SubscriptionManager subscriptionManager;
     private static UnrestrictedRoleManager unrestrictedRoleManager;
@@ -58,29 +57,6 @@ public class APIUtil {
         }
 
         return applicationManager;
-    }
-
-    /**
-     * To get the Application Release Manager from the osgi context.
-     *
-     * @return ApplicationRelease Manager instance in the current osgi context.
-     */
-    public static ApplicationReleaseManager getApplicationReleaseManager() {
-        if (applicationReleaseManager == null) {
-            synchronized (APIUtil.class) {
-                if (applicationReleaseManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    applicationReleaseManager = (ApplicationReleaseManager) ctx
-                            .getOSGiService(ApplicationReleaseManager.class, null);
-                    if (applicationReleaseManager == null) {
-                        String msg = "Application Release Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
-            }
-        }
-        return applicationReleaseManager;
     }
 
     /**

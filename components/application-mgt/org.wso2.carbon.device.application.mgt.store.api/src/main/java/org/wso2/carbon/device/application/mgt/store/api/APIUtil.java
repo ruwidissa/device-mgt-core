@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationReleaseManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
@@ -38,7 +37,6 @@ public class APIUtil {
     private static Log log = LogFactory.getLog(APIUtil.class);
 
     private static ApplicationManager applicationManager;
-    private static ApplicationReleaseManager applicationReleaseManager;
     private static ApplicationStorageManager applicationStorageManager;
     private static SubscriptionManager subscriptionManager;
 
@@ -51,23 +49,6 @@ public class APIUtil {
             throw new IllegalStateException(msg);
         }
         return applicationManager;
-    }
-
-    /**
-     * To get the Application Release Manager from the osgi context.
-     *
-     * @return ApplicationRelease Manager instance in the current osgi context.
-     */
-    public static ApplicationReleaseManager getApplicationReleaseManager() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        ApplicationReleaseManager applicationReleaseManager = (ApplicationReleaseManager) ctx
-                .getOSGiService(ApplicationReleaseManager.class, null);
-        if (applicationReleaseManager == null) {
-            String msg = "Application Release Manager service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return applicationReleaseManager;
     }
 
     /**

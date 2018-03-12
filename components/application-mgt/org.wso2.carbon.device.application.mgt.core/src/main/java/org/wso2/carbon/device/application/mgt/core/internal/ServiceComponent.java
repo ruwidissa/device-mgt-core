@@ -24,7 +24,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationReleaseManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
@@ -74,11 +73,6 @@ public class ServiceComponent {
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             DataHolder.getInstance().setApplicationManager(applicationManager);
             bundleContext.registerService(ApplicationManager.class.getName(), applicationManager, null);
-
-            ApplicationReleaseManager applicationReleaseManager = ApplicationManagementUtil
-                    .getApplicationReleaseManagerInstance();
-            DataHolder.getInstance().setApplicationReleaseManager(applicationReleaseManager);
-            bundleContext.registerService(ApplicationReleaseManager.class.getName(), applicationReleaseManager, null);
 
             CommentsManager commentsManager = ApplicationManagementUtil.getCommentsManagerInstance();
             DataHolder.getInstance().setCommentsManager(commentsManager);

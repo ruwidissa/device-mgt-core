@@ -19,7 +19,6 @@
 package org.wso2.carbon.device.application.mgt.core.internal;
 
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationReleaseManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
@@ -37,8 +36,6 @@ public class DataHolder {
     private RealmService realmService;
 
     private ApplicationManager applicationManager;
-
-    private ApplicationReleaseManager releaseManager;
 
     private CommentsManager commentsManager;
 
@@ -72,14 +69,6 @@ public class DataHolder {
 
     public void setApplicationManager(ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
-    }
-
-    public ApplicationReleaseManager getApplicationReleaseManager() {
-        return releaseManager;
-    }
-
-    public void setApplicationReleaseManager(ApplicationReleaseManager releaseManager) {
-        this.releaseManager = releaseManager;
     }
 
     public CommentsManager getCommentsManager() {
