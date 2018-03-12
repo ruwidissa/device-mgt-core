@@ -28,9 +28,11 @@ import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,10 +46,11 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      *
      * @param appId Id of the application
      * @param applicationRelease Application Release the properties of which that need to be inserted.
+     * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public ApplicationRelease createRelease(ApplicationRelease applicationRelease, int appId) throws
+    public ApplicationRelease createRelease(ApplicationRelease applicationRelease, int appId, int tenantId) throws
             ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
@@ -64,7 +67,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql, generatedColumns);
             statement.setString(++index, applicationRelease.getVersion());
-            statement.setString(++index, applicationRelease.getTenantId());
+            statement.setInt(++index, tenantId);
             statement.setString(++index, applicationRelease.getUuid());
             statement.setString(++index, String.valueOf(applicationRelease.getReleaseType()));
             statement.setDouble(++index, applicationRelease.getPrice());
@@ -267,21 +270,50 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         }
     }
 
-//    have to complete
-//Todo
     /**
      * To insert the application release properties.
      *
      * @param applicationRelease Application Release the properties of which that need to be inserted.
-     * @throws SQLException SQL Exception.
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public ApplicationRelease updateRelease(ApplicationRelease applicationRelease)
+    public ApplicationRelease updateRelease(int applicationId, ApplicationRelease applicationRelease, int tenantId)
             throws ApplicationManagementDAOException {
+        Connection connection;
+        PreparedStatement statement = null;
+        String sql = "UPDATE AP_APP_RELEASE SET VERSION = ? AND UUID = ? AND RELEASE_TYPE = ? AND APP_PRICE = ? AND " +
+                "STORED_LOCATION = ? AND BANNER_LOCATION = ? AND SC_1_LOCATION = ? AND SC_2_LOCATION = ? AND " +
+                "SC_3_LOCATION = ? AND APP_HASH_VALUE = ? AND SHARED_WITH_ALL_TENANTS = ? AND APP_META_INFO = ? AND " +
+                "CREATED_BY = ? AND CREATED_AT = ? WHERE AP_APP_ID = ? AND TENANT_ID = ? AND ID = ?;";
+        try {
+            connection = this.getDBConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setString(1, applicationRelease.getVersion());
+            statement.setString(2, applicationRelease.getUuid());
+            statement.setString(3, applicationRelease.getReleaseType());
+            statement.setDouble(4, applicationRelease.getPrice());
+            statement.setString(5, applicationRelease.getAppStoredLoc());
+            statement.setString(6, applicationRelease.getBannerLoc());
+            statement.setString(7, applicationRelease.getScreenshotLoc1());
+            statement.setString(8, applicationRelease.getScreenshotLoc2());
+            statement.setString(9, applicationRelease.getScreenshotLoc3());
+            statement.setString(10, applicationRelease.getAppHashValue());
+            statement.setInt(11, applicationRelease.getIsSharedWithAllTenants());
+            statement.setString(12, applicationRelease.getMetaData());
+            statement.setString(13, applicationRelease.getApplicationCreator());
+            statement.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
+            statement.executeUpdate();
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Database connection exception while trying to update the application release", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "SQL exception while updating the release ,while executing the query " + sql, e);
+        } finally {
+            Util.cleanupResources(statement, null);
+        }
         return applicationRelease;
     }
-
-//
 
     /**
      * To delete an application release.

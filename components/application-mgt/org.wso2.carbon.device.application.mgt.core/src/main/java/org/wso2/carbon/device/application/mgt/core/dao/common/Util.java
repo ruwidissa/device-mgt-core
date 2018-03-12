@@ -45,7 +45,7 @@ public class Util {
     /**
      * To create application object from the result set retrieved from the Database.
      *
-     * @param rs           ResultSet
+     * @param rs ResultSet
      * @return List of Applications that is retrieved from the Database.
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
@@ -53,13 +53,13 @@ public class Util {
     public static List<Application> loadApplications(ResultSet rs) throws SQLException, JSONException {
 
         List<Application> applications = new ArrayList<>();
-        Application application = null ;
+        Application application = null;
         int applicatioId = -1;
 
-        while (rs.next()){
-            if (applicatioId != rs.getInt("APP_ID")){
+        while (rs.next()) {
+            if (applicatioId != rs.getInt("APP_ID")) {
 
-                if( application != null){
+                if (application != null) {
                     applications.add(application);
                 }
                 applicatioId = rs.getInt("APP_ID");
@@ -82,20 +82,20 @@ public class Util {
                 unrestrictedRole.setRole(rs.getString("ROLE"));
                 unrestrictedRoles.add(unrestrictedRole);
                 application.setUnrestrictedRoles(unrestrictedRoles);
-            }else{
+            } else {
                 Tag tag = new Tag();
                 tag.setTagName(rs.getString("APP_TAG"));
                 UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
                 unrestrictedRole.setRole(rs.getString("ROLE"));
-                if (application != null && application.getTags().contains(tag)){
+                if (application != null && application.getTags().contains(tag)) {
                     application.getTags().add(tag);
                 }
-                if (application != null && application.getUnrestrictedRoles().contains(unrestrictedRole)){
+                if (application != null && application.getUnrestrictedRoles().contains(unrestrictedRole)) {
                     application.getUnrestrictedRoles().add(unrestrictedRole);
                 }
 
             }
-            if(rs.last()){
+            if (rs.last()) {
                 applications.add(application);
             }
         }
@@ -108,7 +108,7 @@ public class Util {
     /**
      * To create application object from the result set retrieved from the Database.
      *
-     * @param rs           ResultSet
+     * @param rs ResultSet
      * @return Application that is retrieved from the Database.
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
@@ -116,11 +116,11 @@ public class Util {
     public static Application loadApplication(ResultSet rs) throws SQLException, JSONException {
 
         Application application = null;
-        int applicatioId = -1;
+        int applicatioId;
         int iteration = 0;
 
-        while (rs.next()){
-            if (iteration == 0){
+        while (rs.next()) {
+            if (iteration == 0) {
                 application = new Application();
                 applicatioId = rs.getInt("APP_ID");
                 application.setId(applicatioId);
@@ -135,10 +135,10 @@ public class Util {
             tag.setTagName(rs.getString("APP_TAG"));
             UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
             unrestrictedRole.setRole(rs.getString("ROLE"));
-            if (application.getTags().contains(tag)){
+            if (application.getTags().contains(tag)) {
                 application.getTags().add(tag);
             }
-            if (application.getUnrestrictedRoles().contains(unrestrictedRole)){
+            if (application.getUnrestrictedRoles().contains(unrestrictedRole)) {
                 application.getUnrestrictedRoles().add(unrestrictedRole);
             }
             iteration++;
@@ -159,7 +159,6 @@ public class Util {
 
         appRelease.setId(rs.getInt("RELEASE_ID"));
         appRelease.setVersion(rs.getString("VERSION"));
-        appRelease.setTenantId(rs.getString("TENANT_ID"));
         appRelease.setUuid(rs.getString("UUID"));
         appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
         appRelease.setPrice(rs.getDouble("APP_PRICE"));
@@ -179,6 +178,7 @@ public class Util {
 
         return appRelease;
     }
+
     /**
      * Cleans up the statement and resultset after executing the query
      *
@@ -203,14 +203,15 @@ public class Util {
     }
 
     public static PaginationRequest validateCommentListPageSize(PaginationRequest paginationRequest) throws
-            CommentManagementException{
+                                                                                                     CommentManagementException {
         if (paginationRequest.getLimit() == 0) {
             Configuration commentManagementConfig = ConfigurationManager.getInstance().getConfiguration();
             if (commentManagementConfig != null) {
-                paginationRequest.setLimit(commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
+                paginationRequest.setLimit(
+                        commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
             } else {
                 throw new CommentManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                        "cdm-config.xml file.");
+                                                             "cdm-config.xml file.");
             }
         }
         return paginationRequest;

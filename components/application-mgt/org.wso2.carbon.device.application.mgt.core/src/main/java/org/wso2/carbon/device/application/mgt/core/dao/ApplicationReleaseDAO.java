@@ -35,7 +35,7 @@ public interface ApplicationReleaseDAO {
      * @return Unique ID of the relevant release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    ApplicationRelease createRelease(ApplicationRelease applicationRelease, int appId) throws
+    ApplicationRelease createRelease(ApplicationRelease applicationRelease, int appId, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**
@@ -67,11 +67,15 @@ public interface ApplicationReleaseDAO {
 
     /**
      * To update an Application release.
+     *
      * @param applicationRelease ApplicationRelease that need to be updated.
+     * @param applicationId      Id of the application.
+     * @param tenantId           Id of the tenant
      * @return the updated Application Release
      * @throws ApplicationManagementDAOException Application Management DAO Exception
      */
-    ApplicationRelease updateRelease(ApplicationRelease applicationRelease) throws ApplicationManagementDAOException;
+    ApplicationRelease updateRelease(int applicationId, ApplicationRelease applicationRelease, int tenantId) throws
+                                                                                                             ApplicationManagementDAOException;
 
     /**
      * To update an Application release.
