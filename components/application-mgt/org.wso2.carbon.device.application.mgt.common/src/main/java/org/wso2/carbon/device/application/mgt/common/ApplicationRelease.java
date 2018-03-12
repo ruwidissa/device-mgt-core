@@ -34,8 +34,6 @@ public class ApplicationRelease {
 
     private String version;
 
-    private String tenantId;
-
     private String uuid;
 
     private String appStoredLoc;
@@ -108,10 +106,6 @@ public class ApplicationRelease {
         this.version = version;
     }
 
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
     public String getUuid() {
         return uuid;
     }
@@ -146,10 +140,6 @@ public class ApplicationRelease {
 
     public String getVersion() {
         return version;
-    }
-
-    public String getTenantId() {
-        return tenantId;
     }
 
     public Double getPrice() {
