@@ -327,9 +327,18 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         try {
             Application application = applicationManager.validateApplication(applicationId);
 
+            if (!applicationManager.isApplicationReleaseUpdateAcceptable(application.getId(),
+                                                                         applicationRelease.getUuid())) {
+                String msg = "Application release is in the " + applicationRelease.getCurrentState() + " state. Hence" +
+                        " updating is not acceptable when application in this state";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
             if (binaryFile != null) {
                 applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease,
-                        application.getType(), binaryFile.getDataHandler().getInputStream());
+                                                                                      application.getType(),
+                                                                                      binaryFile.getDataHandler()
+                                                                                              .getInputStream());
             }
             if (iconFile != null) {
                 iconFileStream = iconFile.getDataHandler().getInputStream();
