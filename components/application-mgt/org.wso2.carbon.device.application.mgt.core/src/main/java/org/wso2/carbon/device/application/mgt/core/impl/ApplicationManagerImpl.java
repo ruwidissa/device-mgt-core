@@ -30,7 +30,6 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
-import org.wso2.carbon.device.application.mgt.common.LifecycleStateTransition;
 import org.wso2.carbon.device.application.mgt.common.SortingOrder;
 import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
@@ -85,23 +84,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public Application createApplication(Application application) throws ApplicationManagementException {
-
-        User loggedInUser = new User(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername(),
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true));
-        application.setUser(loggedInUser);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        application.setUser(new User(userName, tenantId));
         if (log.isDebugEnabled()) {
             log.debug("Create Application received for the tenant : " + application.getUser().getTenantId() + " From"
-                    + " the user : " + application.getUser().getUserName());
+                              + " the user : " + application.getUser().getUserName());
         }
 
         validateAppCreatingRequest(application);
-        validateReleaseCreatingRequest(application.getApplicationReleases());
+        validateReleaseCreatingRequest(application.getApplicationReleases().get(0));
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            int tenantId = application.getUser().getTenantId();
-            deviceType = this.deviceTypeDAO.getDeviceType(application.getType(), application.getUser().getTenantId());
+            deviceType = this.deviceTypeDAO.getDeviceType(application.getType(), tenantId);
 
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
@@ -128,12 +125,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease.setCreatedAt((Timestamp) new Date());
                 applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
-                        createRelease(applicationRelease, application.getId());
+                        createRelease(applicationRelease, application.getId(), tenantId);
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setAppId(application.getId());
                 lifecycleState.setReleaseId(applicationRelease.getId());
-                lifecycleState.setUpdatedBy(loggedInUser.getUserName());
-                lifecycleState.setTenantId(loggedInUser.getTenantId());
+                lifecycleState.setUpdatedBy(userName);
+                lifecycleState.setTenantId(tenantId);
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
                 addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
@@ -191,6 +188,35 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    @Override
+    public ApplicationRelease createRelease(int applicationId, ApplicationRelease applicationRelease) throws
+                                                                                                      ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        Application application = validateApplication(applicationId);
+        validateReleaseCreatingRequest(applicationRelease);
+        if (log.isDebugEnabled()) {
+            log.debug("Application release request is received for the application " + application.toString());
+        }
+        applicationRelease.setCreatedAt((Timestamp) new Date());
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
+                    createRelease(applicationRelease, application.getId(), tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+            return applicationRelease;
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw e;
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public ApplicationRelease getReleaseByUuid(String applicationUuid) throws ApplicationManagementException {
+        return null;
     }
 
     @Override
@@ -314,7 +340,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     .getApplicationByRelease(appReleaseUUID, tenantId);
 
             if (application.getUnrestrictedRoles().isEmpty() || isRoleExists(application.getUnrestrictedRoles(),
-                    userName)) {
+                                                                             userName)) {
                 return application;
             }
             return null;
@@ -386,7 +412,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         List<String> storedLocations = new ArrayList<>();
         if (log.isDebugEnabled()) {
             log.debug("Request is received to delete applications which are related with the application id " +
-                    applicationId);
+                              applicationId);
         }
         for (ApplicationRelease applicationRelease : applicationReleases) {
             LifecycleState appLifecycleState = getLifecycleState(applicationId, applicationRelease.getUuid());
@@ -403,7 +429,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException {
+    public String deleteApplicationRelease(int applicationId, String releaseUuid)
+            throws ApplicationManagementException {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application application = validateApplication(applicationId);
@@ -439,7 +466,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         UserRealm userRealm = DataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
         return userRealm != null && userRealm.getAuthorizationManager() != null && userRealm.getAuthorizationManager()
                 .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
-                        CarbonConstants.UI_PERMISSION_ACTION);
+                                  CarbonConstants.UI_PERMISSION_ACTION);
     }
 
     /**
@@ -466,14 +493,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
             isValidApplicationType = isValidAppType(application);
 
             if (!isValidApplicationType) {
-                throw new ValidationException("App Type contains in the application creating payload doesn't match with " +
-                        "supported app types");
+                throw new ValidationException(
+                        "App Type contains in the application creating payload doesn't match with " +
+                                "supported app types");
             }
 
             validateApplicationExistence(application);
         } catch (ApplicationManagementException e) {
             throw new ValidationException("Error occured while validating whether there is already an application "
-                    + "registered with same name.", e);
+                                                  + "registered with same name.", e);
         }
     }
 
@@ -517,7 +545,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public Application validateApplication(int applicationID) throws ApplicationManagementException {
         if (applicationID <= 0) {
             throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
-                    + "parameter to get the relevant application.");
+                                                             + "parameter to get the relevant application.");
         }
         Application application = DataHolder.getInstance().getApplicationManager().getApplicationById(applicationID);
         if (application == null) {
@@ -535,9 +563,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public ApplicationRelease validateApplicationRelease(String applicationUuid) throws ApplicationManagementException {
         if (applicationUuid == null) {
             throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
-                    + "parameter to get the relevant application.");
+                                                             + "parameter to get the relevant application.");
         }
-        ApplicationRelease applicationRelease = DataHolder.getInstance().getApplicationReleaseManager()
+        ApplicationRelease applicationRelease = DataHolder.getInstance().getApplicationManager()
                 .getReleaseByUuid(applicationUuid);
         if (applicationRelease == null) {
             throw new ApplicationManagementException(
@@ -548,10 +576,32 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease) throws
-            ApplicationManagementException {
-        LifecycleState lifecycleState = getLifecycleState(appId, applicationRelease.getUuid());
+                                                                                              ApplicationManagementException {
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (log.isDebugEnabled()) {
+            log.debug("Updating the Application release. UUID: " + applicationRelease.getUuid() + ", " +
+                              "Application Id: " + appId);
+        }
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            applicationRelease.setModifiedBy(userName);
+            applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO()
+                    .updateRelease(appId, applicationRelease, tenantId);
 
-        return null;
+            return applicationRelease;
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public boolean isApplicationReleaseUpdateAcceptable(int appId, String appReleaseUuid)
+            throws ApplicationManagementException {
+        LifecycleState lifecycleState = getLifecycleState(appId, appReleaseUuid);
+        return AppLifecycleState.CREATED.toString().equals(lifecycleState.getCurrentState()) || AppLifecycleState
+                .IN_REVIEW.toString().equals(lifecycleState.getCurrentState()) ||
+                AppLifecycleState.REJECTED.toString().equals(lifecycleState.getCurrentState());
     }
 
     /**
@@ -585,38 +635,25 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /**
      * To validate a create release request to make sure all the pre-conditions satisfied.
      *
-     * @param applicationReleases ApplicationRelease that need to be created.
+     * @param applicationRelease ApplicationRelease that need to be created.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    private void validateReleaseCreatingRequest(List<ApplicationRelease> applicationReleases)
+    private void validateReleaseCreatingRequest(ApplicationRelease applicationRelease)
             throws ApplicationManagementException {
 
-        if (applicationReleases.isEmpty() || applicationReleases.size() > 1) {
-            throw new ApplicationManagementException("ApplicationRelease size is grater than minimal release size or "
-                    + "request doesn't contains application release");
-        }
-        if (applicationReleases.get(0).getVersion() == null) {
+        if (applicationRelease.getVersion() == null) {
             throw new ApplicationManagementException("ApplicationRelease version name is a mandatory parameter for "
-                    + "creating release. It cannot be found.");
+                                                             + "creating release. It cannot be found.");
         }
-        //todo
-        //        if (getRelease(applicationReleases.get(0).getUuid(), applicationReleases.get(0).getVersion(),
-        //                applicationReleases.get(0).getReleaseType()) != null) {
-        //            throw new ApplicationManagementException( "Application Release for the Application UUID " +
-        //                    applicationReleases.get(0).getUuid() + " " + "with the version "
-        //                    + applicationReleases.get(0).getVersion() + " already exists. Cannot create an " +
-        //                    "application release with the same version.");
-        //        }
     }
 
     @Override
     public LifecycleState getLifecycleState(int applicationId, String applicationUuid) throws
-            ApplicationManagementException {
+                                                                                       ApplicationManagementException {
         LifecycleState lifecycleState;
         try {
             ConnectionManagerUtil.openDBConnection();
             LifecycleStateDAO lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
-            Application application = validateApplication(applicationId);
             //todo applicationUuid and applicationId should be passed and util method has to be changed
             ApplicationRelease applicationRelease = validateApplicationRelease(applicationUuid);
             lifecycleState = lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
@@ -633,7 +670,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws
-            ApplicationManagementException {
+                                                                                                   ApplicationManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
             Application application = validateApplication(applicationId);
@@ -700,40 +737,46 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!AppLifecycleState.CREATED.toString().equals(state.getPreviousState()) &&
                     !AppLifecycleState.REJECTED.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be either " + AppLifecycleState.CREATED.toString() + " or " +
-                        AppLifecycleState.REJECTED.toString());
+                                                               "Previous State should be either " +
+                                                               AppLifecycleState.CREATED.toString() + " or " +
+                                                               AppLifecycleState.REJECTED.toString());
             }
         }
         if (AppLifecycleState.APPROVED.toString().equals(state.getCurrentState())) {
             if (!AppLifecycleState.IN_REVIEW.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be " + AppLifecycleState.IN_REVIEW.toString());
+                                                               "Previous State should be " +
+                                                               AppLifecycleState.IN_REVIEW.toString());
             }
         }
         if (AppLifecycleState.PUBLISHED.toString().equals(state.getCurrentState())) {
             if (!AppLifecycleState.APPROVED.toString().equals(state.getPreviousState()) &&
                     !AppLifecycleState.UNPUBLISHED.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be either " + AppLifecycleState.APPROVED.toString() + " or " +
-                        AppLifecycleState.UNPUBLISHED.toString());
+                                                               "Previous State should be either " +
+                                                               AppLifecycleState.APPROVED.toString() + " or " +
+                                                               AppLifecycleState.UNPUBLISHED.toString());
             }
         }
         if (AppLifecycleState.UNPUBLISHED.toString().equals(state.getCurrentState())) {
             if (!AppLifecycleState.PUBLISHED.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be " + AppLifecycleState.PUBLISHED.toString());
+                                                               "Previous State should be " +
+                                                               AppLifecycleState.PUBLISHED.toString());
             }
         }
         if (AppLifecycleState.REJECTED.toString().equals(state.getCurrentState())) {
             if (!AppLifecycleState.IN_REVIEW.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be " + AppLifecycleState.IN_REVIEW.toString());
+                                                               "Previous State should be " +
+                                                               AppLifecycleState.IN_REVIEW.toString());
             }
         }
         if (AppLifecycleState.DEPRECATED.toString().equals(state.getCurrentState())) {
             if (!AppLifecycleState.PUBLISHED.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be " + AppLifecycleState.PUBLISHED.toString());
+                                                               "Previous State should be " +
+                                                               AppLifecycleState.PUBLISHED.toString());
             }
         }
         if (AppLifecycleState.REMOVED.toString().equals(state.getCurrentState())) {
@@ -741,8 +784,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     !AppLifecycleState.REJECTED.toString().equals(state.getPreviousState()) &&
                     !AppLifecycleState.UNPUBLISHED.toString().equals(state.getPreviousState())) {
                 throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                        "Previous State should be either " + AppLifecycleState.DEPRECATED.toString() + " or " +
-                        AppLifecycleState.REJECTED.toString() + " or " + AppLifecycleState.UNPUBLISHED.toString());
+                                                               "Previous State should be either " +
+                                                               AppLifecycleState.DEPRECATED.toString() + " or " +
+                                                               AppLifecycleState.REJECTED.toString() + " or " +
+                                                               AppLifecycleState.UNPUBLISHED.toString());
             }
         }
     }
@@ -752,23 +797,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
         Application existingApplication = validateApplication(application.getId());
         if (existingApplication == null) {
             throw new NotFoundException("Tried to update Application which is not in the publisher, " +
-                    "Please verify application details");
+                                                "Please verify application details");
         }
         if (!existingApplication.getType().equals(application.getType())) {
             throw new ApplicationManagementException("You are trying to change the application type and it is not " +
-                    "possible after you create an application. Therefore please remove this application and publish " +
-                    "new application with type: " + application.getType());
+                                                             "possible after you create an application. Therefore " +
+                                                             "please remove this application and publish " +
+                                                             "new application with type: " + application.getType());
         }
         if (existingApplication.getIsFree() != application.getIsFree()) {
             if (existingApplication.getIsFree() == 1) {
                 if (application.getPaymentCurrency() != null || !application.getPaymentCurrency().equals("")) {
                     throw new ApplicationManagementException("If you are going to change Non-Free app as Free app, " +
-                            "currency attribute in the application updating payload should be null or \"\"");
+                                                                     "currency attribute in the application updating " +
+                                                                     "payload should be null or \"\"");
                 }
             } else if (existingApplication.getIsFree() == 0) {
                 if (application.getPaymentCurrency() == null || application.getPaymentCurrency().equals("")) {
                     throw new ApplicationManagementException("If you are going to change Free app as Non-Free app, " +
-                            "currency attribute in the application payload should not be null or \"\"");
+                                                                     "currency attribute in the application payload " +
+                                                                     "should not be null or \"\"");
                 }
             }
         }
@@ -777,12 +825,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (existingApplication.getIsRestricted() == 1) {
                 if (application.getUnrestrictedRoles() == null || application.getUnrestrictedRoles().isEmpty()) {
                     throw new ApplicationManagementException("If you are going to add role restriction for non role " +
-                            "restricted Application, Unrestricted role list won't be empty or null");
+                                                                     "restricted Application, Unrestricted role list " +
+                                                                     "won't be empty or null");
                 }
             } else if (existingApplication.getIsRestricted() == 0) {
                 if (application.getUnrestrictedRoles() != null || !application.getUnrestrictedRoles().isEmpty()) {
                     throw new ApplicationManagementException("If you are going to remove role restriction from role " +
-                            "restricted Application, Unrestricted role list should be empty or null");
+                                                                     "restricted Application, Unrestricted role list should be empty or null");
                 }
             }
             //todo update role restriction

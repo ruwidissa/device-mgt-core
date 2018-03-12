@@ -187,4 +187,34 @@ public interface ApplicationManager {
      */
     ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease)
             throws ApplicationManagementException;
+
+    /**
+     * To verify whether application release is acceptable to update or not.
+     *
+     * @param appId    ID of the Application
+     * @param appReleaseUuid UUID of the ApplicationRelease
+     * @return Updated Application Release.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    boolean isApplicationReleaseUpdateAcceptable(int appId, String appReleaseUuid)
+            throws ApplicationManagementException;
+
+    /**
+     * To create an application release for an Application.
+     *
+     * @param applicationId     ID of the Application
+     * @param applicationRelease ApplicatonRelease that need to be be created.
+     * @return the unique id of the application release, if the application release succeeded else -1
+     */
+    ApplicationRelease createRelease(int applicationId, ApplicationRelease applicationRelease)
+            throws ApplicationManagementException;
+
+    /**
+     * To get the application release of the Application/
+     *
+     * @param applicationUuid UUID of the Application.
+     * @return ApplicationRelease related with particular Application UUID and version.
+     * @throws ApplicationManagementException ApplicationManagementException
+     */
+    ApplicationRelease getReleaseByUuid(String applicationUuid) throws ApplicationManagementException;
 }
