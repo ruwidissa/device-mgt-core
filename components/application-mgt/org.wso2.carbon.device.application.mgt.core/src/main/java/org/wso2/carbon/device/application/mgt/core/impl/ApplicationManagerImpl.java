@@ -387,7 +387,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             applicationReleases = ApplicationManagementDAOFactory.getApplicationReleaseDAO()
-                    .getApplicationReleases(application.getName(), application.getType(), tenantId);
+                    .getReleases(application.getName(), application.getType(), tenantId);
             for (ApplicationRelease applicationRelease : applicationReleases) {
                 if (!AppLifecycleState.REMOVED.toString().equals(ApplicationManagementDAOFactory.getLifecycleStateDAO().
                         getLatestLifeCycleStateByReleaseID(applicationRelease.getId()).getCurrentState())) {

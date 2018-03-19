@@ -62,7 +62,7 @@ public interface ApplicationReleaseDAO {
      * @return list of the application releases
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    List<ApplicationRelease> getApplicationReleases(String applicationName, String applicationType, int tenantId) throws
+    List<ApplicationRelease> getReleases(String applicationName, String applicationType, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**

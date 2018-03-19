@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * Concrete implementation for Lifecycle related DB operations.
  */
-public class GenericLifecycleStateImpl extends AbstractDAOImpl implements LifecycleStateDAO {
+public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements LifecycleStateDAO {
 
     @Override
     public LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws ApplicationManagementDAOException {
@@ -80,13 +80,12 @@ public class GenericLifecycleStateImpl extends AbstractDAOImpl implements Lifecy
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int index = 0;
         try {
             conn = this.getDBConnection();
             String sql = "SELECT ID, CURRENT_STATE, PREVIOUSE_STATE, TENANT_ID, UPDATED_AT, UPDATED_BY FROM "
                     + "AP_APP_LIFECYCLE_STATE WHERE AP_APP_RELEASE_ID = ? ORDER BY UPDATED_AT ASC;";
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(++index,appReleaseId);
+            stmt.setInt(1,appReleaseId);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 LifecycleState lifecycleState = new LifecycleState();

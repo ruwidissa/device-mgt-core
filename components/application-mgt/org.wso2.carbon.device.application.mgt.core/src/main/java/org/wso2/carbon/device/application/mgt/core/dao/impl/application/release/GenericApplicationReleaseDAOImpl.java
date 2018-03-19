@@ -182,7 +182,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public List<ApplicationRelease> getApplicationReleases(String applicationName, String applicationType, int tenantId)
+    public List<ApplicationRelease> getReleases(String applicationName, String applicationType, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;

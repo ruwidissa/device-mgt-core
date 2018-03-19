@@ -26,8 +26,8 @@ import org.wso2.carbon.device.application.mgt.core.dao.*;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.Comment.CommentDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.GenericApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.GenericApplicationReleaseDAOImpl;
-import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.OracleApplicationDAOImpl;
-import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.GenericLifecycleStateImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.application.OracleApplicationDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.GenericLifecycleStateDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.GenericSubscriptionDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.GenericVisibilityDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
@@ -79,7 +79,7 @@ public class ApplicationManagementDAOFactory {
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
                 case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
-                    return new GenericLifecycleStateImpl();
+                    return new GenericLifecycleStateDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
@@ -116,6 +116,8 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new GenericVisibilityDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);

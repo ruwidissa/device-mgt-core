@@ -97,5 +97,4 @@ public class ConfigurationManager {
         }
         throw new InvalidConfigurationException("Expecting an extension with name - " + extName + " , but not found!");
     }
-
 }

@@ -49,16 +49,15 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int index = 0;
         String sql = "INSERT INTO AP_UNRESTRICTED_ROLES (ROLE, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
             for (UnrestrictedRole role : unrestrictedRoles) {
-                stmt.setString(++index, role.getRole());
-                stmt.setInt(++index, tenantId);
-                stmt.setInt(++index, applicationId);
+                stmt.setString(1, role.getRole());
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, applicationId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -82,14 +81,13 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         ResultSet rs = null;
         List<UnrestrictedRole> unrestrictedRoles = new ArrayList<>();
         UnrestrictedRole unrestrictedRole = null;
-        int index = 0;
         String sql = "SELECT ID, ROLE FROM AP_UNRESTRICTED_ROLES WHERE AP_APP_ID = ? AND TENANT_ID = ?;";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(++index, applicationId);
-            stmt.setInt(++index, tenantId);
+            stmt.setInt(1, applicationId);
+            stmt.setInt(2, tenantId);
             rs = stmt.executeQuery();
 
             while (rs.next()){
@@ -117,17 +115,16 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int index = 0;
-        String sql = "DELETE FROM AP_UNRESTRICTED_ROLES WHERE AP_APP_ID = 1 AND ROLE = 'role1' AND TENANT_ID = -1234;";
+        String sql = "DELETE FROM AP_UNRESTRICTED_ROLES WHERE AP_APP_ID = ? AND ROLE = ? AND TENANT_ID = ?;";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
 
             for (UnrestrictedRole role : unrestrictedRoles) {
-                stmt.setInt(++index, applicationId);
-                stmt.setString(++index, role.getRole());
-                stmt.setInt(++index, role.getTenantId());
+                stmt.setInt(1, applicationId);
+                stmt.setString(2, role.getRole());
+                stmt.setInt(3, role.getTenantId());
                 stmt.addBatch();
             }
             stmt.executeBatch();
