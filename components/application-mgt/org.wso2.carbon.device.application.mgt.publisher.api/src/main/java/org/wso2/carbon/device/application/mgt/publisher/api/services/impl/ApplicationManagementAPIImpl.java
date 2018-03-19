@@ -61,10 +61,15 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @GET
     @Override
     @Consumes("application/json")
-    public Response getApplications(@Valid Filter filter) {
+    public Response getApplications(
+            @Valid Filter filter,
+            @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
+            filter.setOffset(offset);
+            filter.setLimit(limit);
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity

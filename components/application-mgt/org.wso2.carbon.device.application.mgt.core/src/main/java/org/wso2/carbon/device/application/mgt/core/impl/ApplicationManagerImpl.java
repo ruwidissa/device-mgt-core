@@ -66,8 +66,6 @@ import java.util.Date;
 public class ApplicationManagerImpl implements ApplicationManager {
 
     private static final Log log = LogFactory.getLog(ApplicationManagerImpl.class);
-    private static final int DEFAULT_LIMIT = 20;
-    private static final int DEFAULT_OFFSET = 10;
     private DeviceTypeDAO deviceTypeDAO;
     private VisibilityDAO visibilityDAO;
     private ApplicationDAO applicationDAO;
@@ -843,12 +841,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private Filter validateFilter(Filter filter) {
         if (filter != null) {
-            if (filter.getLimit() == 0) {
-                filter.setLimit(DEFAULT_LIMIT);
-            }
-            if (filter.getOffset() == 0) {
-                filter.setOffset(DEFAULT_OFFSET);
-            }
             if (!SortingOrder.ASC.toString().equals(filter.getSortBy()) &&
                     !SortingOrder.DESC.toString().equals(filter.getSortBy())) {
                 return null;

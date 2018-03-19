@@ -133,9 +133,9 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully got application list.",
                             response = ApplicationList.class),
                     @ApiResponse(
-                            code = 304,
-                            message = "Not Modified. Empty body because the client already has the latest version "
-                                    + "of the requested resource."),
+                            code = 404,
+                            message = "Not Found. There doesn't have an application which is matched with requested " +
+                                    "query."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
@@ -146,7 +146,17 @@ public interface ApplicationManagementAPI {
                     name = "filter",
                     value = "Filter to get application list",
                     required = true)
-            @Valid Filter filter
+            @Valid Filter filter,
+            @ApiParam(
+                    name = "offset",
+                    value = "offset",
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "limit",
+                    defaultValue = "20")
+            @QueryParam("limit") int limit
     );
 
     @GET
