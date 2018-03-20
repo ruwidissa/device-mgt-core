@@ -422,7 +422,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
             storedLocations.add(applicationRelease.getAppHashValue());
         }
-        //todo add column into application and move application into removed state
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationManagementDAOFactory.getApplicationDAO().deleteApplication(applicationId);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
         return storedLocations;
     }
 

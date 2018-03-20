@@ -232,7 +232,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
             applicationRelease = applicationStorageManager
                     .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            //todo need to implement updateRelease method
             applicationManager.updateRelease(appId, applicationRelease);
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
@@ -262,7 +261,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     public Response updateApplicationArtifact(
             @PathParam("appType") String appType,
             @PathParam("appId") int applicationId,
-            @PathParam("uuid") String applicationUuuid,
+            @PathParam("uuid") String applicationUuid,
             @Multipart("binaryFile") Attachment binaryFile) {
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
@@ -272,27 +271,26 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
             if (binaryFile == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Uploading artifacts for the application is failed " + applicationUuuid).build();
+                        .entity("Uploading artifacts for the application is failed " + applicationUuid).build();
             }
-            applicationRelease = applicationManager.validateApplicationRelease(applicationUuuid);
+            applicationRelease = applicationManager.validateApplicationRelease(applicationUuid);
             applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease, appType,
                     binaryFile.getDataHandler().getInputStream());
-            //todo
             applicationManager.updateRelease(applicationId, applicationRelease);
             return Response.status(Response.Status.OK)
-                    .entity("Successfully uploaded artifacts for the application " + applicationUuuid).build();
+                    .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
         } catch (IOException e) {
-            log.error("Exception while trying to read icon, banner files for the application " + applicationUuuid);
+            log.error("Exception while trying to read icon, banner files for the application " + applicationUuid);
             return APIUtil.getResponse(new ApplicationManagementException(
-                            "Exception while trying to read icon, banner files for the application " + applicationUuuid, e),
+                            "Exception while trying to read icon, banner files for the application " + applicationUuid, e),
                     Response.Status.BAD_REQUEST);
         } catch (ResourceManagementException e) {
             log.error("Error occurred while uploading the image artifacts of the application with the uuid "
-                    + applicationUuuid, e);
+                    + applicationUuid, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         } catch (ApplicationManagementException e) {
             log.error("Error occurred while updating the image artifacts of the application with the uuid "
-                    + applicationUuuid, e);
+                    + applicationUuid, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
@@ -361,8 +359,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
             applicationRelease = applicationStorageManager
                     .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-
-            //todo
             applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
 
             return Response.status(Response.Status.OK).entity(applicationRelease).build();

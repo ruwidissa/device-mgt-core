@@ -515,9 +515,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         PreparedStatement stmt = null;
         try {
             conn = this.getDBConnection();
-            String sql = "DELETE FROM AP_APP WHERE ID = ? ";
+            String sql = "UPDATE AP_APP SET STATUS = ? WHERE ID = ? ";
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, appId);
+            stmt.setString(1, AppLifecycleState.REMOVED.toString());
+            stmt.setInt(2, appId);
             stmt.executeUpdate();
 
         } catch (DBConnectionException e) {
