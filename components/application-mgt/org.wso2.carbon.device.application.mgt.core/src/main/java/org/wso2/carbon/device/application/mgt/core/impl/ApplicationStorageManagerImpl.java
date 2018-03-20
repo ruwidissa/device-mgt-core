@@ -19,6 +19,10 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import com.dd.plist.NSDictionary;
+import com.dd.plist.NSString;
+import com.dd.plist.PropertyListFormatException;
+import com.dd.plist.PropertyListParser;
 import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -28,20 +32,32 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.xml.sax.SAXException;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.deleteDir;
 import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.saveFile;
 
 /**
@@ -51,6 +67,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     private static final Log log = LogFactory.getLog(ApplicationStorageManagerImpl.class);
     private String storagePath;
     private int screenShotMaxCount;
+    private static final int BUFFER_SIZE = 4096;
 
     /**
      * Create a new ApplicationStorageManager Instance
@@ -163,11 +180,30 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     public ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
             throws ResourceManagementException {
 
-        String artifactDirectoryPath;
-        String md5OfApp;
-        md5OfApp = getMD5(binaryFile);
-
         try {
+            if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
+                applicationRelease.setVersion(Constants.DEFAULT_VERSION);
+                UrlValidator urlValidator = new UrlValidator();
+                if (applicationRelease.getUrl() == null || !urlValidator.isValid(applicationRelease.getUrl())) {
+                    throw new ApplicationStorageManagementException("Request payload doesn't contains Web Clip URL " +
+                                                                            "with application release object or Web " +
+                                                                            "Clip URL is invalid");
+                    //todo if we throw this we must send BAD REQUEST to end user
+                }
+                applicationRelease.setAppStoredLoc(applicationRelease.getUrl());
+                applicationRelease.setAppHashValue(null);
+                return applicationRelease;
+            }
+
+            String artifactDirectoryPath;
+            String md5OfApp;
+            md5OfApp = getMD5(binaryFile);
+
+            if (md5OfApp == null) {
+                throw new ApplicationStorageManagementException(
+                        "Error occurred while md5sum value retrieving process: " +
+                                "application UUID " + applicationRelease.getUuid());
+            }
 
             if (ApplicationType.ANDROID.toString().equals(appType)) {
                 String prefix = "stream2file";
@@ -184,37 +220,42 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 if (!isTempDelete) {
                     log.error("Temporary created APK file deletion failed");
                 }
-            } else if (ApplicationType.iOS.toString().equals(appType)) {
-                //todo iOS ipa validate
-            } else if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
-                //todo Web Clip validate
+            } else if (ApplicationType.IOS.toString().equals(appType)) {
+                String prefix = "stream2file";
+                String suffix = ".ipa";
+                Boolean isTempDelete;
+
+                File tempFile = File.createTempFile(prefix, suffix);
+                FileOutputStream out = new FileOutputStream(tempFile);
+                IOUtils.copy(binaryFile, out);
+                Map<String, String> plistInfo = getIPAInfo(tempFile);
+                applicationRelease.setVersion(plistInfo.get("CFBundleVersion"));
+                isTempDelete = tempFile.delete();
+                if (!isTempDelete) {
+                    log.error("Temporary created ipa file deletion failed");
+                }
             } else {
                 throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
                         "application types " + applicationRelease.getUuid());
             }
 
-            if (md5OfApp != null) {
-                artifactDirectoryPath = storagePath + md5OfApp;
-                StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-                if (log.isDebugEnabled()) {
-                    log.debug("Artifact Directory Path for saving the application release related artifacts related with "
-                            + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
-                }
-
-                String artifactPath = artifactDirectoryPath + Constants.RELEASE_ARTIFACT;
-                saveFile(binaryFile, artifactPath);
-                applicationRelease.setAppStoredLoc(artifactPath);
-                applicationRelease.setAppHashValue(md5OfApp);
-            } else {
-                throw new ApplicationStorageManagementException("Error occurred while md5sum value retrieving process: " +
-                        "application UUID " + applicationRelease.getUuid());
+            artifactDirectoryPath = storagePath + md5OfApp;
+            StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
+            if (log.isDebugEnabled()) {
+                log.debug("Artifact Directory Path for saving the application release related artifacts related with "
+                                  + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
             }
+
+            String artifactPath = artifactDirectoryPath + Constants.RELEASE_ARTIFACT;
+            saveFile(binaryFile, artifactPath);
+            applicationRelease.setAppStoredLoc(artifactPath);
+            applicationRelease.setAppHashValue(md5OfApp);
+
         } catch (IOException e) {
             throw new ApplicationStorageManagementException(
                     "IO Exception while saving the release artifacts in the server for the application UUID "
                             + applicationRelease.getUuid(), e);
         }
-
 
         return applicationRelease;
     }
@@ -266,5 +307,131 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     ("IO Exception while trying to get the md5sum value of application");
         }
         return md5;
+    }
+
+    private synchronized Map<String, String> getIPAInfo(File ipaFile) throws ApplicationStorageManagementException {
+        Map<String, String> ipaInfo = new HashMap<>();
+
+        String ipaDirectory = null;
+        try {
+            String ipaAbsPath = ipaFile.getAbsolutePath();
+            ipaDirectory = new File(ipaAbsPath).getParent();
+
+            if (new File(ipaDirectory + File.separator + Constants.PAYLOAD).exists()) {
+                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+            }
+
+            // unzip ipa zip file
+            unzip(ipaAbsPath, ipaDirectory);
+
+            // fetch app file name, after unzip ipa
+            String appFileName = "";
+            for (File file : Objects.requireNonNull(
+                    new File(ipaDirectory + File.separator + Constants.PAYLOAD).listFiles()
+            )) {
+                if (file.toString().endsWith(Constants.APP_EXTENSION)) {
+                    appFileName = new File(file.toString()).getAbsolutePath();
+                    break;
+                }
+            }
+
+            String plistFilePath = appFileName + File.separator + Constants.PLIST_NAME;
+
+            // parse info.plist
+            File plistFile = new File(plistFilePath);
+            NSDictionary rootDict;
+            rootDict = (NSDictionary) PropertyListParser.parse(plistFile);
+
+            // get version
+            NSString parameter = (NSString) rootDict.objectForKey(Constants.CF_BUNDLE_VERSION);
+            ipaInfo.put(Constants.CF_BUNDLE_VERSION, parameter.toString());
+
+        } catch (ParseException e) {
+            String msg = "Error occurred while parsing the plist data";
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg, e);
+        } catch (IOException e) {
+            String msg = "Error occurred while accessing the ipa file";
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg, e);
+        } catch (SAXException | ParserConfigurationException | PropertyListFormatException e) {
+            log.error(e);
+            throw new ApplicationStorageManagementException(e.getMessage(), e);
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred while unzipping the ipa file";
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg, e);
+        } finally {
+            if (ipaDirectory != null) {
+                // remove unzip folder
+                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+            }
+        }
+        return ipaInfo;
+    }
+
+    /**
+     * Extracts a zip file specified by the zipFilePath to a directory specified by
+     * destDirectory (will be created if does not exists)
+     *
+     * @param zipFilePath   file path of the zip
+     * @param destDirectory destination directory path
+     */
+    private void unzip(String zipFilePath, String destDirectory)
+            throws IOException, ApplicationStorageManagementException {
+        File destDir = new File(destDirectory);
+        Boolean isDirCreated;
+
+        if (!destDir.exists()) {
+            isDirCreated = destDir.mkdir();
+            if (!isDirCreated) {
+                throw new ApplicationStorageManagementException("Directory Creation Is Failed while iOS app vertion " +
+                                                                        "retrieval");
+            }
+        }
+
+        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+        ZipEntry entry = zipIn.getNextEntry();
+
+        // iterates over entries in the zip file
+        while (entry != null) {
+            String filePath = destDirectory + File.separator + entry.getName();
+
+            if (!entry.isDirectory()) {
+                // if the entry is a file, extracts it
+                extractFile(zipIn, filePath);
+            } else {
+                // if the entry is a directory, make the directory
+                File dir = new File(filePath);
+                isDirCreated = dir.mkdir();
+                if (!isDirCreated) {
+                    throw new ApplicationStorageManagementException(
+                            "Directory Creation Is Failed while iOS app vertion " +
+                                    "retrieval");
+                }
+
+            }
+
+            zipIn.closeEntry();
+            entry = zipIn.getNextEntry();
+        }
+        zipIn.close();
+    }
+
+    /**
+     * Extracts a zip entry (file entry)
+     *
+     * @param zipIn    zip input stream
+     * @param filePath file path
+     */
+    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+        byte[] bytesIn = new byte[BUFFER_SIZE];
+        int read;
+
+        while ((read = zipIn.read(bytesIn)) != -1) {
+            bos.write(bytesIn, 0, read);
+        }
+        bos.close();
     }
 }

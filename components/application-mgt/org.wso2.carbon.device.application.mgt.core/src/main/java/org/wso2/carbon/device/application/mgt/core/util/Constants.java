@@ -31,9 +31,11 @@ public class Constants {
 
     public static final String DEFAULT_CONFIG_FILE_LOCATION = CarbonUtils.getCarbonConfigDirPath() + File.separator +
             Constants.APPLICATION_CONFIG_XML_FILE;
-    //can remove
-    public static final String PLATFORMS_DEPLOYMENT_DIR_NAME = "platforms";
-    public static final String PLATFORM_DEPLOYMENT_EXT = ".xml";
+    public static final String DEFAULT_VERSION = "1.0.0";
+    public static final String PAYLOAD = "Payload";
+    public static final String PLIST_NAME = "Info.plist";
+    public static final String CF_BUNDLE_VERSION = "CFBundleVersion";
+    public static final String APP_EXTENSION = ".app";
 
     /**
      * Database types supported by Application Management.

@@ -138,10 +138,16 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
-            if (binaryFile == null) {
+            if (binaryFile == null && !ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
                 log.error("Binary file is not uploaded for the application release of " + application.getName() +
                         " of application type " + application.getType());
                 return Response.status(Response.Status.BAD_REQUEST).build();
+            }else if(binaryFile == null && ApplicationType.WEB_CLIP.toString().equals(application.getType())){
+                applicationRelease = applicationStorageManager.uploadReleaseArtifact(applicationRelease, application.getType(),
+                                                                                     null);
+            }else if (binaryFile != null && !ApplicationType.WEB_CLIP.toString().equals(application.getType())){
+                applicationRelease = applicationStorageManager.uploadReleaseArtifact(applicationRelease, application.getType(),
+                                                                                     binaryFile.getDataHandler().getInputStream());
             }
 
             iconFileStream = iconFile.getDataHandler().getInputStream();
@@ -151,8 +157,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 attachments.add(screenshot.getDataHandler().getInputStream());
             }
 
-            applicationRelease = applicationStorageManager.uploadReleaseArtifact(applicationRelease, application.getType(),
-                    binaryFile.getDataHandler().getInputStream());
 
             if (applicationRelease.getAppStoredLoc() == null || applicationRelease.getAppHashValue() == null) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

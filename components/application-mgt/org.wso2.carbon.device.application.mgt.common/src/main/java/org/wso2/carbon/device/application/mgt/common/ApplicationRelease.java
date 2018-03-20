@@ -82,6 +82,8 @@ public class ApplicationRelease {
 
     private int stars;
 
+    private String url;
+
     public int getNoOfRatedUsers() {
         return noOfRatedUsers;
     }
@@ -288,5 +290,13 @@ public class ApplicationRelease {
 
     public void setIconLoc(String iconLoc) {
         this.iconLoc = iconLoc;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

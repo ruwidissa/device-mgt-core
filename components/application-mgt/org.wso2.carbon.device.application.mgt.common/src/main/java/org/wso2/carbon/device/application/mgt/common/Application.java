@@ -51,8 +51,6 @@ public class Application {
 
     private List<ApplicationRelease> applicationReleases;
 
-//    private ApplicationRelease releaseVersion;
-
     private DeviceType devicetype;
 
     public int getId() {
@@ -104,14 +102,6 @@ public class Application {
     public void setUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles) {
         this.unrestrictedRoles = unrestrictedRoles;
     }
-
-//    public ApplicationRelease getReleaseVersion() {
-//        return releaseVersion;
-//    }
-//
-//    public void setReleaseVersion(ApplicationRelease releaseVersion) {
-//        this.releaseVersion = releaseVersion;
-//    }
 
     public String getType() {
         return type;

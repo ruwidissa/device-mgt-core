@@ -23,6 +23,6 @@ package org.wso2.carbon.device.application.mgt.common;
  * Application Types.
  */
 public enum ApplicationType {
-    ANDROID, iOS, WEB_CLIP
+    ANDROID, IOS, WEB_CLIP
 }
 

@@ -397,7 +397,7 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationArtifact(
-            @ApiParam(name = "appType", value = "Type of the application i.e Android, iOS etc", required = true)
+            @ApiParam(name = "appType", value = "Type of the application i.e Android, IOS etc", required = true)
             @PathParam("appType") String appType,
             @ApiParam(name = "id", value = "Id of the application", required = true)
             @PathParam("uuid") int applicationId,
