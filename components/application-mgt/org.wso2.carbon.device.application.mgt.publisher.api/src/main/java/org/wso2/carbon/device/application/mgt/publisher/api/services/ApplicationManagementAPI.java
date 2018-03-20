@@ -260,10 +260,9 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully created an application.",
                             response = Application.class),
                     @ApiResponse(
-                            code = 304,
-                            message = "Not Modified. \n " +
-                                    "Empty body because the client already has the latest version of the requested "
-                                    + "resource."),
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application creating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",

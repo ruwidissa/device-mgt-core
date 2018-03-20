@@ -98,8 +98,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
 
             return Response.status(Response.Status.OK).entity(application).build();
-        } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
             log.error("Error occurred while getting application with the uuid " + appType, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
