@@ -40,7 +40,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <packagingExcludes>WEB-INF/lib/*cxf*.jar</packagingExcludes>
-                    <warName>api#application-mgt#v1.0</warName>
+                    <warName>api#application-mgt-publisher#v1.0</warName>
                 </configuration>
             </plugin>
         </plugins>
