@@ -19,9 +19,7 @@
 
 package org.wso2.carbon.device.application.mgt.common.services;
 
-import javassist.NotFoundException;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.ImageArtifact;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
