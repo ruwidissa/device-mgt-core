@@ -99,15 +99,6 @@ public interface ApplicationManager {
     Application getApplication(String appType, String appName) throws ApplicationManagementException;
 
     /**
-     * To get Application with the given UUID.
-     *
-     * @param applicationId Id of the Application
-     * @return the Application identified by the application id
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    Application getApplicationById(int applicationId) throws ApplicationManagementException;
-
-    /**
      * To get an application associated with the release.
      *
      * @param appReleaseUUID UUID of the app release
@@ -175,7 +166,8 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of the Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    ApplicationRelease validateApplicationRelease(String releaseUuid) throws ApplicationManagementException;
+    ApplicationRelease validateApplicationRelease(int applicationId, String releaseUuid) throws
+                                                                                   ApplicationManagementException;
 
     /**
      * To update with a new release for an Application.
@@ -209,12 +201,4 @@ public interface ApplicationManager {
     ApplicationRelease createRelease(int applicationId, ApplicationRelease applicationRelease)
             throws ApplicationManagementException;
 
-    /**
-     * To get the application release of the Application/
-     *
-     * @param applicationUuid UUID of the Application.
-     * @return ApplicationRelease related with particular Application UUID and version.
-     * @throws ApplicationManagementException ApplicationManagementException
-     */
-    ApplicationRelease getReleaseByUuid(String applicationUuid) throws ApplicationManagementException;
 }

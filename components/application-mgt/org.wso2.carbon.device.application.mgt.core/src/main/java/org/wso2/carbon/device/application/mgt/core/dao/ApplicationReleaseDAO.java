@@ -95,4 +95,15 @@ public interface ApplicationReleaseDAO {
      */
     void deleteRelease(int id, String version) throws ApplicationManagementDAOException;
 
+    /**
+     * To get release details of a specific application.
+     *
+     * @param applicationId ID of the application.
+     * @param releaseUuid UUID of the application release.
+     * @param tenantId Tenant Id
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    ApplicationRelease getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
+                                                                                            ApplicationManagementDAOException;
+
 }

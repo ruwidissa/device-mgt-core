@@ -222,7 +222,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     attachments.add(screenshot.getDataHandler().getInputStream());
                 }
             }
-            applicationRelease = applicationManager.validateApplicationRelease(applicationUuid);
+            applicationRelease = applicationManager.validateApplicationRelease(appId, applicationUuid);
             LifecycleState lifecycleState = applicationManager.getLifecycleState(appId, applicationRelease.getUuid());
             if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState()) ||
                     AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
@@ -273,7 +273,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity("Uploading artifacts for the application is failed " + applicationUuid).build();
             }
-            applicationRelease = applicationManager.validateApplicationRelease(applicationUuid);
+            applicationRelease = applicationManager.validateApplicationRelease(applicationId, applicationUuid);
             applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease, appType,
                     binaryFile.getDataHandler().getInputStream());
             applicationManager.updateRelease(applicationId, applicationRelease);

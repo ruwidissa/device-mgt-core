@@ -213,11 +213,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease getReleaseByUuid(String applicationUuid) throws ApplicationManagementException {
-        return null;
-    }
-
-    @Override
     public String getUuidOfLatestRelease(int appId) throws ApplicationManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -288,40 +283,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while getting application with the " + "application name " + appName);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
-        }
-    }
-
-    @Override
-    public Application getApplicationById(int applicationId) throws ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        Application application;
-        boolean isAppAllowed = false;
-        try {
-            ConnectionManagerUtil.openDBConnection();
-            application = ApplicationManagementDAOFactory.getApplicationDAO()
-                    .getApplicationById(applicationId, tenantId);
-            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                return application;
-            }
-
-            if (!application.getUnrestrictedRoles().isEmpty()) {
-                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
-                    isAppAllowed = true;
-                }
-            } else {
-                isAppAllowed = true;
-            }
-
-            if (!isAppAllowed) {
-                return null;
-            }
-            return application;
-        } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while getting application with the " + "application id " + applicationId, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -448,7 +409,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (application == null) {
             throw new ApplicationManagementException("Invalid Application ID is received");
         }
-        ApplicationRelease applicationRelease = validateApplicationRelease(releaseUuid);
+        ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, releaseUuid);
         if (applicationRelease == null) {
             throw new ApplicationManagementException("Invalid Application Release UUID is received");
         }
@@ -557,19 +518,44 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /**
      * To validate the pre-request of the ApplicationRelease.
      *
-     * @param applicationID ID of the Application.
+     * @param applicationId ID of the Application.
      * @return Application related with the UUID
      */
-    public Application validateApplication(int applicationID) throws ApplicationManagementException {
-        if (applicationID <= 0) {
-            throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
-                                                             + "parameter to get the relevant application.");
+    public Application validateApplication(int applicationId) throws ApplicationManagementException {
+        if (applicationId <= 0) {
+            throw new ApplicationManagementException("Application id could,t be a negative integer. Hence please add " +
+                                                             "valid application id.");
         }
-        Application application = DataHolder.getInstance().getApplicationManager().getApplicationById(applicationID);
-        if (application == null) {
-            throw new NotFoundException("Application of the " + applicationID + " does not exist.");
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        Application application;
+        boolean isAppAllowed = false;
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            application = ApplicationManagementDAOFactory.getApplicationDAO()
+                    .getApplicationById(applicationId, tenantId);
+            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
+                return application;
+            }
+
+            if (!application.getUnrestrictedRoles().isEmpty()) {
+                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                    isAppAllowed = true;
+                }
+            } else {
+                isAppAllowed = true;
+            }
+
+            if (!isAppAllowed) {
+                throw new NotFoundException("Application of the " + applicationId + " does not exist.");
+            }
+            return application;
+        } catch (UserStoreException e) {
+            throw new ApplicationManagementException(
+                    "User-store exception while getting application with the " + "application id " + applicationId, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
-        return application;
     }
 
     /**
@@ -578,18 +564,33 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param applicationUuid UUID of the Application.
      * @return Application related with the UUID
      */
-    public ApplicationRelease validateApplicationRelease(String applicationUuid) throws ApplicationManagementException {
-        if (applicationUuid == null) {
-            throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
-                                                             + "parameter to get the relevant application.");
+    public ApplicationRelease validateApplicationRelease(int applicationId, String applicationUuid) throws
+                                                                                                    ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        ApplicationRelease applicationRelease;
+        try {
+            if (applicationId <= 0) {
+                throw new ApplicationManagementException(
+                        "Application id could,t be a negative integer. Hence please add " +
+                                "valid application id.");
+            }
+            if (applicationUuid == null) {
+                throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
+                                                                 + "parameter to get the relevant application.");
+            }
+            ConnectionManagerUtil.openDBConnection();
+            applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().getReleaseByIds
+                    (applicationId, applicationUuid, tenantId);
+            if (applicationRelease == null) {
+                throw new ApplicationManagementException("Doesn't exist a application release for application ID: " +
+                                                                 applicationId + "and application UUID: " +
+                                                                 applicationUuid);
+            }
+            return applicationRelease;
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
-        ApplicationRelease applicationRelease = DataHolder.getInstance().getApplicationManager()
-                .getReleaseByUuid(applicationUuid);
-        if (applicationRelease == null) {
-            throw new ApplicationManagementException(
-                    "Application with UUID " + applicationUuid + " does not exist.");
-        }
-        return applicationRelease;
+
     }
 
     @Override
@@ -672,8 +673,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             LifecycleStateDAO lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
-            //todo applicationUuid and applicationId should be passed and util method has to be changed
-            ApplicationRelease applicationRelease = validateApplicationRelease(applicationUuid);
+            ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, applicationUuid);
             lifecycleState = lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
             lifecycleState.setNextStates(getNextLifecycleStates(lifecycleState.getCurrentState()));
         } catch (ApplicationManagementDAOException e) {
@@ -692,8 +692,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             Application application = validateApplication(applicationId);
-            //todo applicationUuid and applicationId should be passed and util method has to be changed
-            ApplicationRelease applicationRelease = validateApplicationRelease(applicationUuid);
+            ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, applicationUuid);
             LifecycleStateDAO lifecycleStateDAO;
 
             if (application != null) {

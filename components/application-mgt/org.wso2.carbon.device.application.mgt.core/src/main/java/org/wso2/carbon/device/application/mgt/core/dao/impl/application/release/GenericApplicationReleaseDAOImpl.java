@@ -22,13 +22,11 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.application.release
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -168,6 +166,80 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error while getting release details of the application " +
                     applicationName + " and version " + versionName + " , while executing the query " + sql, e);
+        } finally {
+            Util.cleanupResources(statement, resultSet);
+        }
+    }
+
+    /**
+     * To get release details of a specific application.
+     *
+     * @param applicationId ID of the application.
+     * @param releaseUuid UUID of the application release.
+     * @param tenantId Tenant Id
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    @Override
+    public ApplicationRelease getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
+                                                                               ApplicationManagementDAOException {
+
+        Connection connection;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        ApplicationRelease applicationRelease = null;
+        String sql = "SELECT AR.ID AS RELESE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE, AR.APP_PRICE,"
+                + " AR.STORED_LOCATION, AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, "
+                + "AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS " +
+                "HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO, AR.CREATED_BY, AR.CREATED_AT, AR" +
+                ".PUBLISHED_BY, AR.PUBLISHED_AT, AR.STARS, AL.CURRENT_STATE, AL.PREVIOUSE_STATE, AL.UPDATED_BY, " +
+                "AL.UPDATED_AT FROM AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE AS AL WHERE " +
+                "AR.AP_APP_ID = ? AND AR.UUID = ? AND AR.TENANT_ID = ? AND AL.AP_APP_RELEASE_ID=AR.ID AND " +
+                "AL.TENANT_ID = AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
+
+        try {
+            connection = this.getDBConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, applicationId);
+            statement.setString(2, releaseUuid);
+            statement.setInt(3, tenantId);
+            resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                applicationRelease = new ApplicationRelease();
+                applicationRelease.setId(resultSet.getInt("RELEASE_ID"));
+                applicationRelease.setVersion(resultSet.getString("RELEASE_VERSION"));
+                applicationRelease.setUuid(resultSet.getString("UUID"));
+                applicationRelease.setReleaseType(resultSet.getString("RELEASE_TYPE"));
+                applicationRelease.setPrice(resultSet.getDouble("APP_PRICE"));
+                applicationRelease.setAppStoredLoc(resultSet.getString("STORED_LOCATION"));
+                applicationRelease.setBannerLoc(resultSet.getString("BANNER_LOCATION"));
+                applicationRelease.setScreenshotLoc1(resultSet.getString("SCREEN_SHOT_1"));
+                applicationRelease.setScreenshotLoc2(resultSet.getString("SCREEN_SHOT_2"));
+                applicationRelease.setScreenshotLoc3(resultSet.getString("SCREEN_SHOT_3"));
+                applicationRelease.setAppHashValue(resultSet.getString("HASH_VALUE"));
+                applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
+                applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
+                applicationRelease.setApplicationCreator(resultSet.getString("CREATED_BY"));
+                applicationRelease.setCreatedAt(resultSet.getTimestamp("CREATED_AT"));
+                applicationRelease.setPublishedBy(resultSet.getString("PUBLISHED_BY"));
+                applicationRelease.setPublishedAt(resultSet.getTimestamp("PUBLISHED_AT"));
+                applicationRelease.setStars(resultSet.getInt("STARS"));
+                applicationRelease.setCurrentState(resultSet.getString("CURRENT_STATE"));
+                applicationRelease.setPreviousState(resultSet.getString("PREVIOUSE_STATE"));
+                applicationRelease.setStateModifiedBy(resultSet.getString("UPDATED_BY"));
+                applicationRelease.setStateModifiedAt(resultSet.getTimestamp("UPDATED_AT"));
+            }
+            return applicationRelease;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Database connection exception while trying to get the release details of the " +
+                            "application id: " + applicationId + "and UUID of the application release:  " +
+                            releaseUuid, e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error while getting release details of the application id: " + applicationId +
+                            " and theUUID of the application " +
+                            "release: " + releaseUuid + " , while executing the query " + sql, e);
         } finally {
             Util.cleanupResources(statement, resultSet);
         }
