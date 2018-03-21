@@ -402,29 +402,37 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public List<String> deleteApplication(int applicationId) throws ApplicationManagementException {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-
-        if (validateApplication(applicationId) == null) {
-            throw new ApplicationManagementException("Invalid Application");
-        }
-        List<ApplicationRelease> applicationReleases = getReleases(applicationId);
         List<String> storedLocations = new ArrayList<>();
-        if (log.isDebugEnabled()) {
-            log.debug("Request is received to delete applications which are related with the application id " +
-                              applicationId);
-        }
-        for (ApplicationRelease applicationRelease : applicationReleases) {
-            LifecycleState appLifecycleState = getLifecycleState(applicationId, applicationRelease.getUuid());
-            LifecycleState newAppLifecycleState = new LifecycleState();
-            newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
-            newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-            newAppLifecycleState.setTenantId(tenantId);
-            newAppLifecycleState.setUpdatedBy(userName);
-            addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
-            storedLocations.add(applicationRelease.getAppHashValue());
-        }
+
         try {
+            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
+                throw new ApplicationManagementException(
+                        "You don't have permission to delete this application. In order to delete an application you " +
+                                "need to have admin permission");
+            }
+
+            if (validateApplication(applicationId) == null) {
+                throw new ApplicationManagementException("Invalid Application");
+            }
+            List<ApplicationRelease> applicationReleases = getReleases(applicationId);
+            if (log.isDebugEnabled()) {
+                log.debug("Request is received to delete applications which are related with the application id " +
+                                  applicationId);
+            }
+            for (ApplicationRelease applicationRelease : applicationReleases) {
+                LifecycleState appLifecycleState = getLifecycleState(applicationId, applicationRelease.getUuid());
+                LifecycleState newAppLifecycleState = new LifecycleState();
+                newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
+                newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
+                newAppLifecycleState.setTenantId(tenantId);
+                newAppLifecycleState.setUpdatedBy(userName);
+                addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+                storedLocations.add(applicationRelease.getAppHashValue());
+            }
             ConnectionManagerUtil.openDBConnection();
             ApplicationManagementDAOFactory.getApplicationDAO().deleteApplication(applicationId);
+        } catch (UserStoreException e) {
+            e.printStackTrace();
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -437,7 +445,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application application = validateApplication(applicationId);
-
         if (application == null) {
             throw new ApplicationManagementException("Invalid Application ID is received");
         }
@@ -445,14 +452,22 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (applicationRelease == null) {
             throw new ApplicationManagementException("Invalid Application Release UUID is received");
         }
-
         LifecycleState appLifecycleState = getLifecycleState(applicationId, applicationRelease.getUuid());
-        LifecycleState newAppLifecycleState = new LifecycleState();
-        newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
-        newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-        newAppLifecycleState.setTenantId(tenantId);
-        newAppLifecycleState.setUpdatedBy(userName);
-        addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+        String currentState = appLifecycleState.getCurrentState();
+        if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState
+                .REJECTED.toString().equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals
+                (currentState) ) {
+            LifecycleState newAppLifecycleState = new LifecycleState();
+            newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
+            newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
+            newAppLifecycleState.setTenantId(tenantId);
+            newAppLifecycleState.setUpdatedBy(userName);
+            addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+        }else{
+            throw new ApplicationManagementException("Can't delete the application release, You have to move the " +
+                                                             "lifecycle state from "+ currentState + " to acceptable " +
+                                                             "state") ;
+        }
         return applicationRelease.getAppHashValue();
     }
 
