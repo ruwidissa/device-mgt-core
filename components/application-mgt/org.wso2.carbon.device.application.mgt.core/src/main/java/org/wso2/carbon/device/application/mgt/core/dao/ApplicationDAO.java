@@ -143,14 +143,15 @@ public interface ApplicationDAO {
      */
     int getApplicationCount(Filter filter, int tenantId) throws ApplicationManagementDAOException;
 
-
     /**
      * To delete the tags of a application.
      *
+     * @param tags Tags which are going to delete.
      * @param applicationId ID of the application to delete the tags.
+     * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    void deleteTags(int applicationId) throws ApplicationManagementDAOException;
+    void deleteTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get an {@link Application} associated with the given release

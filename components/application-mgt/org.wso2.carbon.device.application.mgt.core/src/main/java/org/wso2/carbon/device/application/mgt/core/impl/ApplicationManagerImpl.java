@@ -31,6 +31,7 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.SortingOrder;
+import org.wso2.carbon.device.application.mgt.common.Tag;
 import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -56,6 +57,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -223,7 +225,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     }
 
-    private boolean isRoleExists(List<UnrestrictedRole> unrestrictedRoleList, String userName)
+    private boolean isRoleExists(Collection<UnrestrictedRole> unrestrictedRoleList, String userName)
             throws UserStoreException {
         String[] roleList;
         roleList = getRolesOfUser(userName);
@@ -811,7 +813,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public Application updateApplication(Application application) throws ApplicationManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application existingApplication = validateApplication(application.getId());
+        ApplicationDAO applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
+        VisibilityDAO visibilityDAO = ApplicationManagementDAOFactory.getVisibilityDAO();
+        List<UnrestrictedRole> addingRoleList;
+        List<UnrestrictedRole> removingRoleList;
+        List<Tag> addingTags;
+        List<Tag> removingTags;
+
+
         if (existingApplication == null) {
             throw new NotFoundException("Tried to update Application which is not in the publisher, " +
                                                 "Please verify application details");
@@ -837,25 +849,51 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
         }
-        //todo get restricted roles and assign for application
         if (existingApplication.getIsRestricted() != application.getIsRestricted()) {
-            if (existingApplication.getIsRestricted() == 1) {
+            if (existingApplication.getIsRestricted() == 0 && existingApplication.getUnrestrictedRoles() == null) {
                 if (application.getUnrestrictedRoles() == null || application.getUnrestrictedRoles().isEmpty()) {
                     throw new ApplicationManagementException("If you are going to add role restriction for non role " +
                                                                      "restricted Application, Unrestricted role list " +
                                                                      "won't be empty or null");
                 }
-            } else if (existingApplication.getIsRestricted() == 0) {
+                visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), application.getId(), tenantId);
+            } else if (existingApplication.getIsRestricted() == 1 && existingApplication.getUnrestrictedRoles() !=
+                    null) {
                 if (application.getUnrestrictedRoles() != null || !application.getUnrestrictedRoles().isEmpty()) {
                     throw new ApplicationManagementException("If you are going to remove role restriction from role " +
-                                                                     "restricted Application, Unrestricted role list should be empty or null");
+                                                                     "restricted Application, Unrestricted role list " +
+                                                                     "should be empty or null");
                 }
+                visibilityDAO.deleteUnrestrictedRoles(existingApplication.getUnrestrictedRoles(), application.getId(),
+                                                      tenantId);
             }
-            //todo update role restriction
+        } else if (existingApplication.getIsRestricted() == application.getIsRestricted()) {
+            if (existingApplication.getIsRestricted() == 1) {
+                addingRoleList = getDifference(application.getUnrestrictedRoles(), existingApplication
+                        .getUnrestrictedRoles());
+                removingRoleList = getDifference(existingApplication
+                                                         .getUnrestrictedRoles(), application.getUnrestrictedRoles());
+                if (!addingRoleList.isEmpty()) {
+                    visibilityDAO.addUnrestrictedRoles(addingRoleList, application.getId(), tenantId);
+
+                }
+                if (!removingRoleList.isEmpty()) {
+                    visibilityDAO.deleteUnrestrictedRoles(removingRoleList, application.getId(), tenantId);
+
+                }
+
+            }
         }
-        //todo get tags and assign for application verify
-        //todo update application
-        return application;
+        addingTags = getDifference(existingApplication.getTags(), application.getTags());
+        removingTags = getDifference(application.getTags(), existingApplication.getTags());
+        if (!addingTags.isEmpty()) {
+            applicationDAO.addTags(addingTags, application.getId(), tenantId);
+        }
+        if (!removingTags.isEmpty()) {
+            applicationDAO.deleteTags(removingTags, application.getId(), tenantId);
+        }
+
+        return applicationDAO.editApplication(application, tenantId);
     }
 
     private Filter validateFilter(Filter filter) {
@@ -878,5 +916,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
         }
         return filter;
+    }
+
+    private <T> List<T> getDifference(List<T> list1, Collection<T> list2) {
+        List<T> list = new ArrayList<>();
+        for (T t : list1) {
+            if(!list2.contains(t)) {
+                list.add(t);
+            }
+        }
+        return list;
     }
 }

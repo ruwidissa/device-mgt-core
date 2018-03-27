@@ -26,6 +26,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 
+import java.util.Collection;
 import java.util.List;
 
 //todo need to work on business logic

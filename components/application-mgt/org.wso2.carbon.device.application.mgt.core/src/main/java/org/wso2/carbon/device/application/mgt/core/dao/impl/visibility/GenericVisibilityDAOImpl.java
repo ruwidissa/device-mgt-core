@@ -80,7 +80,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<UnrestrictedRole> unrestrictedRoles = new ArrayList<>();
-        UnrestrictedRole unrestrictedRole = null;
+        UnrestrictedRole unrestrictedRole;
         String sql = "SELECT ID, ROLE FROM AP_UNRESTRICTED_ROLES WHERE AP_APP_ID = ? AND TENANT_ID = ?;";
         try{
             conn = this.getDBConnection();

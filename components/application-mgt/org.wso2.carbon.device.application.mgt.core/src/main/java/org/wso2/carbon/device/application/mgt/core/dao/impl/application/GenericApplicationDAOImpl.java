@@ -94,36 +94,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void addTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to add tags");
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        String sql = "INSERT INTO AP_APP_TAG (TAG, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
-        try {
-            conn = this.getDBConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.prepareStatement(sql);
-            for (Tag tag : tags) {
-                stmt.setString(1, tag.getTagName());
-                stmt.setInt(2, tenantId);
-                stmt.setInt(3, applicationId);
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-
-        } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while obtaining the DB connection when adding tags", e);
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
-        } finally {
-            Util.cleanupResources(stmt, null);
-        }
-    }
-
-    @Override
     public int isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to verify whether the registering app is registered or not");
@@ -531,15 +501,55 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void deleteTags(int applicationId) throws ApplicationManagementDAOException {
+    public void addTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to add tags");
+        }
         Connection conn;
         PreparedStatement stmt = null;
+        String sql = "INSERT INTO AP_APP_TAG (TAG, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
         try {
             conn = this.getDBConnection();
-            String sql = "DELETE FROM AP_APP_TAG WHERE ID = ?";
+            conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, applicationId);
-            stmt.executeUpdate();
+            for (Tag tag : tags) {
+                stmt.setString(1, tag.getTagName());
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, applicationId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when adding tags", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        } finally {
+            Util.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void deleteTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+
+            String sql = "DELETE FROM AP_APP_TAG WHERE ID = ? AND AP_APP_ID = ? AND TENANT_ID = ?;";
+            try{
+                conn = this.getDBConnection();
+                conn.setAutoCommit(false);
+                stmt = conn.prepareStatement(sql);
+
+                for (Tag tag : tags) {
+                    stmt.setInt(1, tag.getId());
+                    stmt.setInt(2, applicationId);
+                    stmt.setInt(3, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+
+
 
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);

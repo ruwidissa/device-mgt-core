@@ -21,6 +21,7 @@ package org.wso2.carbon.device.application.mgt.common;
 
 import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+
 import java.util.List;
 
 /**
@@ -95,13 +96,6 @@ public class Application {
 
     public ImageArtifact iconOfLatestRelease;
 
-    public List<UnrestrictedRole> getUnrestrictedRoles() {
-        return unrestrictedRoles;
-    }
-
-    public void setUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles) {
-        this.unrestrictedRoles = unrestrictedRoles;
-    }
 
     public String getType() {
         return type;
@@ -165,5 +159,13 @@ public class Application {
 
     public void setApplicationReleases(List<ApplicationRelease> applicationReleases) {
         this.applicationReleases = applicationReleases;
+    }
+
+    public List<UnrestrictedRole> getUnrestrictedRoles() {
+        return unrestrictedRoles;
+    }
+
+    public void setUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles) {
+        this.unrestrictedRoles = unrestrictedRoles;
     }
 }
