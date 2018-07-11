@@ -1873,7 +1873,7 @@
         <repository>
             <id>entgra.snapshots</id>
             <name>Entgra Snapshot Repository</name>
-            <url>http://104.215.188.88/repository/maven-snapshots/</url>
+            <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
@@ -2104,7 +2104,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>maven-snapshots</id>
-            <url>http://104.215.188.88/repository/maven-snapshots/</url>
+            <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
