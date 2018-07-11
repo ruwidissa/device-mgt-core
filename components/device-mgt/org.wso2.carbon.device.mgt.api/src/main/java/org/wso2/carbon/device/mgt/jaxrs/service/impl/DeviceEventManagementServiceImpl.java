@@ -4,12 +4,15 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Stub;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
 import org.wso2.carbon.analytics.dataservice.commons.SearchResultEntry;
 import org.wso2.carbon.analytics.dataservice.commons.SortByField;
 import org.wso2.carbon.analytics.dataservice.commons.SortType;
+import org.wso2.carbon.analytics.datasource.commons.Record;
 import org.wso2.carbon.analytics.stream.persistence.stub
         .EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
@@ -53,7 +56,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is used for device type integration with DAS, to create streams and receiver dynamically and a common endpoint
@@ -430,7 +435,6 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     }
 
 
-
     /**
      * Returns the filterd device list. Devices are filterd using the paramter given.
      * parameter can be given as a range or a single value.
@@ -438,19 +442,16 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     @GET
     @Path("filter/{type}/{parameter}")
     @Override
-    public Response getFilteredDevices( @PathParam("type") String deviceType, @PathParam("parameter") String parameter,
-                                        @QueryParam("min") int min,@QueryParam("max") int max) {
+    public Response getFilteredDevices(@PathParam("type") String deviceType, @PathParam("parameter") String parameter,
+                                       @QueryParam("min") int min, @QueryParam("max") int max) {
         String query;
         if (min != 0 & max != 0) {
-            query = "DISTINCT "+DEFAULT_META_DEVICE_ID_ATTRIBUTE
-                    + " AND " + parameter + " : [" + min + " TO " + max + "]";
+            query = parameter + " : [" + min + " TO " + max + "]";
         } else if (min != 0 & max == 0) {
-            query = "DISTINCT "+DEFAULT_META_DEVICE_ID_ATTRIBUTE
-                    + " AND " + parameter + " : [" + min + " TO " + max + "]";
-        }else if(max != 0 & min==0){
-            query = "DISTINCT "+DEFAULT_META_DEVICE_ID_ATTRIBUTE
-                    + " AND " + parameter + " : [" + min + " TO " + max + "]";
-        }else{
+            query = parameter + " : [" + min + " TO " + max + "]";
+        } else if (max != 0 & min == 0) {
+            query = parameter + " : [" + min + " TO " + max + "]";
+        } else {
             String errorMessage = "One of the range values need to be given";
             log.error(errorMessage);
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -471,7 +472,23 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             sortByFields.add(sortByField);
 
             EventRecords eventRecords = getAllEventsForDevice(sensorTableName, query, sortByFields, 0, 1);
-            return Response.status(Response.Status.OK.getStatusCode()).entity(eventRecords).build();
+
+            List<Record> filterdEvents = eventRecords.getRecord();
+            List<Record> uniqueFilterdEvents = new ArrayList<Record>();
+            Set<String> devices = new HashSet<>();
+
+            for (int i = 0; i < filterdEvents.size(); i++) {
+
+                String deviceid = (String) filterdEvents.get(i).getValue("meta_deviceId");
+                if (!devices.contains(deviceid)) {
+                    devices.add(deviceid);
+                    uniqueFilterdEvents.add(filterdEvents.get(i));
+                }
+            }
+
+            EventRecords filterdRecords=new EventRecords();
+            filterdRecords.setList(uniqueFilterdEvents);
+            return Response.status(Response.Status.OK.getStatusCode()).entity(filterdRecords).build();
 
         } catch (AnalyticsException e) {
             String errorMsg = "Error on retrieving stats on table " + sensorTableName + " with query " + query;
