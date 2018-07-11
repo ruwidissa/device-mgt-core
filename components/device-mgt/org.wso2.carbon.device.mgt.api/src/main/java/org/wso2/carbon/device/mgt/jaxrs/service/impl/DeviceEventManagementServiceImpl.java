@@ -429,6 +429,61 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
         }
     }
 
+
+
+    /**
+     * Returns the filterd device list. Devices are filterd using the paramter given.
+     * parameter can be given as a range or a single value.
+     */
+    @GET
+    @Path("filter/{type}/{parameter}")
+    @Override
+    public Response getFilteredDevices( @PathParam("type") String deviceType, @PathParam("parameter") String parameter,
+                                        @QueryParam("min") int min,@QueryParam("max") int max) {
+        String query;
+        if (min != 0 & max != 0) {
+            query = "DISTINCT "+DEFAULT_META_DEVICE_ID_ATTRIBUTE
+                    + " AND " + parameter + " : [" + min + " TO " + max + "]";
+        } else if (min != 0 & max == 0) {
+            query = "DISTINCT "+DEFAULT_META_DEVICE_ID_ATTRIBUTE
+                    + " AND " + parameter + " : [" + min + " TO " + max + "]";
+        }else if(max != 0 & min==0){
+            query = "DISTINCT "+DEFAULT_META_DEVICE_ID_ATTRIBUTE
+                    + " AND " + parameter + " : [" + min + " TO " + max + "]";
+        }else{
+            String errorMessage = "One of the range values need to be given";
+            log.error(errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String sensorTableName = getTableName(DeviceMgtAPIUtils.getStreamDefinition(deviceType, tenantDomain));
+        try {
+            if (deviceType == null ||
+                    !DeviceMgtAPIUtils.getDeviceManagementService().getAvailableDeviceTypes().contains(deviceType)) {
+                String errorMessage = "Invalid device type";
+                log.error(errorMessage);
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            List<SortByField> sortByFields = new ArrayList<>();
+            SortByField sortByField = new SortByField(TIMESTAMP_FIELD_NAME, SortType.DESC);
+            sortByFields.add(sortByField);
+
+            EventRecords eventRecords = getAllEventsForDevice(sensorTableName, query, sortByFields, 0, 1);
+            return Response.status(Response.Status.OK.getStatusCode()).entity(eventRecords).build();
+
+        } catch (AnalyticsException e) {
+            String errorMsg = "Error on retrieving stats on table " + sensorTableName + " with query " + query;
+            log.error(errorMsg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(errorMsg).build();
+        } catch (DeviceManagementException e) {
+            String errorMsg = "Error on retrieving stats on table " + sensorTableName + " with query " + query;
+            log.error(errorMsg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(errorMsg).build();
+        }
+    }
+
     private void publishEventReceivers(String streamNameWithVersion, TransportType transportType
             , String requestedTenantDomain, String deviceType)
             throws RemoteException, UserStoreException, JWTClientException {
