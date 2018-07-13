@@ -352,9 +352,9 @@ public interface DeviceEventManagementService {
             @ApiParam(name = "type", value = "name of the parameter", required = true)
             @PathParam("type") String parameter,
             @ApiParam(name = "limit", value = "minimum value the parameter can have", required = false)
-            @QueryParam("min") int min,
+            @QueryParam("min") double min,
             @ApiParam(name = "max", value = "max value the parameter can have", required = false)
-            @QueryParam("max") int max
+            @QueryParam("max") double max
     );
 
   

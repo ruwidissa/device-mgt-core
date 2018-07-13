@@ -55,10 +55,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This is used for device type integration with DAS, to create streams and receiver dynamically and a common endpoint
@@ -443,14 +440,14 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     @Path("filter/{type}/{parameter}")
     @Override
     public Response getFilteredDevices(@PathParam("type") String deviceType, @PathParam("parameter") String parameter,
-                                       @QueryParam("min") int min, @QueryParam("max") int max) {
+                                       @QueryParam("min") double min, @QueryParam("max") double max) {
         String query;
         if (min != 0 & max != 0) {
             query = parameter + " : [" + min + " TO " + max + "]";
         } else if (min != 0 & max == 0) {
-            query = parameter + " : [" + min + " TO " + max + "]";
+            query = parameter + " : [ " + min + " TO *]";
         } else if (max != 0 & min == 0) {
-            query = parameter + " : [" + min + " TO " + max + "]";
+            query = parameter + " : [* TO " + max + "]";
         } else {
             String errorMessage = "One of the range values need to be given";
             log.error(errorMessage);
@@ -471,7 +468,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             SortByField sortByField = new SortByField(TIMESTAMP_FIELD_NAME, SortType.DESC);
             sortByFields.add(sortByField);
 
-            EventRecords eventRecords = getAllEventsForDevice(sensorTableName, query, sortByFields, 0, 1);
+            EventRecords eventRecords = getAllEventsForDevice(sensorTableName, query, sortByFields, 0, 100);
 
             List<Record> filterdEvents = eventRecords.getRecord();
             List<Record> uniqueFilterdEvents = new ArrayList<Record>();
@@ -480,13 +477,16 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             for (int i = 0; i < filterdEvents.size(); i++) {
 
                 String deviceid = (String) filterdEvents.get(i).getValue("meta_deviceId");
-                if (!devices.contains(deviceid)) {
+                long timestamp=(long).filterdEvents.get(i).getTimestamp();
+                Calendar c = java.util.Calendar.getInstance();
+                long currentTimestamp = c.getTimeInMillis();
+                if (!devices.contains(deviceid) && (currentTimestamp-timestamp<=300*1000)) {
                     devices.add(deviceid);
                     uniqueFilterdEvents.add(filterdEvents.get(i));
                 }
             }
 
-            EventRecords filterdRecords=new EventRecords();
+            EventRecords filterdRecords = new EventRecords();
             filterdRecords.setList(uniqueFilterdEvents);
             return Response.status(Response.Status.OK.getStatusCode()).entity(filterdRecords).build();
 
