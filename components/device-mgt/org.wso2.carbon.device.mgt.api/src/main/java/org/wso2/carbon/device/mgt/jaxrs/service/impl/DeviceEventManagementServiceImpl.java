@@ -444,12 +444,8 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
         String query;
         if (min != 0 & max != 0) {
             query = parameter + " : [" + min + " TO " + max + "]";
-        } else if (min != 0 & max == 0) {
-            query = parameter + " : [ " + min + " TO *]";
-        } else if (max != 0 & min == 0) {
-            query = parameter + " : [* TO " + max + "]";
-        } else {
-            String errorMessage = "One of the range values need to be given";
+        }  else {
+            String errorMessage = "The of range values need to be given";
             log.error(errorMessage);
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
@@ -467,17 +463,14 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             List<SortByField> sortByFields = new ArrayList<>();
             SortByField sortByField = new SortByField(TIMESTAMP_FIELD_NAME, SortType.DESC);
             sortByFields.add(sortByField);
-
             EventRecords eventRecords = getAllEventsForDevice(sensorTableName, query, sortByFields, 0, 100);
-
             List<Record> filterdEvents = eventRecords.getRecord();
             List<Record> uniqueFilterdEvents = new ArrayList<Record>();
             Set<String> devices = new HashSet<>();
 
             for (int i = 0; i < filterdEvents.size(); i++) {
-
                 String deviceid = (String) filterdEvents.get(i).getValue("meta_deviceId");
-                long timestamp=(long).filterdEvents.get(i).getTimestamp();
+                long timestamp=(long)filterdEvents.get(i).getTimestamp();
                 Calendar c = java.util.Calendar.getInstance();
                 long currentTimestamp = c.getTimeInMillis();
                 if (!devices.contains(deviceid) && (currentTimestamp-timestamp<=300*1000)) {
