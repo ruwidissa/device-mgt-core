@@ -4,8 +4,6 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Stub;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPIUtil;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
@@ -13,8 +11,8 @@ import org.wso2.carbon.analytics.dataservice.commons.SearchResultEntry;
 import org.wso2.carbon.analytics.dataservice.commons.SortByField;
 import org.wso2.carbon.analytics.dataservice.commons.SortType;
 import org.wso2.carbon.analytics.datasource.commons.Record;
-import org.wso2.carbon.analytics.stream.persistence.stub
-        .EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException;
+import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
+import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceEventStreamPersistenceAdminServiceExceptionException;
 import org.wso2.carbon.analytics.stream.persistence.stub.EventStreamPersistenceAdminServiceStub;
 import org.wso2.carbon.analytics.stream.persistence.stub.dto.AnalyticsTable;
 import org.wso2.carbon.analytics.stream.persistence.stub.dto.AnalyticsTableRecord;
@@ -24,12 +22,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventRecords;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AttributeType;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.TransportType;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.*;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceEventManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
@@ -44,15 +37,9 @@ import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
 
 import javax.validation.Valid;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
 import java.util.*;
@@ -433,8 +420,8 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
 
 
     /**
-     * Returns the filterd device list. Devices are filterd using the paramter given.
-     * parameter can be given as a range or a single value.
+     * Returns the filterd device list. Devices are filterd using the paramter given and the timestamp of the record.
+     * parameter should given as a range.
      */
     @GET
     @Path("filter/{type}/{parameter}")
@@ -442,9 +429,15 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     public Response getFilteredDevices(@PathParam("type") String deviceType, @PathParam("parameter") String parameter,
                                        @QueryParam("min") double min, @QueryParam("max") double max) {
         String query;
+        Calendar c = java.util.Calendar.getInstance();
+        long currentTimestamp = c.getTimeInMillis();
+        long previousTimestamp = currentTimestamp - 300 * 1000;
+        String fromDate = String.valueOf(previousTimestamp);
+        String toDate = String.valueOf(currentTimestamp);
         if (min != 0 & max != 0) {
-            query = parameter + " : [" + min + " TO " + max + "]";
-        }  else {
+            query = parameter + " : [" + min + " TO " + max + "]" +
+                    " AND _timestamp : [" + fromDate + " TO " + toDate + "]";
+        } else {
             String errorMessage = "The of range values need to be given";
             log.error(errorMessage);
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -470,10 +463,8 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
 
             for (int i = 0; i < filterdEvents.size(); i++) {
                 String deviceid = (String) filterdEvents.get(i).getValue("meta_deviceId");
-                long timestamp=(long)filterdEvents.get(i).getTimestamp();
-                Calendar c = java.util.Calendar.getInstance();
-                long currentTimestamp = c.getTimeInMillis();
-                if (!devices.contains(deviceid) && (currentTimestamp-timestamp<=300*1000)) {
+                if (!devices.contains(deviceid) && DeviceMgtAPIUtils.getDeviceAccessAuthorizationService().isUserAuthorized(
+                        new DeviceIdentifier(deviceid, deviceType))) {
                     devices.add(deviceid);
                     uniqueFilterdEvents.add(filterdEvents.get(i));
                 }
@@ -491,8 +482,12 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             String errorMsg = "Error on retrieving stats on table " + sensorTableName + " with query " + query;
             log.error(errorMsg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(errorMsg).build();
+        } catch (DeviceAccessAuthorizationException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
         }
     }
+
 
     private void publishEventReceivers(String streamNameWithVersion, TransportType transportType
             , String requestedTenantDomain, String deviceType)
@@ -654,6 +649,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     private String getReceiverName(String deviceType, String tenantDomain, TransportType transportType) {
         return deviceType.replace(" ", "_").trim() + "-" + tenantDomain + "-" + transportType.toString() + "-receiver";
     }
+
 
     private void cleanup(Stub stub) {
         if (stub != null) {
