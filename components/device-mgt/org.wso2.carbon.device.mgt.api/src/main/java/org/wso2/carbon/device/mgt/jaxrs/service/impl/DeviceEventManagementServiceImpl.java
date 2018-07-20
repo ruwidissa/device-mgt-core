@@ -499,7 +499,6 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(errorMsg).build();
         } catch (DeviceAccessAuthorizationException e) {
             String errorMsg = "Error on retrieving stats on table " + sensorTableName + " with query " + query;
-            e.printStackTrace();
             log.error(errorMsg);
             return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
         }
