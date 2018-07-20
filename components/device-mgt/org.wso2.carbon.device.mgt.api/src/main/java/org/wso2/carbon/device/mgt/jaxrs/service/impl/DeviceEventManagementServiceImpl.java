@@ -22,7 +22,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.*;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AttributeType;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventRecords;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.TransportType;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceEventManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
@@ -39,10 +44,20 @@ import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientExceptio
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * This is used for device type integration with DAS, to create streams and receiver dynamically and a common endpoint
@@ -483,7 +498,9 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             log.error(errorMsg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(errorMsg).build();
         } catch (DeviceAccessAuthorizationException e) {
+            String errorMsg = "Error on retrieving stats on table " + sensorTableName + " with query " + query;
             e.printStackTrace();
+            log.error(errorMsg);
             return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
         }
     }
