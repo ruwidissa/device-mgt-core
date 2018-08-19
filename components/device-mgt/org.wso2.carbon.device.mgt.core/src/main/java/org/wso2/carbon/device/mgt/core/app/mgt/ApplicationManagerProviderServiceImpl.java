@@ -296,7 +296,8 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
                 }
             }
             DeviceManagementDAOFactory.beginTransaction();
-            applicationMappingDAO.removeApplicationMapping(device.getId(), appIdsToRemove, tenantId);
+            applicationMappingDAO.removeApplicationMapping(device.getId(), device.getEnrolmentInfo().getId(),
+                    appIdsToRemove, tenantId);
             Application installedApp;
             List<Integer> applicationIds = new ArrayList<>();
             List<Application> applicationsToMap = new ArrayList<>();
@@ -328,7 +329,8 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
             if (log.isDebugEnabled()) {
                 log.debug("num of app Ids:" + applicationIds.size());
             }
-            applicationMappingDAO.addApplicationMappingsWithApps(device.getId(), applicationsToMap, tenantId);
+            applicationMappingDAO.addApplicationMappingsWithApps(device.getId(), device.getEnrolmentInfo().getId(),
+                    applicationsToMap, tenantId);
 
             if (log.isDebugEnabled()) {
                 log.debug("num of remove app Ids:" + appIdsToRemove.size());
@@ -367,7 +369,7 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
         }
         try {
             DeviceManagementDAOFactory.openConnection();
-            return applicationDAO.getInstalledApplications(device.getId());
+            return applicationDAO.getInstalledApplications(device.getId(), device.getEnrolmentInfo().getId());
         } catch (DeviceManagementDAOException e) {
             throw new ApplicationManagementException("Error occurred while fetching the Application List of '" +
                     deviceId.getType() + "' device carrying the identifier'" + deviceId.getId(), e);

@@ -22,10 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceManager;
+import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
-import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.ProvisioningConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
@@ -59,6 +59,8 @@ import java.util.Map;
 public class DeviceTypeManagerService implements DeviceManagementService {
 
     private static final Log log = LogFactory.getLog(DeviceTypeManagerService.class);
+    private static final String NOTIFIER_PROPERTY = "notifierType";
+    private static final String NOTIFIER_TYPE_LOCAL = "LOCAL";
 
     private DeviceManager deviceManager;
     private PushNotificationConfig pushNotificationConfig;
@@ -71,6 +73,9 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private PullNotificationSubscriber pullNotificationSubscriber;
     private DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
     private GeneralConfig generalConfig;
+    private boolean isRegistryBasedConfigs = false;
+    private boolean isScheduled = false;
+    private String notifierType;
 
     public DeviceTypeManagerService(DeviceTypeConfigIdentifier deviceTypeConfigIdentifier,
                                     DeviceTypeConfiguration deviceTypeConfiguration) {
@@ -126,11 +131,12 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private void populatePushNotificationConfig(PushNotificationProvider pushNotificationProvider) {
         if (pushNotificationProvider != null) {
             if (pushNotificationProvider.isFileBasedProperties()) {
+                isRegistryBasedConfigs = false;
                 Map<String, String> staticProps = new HashMap<>();
                 ConfigProperties configProperties = pushNotificationProvider.getConfigProperties();
                 if (configProperties != null) {
                     List<Property> properties = configProperties.getProperty();
-                    if (properties != null && properties.size() > 0) {
+                    if (properties != null && !properties.isEmpty()) {
                         for (Property property : properties) {
                             staticProps.put(property.getName(), property.getValue());
                         }
@@ -139,21 +145,34 @@ public class DeviceTypeManagerService implements DeviceManagementService {
                 pushNotificationConfig = new PushNotificationConfig(pushNotificationProvider.getType(),
                         pushNotificationProvider.isScheduled(), staticProps);
             } else {
-                try {
-                    PlatformConfiguration deviceTypeConfig = deviceManager.getConfiguration();
-                    if (deviceTypeConfig != null) {
-                        List<ConfigurationEntry> configuration = deviceTypeConfig.getConfiguration();
-                        if (configuration.size() > 0) {
-                            Map<String, String> properties = this.getConfigProperty(configuration);
-                            pushNotificationConfig = new PushNotificationConfig(
-                                    pushNotificationProvider.getType(), pushNotificationProvider.isScheduled(),
-                                    properties);
-                        }
+                isRegistryBasedConfigs = true;
+                isScheduled = pushNotificationProvider.isScheduled();
+                notifierType = pushNotificationProvider.getType();
+                refreshPlatformConfigurations();
+            }
+        }
+    }
+
+    private void refreshPlatformConfigurations() {
+        //Build up push notification configs to use with push notification provider.
+        try {
+            PlatformConfiguration deviceTypeConfig = deviceManager.getConfiguration();
+            if (deviceTypeConfig != null) {
+                List<ConfigurationEntry> configuration = deviceTypeConfig.getConfiguration();
+                if (!configuration.isEmpty()) {
+                    Map<String, String> properties = this.getConfigProperty(configuration);
+                    String notifierValue = properties.get(NOTIFIER_PROPERTY);
+                    String enabledNotifierType = notifierType;
+                    //In registry we are keeping local notifier as value "1". Other notifiers will have
+                    // a number grater than 1.
+                    if (notifierValue != null && notifierValue.equals("1")) {
+                        enabledNotifierType = NOTIFIER_TYPE_LOCAL;
                     }
-                } catch (DeviceManagementException e) {
-                    log.error("Unable to get the " + type + " platform configuration from registry.");
+                    pushNotificationConfig = new PushNotificationConfig(enabledNotifierType, isScheduled, properties);
                 }
             }
+        } catch (DeviceManagementException e) {
+            log.error("Unable to get the " + type + " platform configuration from registry.", e);
         }
     }
 
@@ -174,6 +193,10 @@ public class DeviceTypeManagerService implements DeviceManagementService {
 
     @Override
     public PushNotificationConfig getPushNotificationConfig() {
+        //We only need to update push notification configs if this device type uses registry based configs.
+        if (isRegistryBasedConfigs) {
+            refreshPlatformConfigurations();
+        }
         return pushNotificationConfig;
     }
 

@@ -78,7 +78,7 @@ function initializeGeoLocation(geoFencingEnabled) {
         geoPublicUri = geoCharts.data("geo-public-uri");
         webSocketURL = wsEndPoint + "iot.per.device.stream.geo.FusedSpatialEvent/1.0.0?"
             + "deviceId=" + deviceId + "&deviceType=" + deviceType + "&websocketToken=" + wsToken;
-        alertWebSocketURL = wsEndPoint + "iot.per.device.stream.geo.AlertsNotifications/1.0.0?"
+        alertWebSocketURL = wsEndPoint + "iot.per.device.stream.geo.AlertNotifications/1.0.0?"
             + "deviceId=" + deviceId + "&deviceType=" + deviceType + "&websocketToken=" + wsToken;
         $("#proximity_alert").hide();
 
@@ -214,7 +214,7 @@ SpatialObject.prototype.update = function (geoJSON) {
     this.popupTemplate.find('#information').html(this.information);
 
     this.popupTemplate.find('#speed').html(Math.round(this.speed * 10) / 10);
-    this.popupTemplate.find('#heading').html(angleToHeading(this.heading));
+    // this.popupTemplate.find('#heading').html(angleToHeading(this.heading));
     this.marker.setPopupContent(this.popupTemplate.html())
 };
 
@@ -561,7 +561,7 @@ var webSocketOnAlertMessage = function processMessage(message) {
         var json = $.parseJSON(message.data);
         if (json.messageType == "Alert") {
             processAlertMessage(json);
-        }else {
+        } else {
             console.log("Message type not supported.");
         }
     }
@@ -571,7 +571,11 @@ var webSocketOnAlertClose = function (e) {
 };
 
 var webSocketOnAlertError = function (e) {
-    noty({text: 'Something went wrong when trying to connect to <b>' + alertWebSocketURL + '<b/>', type: 'error'});
+    var wsURL = alertWebSocketURL;
+    wsURL = wsURL.replace("wss://","https://");
+    var uriParts = wsURL.split("/");
+    wsURL = uriParts[0] + "//" + uriParts[2];
+    noty({text: 'Something went wrong when trying to connect to <b>' + wsURL + '<b/>', type: 'error'});
 };
 
 var webSocketSpatialOnOpen = function () {
@@ -598,7 +602,11 @@ var webSocketSpatialOnClose = function (e) {
 };
 
 var webSocketSpatialOnError = function (err) {
-    noty({text: 'Something went wrong when trying to connect to <b>' + webSocketURL + '<b/>', type: 'error'});
+    var wsURL = webSocketURL;
+    wsURL = wsURL.replace("wss://","https://");
+    var uriParts = wsURL.split("/");
+    wsURL = uriParts[0] + "//" + uriParts[2];
+    noty({text: 'Something went wrong when trying to connect to <b>' + wsURL + '<b/>', type: 'error'});
 };
 
 

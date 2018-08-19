@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.core.operation.mgt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
@@ -39,7 +40,10 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationContext;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
+import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationExecutionFailedException;
+import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationProvider;
+import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
@@ -61,9 +65,12 @@ import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class implements all the functionality exposed as part of the OperationManager. Any transaction initiated
@@ -73,6 +80,9 @@ import java.util.List;
 public class OperationManagerImpl implements OperationManager {
 
     private static final Log log = LogFactory.getLog(OperationManagerImpl.class);
+    private static final int CACHE_VALIDITY_PERIOD = 5 * 60 * 1000;
+    private static final String NOTIFIER_TYPE_LOCAL = "LOCAL";
+    private static final String SYSTEM = "system";
 
     private OperationDAO commandOperationDAO;
     private OperationDAO configOperationDAO;
@@ -82,8 +92,10 @@ public class OperationManagerImpl implements OperationManager {
     private OperationDAO operationDAO;
     private DeviceDAO deviceDAO;
     private EnrollmentDAO enrollmentDAO;
-    private NotificationStrategy notificationStrategy;
     private String deviceType;
+    private DeviceManagementService deviceManagementService;
+    private Map<Integer, NotificationStrategy> notificationStrategies;
+    private Map<Integer, Long> lastUpdatedTimeStamps;
 
     public OperationManagerImpl() {
         commandOperationDAO = OperationManagementDAOFactory.getCommandOperationDAO();
@@ -94,20 +106,43 @@ public class OperationManagerImpl implements OperationManager {
         operationDAO = OperationManagementDAOFactory.getOperationDAO();
         deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
         enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
+        notificationStrategies = new HashMap<>();
+        lastUpdatedTimeStamps = new HashMap<>();
     }
 
-    public OperationManagerImpl(String deviceType) {
+    public OperationManagerImpl(String deviceType, DeviceManagementService deviceManagementService) {
         this();
         this.deviceType = deviceType;
+        this.deviceManagementService = deviceManagementService;
     }
 
     public NotificationStrategy getNotificationStrategy() {
-        return notificationStrategy;
-    }
-
-    public OperationManagerImpl(String deviceType, NotificationStrategy notificationStrategy) {
-        this(deviceType);
-        this.notificationStrategy = notificationStrategy;
+        // Notification strategy can be set by the platform configurations. Therefore it is needed to
+        // get tenant specific notification strategy dynamically in the runtime. However since this is
+        // a resource intensive retrieval, we are maintaining tenant aware local cache here to keep device
+        // type specific notification strategy.
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(false);
+        long lastUpdatedTimeStamp = 0;
+        if (lastUpdatedTimeStamps.containsKey(tenantId)){
+            lastUpdatedTimeStamp = lastUpdatedTimeStamps.get(tenantId);
+        }
+        if (Calendar.getInstance().getTimeInMillis() - lastUpdatedTimeStamp > CACHE_VALIDITY_PERIOD) {
+            PushNotificationConfig pushNoteConfig = deviceManagementService.getPushNotificationConfig();
+            if (pushNoteConfig != null && !NOTIFIER_TYPE_LOCAL.equals(pushNoteConfig.getType())) {
+                PushNotificationProvider provider = DeviceManagementDataHolder.getInstance()
+                        .getPushNotificationProviderRepository().getProvider(pushNoteConfig.getType());
+                if (provider == null) {
+                    log.error("No registered push notification provider found for the type '" +
+                              pushNoteConfig.getType() + "' under tenant ID '" + tenantId + "'.");
+                    return null;
+                }
+                notificationStrategies.put(tenantId, provider.getNotificationStrategy(pushNoteConfig));
+            } else if (notificationStrategies.containsKey(tenantId)){
+                notificationStrategies.remove(tenantId);
+            }
+            lastUpdatedTimeStamps.put(tenantId, Calendar.getInstance().getTimeInMillis());
+        }
+        return notificationStrategies.get(tenantId);
     }
 
     @Override
@@ -137,13 +172,27 @@ public class OperationManagerImpl implements OperationManager {
                     return activity;
                 }
 
+                boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
+                String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+                if (initiatedBy == null && isScheduledOperation) {
+                    if(log.isDebugEnabled()) {
+                        log.debug("initiatedBy : "  + SYSTEM);
+                    }
+                    operation.setInitiatedBy(SYSTEM);
+                } else {
+                    if(log.isDebugEnabled()) {
+                        log.debug("initiatedBy : "  + initiatedBy);
+                    }
+                    operation.setInitiatedBy(initiatedBy);
+                }
+
                 OperationManagementDAOFactory.beginTransaction();
                 org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto =
                         OperationDAOUtil.convertOperation(operation);
                 int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
-                boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
                 boolean isNotRepeated = false;
                 boolean isScheduled = false;
+                NotificationStrategy notificationStrategy = getNotificationStrategy();
 
                 // check whether device list is greater than batch size notification strategy has enable to send push
                 // notification using scheduler task

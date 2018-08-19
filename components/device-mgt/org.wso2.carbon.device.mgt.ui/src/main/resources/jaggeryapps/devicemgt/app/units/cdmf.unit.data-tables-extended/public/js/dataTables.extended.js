@@ -56,7 +56,7 @@ $.fn.datatables_extended = function (settings) {
                 search: ''
             },
             initComplete: function () {
-
+                var cachedFilterRes;
                 this.api().columns().every(function () {
 
                     var column = this;
@@ -94,8 +94,55 @@ $.fn.datatables_extended = function (settings) {
                                 }
                             });
 
+                        if (!cachedFilterRes) {
+                            $.ajax(
+                                {
+                                    url: context + "/api/data-tables/invoker/filters",
+                                    async:false,
+                                    success: function(data) {
+                                        cachedFilterRes = data;
+                                    }
+                                }
+                            );
+                        }
+
                         $(column).each(function () {
-                            if ($(column.nodes()).attr('data-search')) {
+                            var i;
+                            if (filterColumn.eq(column.index()).hasClass('data-status')) {
+                                for (i = 0; i < cachedFilterRes.status.length; i++) {
+                                    var status = cachedFilterRes.status[i];
+                                    select.append('<option value="' + status + '">' + status + '</option>')
+                                }
+                            } else if (filterColumn.eq(column.index()).hasClass('data-ownership')) {
+                                for (i = 0; i < cachedFilterRes.ownership.length; i++) {
+                                    var ownership = cachedFilterRes.ownership[i];
+                                    select.append('<option value="' + ownership + '">' + ownership + '</option>')
+                                }
+                            } else if (filterColumn.eq(column.index()).hasClass('data-platform')) {
+                                for (i = 0; i < cachedFilterRes.deviceTypes.length; i++) {
+                                    var deviceTypes = cachedFilterRes.deviceTypes[i];
+                                    var name = deviceTypes;
+                                    var value = deviceTypes;
+                                    if (deviceTypes.name && deviceTypes.value) {
+                                        name = deviceTypes.name;
+                                        value = deviceTypes.value;
+                                    }
+                                    select.append('<option value="' + value + '">' + name + '</option>')
+                                }
+                            } else if (filterColumn.eq(column.index()).hasClass('data-compliance')) {
+                                for (i = 0; i < cachedFilterRes.deviceTypes.length; i++) {
+                                    var compliance = cachedFilterRes.compliance[i];
+                                    select.append('<option value="' + compliance + '">' + compliance + '</option>')
+                                }
+                            } else if (filterColumn.eq(column.index()).hasClass('data-dep-status')) {
+                                for (i = 0; i < cachedFilterRes.deviceTypes.length; i++) {
+                                    var depStatus = cachedFilterRes.depStatus[i];
+                                    select.append('<option value="' + depStatus + '">' + depStatus + '</option>')
+                                }
+                            } else if (filterColumn.eq(column.index()).hasClass('data-boolean')) {
+                                select.append('<option value="true">Enabled</option>');
+                                select.append('<option value="false">Disabled</option>');
+                            } else if ($(column.nodes()).attr('data-search')) {
                                 var values = [];
                                 column.nodes().unique().sort().each(function (d, j) {
                                     var title = $(d).attr('data-display');
@@ -154,22 +201,27 @@ $.fn.datatables_extended = function (settings) {
                 }
 
                 function getAdvanceToolBar() {
+                    var selectableBtnHtml = "";
                     if (!table.hasClass('no-toolbar')) {
                         if (table.hasClass('sorting-enabled')) {
-                            return '<ul class="nav nav-pills navbar-right remove-margin" role="tablist">' +
-                                '<li><button data-click-event="toggle-selectable" class="btn btn-default btn-primary select-enable-btn">Select</li>' +
-                                '<li><button data-click-event="toggle-selected" id="dt-select-all" class="btn btn-default btn-primary disabled">Select All</li>' +
-                                '<li><button data-click-event="toggle-list-view" data-view="grid" class="btn btn-default"><i class="fw fw-grid"></i></button></li>' +
-                                '<li><button data-click-event="toggle-list-view" data-view="list" class="btn btn-default"><i class="fw fw-list"></i></button></li>' +
-                                '<li><button class="btn btn-default" data-toggle="dropdown"><i class="fw fw-sort"></i></button>' + dropdownmenu[0].outerHTML + '</li>' +
-                                '</ul>'
+                            if(!table.hasClass('un-selectable')) {
+                                selectableBtnHtml = '<li><button data-click-event="toggle-selectable" class="btn btn-default btn-primary select-enable-btn">Select</li>' +
+                                                    '<li><button data-click-event="toggle-selected" id="dt-select-all" class="btn btn-default btn-primary disabled">Select All</li>';
+                            }
+                            return '<ul class="nav nav-pills navbar-right remove-margin" role="tablist">' + selectableBtnHtml +
+                                   '<li><button data-click-event="toggle-list-view" data-view="grid" class="btn btn-default"><i class="fw fw-grid"></i></button></li>' +
+                                   '<li><button data-click-event="toggle-list-view" data-view="list" class="btn btn-default"><i class="fw fw-list"></i></button></li>' +
+                                   '<li><button class="btn btn-default" data-toggle="dropdown"><i class="fw fw-sort"></i></button>' + dropdownmenu[0].outerHTML + '</li>' +
+                                   '</ul>'
                         } else {
-                            return '<ul class="nav nav-pills navbar-right remove-margin" role="tablist">' +
-                                '<li><button data-click-event="toggle-selectable" class="btn btn-default btn-primary select-enable-btn">Select</li>' +
-                                '<li><button data-click-event="toggle-selected" id="dt-select-all" class="btn btn-default btn-primary disabled">Select All</li>' +
-                                '<li><button data-click-event="toggle-list-view" data-view="grid" class="btn btn-default"><i class="fw fw-grid"></i></button></li>' +
-                                '<li><button data-click-event="toggle-list-view" data-view="list" class="btn btn-default"><i class="fw fw-list"></i></button></li>' +
-                                '</ul>'
+                            if(!table.hasClass('un-selectable')) {
+                                selectableBtnHtml = '<li><button data-click-event="toggle-selectable" class="btn btn-default btn-primary select-enable-btn">Select</li>' +
+                                                    '<li><button data-click-event="toggle-selected" id="dt-select-all" class="btn btn-default btn-primary disabled">Select All</li>';
+                            }
+                            return '<ul class="nav nav-pills navbar-right remove-margin" role="tablist">' + selectableBtnHtml +
+                                   '<li><button data-click-event="toggle-list-view" data-view="grid" class="btn btn-default"><i class="fw fw-grid"></i></button></li>' +
+                                   '<li><button data-click-event="toggle-list-view" data-view="list" class="btn btn-default"><i class="fw fw-list"></i></button></li>' +
+                                   '</ul>'
                         }
                     } else {
                         return '';
@@ -180,14 +232,14 @@ $.fn.datatables_extended = function (settings) {
                 /**
                  *  append advance operations to list table toolbar
                  */
-                $('.dataTable.list-table').closest('.dataTables_wrapper').find('.dataTablesTop .dataTables_toolbar').html(
+                table.closest('.dataTables_wrapper').find('.dataTable.list-table').closest('.dataTables_wrapper').find('.dataTablesTop .dataTables_toolbar').html(
                     getAdvanceToolBar()
                 );
 
                 /**
                  *  sorting dropdown menu select function
                  */
-                $('.dataTables_wrapper .sort-list li a').click(function () {
+                table.closest('.dataTables_wrapper').find('.sort-list li a').click(function () {
                     $(this).closest('li').siblings('li').find('a').removeClass('sorting_asc').removeClass('sorting_desc');
 
                     var thisTable = $(this).closest('.dataTables_wrapper').find('.dataTable').dataTable();
@@ -211,7 +263,7 @@ $.fn.datatables_extended = function (settings) {
                 /**
                  *  Enable/Disable selection on rows
                  */
-                $('.dataTables_wrapper [data-click-event=toggle-selectable]').click(function () {
+                table.closest('.dataTables_wrapper').find('[data-click-event=toggle-selectable]').click(function () {
                     var button = this,
                         thisTable = $(this).closest('.dataTables_wrapper').find('.dataTable').dataTable();
                     if ($(button).html() == 'Select') {
@@ -234,7 +286,7 @@ $.fn.datatables_extended = function (settings) {
                 /**
                  *  select/deselect all rows function
                  */
-                $('.dataTables_wrapper [data-click-event=toggle-selected]').click(function () {
+                table.closest('.dataTables_wrapper').find('[data-click-event=toggle-selected]').click(function () {
                     var button = this,
                         thisTable = $(this).closest('.dataTables_wrapper').find('.dataTable').dataTable();
                     if ($(button).html() == 'Select All') {

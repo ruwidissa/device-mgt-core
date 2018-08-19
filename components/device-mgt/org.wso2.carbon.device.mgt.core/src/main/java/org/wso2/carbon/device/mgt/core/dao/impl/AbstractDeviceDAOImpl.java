@@ -1062,7 +1062,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         return tenants;
     }
 
-    public List<GeoCluster> findGeoClusters(GeoCoordinate southWest, GeoCoordinate northEast,
+    public List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
                                             int geohashLength, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
@@ -1076,13 +1076,17 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     " MAX(DEVICE_LOCATION.LONGITUDE) AS MAX_LONGITUDE," +
                     " SUBSTRING(DEVICE_LOCATION.GEO_HASH,1,?) AS GEOHASH_PREFIX, COUNT(*) AS COUNT," +
                     " MIN(DEVICE.DEVICE_IDENTIFICATION) AS DEVICE_IDENTIFICATION," +
-                    " MIN(DEVICE_TYPE.NAME) AS TYPE " +
+                    " MIN(DEVICE_TYPE.NAME) AS TYPE, " +
+                    " MIN(DEVICE.LAST_UPDATED_TIMESTAMP) AS LAST_UPDATED_TIMESTAMP " +
                     "FROM DM_DEVICE_LOCATION AS DEVICE_LOCATION,DM_DEVICE AS DEVICE, DM_DEVICE_TYPE AS DEVICE_TYPE " +
                     "WHERE DEVICE_LOCATION.LATITUDE BETWEEN ? AND ? AND " +
                     "DEVICE_LOCATION.LONGITUDE BETWEEN ? AND ? AND " +
                     "DEVICE.TENANT_ID=? AND " +
-                    "DEVICE.ID=DEVICE_LOCATION.DEVICE_ID  AND DEVICE.DEVICE_TYPE_ID=DEVICE_TYPE.ID" +
-                    " GROUP BY GEOHASH_PREFIX";
+                    "DEVICE.ID=DEVICE_LOCATION.DEVICE_ID  AND DEVICE.DEVICE_TYPE_ID=DEVICE_TYPE.ID";
+            if (deviceType != null && !deviceType.isEmpty()) {
+                sql += " AND DEVICE_TYPE.NAME=?";
+            }
+            sql += " GROUP BY GEOHASH_PREFIX";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, geohashLength);
             stmt.setDouble(2, southWest.getLatitude());
@@ -1090,6 +1094,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             stmt.setDouble(4, southWest.getLongitude());
             stmt.setDouble(5, northEast.getLongitude());
             stmt.setDouble(6,tenantId);
+            if (deviceType != null && !deviceType.isEmpty()) {
+                stmt.setString(7, deviceType);
+            }
             rs = stmt.executeQuery();
             while (rs.next()) {
                 double latitude = rs.getDouble("LATITUDE");
@@ -1100,11 +1107,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 double max_longitude = rs.getDouble("MAX_LONGITUDE");
                 String device_identification = rs.getString("DEVICE_IDENTIFICATION");
                 String device_type=rs.getString("TYPE");
+                String last_seen = rs.getString("LAST_UPDATED_TIMESTAMP");
                 long count = rs.getLong("COUNT");
                 String geohashPrefix = rs.getString("GEOHASH_PREFIX");
                 geoClusters.add(new GeoCluster(new GeoCoordinate(latitude, longitude),
                         new GeoCoordinate(min_latitude,min_longitude), new GeoCoordinate(max_latitude,max_longitude),
-                        count, geohashPrefix,device_identification,device_type));
+                        count, geohashPrefix,device_identification,device_type,last_seen));
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving information of  " +

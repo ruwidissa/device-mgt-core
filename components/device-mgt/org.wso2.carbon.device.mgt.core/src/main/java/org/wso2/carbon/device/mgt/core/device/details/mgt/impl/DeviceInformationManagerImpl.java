@@ -68,12 +68,14 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
             DeviceManagementDAOFactory.beginTransaction();
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
-            deviceDetailsDAO.deleteDeviceInformation(device.getId());
-            deviceDetailsDAO.deleteDeviceProperties(device.getId());
-            deviceDetailsDAO.addDeviceInformation(device.getId(), deviceInfo);
-            deviceDetailsDAO.addDeviceProperties(deviceInfo.getDeviceDetailsMap(), device.getId());
+            deviceDetailsDAO.deleteDeviceInformation(device.getId(), device.getEnrolmentInfo().getId());
+            deviceDetailsDAO.deleteDeviceProperties(device.getId(), device.getEnrolmentInfo().getId());
+            deviceDetailsDAO.addDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(), deviceInfo);
+            deviceDetailsDAO.addDeviceProperties(deviceInfo.getDeviceDetailsMap(), device.getId(),
+                    device.getEnrolmentInfo().getId());
             DeviceManagementDAOFactory.commitTransaction();
 
+            //TODO :: This has to be fixed by adding the enrollment ID.
             if (DeviceManagerUtil.isPublishDeviceInfoResponseEnabled()) {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getType()};
                 Object[] payload = new Object[]{
@@ -131,8 +133,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         }
         try {
             DeviceManagementDAOFactory.openConnection();
-            DeviceInfo deviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId());
-            deviceInfo.setDeviceDetailsMap(deviceDetailsDAO.getDeviceProperties(device.getId()));
+            DeviceInfo deviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            deviceInfo.setDeviceDetailsMap(deviceDetailsDAO.getDeviceProperties(device.getId(),
+                    device.getEnrolmentInfo().getId()));
             return deviceInfo;
 
         } catch (SQLException e) {
@@ -154,19 +158,21 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             identifierMap.put(identifier.getId(), identifier);
         }
         try {
-            List<Integer> deviceIds = new ArrayList<>();
+            List<Device> deviceIds = new ArrayList<>();
             List<Device> devices = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider().
                     getAllDevices(false);
             for (Device device : devices) {
                 if (identifierMap.containsKey(device.getDeviceIdentifier()) &&
                         device.getType().equals(identifierMap.get(device.getDeviceIdentifier()).getType())) {
-                    deviceIds.add(device.getId());
+                    deviceIds.add(device);
                 }
             }
             DeviceManagementDAOFactory.openConnection();
-            for (Integer id : deviceIds) {
-                DeviceInfo deviceInfo = deviceDetailsDAO.getDeviceInformation(id);
-                deviceInfo.setDeviceDetailsMap(deviceDetailsDAO.getDeviceProperties(id));
+            for (Device device : deviceIds) {
+                DeviceInfo deviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
+                        device.getEnrolmentInfo().getId());
+                deviceInfo.setDeviceDetailsMap(deviceDetailsDAO.getDeviceProperties(device.getId(),
+                        device.getEnrolmentInfo().getId()));
                 deviceInfos.add(deviceInfo);
             }
         } catch (SQLException e) {
@@ -190,10 +196,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             deviceLocation.setDeviceId(device.getId());
             DeviceManagementDAOFactory.beginTransaction();
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
-            deviceDetailsDAO.deleteDeviceLocation(deviceLocation.getDeviceId());
-            deviceDetailsDAO.addDeviceLocation(deviceLocation);
+            deviceDetailsDAO.deleteDeviceLocation(deviceLocation.getDeviceId(), device.getEnrolmentInfo().getId());
+            deviceDetailsDAO.addDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
             if (DeviceManagerUtil.isPublishLocationResponseEnabled()) {
-                Object[] metaData = {device.getDeviceIdentifier(), device.getType()};
+                Object[] metaData = {device.getDeviceIdentifier(), device.getEnrolmentInfo().getOwner(), device.getType()};
                 Object[] payload = new Object[]{
                         deviceLocation.getUpdatedTime().getTime(),
                         deviceLocation.getLatitude(),
@@ -233,7 +239,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         }
         try {
             DeviceManagementDAOFactory.openConnection();
-            return deviceDetailsDAO.getDeviceLocation(device.getId());
+            return deviceDetailsDAO.getDeviceLocation(device.getId(), device.getEnrolmentInfo().getId());
         } catch (SQLException e) {
             throw new DeviceDetailsMgtException("SQL error occurred while retrieving device from database.", e);
         } catch (DeviceDetailsMgtDAOException e) {
@@ -270,7 +276,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             List<DeviceLocation> deviceLocations = new ArrayList<>();
             DeviceManagementDAOFactory.openConnection();
             for (Device device : devices) {
-                deviceLocations.add(deviceDetailsDAO.getDeviceLocation(device.getId()));
+                deviceLocations.add(deviceDetailsDAO.getDeviceLocation(device.getId(),
+                        device.getEnrolmentInfo().getId()));
             }
             return deviceLocations;
         } catch (DeviceManagementException e) {
