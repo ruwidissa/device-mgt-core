@@ -108,7 +108,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             application.setDevicetype(deviceType);
             int appId = this.applicationDAO.createApplication(application, deviceType.getId());
 
-            if (appId != -1) {
+            if (appId == -1) {
                 log.error("Application creation Failed");
                 ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
@@ -350,6 +350,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationReleases = ApplicationManagementDAOFactory.getApplicationReleaseDAO()
                     .getReleases(application.getName(), application.getType(), tenantId);
             for (ApplicationRelease applicationRelease : applicationReleases) {
+                if (AppLifecycleState.PUBLISHED.toString().equals(ApplicationManagementDAOFactory.getLifecycleStateDAO().
+                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId()).getCurrentState())){
+                    applicationRelease.setPublishedRelease(true);
+                }
                 if (!AppLifecycleState.REMOVED.toString().equals(ApplicationManagementDAOFactory.getLifecycleStateDAO().
                         getLatestLifeCycleStateByReleaseID(applicationRelease.getId()).getCurrentState())) {
                     filteredApplicationReleases.add(applicationRelease);
@@ -834,14 +838,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                                              "please remove this application and publish " +
                                                              "new application with type: " + application.getType());
         }
-        if (existingApplication.getIsFree() != application.getIsFree()) {
-            if (existingApplication.getIsFree() == 1) {
+        if (existingApplication.getSubType() != application.getSubType()) {
+            if ("PAID".equals(existingApplication.getSubType())) {
                 if (application.getPaymentCurrency() != null || !application.getPaymentCurrency().equals("")) {
                     throw new ApplicationManagementException("If you are going to change Non-Free app as Free app, " +
                                                                      "currency attribute in the application updating " +
                                                                      "payload should be null or \"\"");
                 }
-            } else if (existingApplication.getIsFree() == 0) {
+            } else if ("FREE".equals(existingApplication.getSubType())) {
                 if (application.getPaymentCurrency() == null || application.getPaymentCurrency().equals("")) {
                     throw new ApplicationManagementException("If you are going to change Free app as Non-Free app, " +
                                                                      "currency attribute in the application payload " +
@@ -903,7 +907,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 return null;
             }
             if (filter.getAppType() != null) {
-                Boolean isValidRequest = false;
+                boolean isValidRequest = false;
                 for (ApplicationType applicationType : ApplicationType.values()) {
                     if (applicationType.toString().equals(filter.getAppType())) {
                         isValidRequest = true;

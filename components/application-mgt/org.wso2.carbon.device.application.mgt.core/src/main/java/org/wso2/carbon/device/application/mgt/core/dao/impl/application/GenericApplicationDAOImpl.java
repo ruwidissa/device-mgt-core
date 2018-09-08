@@ -66,12 +66,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, "
-                                                 + "IS_FREE, PAYMENT_CURRENCY, RESTRICTED, TENANT_ID) VALUES "
+                                                 + "SUB_TYPE, PAYMENT_CURRENCY, RESTRICTED, TENANT_ID) VALUES "
                                                  + "(?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
             stmt.setString(2, application.getType());
             stmt.setString(3, application.getAppCategory());
-            stmt.setInt(4, application.getIsFree());
+            stmt.setString(4, application.getSubType());
             stmt.setString(5, application.getPaymentCurrency());
             stmt.setInt(6, application.getIsRestricted());
             stmt.setInt(7, application.getUser().getTenantId());
@@ -133,7 +133,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Getting application data from the database");
             log.debug(String.format("Filter: limit=%s, offset=%s", filter.getLimit(), filter.getOffset()));
         }
-
+        int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -141,8 +141,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Pagination pagination = new Pagination();
         String sql = "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY"
                 +
-                " AS APP_CATEGORY, AP_APP.IS_FREE, AP_APP.RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, " +
-                "AP_UNRESTRICTED_ROLES.ROLE "
+                " AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
+                + "AP_APP.RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
                 + "AS APP_UNRESTRICTED_ROLES FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
                 + "LEFT JOIN AP_UNRESTRICTED_ROLES ON AP_APP.ID = AP_UNRESTRICTED_ROLES.AP_APP_ID) "
                 + "WHERE AP_APP.TENANT_ID =  ? AND AP_APP.STATUS != ?";
@@ -165,7 +165,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         }
 
-        sql += " LIMIT ? OFFSET ? ORDER BY " + filter.getSortBy() + " APP_ID";
+        sql += " LIMIT ? OFFSET ? ORDER BY " + filter.getSortBy() + " APP_ID;";
 
         pagination.setLimit(filter.getLimit());
         pagination.setOffset(filter.getOffset());
@@ -173,22 +173,22 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, tenantId);
-            stmt.setString(2, AppLifecycleState.REMOVED.toString());
+            stmt.setInt(paramIndex, tenantId);
+            stmt.setString(paramIndex++, AppLifecycleState.REMOVED.toString());
 
             if (filter.getAppType() != null) {
-                stmt.setString(3, filter.getAppType());
+                stmt.setString(paramIndex++, filter.getAppType());
             }
             if (filter.getAppName() != null) {
                 if (filter.isFullMatch()) {
-                    stmt.setString(4, filter.getAppName().toLowerCase());
+                    stmt.setString(paramIndex++, filter.getAppName().toLowerCase());
                 } else {
-                    stmt.setString(4, "%" + filter.getAppName().toLowerCase() + "%");
+                    stmt.setString(paramIndex++, "%" + filter.getAppName().toLowerCase() + "%");
                 }
             }
 
-            stmt.setInt(5, filter.getLimit());
-            stmt.setInt(6, filter.getOffset());
+            stmt.setInt(paramIndex++, filter.getLimit());
+            stmt.setInt(paramIndex, filter.getOffset());
             rs = stmt.executeQuery();
             applicationList.setApplications(Util.loadApplications(rs));
             applicationList.setPagination(pagination);
@@ -251,7 +251,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Getting application count from the database");
             log.debug(String.format("Filter: limit=%s, offset=%s", filter.getLimit(), filter.getOffset()));
         }
-
+        int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -272,9 +272,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += ";";
 
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, tenantId);
+            stmt.setInt(paramIndex++, tenantId);
             if (filter.getAppName() != null) {
-                stmt.setString(2, "%" + filter.getAppName().toLowerCase() + "%");
+                stmt.setString(paramIndex, "%" + filter.getAppName().toLowerCase() + "%");
             }
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -304,9 +304,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             String sql =
                     "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.IS_FREE AS IS_FREE, AP_APP.RESTRICTED AS RESTRICTED, " +
-                            "AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE AS ROLE FROM AP_APP, AP_APP_TAG, " +
-                            "AP_UNRESTRICTED_ROLES WHERE AP_APP.NAME=? AND AP_APP.TYPE= ? AND AP_APP.TENANT_ID=?;";
+                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY,"
+                            + " AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
+                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES WHERE AP_APP.NAME=? AND "
+                            + "AP_APP.TYPE= ? AND AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, appName);
@@ -347,9 +348,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             String sql =
                     "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.IS_FREE AS IS_FREE, AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG"
-                            + ".TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE AS ROLE FROM AP_APP, AP_APP_TAG, " +
-                            "AP_UNRESTRICTED_ROLES WHERE AP_APP.ID=? AND AP_APP.TENANT_ID=?;";
+                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY, "
+                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
+                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES WHERE AP_APP.ID=? AND "
+                            + "AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, applicationId);
@@ -389,8 +391,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             String sql =
                     "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.IS_FREE, AP_APP_TAG.TAG, AP_UNRESTRICTED_ROLES.ROLE AS RELESE_ID"
-                            + " FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES WHERE AP_APP.ID = ?;";
+                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP_TAG.TAG AS TAG, "
+                            + "AP_UNRESTRICTED_ROLES.ROLE AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES "
+                            + "WHERE AP_APP.ID = ?;";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, appId);
@@ -419,6 +422,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
     @Override
     public Application editApplication(Application application, int tenantId) throws ApplicationManagementException {
+        int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
         Application existingApplication = this.getApplication(application.getName(), application.getType(), tenantId);
@@ -443,31 +447,30 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
                 sql += "RESTRICTED = ? ";
             }
-            if (application.getIsFree() != existingApplication.getIsFree()) {
-                sql += "IS_FREE = ? ";
+            if (!application.getSubType().equals(existingApplication.getSubType())) {
+                sql += "SUB_TYPE = ? ";
             }
 
             sql += "WHERE ID = ?";
 
             stmt = conn.prepareStatement(sql);
             if (application.getName() != null && !application.getName().equals(existingApplication.getName())) {
-                stmt.setString(1, application.getName());
+                stmt.setString(paramIndex++, application.getName());
             }
             if (application.getType() != null && !application.getType().equals(existingApplication.getType())) {
-                stmt.setString(2, application.getType());
+                stmt.setString(paramIndex++, application.getType());
             }
             if (application.getAppCategory() != null && !application.getAppCategory().equals(
                     existingApplication.getAppCategory())) {
-                stmt.setString(3, application.getAppCategory());
+                stmt.setString(paramIndex++, application.getAppCategory());
             }
             if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-                stmt.setInt(4, application.getIsRestricted());
+                stmt.setInt(paramIndex++, application.getIsRestricted());
             }
-            if (application.getIsFree() != existingApplication.getIsFree()) {
-                stmt.setInt(5, application.getIsFree());
+            if (!application.getSubType().equals(existingApplication.getSubType())) {
+                stmt.setString(paramIndex++, application.getSubType());
             }
-
-            stmt.setInt(6, application.getId());
+            stmt.setInt(paramIndex, application.getId());
             stmt.executeUpdate();
             return application;
         } catch (DBConnectionException e) {
@@ -580,8 +583,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + "AP_APP_RELEASE.CREATED_AT, AP_APP_RELEASE.PUBLISHED_BY, AP_APP_RELEASE.PUBLISHED_AT, "
                     + "AP_APP_RELEASE.STARS,"
                     + "AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, "
-                    + "AP_APP.APP_CATEGORY AS APP_CATEGORY, AP_APP.IS_FREE, AP_UNRESTRICTED_ROLES.ROLE AS ROLE "
-                    + "FROM AP_APP, AP_UNRESTRICTED_ROLES, AP_APP_RELEASE "
+                    + "AP_APP.APP_CATEGORY AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
+                    + "AP_UNRESTRICTED_ROLES.ROLE AS ROLE FROM AP_APP, AP_UNRESTRICTED_ROLES, AP_APP_RELEASE "
                     + "WHERE AP_APP_RELEASE.UUID=? AND AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
@@ -602,7 +605,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
-                application.setIsFree(rs.getInt("IS_FREE"));
+                application.setSubType(rs.getString("SUB_TYPE"));
+                application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getInt("RESTRICTED"));
 
                 UnrestrictedRole unrestrictedRole = new UnrestrictedRole();

@@ -38,7 +38,7 @@ public class Application {
 
     private String type;
 
-    private int isFree;
+    private String subType;
 
     private String paymentCurrency;
 
@@ -105,12 +105,12 @@ public class Application {
         this.type = type;
     }
 
-    public int getIsFree() {
-        return isFree;
+    public String getSubType() {
+        return subType;
     }
 
-    public void setIsFree(int isFree) {
-        this.isFree = isFree;
+    public void setSubType(String subType) {
+        this.subType = subType;
     }
 
     public String getPaymentCurrency() {

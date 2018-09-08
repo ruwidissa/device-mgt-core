@@ -68,7 +68,8 @@ public class Util {
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
-                application.setIsFree(rs.getInt("IS_FREE"));
+                application.setSubType(rs.getString("SUB_TYPE"));
+                application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getInt("RESTRICTED"));
 
                 List<Tag> tags = new ArrayList<>();
@@ -127,7 +128,8 @@ public class Util {
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
-                application.setIsFree(rs.getInt("IS_FREE"));
+                application.setSubType(rs.getString("SUB_TYPE"));
+                application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getInt("RESTRICTED"));
             }
 

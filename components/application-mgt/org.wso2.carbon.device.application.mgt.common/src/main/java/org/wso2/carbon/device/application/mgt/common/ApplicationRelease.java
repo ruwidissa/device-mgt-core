@@ -84,6 +84,8 @@ public class ApplicationRelease {
 
     private String url;
 
+    private boolean isPublishedRelease;
+
     public int getNoOfRatedUsers() {
         return noOfRatedUsers;
     }
@@ -298,5 +300,13 @@ public class ApplicationRelease {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public boolean isPublishedRelease() {
+        return isPublishedRelease;
+    }
+
+    public void setPublishedRelease(boolean publishedRelease) {
+        isPublishedRelease = publishedRelease;
     }
 }

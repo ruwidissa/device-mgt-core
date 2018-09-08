@@ -222,9 +222,13 @@ public interface ApplicationManagementAPI {
     @ApiResponses(
             value = {
                     @ApiResponse(
-                            code = 201,
+                            code = 200,
                             message = "OK. \n Successfully edited the application.",
                             response = Application.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while editing the application.",
@@ -235,7 +239,8 @@ public interface ApplicationManagementAPI {
                     name = "application",
                     value = "The application that need to be edited.",
                     required = true)
-            @Valid Application application);
+            @Valid Application application
+    );
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -265,7 +270,7 @@ public interface ApplicationManagementAPI {
                                     "Application creating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while getting the application list.",
+                            message = "Internal Server Error. \n Error occurred while creating the application.",
                             response = ErrorResponse.class)
             })
     Response createApplication(
@@ -297,7 +302,8 @@ public interface ApplicationManagementAPI {
                     name = "screenshot",
                     value = "Screen Shots of the uploading application",
                     required = true)
-            @Multipart(value = "screenshot") List<Attachment> attachmentList);
+            @Multipart(value = "screenshot") List<Attachment> attachmentList
+    );
 
     @DELETE
     @Consumes("application/json")
@@ -331,7 +337,8 @@ public interface ApplicationManagementAPI {
                     name = "UUID",
                     value = "Unique identifier of the Application",
                     required = true)
-            @PathParam("appid") int applicationId);
+            @PathParam("appid") int applicationId
+    );
 
     @POST
     @Path("/image-artifacts/{appId}/{uuid}")
@@ -353,8 +360,15 @@ public interface ApplicationManagementAPI {
     @ApiResponses(
             value = {
                     @ApiResponse(
-                            code = 201,
-                            message = "OK. \n Successfully uploaded artifacts."),
+                            code = 200,
+                            message = "OK. \n Successfully updated artifacts."),
+                    @ApiResponse(
+                            code = 403,
+                            message = "FORBIDDEN. \n Can't Update the application release in PUBLISHED or DEPRECATED "
+                                    + "state. Hence please demote the application and update the application release"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Error occurred while updating the application."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
@@ -367,10 +381,11 @@ public interface ApplicationManagementAPI {
             @PathParam("uuid") String applicationUUID,
             @Multipart(value = "icon") Attachment iconFile,
             @Multipart(value = "banner") Attachment bannerFile,
-            @Multipart(value = "screenshot") List<Attachment> screenshots);
+            @Multipart(value = "screenshot") List<Attachment> screenshots
+    );
 
     @PUT
-    @Path("/app-artifacts/{appId}/{uuid}")
+    @Path("/app-artifacts/{appType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -392,6 +407,10 @@ public interface ApplicationManagementAPI {
                             code = 201,
                             message = "OK. \n Successfully uploaded artifacts."),
                     @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application artifact updating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
                             response = ErrorResponse.class)
@@ -399,11 +418,12 @@ public interface ApplicationManagementAPI {
     Response updateApplicationArtifact(
             @ApiParam(name = "appType", value = "Type of the application i.e Android, IOS etc", required = true)
             @PathParam("appType") String appType,
-            @ApiParam(name = "id", value = "Id of the application", required = true)
-            @PathParam("uuid") int applicationId,
+            @ApiParam(name = "appId", value = "Id of the application", required = true)
+            @PathParam("appId") int applicationId,
             @ApiParam(name = "uuid", value = "UUID of the application", required = true)
             @PathParam("uuid") String applicationUUID,
-            @Multipart("binaryFile") Attachment binaryFile);
+            @Multipart("binaryFile") Attachment binaryFile
+    );
 
     @PUT
     @Path("/{appId}/{uuid}")
@@ -428,6 +448,10 @@ public interface ApplicationManagementAPI {
                             code = 201,
                             message = "OK. \n Successfully created an application release.",
                             response = ApplicationRelease.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application release updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while releasing the application.",
@@ -495,11 +519,6 @@ public interface ApplicationManagementAPI {
                             code = 201,
                             message = "OK. \n Successfully add a lifecycle state.",
                             response = Application.class),
-                    @ApiResponse(
-                            code = 304,
-                            message = "Not Modified. \n " +
-                                    "Empty body because the client already has the latest version of the requested "
-                                    + "resource."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred adding a lifecycle state.",

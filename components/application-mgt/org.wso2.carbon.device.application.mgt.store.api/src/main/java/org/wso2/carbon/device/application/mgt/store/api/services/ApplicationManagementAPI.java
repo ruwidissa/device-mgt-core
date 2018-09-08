@@ -32,6 +32,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
@@ -159,9 +160,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
-                    name = "searchQuery",
-                    value = "Relevant search query to search on", defaultValue = "*")
-            @QueryParam("query") String searchQuery,
+                    name = "filter",
+                    value = "Filter to get application list",
+                    required = true)
+            @Valid Filter filter,
             @ApiParam(
                     name = "offset",
                     value = "Provide from which position apps should return", defaultValue = "20")
@@ -217,35 +219,5 @@ public interface ApplicationManagementAPI {
             @QueryParam("appName") String appName
     );
 
-    @GET
-    @Path("/release/{uuid}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Get all the releases or specific release of an application",
-            notes = "This will retrieve the all the releases or specific release of an application",
-            tags = "Application Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:get")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully retrieved the Application release."),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Error occurred while releasing the application.",
-                            response = ErrorResponse.class)
-            })
-    Response getApplicationRelease(
-            @ApiParam(name = "ID", value = "Identifier of the Application", required = true) @PathParam("uuid") String applicationUUID,
-            @ApiParam(name = "version", value = "Version of the application", required = false) @QueryParam("version") String version);
 
-    }
+}

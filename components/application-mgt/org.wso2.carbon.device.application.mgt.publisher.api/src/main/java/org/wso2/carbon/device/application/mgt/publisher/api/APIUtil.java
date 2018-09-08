@@ -39,7 +39,6 @@ public class APIUtil {
     private static SubscriptionManager subscriptionManager;
     private static UnrestrictedRoleManager unrestrictedRoleManager;
 
-
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {
             synchronized (APIUtil.class) {
@@ -55,7 +54,6 @@ public class APIUtil {
                 }
             }
         }
-
         return applicationManager;
     }
 
