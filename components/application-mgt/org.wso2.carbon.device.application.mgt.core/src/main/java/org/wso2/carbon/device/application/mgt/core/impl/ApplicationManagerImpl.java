@@ -27,6 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.ApplicationSubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
@@ -399,7 +400,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.openDBConnection();
             ApplicationManagementDAOFactory.getApplicationDAO().deleteApplication(applicationId);
         } catch (UserStoreException e) {
-            e.printStackTrace();
+            String msg = "Error occured while check whether current user has the permission to delete an application";
+            log.error(msg);
+            throw new ApplicationManagementException(msg,e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -756,62 +759,61 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (AppLifecycleState.CREATED.toString().equals(state.getCurrentState())) {
             throw new LifecycleManagementException("Current State Couldn't be " + state.getCurrentState());
         }
-        if (AppLifecycleState.IN_REVIEW.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.CREATED.toString().equals(state.getPreviousState()) &&
-                    !AppLifecycleState.REJECTED.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be either " +
-                                                               AppLifecycleState.CREATED.toString() + " or " +
-                                                               AppLifecycleState.REJECTED.toString());
-            }
+        if (AppLifecycleState.IN_REVIEW.toString().equals(state.getCurrentState()) && !AppLifecycleState.CREATED
+                .toString().equals(state.getPreviousState()) && !AppLifecycleState.REJECTED.toString()
+                .equals(state.getPreviousState())) {
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be either "
+                            + AppLifecycleState.CREATED.toString() + " or " + AppLifecycleState.REJECTED.toString());
+
         }
-        if (AppLifecycleState.APPROVED.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.IN_REVIEW.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be " +
-                                                               AppLifecycleState.IN_REVIEW.toString());
-            }
+        if (AppLifecycleState.APPROVED.toString().equals(state.getCurrentState()) && !AppLifecycleState.IN_REVIEW
+                .toString().equals(state.getPreviousState())) {
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be "
+                            + AppLifecycleState.IN_REVIEW.toString());
+
         }
-        if (AppLifecycleState.PUBLISHED.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.APPROVED.toString().equals(state.getPreviousState()) &&
-                    !AppLifecycleState.UNPUBLISHED.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be either " +
-                                                               AppLifecycleState.APPROVED.toString() + " or " +
-                                                               AppLifecycleState.UNPUBLISHED.toString());
-            }
+        if (AppLifecycleState.PUBLISHED.toString().equals(state.getCurrentState()) && !AppLifecycleState.APPROVED
+                .toString().equals(state.getPreviousState()) && !AppLifecycleState.UNPUBLISHED.toString()
+                .equals(state.getPreviousState())) {
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be either "
+                            + AppLifecycleState.APPROVED.toString() + " or " + AppLifecycleState.UNPUBLISHED
+                            .toString());
+
         }
-        if (AppLifecycleState.UNPUBLISHED.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.PUBLISHED.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be " +
-                                                               AppLifecycleState.PUBLISHED.toString());
-            }
+        if (AppLifecycleState.UNPUBLISHED.toString().equals(state.getCurrentState()) && !AppLifecycleState.PUBLISHED
+                .toString().equals(state.getPreviousState())) {
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be "
+                            + AppLifecycleState.PUBLISHED.toString());
+
         }
-        if (AppLifecycleState.REJECTED.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.IN_REVIEW.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be " +
-                                                               AppLifecycleState.IN_REVIEW.toString());
-            }
+        if (AppLifecycleState.REJECTED.toString().equals(state.getCurrentState()) && !AppLifecycleState.IN_REVIEW
+                .toString().equals(state.getPreviousState())) {
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be "
+                            + AppLifecycleState.IN_REVIEW.toString());
+
         }
-        if (AppLifecycleState.DEPRECATED.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.PUBLISHED.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be " +
-                                                               AppLifecycleState.PUBLISHED.toString());
-            }
+        if (AppLifecycleState.DEPRECATED.toString().equals(state.getCurrentState()) && !AppLifecycleState.PUBLISHED
+                .toString().equals(state.getPreviousState())) {
+
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be "
+                            + AppLifecycleState.PUBLISHED.toString());
+
         }
-        if (AppLifecycleState.REMOVED.toString().equals(state.getCurrentState())) {
-            if (!AppLifecycleState.DEPRECATED.toString().equals(state.getPreviousState()) &&
-                    !AppLifecycleState.REJECTED.toString().equals(state.getPreviousState()) &&
-                    !AppLifecycleState.UNPUBLISHED.toString().equals(state.getPreviousState())) {
-                throw new LifecycleManagementException("If Current State is " + state.getCurrentState() +
-                                                               "Previous State should be either " +
-                                                               AppLifecycleState.DEPRECATED.toString() + " or " +
-                                                               AppLifecycleState.REJECTED.toString() + " or " +
-                                                               AppLifecycleState.UNPUBLISHED.toString());
-            }
+        if (AppLifecycleState.REMOVED.toString().equals(state.getCurrentState()) && !AppLifecycleState.DEPRECATED
+                .toString().equals(state.getPreviousState()) && !AppLifecycleState.REJECTED.toString()
+                .equals(state.getPreviousState()) && !AppLifecycleState.UNPUBLISHED.toString()
+                .equals(state.getPreviousState())) {
+
+            throw new LifecycleManagementException(
+                    "If Current State is " + state.getCurrentState() + "Previous State should be either "
+                            + AppLifecycleState.DEPRECATED.toString() + " or " + AppLifecycleState.REJECTED.toString()
+                            + " or " + AppLifecycleState.UNPUBLISHED.toString());
         }
     }
 
@@ -820,8 +822,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application existingApplication = validateApplication(application.getId());
-        ApplicationDAO applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
-        VisibilityDAO visibilityDAO = ApplicationManagementDAOFactory.getVisibilityDAO();
         List<UnrestrictedRole> addingRoleList;
         List<UnrestrictedRole> removingRoleList;
         List<Tag> addingTags;
@@ -838,54 +838,45 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                                              "please remove this application and publish " +
                                                              "new application with type: " + application.getType());
         }
-        if (existingApplication.getSubType() != application.getSubType()) {
-            if ("PAID".equals(existingApplication.getSubType())) {
-                if (application.getPaymentCurrency() != null || !application.getPaymentCurrency().equals("")) {
-                    throw new ApplicationManagementException("If you are going to change Non-Free app as Free app, " +
-                                                                     "currency attribute in the application updating " +
-                                                                     "payload should be null or \"\"");
-                }
-            } else if ("FREE".equals(existingApplication.getSubType())) {
-                if (application.getPaymentCurrency() == null || application.getPaymentCurrency().equals("")) {
-                    throw new ApplicationManagementException("If you are going to change Free app as Non-Free app, " +
-                                                                     "currency attribute in the application payload " +
-                                                                     "should not be null or \"\"");
-                }
+        if (!existingApplication.getSubType().equals(application.getSubType())) {
+            if (ApplicationSubscriptionType.PAID.toString().equals(existingApplication.getSubType()) && (
+                    !"".equals(application.getPaymentCurrency()) || application.getPaymentCurrency() != null)) {
+                throw new ApplicationManagementException("If you are going to change Non-Free app as Free app, "
+                        + "currency attribute in the application updating " + "payload should be null or \"\"");
+            } else if (ApplicationSubscriptionType.FREE.toString().equals(existingApplication.getSubType()) && (
+                    application.getPaymentCurrency() == null || "".equals(application.getPaymentCurrency()))) {
+                throw new ApplicationManagementException("If you are going to change Free app as Non-Free app, "
+                        + "currency attribute in the application payload " + "should not be null or \"\"");
             }
         }
         if (existingApplication.getIsRestricted() != application.getIsRestricted()) {
             if (existingApplication.getIsRestricted() == 0 && existingApplication.getUnrestrictedRoles() == null) {
                 if (application.getUnrestrictedRoles() == null || application.getUnrestrictedRoles().isEmpty()) {
-                    throw new ApplicationManagementException("If you are going to add role restriction for non role " +
-                                                                     "restricted Application, Unrestricted role list " +
-                                                                     "won't be empty or null");
+                    throw new ApplicationManagementException("If you are going to add role restriction for non role "
+                            + "restricted Application, Unrestricted role list " + "won't be empty or null");
                 }
                 visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), application.getId(), tenantId);
-            } else if (existingApplication.getIsRestricted() == 1 && existingApplication.getUnrestrictedRoles() !=
-                    null) {
-                if (application.getUnrestrictedRoles() != null || !application.getUnrestrictedRoles().isEmpty()) {
-                    throw new ApplicationManagementException("If you are going to remove role restriction from role " +
-                                                                     "restricted Application, Unrestricted role list " +
-                                                                     "should be empty or null");
+            } else if (existingApplication.getIsRestricted() == 1
+                    && existingApplication.getUnrestrictedRoles() != null) {
+                if (application.getUnrestrictedRoles() != null && !application.getUnrestrictedRoles().isEmpty()) {
+                    throw new ApplicationManagementException("If you are going to remove role restriction from role "
+                            + "restricted Application, Unrestricted role list should be empty or null");
                 }
                 visibilityDAO.deleteUnrestrictedRoles(existingApplication.getUnrestrictedRoles(), application.getId(),
-                                                      tenantId);
+                        tenantId);
             }
-        } else if (existingApplication.getIsRestricted() == application.getIsRestricted()) {
-            if (existingApplication.getIsRestricted() == 1) {
-                addingRoleList = getDifference(application.getUnrestrictedRoles(), existingApplication
-                        .getUnrestrictedRoles());
-                removingRoleList = getDifference(existingApplication
-                                                         .getUnrestrictedRoles(), application.getUnrestrictedRoles());
-                if (!addingRoleList.isEmpty()) {
-                    visibilityDAO.addUnrestrictedRoles(addingRoleList, application.getId(), tenantId);
+        } else if (existingApplication.getIsRestricted() == application.getIsRestricted()
+                && existingApplication.getIsRestricted() == 1) {
+            addingRoleList = getDifference(application.getUnrestrictedRoles(),
+                    existingApplication.getUnrestrictedRoles());
+            removingRoleList = getDifference(existingApplication.getUnrestrictedRoles(),
+                    application.getUnrestrictedRoles());
+            if (!addingRoleList.isEmpty()) {
+                visibilityDAO.addUnrestrictedRoles(addingRoleList, application.getId(), tenantId);
 
-                }
-                if (!removingRoleList.isEmpty()) {
-                    visibilityDAO.deleteUnrestrictedRoles(removingRoleList, application.getId(), tenantId);
-
-                }
-
+            }
+            if (!removingRoleList.isEmpty()) {
+                visibilityDAO.deleteUnrestrictedRoles(removingRoleList, application.getId(), tenantId);
             }
         }
         addingTags = getDifference(existingApplication.getTags(), application.getTags());

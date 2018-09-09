@@ -166,11 +166,11 @@ public interface ApplicationManagementAPI {
             @Valid Filter filter,
             @ApiParam(
                     name = "offset",
-                    value = "Provide from which position apps should return", defaultValue = "20")
+                    value = "Provide from which position apps should return", defaultValue = "0")
             @QueryParam("offset") int offset,
             @ApiParam(
                     name = "limit",
-                    value = "Provide how many apps it should return", defaultValue = "0")
+                    value = "Provide how many apps it should return", defaultValue = "20")
             @QueryParam("limit") int limit
 
     );

@@ -61,9 +61,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
-            if (limit == 0) {
-                limit = DEFAULT_LIMIT;
-            }
             filter.setOffset(offset);
             filter.setLimit(limit);
 
