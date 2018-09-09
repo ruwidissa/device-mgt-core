@@ -33,6 +33,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
@@ -47,6 +48,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -104,9 +106,10 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 saveFile(bannerFileStream, bannerStoredLocation);
                 applicationRelease.setBannerLoc(bannerStoredLocation);
             }
-            if (screenShotStreams.size() > screenShotMaxCount) {
-                throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
-            } else if (!screenShotStreams.isEmpty() && screenShotStreams.size() <= screenShotMaxCount) {
+            if (!screenShotStreams.isEmpty()) {
+                if (screenShotStreams.size() > screenShotMaxCount) {
+                    throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
+                }
                 int count = 1;
                 for (InputStream screenshotStream : screenShotStreams) {
                     scStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[2] + count;
@@ -123,7 +126,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     count++;
                 }
             }
-
             return applicationRelease;
         } catch (IOException e) {
             throw new ApplicationStorageManagementException("IO Exception while saving the screens hots for " +
@@ -149,9 +151,10 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             if (bannerFileStream != null) {
                 deleteApplicationReleaseArtifacts(applicationRelease.getBannerLoc());
             }
-            if (screenShotStreams.size() > screenShotMaxCount) {
-                throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
-            } else if (!screenShotStreams.isEmpty() && screenShotStreams.size() <= screenShotMaxCount) {
+            if (!screenShotStreams.isEmpty()) {
+                if (screenShotStreams.size() > screenShotMaxCount) {
+                    throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
+                }
                 int count = 1;
                 while (count < screenShotStreams.size()) {
                     if (count == 1) {
@@ -166,8 +169,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     count++;
                 }
             }
-            applicationRelease = uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, screenShotStreams);
-            return applicationRelease;
+            return uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, screenShotStreams);
         } catch (ApplicationStorageManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationStorageManagementException("Application Storage exception while trying to"
@@ -177,15 +179,15 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
-            throws ResourceManagementException {
+    public ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType,
+            InputStream binaryFile) throws ResourceManagementException, RequestValidatingException {
 
         try {
             if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
                 applicationRelease.setVersion(Constants.DEFAULT_VERSION);
                 UrlValidator urlValidator = new UrlValidator();
                 if (applicationRelease.getUrl() == null || !urlValidator.isValid(applicationRelease.getUrl())) {
-                    throw new ApplicationStorageManagementException("Request payload doesn't contains Web Clip URL " +
+                    throw new RequestValidatingException("Request payload doesn't contains Web Clip URL " +
                                                                             "with application release object or Web " +
                                                                             "Clip URL is invalid");
                     //todo if we throw this we must send BAD REQUEST to end user
@@ -208,32 +210,25 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             if (ApplicationType.ANDROID.toString().equals(appType)) {
                 String prefix = "stream2file";
                 String suffix = ".apk";
-                Boolean isTempDelete;
-
                 File tempFile = File.createTempFile(prefix, suffix);
                 FileOutputStream out = new FileOutputStream(tempFile);
                 IOUtils.copy(binaryFile, out);
-                ApkFile apkFile = new ApkFile(tempFile);
-                ApkMeta apkMeta = apkFile.getApkMeta();
-                applicationRelease.setVersion(apkMeta.getVersionName());
-                isTempDelete = tempFile.delete();
-                if (!isTempDelete) {
-                    log.error("Temporary created APK file deletion failed");
+                try (ApkFile apkFile = new ApkFile(tempFile)){
+                    ApkMeta apkMeta = apkFile.getApkMeta();
+                    applicationRelease.setVersion(apkMeta.getVersionName());
+                    Files.delete(tempFile.toPath());
                 }
+
             } else if (ApplicationType.IOS.toString().equals(appType)) {
                 String prefix = "stream2file";
                 String suffix = ".ipa";
-                Boolean isTempDelete;
 
                 File tempFile = File.createTempFile(prefix, suffix);
                 FileOutputStream out = new FileOutputStream(tempFile);
                 IOUtils.copy(binaryFile, out);
                 Map<String, String> plistInfo = getIPAInfo(tempFile);
                 applicationRelease.setVersion(plistInfo.get("CFBundleVersion"));
-                isTempDelete = tempFile.delete();
-                if (!isTempDelete) {
-                    log.error("Temporary created ipa file deletion failed");
-                }
+                Files.delete(tempFile.toPath());
             } else {
                 throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
                         "application types " + applicationRelease.getUuid());
@@ -262,7 +257,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType,
-                                                     InputStream binaryFile) throws ApplicationStorageManagementException {
+            InputStream binaryFile) throws ApplicationStorageManagementException, RequestValidatingException {
 
         try {
             deleteApplicationReleaseArtifacts(applicationRelease.getAppStoredLoc());
@@ -284,15 +279,20 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         File artifact = new File(artifactPath);
 
         if (artifact.exists()) {
-            StorageManagementUtil.deleteDir(artifact);
+            try {
+                StorageManagementUtil.deleteDir(artifact);
+            } catch (IOException e) {
+                throw new ApplicationStorageManagementException(
+                        "Error occured while deleting application release artifacts", e);
+            }
         } else {
-            throw new ApplicationStorageManagementException("Tried to delete application release, but it doesn't exist " +
-                    "in the system");
+            throw new ApplicationStorageManagementException(
+                    "Tried to delete application release, but it doesn't exist in the system");
         }
     }
 
-    @Override
-    public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths) throws ApplicationStorageManagementException {
+    @Override public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths)
+            throws ApplicationStorageManagementException {
         for (String directoryBasePath : directoryPaths) {
             deleteApplicationReleaseArtifacts(directoryBasePath);
         }
@@ -346,6 +346,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             NSString parameter = (NSString) rootDict.objectForKey(Constants.CF_BUNDLE_VERSION);
             ipaInfo.put(Constants.CF_BUNDLE_VERSION, parameter.toString());
 
+            if (ipaDirectory != null) {
+                // remove unzip folder
+                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+            }
+
         } catch (ParseException e) {
             String msg = "Error occurred while parsing the plist data";
             log.error(msg);
@@ -361,11 +366,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String msg = "Error occurred while unzipping the ipa file";
             log.error(msg);
             throw new ApplicationStorageManagementException(msg, e);
-        } finally {
-            if (ipaDirectory != null) {
-                // remove unzip folder
-                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
-            }
         }
         return ipaInfo;
     }
@@ -380,7 +380,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     private void unzip(String zipFilePath, String destDirectory)
             throws IOException, ApplicationStorageManagementException {
         File destDir = new File(destDirectory);
-        Boolean isDirCreated;
+        boolean isDirCreated;
 
         if (!destDir.exists()) {
             isDirCreated = destDir.mkdir();
@@ -389,33 +389,31 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                                                         "retrieval");
             }
         }
+        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
 
-        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
-        ZipEntry entry = zipIn.getNextEntry();
+            ZipEntry entry = zipIn.getNextEntry();
+            // iterates over entries in the zip file
+            while (entry != null) {
+                String filePath = destDirectory + File.separator + entry.getName();
 
-        // iterates over entries in the zip file
-        while (entry != null) {
-            String filePath = destDirectory + File.separator + entry.getName();
+                if (!entry.isDirectory()) {
+                    // if the entry is a file, extracts it
+                    extractFile(zipIn, filePath);
+                } else {
+                    // if the entry is a directory, make the directory
+                    File dir = new File(filePath);
+                    isDirCreated = dir.mkdir();
+                    if (!isDirCreated) {
+                        throw new ApplicationStorageManagementException(
+                                "Directory Creation Is Failed while iOS app vertion " + "retrieval");
+                    }
 
-            if (!entry.isDirectory()) {
-                // if the entry is a file, extracts it
-                extractFile(zipIn, filePath);
-            } else {
-                // if the entry is a directory, make the directory
-                File dir = new File(filePath);
-                isDirCreated = dir.mkdir();
-                if (!isDirCreated) {
-                    throw new ApplicationStorageManagementException(
-                            "Directory Creation Is Failed while iOS app vertion " +
-                                    "retrieval");
                 }
 
+                zipIn.closeEntry();
+                entry = zipIn.getNextEntry();
             }
-
-            zipIn.closeEntry();
-            entry = zipIn.getNextEntry();
         }
-        zipIn.close();
     }
 
     /**
@@ -425,13 +423,12 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
      * @param filePath file path
      */
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-        byte[] bytesIn = new byte[BUFFER_SIZE];
-        int read;
-
-        while ((read = zipIn.read(bytesIn)) != -1) {
-            bos.write(bytesIn, 0, read);
+        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+            byte[] bytesIn = new byte[BUFFER_SIZE];
+            int read;
+            while ((read = zipIn.read(bytesIn)) != -1) {
+                bos.write(bytesIn, 0, read);
+            }
         }
-        bos.close();
     }
 }

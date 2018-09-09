@@ -55,14 +55,14 @@ public class StorageManagementUtil {
      *
      * @param artifactDirectory Artifact Directory that need to be deleted.
      */
-    public static void deleteDir(File artifactDirectory) {
+    public static void deleteDir(File artifactDirectory) throws IOException {
         File[] contents = artifactDirectory.listFiles();
         if (contents != null) {
             for (File file : contents) {
                 deleteDir(file);
             }
         }
-        artifactDirectory.delete();
+        Files.delete(artifactDirectory.toPath());
     }
 
     /**
@@ -72,19 +72,13 @@ public class StorageManagementUtil {
      * @param path        Path the file need to be saved in.
      */
     public static void saveFile(InputStream inputStream, String path) throws IOException {
-        OutputStream outStream = null;
-        try {
+        try (OutputStream outStream = new FileOutputStream(new File(path))) {
             byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
-            outStream = new FileOutputStream(new File(path));
-            outStream.write(buffer);
-        } finally {
-
-            inputStream.close();
-
-            if (outStream != null) {
-                outStream.close();
+            if (inputStream.read(buffer) != -1) {
+                outStream.write(buffer);
             }
+        } finally {
+            inputStream.close();
         }
     }
 

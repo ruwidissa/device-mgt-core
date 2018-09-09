@@ -24,6 +24,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.publisher.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -171,6 +172,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error(errorMessage, e);
             return APIUtil.getResponse(new ApplicationManagementException(errorMessage, e),
                     Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (RequestValidatingException e) {
+            log.error("Error occured while handling the application creating request");
+            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         }
     }
 
@@ -252,8 +256,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         try {
 
             if (binaryFile == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Uploading artifacts for the application is failed " + applicationUuid).build();
+                return APIUtil.getResponse("Uploading artifacts for the application is failed " + applicationUuid,
+                        Response.Status.BAD_REQUEST);
             }
             applicationRelease = applicationManager.validateApplicationRelease(applicationId, applicationUuid);
             applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease, appType,
@@ -263,7 +267,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     .entity("Successfully uploaded artifacts for the application release. UUID is " + applicationUuid).build();
         } catch (IOException e) {
             String msg =
-                    "Exception while trying to read icon, banner files for the application release" + applicationUuid;
+                    "Error occured while trying to read icon, banner files for the application release" + applicationUuid;
             log.error(msg);
             return APIUtil.getResponse(new ApplicationManagementException(msg, e),
                     Response.Status.BAD_REQUEST);
@@ -275,6 +279,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error("Error occurred while updating the image artifacts of the application with the uuid "
                     + applicationUuid, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (RequestValidatingException e) {
+            log.error("Error occured while handling the application artifact updating request. application release UUID:  "
+                    + applicationUuid);
+            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         }
     }
 
@@ -357,6 +365,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error("Error occurred while updating the releases artifacts of the application with the uuid "
                     + applicationUUID + " for the release " + applicationRelease.getVersion(), e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (RequestValidatingException e) {
+            log.error("Error occured while handling the application release updating request. application release UUID:  "
+                    + applicationUUID);
+            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         }
     }
 

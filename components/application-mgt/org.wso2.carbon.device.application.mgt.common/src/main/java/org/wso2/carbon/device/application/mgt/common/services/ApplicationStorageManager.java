@@ -22,6 +22,7 @@ package org.wso2.carbon.device.application.mgt.common.services;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 
 import java.io.InputStream;
@@ -64,7 +65,7 @@ public interface ApplicationStorageManager {
      * @throws ResourceManagementException Resource Management Exception.
      */
     ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
-            throws ResourceManagementException;
+            throws ResourceManagementException, RequestValidatingException;
 
     /**
      * To upload release artifacts for an Application.
@@ -75,7 +76,7 @@ public interface ApplicationStorageManager {
      * @throws ApplicationStorageManagementException Resource Management Exception.
      */
     ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
-            throws ApplicationStorageManagementException;
+            throws ApplicationStorageManagementException, RequestValidatingException;
 
     /**
      * To delete the artifacts related with particular Application Release.
