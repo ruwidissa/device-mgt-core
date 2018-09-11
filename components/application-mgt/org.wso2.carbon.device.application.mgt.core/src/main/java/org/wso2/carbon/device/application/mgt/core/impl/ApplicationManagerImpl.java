@@ -99,6 +99,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationRelease applicationRelease;
         try {
             ConnectionManagerUtil.beginDBTransaction();
+            //            todo think about web clip and try to remove application - type
             deviceType = this.deviceTypeDAO.getDeviceType(application.getType(), tenantId);
 
             if (deviceType == null) {
@@ -351,12 +352,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationReleases = ApplicationManagementDAOFactory.getApplicationReleaseDAO()
                     .getReleases(application.getName(), application.getType(), tenantId);
             for (ApplicationRelease applicationRelease : applicationReleases) {
-                if (AppLifecycleState.PUBLISHED.toString().equals(ApplicationManagementDAOFactory.getLifecycleStateDAO().
-                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId()).getCurrentState())){
-                    applicationRelease.setPublishedRelease(true);
-                }
-                if (!AppLifecycleState.REMOVED.toString().equals(ApplicationManagementDAOFactory.getLifecycleStateDAO().
-                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId()).getCurrentState())) {
+                LifecycleState lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
+                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
+                applicationRelease.setCurrentState(lifecycleState.getCurrentState());
+                applicationRelease.setPreviousState(lifecycleState.getPreviousState());
+
+                if (!AppLifecycleState.REMOVED.toString().equals(applicationRelease.getCurrentState())) {
                     filteredApplicationReleases.add(applicationRelease);
                 }
             }

@@ -53,7 +53,7 @@ public interface ApplicationDAO {
      * @param tenantId tenantId that need to identify application.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-     int isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException;
+     boolean isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get the applications that satisfy the given criteria.

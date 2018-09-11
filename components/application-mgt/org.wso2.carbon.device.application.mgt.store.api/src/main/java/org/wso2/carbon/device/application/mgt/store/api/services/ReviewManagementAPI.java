@@ -96,12 +96,12 @@ import java.util.List;
         }
 )
 
-@Path("/comments")
+@Path("/reviews")
 @Api(value = "Comments Management", description = "This API carries all comments management related operations " +
         "such as get all the comments, add comment, etc.")
 @Produces(MediaType.APPLICATION_JSON)
 
-public interface CommentManagementAPI {
+public interface ReviewManagementAPI {
     String SCOPE = "scope";
 
     @GET
@@ -191,7 +191,7 @@ public interface CommentManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response addComments(
+    Response addComment(
             @ApiParam(
                     name = "comment",
                     value = "Comment details",
@@ -322,7 +322,7 @@ public interface CommentManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response getStars(
+    Response getRating(
             @ApiParam(
                     name = "uuid",
                     value = "uuid of the application release",
@@ -359,7 +359,7 @@ public interface CommentManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response getRatedUser(
+    Response getNumOfRatedUsers(
             @ApiParam(
                     name = "uuid",
                     value = "uuid of the application release",
@@ -401,7 +401,7 @@ public interface CommentManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response updateStars(
+    Response updateRatings(
             @ApiParam(
                     name = "stars",
                     value = "ratings for the application",

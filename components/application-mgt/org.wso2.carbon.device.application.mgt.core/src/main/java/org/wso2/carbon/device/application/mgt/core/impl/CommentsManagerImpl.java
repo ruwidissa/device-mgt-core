@@ -65,9 +65,13 @@ public class CommentsManagerImpl implements CommentsManager {
         comment.setCreatedAt(Timestamp.from(Instant.now()));
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            commentDAO.addComment(tenantId, comment, comment.getCreatedBy(), comment.getParent(), uuid);
-            ConnectionManagerUtil.commitDBTransaction();
-            return comment;
+            if (commentDAO.addComment(tenantId, comment, comment.getCreatedBy(), comment.getParent(), uuid)) {
+                ConnectionManagerUtil.commitDBTransaction();
+                return comment;
+            } else {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                return null;
+            }
         } catch (DBConnectionException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new CommentManagementException(

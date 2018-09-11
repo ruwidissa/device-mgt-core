@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.common.Application;
@@ -48,7 +49,6 @@ import java.util.List;
 @Path("/store/applications")
 public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
-    private static final int DEFAULT_LIMIT = 20;
     private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
 
     @GET
@@ -70,7 +70,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             for (Application application : applications.getApplications()) {
 
                 for (ApplicationRelease appRelease: application.getApplicationReleases()){
-                    if (appRelease.isPublishedRelease()){
+                    if (AppLifecycleState.PUBLISHED.toString().equals(appRelease.getCurrentState())){
                         publishedApplicationRelease.add(appRelease);
                     }
                 }
@@ -110,7 +110,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
 
             for (ApplicationRelease appRelease : application.getApplicationReleases()) {
-                if (appRelease.isPublishedRelease()) {
+                if (AppLifecycleState.PUBLISHED.toString().equals(appRelease.getCurrentState())){
                     publishedApplicationRelease.add(appRelease);
                 }
             }

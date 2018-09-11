@@ -42,11 +42,11 @@ import java.util.List;
      * @param createdBy Username of the created person.
      * @param parentId  parent id of the parent comment.
      * @param uuid      uuid of the application
-     * @return Comment Id
+     * @return If comment is added successfully, it return true otherwise false
      * @throws CommentManagementException Exceptions of the comment management.
      * @throws DBConnectionException      db connection exception.
      */
-    int addComment(int tenantId, Comment comment, String createdBy, int parentId, String uuid)
+    boolean addComment(int tenantId, Comment comment, String createdBy, int parentId, String uuid)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**

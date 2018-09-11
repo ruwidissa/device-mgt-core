@@ -94,14 +94,13 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public int isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException {
+    public boolean isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to verify whether the registering app is registered or not");
         }
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int isExist = 0;
         String sql = "SELECT * FROM AP_APP WHERE NAME = ? AND TYPE = ? AND TENANT_ID = ?";
         try {
             conn = this.getDBConnection();
@@ -111,11 +110,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             stmt.setString(2, type);
             stmt.setInt(3, tenantId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                isExist = 1;
-            }
-
-            return isExist;
+            return rs.next();
 
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(

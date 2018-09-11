@@ -171,7 +171,7 @@ public class Util {
         appRelease.setCreatedAt(rs.getTimestamp("CREATED_AT"));
         appRelease.setPublishedBy(rs.getString("PUBLISHED_BY"));
         appRelease.setPublishedAt(rs.getTimestamp("PUBLISHED_AT"));
-        appRelease.setStars(rs.getInt("STARS"));
+        appRelease.setRating(rs.getInt("STARS"));
         appRelease.setIsSharedWithAllTenants(rs.getInt("SHARED_WITH_ALL_TENANTS"));
         appRelease.setMetaData(rs.getString("APP_META_INFO"));
         appRelease.setScreenshotLoc1(rs.getString("SC_1_LOCATION"));

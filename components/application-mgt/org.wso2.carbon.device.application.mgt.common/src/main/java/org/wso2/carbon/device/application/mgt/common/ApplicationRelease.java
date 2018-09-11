@@ -21,8 +21,6 @@ package org.wso2.carbon.device.application.mgt.common;
 import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class holds the details when releasing an Application to application store.
@@ -78,28 +76,26 @@ public class ApplicationRelease {
 
     private String metaData;
 
-    private int noOfRatedUsers;
+    private int ratedUsers;
 
-    private int stars;
+    private Double rating;
 
     private String url;
 
-    private boolean isPublishedRelease;
-
-    public int getNoOfRatedUsers() {
-        return noOfRatedUsers;
+    public int getRatedUsers() {
+        return ratedUsers;
     }
 
-    public void setNoOfRatedUsers(int noOfRatedUsers) {
-        this.noOfRatedUsers = noOfRatedUsers;
+    public void setRatedUsers(int ratedUsers) {
+        this.ratedUsers = ratedUsers;
     }
 
-    public int getStars() {
-        return stars;
+    public Double getRating() {
+        return rating;
     }
 
-    public void setStars(int stars) {
-        this.stars = stars;
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 
     public void setId(int id) {
@@ -302,11 +298,4 @@ public class ApplicationRelease {
         this.url = url;
     }
 
-    public boolean isPublishedRelease() {
-        return isPublishedRelease;
-    }
-
-    public void setPublishedRelease(boolean publishedRelease) {
-        isPublishedRelease = publishedRelease;
-    }
 }
