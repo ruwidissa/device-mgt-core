@@ -64,7 +64,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         try {
             statement = conn.prepareStatement(sql, new String[] { "id" });
             statement.setInt(1, tenantId);
-            statement.setString(2, comment.getComment());
+            statement.setString(2, comment.getCommentText());
             statement.setString(3, createdBy);
             statement.setInt(4, parentId);
             statement.setString(5, uuid);
@@ -95,7 +95,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         try {
             statement = conn.prepareStatement(sql, new String[] { "id" });
             statement.setInt(1, tenantId);
-            statement.setString(2, comment.getComment());
+            statement.setString(2, comment.getCommentText());
             statement.setString(3, createdBy);
             statement.setString(4, version);
             statement.setString(5, appType);
@@ -183,7 +183,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             if (rs.next()) {
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -225,7 +225,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -245,7 +245,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
 
     @Override
     public List<Comment> getAllComments(String uuid, PaginationRequest request)
-            throws CommentManagementException, SQLException, DBConnectionException {
+            throws SQLException, DBConnectionException {
 
         if (log.isDebugEnabled()) {
             log.debug("Getting comment of the application release (" + uuid + ") from the database");
@@ -256,7 +256,11 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         List<Comment> comments = new ArrayList<>();
         try {
             conn = this.getDBConnection();
-            sql = "SELECT COMMENT_TEXT FROM AP_APP_COMMENT, AP_APP_RELEASE WHERE AP_APP_COMMENT.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID "
+            sql = "SELECT AP_APP_COMMENT.ID AS ID, AP_APP_COMMENT.COMMENT_TEXT AS COMMENT_TEXT, "
+                    + "AP_APP_COMMENT.CREATED_AT AS CREATED_AT, AP_APP_COMMENT.CREATED_BY AS CREATED_BY, "
+                    + "AP_APP_COMMENT.MODIFIED_AT AS MODIFIED_AT, AP_APP_COMMENT.MODIFIED_BY AS MODIFIED_BY, "
+                    + "AP_APP_COMMENT.PARENT_ID AS PARENT_ID, AP_APP_COMMENT.TENANT_ID AS TENANT_ID FROM"
+                    + " AP_APP_COMMENT, AP_APP_RELEASE WHERE AP_APP_COMMENT.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID "
                     + "AND AP_APP_RELEASE.UUID =? LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
@@ -266,13 +270,13 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             while (rs.next()) {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("MODEFIED_BY"));
+                comment.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                comment.setModifiedBy(rs.getString("MODIFIED_BY"));
                 comment.setParent(rs.getInt("PARENT_ID"));
+                comment.setTenantId(rs.getInt("TENANT_ID"));
                 comments.add(comment);
             }
         } finally {
@@ -337,7 +341,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -383,7 +387,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -418,7 +422,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -454,7 +458,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -492,7 +496,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -528,7 +532,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -566,7 +570,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
@@ -610,7 +614,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
                 Comment comment = new Comment();
                 comment.setId(rs.getInt("ID"));
                 comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setComment(rs.getString("COMMENT_TEXT"));
+                comment.setCommentText(rs.getString("COMMENT_TEXT"));
                 comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                 comment.setCreatedBy(rs.getString("CREATED_BY"));
                 comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));

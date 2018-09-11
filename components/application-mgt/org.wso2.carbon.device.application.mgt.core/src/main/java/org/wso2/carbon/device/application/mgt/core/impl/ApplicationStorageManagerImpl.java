@@ -180,7 +180,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType,
-            InputStream binaryFile) throws ResourceManagementException, RequestValidatingException {
+            String deviceType, InputStream binaryFile) throws ResourceManagementException, RequestValidatingException {
 
         try {
             if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
@@ -190,7 +190,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     throw new RequestValidatingException("Request payload doesn't contains Web Clip URL " +
                                                                             "with application release object or Web " +
                                                                             "Clip URL is invalid");
-                    //todo if we throw this we must send BAD REQUEST to end user
                 }
                 applicationRelease.setAppStoredLoc(applicationRelease.getUrl());
                 applicationRelease.setAppHashValue(null);
@@ -207,7 +206,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                 "application UUID " + applicationRelease.getUuid());
             }
 
-            if (ApplicationType.ANDROID.toString().equals(appType)) {
+            if (ApplicationType.ANDROID.toString().equals(deviceType)) {
                 String prefix = "stream2file";
                 String suffix = ".apk";
                 File tempFile = File.createTempFile(prefix, suffix);
@@ -219,7 +218,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     Files.delete(tempFile.toPath());
                 }
 
-            } else if (ApplicationType.IOS.toString().equals(appType)) {
+            } else if (ApplicationType.IOS.toString().equals(deviceType)) {
                 String prefix = "stream2file";
                 String suffix = ".ipa";
 
@@ -257,11 +256,12 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType,
-            InputStream binaryFile) throws ApplicationStorageManagementException, RequestValidatingException {
+            String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException,
+            RequestValidatingException {
 
         try {
             deleteApplicationReleaseArtifacts(applicationRelease.getAppStoredLoc());
-            applicationRelease = uploadReleaseArtifact(applicationRelease, appType, binaryFile);
+            applicationRelease = uploadReleaseArtifact(applicationRelease, appType, deviceType, binaryFile);
         } catch (ApplicationStorageManagementException e) {
             throw new ApplicationStorageManagementException("Application Artifact doesn't contains in the System", e);
         } catch (ResourceManagementException e) {

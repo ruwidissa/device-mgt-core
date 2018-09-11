@@ -37,6 +37,7 @@ import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,30 +113,33 @@ public class CommentsManagerImpl implements CommentsManager {
     }
 
     @Override
-    public List<Comment> getAllComments(PaginationRequest request, String uuid)
-            throws CommentManagementException {
+    public PaginationResult getAllComments(PaginationRequest request, String uuid) throws CommentManagementException {
 
         PaginationResult paginationResult = new PaginationResult();
+        int numOfComments;
         List<Comment> comments;
-        request = Util.validateCommentListPageSize(request);
         if (log.isDebugEnabled()) {
             log.debug("get all comments of the application release" + uuid);
         }
         try {
             ConnectionManagerUtil.openDBConnection();
-            comments = commentDAO.getAllComments(uuid, request);
-            int count = commentDAO.getCommentCount(request, uuid);
+            comments = commentDAO.getAllComments(uuid, Util.validateCommentListPageSize(request));
+            numOfComments = comments.size();
             paginationResult.setData(comments);
-            paginationResult.setRecordsFiltered(count);
-            paginationResult.setRecordsTotal(count);
-
-            return comments;
+            if (numOfComments > 0) {
+                paginationResult.setRecordsFiltered(numOfComments);
+                paginationResult.setRecordsTotal(numOfComments);
+            } else {
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+            }
+            return paginationResult;
         } catch (DBConnectionException e) {
             throw new CommentManagementException(
-                    "DB Connection error occurs ,Comments of application with UUID " + uuid + "cannot get.", e);
+                    "DB Connection error occurs , while getting comments of application release UUID: " + uuid, e);
         } catch (SQLException e) {
             throw new CommentManagementException(
-                    "SQL Exception occurs,Comments of application with UUID " + uuid + "cannot get.", e);
+                    "SQL Exception occurs, while getting comments of application release UUID: " + uuid, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -195,7 +199,7 @@ public class CommentsManagerImpl implements CommentsManager {
     public Comment updateComment(Comment comment, int commentId) throws CommentManagementException {
 
         PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        validateComment(commentId, comment.getComment());
+        validateComment(commentId, comment.getCommentText());
         if (log.isDebugEnabled()) {
             log.debug("Comment retrieval request is received for the comment id " + commentId);
         }
@@ -204,7 +208,7 @@ public class CommentsManagerImpl implements CommentsManager {
             ConnectionManagerUtil.openDBConnection();
             commentDAO.getComment(commentId);
             return commentDAO
-                    .updateComment(commentId, comment.getComment(), comment.getModifiedBy(), comment.getModifiedAt());
+                    .updateComment(commentId, comment.getCommentText(), comment.getModifiedBy(), comment.getModifiedAt());
         } catch (SQLException e) {
             throw new CommentManagementException("SQL Error occurs updating comment with comment id " + commentId + ".",
                     e);

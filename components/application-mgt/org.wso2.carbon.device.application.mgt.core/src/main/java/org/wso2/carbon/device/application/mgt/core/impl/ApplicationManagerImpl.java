@@ -99,15 +99,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationRelease applicationRelease;
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            //            todo think about web clip and try to remove application - type
-            deviceType = this.deviceTypeDAO.getDeviceType(application.getType(), tenantId);
+            deviceType = this.deviceTypeDAO.getDeviceType(application.getDeviceType(), tenantId);
 
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
                 ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
             }
-            application.setDevicetype(deviceType);
             int appId = this.applicationDAO.createApplication(application, deviceType.getId());
 
             if (appId == -1) {
@@ -175,6 +173,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             for (Application application : applicationList.getApplications()) {
+
                 applicationReleases = getReleases(application.getId());
                 application.setApplicationReleases(applicationReleases);
             }

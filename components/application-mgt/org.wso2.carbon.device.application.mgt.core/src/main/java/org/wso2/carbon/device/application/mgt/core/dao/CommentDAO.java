@@ -122,12 +122,10 @@ import java.util.List;
      * @param uuid    uuid of the application
      * @param request {@link PaginationRequest}pagination request with offSet and limit
      * @return {@link List}List of all the comments in an application
-     * @throws CommentManagementException Exception of the comment management
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      **/
-    List<Comment> getAllComments(String uuid, PaginationRequest request)
-            throws CommentManagementException, SQLException, DBConnectionException;
+    List<Comment> getAllComments(String uuid, PaginationRequest request) throws SQLException, DBConnectionException;
 
     /**
      * To get list of comments using release id and application id.

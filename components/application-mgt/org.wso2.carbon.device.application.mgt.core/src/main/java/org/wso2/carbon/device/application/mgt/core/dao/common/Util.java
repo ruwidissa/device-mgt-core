@@ -171,7 +171,7 @@ public class Util {
         appRelease.setCreatedAt(rs.getTimestamp("CREATED_AT"));
         appRelease.setPublishedBy(rs.getString("PUBLISHED_BY"));
         appRelease.setPublishedAt(rs.getTimestamp("PUBLISHED_AT"));
-        appRelease.setRating(rs.getInt("STARS"));
+        appRelease.setRating(rs.getDouble("RATING"));
         appRelease.setIsSharedWithAllTenants(rs.getInt("SHARED_WITH_ALL_TENANTS"));
         appRelease.setMetaData(rs.getString("APP_META_INFO"));
         appRelease.setScreenshotLoc1(rs.getString("SC_1_LOCATION"));
@@ -212,8 +212,8 @@ public class Util {
                 paginationRequest.setLimit(
                         commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
             } else {
-                throw new CommentManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                             "cdm-config.xml file.");
+                throw new CommentManagementException(
+                        "Application Management configuration has not initialized. Please check the application-mgt.xml file.");
             }
         }
         return paginationRequest;

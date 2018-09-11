@@ -59,7 +59,7 @@ public interface CommentsManager {
      * @return {@link PaginationResult} pagination result with starting offSet and limit
      * @throws CommentManagementException Exceptions of the comment management.
      */
-    List<Comment> getAllComments(PaginationRequest request, String uuid) throws CommentManagementException;
+    PaginationResult getAllComments(PaginationRequest request, String uuid) throws CommentManagementException;
 
     /**
      * To get the comment with id.

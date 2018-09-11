@@ -44,7 +44,7 @@ public class CommentMgtTestHelper {
         comment.setCreatedBy(CREATED_BY);
         comment.setModifiedBy(MODIFIED_BY);
         comment.setParent(PARENT_ID);
-        comment.setComment(commentText != null ? commentText : COMMENT_TEXT);
+        comment.setCommentText(commentText != null ? commentText : COMMENT_TEXT);
 
         return comment;
     }

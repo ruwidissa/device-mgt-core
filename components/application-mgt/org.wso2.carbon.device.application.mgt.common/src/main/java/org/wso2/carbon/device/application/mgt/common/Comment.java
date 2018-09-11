@@ -19,18 +19,17 @@
 package org.wso2.carbon.device.application.mgt.common;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 /**
- * Represents a comment for an {@link Application}.
+ * Represents a commentText for an {@link Application}.
  */
 public class Comment {
 
     private int id;
 
-    private String comment;
+    private String commentText;
 
-    //TODO: Pagination, comment ID for child
+    //TODO: Pagination, commentText ID for child
     private int parent;
 
     private int tenantId;
@@ -59,12 +58,12 @@ public class Comment {
         this.id = id;
     }
 
-    public String getComment() {
-        return comment;
+    public String getCommentText() {
+        return commentText;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setCommentText(String commentText) {
+        this.commentText = commentText;
     }
 
     public int getParent() {

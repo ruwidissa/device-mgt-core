@@ -65,9 +65,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         int applicationId = -1;
         try {
             conn = this.getDBConnection();
-            stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, "
-                                                 + "SUB_TYPE, PAYMENT_CURRENCY, RESTRICTED, TENANT_ID) VALUES "
-                                                 + "(?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, SUB_TYPE, PAYMENT_CURRENCY, "
+                    + "RESTRICTED, TENANT_ID, DM_DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
             stmt.setString(2, application.getType());
             stmt.setString(3, application.getAppCategory());
@@ -75,6 +75,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             stmt.setString(5, application.getPaymentCurrency());
             stmt.setInt(6, application.getIsRestricted());
             stmt.setInt(7, application.getUser().getTenantId());
+            stmt.setInt(8, deviceId);
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();

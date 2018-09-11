@@ -20,7 +20,6 @@ package org.wso2.carbon.device.application.mgt.common;
 
 
 import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import java.util.List;
 
@@ -32,27 +31,59 @@ public class Application {
     @Exclude
     private int id;
 
+    /**
+     * Name of the application
+     */
     private String name;
 
+    /**
+     * Category of the application.
+     * e.g: Educational, Gaming, Travel, Entertainment etc.
+     */
     private String appCategory;
 
+    /**
+     * Type of the application
+     * e.g. Mobile, Web, Web Clip etc
+     */
     private String type;
 
+    /**
+     * Subscription type of the application.
+     * e.g: PAID, FREE
+     */
     private String subType;
 
+    /**
+     * Payment currency of the application and the default value is '$'.
+     */
     private String paymentCurrency;
 
+    /**
+     * List of application tags
+     */
     private List<Tag> tags;
 
+    /**
+     * Application creating user
+     */
     private User user;
 
+    /**
+     * List of roles that users should have to access the application
+     */
     private List<UnrestrictedRole> unrestrictedRoles;
 
+    //todo reomve this and get the idea from unrestrictefRoles list size
     private int isRestricted;
 
-    private List<ApplicationRelease> applicationReleases;
+    /**
+     * Related device type of the application.
+     * e.g: IoS, Android, Arduino, RaspberryPi etc
+     */
+    private String deviceType;
 
-    private DeviceType devicetype;
+    private List<ApplicationRelease> applicationReleases;
 
     public int getId() {
         return id;
@@ -92,11 +123,6 @@ public class Application {
         this.user = user;
     }
 
-    public String uuidOfLatestRelease;
-
-    public ImageArtifact iconOfLatestRelease;
-
-
     public String getType() {
         return type;
     }
@@ -129,30 +155,6 @@ public class Application {
         this.isRestricted = isRestricted;
     }
 
-    public DeviceType getDevicetype() {
-        return devicetype;
-    }
-
-    public void setDevicetype(DeviceType devicetype) {
-        this.devicetype = devicetype;
-    }
-
-    public String getUuidOfLatestRelease() {
-        return uuidOfLatestRelease;
-    }
-
-    public void setUuidOfLatestRelease(String uuidOfLatestRelease) {
-        this.uuidOfLatestRelease = uuidOfLatestRelease;
-    }
-
-    public ImageArtifact getIconOfLatestRelease() {
-        return iconOfLatestRelease;
-    }
-
-    public void setIconOfLatestRelease(ImageArtifact iconOfLatestRelease) {
-        this.iconOfLatestRelease = iconOfLatestRelease;
-    }
-
     public List<ApplicationRelease> getApplicationReleases() {
         return applicationReleases;
     }
@@ -167,5 +169,13 @@ public class Application {
 
     public void setUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles) {
         this.unrestrictedRoles = unrestrictedRoles;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
     }
 }

@@ -126,10 +126,11 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             } else if (binaryFile == null && ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
                 applicationRelease = applicationStorageManager
-                        .uploadReleaseArtifact(applicationRelease, application.getType(), null);
+                        .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
+                                null);
             } else if (binaryFile != null && !ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
                 applicationRelease = applicationStorageManager
-                        .uploadReleaseArtifact(applicationRelease, application.getType(),
+                        .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
                                 binaryFile.getDataHandler().getInputStream());
             }
 
@@ -243,8 +244,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @Override
     @PUT
-    @Path("/app-artifacts/{appType}/{appId}/{uuid}")
+    @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
     public Response updateApplicationArtifact(
+            @PathParam("deviceType") String deviceType,
             @PathParam("appType") String appType,
             @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUuid,
@@ -260,8 +262,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                         Response.Status.BAD_REQUEST);
             }
             applicationRelease = applicationManager.validateApplicationRelease(applicationId, applicationUuid);
-            applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease, appType,
-                    binaryFile.getDataHandler().getInputStream());
+            applicationRelease = applicationStorageManager
+                    .updateReleaseArtifacts(applicationRelease, appType, deviceType,
+                            binaryFile.getDataHandler().getInputStream());
             applicationManager.updateRelease(applicationId, applicationRelease);
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application release. UUID is " + applicationUuid).build();
@@ -331,10 +334,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
             if (binaryFile != null) {
-                applicationRelease = applicationStorageManager.updateReleaseArtifacts(applicationRelease,
-                                                                                      application.getType(),
-                                                                                      binaryFile.getDataHandler()
-                                                                                              .getInputStream());
+                applicationRelease = applicationStorageManager
+                        .updateReleaseArtifacts(applicationRelease, application.getType(), application.getDeviceType(),
+                                binaryFile.getDataHandler().getInputStream());
             }
             if (iconFile != null) {
                 iconFileStream = iconFile.getDataHandler().getInputStream();

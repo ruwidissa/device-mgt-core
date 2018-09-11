@@ -61,22 +61,24 @@ public interface ApplicationStorageManager {
      *
      * @param applicationRelease Application Release Object.
      * @param appType Application Type.
+     * @param deviceType Compatible device tipe of the application.
      * @param binaryFile      Binary File for the release.
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
-            throws ResourceManagementException, RequestValidatingException;
+    ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, String deviceType,
+            InputStream binaryFile) throws ResourceManagementException, RequestValidatingException;
 
     /**
      * To upload release artifacts for an Application.
      *
      * @param applicationRelease applicationRelease Application release of a particular application.
-     * @param appType   Type of the application
+     * @param appType   Type of the application.
+     * @param deviceType Compatible device tipe of the application.
      * @param binaryFile      Binary File for the release.
      * @throws ApplicationStorageManagementException Resource Management Exception.
      */
-    ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType, InputStream binaryFile)
-            throws ApplicationStorageManagementException, RequestValidatingException;
+    ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType, String deviceType,
+            InputStream binaryFile) throws ApplicationStorageManagementException, RequestValidatingException;
 
     /**
      * To delete the artifacts related with particular Application Release.

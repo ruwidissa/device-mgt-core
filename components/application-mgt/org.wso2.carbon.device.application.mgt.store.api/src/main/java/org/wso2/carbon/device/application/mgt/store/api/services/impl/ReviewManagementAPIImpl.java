@@ -21,6 +21,7 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.ReviewManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.Comment;
@@ -58,22 +59,16 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @QueryParam("limit") int limit) {
 
         CommentsManager commentsManager = APIUtil.getCommentsManager();
-        List<Comment> comments = new ArrayList<>();
+        PaginationRequest request = new PaginationRequest(offSet, limit);
         try {
-            PaginationRequest request = new PaginationRequest(offSet, limit);
-            if (uuid == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Comments not found").build();
-            } else if (request.validatePaginationRequest(offSet, limit)) {
-                commentsManager.getAllComments(request, uuid);
-                return Response.status(Response.Status.OK).entity(comments).build();
-            }
+            PaginationResult paginationResult = commentsManager.getAllComments(request, uuid);
+            return Response.status(Response.Status.OK).entity(paginationResult).build();
         } catch (CommentManagementException e) {
             String msg = "Error occurred while retrieving comments.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg)
                 .build();
         }
-        return Response.status(Response.Status.OK).entity(comments).build();
     }
 
     @Override

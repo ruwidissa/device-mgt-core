@@ -385,7 +385,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
-    @Path("/app-artifacts/{appType}/{appId}/{uuid}")
+    @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -416,7 +416,9 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationArtifact(
-            @ApiParam(name = "appType", value = "Type of the application i.e Android, IOS etc", required = true)
+            @ApiParam(name = "deviceType", value = "Type of the device i.e Android, IOS etc", required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(name = "appType", value = "Type of the application i.e Mobile, WEB, WEB-CLIP etc", required = true)
             @PathParam("appType") String appType,
             @ApiParam(name = "appId", value = "Id of the application", required = true)
             @PathParam("appId") int applicationId,
