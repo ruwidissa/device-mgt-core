@@ -168,9 +168,6 @@ public class Util {
         appRelease.setAppStoredLoc(rs.getString("STORED_LOCATION"));
         appRelease.setBannerLoc(rs.getString("BANNER_LOCATION"));
         appRelease.setApplicationCreator(rs.getString("CREATED_BY"));
-        appRelease.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-        appRelease.setPublishedBy(rs.getString("PUBLISHED_BY"));
-        appRelease.setPublishedAt(rs.getTimestamp("PUBLISHED_AT"));
         appRelease.setRating(rs.getDouble("RATING"));
         appRelease.setIsSharedWithAllTenants(rs.getInt("SHARED_WITH_ALL_TENANTS"));
         appRelease.setMetaData(rs.getString("APP_META_INFO"));

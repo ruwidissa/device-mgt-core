@@ -70,7 +70,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             for (Application application : applications.getApplications()) {
 
                 for (ApplicationRelease appRelease: application.getApplicationReleases()){
-                    if (AppLifecycleState.PUBLISHED.toString().equals(appRelease.getCurrentState())){
+                    if (AppLifecycleState.PUBLISHED.toString()
+                            .equals(appRelease.getLifecycleState().getCurrentState())) {
                         publishedApplicationRelease.add(appRelease);
                     }
                 }
@@ -110,7 +111,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
 
             for (ApplicationRelease appRelease : application.getApplicationReleases()) {
-                if (AppLifecycleState.PUBLISHED.toString().equals(appRelease.getCurrentState())){
+                if (AppLifecycleState.PUBLISHED.toString().equals(appRelease.getLifecycleState().getCurrentState())){
                     publishedApplicationRelease.add(appRelease);
                 }
             }

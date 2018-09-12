@@ -247,9 +247,6 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
                 applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
                 applicationRelease.setApplicationCreator(resultSet.getString("CREATED_BY"));
-                applicationRelease.setCreatedAt(resultSet.getTimestamp("CREATED_AT"));
-                applicationRelease.setPublishedBy(resultSet.getString("PUBLISHED_BY"));
-                applicationRelease.setPublishedAt(resultSet.getTimestamp("PUBLISHED_AT"));
                 applicationRelease.setRating(resultSet.getDouble("RATING"));
                 applicationReleases.add(applicationRelease);
 
@@ -392,14 +389,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
         applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
         applicationRelease.setApplicationCreator(resultSet.getString("CREATED_BY"));
-        applicationRelease.setCreatedAt(resultSet.getTimestamp("CREATED_AT"));
-        applicationRelease.setPublishedBy(resultSet.getString("PUBLISHED_BY"));
-        applicationRelease.setPublishedAt(resultSet.getTimestamp("PUBLISHED_AT"));
         applicationRelease.setRating(resultSet.getDouble("RATING"));
-        applicationRelease.setCurrentState(resultSet.getString("CURRENT_STATE"));
-        applicationRelease.setPreviousState(resultSet.getString("PREVIOUS_STATE"));
-        applicationRelease.setStateModifiedBy(resultSet.getString("UPDATED_BY"));
-        applicationRelease.setStateModifiedAt(resultSet.getTimestamp("UPDATED_AT"));
 
         return applicationRelease;
     }

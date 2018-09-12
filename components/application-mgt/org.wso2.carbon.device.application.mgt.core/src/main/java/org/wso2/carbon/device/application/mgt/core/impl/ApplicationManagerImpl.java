@@ -97,6 +97,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         validateReleaseCreatingRequest(application.getApplicationReleases().get(0));
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
+        List<ApplicationRelease> applicationReleases = new ArrayList<>();
         try {
             ConnectionManagerUtil.beginDBTransaction();
             deviceType = this.deviceTypeDAO.getDeviceType(application.getDeviceType(), tenantId);
@@ -121,9 +122,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 } else {
                     application.setIsRestricted(0);
                 }
+                if (application.getApplicationReleases().size() > 1 ){
+                    throw new ApplicationManagementException(
+                            "Invalid payload. Application creating payload should contains one application release, but "
+                                    + "the payload contains more than one");
+                }
                 ConnectionManagerUtil.commitDBTransaction();
                 applicationRelease = application.getApplicationReleases().get(0);
-                applicationRelease.setCreatedAt((Timestamp) new Date());
                 applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
                         createRelease(applicationRelease, application.getId(), tenantId);
                 LifecycleState lifecycleState = new LifecycleState();
@@ -134,6 +139,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
                 addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+                applicationRelease.setLifecycleState(lifecycleState);
+                applicationReleases.add(applicationRelease);
+                application.setApplicationReleases(applicationReleases);
             }
 
             return application;
@@ -200,9 +208,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (log.isDebugEnabled()) {
             log.debug("Application release request is received for the application " + application.toString());
         }
-        applicationRelease.setCreatedAt((Timestamp) new Date());
         try {
             ConnectionManagerUtil.beginDBTransaction();
+//            todo consider about lifecycle adding
             applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
                     createRelease(applicationRelease, application.getId(), tenantId);
             ConnectionManagerUtil.commitDBTransaction();
@@ -353,10 +361,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             for (ApplicationRelease applicationRelease : applicationReleases) {
                 LifecycleState lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
                         getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
-                applicationRelease.setCurrentState(lifecycleState.getCurrentState());
-                applicationRelease.setPreviousState(lifecycleState.getPreviousState());
+                applicationRelease.setLifecycleState(lifecycleState);
 
-                if (!AppLifecycleState.REMOVED.toString().equals(applicationRelease.getCurrentState())) {
+                if (!AppLifecycleState.REMOVED.toString()
+                        .equals(applicationRelease.getLifecycleState().getCurrentState())) {
                     filteredApplicationReleases.add(applicationRelease);
                 }
             }
@@ -613,7 +621,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         try {
             ConnectionManagerUtil.openDBConnection();
-            applicationRelease.setModifiedBy(userName);
+//            todo consider about lifecycle
             applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO()
                     .updateRelease(appId, applicationRelease, tenantId);
 

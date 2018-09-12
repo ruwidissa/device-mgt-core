@@ -30,57 +30,96 @@ public class ApplicationRelease {
     @Exclude
     private int id;
 
+    /**
+     * Version of the application release
+     */
     private String version;
 
+    /**
+     * UUID of the application release
+     */
     private String uuid;
 
+    /**
+     * Application storing location
+     */
     private String appStoredLoc;
 
+    /**
+     * Banner file storing location
+     */
     private String bannerLoc;
 
+    /**
+     * Screenshot storing location
+     */
     private String screenshotLoc1;
 
+    /**
+     * Screenshot storing location
+     */
     private String screenshotLoc2;
 
+    /**
+     * Screenshot storing location
+     */
     private String screenshotLoc3;
 
+    /**
+     * Application release creator
+     */
     private String applicationCreator;
 
+    /**
+     * Release type of the application release
+     * e.g: alpha, beta etc
+     */
     private String releaseType;
 
+    /**
+     * Price of the application release
+     */
     private Double price;
 
-    private Timestamp createdAt;
-
-    private String publishedBy;
-
-    private Timestamp publishedAt;
-
-    private String modifiedBy;
-
-    private Timestamp modifiedAt;
-
+    /**
+     * icon file storing location
+     */
     private String iconLoc;
 
-    private String currentState;
-
-    private String previousState;
-
-    private String stateModifiedBy;
-
-    private Timestamp stateModifiedAt;
-
+    /**
+     * Hash value of the application release
+     */
     private String appHashValue;
 
+    /**
+     * If application release is shared with all tenants it is eqal to 1 otherwise 0
+     */
     private int isSharedWithAllTenants;
 
+    /**
+     * MEta data of the application release
+     */
     private String metaData;
 
+    /**
+     * Number of users who has rated the application release
+     */
     private int ratedUsers;
 
+    /**
+     * Rating value of the application release
+     */
     private Double rating;
 
+    /**
+     * URL which is used for WEB-CLIP
+     */
     private String url;
+
+    /**
+     * Latest Lifecycle state of the application release
+     */
+    private LifecycleState lifecycleState;
 
     public int getRatedUsers() {
         return ratedUsers;
@@ -150,37 +189,6 @@ public class ApplicationRelease {
         this.price = price;
     }
 
-    public String getCurrentState() {
-        return currentState;
-    }
-
-    public void setCurrentState(String currentState) {
-        this.currentState = currentState;
-    }
-
-    public String getPreviousState() {
-        return previousState;
-    }
-
-    public void setPreviousState(String previousState) {
-        this.previousState = previousState;
-    }
-
-    public String getStateModifiedBy() {
-        return stateModifiedBy;
-    }
-
-    public void setStateModifiedBy(String stateModifiedBy) {
-        this.stateModifiedBy = stateModifiedBy;
-    }
-
-    public Timestamp getStateModifiedAt() {
-        return stateModifiedAt;
-    }
-
-    public void setStateModifiedAt(Timestamp stateModifiedAt) {
-        this.stateModifiedAt = stateModifiedAt;
-    }
 
     public String getAppHashValue() {
         return appHashValue;
@@ -242,46 +250,6 @@ public class ApplicationRelease {
         this.applicationCreator = applicationCreator;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getPublishedBy() {
-        return publishedBy;
-    }
-
-    public void setPublishedBy(String publishedBy) {
-        this.publishedBy = publishedBy;
-    }
-
-    public Timestamp getPublishedAt() {
-        return publishedAt;
-    }
-
-    public void setPublishedAt(Timestamp publishedAt) {
-        this.publishedAt = publishedAt;
-    }
-
-    public String getModifiedBy() {
-        return modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public Timestamp getModifiedAt() {
-        return modifiedAt;
-    }
-
-    public void setModifiedAt(Timestamp modifiedAt) {
-        this.modifiedAt = modifiedAt;
-    }
-
     public String getIconLoc() {
         return iconLoc;
     }
@@ -298,4 +266,11 @@ public class ApplicationRelease {
         this.url = url;
     }
 
+    public LifecycleState getLifecycleState() {
+        return lifecycleState;
+    }
+
+    public void setLifecycleState(LifecycleState lifecycleState) {
+        this.lifecycleState = lifecycleState;
+    }
 }
