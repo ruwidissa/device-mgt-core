@@ -70,7 +70,7 @@ public class Util {
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
-                application.setIsRestricted(rs.getInt("RESTRICTED"));
+                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
 
                 List<Tag> tags = new ArrayList<>();
                 Tag tag = new Tag();
@@ -130,7 +130,7 @@ public class Util {
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
-                application.setIsRestricted(rs.getInt("RESTRICTED"));
+                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
             }
 
             Tag tag = new Tag();

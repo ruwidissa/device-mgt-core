@@ -74,8 +74,10 @@ public class Application {
      */
     private List<UnrestrictedRole> unrestrictedRoles;
 
-    //todo reomve this and get the idea from unrestrictefRoles list size
-    private int isRestricted;
+    /**
+     * If unrestricted roles are defined then isRestricted value is true otherwise it is false.
+     */
+    private boolean isRestricted;
 
     /**
      * Related device type of the application.
@@ -147,11 +149,11 @@ public class Application {
         this.paymentCurrency = paymentCurrency;
     }
 
-    public int getIsRestricted() {
+    public boolean getIsRestricted() {
         return isRestricted;
     }
 
-    public void setIsRestricted(int isRestricted) {
+    public void setIsRestricted(boolean isRestricted) {
         this.isRestricted = isRestricted;
     }
 

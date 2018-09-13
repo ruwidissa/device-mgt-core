@@ -141,7 +141,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 attachments.add(screenshot.getDataHandler().getInputStream());
             }
 
-
             if (applicationRelease.getAppStoredLoc() == null || applicationRelease.getAppHashValue() == null) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }

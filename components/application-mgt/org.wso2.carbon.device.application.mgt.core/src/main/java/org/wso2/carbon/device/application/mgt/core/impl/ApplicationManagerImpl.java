@@ -60,8 +60,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.sql.Timestamp;
-import java.util.Date;
 
 /**
  * Default Concrete implementation of Application Management related implementations.
@@ -117,10 +115,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (!application.getTags().isEmpty()) {
                     this.applicationDAO.addTags(application.getTags(), appId, tenantId);
                 }
-                if (application.getIsRestricted() == 1 && !application.getUnrestrictedRoles().isEmpty()) {
+                if (!application.getUnrestrictedRoles().isEmpty()) {
+                    application.setIsRestricted(true);
                     this.visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), appId, tenantId);
                 } else {
-                    application.setIsRestricted(0);
+                    application.setIsRestricted(false);
                 }
                 if (application.getApplicationReleases().size() > 1 ){
                     throw new ApplicationManagementException(
@@ -858,14 +857,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
         }
         if (existingApplication.getIsRestricted() != application.getIsRestricted()) {
-            if (existingApplication.getIsRestricted() == 0 && existingApplication.getUnrestrictedRoles() == null) {
+            if (!existingApplication.getIsRestricted() && existingApplication.getUnrestrictedRoles() == null) {
                 if (application.getUnrestrictedRoles() == null || application.getUnrestrictedRoles().isEmpty()) {
                     throw new ApplicationManagementException("If you are going to add role restriction for non role "
                             + "restricted Application, Unrestricted role list " + "won't be empty or null");
                 }
                 visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), application.getId(), tenantId);
-            } else if (existingApplication.getIsRestricted() == 1
-                    && existingApplication.getUnrestrictedRoles() != null) {
+            } else if (existingApplication.getIsRestricted() && existingApplication.getUnrestrictedRoles() != null) {
                 if (application.getUnrestrictedRoles() != null && !application.getUnrestrictedRoles().isEmpty()) {
                     throw new ApplicationManagementException("If you are going to remove role restriction from role "
                             + "restricted Application, Unrestricted role list should be empty or null");
@@ -874,7 +872,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         tenantId);
             }
         } else if (existingApplication.getIsRestricted() == application.getIsRestricted()
-                && existingApplication.getIsRestricted() == 1) {
+                && existingApplication.getIsRestricted()) {
             addingRoleList = getDifference(application.getUnrestrictedRoles(),
                     existingApplication.getUnrestrictedRoles());
             removingRoleList = getDifference(existingApplication.getUnrestrictedRoles(),

@@ -65,17 +65,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         int applicationId = -1;
         try {
             conn = this.getDBConnection();
-            stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, SUB_TYPE, PAYMENT_CURRENCY, "
-                    + "RESTRICTED, TENANT_ID, DM_DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, SUB_TYPE, RESTRICTED, "
+                            + "TENANT_ID, DM_DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
             stmt.setString(2, application.getType());
             stmt.setString(3, application.getAppCategory());
             stmt.setString(4, application.getSubType());
-            stmt.setString(5, application.getPaymentCurrency());
-            stmt.setInt(6, application.getIsRestricted());
-            stmt.setInt(7, application.getUser().getTenantId());
-            stmt.setInt(8, deviceId);
+            stmt.setBoolean(5, application.getIsRestricted());
+            stmt.setInt(6, application.getUser().getTenantId());
+            stmt.setInt(7, deviceId);
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
@@ -136,8 +135,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ApplicationList applicationList = new ApplicationList();
         Pagination pagination = new Pagination();
         String sql = "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY"
-                +
-                " AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
+                + " AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
                 + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
                 + "AS ROLE FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
                 + "LEFT JOIN AP_UNRESTRICTED_ROLES ON AP_APP.ID = AP_UNRESTRICTED_ROLES.AP_APP_ID) "
@@ -461,7 +459,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 stmt.setString(paramIndex++, application.getAppCategory());
             }
             if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-                stmt.setInt(paramIndex++, application.getIsRestricted());
+                stmt.setBoolean(paramIndex++, application.getIsRestricted());
             }
             if (!application.getSubType().equals(existingApplication.getSubType())) {
                 stmt.setString(paramIndex++, application.getSubType());
@@ -603,7 +601,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
-                application.setIsRestricted(rs.getInt("RESTRICTED"));
+                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
 
                 UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
                 unrestrictedRole.setRole(rs.getString("ROLE"));
