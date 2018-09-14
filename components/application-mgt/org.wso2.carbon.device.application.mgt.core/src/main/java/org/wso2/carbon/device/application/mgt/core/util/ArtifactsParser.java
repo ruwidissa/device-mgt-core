@@ -28,7 +28,6 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
 
 import java.io.ByteArrayOutputStream;
@@ -38,6 +37,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -55,19 +55,22 @@ public class ArtifactsParser {
         File tempFile = null;
         ApkMeta apkMeta;
         try {
-
             tempFile = File.createTempFile("temp" + UUID.randomUUID(), ".apk");
             try (FileOutputStream out = new FileOutputStream(tempFile)) {
                 IOUtils.copy(inputStream, out);
+                try (ApkFile apkFile = new ApkFile(tempFile)) {
+                    apkMeta = apkFile.getApkMeta();
+                }
             }
-
-            ApkFile apkFile = new ApkFile(tempFile);
-            apkMeta = apkFile.getApkMeta();
         } catch (IOException e) {
             throw new ParsingException("Error while parsing the apk.", e);
         } finally {
             if (tempFile != null) {
-                tempFile.delete();
+                try {
+                    Files.delete(tempFile.toPath());
+                } catch (IOException e) {
+                    log.error("Error occured while deleting the temp file", e);
+                }
             }
         }
         return apkMeta;
@@ -75,42 +78,37 @@ public class ArtifactsParser {
 
     public static NSDictionary readiOSManifestFile(InputStream inputStream) throws ParsingException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        File tempFile = null;
         NSDictionary rootDict;
-        ZipInputStream stream = null;
-        FileOutputStream out = null;
-
+        File tempFile = null;
         try {
             tempFile = File.createTempFile("temp" + UUID.randomUUID(), ".ipa");
-            out = new FileOutputStream(tempFile);
-            IOUtils.copy(inputStream, out);
-            stream = new ZipInputStream(new FileInputStream(tempFile));
+            try (FileOutputStream out = new FileOutputStream(tempFile)) {
+                IOUtils.copy(inputStream, out);
+                try (ZipInputStream stream = new ZipInputStream(new FileInputStream(tempFile))) {
+                    ZipEntry entry;
+                    while ((entry = stream.getNextEntry()) != null) {
+                        if (entry.getName().matches("^(Payload/)(.)+(.app/Info.plist)$")) {
+                            InputStream is = stream;
+                            int nRead;
+                            byte[] data = new byte[16384];
 
-            ZipEntry entry;
-            while ((entry = stream.getNextEntry()) != null) {
-                if (entry.getName().matches("^(Payload/)(.)+(.app/Info.plist)$")) {
-                    InputStream is = stream;
-
-                    int nRead;
-                    byte[] data = new byte[16384];
-
-                    while ((nRead = is.read(data, 0, data.length)) != -1) {
-                        buffer.write(data, 0, nRead);
+                            while ((nRead = is.read(data, 0, data.length)) != -1) {
+                                buffer.write(data, 0, nRead);
+                            }
+                            buffer.flush();
+                            break;
+                        }
                     }
-
-                    buffer.flush();
-                    break;
-                }
-            }
-
-            try {
-                rootDict = (NSDictionary) BinaryPropertyListParser.parse(buffer.toByteArray());
-            } catch (IllegalArgumentException e) {
-                log.debug("Uploaded file didn't have a Binary Plist");
-                try {
-                    rootDict = (NSDictionary) PropertyListParser.parse(buffer.toByteArray());
-                } catch (Exception e1) {
-                    throw new ParsingException("Error while parsing the non binary plist.", e1);
+                    try {
+                        rootDict = (NSDictionary) BinaryPropertyListParser.parse(buffer.toByteArray());
+                    } catch (IllegalArgumentException e) {
+                        log.debug("Uploaded file didn't have a Binary Plist");
+                        try {
+                            rootDict = (NSDictionary) PropertyListParser.parse(buffer.toByteArray());
+                        } catch (Exception e1) {
+                            throw new ParsingException("Error while parsing the non binary plist.", e1);
+                        }
+                    }
                 }
             }
         } catch (PropertyListFormatException e1) {
@@ -121,21 +119,13 @@ public class ArtifactsParser {
             throw new ParsingException("Error while parsing the file.", e);
         } finally {
             if (tempFile != null) {
-                tempFile.delete();
-            }
-            try {
-                if (out != null) {
-                    out.close();
+                try {
+                    Files.delete(tempFile.toPath());
+                } catch (IOException e) {
+                    log.error("Error occured while deleting the temp file", e);
                 }
-                if (stream != null) {
-
-                    stream.close();
-
-                }
-            } catch (IOException e) {
             }
         }
-
         return rootDict;
     }
 }
