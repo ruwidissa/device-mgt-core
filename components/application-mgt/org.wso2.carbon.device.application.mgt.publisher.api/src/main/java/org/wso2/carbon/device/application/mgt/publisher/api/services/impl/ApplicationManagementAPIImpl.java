@@ -54,7 +54,7 @@ import javax.ws.rs.core.Response;
  * Implementation of Application Management related APIs.
  */
 @Produces({"application/json"})
-@Path("/publisher/applications")
+@Path("/applications")
 public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
