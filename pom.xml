@@ -1725,6 +1725,16 @@
                 <scope>test</scope>
                 <version>${slf4j.nop.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.googlecode.plist</groupId>
+                <artifactId>dd-plist</artifactId>
+                <version>${googlecode.plist.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.dongliu</groupId>
+                <artifactId>apk-parser</artifactId>
+                <version>${net.dongliu.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2164,6 +2174,10 @@
         <power.mock.version>1.7.0</power.mock.version>
         <commons.dbcp.version>1.4.0.wso2v1</commons.dbcp.version>
         <slf4j.nop.version>1.7.25</slf4j.nop.version>
+
+        <!-- app management related versions -->
+        <googlecode.plist.version>1.8</googlecode.plist.version>
+        <net.dongliu.version>2.4.2</net.dongliu.version>
 
     </properties>
 
