@@ -33,7 +33,7 @@ public interface LifecycleStateDAO {
 
     List<LifecycleState> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException;
 
-    void addLifecycleState(LifecycleState state) throws LifeCycleManagementDAOException;
+    void addLifecycleState(LifecycleState state, int appId, int releaseId, int tenantId) throws LifeCycleManagementDAOException;
 
     void deleteLifecycleState(int identifier) throws LifeCycleManagementDAOException;
 

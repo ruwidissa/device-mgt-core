@@ -109,7 +109,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Consumes("application/json")
     public Response createApplication(
             @Valid Application application,
-            @Valid ApplicationRelease applicationRelease,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
@@ -120,18 +119,24 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         InputStream bannerFileStream;
         List<InputStream> attachments = new ArrayList<>();
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
+        ApplicationRelease applicationRelease;
         try {
-
             if (!isValidAppCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application)) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
-            } else if (binaryFile == null && ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
+            }
+            if (ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
+                applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = applicationStorageManager
                         .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
                                 null);
-            } else if (binaryFile != null && !ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
+            } else {
+                applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = applicationStorageManager
                         .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
                                 binaryFile.getDataHandler().getInputStream());
+                if (applicationRelease.getAppStoredLoc() == null || applicationRelease.getAppHashValue() == null) {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                }
             }
 
             iconFileStream = iconFile.getDataHandler().getInputStream();
@@ -140,13 +145,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             for (Attachment screenshot : attachmentList) {
                 attachments.add(screenshot.getDataHandler().getInputStream());
             }
-
-            if (applicationRelease.getAppStoredLoc() == null || applicationRelease.getAppHashValue() == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            }
             applicationRelease = applicationStorageManager.uploadImageArtifacts(applicationRelease, iconFileStream,
                     bannerFileStream, attachments);
-
             applicationRelease.setUuid(UUID.randomUUID().toString());
             applicationReleases.add(applicationRelease);
             application.setApplicationReleases(applicationReleases);
@@ -451,6 +451,14 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     private boolean isValidAppCreatingRequest(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
             List<Attachment> attachmentList, Application application){
+
+        if (application.getApplicationReleases().size() > 1) {
+            log.error(
+                    "Invalid application creating request. Application creating request must have single application "
+                            + "release.  Application name:" + application.getName() + " and type: " +
+                            application.getType());
+            return false;
+        }
 
         if (iconFile == null) {
             log.error("Icon file is not found for the application release. Application name: " +

@@ -18,107 +18,91 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
-import java.sql.Timestamp;
-
-/**
- * This class holds the details when releasing an Application to application store.
- */
+@ApiModel(value = "ApplicationRelease", description = "This class holds the details when releasing an Application to application store")
 public class ApplicationRelease {
 
-    @Exclude
+    @ApiModelProperty(name = "id",
+            value = "ID of the application release")
     private int id;
 
-    /**
-     * Version of the application release
-     */
+    @ApiModelProperty(name = "version",
+            value = "Version of the application release")
     private String version;
 
-    /**
-     * UUID of the application release
-     */
+    @ApiModelProperty(name = "uuid",
+            value = "UUID of the application release")
     private String uuid;
 
-    /**
-     * Application storing location
-     */
+    @ApiModelProperty(name = "appStoredLoc",
+            value = "Application storing location")
     private String appStoredLoc;
 
-    /**
-     * Banner file storing location
-     */
+    @ApiModelProperty(name = "bannerLoc",
+            value = "Banner file storing location")
     private String bannerLoc;
 
-    /**
-     * Screenshot storing location
-     */
+    @ApiModelProperty(name = "screenshotLoc1",
+            value = "Screenshot storing location")
     private String screenshotLoc1;
 
-    /**
-     * Screenshot storing location
-     */
+    @ApiModelProperty(name = "screenshotLoc2",
+            value = "Screenshot storing location")
     private String screenshotLoc2;
 
-    /**
-     * Screenshot storing location
-     */
+    @ApiModelProperty(name = "screenshotLoc3",
+            value = "Screenshot storing location")
     private String screenshotLoc3;
 
-    /**
-     * Application release creator
-     */
-    private String applicationCreator;
-
-    /**
-     * Release type of the application release
-     * e.g: alpha, beta etc
-     */
-    private String releaseType;
-
-    /**
-     * Price of the application release
-     */
-    private Double price;
-
-    /**
-     * icon file storing location
-     */
+    @ApiModelProperty(name = "iconLoc",
+            value = "icon file storing location")
     private String iconLoc;
 
-    /**
-     * Hash value of the application release
-     */
+    @ApiModelProperty(name = "applicationCreator",
+            value = "Application release creator")
+    private String applicationCreator;
+
+    @ApiModelProperty(name = "releaseType",
+            value = "Release type of the application release",
+            required = true,
+            example = "alpha, beta etc")
+    private String releaseType;
+
+    @ApiModelProperty(name = "price",
+            value = "Price of the application release",
+            required = true)
+    private Double price;
+
+    @ApiModelProperty(name = "appHashValue",
+            value = "Hash value of the application release")
     private String appHashValue;
 
-    /**
-     * If application release is shared with all tenants it is eqal to 1 otherwise 0
-     */
+    @ApiModelProperty(name = "isSharedWithAllTenants",
+            value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
+            required = true)
     private int isSharedWithAllTenants;
 
-    /**
-     * MEta data of the application release
-     */
+    @ApiModelProperty(name = "metaData",
+            value = "Meta data of the application release",
+            required = true)
     private String metaData;
 
-    /**
-     * Number of users who has rated the application release
-     */
+    @ApiModelProperty(name = "ratedUsers",
+            value = "Number of users who has rated the application release")
     private int ratedUsers;
 
-    /**
-     * Rating value of the application release
-     */
+    @ApiModelProperty(name = "rating",
+            value = "Rating value of the application release")
     private Double rating;
 
-    /**
-     * URL which is used for WEB-CLIP
-     */
+    @ApiModelProperty(name = "url",
+            value = "URL which is used for WEB-CLIP")
     private String url;
 
-    /**
-     * Latest Lifecycle state of the application release
-     */
+    @ApiModelProperty(name = "lifecycleState",
+            value = "Latest Lifecycle state of the application release")
     private LifecycleState lifecycleState;
 
     public int getRatedUsers() {

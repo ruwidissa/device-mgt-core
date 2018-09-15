@@ -2196,7 +2196,10 @@
         <googlecode.plist.version>1.8</googlecode.plist.version>
         <net.dongliu.version>2.4.2</net.dongliu.version>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 625589decc78a4f3da8091a227c0fac6e2617c9e
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>
         <javax.websocket.version>1.0</javax.websocket.version>
