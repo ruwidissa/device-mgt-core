@@ -36,6 +36,8 @@ import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorag
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
+import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
+import org.wso2.carbon.device.application.mgt.core.util.ArtifactsParser;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
@@ -207,27 +209,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             }
 
             if (ApplicationType.ANDROID.toString().equals(deviceType)) {
-                String prefix = "stream2file";
-                String suffix = ".apk";
-                File tempFile = File.createTempFile(prefix, suffix);
-                FileOutputStream out = new FileOutputStream(tempFile);
-                IOUtils.copy(binaryFile, out);
-                try (ApkFile apkFile = new ApkFile(tempFile)){
-                    ApkMeta apkMeta = apkFile.getApkMeta();
-                    applicationRelease.setVersion(apkMeta.getVersionName());
-                    Files.delete(tempFile.toPath());
-                }
-
+                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(binaryFile);
+                applicationRelease.setVersion(apkMeta.getVersionName());
             } else if (ApplicationType.IOS.toString().equals(deviceType)) {
-                String prefix = "stream2file";
-                String suffix = ".ipa";
-
-                File tempFile = File.createTempFile(prefix, suffix);
-                FileOutputStream out = new FileOutputStream(tempFile);
-                IOUtils.copy(binaryFile, out);
-                Map<String, String> plistInfo = getIPAInfo(tempFile);
-                applicationRelease.setVersion(plistInfo.get("CFBundleVersion"));
-                Files.delete(tempFile.toPath());
+                NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
+                applicationRelease.setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
             } else {
                 throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
                         "application types " + applicationRelease.getUuid());
@@ -249,6 +235,10 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             throw new ApplicationStorageManagementException(
                     "IO Exception while saving the release artifacts in the server for the application UUID "
                             + applicationRelease.getUuid(), e);
+        } catch (ParsingException e) {
+            throw new ApplicationStorageManagementException(
+                    "Error occured while parsing the artifact file. Application release UUID is " + applicationRelease
+                            .getUuid(), e);
         }
 
         return applicationRelease;

@@ -126,21 +126,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             "Invalid payload. Application creating payload should contains one application release, but "
                                     + "the payload contains more than one");
                 }
-                ConnectionManagerUtil.commitDBTransaction();
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
                         createRelease(applicationRelease, application.getId(), tenantId);
+
                 LifecycleState lifecycleState = new LifecycleState();
-                lifecycleState.setAppId(application.getId());
-                lifecycleState.setReleaseId(applicationRelease.getId());
                 lifecycleState.setUpdatedBy(userName);
-                lifecycleState.setTenantId(tenantId);
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
                 addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+                LifecycleStateDAO lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
+                lifecycleStateDAO.addLifecycleState(lifecycleState, application.getId(), applicationRelease.getId(), tenantId);
+
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
                 application.setApplicationReleases(applicationReleases);
+
+                ConnectionManagerUtil.commitDBTransaction();
             }
 
             return application;
@@ -155,7 +157,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
-        } finally {
+        } catch (LifeCycleManagementDAOException e) {
+            String msg = "Error occurred while adding application lifecycle state";
+            log.error(msg, e);
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(msg, e);
+        }finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
@@ -399,7 +406,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = new LifecycleState();
                 newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
                 newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-                newAppLifecycleState.setTenantId(tenantId);
                 newAppLifecycleState.setUpdatedBy(userName);
                 addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
                 storedLocations.add(applicationRelease.getAppHashValue());
@@ -437,7 +443,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             LifecycleState newAppLifecycleState = new LifecycleState();
             newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
             newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-            newAppLifecycleState.setTenantId(tenantId);
             newAppLifecycleState.setUpdatedBy(userName);
             addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
         }else{
@@ -710,17 +715,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             Application application = validateApplication(applicationId);
             ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, applicationUuid);
             LifecycleStateDAO lifecycleStateDAO;
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
-            if (application != null) {
-                state.setAppId(applicationId);
-            }
-            if (applicationRelease != null) {
-                state.setReleaseId(applicationRelease.getId());
-            }
             if (state.getCurrentState() != null && state.getPreviousState() != null && state.getUpdatedBy() != null) {
                 validateLifecycleState(state);
                 lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
-                lifecycleStateDAO.addLifecycleState(state);
+                lifecycleStateDAO.addLifecycleState(state, application.getId(), applicationRelease.getId(), tenantId);
             }
         } catch (LifeCycleManagementDAOException | DBConnectionException e) {
             throw new ApplicationManagementException("Failed to add lifecycle state", e);
