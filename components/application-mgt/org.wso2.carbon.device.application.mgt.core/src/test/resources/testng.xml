@@ -20,4 +20,9 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="ApplicationManagementCore">
+    <test name="Util classes tests" preserve-order="true">
+        <classes>
+            <class name="org.wso2.carbon.device.application.mgt.core.ArtifactParserTest"/>
+        </classes>
+    </test>
 </suite>

@@ -28,7 +28,6 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
 
 import java.io.ByteArrayOutputStream;
@@ -128,9 +127,7 @@ public class ArtifactsParser {
                     out.close();
                 }
                 if (stream != null) {
-
                     stream.close();
-
                 }
             } catch (IOException e) {
             }
