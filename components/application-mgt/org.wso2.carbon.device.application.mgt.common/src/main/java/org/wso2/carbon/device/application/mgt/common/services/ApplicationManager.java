@@ -188,7 +188,7 @@ public interface ApplicationManager {
      * @return Updated Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    boolean isApplicationReleaseUpdateAcceptable(int appId, String appReleaseUuid)
+    boolean isAcceptableAppReleaseUpdate(int appId, String appReleaseUuid)
             throws ApplicationManagementException;
 
     /**

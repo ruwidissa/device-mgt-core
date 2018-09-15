@@ -325,7 +325,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         try {
             Application application = applicationManager.getApplicationIfAccessible(applicationId);
 
-            if (!applicationManager.isApplicationReleaseUpdateAcceptable(application.getId(),
+            if (!applicationManager.isAcceptableAppReleaseUpdate(application.getId(),
                                                                          applicationRelease.getUuid())) {
                 String msg = "Application release is in the " + applicationRelease.getLifecycleState().getCurrentState()
                         + " state. Hence updating is not acceptable when application in this state";
