@@ -19,72 +19,73 @@
 package org.wso2.carbon.device.application.mgt.common;
 
 
-import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-/**
- * Application represents the an Application in Application Store.
- */
+
+@ApiModel(value = "Application", description = "Application represents the an Application in Application Store")
 public class Application {
 
-    @Exclude
+    @ApiModelProperty(name = "id",
+            value = "The ID given to the application when it is stored in the APPM database")
     private int id;
 
-    /**
-     * Name of the application
-     */
+    @ApiModelProperty(name = "name",
+            value = "Name of the application",
+            required = true)
     private String name;
 
-    /**
-     * Category of the application.
-     * e.g: Educational, Gaming, Travel, Entertainment etc.
-     */
+    @ApiModelProperty(name = "appCategory",
+            value = "Category of the application",
+            required = true,
+            example = "Educational, Gaming, Travel, Entertainment etc")
     private String appCategory;
 
-    /**
-     * Type of the application
-     * e.g. Mobile, Web, Web Clip etc
-     */
+    @ApiModelProperty(name = "type",
+            value = "Type of the application",
+            required = true,
+            example = "Mobile, Web, Web Clip etc")
     private String type;
 
-    /**
-     * Subscription type of the application.
-     * e.g: PAID, FREE
-     */
+    @ApiModelProperty(name = "subType",
+            value = "Subscription type of the application",
+            required = true,
+            example = "PAID, FREE")
     private String subType;
 
-    /**
-     * Payment currency of the application and the default value is '$'.
-     */
+    @ApiModelProperty(name = "paymentCurrency",
+            value = "Payment currency of the application",
+            required = true,
+            example = "$")
     private String paymentCurrency;
 
-    /**
-     * List of application tags
-     */
+    @ApiModelProperty(name = "tags",
+            value = "List of application tags")
     private List<Tag> tags;
 
-    /**
-     * Application creating user
-     */
+    @ApiModelProperty(name = "user",
+            value = "Application creating user")
     private User user;
 
-    /**
-     * List of roles that users should have to access the application
-     */
+    @ApiModelProperty(name = "unrestrictedRoles",
+            value = "List of roles that users should have to access the application")
     private List<UnrestrictedRole> unrestrictedRoles;
 
-    /**
-     * If unrestricted roles are defined then isRestricted value is true otherwise it is false.
-     */
+    @ApiModelProperty(name = "isRestricted",
+            value = "If unrestricted roles are defined then isRestricted value is true otherwise it is false")
     private boolean isRestricted;
 
-    /**
-     * Related device type of the application.
-     * e.g: IoS, Android, Arduino, RaspberryPi etc
-     */
+    @ApiModelProperty(name = "deviceType",
+            value = "Related device type of the application",
+            required = true,
+            example = "IoS, Android, Arduino, RaspberryPi etc")
     private String deviceType;
 
+    @ApiModelProperty(name = "applicationReleases",
+            value = "List of application releases",
+            required = true)
     private List<ApplicationRelease> applicationReleases;
 
     public int getId() {

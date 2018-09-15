@@ -58,6 +58,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
+import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecutionFailedException;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
@@ -1431,6 +1432,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public void addPolicyOperations(String type, Policy policy,
+            List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException {
+        pluginRepository.getOperationManager(type, this.getTenantId()).addOperationsForPolicyRevoke(policy, devices);
+    }
+
+    @Override
     public List<? extends Operation> getOperations(DeviceIdentifier deviceId) throws OperationManagementException {
         return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId()).getOperations(deviceId);
     }
@@ -1564,8 +1571,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public List<Activity> getActivitiesUpdatedAfterByUser(long timestamp, String user, int limit, int offset) throws OperationManagementException {
+        limit = DeviceManagerUtil.validateActivityListPageSize(limit);
+        return DeviceManagementDataHolder.getInstance().getOperationManager().getActivitiesUpdatedAfterByUser(timestamp, user, limit, offset);
+    }
+
+    @Override
     public int getActivityCountUpdatedAfter(long timestamp) throws OperationManagementException {
         return DeviceManagementDataHolder.getInstance().getOperationManager().getActivityCountUpdatedAfter(timestamp);
+    }
+
+    @Override
+    public int getActivityCountUpdatedAfterByUser(long timestamp, String user) throws OperationManagementException {
+        return DeviceManagementDataHolder.getInstance().getOperationManager().getActivityCountUpdatedAfterByUser(timestamp, user);
     }
 
     @Override

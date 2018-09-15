@@ -280,10 +280,6 @@ public interface ApplicationManagementAPI {
                     required = true)
             @Valid Application application,
             @ApiParam(
-                    name = "applicationRelease",
-                    value = "Application Release")
-            @Valid ApplicationRelease applicationRelease,
-            @ApiParam(
                     name = "binaryFile",
                     value = "Binary file of uploading application",
                     required = true)

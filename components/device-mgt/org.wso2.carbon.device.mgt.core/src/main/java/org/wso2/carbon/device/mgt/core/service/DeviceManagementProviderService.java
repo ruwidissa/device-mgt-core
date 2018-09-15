@@ -33,6 +33,7 @@ import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecutionFailedException;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
@@ -542,6 +543,10 @@ public interface DeviceManagementProviderService {
     Activity addOperation(String type, Operation operation,
                           List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException;
 
+    void addPolicyOperations(String type, Policy policy,
+            List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException;
+
+
     List<? extends Operation> getOperations(DeviceIdentifier deviceId) throws OperationManagementException;
 
     PaginationResult getOperations(DeviceIdentifier deviceId,
@@ -577,7 +582,11 @@ public interface DeviceManagementProviderService {
 
     int getTotalCountOfFilteredActivities(String operationCode) throws OperationManagementException;
 
+    List<Activity> getActivitiesUpdatedAfterByUser(long timestamp, String user, int limit, int offset) throws OperationManagementException;
+
     int getActivityCountUpdatedAfter(long timestamp) throws OperationManagementException;
+
+    int getActivityCountUpdatedAfterByUser(long timestamp, String user) throws OperationManagementException;
 
     List<MonitoringOperation> getMonitoringOperationList(String deviceType);
 
