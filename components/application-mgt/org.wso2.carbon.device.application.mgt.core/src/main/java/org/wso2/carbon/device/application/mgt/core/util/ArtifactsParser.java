@@ -38,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+import java.nio.file.Files;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -120,16 +121,11 @@ public class ArtifactsParser {
             throw new ParsingException("Error while parsing the file.", e);
         } finally {
             if (tempFile != null) {
-                tempFile.delete();
-            }
-            try {
-                if (out != null) {
-                    out.close();
+                try {
+                    Files.delete(tempFile.toPath());
+                } catch (IOException e) {
+                    log.error("Error occured while deleting the temp file", e);
                 }
-                if (stream != null) {
-                    stream.close();
-                }
-            } catch (IOException e) {
             }
         }
 
