@@ -57,7 +57,6 @@
                             org.osgi.framework,
                             org.osgi.service.component,
                             org.apache.commons.logging,
-                            javax.xml.*,
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             org.wso2.carbon.context.*,
                             org.wso2.carbon.utils.*,
@@ -71,36 +70,41 @@
                             org.wso2.carbon.device.application.mgt.common.*,
                             org.wso2.carbon.device.mgt.core.*,
                             org.wso2.carbon.device.mgt.common.*,
-                            org.apache.axis2.*,
                             org.wso2.carbon.user.core.*,
                             org.wso2.carbon.user.api.*,
                             org.wso2.carbon.ndatasource.core,
                             org.wso2.carbon,
                             javax.annotation,
-                            org.bouncycastle.cert,
-                            org.bouncycastle.cert.jcajce,
-                            org.bouncycastle.cms,
-                            org.bouncycastle.jce.provider,
-                            org.bouncycastle.util,
                             org.xml.sax,
                             org.xml.sax.helpers,
                             org.apache.commons.io,
                             org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
                             org.apache.commons.codec.digest;version="${commons-codec.wso2.osgi.version.range}",
                             org.wso2.carbon.base,
-                            org.wso2.carbon.device.mgt.core.dto.*;version="${carbon.device.mgt.version}",
-                            org.wso2.carbon.device.mgt.core.dao.*;version="${carbon.device.mgt.version}",
-                            net.dongliu.*
+                            net.dongliu.apk.parser.*
                         </Import-Package>
                         <Embed-Dependency>apk-parser;scope=compile|runtime;inline=false</Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
-                        <Embed-StripGroup>true</Embed-StripGroup>
+                        <!--<Embed-Transitive>true</Embed-Transitive>-->
+                        <!--<Embed-StripGroup>true</Embed-StripGroup>-->
                         <Export-Package>
                             !org.wso2.carbon.device.application.mgt.core.internal.*,
                             org.wso2.carbon.device.application.mgt.core.*
                         </Export-Package>
-                        <Axis2Deployer>PlatformDeployer</Axis2Deployer>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18</version>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <systemPropertyVariables>
+                        <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-unit.exec</jacoco-agent.destfile>
+                        <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
