@@ -19,27 +19,40 @@
 package org.wso2.carbon.device.application.mgt.common;
 
 import java.sql.Timestamp;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
+@ApiModel(value = "LifecycleState", description = "LifecycleState represents the an Lifecycle state for an application release")
 public class LifecycleState {
 
+    @ApiModelProperty(name = "id",
+            value = "ID of the application release lifecycle",
+            required = true)
     private int id;
 
+    @ApiModelProperty(name = "currentState",
+            value = "Current state of the application release",
+            required = true)
     private String currentState;
 
+    @ApiModelProperty(name = "previousState",
+            value = "Previous state of the application release",
+            required = true)
     private String previousState;
 
+    @ApiModelProperty(name = "nextStates",
+            value = "Next possible transferring states from the current state")
     private List<String> nextStates;
 
+    @ApiModelProperty(name = "updatedBy",
+            value = "Username who is update the application release state")
     private String updatedBy;
 
+    @ApiModelProperty(name = "updatedAt",
+            value = "Timestamp of the lifecycle has been updated")
     private Timestamp updatedAt;
-
-    private int tenantId;
-
-    private int releaseId;
-
-    private int appId;
 
     public int getId() {
         return id;
@@ -79,30 +92,6 @@ public class LifecycleState {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public int getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(int tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public int getReleaseId() {
-        return releaseId;
-    }
-
-    public void setReleaseId(int releaseId) {
-        this.releaseId = releaseId;
-    }
-
-    public int getAppId() {
-        return appId;
-    }
-
-    public void setAppId(int appId) {
-        this.appId = appId;
     }
 
     public List<String> getNextStates() {

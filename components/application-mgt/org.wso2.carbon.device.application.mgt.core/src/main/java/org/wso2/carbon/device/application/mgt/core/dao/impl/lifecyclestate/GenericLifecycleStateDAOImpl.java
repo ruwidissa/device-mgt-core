@@ -92,7 +92,6 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 lifecycleState.setId(rs.getInt("ID"));
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUSE_STATE"));
-                lifecycleState.setTenantId(rs.getInt("TENANT_ID"));
                 lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
                 lifecycleStates.add(lifecycleState);
@@ -109,7 +108,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     }
 
     @Override
-    public void addLifecycleState(LifecycleState state) throws LifeCycleManagementDAOException {
+    public void addLifecycleState(LifecycleState state, int appId, int releaseId, int tenantId) throws LifeCycleManagementDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -119,10 +118,10 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, state.getCurrentState());
             stmt.setString(2, state.getPreviousState());
-            stmt.setInt(3, state.getTenantId());
+            stmt.setInt(3, tenantId);
             stmt.setString(4, state.getUpdatedBy());
-            stmt.setInt(5, state.getReleaseId());
-            stmt.setInt(6, state.getAppId());
+            stmt.setInt(5, releaseId);
+            stmt.setInt(6, appId);
             stmt.executeUpdate();
 
         } catch (DBConnectionException e) {
