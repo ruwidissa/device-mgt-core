@@ -70,6 +70,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private DeviceTypeDAO deviceTypeDAO;
     private VisibilityDAO visibilityDAO;
     private ApplicationDAO applicationDAO;
+    private LifecycleStateDAO lifecycleStateDAO;
+
 
     public ApplicationManagerImpl() {
         initDataAccessObjects();
@@ -79,6 +81,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.deviceTypeDAO = ApplicationManagementDAOFactory.getDeviceTypeDAO();
         this.visibilityDAO = ApplicationManagementDAOFactory.getVisibilityDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
+        this.lifecycleStateDAO =  ApplicationManagementDAOFactory.getLifecycleStateDAO();;
     }
 
     @Override
@@ -134,9 +137,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 lifecycleState.setUpdatedBy(userName);
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
+                lifecycleState.setUpdatedBy(userName);
                 addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
-                LifecycleStateDAO lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
-                lifecycleStateDAO.addLifecycleState(lifecycleState, application.getId(), applicationRelease.getId(), tenantId);
+                this.lifecycleStateDAO
+                        .addLifecycleState(lifecycleState, application.getId(), applicationRelease.getId(), tenantId);
 
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
@@ -209,21 +213,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public ApplicationRelease createRelease(int applicationId, ApplicationRelease applicationRelease) throws
                                                                                                       ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        Application application = validateApplication(applicationId);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        Application application = getApplicationIfAccessible(applicationId);
         validateReleaseCreatingRequest(applicationRelease);
         if (log.isDebugEnabled()) {
             log.debug("Application release request is received for the application " + application.toString());
         }
         try {
             ConnectionManagerUtil.beginDBTransaction();
-//            todo consider about lifecycle adding
             applicationRelease = ApplicationManagementDAOFactory.getApplicationReleaseDAO().
                     createRelease(applicationRelease, application.getId(), tenantId);
+            LifecycleState lifecycleState = new LifecycleState();
+            lifecycleState.setUpdatedBy(userName);
+            lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
+            lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
+            lifecycleState.setUpdatedBy(userName);
+            addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+            this.lifecycleStateDAO
+                    .addLifecycleState(lifecycleState, application.getId(), applicationRelease.getId(), tenantId);
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw e;
+            throw new ApplicationManagementException(
+                    "Error occured while adding application release into IoTS app management Application id of the "
+                            + "application release: " + applicationId, e);
+        } catch (LifeCycleManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(
+                    "Error occured while adding application release lifecycle state to IoTS app management. "
+                            + "Application id of the application release: " + applicationId, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -353,7 +372,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public List<ApplicationRelease> getReleases(int applicationId) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
-        Application application = validateApplication(applicationId);
+        Application application = getApplicationIfAccessible(applicationId);
         List<ApplicationRelease> applicationReleases;
         List<ApplicationRelease> filteredApplicationReleases = new ArrayList<>();
         if (log.isDebugEnabled()) {
@@ -393,7 +412,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 "need to have admin permission");
             }
 
-            if (validateApplication(applicationId) == null) {
+            if (getApplicationIfAccessible(applicationId) == null) {
                 throw new ApplicationManagementException("Invalid Application");
             }
             List<ApplicationRelease> applicationReleases = getReleases(applicationId);
@@ -427,11 +446,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throws ApplicationManagementException {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        Application application = validateApplication(applicationId);
+        Application application = getApplicationIfAccessible(applicationId);
         if (application == null) {
             throw new ApplicationManagementException("Invalid Application ID is received");
         }
-        ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, releaseUuid);
+        ApplicationRelease applicationRelease = getAppReleaseIfExists(applicationId, releaseUuid);
         if (applicationRelease == null) {
             throw new ApplicationManagementException("Invalid Application Release UUID is received");
         }
@@ -537,12 +556,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     /**
-     * To validate the pre-request of the ApplicationRelease.
+     * Get the application if application is an accessible one.
      *
      * @param applicationId ID of the Application.
      * @return Application related with the UUID
      */
-    public Application validateApplication(int applicationId) throws ApplicationManagementException {
+    public Application getApplicationIfAccessible(int applicationId) throws ApplicationManagementException {
         if (applicationId <= 0) {
             throw new ApplicationManagementException("Application id could,t be a negative integer. Hence please add " +
                                                              "valid application id.");
@@ -568,7 +587,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             if (!isAppAllowed) {
-                throw new NotFoundException("Application of the " + applicationId + " does not exist.");
+                throw new NotFoundException("Application of the " + applicationId
+                        + " does not exist. Please check whether user have permissions to access the application.");
             }
             return application;
         } catch (UserStoreException e) {
@@ -580,12 +600,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     /**
-     * To validate the pre-request of the ApplicationRelease.
+     * Get the application release for given UUID if application release is exists and application id is valid one.
      *
      * @param applicationUuid UUID of the Application.
      * @return Application related with the UUID
      */
-    public ApplicationRelease validateApplicationRelease(int applicationId, String applicationUuid) throws
+    public ApplicationRelease getAppReleaseIfExists(int applicationId, String applicationUuid) throws
                                                                                                     ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationRelease applicationRelease;
@@ -694,7 +714,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             LifecycleStateDAO lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
-            ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, applicationUuid);
+            ApplicationRelease applicationRelease = getAppReleaseIfExists(applicationId, applicationUuid);
             lifecycleState = lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
             lifecycleState.setNextStates(getNextLifecycleStates(lifecycleState.getCurrentState()));
         } catch (ApplicationManagementDAOException e) {
@@ -712,8 +732,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                                                                                    ApplicationManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
-            Application application = validateApplication(applicationId);
-            ApplicationRelease applicationRelease = validateApplicationRelease(applicationId, applicationUuid);
+            Application application = getApplicationIfAccessible(applicationId);
+            ApplicationRelease applicationRelease = getAppReleaseIfExists(applicationId, applicationUuid);
             LifecycleStateDAO lifecycleStateDAO;
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
@@ -828,7 +848,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public Application updateApplication(Application application) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        Application existingApplication = validateApplication(application.getId());
+        Application existingApplication = getApplicationIfAccessible(application.getId());
         List<UnrestrictedRole> addingRoleList;
         List<UnrestrictedRole> removingRoleList;
         List<Tag> addingTags;

@@ -208,7 +208,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     attachments.add(screenshot.getDataHandler().getInputStream());
                 }
             }
-            applicationRelease = applicationManager.validateApplicationRelease(appId, applicationUuid);
+            applicationRelease = applicationManager.getAppReleaseIfExists(appId, applicationUuid);
             LifecycleState lifecycleState = applicationManager.getLifecycleState(appId, applicationRelease.getUuid());
             if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState()) ||
                     AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
@@ -260,7 +260,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return APIUtil.getResponse("Uploading artifacts for the application is failed " + applicationUuid,
                         Response.Status.BAD_REQUEST);
             }
-            applicationRelease = applicationManager.validateApplicationRelease(applicationId, applicationUuid);
+            applicationRelease = applicationManager.getAppReleaseIfExists(applicationId, applicationUuid);
             applicationRelease = applicationStorageManager
                     .updateReleaseArtifacts(applicationRelease, appType, deviceType,
                             binaryFile.getDataHandler().getInputStream());
@@ -323,7 +323,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         List<InputStream> attachments = new ArrayList<>();
 
         try {
-            Application application = applicationManager.validateApplication(applicationId);
+            Application application = applicationManager.getApplicationIfAccessible(applicationId);
 
             if (!applicationManager.isApplicationReleaseUpdateAcceptable(application.getId(),
                                                                          applicationRelease.getUuid())) {
