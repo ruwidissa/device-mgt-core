@@ -153,20 +153,20 @@ public interface ApplicationManager {
     void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws ApplicationManagementException;
 
     /**
-     * To validate the application existence for given application id
+     * Get the application if application is an accessible one.
      *
      * @param applicationId ID of the Application.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Application validateApplication(int applicationId) throws ApplicationManagementException;
+    Application getApplicationIfAccessible(int applicationId) throws ApplicationManagementException;
 
     /**
-     * To validate the application release existence for given application release UUID
+     * Get the application release for given UUID if application release is exists and application id is valid one.
      *
      * @param releaseUuid UUID of the Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    ApplicationRelease validateApplicationRelease(int applicationId, String releaseUuid) throws
+    ApplicationRelease getAppReleaseIfExists(int applicationId, String releaseUuid) throws
                                                                                    ApplicationManagementException;
 
     /**
@@ -188,7 +188,7 @@ public interface ApplicationManager {
      * @return Updated Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    boolean isApplicationReleaseUpdateAcceptable(int appId, String appReleaseUuid)
+    boolean isAcceptableAppReleaseUpdate(int appId, String appReleaseUuid)
             throws ApplicationManagementException;
 
     /**

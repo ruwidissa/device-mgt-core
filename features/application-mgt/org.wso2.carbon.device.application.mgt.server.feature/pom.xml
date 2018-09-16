@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>application-mgt-feature</artifactId>
-        <version>3.1.34-SNAPSHOT</version>
+        <version>3.1.40-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.device.application.mgt.server.feature</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.34-SNAPSHOT</version>
+    <version>3.1.40-SNAPSHOT</version>
     <name>WSO2 Carbon - Application Management Server Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for Back-end Application Management functionality
@@ -44,16 +44,24 @@
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.application.mgt.core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.application.mgt.api.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.devicemgt</groupId>
-            <artifactId>org.wso2.carbon.device.application.mgt.auth.handler.feature</artifactId>
-            <type>zip</type>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>javax.servlet.jsp</groupId>-->
+            <!--<artifactId>javax.servlet.jsp-api</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.orbit.org.scannotation</groupId>-->
+            <!--<artifactId>scannotation</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon.devicemgt</groupId>-->
+            <!--<artifactId>org.wso2.carbon.device.application.mgt.api.feature</artifactId>-->
+            <!--<type>zip</type>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.carbon.devicemgt</groupId>-->
+            <!--<artifactId>org.wso2.carbon.device.application.mgt.auth.handler.feature</artifactId>-->
+            <!--<type>zip</type>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
@@ -103,10 +111,10 @@
                                     <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
                                 </properties>
                             </adviceFile>
-                            <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.api.feature:${carbon.device.mgt.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.auth.handler.feature:${carbon.device.mgt.version}</includedFeatureDef>
-                            </includedFeatures>
+                            <!--<includedFeatures>-->
+                                <!--<includedFeatureDef>org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.api.feature:${carbon.device.mgt.version}</includedFeatureDef>-->
+                                <!--<includedFeatureDef>org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.auth.handler.feature:${carbon.device.mgt.version}</includedFeatureDef>-->
+                            <!--</includedFeatures>-->
                             <bundles>
                                 <bundleDef>
                                     org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.common:${carbon.device.mgt.version}
@@ -114,12 +122,14 @@
                                 <bundleDef>
                                     org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.core:${carbon.device.mgt.version}
                                 </bundleDef>
+                                <!--<bundleDef>javax.servlet.jsp:javax.servlet.jsp-api</bundleDef>-->
+                                <!--<bundleDef>org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}</bundleDef>-->
                             </bundles>
                             <importBundles>
                             </importBundles>
-                            <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                            </importFeatures>
+                            <!--<importFeatures>-->
+                                <!--<importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>-->
+                            <!--</importFeatures>-->
                         </configuration>
                     </execution>
                 </executions>

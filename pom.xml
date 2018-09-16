@@ -1740,7 +1740,6 @@
                 <artifactId>apk-parser</artifactId>
                 <version>${net.dongliu.version}</version>
             </dependency>
-
             <!--websocket dependency-->
             <dependency>
                 <groupId>javax.websocket</groupId>
@@ -2196,7 +2195,7 @@
         <!-- app management related versions -->
         <googlecode.plist.version>1.8</googlecode.plist.version>
         <net.dongliu.version>2.4.2</net.dongliu.version>
-
+        
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>
         <javax.websocket.version>1.0</javax.websocket.version>

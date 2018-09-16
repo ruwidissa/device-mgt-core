@@ -208,7 +208,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     attachments.add(screenshot.getDataHandler().getInputStream());
                 }
             }
-            applicationRelease = applicationManager.validateApplicationRelease(appId, applicationUuid);
+            applicationRelease = applicationManager.getAppReleaseIfExists(appId, applicationUuid);
             LifecycleState lifecycleState = applicationManager.getLifecycleState(appId, applicationRelease.getUuid());
             if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState()) ||
                     AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
@@ -222,7 +222,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
         } catch (NotFoundException e) {
-            String msg = "Couldn't found application release details and storage details";
+            String msg =
+                    "Couldn't found application release details or storage details or lifecycle details. Application id: "
+                            + appId + " App release uuid: " + applicationUuid;
             log.error(msg, e);
             return APIUtil.getResponse(e, Response.Status.NOT_FOUND);
         } catch (ApplicationManagementException e) {
@@ -260,7 +262,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return APIUtil.getResponse("Uploading artifacts for the application is failed " + applicationUuid,
                         Response.Status.BAD_REQUEST);
             }
-            applicationRelease = applicationManager.validateApplicationRelease(applicationId, applicationUuid);
+            applicationRelease = applicationManager.getAppReleaseIfExists(applicationId, applicationUuid);
             applicationRelease = applicationStorageManager
                     .updateReleaseArtifacts(applicationRelease, appType, deviceType,
                             binaryFile.getDataHandler().getInputStream());
@@ -323,9 +325,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         List<InputStream> attachments = new ArrayList<>();
 
         try {
-            Application application = applicationManager.validateApplication(applicationId);
+            Application application = applicationManager.getApplicationIfAccessible(applicationId);
 
-            if (!applicationManager.isApplicationReleaseUpdateAcceptable(application.getId(),
+            if (!applicationManager.isAcceptableAppReleaseUpdate(application.getId(),
                                                                          applicationRelease.getUuid())) {
                 String msg = "Application release is in the " + applicationRelease.getLifecycleState().getCurrentState()
                         + " state. Hence updating is not acceptable when application in this state";
@@ -424,7 +426,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
-        } catch (ApplicationManagementException e) {
+        } catch (NotFoundException e){
+            String msg = "Couldn't found application lifecycle details for appid: " + applicationId
+                    + " and app release UUID: " + applicationUuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting lifecycle state.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
