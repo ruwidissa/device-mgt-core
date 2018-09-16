@@ -222,7 +222,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
         } catch (NotFoundException e) {
-            String msg = "Couldn't found application release details and storage details";
+            String msg =
+                    "Couldn't found application release details or storage details or lifecycle details. Application id: "
+                            + appId + " App release uuid: " + applicationUuid;
             log.error(msg, e);
             return APIUtil.getResponse(e, Response.Status.NOT_FOUND);
         } catch (ApplicationManagementException e) {
@@ -424,7 +426,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
-        } catch (ApplicationManagementException e) {
+        } catch (NotFoundException e){
+            String msg = "Couldn't found application lifecycle details for appid: " + applicationId
+                    + " and app release UUID: " + applicationUuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting lifecycle state.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
