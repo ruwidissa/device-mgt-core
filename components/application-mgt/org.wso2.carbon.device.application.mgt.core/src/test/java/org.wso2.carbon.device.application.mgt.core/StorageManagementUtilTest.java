@@ -30,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
 public class StorageManagementUtilTest {
     private static final String TEMP_FOLDER = "src/test/resources/util/temp";
     private static final String APK_FILE = "src/test/resources/util/app-debug.apk";
@@ -60,7 +59,7 @@ public class StorageManagementUtilTest {
         InputStream apk = new FileInputStream(APK_FILE);
         StorageManagementUtil.saveFile(apk, TEMP_FOLDER + APK_FILE_NAME);
         File file = new File(TEMP_FOLDER + APK_FILE_NAME);
-        if(!file.exists()) {
+        if (!file.exists()) {
             Assert.fail("File saving failed.");
         }
     }
@@ -69,7 +68,7 @@ public class StorageManagementUtilTest {
     public void deleteFileTest() throws IOException, ResourceManagementException {
         File file = new File(TEMP_FOLDER);
         StorageManagementUtil.deleteDir(file);
-        if(file.exists()) {
+        if (file.exists()) {
             Assert.fail("File deleting failed.");
         }
     }
