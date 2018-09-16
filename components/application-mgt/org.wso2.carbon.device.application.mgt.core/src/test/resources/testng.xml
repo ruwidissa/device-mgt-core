@@ -23,6 +23,7 @@
     <test name="Util classes tests" preserve-order="true">
         <classes>
             <class name="org.wso2.carbon.device.application.mgt.core.ArtifactParserTest"/>
+            <class name="org.wso2.carbon.device.application.mgt.core.StorageManagementUtilTest"/>
         </classes>
     </test>
 </suite>
