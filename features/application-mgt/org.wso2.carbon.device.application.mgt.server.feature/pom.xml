@@ -30,6 +30,7 @@
     <artifactId>org.wso2.carbon.device.application.mgt.server.feature</artifactId>
     <packaging>pom</packaging>
     <version>3.1.40-SNAPSHOT</version>
+
     <name>WSO2 Carbon - Application Management Server Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for Back-end Application Management functionality
@@ -44,6 +45,18 @@
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.application.mgt.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.plist</groupId>
+            <artifactId>dd-plist</artifactId>
+            <version>${googlecode.plist.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${commons-validator.version}</version>
+        </dependency>
+
         <!--<dependency>-->
             <!--<groupId>javax.servlet.jsp</groupId>-->
             <!--<artifactId>javax.servlet.jsp-api</artifactId>-->
@@ -122,6 +135,12 @@
                                 <bundleDef>
                                     org.wso2.carbon.devicemgt:org.wso2.carbon.device.application.mgt.core:${carbon.device.mgt.version}
                                 </bundleDef>
+                                <bundleDef>
+                                    com.googlecode.plist:dd-plist:${googlecode.plist.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    commons-validator:commons-validator:${commons-validator.version}
+                                </bundleDef>
                                 <!--<bundleDef>javax.servlet.jsp:javax.servlet.jsp-api</bundleDef>-->
                                 <!--<bundleDef>org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}</bundleDef>-->
                             </bundles>
@@ -136,4 +155,7 @@
             </plugin>
         </plugins>
     </build>
+    <properties>
+        <commons-validator.version>1.6</commons-validator.version>
+    </properties>
 </project>

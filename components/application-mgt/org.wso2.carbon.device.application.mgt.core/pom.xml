@@ -42,7 +42,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.0.1</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -50,9 +49,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${carbon.device.mgt.version}</Bundle-Version>
                         <Bundle-Description>Application Management Core Bundle</Bundle-Description>
-                        <Private-Package>
-                            org.wso2.carbon.device.application.mgt.core.internal
-                        </Private-Package>
+                        <Private-Package>org.wso2.carbon.device.application.mgt.core.internal</Private-Package>
                         <Import-Package>
                             org.osgi.framework,
                             org.osgi.service.component,
@@ -81,7 +78,8 @@
                             org.apache.commons.codec.binary;version="${commons-codec.wso2.osgi.version.range}",
                             org.apache.commons.codec.digest;version="${commons-codec.wso2.osgi.version.range}",
                             org.wso2.carbon.base,
-                            net.dongliu.apk.parser.*
+                            com.dd.*,
+                            org.apache.commons.validator.routines
                         </Import-Package>
                         <Embed-Dependency>apk-parser;scope=compile|runtime;inline=false</Embed-Dependency>
                         <!--<Embed-Transitive>true</Embed-Transitive>-->

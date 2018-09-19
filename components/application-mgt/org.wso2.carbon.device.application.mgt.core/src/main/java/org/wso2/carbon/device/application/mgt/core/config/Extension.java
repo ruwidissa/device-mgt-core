@@ -81,7 +81,7 @@ public class Extension {
         ApplicationManager,
         ApplicationReleaseManager,
         CategoryManager,
-        CommentsManager,
+        ReviewManager,
         LifecycleStateManager,
         PlatformManager,
         VisibilityTypeManager,
