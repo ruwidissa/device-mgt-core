@@ -31,12 +31,15 @@ import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleMa
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.naming.NamingException;
+import java.util.List;
 
 /**
  * @scr.component name="org.wso2.carbon.application.mgt.service" immediate="true"
@@ -93,6 +96,12 @@ public class ServiceComponent {
 
             ApplicationManagementDAOFactory.init(datasourceName);
             ApplicationManagementDAOFactory.initDatabases();
+
+            List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
+                    getConfiguration().getLifecycleStates();
+            LifecycleStateManger lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
+            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
+
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (InvalidConfigurationException e) {
             log.error("Error while activating Application Management core component. ", e);

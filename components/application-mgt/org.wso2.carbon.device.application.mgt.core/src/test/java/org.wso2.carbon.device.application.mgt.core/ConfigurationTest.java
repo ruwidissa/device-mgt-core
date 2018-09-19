@@ -17,25 +17,30 @@
 */
 package org.wso2.carbon.device.application.mgt.core;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
+import org.junit.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 
-import java.io.File;
+import java.util.List;
 
 public class ConfigurationTest {
-
-    @BeforeClass
-    public static void init() throws InvalidConfigurationException {
-        File configPath = new File("src/test/resources/application-mgt.xml");
-        ConfigurationManager.setConfigLocation(configPath.getAbsolutePath());
-    }
 
     @Test
     public void validateConfiguration() {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
         Configuration configuration = configurationManager.getConfiguration();
+        Assert.assertNotNull("Invalid app manager configuration", configuration);
+    }
+
+    @Test
+    public void validateLifecycleStateConfiguration() {
+        ConfigurationManager configurationManager = ConfigurationManager.getInstance();
+        Configuration configuration = configurationManager.getConfiguration();
+        List<LifecycleState> lifecycleStates = configuration.getLifecycleStates();
+        Assert.assertNotNull("Invalid lifecycle states configuration", lifecycleStates);
+        Assert.assertTrue("Invalid lifecycle states configuration. Lifecycle states cannot be empty",
+                          !lifecycleStates.isEmpty());
     }
 }

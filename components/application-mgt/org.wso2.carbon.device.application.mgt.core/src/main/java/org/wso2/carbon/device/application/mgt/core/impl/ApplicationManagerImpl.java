@@ -37,7 +37,6 @@ import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
-import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
@@ -49,6 +48,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagement
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
@@ -73,10 +73,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ApplicationDAO applicationDAO;
     private ApplicationReleaseDAO applicationReleaseDAO;
     private LifecycleStateDAO lifecycleStateDAO;
+    private LifecycleStateManger lifecycleStateManger;
 
 
     public ApplicationManagerImpl() {
         initDataAccessObjects();
+        lifecycleStateManger = DataHolder.getInstance().getLifecycleStateManager();
     }
 
     private void initDataAccessObjects() {
@@ -139,7 +141,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-                addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+                changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
 
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
@@ -216,7 +218,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             LifecycleState lifecycleState = new LifecycleState();
             lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
             lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-            addLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+            changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
 
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
@@ -406,7 +408,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = new LifecycleState();
                 newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
                 newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-                addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
                 storedLocations.add(applicationRelease.getAppHashValue());
             }
             ConnectionManagerUtil.openDBConnection();
@@ -437,7 +439,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             LifecycleState newAppLifecycleState = new LifecycleState();
             newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
             newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-            addLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+            changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
         }else{
             throw new ApplicationManagementException("Can't delete the application release, You have to move the " +
                                                              "lifecycle state from "+ currentState + " to acceptable " +
@@ -689,7 +691,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + applicationUuid);
 
             }
-            lifecycleState.setNextStates(getNextLifecycleStates(lifecycleState.getCurrentState()));
+            lifecycleState.setNextStates(new ArrayList<>(lifecycleStateManger.
+                    getNextLifecycleStates(lifecycleState.getCurrentState())));
         } catch (ApplicationManagementDAOException e) {
             throw new ApplicationManagementException("Failed to get lifecycle state", e);
         } catch (ApplicationManagementException e) {
@@ -701,7 +704,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state)
+    public void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state)
             throws ApplicationManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -712,9 +715,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                validateLifecycleState(state);
-                this.lifecycleStateDAO
-                        .addLifecycleState(state, application.getId(), applicationRelease.getId(), tenantId);
+                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
+                    this.lifecycleStateDAO
+                            .addLifecycleState(state, application.getId(), applicationRelease.getId(), tenantId);
+                } else {
+                    log.error("Invalid lifecycle state transition from '" + state.getPreviousState() + "'"
+                              + " to '" + state.getCurrentState() + "'");
+                    throw new ApplicationManagementException("Lifecycle State Validation failed");
+                }
             }
         } catch (LifeCycleManagementDAOException | DBConnectionException e) {
             throw new ApplicationManagementException("Failed to add lifecycle state", e);
@@ -722,99 +730,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException("Lifecycle State Validation failed", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
-        }
-    }
-
-    private List<String> getNextLifecycleStates(String currentLifecycleState) {
-        List<String> nextLifecycleStates = new ArrayList<>();
-        if (AppLifecycleState.CREATED.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.IN_REVIEW.toString());
-        }
-        if (AppLifecycleState.IN_REVIEW.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.APPROVED.toString());
-            nextLifecycleStates.add(AppLifecycleState.REJECTED.toString());
-        }
-        if (AppLifecycleState.REJECTED.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.IN_REVIEW.toString());
-            nextLifecycleStates.add(AppLifecycleState.REMOVED.toString());
-        }
-        if (AppLifecycleState.APPROVED.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.PUBLISHED.toString());
-        }
-        if (AppLifecycleState.PUBLISHED.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.UNPUBLISHED.toString());
-            nextLifecycleStates.add(AppLifecycleState.DEPRECATED.toString());
-        }
-        if (AppLifecycleState.UNPUBLISHED.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.PUBLISHED.toString());
-            nextLifecycleStates.add(AppLifecycleState.REMOVED.toString());
-        }
-        if (AppLifecycleState.DEPRECATED.toString().equals(currentLifecycleState)) {
-            nextLifecycleStates.add(AppLifecycleState.REMOVED.toString());
-        }
-        return nextLifecycleStates;
-    }
-
-    private void validateLifecycleState(LifecycleState state) throws LifecycleManagementException {
-
-        if (AppLifecycleState.CREATED.toString().equals(state.getCurrentState())) {
-            throw new LifecycleManagementException("Current State Couldn't be " + state.getCurrentState());
-        }
-        if (AppLifecycleState.IN_REVIEW.toString().equals(state.getCurrentState()) && !AppLifecycleState.CREATED
-                .toString().equals(state.getPreviousState()) && !AppLifecycleState.REJECTED.toString()
-                .equals(state.getPreviousState())) {
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be either "
-                            + AppLifecycleState.CREATED.toString() + " or " + AppLifecycleState.REJECTED.toString());
-
-        }
-        if (AppLifecycleState.APPROVED.toString().equals(state.getCurrentState()) && !AppLifecycleState.IN_REVIEW
-                .toString().equals(state.getPreviousState())) {
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be "
-                            + AppLifecycleState.IN_REVIEW.toString());
-
-        }
-        if (AppLifecycleState.PUBLISHED.toString().equals(state.getCurrentState()) && !AppLifecycleState.APPROVED
-                .toString().equals(state.getPreviousState()) && !AppLifecycleState.UNPUBLISHED.toString()
-                .equals(state.getPreviousState())) {
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be either "
-                            + AppLifecycleState.APPROVED.toString() + " or " + AppLifecycleState.UNPUBLISHED
-                            .toString());
-
-        }
-        if (AppLifecycleState.UNPUBLISHED.toString().equals(state.getCurrentState()) && !AppLifecycleState.PUBLISHED
-                .toString().equals(state.getPreviousState())) {
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be "
-                            + AppLifecycleState.PUBLISHED.toString());
-
-        }
-        if (AppLifecycleState.REJECTED.toString().equals(state.getCurrentState()) && !AppLifecycleState.IN_REVIEW
-                .toString().equals(state.getPreviousState())) {
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be "
-                            + AppLifecycleState.IN_REVIEW.toString());
-
-        }
-        if (AppLifecycleState.DEPRECATED.toString().equals(state.getCurrentState()) && !AppLifecycleState.PUBLISHED
-                .toString().equals(state.getPreviousState())) {
-
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be "
-                            + AppLifecycleState.PUBLISHED.toString());
-
-        }
-        if (AppLifecycleState.REMOVED.toString().equals(state.getCurrentState()) && !AppLifecycleState.DEPRECATED
-                .toString().equals(state.getPreviousState()) && !AppLifecycleState.REJECTED.toString()
-                .equals(state.getPreviousState()) && !AppLifecycleState.UNPUBLISHED.toString()
-                .equals(state.getPreviousState())) {
-
-            throw new LifecycleManagementException(
-                    "If Current State is " + state.getCurrentState() + "Previous State should be either "
-                            + AppLifecycleState.DEPRECATED.toString() + " or " + AppLifecycleState.REJECTED.toString()
-                            + " or " + AppLifecycleState.UNPUBLISHED.toString());
         }
     }
 

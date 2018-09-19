@@ -58,4 +58,47 @@
         </Extension>
     </Extensions>
 
+    <LifecycleStates>
+        <LifecycleState name="Created">
+            <ProceedingStates>
+                <State>In-Review</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="In-Review">
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Approved">
+            <ProceedingStates>
+                <State>Published</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Rejected">
+            <ProceedingStates>
+                <State>In-Review</State>
+                <State>Removed</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Published">
+            <ProceedingStates>
+                <State>Unpublished</State>
+                <State>Deprecated</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Unpublished">
+            <ProceedingStates>
+                <State>Removed</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Deprecated">
+            <ProceedingStates>
+                <State>Removed</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Removed">
+        </LifecycleState>
+    </LifecycleStates>
+
 </ApplicationManagementConfiguration>

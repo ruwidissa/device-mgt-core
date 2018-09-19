@@ -23,6 +23,7 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorage
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleManager;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -44,6 +45,8 @@ public class DataHolder {
     private UnrestrictedRoleManager unrestrictedRoleManager;
 
     private ApplicationStorageManager applicationStorageManager;
+
+    private LifecycleStateManger lifecycleStateManger;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -109,5 +112,13 @@ public class DataHolder {
 
     public ApplicationStorageManager getApplicationStorageManager() {
         return applicationStorageManager;
+    }
+
+    public LifecycleStateManger getLifecycleStateManager() {
+        return lifecycleStateManger;
+    }
+
+    public void setLifecycleStateManger(LifecycleStateManger lifecycleStateManger) {
+        this.lifecycleStateManger = lifecycleStateManger;
     }
 }
