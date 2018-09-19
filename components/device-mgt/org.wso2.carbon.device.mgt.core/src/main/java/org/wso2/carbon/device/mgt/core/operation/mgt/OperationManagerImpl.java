@@ -82,6 +82,7 @@ public class OperationManagerImpl implements OperationManager {
     private static final Log log = LogFactory.getLog(OperationManagerImpl.class);
     private static final int CACHE_VALIDITY_PERIOD = 5 * 60 * 1000;
     private static final String NOTIFIER_TYPE_LOCAL = "LOCAL";
+    private static final String SYSTEM = "system";
 
     private OperationDAO commandOperationDAO;
     private OperationDAO configOperationDAO;
@@ -160,8 +161,8 @@ public class OperationManagerImpl implements OperationManager {
             List<DeviceIdentifier> validDeviceIds = deviceValidationResult.getValidDeviceIDList();
             if (validDeviceIds.size() > 0) {
                 DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
-                List<DeviceIdentifier> authorizedDeviceList = deviceAuthorizationResult.getValidDeviceIDList();
-                if (authorizedDeviceList.size() <= 0) {
+                List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
+                if (authorizedDeviceIds.size() <= 0) {
                     log.warn("User : " + getUser() + " is not authorized to perform operations on given device-list.");
                     Activity activity = new Activity();
                     //Send the operation statuses only for admin triggered operations
@@ -171,90 +172,88 @@ public class OperationManagerImpl implements OperationManager {
                     return activity;
                 }
 
+                boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
+                String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+                if (initiatedBy == null && isScheduledOperation) {
+                    if(log.isDebugEnabled()) {
+                        log.debug("initiatedBy : "  + SYSTEM);
+                    }
+                    operation.setInitiatedBy(SYSTEM);
+                } else {
+                    if(log.isDebugEnabled()) {
+                        log.debug("initiatedBy : "  + initiatedBy);
+                    }
+                    operation.setInitiatedBy(initiatedBy);
+                }
+
                 OperationManagementDAOFactory.beginTransaction();
                 org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto =
                         OperationDAOUtil.convertOperation(operation);
+                int enrolmentId;
+                String operationCode = operationDto.getCode();
+
+                List<Device> authorizedDevices = new ArrayList<>();
+                List<Device> ignoredDevices = new ArrayList<>();
+                for (DeviceIdentifier deviceId : authorizedDeviceIds) {
+                    Device device = getDevice(deviceId);
+                    authorizedDevices.add(device);
+                }
+
+                if (operationDto.getControl() ==
+                    org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
+                    int existingOperationID;
+                    for (Device device : authorizedDevices) {
+                        enrolmentId = device.getEnrolmentInfo().getId();
+                        existingOperationID = operationDAO.getExistingOperationID(enrolmentId, operationCode);
+                        if (existingOperationID > 0) {
+                            ignoredDevices.add(device);
+                            operation.setId(existingOperationID);
+                            this.sendNotification(operation, device);
+                        }
+                    }
+                }
+
+                if (ignoredDevices.size() > 0) {
+                    if (authorizedDevices.size() == ignoredDevices.size()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("All the devices contain a pending operation for the Operation Code: "
+                                    + operationCode);
+                        }
+                        Activity activity = new Activity();
+                        //Send the operation statuses only for admin triggered operations
+                        String deviceType = validDeviceIds.get(0).getType();
+                        activity.setActivityStatus(this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult,
+                                deviceType));
+                        return activity;
+                    } else {
+                        authorizedDevices.removeAll(ignoredDevices);
+                    }
+                }
+
                 int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
-                boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
-                boolean isNotRepeated = false;
+
                 boolean isScheduled = false;
                 NotificationStrategy notificationStrategy = getNotificationStrategy();
 
                 // check whether device list is greater than batch size notification strategy has enable to send push
                 // notification using scheduler task
                 if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
-                        getPushNotificationConfiguration().getSchedulerBatchSize() <= authorizedDeviceList.size() &&
+                        getPushNotificationConfiguration().getSchedulerBatchSize() <= authorizedDeviceIds.size() &&
                         notificationStrategy != null) {
                     isScheduled = notificationStrategy.getConfig().isScheduled();
                 }
 
-                boolean hasExistingTaskOperation;
-                int enrolmentId;
-                List<Device> devices = new ArrayList<>();
-                if (org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT == operationDto.
-                        getControl()) {
-                    isNotRepeated = true;
-                }
-
                 //TODO have to create a sql to load device details from deviceDAO using single query.
-                String operationCode = operationDto.getCode();
-                for (DeviceIdentifier deviceId : authorizedDeviceList) {
-                    Device device = getDevice(deviceId);
-                    devices.add(device);
+                for (Device device : authorizedDevices) {
                     enrolmentId = device.getEnrolmentInfo().getId();
                     //Do not repeat the task operations
-                    if (isScheduledOperation) {
-                        hasExistingTaskOperation = operationDAO.updateTaskOperation(enrolmentId, operationCode);
-                        if (!hasExistingTaskOperation) {
-                            operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
-                        }
-                    } else if (isNotRepeated) {
-                        operationDAO.updateEnrollmentOperationsStatus(enrolmentId, operationCode,
-                                org.wso2.carbon.device.mgt.core.dto.operation.mgt.
-                                        Operation.Status.PENDING,
-                                org.wso2.carbon.device.mgt.core.dto.operation.mgt.
-                                        Operation.Status.REPEATED);
-                        operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
-                    } else {
-                        operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
-                    }
+                    operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
                 }
                 OperationManagementDAOFactory.commitTransaction();
 
-                /*
-                 If notification strategy has not enable to send push notification using scheduler task we will send
-                 notification immediately. This is done in separate loop inorder to prevent overlap with DB insert
-                 operations with the possible db update operations trigger followed by pending operation call.
-                 Otherwise device may call pending operation while DB is locked for write and deadlock can occur.
-                 */
-                if (notificationStrategy != null && !isScheduled) {
-                    for (Device device : devices) {
-                        DeviceIdentifier deviceId = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
-                        if (log.isDebugEnabled()) {
-                            log.debug("Sending push notification to " + deviceId + " from add operation method.");
-                        }
-                        operation.setId(operationId);
-                        operation.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
-                        try {
-                            notificationStrategy.execute(new NotificationContext(deviceId, operation));
-                        } catch (PushNotificationExecutionFailedException e) {
-                            log.error("Error occurred while sending push notifications to " + deviceId.getType() +
-                                      " device carrying id '" + deviceId + "'", e);
-                            /*
-                             Reschedule if push notification failed. Doing db transactions in atomic way to prevent
-                             deadlocks.
-                             */
-                            enrolmentId = device.getEnrolmentInfo().getId();
-                            try {
-                                operationMappingDAO.updateOperationMapping(operationId, enrolmentId, org.wso2.carbon
-                                        .device.mgt.core.dto.operation.mgt.Operation.PushNotificationStatus.SCHEDULED);
-                                OperationManagementDAOFactory.commitTransaction();
-                            } catch (OperationManagementDAOException ex) {
-                                // Not throwing this exception in order to keep sending remaining notifications if any.
-                                log.error("Error occurred while setting push notification status to SCHEDULED.", ex);
-                                OperationManagementDAOFactory.rollbackTransaction();
-                            }
-                        }
+                if (isScheduled) {
+                    for (Device device : authorizedDevices) {
+                        this.sendNotification(operation, device);
                     }
                 }
 
@@ -281,6 +280,41 @@ public class OperationManagerImpl implements OperationManager {
             throw new OperationManagementException("Error occurred while initiating the transaction", e);
         } finally {
             OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    private void sendNotification(Operation operation, Device device) {
+        NotificationStrategy notificationStrategy = getNotificationStrategy();
+        /*
+         * If notification strategy has not enable to send push notification using scheduler task we will send
+         * notification immediately. This is done in separate loop inorder to prevent overlap with DB insert
+         * operations with the possible db update operations trigger followed by pending operation call.
+         * Otherwise device may call pending operation while DB is locked for write and deadlock can occur.
+         */
+        if (notificationStrategy != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Sending push notification to " + device.getDeviceIdentifier() + " from add operation method.");
+            }
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
+            try {
+                notificationStrategy.execute(new NotificationContext(deviceIdentifier, operation));
+            } catch (PushNotificationExecutionFailedException e) {
+                log.error("Error occurred while sending push notifications to " + device.getType() +
+                          " device carrying id '" + device.getDeviceIdentifier() + "'", e);
+                /*
+                 * Reschedule if push notification failed. Doing db transactions in atomic way to prevent
+                 * deadlocks.
+                 */
+                try {
+                    operationMappingDAO.updateOperationMapping(operation.getId(), device.getEnrolmentInfo().getId(), org.wso2.carbon
+                            .device.mgt.core.dto.operation.mgt.Operation.PushNotificationStatus.SCHEDULED);
+                    OperationManagementDAOFactory.commitTransaction();
+                } catch (OperationManagementDAOException ex) {
+                    // Not throwing this exception in order to keep sending remaining notifications if any.
+                    log.error("Error occurred while setting push notification status to SCHEDULED.", ex);
+                    OperationManagementDAOFactory.rollbackTransaction();
+                }
+            }
         }
     }
 
@@ -893,6 +927,22 @@ public class OperationManagerImpl implements OperationManager {
     }
 
     @Override
+    public List<Activity> getActivitiesUpdatedAfterByUser(long timestamp, String user, int limit, int offset)
+            throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getActivitiesUpdatedAfterByUser(timestamp, user, limit, offset);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the activity list changed after a " +
+                    "given time which are added by user : " + user, e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
     public int getActivityCountUpdatedAfter(long timestamp) throws OperationManagementException {
         try {
             OperationManagementDAOFactory.openConnection();
@@ -902,6 +952,21 @@ public class OperationManagerImpl implements OperationManager {
         } catch (OperationManagementDAOException e) {
             throw new OperationManagementException("Error occurred while getting the activity count changed after a " +
                     "given time.", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getActivityCountUpdatedAfterByUser(long timestamp, String user) throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.openConnection();
+            return operationDAO.getActivityCountUpdatedAfterByUser(timestamp, user);
+        } catch (SQLException e) {
+            throw new OperationManagementException("Error occurred while opening a connection to the data source.", e);
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while getting the activity count changed after a " +
+                    "given time which are added by user :" + user, e);
         } finally {
             OperationManagementDAOFactory.closeConnection();
         }
