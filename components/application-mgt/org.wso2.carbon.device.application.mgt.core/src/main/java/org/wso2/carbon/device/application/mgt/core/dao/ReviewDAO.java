@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.Comment;
+import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.CommentManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
@@ -32,35 +32,40 @@ import java.util.List;
  * This interface specifies the database access operations performed for comments.
  */
 
- public interface CommentDAO {
+ public interface ReviewDAO {
 
     /**
-     * To add a comment to a application.
+     * To add a review to a application.
      *
      * @param tenantId  tenantId of the commented application.
-     * @param comment   comment of the application.
+     * @param review   review of the application.
      * @param createdBy Username of the created person.
-     * @param parentId  parent id of the parent comment.
+     * @param parentId  parent id of the parent review.
      * @param uuid      uuid of the application
-     * @return If comment is added successfully, it return true otherwise false
-     * @throws CommentManagementException Exceptions of the comment management.
+     * @return If review is added successfully, it return true otherwise false
+     * @throws CommentManagementException Exceptions of the review management.
      * @throws DBConnectionException      db connection exception.
      */
-    boolean addComment(int tenantId, Comment comment, String createdBy, int parentId, String uuid)
+    boolean addReview(Review review, int appId, int appReleaseId, int tenantId)
             throws CommentManagementException, DBConnectionException, SQLException;
 
+
+    Review isExistReview(int appId, int appReleaseId, String username, int tenantId)
+            throws DBConnectionException, SQLException;
+
+
     /**
-     * To add a comment to a application.
+     * To add a review to a application.
      *
-     * @param comment   comment of the application.
+     * @param review   review of the application.
      * @param createdBy Username of the created person.
      * @param appType   type of the commented application.
      * @param appName   name of the commented application.
      * @param version   version of the commented application.
-     * @return comment id
-     * @throws CommentManagementException Exceptions of the comment management.
+     * @return review id
+     * @throws CommentManagementException Exceptions of the review management.
      */
-    int addComment(int tenantId, Comment comment, String createdBy, String appType, String appName, String version)
+    int addReview(int tenantId, Review review, String createdBy, String appType, String appName, String version)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -70,12 +75,12 @@ import java.util.List;
      * @param updatedComment comment after updated
      * @param modifiedBy     Username of the modified person.
      * @param modifiedAt     time of the modification.
-     * @return {@link Comment}Updated comment
+     * @return {@link Review}Updated comment
      * @throws CommentManagementException Exceptions of the comment management.
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      */
-    Comment updateComment(int commentId, String updatedComment, String modifiedBy, Timestamp modifiedAt)
+    boolean updateReview(Review review, int reviewId, int tenantId)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -86,24 +91,24 @@ import java.util.List;
      * @param updatedComment comment after updated
      * @param modifiedBy     Username of the modified person.
      * @param modifiedAt     time of the modification.
-     * @return {@link Comment}Updated comment
+     * @return {@link Review}Updated comment
      * @throws CommentManagementException Exceptions of the comment management.
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      */
-    Comment updateComment(String uuid, int commentId, String updatedComment, String modifiedBy, Timestamp modifiedAt)
+    Review updateReview(String uuid, int commentId, String updatedComment, String modifiedBy, Timestamp modifiedAt)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
      * To get the comment with id.
      *
      * @param commentId id of the comment
-     * @return {@link Comment}Comment
+     * @return {@link Review}Review
      * @throws CommentManagementException Exceptions of the comment management.
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      */
-    Comment getComment(int commentId) throws CommentManagementException, SQLException, DBConnectionException;
+    Review getComment(int commentId) throws CommentManagementException, SQLException, DBConnectionException;
 
     /**
      * To get the comment with id.
@@ -114,7 +119,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      */
-    List<Comment> getComment(String uuid) throws CommentManagementException, SQLException, DBConnectionException;
+    List<Review> getComment(String uuid) throws CommentManagementException, SQLException, DBConnectionException;
 
     /**
      * To get all the comments
@@ -125,7 +130,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      **/
-    List<Comment> getAllComments(String uuid, PaginationRequest request) throws SQLException, DBConnectionException;
+    List<Review> getAllComments(String uuid, PaginationRequest request) throws SQLException, DBConnectionException;
 
     /**
      * To get list of comments using release id and application id.
@@ -135,7 +140,10 @@ import java.util.List;
      * @return {@link List}List of comments
      * @throws CommentManagementException Exceptions of the comment management.
      */
-    List<Comment> getComments(int appReleasedId, int appId) throws CommentManagementException;
+
+    List<Integer> getAllRatingValues(String uuid)throws SQLException, DBConnectionException;
+
+       List<Review> getComments(int appReleasedId, int appId) throws CommentManagementException;
 
     /**
      * To get list of comments using application type, application name and version of the application.
@@ -148,7 +156,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    List<Comment> getComments(String appType, String appName, String version)
+    List<Review> getComments(String appType, String appName, String version)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -160,7 +168,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    List<Comment> getComments(int tenantId) throws CommentManagementException, DBConnectionException, SQLException;
+    List<Review> getComments(int tenantId) throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
      * To get list of comments by created user.
@@ -171,7 +179,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    List<Comment> getCommentsByUser(String createdBy)
+    List<Review> getCommentsByUser(String createdBy)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -184,7 +192,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    List<Comment> getCommentsByUser(String createdBy, Timestamp createdAt)
+    List<Review> getCommentsByUser(String createdBy, Timestamp createdAt)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -196,7 +204,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    List<Comment> getCommentsByModifiedUser(String modifiedBy)
+    List<Review> getCommentsByModifiedUser(String modifiedBy)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -209,7 +217,7 @@ import java.util.List;
      * @throws DBConnectionException db connection exception.
      * @throws SQLException          sql exception
      */
-    List<Comment> getCommentsByModifiedUser(String modifiedBy, Timestamp modifiedAt)
+    List<Review> getCommentsByModifiedUser(String modifiedBy, Timestamp modifiedAt)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -224,7 +232,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    List<Comment> getComments(String appType, String appName, String version, int parentId)
+    List<Review> getComments(String appType, String appName, String version, int parentId)
             throws CommentManagementException, DBConnectionException, SQLException;
 
     /**
@@ -398,7 +406,7 @@ import java.util.List;
      *
      * @param request
      * @param uuid
-     * @return Comment count
+     * @return Review count
      * @throws CommentManagementException
      */
     int getCommentCount(PaginationRequest request, String uuid) throws CommentManagementException;

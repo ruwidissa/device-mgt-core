@@ -380,7 +380,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Boolean isAppExist = false;
+        boolean isAppExist = false;
         try {
             conn = this.getDBConnection();
             String sql =

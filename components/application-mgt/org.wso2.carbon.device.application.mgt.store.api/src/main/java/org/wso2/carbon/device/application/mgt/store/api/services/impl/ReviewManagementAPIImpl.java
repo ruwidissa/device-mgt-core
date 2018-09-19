@@ -21,14 +21,18 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.Application;
+import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
+import org.wso2.carbon.device.application.mgt.common.Rating;
+import org.wso2.carbon.device.application.mgt.common.Review;
+import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
+import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.ReviewManagementAPI;
-import org.wso2.carbon.device.application.mgt.common.Comment;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.CommentManagementException;
-import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
@@ -39,11 +43,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Comment Management related jax-rs APIs.
+ * Review Management related jax-rs APIs.
  */
 @Path("/review")
 public class ReviewManagementAPIImpl implements ReviewManagementAPI {
@@ -52,16 +54,16 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
 
     @Override
     @GET
-    @Path("/application/{uuid}/comments")
-    public Response getAllComments(
+    @Path("/{uuid}")
+    public Response getAllReviews(
             @PathParam("uuid") String uuid,
             @QueryParam("offset") int offSet,
             @QueryParam("limit") int limit) {
 
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getCommentsManager();
         PaginationRequest request = new PaginationRequest(offSet, limit);
         try {
-            PaginationResult paginationResult = commentsManager.getAllComments(request, uuid);
+            PaginationResult paginationResult = reviewManager.getAllReviews(request, uuid);
             return Response.status(Response.Status.OK).entity(paginationResult).build();
         } catch (CommentManagementException e) {
             String msg = "Error occurred while retrieving comments.";
@@ -74,48 +76,60 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @Override
     @POST
     @Consumes("application/json")
-    @Path("/application/{uuid}/comment")
-    public Response addComment(
-            @ApiParam Comment comment,
+    @Path("/{uuid}")
+    public Response addReview(
+            @ApiParam Review review,
             @PathParam("uuid") String uuid) {
 
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getCommentsManager();
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        Application application;
+        ApplicationRelease applicationRelease;
         try {
-            if (commentsManager.addComment(comment, uuid) != null) {
-                return Response.status(Response.Status.CREATED).entity(comment).build();
+            application = applicationManager.getApplicationByRelease(uuid);
+            applicationRelease = applicationManager.getAppReleaseIfExists(application.getId(), uuid);
+            boolean abc = reviewManager.addReview(review, application.getId(), applicationRelease.getId());
+            if (abc) {
+                return Response.status(Response.Status.CREATED).entity(review).build();
             } else {
-                String msg = "Given comment is not valid ";
+                String msg = "Given review is not valid ";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
         } catch (CommentManagementException e) {
-            String msg = "Error occurred while creating the comment";
+            String msg = "Error occurred while creating the review";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(msg).build();
+        } catch (ApplicationManagementException e) {
+//            todo
+            log.error("");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("").build();
         }
     }
 
     @Override
     @PUT
     @Consumes("application/json")
-    @Path("/comment/{commentId}")
+    @Path("/review/{commentId}")
     public Response updateComment(
-            @ApiParam Comment comment,
+            @ApiParam Review review,
             @PathParam("commentId") int commentId) {
 
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getCommentsManager();
         try {
             if (commentId == 0) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Comment not found").build();
-            } else if (comment == null) {
-                String msg = "Given comment is not valid ";
+                        .entity("Review not found").build();
+            } else if (review == null) {
+                String msg = "Given review is not valid ";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).build();
+            } else if (reviewManager.updateReview(review, commentId, true)) {
+                return Response.status(Response.Status.OK).entity(review).build();
             } else {
-                comment = commentsManager.updateComment(comment, commentId);
-                return Response.status(Response.Status.OK).entity(comment).build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("").build();
             }
         } catch (CommentManagementException e) {
             String msg = "Error occurred while retrieving comments.";
@@ -129,14 +143,15 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @DELETE
     @Path("/comment/{commentId}")
     public Response deleteComment(
-            @PathParam("commentId") int commentId) {
+            @PathParam("commentId") int commentId,
+            @QueryParam("username") String username) {
 
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getCommentsManager();
         try {
             if (commentId == 0) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Comment not found").build();
+                return Response.status(Response.Status.NOT_FOUND).entity("Review not found").build();
             } else {
-                commentsManager.deleteComment(commentId);
+                reviewManager.deleteReview(username, commentId);
             }
         } catch (CommentManagementException e) {
             String msg = "Error occurred while deleting the comment.";
@@ -144,79 +159,24 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg)
                 .build();
         }
-        return Response.status(Response.Status.OK).entity("Comment is deleted successfully.").build();
+        return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
     }
 
     @Override
     @GET
-    @Path("/application/{uuid}/rating")
+    @Path("/{uuid}/rating")
     public Response getRating(
             @PathParam("uuid") String uuid) {
 
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
-        int stars;
+        ReviewManager reviewManager = APIUtil.getCommentsManager();
+        Rating rating;
         try {
-            stars = commentsManager.getStars(uuid);
+            rating = reviewManager.getRating(uuid);
         } catch (CommentManagementException e) {
-            log.error("Comment Management Exception occurs", e);
+            log.error("Review Management Exception occurs", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (ApplicationManagementException e) {
-            String msg="Application Management Exception occurs";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(msg).build();
         }
-        return Response.status(Response.Status.OK).entity(stars).build();
+        return Response.status(Response.Status.OK).entity(rating).build();
     }
 
-    @Override
-    @GET
-    @Path("/application/{uuid}/total-rated-users")
-    public Response getNumOfRatedUsers(
-            @PathParam("uuid") String uuid) {
-
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
-        int ratedUsers;
-        try {
-            ratedUsers = commentsManager.getRatedUser(uuid);
-        } catch (CommentManagementException e) {
-            String msg="Comment Management Exception occurs";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            String msg="Application Management Exception occurs";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Application with UUID" + uuid + " Internal server error occurs").build();
-        }
-        return Response.status(Response.Status.OK).entity(ratedUsers).build();
-    }
-
-    @Override
-    @PUT
-    @Consumes("application/json")
-    @Path("/application/{uuid}/rating")
-    public Response updateRatings(
-            @ApiParam int stars,
-            @PathParam("uuid") String uuid) {
-
-        CommentsManager commentsManager = APIUtil.getCommentsManager();
-        int newStars;
-        try {
-            newStars = commentsManager.updateStars(stars, uuid);
-            if (stars != 0) {
-                return Response.status(Response.Status.CREATED).entity(newStars).build();
-            } else {
-                String msg = "Given star value is not valid ";
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-        } catch (ApplicationManagementException e) {
-            String msg="Application Management Exception occurs";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(msg).build();
-        }
-    }
 }

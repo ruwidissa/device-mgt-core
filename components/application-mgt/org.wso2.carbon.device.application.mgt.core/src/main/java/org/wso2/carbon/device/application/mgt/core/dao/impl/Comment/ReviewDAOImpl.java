@@ -22,11 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.Comment;
+import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.CommentManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
-import org.wso2.carbon.device.application.mgt.core.dao.CommentDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
@@ -40,20 +40,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This handles CommentDAO related operations.
+ * This handles ReviewDAO related operations.
  */
 
-public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
+public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
 
-    private static final Log log = LogFactory.getLog(CommentDAOImpl.class);
+    private static final Log log = LogFactory.getLog(ReviewDAOImpl.class);
     private String sql;
 
     @Override
-    public boolean addComment(int tenantId, Comment comment, String createdBy, int parentId, String uuid)
+    public boolean addReview(Review review, int appId, int appReleaseId, int tenantId)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to add comment for application release (" + uuid + ")");
+            log.debug("Request received in DAO Layer to add review for application release. Application id: " + appId
+                    + "Application Release id: " + appReleaseId);
         }
         Connection conn = this.getDBConnection();
         PreparedStatement statement = null;
@@ -64,11 +65,11 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         try {
             statement = conn.prepareStatement(sql, new String[] { "id" });
             statement.setInt(1, tenantId);
-            statement.setString(2, comment.getCommentText());
-            statement.setString(3, createdBy);
-            statement.setInt(4, parentId);
-            statement.setString(5, uuid);
-            statement.setString(6, uuid);
+            statement.setString(2, review.getComment());
+//            statement.setString(3, createdBy);
+//            statement.setInt(4, parentId);
+//            statement.setString(5, uuid);
+//            statement.setString(6, uuid);
             statement.executeUpdate();
             rs = statement.getGeneratedKeys();
             return rs.next();
@@ -78,7 +79,47 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
     }
 
     @Override
-    public int addComment(int tenantId, Comment comment, String createdBy, String appType, String appName,
+    public Review isExistReview(int appId, int appReleaseId, String username, int tenantId)
+            throws DBConnectionException, SQLException {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Request received in DAO Layer to check whether review exist or not rein the IoTS APPM. Application id:  "
+                            + appId + " Application release id: " + appReleaseId + " comment owner: " + username);
+        }
+        Connection conn;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        Review review = null;
+        sql = "SELECT ID, COMMENT, REPLY_COMMENT, CREATED_AT, MODEFIED_AT, USERNAME, PARENT_ID, RATING FROM AP_APP_REVIEW "
+                + "WHERE AP_APP_ID = ? AND AP_APP_RELEASE_ID = ? AND USERNAME = ? AND TENANT_ID = ?;";
+        try {
+            conn = this.getDBConnection();
+            statement = conn.prepareStatement(sql);
+            statement.setInt(1, appId);
+            statement.setInt(2, appReleaseId);
+            statement.setString(3, username);
+            statement.setInt(4, tenantId);
+
+            rs = statement.executeQuery();
+            if (rs.next()){
+                review = new Review();
+                review.setId(rs.getInt("ID"));
+                review.setComment(rs.getString("COMMENT"));
+                review.setReplyComment(rs.getString("REPLY_COMMENT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                review.setUsername(rs.getString("USERNAME"));
+                review.setRating(rs.getInt("RATING"));
+            }
+            return review;
+        } finally {
+            Util.cleanupResources(statement, rs);
+        }
+    }
+
+
+    @Override
+    public int addReview(int tenantId, Review review, String createdBy, String appType, String appName,
             String version) throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
@@ -95,7 +136,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         try {
             statement = conn.prepareStatement(sql, new String[] { "id" });
             statement.setInt(1, tenantId);
-            statement.setString(2, comment.getCommentText());
+            statement.setString(2, review.getComment());
             statement.setString(3, createdBy);
             statement.setString(4, version);
             statement.setString(5, appType);
@@ -114,11 +155,10 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
     }
 
     @Override
-    public Comment updateComment(int commentId, String updatedComment, String modifiedBy,
-            Timestamp modifiedAt) throws CommentManagementException, DBConnectionException, SQLException {
+    public boolean updateReview(Review review, int reviewId, int tenantId) throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to update the comment with ID (" + commentId + ")");
+            log.debug("Request received in DAO Layer to update the comment with ID (" + reviewId + ")");
         }
         Connection connection;
         PreparedStatement statement = null;
@@ -127,19 +167,20 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, updatedComment);
-            statement.setString(2, modifiedBy);
-            statement.setInt(3, commentId);
+//            statement.setString(1, updatedComment);
+//            statement.setString(2, modifiedBy);
+            statement.setInt(3, reviewId);
             statement.executeUpdate();
             rs = statement.executeQuery();
         } finally {
             Util.cleanupResources(statement, rs);
         }
-        return getComment(commentId);
+        // todo
+        return false;
     }
 
     @Override
-    public Comment updateComment(String uuid, int commentId, String updatedComment, String modifiedBy,
+    public Review updateReview(String uuid, int commentId, String updatedComment, String modifiedBy,
             Timestamp modifiedAt) throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
@@ -165,15 +206,15 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
     }
 
     @Override
-    public Comment getComment(int commentId) throws CommentManagementException {
+    public Review getComment(int commentId) throws CommentManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comment with the comment id(" + commentId + ") from the database");
+            log.debug("Getting review with the review id(" + commentId + ") from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        Comment comment = new Comment();
+        Review review = new Review();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT FROM AP_APP_COMMENT WHERE ID=?;";
@@ -181,30 +222,28 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setInt(1, commentId);
             rs = statement.executeQuery();
             if (rs.next()) {
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("MODEFIED_AT"));
-                comment.setParent(rs.getInt("PARENT_ID"));
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
                 Util.cleanupResources(statement, rs);
-                return comment;
+                return review;
             }
         } catch (SQLException e) {
             throw new CommentManagementException(
-                    "SQL Error occurred while retrieving information of the comment " + commentId, e);
+                    "SQL Error occurred while retrieving information of the review " + commentId, e);
         } catch (DBConnectionException e) {
-            log.error("DB Connection Exception occurred while retrieving information of the comment " + commentId, e);
+            log.error("DB Connection Exception occurred while retrieving information of the review " + commentId, e);
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comment;
+        return review;
     }
 
     @Override
-    public List<Comment> getComment(String uuid) throws CommentManagementException {
+    public List<Review> getComment(String uuid) throws CommentManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug("Getting comment with the application release(" + uuid + ") from the database");
@@ -212,7 +251,7 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT FROM AP_APP_COMMENT WHERE (SELECT ID FROM AP_APP_RELEASE where UUID=?)AND "
@@ -222,29 +261,27 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setString(2, uuid);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("MODEFIED_AT"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } catch (DBConnectionException e) {
-            log.error("DB Connection Exception occurred while retrieving comments", e);
+            log.error("DB Connection Exception occurred while retrieving reviews", e);
         } catch (SQLException e) {
-            throw new CommentManagementException("SQL Error occurred while retrieving comments", e);
+            throw new CommentManagementException("SQL Error occurred while retrieving reviews", e);
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getAllComments(String uuid, PaginationRequest request)
+    public List<Review> getAllComments(String uuid, PaginationRequest request)
             throws SQLException, DBConnectionException {
 
         if (log.isDebugEnabled()) {
@@ -253,36 +290,61 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
-            sql = "SELECT AP_APP_COMMENT.ID AS ID, AP_APP_COMMENT.COMMENT_TEXT AS COMMENT_TEXT, "
-                    + "AP_APP_COMMENT.CREATED_AT AS CREATED_AT, AP_APP_COMMENT.CREATED_BY AS CREATED_BY, "
-                    + "AP_APP_COMMENT.MODIFIED_AT AS MODIFIED_AT, AP_APP_COMMENT.MODIFIED_BY AS MODIFIED_BY, "
-                    + "AP_APP_COMMENT.PARENT_ID AS PARENT_ID, AP_APP_COMMENT.TENANT_ID AS TENANT_ID FROM"
-                    + " AP_APP_COMMENT, AP_APP_RELEASE WHERE AP_APP_COMMENT.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID "
-                    + "AND AP_APP_RELEASE.UUID =? LIMIT ? OFFSET ?;";
+            sql = "SELECT AP_APP_COMMENT.ID AS ID, AP_APP_COMMENT.COMMENT_TEXT AS "
+                    + "COMMENT_TEXT, AP_APP_COMMENT.CREATED_BY AS CREATED_BY, AP_APP_COMMENT.MODIFIED_BY AS "
+                    + "MODIFIED_BY, AP_APP_COMMENT.PARENT_ID AS PARENT_ID FROM AP_APP_COMMENT, AP_APP_RELEASE WHERE "
+                    + "AP_APP_COMMENT.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? AND "
+                    + "AP_APP_COMMENT.TENANT_ID = ? AND AP_APP_COMMENT.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                    + "LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
             statement.setInt(2, request.getLimit());
             statement.setInt(3, request.getOffSet());
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                comment.setModifiedBy(rs.getString("MODIFIED_BY"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, rs);
         }
-        return comments;
+        return reviews;
+    }
+
+    @Override
+    public List<Integer> getAllRatingValues(String uuid)throws SQLException, DBConnectionException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Getting comment of the application release (" + uuid + ") from the database");
+        }
+        Connection conn;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        List<Integer> reviews = new ArrayList<>();
+        try {
+            conn = this.getDBConnection();
+//            todo
+            sql = "SELECT AP_APP_COMMENT.ID AS ID, AP_APP_COMMENT.COMMENT_TEXT AS "
+                    + "COMMENT_TEXT, AP_APP_COMMENT.CREATED_BY AS CREATED_BY, AP_APP_COMMENT.MODIFIED_BY AS "
+                    + "MODIFIED_BY, AP_APP_COMMENT.PARENT_ID AS PARENT_ID FROM AP_APP_COMMENT, AP_APP_RELEASE WHERE "
+                    + "AP_APP_COMMENT.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? AND "
+                    + "AP_APP_COMMENT.TENANT_ID = ? AND AP_APP_COMMENT.TENANT_ID = AP_APP_RELEASE.TENANT_ID;";
+            statement = conn.prepareStatement(sql);
+            statement.setString(1, uuid);
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                reviews.add(rs.getInt("RATING"));
+            }
+        } finally {
+            Util.cleanupResources(statement, rs);
+        }
+        return reviews;
     }
 
     @Override
@@ -320,16 +382,16 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
     }
 
     @Override
-    public List<Comment> getComments(int appReleasedId, int appId) throws CommentManagementException {
+    public List<Review> getComments(int appReleasedId, int appId) throws CommentManagementException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comments with the application release id(" + appReleasedId + ") and " + "application id("
+            log.debug("Getting reviews with the application release id(" + appReleasedId + ") and " + "application id("
                     + appId + ") from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT FROM AP_APP_COMMENT WHERE AP_APP_RELEASE_ID=? AND AP_APP_ID=?;";
@@ -338,39 +400,37 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setInt(2, appId);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } catch (DBConnectionException e) {
-            log.error("DB Connection Exception occurred while retrieving information of comments", e);
+            log.error("DB Connection Exception occurred while retrieving information of reviews", e);
         } catch (SQLException e) {
-            throw new CommentManagementException("SQL Error occurred while retrieving information of comments", e);
+            throw new CommentManagementException("SQL Error occurred while retrieving information of reviews", e);
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getComments(String appType, String appName, String version)
+    public List<Review> getComments(String appType, String appName, String version)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comments with the application name(" + appName + "),application type(" + appType + ") "
+            log.debug("Getting reviews with the application name(" + appName + "),application type(" + appType + ") "
                     + "and application version (" + version + ") from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT,PARENT_ID,TENANT_ID FROM AP_APP_COMMENT C ,"
@@ -384,34 +444,32 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setString(3, appType);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getComments(int tenantId)
+    public List<Review> getComments(int tenantId)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comments with the tenant_id(" + tenantId + ")  from the database");
+            log.debug("Getting reviews with the tenant_id(" + tenantId + ")  from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT FROM AP_APP_COMMENT WHERE TENANT_ID='?';";
@@ -419,34 +477,32 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setInt(1, tenantId);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getCommentsByUser(String createdBy)
+    public List<Review> getCommentsByUser(String createdBy)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comments with the created by(" + createdBy + ")  from the database");
+            log.debug("Getting reviews with the created by(" + createdBy + ")  from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT ,PARENT_ID,TENANT_ID,CREATED_AT FROM AP_APP_COMMENT WHERE CREATED_BY= ?"
@@ -455,35 +511,33 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setString(1, createdBy);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getCommentsByUser(String createdBy, Timestamp createdAt)
+    public List<Review> getCommentsByUser(String createdBy, Timestamp createdAt)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Getting comments with the created by(" + createdBy + ") at (" + createdAt + ") from the database");
+                    "Getting reviews with the created by(" + createdBy + ") at (" + createdAt + ") from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT,PARENT_ID,TENANT_ID FROM AP_APP_COMMENT WHERE CREATED_BY=?"
@@ -493,34 +547,32 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setTimestamp(2, createdAt);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getCommentsByModifiedUser(String modifiedBy)
+    public List<Review> getCommentsByModifiedUser(String modifiedBy)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comments with the modified by(" + modifiedBy + ")  from the database");
+            log.debug("Getting reviews with the modified by(" + modifiedBy + ")  from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT,PARENT_ID,TENANT_ID,CREATED_AT,MODEFIED_AT FROM AP_APP_COMMENT "
@@ -529,35 +581,33 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setString(1, modifiedBy);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getCommentsByModifiedUser(String modifiedBy, Timestamp modifiedAt)
+    public List<Review> getCommentsByModifiedUser(String modifiedBy, Timestamp modifiedAt)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting comments with the modified by(" + modifiedBy + ") at (" + modifiedAt + ") from the "
+            log.debug("Getting reviews with the modified by(" + modifiedBy + ") at (" + modifiedAt + ") from the "
                     + "database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT,PARENT_ID,TENANT_ID,CREATED_AT FROM AP_APP_COMMENT WHERE MODEFIED_BY= ?,"
@@ -567,36 +617,34 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setTimestamp(2, modifiedAt);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override
-    public List<Comment> getComments(String appType, String appName, String version, int parentId)
+    public List<Review> getComments(String appType, String appName, String version, int parentId)
             throws CommentManagementException, DBConnectionException, SQLException {
 
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Getting comments with the application name(" + appName + "),application type(" + appType + ") and"
+                    "Getting reviews with the application name(" + appName + "),application type(" + appType + ") and"
                             + "application version (" + version + ") from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs;
-        List<Comment> comments = new ArrayList<>();
+        List<Review> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
             sql = "SELECT COMMENT_TEXT,TENANT_ID FROM AP_APP_COMMENT C ,"
@@ -611,21 +659,19 @@ public class CommentDAOImpl extends AbstractDAOImpl implements CommentDAO {
             statement.setInt(4, parentId);
             rs = statement.executeQuery();
             while (rs.next()) {
-                Comment comment = new Comment();
-                comment.setId(rs.getInt("ID"));
-                comment.setTenantId(rs.getInt("TENANT_ID"));
-                comment.setCommentText(rs.getString("COMMENT_TEXT"));
-                comment.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                comment.setCreatedBy(rs.getString("CREATED_BY"));
-                comment.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
-                comment.setModifiedBy(rs.getString("modifiedBy"));
-                comment.setParent(rs.getInt("PARENT_ID"));
-                comments.add(comment);
+                Review review = new Review();
+                review.setId(rs.getInt("ID"));
+//                review.setTenantId(rs.getInt("TENANT_ID"));
+                review.setComment(rs.getString("COMMENT_TEXT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setUsername(rs.getString("CREATED_BY"));
+                review.setModifiedAt(rs.getTimestamp("MODEFIED_AT"));
+                reviews.add(review);
             }
         } finally {
             Util.cleanupResources(statement, null);
         }
-        return comments;
+        return reviews;
     }
 
     @Override

@@ -20,6 +20,7 @@
 package org.wso2.carbon.device.application.mgt.core.dao.impl.application.release;
 
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
@@ -268,20 +269,21 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * To Update starts of an application release.
      *
      * @param id Id of the application Release.
-     * @param stars given stars for the application release.
+     * @param rating given stars for the application release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public void updateStars(int id, int stars) throws ApplicationManagementDAOException {
+    public int updateRatingValue(int id, double rating, int ratedUsers) throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
-        String sql = "UPDATE AP_APP_RELEASE SET STARS = ? WHERE ID = ?;";
+        String sql = "UPDATE AP_APP_RELEASE SET RATING = ? AND RATED_USERS = ? WHERE ID = ?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, stars);
+            statement.setDouble(1, rating);
+            statement.setInt(2, ratedUsers);
             statement.setInt(2, id);
-            statement.executeUpdate();
+            return statement.executeUpdate();
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
                     "Database connection exception while trying to update the application release", e);
@@ -290,6 +292,42 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     "SQL exception while updating the release ,while executing the query " + sql, e);
         } finally {
             Util.cleanupResources(statement, null);
+        }
+    }
+
+    /**
+     * To retrieve rating of an application release.
+     *
+     * @param id Id of the application Release.
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    @Override
+    public Rating getRating(int id) throws ApplicationManagementDAOException {
+        Connection connection;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        Rating rating = null;
+        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE ID = ?;";
+        try {
+            connection = this.getDBConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            resultSet = statement.executeQuery();
+
+            if (resultSet.next()){
+                rating = new Rating();
+                rating.setRatingValue(resultSet.getDouble("RATING"));
+                rating.setNoOfUsers(resultSet.getInt("RATED_USERS"));
+            }
+            return rating;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Database connection exception while trying to update the application release", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "SQL exception while updating the release ,while executing the query " + sql, e);
+        } finally {
+            Util.cleanupResources(statement, resultSet);
         }
     }
 
@@ -369,7 +407,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     /**
-     * This method is capable to construct {@ApplicationRelease} and return the object
+     * This method is capable to construct {@link ApplicationRelease} and return the object
      * @param resultSet result set obtained from the query executing.
      * @throws SQLException SQL exception while accessing result set data.
      */

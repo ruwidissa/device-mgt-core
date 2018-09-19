@@ -23,7 +23,7 @@
 
     <test name="API Unit Tests" preserve-order="true">
         <classes>
-            <class name="org.wso2.carbon.device.application.mgt.store.api.services.CommentManagementAPITest"/>
+            <class name="org.wso2.carbon.device.application.mgt.store.api.services.ReviewManagementAPITest"/>
         </classes>
     </test>
 </suite>

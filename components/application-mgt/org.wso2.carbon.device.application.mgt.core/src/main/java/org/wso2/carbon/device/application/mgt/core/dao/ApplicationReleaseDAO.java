@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.application.mgt.core.dao;
 
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.util.List;
@@ -80,10 +81,18 @@ public interface ApplicationReleaseDAO {
     /**
      * To update an Application release.
      * @param id id of the ApplicationRelease that need to be updated.
-     * @param stars given stars for the application.
+     * @param rating given stars for the application.
+     * @param ratedUsers number of users who has rated for the application release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception
      */
-    void updateStars(int id, int stars) throws ApplicationManagementDAOException;
+    int updateRatingValue(int id, double rating, int ratedUsers) throws ApplicationManagementDAOException;
+
+    /**
+     * To retrieve rating of an application release.
+     * @param id Id of the application Release.
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    Rating getRating(int id) throws ApplicationManagementDAOException;
 
 
     /**
