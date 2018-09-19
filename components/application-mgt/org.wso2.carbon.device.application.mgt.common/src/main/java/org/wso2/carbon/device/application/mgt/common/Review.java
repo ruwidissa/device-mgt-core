@@ -34,9 +34,9 @@ public class Review {
             value = "Comment of the review")
     private String comment;
 
-    @ApiModelProperty(name = "replyComment",
-            value = "Reply comment of the review")
-    private String replyComment;
+    @ApiModelProperty(name = "parentId",
+            value = "Parent id of the review")
+    private int parentId;
 
     @ApiModelProperty(name = "username",
             value = "Username odf the Review creator",
@@ -54,6 +54,10 @@ public class Review {
     @ApiModelProperty(name = "rating",
             value = "Rating value of the application release")
     private int rating;
+
+    @ApiModelProperty(name = "replyReview",
+            value = "Replying review")
+    private Review replyReview;
 
     public int getId() {
         return id;
@@ -103,12 +107,20 @@ public class Review {
         this.rating = rating;
     }
 
-    public String getReplyComment() {
-        return replyComment;
+    public int getParentId() {
+        return parentId;
     }
 
-    public void setReplyComment(String replyComment) {
-        this.replyComment = replyComment;
+    public void setParentId(int parentId) {
+        this.parentId = parentId;
+    }
+
+    public Review getReplyReview() {
+        return replyReview;
+    }
+
+    public void setReplyReview(Review replyReview) {
+        this.replyReview = replyReview;
     }
 }
 

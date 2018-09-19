@@ -32,7 +32,7 @@ import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.ReviewManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.CommentManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
@@ -59,17 +59,15 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("uuid") String uuid,
             @QueryParam("offset") int offSet,
             @QueryParam("limit") int limit) {
-
         ReviewManager reviewManager = APIUtil.getCommentsManager();
         PaginationRequest request = new PaginationRequest(offSet, limit);
         try {
             PaginationResult paginationResult = reviewManager.getAllReviews(request, uuid);
             return Response.status(Response.Status.OK).entity(paginationResult).build();
-        } catch (CommentManagementException e) {
-            String msg = "Error occurred while retrieving comments.";
+        } catch (ReviewManagementException e) {
+            String msg = "Error occurred while retrieving reviews for application UUID: " + uuid;
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg)
-                .build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
@@ -80,7 +78,6 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     public Response addReview(
             @ApiParam Review review,
             @PathParam("uuid") String uuid) {
-
         ReviewManager reviewManager = APIUtil.getCommentsManager();
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         Application application;
@@ -96,7 +93,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-        } catch (CommentManagementException e) {
+        } catch (ReviewManagementException e) {
             String msg = "Error occurred while creating the review";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -131,7 +128,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             } else {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("").build();
             }
-        } catch (CommentManagementException e) {
+        } catch (ReviewManagementException e) {
             String msg = "Error occurred while retrieving comments.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -153,7 +150,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             } else {
                 reviewManager.deleteReview(username, commentId);
             }
-        } catch (CommentManagementException e) {
+        } catch (ReviewManagementException e) {
             String msg = "Error occurred while deleting the comment.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg)
@@ -172,7 +169,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
         Rating rating;
         try {
             rating = reviewManager.getRating(uuid);
-        } catch (CommentManagementException e) {
+        } catch (ReviewManagementException e) {
             log.error("Review Management Exception occurs", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

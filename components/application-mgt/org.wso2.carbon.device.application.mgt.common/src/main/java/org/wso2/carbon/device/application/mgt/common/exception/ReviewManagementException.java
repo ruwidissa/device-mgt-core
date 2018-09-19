@@ -18,20 +18,20 @@
  */
 package org.wso2.carbon.device.application.mgt.common.exception;
 
-public class CommentManagementException extends Exception {
+public class ReviewManagementException extends Exception {
     private String message;
 
-    public CommentManagementException(String message, Throwable throwable) {
+    public ReviewManagementException(String message, Throwable throwable) {
         super(message, throwable);
         setMessage(message);
     }
 
-    public CommentManagementException(String message) {
+    public ReviewManagementException(String message) {
         super(message);
         setMessage(message);
     }
 
-    public CommentManagementException() {
+    public ReviewManagementException() {
 
     }
 

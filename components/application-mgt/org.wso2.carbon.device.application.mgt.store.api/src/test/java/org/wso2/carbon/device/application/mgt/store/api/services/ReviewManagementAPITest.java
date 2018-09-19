@@ -34,7 +34,7 @@ import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.CommentManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.impl.ReviewManagementAPIImpl;
@@ -63,7 +63,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     }
 
     @BeforeClass
-    void init() throws CommentManagementException {
+    void init() throws ReviewManagementException {
 
         log.info("Initializing ReviewManagementAPI tests");
         initMocks(this);
@@ -84,7 +84,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     @Test
     public void testGetAllCommentsInternalError() throws Exception {
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-        Mockito.doThrow(new CommentManagementException()).when(this.reviewManager)
+        Mockito.doThrow(new ReviewManagementException()).when(this.reviewManager)
             .getAllReviews(Mockito.any(), Mockito.anyString());
         Response response = this.commentManagementAPI.getAllReviews("a", 1, 4);
         Assert.assertNotNull(response, "The response object is null.");
@@ -129,7 +129,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
         Review review = CommentMgtTestHelper.getDummyComment("a", "a");
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
         Mockito.when(this.commentManagementAPI.addReview(Mockito.any(), Mockito.anyString()))
-            .thenThrow(new CommentManagementException());
+            .thenThrow(new ReviewManagementException());
         Response response = this.commentManagementAPI.addReview(review, null);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
@@ -170,7 +170,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     public void testUpdateCommentInternalServerError() throws Exception {
         Review review = CommentMgtTestHelper.getDummyComment("a", "a");
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-        Mockito.doThrow(new CommentManagementException()).when(this.reviewManager).updateReview(review, 9, true);
+        Mockito.doThrow(new ReviewManagementException()).when(this.reviewManager).updateReview(review, 9, true);
         Response response = this.commentManagementAPI.updateComment(review, 9);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
@@ -189,7 +189,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     @Test
     public void testDeleteCommentInternalError() throws Exception {
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-        Mockito.when(this.commentManagementAPI.deleteComment(1,"")).thenThrow(new CommentManagementException());
+        Mockito.when(this.commentManagementAPI.deleteComment(1,"")).thenThrow(new ReviewManagementException());
         Response response = this.commentManagementAPI.deleteComment(1,"");
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
@@ -219,7 +219,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     public void testGetStarsCommentError() throws Exception {
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
         Mockito.when(this.commentManagementAPI.getRating(Mockito.anyString()))
-            .thenThrow(new CommentManagementException());
+            .thenThrow(new ReviewManagementException());
         Response response = this.commentManagementAPI.getRating("a");
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
