@@ -73,32 +73,14 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Get Application Details",
                         description = "Get application details",
-                        key = "perm:application:get",
-                        permissions = {"/device-mgt/application/get"}
-                ),
-                @Scope(
-                        name = "Create an Application",
-                        description = "Create an application",
-                        key = "perm:application:create",
-                        permissions = {"/device-mgt/application/create"}
+                        key = "perm:app:publisher:view",
+                        permissions = {"/device-mgt/application/view"}
                 ),
                 @Scope(
                         name = "Update an Application",
                         description = "Update an application",
-                        key = "perm:application:update",
+                        key = "perm:app:publisher:update",
                         permissions = {"/device-mgt/application/update"}
-                ),
-                @Scope(
-                        name = "Login to Application Management",
-                        description = "Login to Application Management",
-                        key = "perm:application-mgt:login",
-                        permissions = {"/device-mgt/application-mgt/login"}
-                ),
-                @Scope(
-                        name = "Delete an Application",
-                        description = "Delete an application",
-                        key = "perm:application:delete",
-                        permissions = {"/device-mgt/application/delete"}
                 )
         }
 )
@@ -122,7 +104,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
                     })
             }
     )
@@ -172,7 +154,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
                     })
             }
     )
@@ -215,7 +197,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -254,7 +236,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:create")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -313,7 +295,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:delete")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -349,7 +331,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:create")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -393,7 +375,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:create")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -436,7 +418,7 @@ public interface ApplicationManagementAPI {
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -475,7 +457,7 @@ public interface ApplicationManagementAPI {
             tags = "Lifecycle Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:lifecycle:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
                     })
             }
     )
@@ -507,7 +489,7 @@ public interface ApplicationManagementAPI {
             tags = "Lifecycle Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:lifecycle:add")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
