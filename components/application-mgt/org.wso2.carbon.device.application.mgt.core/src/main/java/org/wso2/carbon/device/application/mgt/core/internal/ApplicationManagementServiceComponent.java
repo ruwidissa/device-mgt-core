@@ -63,21 +63,26 @@ import java.util.List;
  * bind="setDataSourceService"
  * unbind="unsetDataSourceService"
  */
-public class ServiceComponent {
+public class ApplicationManagementServiceComponent {
 
-    private static Log log = LogFactory.getLog(ServiceComponent.class);
+    private static Log log = LogFactory.getLog(ApplicationManagementServiceComponent.class);
 
 
-    protected void activate(ComponentContext componentContext) throws NamingException {
+    @SuppressWarnings("unused")
+    protected void activate(ComponentContext componentContext) {
+
+        log.info("CALLING ACTIVATE   .............");
         BundleContext bundleContext = componentContext.getBundleContext();
         try {
-            String datasourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
+            String dataSourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
+            ApplicationManagementDAOFactory.init(dataSourceName);
+//            ApplicationManagementDAOFactory.initDatabases();
 
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             DataHolder.getInstance().setApplicationManager(applicationManager);
             bundleContext.registerService(ApplicationManager.class.getName(), applicationManager, null);
 
-            ReviewManager reviewManager = ApplicationManagementUtil.getCommentsManagerInstance();
+            ReviewManager reviewManager = ApplicationManagementUtil.getReviewManagerInstance();
             DataHolder.getInstance().setReviewManager(reviewManager);
             bundleContext.registerService(ReviewManager.class.getName(), reviewManager, null);
 
@@ -94,19 +99,14 @@ public class ServiceComponent {
             DataHolder.getInstance().setApplicationStorageManager(applicationStorageManager);
             bundleContext.registerService(ApplicationStorageManager.class.getName(), applicationStorageManager, null);
 
-            ApplicationManagementDAOFactory.init(datasourceName);
-            ApplicationManagementDAOFactory.initDatabases();
-
             List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
                     getConfiguration().getLifecycleStates();
             LifecycleStateManger lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
             DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
 
             log.info("ApplicationManagement core bundle has been successfully initialized");
-        } catch (InvalidConfigurationException e) {
-            log.error("Error while activating Application Management core component. ", e);
-        } catch (ApplicationManagementDAOException e) {
-            log.error("Error while activating Application Management core component.Failed to create the database ", e);
+        } catch (Throwable e) {
+            log.error("Error occurred while initializing app management core bundle", e);
         }
     }
 

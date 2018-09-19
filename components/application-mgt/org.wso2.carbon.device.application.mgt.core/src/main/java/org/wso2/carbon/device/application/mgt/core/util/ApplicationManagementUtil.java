@@ -45,9 +45,9 @@ public class ApplicationManagementUtil {
         return getInstance(extension, ApplicationManager.class);
     }
 
-    public static ReviewManager getCommentsManagerInstance() throws InvalidConfigurationException {
+    public static ReviewManager getReviewManagerInstance() throws InvalidConfigurationException {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
-        Extension extension = configurationManager.getExtension(Extension.Name.CommentsManager);
+        Extension extension = configurationManager.getExtension(Extension.Name.ReviewManager);
         return getInstance(extension, ReviewManager.class);
     }
 

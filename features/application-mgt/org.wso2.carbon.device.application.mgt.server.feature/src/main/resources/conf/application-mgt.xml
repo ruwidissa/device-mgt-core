@@ -31,8 +31,8 @@
         <Extension name="CategoryManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.CategoryManagerImpl</ClassName>
         </Extension>
-        <Extension name="CommentsManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.CommentsManagerImpl</ClassName>
+        <Extension name="ReviewManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ReviewManagerImpl</ClassName>
         </Extension>
         <Extension name="LifecycleStateManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.LifecycleStateManagerImpl</ClassName>

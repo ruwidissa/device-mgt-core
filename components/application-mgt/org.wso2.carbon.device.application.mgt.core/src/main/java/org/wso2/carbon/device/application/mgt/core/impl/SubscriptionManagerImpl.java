@@ -27,7 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
+import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.mgt.common.Device;
@@ -68,7 +68,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (log.isDebugEnabled()) {
             log.debug("Install application: " + applicationUUID + " to " + deviceList.size() + "devices.");
         }
-        ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
+        ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
         Application application = applicationManager.getApplicationByRelease(applicationUUID);
 
         return installApplication(application, deviceList);
@@ -80,7 +80,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (log.isDebugEnabled()) {
             log.debug("Install application: " + applicationUUID + " to " + userList.size() + " users.");
         }
-        ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
+        ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
         Application application = applicationManager.getApplicationByRelease(applicationUUID);
         List<DeviceIdentifier> deviceList = new ArrayList<>();
         for (String user : userList) {
@@ -121,7 +121,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (log.isDebugEnabled()) {
             log.debug("Install application: " + applicationUUID + " to " + roleList.size() + " roles.");
         }
-        ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
+        ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
         Application application = applicationManager.getApplicationByRelease(applicationUUID);
         List<DeviceIdentifier> deviceList = new ArrayList<>();
         for (String role : roleList) {
@@ -162,7 +162,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (log.isDebugEnabled()) {
             log.debug("Install application: " + applicationUUID + " to " + deviceGroupList.size() + " groups.");
         }
-        ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
+        ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
         Application application = applicationManager.getApplicationByRelease(applicationUUID);
         GroupManagementProviderService groupManagementProviderService = HelperUtil.getGroupManagementProviderService();
         List<DeviceGroup> groupList = new ArrayList<>();
