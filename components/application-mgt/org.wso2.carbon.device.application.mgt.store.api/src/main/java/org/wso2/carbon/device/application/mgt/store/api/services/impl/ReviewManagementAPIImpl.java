@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.Application;
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.Review;
@@ -59,7 +58,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("uuid") String uuid,
             @QueryParam("offset") int offSet,
             @QueryParam("limit") int limit) {
-        ReviewManager reviewManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getReviewManager();
         PaginationRequest request = new PaginationRequest(offSet, limit);
         try {
             PaginationResult paginationResult = reviewManager.getAllReviews(request, uuid);
@@ -78,29 +77,34 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     public Response addReview(
             @ApiParam Review review,
             @PathParam("uuid") String uuid) {
-        ReviewManager reviewManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getReviewManager();
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         Application application;
-        ApplicationRelease applicationRelease;
         try {
             application = applicationManager.getApplicationByRelease(uuid);
-            applicationRelease = applicationManager.getAppReleaseIfExists(application.getId(), uuid);
-            boolean abc = reviewManager.addReview(review, application.getId(), applicationRelease.getId());
-            if (abc) {
+            if (application.getApplicationReleases().isEmpty()){
+                String msg = "Couldn't Found an one application release for the UUID: " + uuid;
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+            if (application.getApplicationReleases().size()>1){
+                String msg = "Found more than one application release for the UUID: " + uuid;
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+            boolean isReviewCreated = reviewManager
+                    .addReview(review, application.getId(), application.getApplicationReleases().get(0).getId());
+            if (isReviewCreated) {
                 return Response.status(Response.Status.CREATED).entity(review).build();
             } else {
-                String msg = "Given review is not valid ";
+                String msg = "Given review is not valid. Please check the review payload.";
                 log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
         } catch (ReviewManagementException e) {
             String msg = "Error occurred while creating the review";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationManagementException e) {
-//            todo
-            log.error("");
+            log.error("Error occured while getting the application for application UUID: " + uuid);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("").build();
         }
@@ -109,41 +113,35 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @Override
     @PUT
     @Consumes("application/json")
-    @Path("/review/{commentId}")
-    public Response updateComment(
+    @Path("/{uuid}/{reviewId}")
+    public Response updateReview(
             @ApiParam Review review,
-            @PathParam("commentId") int commentId) {
-
-        ReviewManager reviewManager = APIUtil.getCommentsManager();
+            @PathParam("uuid") String uuid,
+            @PathParam("reviewId") int reviewId) {
+        ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (commentId == 0) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Review not found").build();
-            } else if (review == null) {
-                String msg = "Given review is not valid ";
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            } else if (reviewManager.updateReview(review, commentId, true)) {
+            if (reviewManager.updateReview(review, reviewId, true)) {
                 return Response.status(Response.Status.OK).entity(review).build();
             } else {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("").build();
+                String msg = "Review updating failed. Please contact the administrator";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (ReviewManagementException e) {
             String msg = "Error occurred while retrieving comments.";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
     @Override
     @DELETE
-    @Path("/comment/{commentId}")
+    @Path("/{commentId}")
     public Response deleteComment(
             @PathParam("commentId") int commentId,
             @QueryParam("username") String username) {
 
-        ReviewManager reviewManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
             if (commentId == 0) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Review not found").build();
@@ -164,8 +162,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @Path("/{uuid}/rating")
     public Response getRating(
             @PathParam("uuid") String uuid) {
-
-        ReviewManager reviewManager = APIUtil.getCommentsManager();
+        ReviewManager reviewManager = APIUtil.getReviewManager();
         Rating rating;
         try {
             rating = reviewManager.getRating(uuid);

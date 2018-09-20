@@ -141,7 +141,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     public void testUpdateComment() throws Exception {
         Review review = CommentMgtTestHelper.getDummyComment("a", "a");
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-        Response response = this.commentManagementAPI.updateComment(review, 1);
+        Response response = this.commentManagementAPI.updateReview(review, 1);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
             "The response status should be 200.");
@@ -150,7 +150,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     @Test
     public void testUpdateNullComment() throws Exception {
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-        Response response = this.commentManagementAPI.updateComment(null, 1);
+        Response response = this.commentManagementAPI.updateReview(null, 1);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(),
             "The response status should be 400.");
@@ -160,7 +160,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
     public void testUpdateCommentWhenNullCommentId() throws Exception {
         Review review = CommentMgtTestHelper.getDummyComment("a", "a");
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-        Response response = this.commentManagementAPI.updateComment(review, 0);
+        Response response = this.commentManagementAPI.updateReview(review, 0);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
             "The response status should be 404.");
@@ -171,7 +171,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
         Review review = CommentMgtTestHelper.getDummyComment("a", "a");
         PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
         Mockito.doThrow(new ReviewManagementException()).when(this.reviewManager).updateReview(review, 9, true);
-        Response response = this.commentManagementAPI.updateComment(review, 9);
+        Response response = this.commentManagementAPI.updateReview(review, 9);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
             "The response status should be 500.");
