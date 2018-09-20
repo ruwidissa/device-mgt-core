@@ -124,7 +124,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             if (!isValidAppCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application)) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            if (ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
+            if (!ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = applicationStorageManager
                         .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
@@ -173,7 +173,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return APIUtil.getResponse(new ApplicationManagementException(errorMessage, e),
                     Response.Status.INTERNAL_SERVER_ERROR);
         } catch (RequestValidatingException e) {
-            log.error("Error occured while handling the application creating request");
+            log.error("Error occurred while handling the application creating request");
             return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         }
     }
@@ -486,7 +486,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return false;
         }
 
-        if (binaryFile == null && !ApplicationType.WEB_CLIP.toString().equals(application.getType())) {
+        if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
             log.error("Binary file is not found for the application release. Application name: "
                     + application.getName() + " Application type: " + application.getType());
             return false;

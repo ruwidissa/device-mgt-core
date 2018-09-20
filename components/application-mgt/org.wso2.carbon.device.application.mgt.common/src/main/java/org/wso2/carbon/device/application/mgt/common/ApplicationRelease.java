@@ -105,6 +105,10 @@ public class ApplicationRelease {
             value = "Latest Lifecycle state of the application release")
     private LifecycleState lifecycleState;
 
+    @ApiModelProperty(name = "packageName",
+            value = "Application bundle identifier")
+    private String packageName;
+
     public int getRatedUsers() {
         return ratedUsers;
     }
@@ -256,5 +260,13 @@ public class ApplicationRelease {
 
     public void setLifecycleState(LifecycleState lifecycleState) {
         this.lifecycleState = lifecycleState;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public String getPackageName() {
+        return packageName;
     }
 }

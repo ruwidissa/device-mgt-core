@@ -63,10 +63,10 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
-        String sql = "INSERT INTO AP_APP_RELEASE (VERSION,TENANT_ID,UUID,RELEASE_TYPE,APP_PRICE,STORED_LOCATION, "
-                + "BANNER_LOCATION, SC_1_LOCATION,SC_2_LOCATION,SC_3_LOCATION, APP_HASH_VALUE,SHARED_WITH_ALL_TENANTS, "
-                + "APP_META_INFO,CREATED_BY,AP_APP_ID) VALUES "
-                + "(?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO AP_APP_RELEASE (VERSION,TENANT_ID,UUID,RELEASE_TYPE, PACKAGE_NAME, APP_PRICE,"
+                + "STORED_LOCATION, BANNER_LOCATION, SC_1_LOCATION,SC_2_LOCATION,SC_3_LOCATION, APP_HASH_VALUE,"
+                + "SHARED_WITH_ALL_TENANTS, APP_META_INFO,CREATED_BY,AP_APP_ID) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
         int index = 0;
         String generatedColumns[] = {"ID"};
@@ -77,6 +77,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             statement.setInt(++index, tenantId);
             statement.setString(++index, applicationRelease.getUuid());
             statement.setString(++index, String.valueOf(applicationRelease.getReleaseType()));
+            statement.setString(++index, String.valueOf(applicationRelease.getPackageName()));
             statement.setDouble(++index, applicationRelease.getPrice());
             statement.setString(++index, applicationRelease.getAppStoredLoc());
             statement.setString(++index, applicationRelease.getScreenshotLoc1());
@@ -121,14 +122,15 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        String sql = "SELECT AR.ID AS RELESE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE, AR.APP_PRICE,"
-                + " AR.STORED_LOCATION, AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, "
-                + "AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, "
-                + "AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO, AR.CREATED_BY, AR.CREATED_AT, AR.PUBLISHED_BY, "
-                + "AR.PUBLISHED_AT, AR.STARS, AL.CURRENT_STATE, AL.PREVIOUSE_STATE, AL.UPDATED_BY, AL.UPDATED_AT FROM "
-                + "AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE AS AL "
-                + "WHERE AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE NAME=? AND TYPE=? AND TENANT_ID=?)"
-                + " AND AR.VERSION=? AND AR.RELEASE_TYPE=? AND AL.AP_APP_RELEASE_ID=AR.ID "
+        String sql = "SELECT AR.ID AS RELESE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE, "
+                + "AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, AR.BANNER_LOCATION, "
+                + "AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS "
+                + "SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS AS SHARED, "
+                + "AR.APP_META_INFO, AR.CREATED_BY, AR.CREATED_AT, AR.PUBLISHED_BY, AR.PUBLISHED_AT, AR.STARS, "
+                + "AL.CURRENT_STATE, AL.PREVIOUSE_STATE, AL.UPDATED_BY, AL.UPDATED_AT FROM "
+                + "AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE AS AL WHERE "
+                + "AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE NAME=? AND TYPE=? AND TENANT_ID=?) "
+                + "AND AR.VERSION=? AND AR.RELEASE_TYPE=? AND AL.AP_APP_RELEASE_ID=AR.ID "
                 + "AND AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
 
         try {
@@ -350,27 +352,29 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
-        String sql = "UPDATE AP_APP_RELEASE SET VERSION = ? AND UUID = ? AND RELEASE_TYPE = ? AND APP_PRICE = ? AND " +
-                "STORED_LOCATION = ? AND BANNER_LOCATION = ? AND SC_1_LOCATION = ? AND SC_2_LOCATION = ? AND " +
-                "SC_3_LOCATION = ? AND APP_HASH_VALUE = ? AND SHARED_WITH_ALL_TENANTS = ? AND APP_META_INFO = ? AND " +
-                "CREATED_BY = ? AND CREATED_AT = ? WHERE AP_APP_ID = ? AND TENANT_ID = ? AND ID = ?;";
+        String sql = "UPDATE AP_APP_RELEASE SET VERSION = ? AND UUID = ? AND RELEASE_TYPE = ? AND PACKAGE_NAME = ? "
+                + "AND APP_PRICE = ? AND STORED_LOCATION = ? AND BANNER_LOCATION = ? AND SC_1_LOCATION = ? "
+                + "AND SC_2_LOCATION = ? AND SC_3_LOCATION = ? AND APP_HASH_VALUE = ? AND SHARED_WITH_ALL_TENANTS = ? "
+                + "AND APP_META_INFO = ? AND CREATED_BY = ? AND CREATED_AT = ? WHERE AP_APP_ID = ? AND TENANT_ID = ? "
+                + "AND ID = ?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, applicationRelease.getVersion());
             statement.setString(2, applicationRelease.getUuid());
             statement.setString(3, applicationRelease.getReleaseType());
-            statement.setDouble(4, applicationRelease.getPrice());
-            statement.setString(5, applicationRelease.getAppStoredLoc());
-            statement.setString(6, applicationRelease.getBannerLoc());
-            statement.setString(7, applicationRelease.getScreenshotLoc1());
-            statement.setString(8, applicationRelease.getScreenshotLoc2());
-            statement.setString(9, applicationRelease.getScreenshotLoc3());
-            statement.setString(10, applicationRelease.getAppHashValue());
-            statement.setInt(11, applicationRelease.getIsSharedWithAllTenants());
-            statement.setString(12, applicationRelease.getMetaData());
-            statement.setString(13, applicationRelease.getApplicationCreator());
-            statement.setTimestamp(14, new Timestamp(System.currentTimeMillis()));
+            statement.setString(4, applicationRelease.getPackageName());
+            statement.setDouble(5, applicationRelease.getPrice());
+            statement.setString(6, applicationRelease.getAppStoredLoc());
+            statement.setString(7, applicationRelease.getBannerLoc());
+            statement.setString(8, applicationRelease.getScreenshotLoc1());
+            statement.setString(9, applicationRelease.getScreenshotLoc2());
+            statement.setString(10, applicationRelease.getScreenshotLoc3());
+            statement.setString(11, applicationRelease.getAppHashValue());
+            statement.setInt(12, applicationRelease.getIsSharedWithAllTenants());
+            statement.setString(13, applicationRelease.getMetaData());
+            statement.setString(14, applicationRelease.getApplicationCreator());
+            statement.setTimestamp(15, new Timestamp(System.currentTimeMillis()));
             statement.executeUpdate();
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
@@ -425,6 +429,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         applicationRelease.setVersion(resultSet.getString("RELEASE_VERSION"));
         applicationRelease.setUuid(resultSet.getString("UUID"));
         applicationRelease.setReleaseType(resultSet.getString("RELEASE_TYPE"));
+        applicationRelease.setPackageName(resultSet.getString("PACKAGE_NAME"));
         applicationRelease.setPrice(resultSet.getDouble("APP_PRICE"));
         applicationRelease.setAppStoredLoc(resultSet.getString("STORED_LOCATION"));
         applicationRelease.setBannerLoc(resultSet.getString("BANNER_LOCATION"));
