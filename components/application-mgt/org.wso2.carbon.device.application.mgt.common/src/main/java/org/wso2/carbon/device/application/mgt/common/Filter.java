@@ -18,21 +18,50 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Filter represents a criteria that can be used for searching applications.
  */
+
+@ApiModel(value = "Filter", description = "This is related to the application filtering.")
 public class Filter {
 
+    @ApiModelProperty(
+            name = "appName",
+            value = "Name of the application",
+            required = false)
     private String appName;
 
+    @ApiModelProperty(
+            name = "appType",
+            value = "Type of the application",
+            required = false)
     private String appType;
 
+    @ApiModelProperty(
+            name = "isFullMatch",
+            value = "Checking the application name matches fully with given name",
+            required = false)
     private boolean isFullMatch;
 
+    @ApiModelProperty(
+            name = "limit",
+            value = "Limit of the applications",
+            required = false)
     private int limit;
 
+    @ApiModelProperty(
+            name = "offset",
+            value = "Started from",
+            required = false)
     private int offset;
 
+    @ApiModelProperty(
+            name = "sortBy",
+            value = "Ascending or descending order",
+            required = false)
     private String sortBy;
 
     public int getLimit() {
