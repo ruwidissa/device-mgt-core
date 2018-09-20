@@ -33,12 +33,11 @@ public interface ReviewManager {
      * To add a review to a application
      *
      * @param review  review of the application.
-     * @param appId     id of the application.
-     * @param appReleaseId id of the application release
+     * @param uuid     uuid of the application release.
      * @return {@link Review} Review added
      * @throws ReviewManagementException Exceptions of the review management.
      */
-    boolean addReview(Review review,int appId, int appReleaseId) throws ReviewManagementException;
+    boolean addReview(Review review, String uuid) throws ReviewManagementException;
 
     /**
      * Get all comments to pagination
@@ -62,20 +61,25 @@ public interface ReviewManager {
     /**
      * To delete review using review id.
      *
+     * @param uuid UUID of the application release
      * @param commentId id of the comment
+     * @return If review is successfully deleted return true, otherwise returns false
      * @throws ReviewManagementException Exceptions of the comment management
      */
-    void deleteReview(String loggedInUser, int commentId) throws ReviewManagementException;
+    boolean deleteReview(String uuid, int commentId) throws ReviewManagementException;
 
     /**
      * To update a review.
      *
      * @param review   review of the application.
      * @param reviewId id of the review
+     * @param uuid UUID of the application release
+     * @param checkExistence Pass true if it is required to check the existence of the review, otherwise pass false
      * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the review management
      */
-    boolean updateReview(Review review, int reviewId, boolean checkExistence) throws ReviewManagementException;
+    boolean updateReview(Review review, int reviewId, String uuid, boolean checkExistence)
+            throws ReviewManagementException;
 
     /**
      * To get the overall rating for a application release

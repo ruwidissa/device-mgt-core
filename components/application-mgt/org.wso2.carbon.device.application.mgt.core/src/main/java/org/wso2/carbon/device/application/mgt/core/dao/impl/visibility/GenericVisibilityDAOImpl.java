@@ -49,7 +49,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String sql = "INSERT INTO AP_UNRESTRICTED_ROLES (ROLE, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO AP_UNRESTRICTED_ROLE (ROLE, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
@@ -81,7 +81,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         ResultSet rs = null;
         List<UnrestrictedRole> unrestrictedRoles = new ArrayList<>();
         UnrestrictedRole unrestrictedRole;
-        String sql = "SELECT ID, ROLE FROM AP_UNRESTRICTED_ROLES WHERE AP_APP_ID = ? AND TENANT_ID = ?;";
+        String sql = "SELECT ID, ROLE FROM AP_UNRESTRICTED_ROLE WHERE AP_APP_ID = ? AND TENANT_ID = ?;";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
@@ -115,7 +115,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        String sql = "DELETE FROM AP_UNRESTRICTED_ROLES WHERE AP_APP_ID = ? AND ROLE = ? AND TENANT_ID = ?;";
+        String sql = "DELETE FROM AP_UNRESTRICTED_ROLE WHERE AP_APP_ID = ? AND ROLE = ? AND TENANT_ID = ?;";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);

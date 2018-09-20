@@ -136,9 +136,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Pagination pagination = new Pagination();
         String sql = "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY"
                 + " AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
+                + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
                 + "AS ROLE FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
-                + "LEFT JOIN AP_UNRESTRICTED_ROLES ON AP_APP.ID = AP_UNRESTRICTED_ROLES.AP_APP_ID) "
+                + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
                 + "WHERE AP_APP.TENANT_ID =  ? AND AP_APP.STATUS != ?";
 
 
@@ -299,8 +299,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             String sql =
                     "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
                             + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY,"
-                            + " AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
-                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES WHERE AP_APP.NAME=? AND "
+                            + " AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
+                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE WHERE AP_APP.NAME=? AND "
                             + "AP_APP.TYPE= ? AND AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
@@ -343,8 +343,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             String sql =
                     "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
                             + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY, "
-                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLES.ROLE "
-                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES WHERE AP_APP.ID=? AND "
+                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
+                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE WHERE AP_APP.ID=? AND "
                             + "AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
@@ -385,7 +385,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             String sql =
                     "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
                             + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP_TAG.TAG AS TAG, "
-                            + "AP_UNRESTRICTED_ROLES.ROLE AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLES "
+                            + "AP_UNRESTRICTED_ROLE.ROLE AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE "
                             + "WHERE AP_APP.ID = ?;";
 
             stmt = conn.prepareStatement(sql);
@@ -571,7 +571,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + "AP_APP_RELEASE.STARS,"
                     + "AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, "
                     + "AP_APP.APP_CATEGORY AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                    + "AP_UNRESTRICTED_ROLES.ROLE AS ROLE FROM AP_APP, AP_UNRESTRICTED_ROLES, AP_APP_RELEASE "
+                    + "AP_UNRESTRICTED_ROLE.ROLE AS ROLE FROM AP_APP, AP_UNRESTRICTED_ROLE, AP_APP_RELEASE "
                     + "WHERE AP_APP_RELEASE.UUID=? AND AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);

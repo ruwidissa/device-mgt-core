@@ -90,10 +90,10 @@ public interface ApplicationReleaseDAO {
 
     /**
      * To retrieve rating of an application release.
-     * @param id Id of the application Release.
+     * @param uuid UUID of the application Release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    Rating getRating(int id) throws ApplicationManagementDAOException;
+    Rating getRating(String uuid) throws ApplicationManagementDAOException;
 
 
     /**

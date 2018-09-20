@@ -255,7 +255,7 @@ public interface ReviewManagementAPI {
             @PathParam("reviewId") int reviewId);
 
     @DELETE
-    @Path("/{commentId}")
+    @Path("/{uuid}/{reviewId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -287,18 +287,17 @@ public interface ReviewManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response deleteComment(
-                    @ApiParam(
-                            name="commentId",
-                            value="Id of the comment.",
-                            required = true)
-                    @PathParam("commentId")
-                            int commentId,
+    Response deleteReview(
             @ApiParam(
-                    name="username",
-                    value="logged in username",
+                    name="uuid",
+                    value="UUID of the application release.",
                     required = true)
-            @QueryParam("username") String username);
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="reviewId",
+                    value="Id of the review.",
+                    required = true)
+            @PathParam("reviewId") int reviewId);
 
     @GET
     @Path("/{uuid}/{stars}")
