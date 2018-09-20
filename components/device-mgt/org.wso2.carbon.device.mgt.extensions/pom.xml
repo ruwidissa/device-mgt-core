@@ -154,7 +154,6 @@
                             javax.xml.namespace;resolution:=optional,
                             org.wso2.carbon.context,
                             org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.common.license.mgt,
                             org.wso2.carbon.registry.api,
                             org.wso2.carbon.registry.core,
                             org.wso2.carbon.registry.core.exceptions,
