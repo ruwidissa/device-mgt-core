@@ -200,11 +200,10 @@ public interface ReviewManagementAPI {
                     name="uuid",
                     value="uuid of the release version of the application",
                     required=true)
-            @PathParam("uuid")
-                    String uuid);
+            @PathParam("uuid") String uuid);
 
     @PUT
-    @Path("/{CommentId}")
+    @Path("/{uuid}/{reviewId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -238,18 +237,22 @@ public interface ReviewManagementAPI {
                             message = "Internal Server Error. \n Error occurred while updating the new review.",
                             response = ErrorResponse.class)
             })
-    Response updateComment(
+    Response updateReview(
             @ApiParam(
                     name = "review",
                     value = "The review that need to be updated.",
                     required = true)
             @Valid Review review,
             @ApiParam(
-                    name="commentId",
+                    name="uuid",
+                    value = "uuid of the application release",
+                    required = true)
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="reviewId",
                     value = "review id of the updating review.",
                     required = true)
-            @QueryParam("commentId")
-            int commentId);
+            @PathParam("reviewId") int reviewId);
 
     @DELETE
     @Path("/{commentId}")

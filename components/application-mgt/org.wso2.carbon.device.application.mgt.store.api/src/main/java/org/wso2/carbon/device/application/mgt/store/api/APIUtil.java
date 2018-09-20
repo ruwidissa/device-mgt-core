@@ -92,7 +92,7 @@ public class APIUtil {
      * @return ReviewManager instance in the current osgi context.
      */
 
-    public static ReviewManager getCommentsManager() {
+    public static ReviewManager getReviewManager() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         ReviewManager reviewManager = (ReviewManager) ctx.getOSGiService(ReviewManager.class, null);
         if (reviewManager == null) {
