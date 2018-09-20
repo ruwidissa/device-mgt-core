@@ -48,12 +48,10 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     private String sql;
 
     @Override
-    public boolean addReview(Review review, int appId, int appReleaseId, int tenantId)
+    public boolean addReview(Review review, String uuid, int tenantId)
             throws ReviewManagementDAOException {
-        //todo
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to add review for application release. Application id: " + appId
-                    + "Application Release id: " + appReleaseId);
+            log.debug("Request received in DAO Layer to add review for application release. Application UUID: " + uuid);
         }
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -67,8 +65,8 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             statement.setString(2, review.getComment());
             statement.setInt(3, review.getParentId());
             statement.setString(4, review.getUsername());
-            statement.setString(5,"");
-            statement.setString(6,"");
+            statement.setString(5,uuid);
+            statement.setString(6,uuid);
             statement.executeUpdate();
             rs = statement.getGeneratedKeys();
             return rs.next();
@@ -85,26 +83,25 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public Review isExistReview(int appId, int appReleaseId, String username, int tenantId)
-            throws DBConnectionException, SQLException {
+    public Review haveUerCommented(String uuid, String username, int tenantId) throws ReviewManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Request received in DAO Layer to check whether review exist or not rein the IoTS APPM. Application id:  "
-                            + appId + " Application release id: " + appReleaseId + " comment owner: " + username);
+                    "Request received in DAO Layer to check whether user have already commented or not for the "
+                            + "application release. Application UUID:  " + uuid +  " comment owner: " + username +
+                            " tenant-id " + tenantId);
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs = null;
         Review review = null;
         sql = "SELECT ID, COMMENT, CREATED_AT, MODEFIED_AT, USERNAME, PARENT_ID, RATING FROM AP_APP_REVIEW WHERE "
-                + "AP_APP_ID = ? AND AP_APP_RELEASE_ID = ? AND USERNAME = ? AND TENANT_ID = ?;";
+                + "AP_APP_RELEASE_ID = (SELECT ID FROM AP_APP_RELEASE WHERE UUID=?) AND USERNAME = ? AND TENANT_ID = ?;";
         try {
             conn = this.getDBConnection();
             statement = conn.prepareStatement(sql);
-            statement.setInt(1, appId);
-            statement.setInt(2, appReleaseId);
-            statement.setString(3, username);
-            statement.setInt(4, tenantId);
+            statement.setString(1, uuid);
+            statement.setString(2, username);
+            statement.setInt(3, tenantId);
 
             rs = statement.executeQuery();
             if (rs.next()){
@@ -118,6 +115,13 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 review.setRating(rs.getInt("RATING"));
             }
             return review;
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException("Error occured while accessing the Database when checking whether "
+                    + "user has already commented for the application ro not", e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException("Error occured while getting the database connection when checking "
+                    + "whether user has already commented for the application ro not", e);
+
         } finally {
             Util.cleanupResources(statement, rs);
         }
@@ -149,7 +153,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public Review getComment(int commentId) throws ReviewManagementException {
+    public Review getReview(int commentId) throws ReviewManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug("Getting review with the review id(" + commentId + ") from the database");
@@ -259,7 +263,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public int getCommentCount(PaginationRequest request, String uuid) throws ReviewManagementException {
+    public int getReviewCount(PaginationRequest request, String uuid) throws ReviewManagementException {
 
         int commentCount = 0;
         Connection conn;
@@ -293,7 +297,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public int getCommentCountByApp(String appType, String appName, String version)
+    public int getReviewCountByApp(String appType, String appName, String version)
             throws ReviewManagementException, DBConnectionException, SQLException {
 
         Connection conn;
@@ -320,24 +324,48 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public void deleteComment(int commentId)
-            throws ReviewManagementException, DBConnectionException, SQLException {
-
+    public int deleteReview(String username, int reviewId) throws ReviewManagementDAOException {
         Connection conn;
         PreparedStatement statement = null;
         try {
             conn = this.getDBConnection();
-            sql = "DELETE FROM AP_APP_COMMENT WHERE ID=?;";
+            sql = "DELETE FROM AP_APP_REVIEW WHERE ID=? AND USERNAME = ?);";
             statement = conn.prepareStatement(sql);
-            statement.setInt(1, commentId);
-            statement.executeUpdate();
+            statement.setInt(1, reviewId);
+            statement.setString(2, username);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException("Error occured while accessing the Database", e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException("Error occured while getting the database connection", e);
+
         } finally {
             Util.cleanupResources(statement, null);
         }
     }
 
     @Override
-    public void deleteComments(String appType, String appName, String version)
+    public int deleteReviewByAdmin(int reviewId) throws ReviewManagementDAOException {
+        Connection conn;
+        PreparedStatement statement = null;
+        try {
+            conn = this.getDBConnection();
+            sql = "DELETE FROM AP_APP_REVIEW WHERE ID=?;";
+            statement = conn.prepareStatement(sql);
+            statement.setInt(1, reviewId);
+            return statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException("Error occured while accessing the Database", e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException("Error occured while getting the database connection", e);
+
+        } finally {
+            Util.cleanupResources(statement, null);
+        }
+    }
+
+    @Override
+    public void deleteReviews(String appType, String appName, String version)
             throws ReviewManagementException {
 
         Connection conn;

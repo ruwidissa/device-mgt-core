@@ -28,24 +28,32 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * This interface specifies the database access operations performed for comments.
+ * This interface specifies the database access operations performed for reviews.
  */
 
  public interface ReviewDAO {
 
     /**
-     * To add a review to a application.
+     * To add a review to an application release.
      *
-     * @param tenantId  tenantId of the commented application.
+     * @param tenantId  tenantId.
      * @param review   review of the application.
+     * @param uuid UUID of the application release
      * @return If review is added successfully, it return true otherwise false
      * @throws ReviewManagementDAOException Exceptions of the review management DAO.
      */
-    boolean addReview(Review review, int appId, int appReleaseId, int tenantId) throws ReviewManagementDAOException;
+    boolean addReview(Review review, String uuid, int tenantId) throws ReviewManagementDAOException;
 
-
-    Review isExistReview(int appId, int appReleaseId, String username, int tenantId)
-            throws DBConnectionException, SQLException;
+   /**
+    * To verify whether review is exists or not.
+    *
+    * @param uuid   UUID of the application release.
+    * @param username   username of the logged in user.
+    * @param tenantId  tenantId of the commented application.
+    * @return If review exists, review returns
+    * @throws ReviewManagementDAOException Exceptions of the review management DAO.
+    */
+    Review haveUerCommented(String uuid, String username, int tenantId) throws ReviewManagementDAOException;
 
     /**
      * To update already added comment.
@@ -68,7 +76,7 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception
      * @throws SQLException               sql exception
      */
-    Review getComment(int commentId) throws ReviewManagementException, SQLException, DBConnectionException;
+    Review getReview(int commentId) throws ReviewManagementException, SQLException, DBConnectionException;
 
     /**
      * To get all the comments
@@ -101,18 +109,27 @@ import java.util.List;
      * @throws DBConnectionException      db connection exception.
      * @throws SQLException               sql exception
      */
-    int getCommentCountByApp(String appType, String appName, String version)
+    int getReviewCountByApp(String appType, String appName, String version)
             throws ReviewManagementException, DBConnectionException, SQLException;
 
     /**
-     * To delete comment using comment id.
+     * To delete review using review id and uuid of the application release.
      *
-     * @param commentId id of the comment
-     * @throws ReviewManagementException Exceptions of the comment management.
-     * @throws DBConnectionException      db connection exception.
-     * @throws SQLException               sql exception
+     * @param username username of the review owner
+     * @param reviewId id of the review
+     * @return If review is successfully deleted return 1, otherwise returns 0.
+     * @throws ReviewManagementDAOException Review management DAO exception.
      */
-    void deleteComment(int commentId) throws ReviewManagementException, DBConnectionException, SQLException;
+    int deleteReview(String username, int reviewId) throws ReviewManagementDAOException;
+
+   /**
+    * To delete review using review id, in this case, it doesn't check whether user is review owner or not.
+    *
+    * @param reviewId id of the review
+    * @return If review is successfully deleted return 1, otherwise returns 0.
+    * @throws ReviewManagementDAOException Review management DAO exception.
+    */
+   int deleteReviewByAdmin(int reviewId) throws ReviewManagementDAOException;
 
     /**
      * To delete comments using application details.
@@ -122,15 +139,15 @@ import java.util.List;
      * @param version version of the commented application.
      * @throws ReviewManagementException Exceptions of the comment management.
      */
-    void deleteComments(String appType, String appName, String version) throws ReviewManagementException;
+    void deleteReviews(String appType, String appName, String version) throws ReviewManagementException;
 
     /**
      * To get comment count for pagination
      *
-     * @param request
-     * @param uuid
+     * @param request pagination request
+     * @param uuid uuid of the application release
      * @return Review count
      * @throws ReviewManagementException
      */
-    int getCommentCount(PaginationRequest request, String uuid) throws ReviewManagementException;
+    int getReviewCount(PaginationRequest request, String uuid) throws ReviewManagementException;
 }

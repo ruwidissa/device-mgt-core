@@ -90,8 +90,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
                 String msg = "Found more than one application release for the UUID: " + uuid;
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            boolean isReviewCreated = reviewManager
-                    .addReview(review, application.getId(), application.getApplicationReleases().get(0).getId());
+            boolean isReviewCreated = reviewManager.addReview(review, uuid);
             if (isReviewCreated) {
                 return Response.status(Response.Status.CREATED).entity(review).build();
             } else {
@@ -120,7 +119,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("reviewId") int reviewId) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.updateReview(review, reviewId, true)) {
+            if (reviewManager.updateReview(review, reviewId, uuid, true)) {
                 return Response.status(Response.Status.OK).entity(review).build();
             } else {
                 String msg = "Review updating failed. Please contact the administrator";
@@ -136,25 +135,26 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
 
     @Override
     @DELETE
-    @Path("/{commentId}")
-    public Response deleteComment(
-            @PathParam("commentId") int commentId,
-            @QueryParam("username") String username) {
+    @Path("/{uuid}/{reviewId}")
+    public Response deleteReview(
+            @PathParam("uuid") String uuid,
+            @PathParam("reviewId") int reviewId) {
 
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (commentId == 0) {
+            if (reviewId == 0) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Review not found").build();
+            } else if (reviewManager.deleteReview(uuid, reviewId)) {
+                return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
             } else {
-                reviewManager.deleteReview(username, commentId);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Review deleting is failed.")
+                        .build();
             }
         } catch (ReviewManagementException e) {
             String msg = "Error occurred while deleting the comment.";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg)
-                .build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
-        return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
     }
 
     @Override

@@ -308,20 +308,20 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     /**
      * To retrieve rating of an application release.
      *
-     * @param id Id of the application Release.
+     * @param uuid UUID of the application Release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public Rating getRating(int id) throws ApplicationManagementDAOException {
+    public Rating getRating(String uuid) throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         Rating rating = null;
-        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE ID = ?;";
+        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE UUID = ?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
+            statement.setString(1, uuid);
             resultSet = statement.executeQuery();
 
             if (resultSet.next()){

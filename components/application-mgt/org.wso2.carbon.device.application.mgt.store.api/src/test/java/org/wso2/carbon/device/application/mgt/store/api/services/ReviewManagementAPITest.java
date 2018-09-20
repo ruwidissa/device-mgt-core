@@ -180,7 +180,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 //    @Test
 //    public void testDeleteComment() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Response response = this.commentManagementAPI.deleteComment(1,"");
+//        Response response = this.commentManagementAPI.deleteReview(1,"");
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
 //            "The response status should be 200.");
@@ -189,8 +189,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 //    @Test
 //    public void testDeleteCommentInternalError() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Mockito.when(this.commentManagementAPI.deleteComment(1,"")).thenThrow(new ReviewManagementException());
-//        Response response = this.commentManagementAPI.deleteComment(1,"");
+//        Mockito.when(this.commentManagementAPI.deleteReview(1,"")).thenThrow(new ReviewManagementException());
+//        Response response = this.commentManagementAPI.deleteReview(1,"");
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
 //            "The response status should be 500.");
@@ -199,7 +199,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 //    @Test
 //    public void testDeleteCommentNotFoundError() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Response response = this.commentManagementAPI.deleteComment(0,"");
+//        Response response = this.commentManagementAPI.deleteReview(0,"");
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
 //            "The response status should be 404.");
