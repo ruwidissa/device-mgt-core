@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Review;
 import javax.validation.Valid;
@@ -47,7 +48,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
         /**
-        * APIs to handle comment management related tasks.
+        * APIs to handle review management related tasks.
         */
 
 @SwaggerDefinition(
@@ -56,51 +57,36 @@ import java.util.List;
                 title = "Store Management Service",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = "name", value = "CommentManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/comments"),
+                                @ExtensionProperty(name = "name", value = "ReviewManagementService"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/review"),
                         })
                 }
         ),
         tags = {
-                @Tag(name = "store_management", description = "Review Management related "
-                        + "APIs")
+                @Tag(name = "store_management", description = "Review Management related APIs")
         }
 )
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "Get Comments Details",
-                        description = "Get comments details",
-                        key = "perm:comment:get",
-                        permissions = {"/device-mgt/comment/get"}
-                ),
-                @Scope(
-                        name = "Add a Review",
-                        description = "Add a comment",
-                        key = "perm:comment:add",
-                        permissions = {"/device-mgt/comment/add"}
+                        name = "Get Review Details",
+                        description = "Get review details",
+                        key = "perm:app:review:view",
+                        permissions = {"/device-mgt/review/view"}
                 ),
                 @Scope(
                         name = "Update a Review",
-                        description = "Update a Review",
-                        key = "perm:comment:update",
-                        permissions = {"/device-mgt/comment/update"}
-                ),
-
-                @Scope(
-                        name = "Delete a Review",
-                        description = "Delete a comment",
-                        key = "perm:comment:delete",
-                        permissions = {"/device-mgt/comment/delete"}
+                        description = "Update a comment",
+                        key = "perm:app:review:update",
+                        permissions = {"/device-mgt/review/update"}
                 ),
         }
 )
 
 @Path("/review")
-@Api(value = "Comments Management", description = "This API carries all comments management related operations " +
-        "such as get all the comments, add comment, etc.")
+@Api(value = "Review Management", description = "This API carries all review management related operations such as get "
+        + "all the reviews, add review, etc.")
 @Produces(MediaType.APPLICATION_JSON)
-
 public interface ReviewManagementAPI {
     String SCOPE = "scope";
 
@@ -110,12 +96,12 @@ public interface ReviewManagementAPI {
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "get comments",
-            notes = "Get all comments",
+            value = "get reviews",
+            notes = "Get all reviews",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:store:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:view")
                     })
             }
     )
@@ -125,12 +111,8 @@ public interface ReviewManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully retrieved comments.",
-                            response = List.class,
-                            responseContainer = "List"),
-                    @ApiResponse(
-                            code = 404,
-                            message = "Not Found. \n No activity found with the given ID.",
-                            response = ErrorResponse.class),
+                            response = PaginationResult.class,
+                            responseContainer = "PaginationResult"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the comment list.",
@@ -146,14 +128,12 @@ public interface ReviewManagementAPI {
                     String uuid,
             @ApiParam(
                     name="offSet",
-                    value="Starting comment number.",defaultValue = "1",
-                    required = false)
+                    value="Starting comment number.",defaultValue = "0")
             @QueryParam("offSet")
                     int offSet,
             @ApiParam(
                     name="limit",
-                    value = "Limit of paginated comments",defaultValue = "20",
-                    required = false)
+                    value = "Limit of paginated comments",defaultValue = "20")
             @QueryParam("limit")
                     int limit);
 
@@ -170,7 +150,7 @@ public interface ReviewManagementAPI {
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:store:add")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:update")
                     })
             }
     )
@@ -215,7 +195,7 @@ public interface ReviewManagementAPI {
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:store:edit")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:update")
                     })
             }
     )
