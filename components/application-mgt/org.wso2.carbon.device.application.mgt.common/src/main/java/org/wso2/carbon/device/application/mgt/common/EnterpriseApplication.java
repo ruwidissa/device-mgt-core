@@ -30,7 +30,9 @@ public class EnterpriseApplication extends AndroidApplication implements Seriali
 	private String url;
 	private String schedule;
 	private String packageName;
-	
+
+	private static final long serialVersionUID = 660343716452348222L;
+
 	public String getSchedule() {
 		return schedule;
 	}

@@ -25,6 +25,8 @@ public class AndroidApplication {
 	private String type;
 	private String appIdentifier;
 
+	private static final long serialVersionUID = 760343716452548282L;
+
 	public String getAppIdentifier() {
 		return appIdentifier;
 	}
