@@ -22,8 +22,11 @@
 <suite name="ApplicationManagementCore">
     <test name="Util classes tests" preserve-order="true">
         <classes>
+            <class name="org.wso2.carbon.device.application.mgt.core.InitTest"/>
             <class name="org.wso2.carbon.device.application.mgt.core.ArtifactParserTest"/>
             <class name="org.wso2.carbon.device.application.mgt.core.StorageManagementUtilTest"/>
+            <class name="org.wso2.carbon.device.application.mgt.core.ConfigurationTest"/>
+            <class name="org.wso2.carbon.device.application.mgt.core.LifecycleManagementTest"/>
         </classes>
     </test>
 </suite>

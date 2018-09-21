@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
+import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
@@ -45,10 +45,10 @@ public class ApplicationManagementUtil {
         return getInstance(extension, ApplicationManager.class);
     }
 
-    public static CommentsManager getCommentsManagerInstance() throws InvalidConfigurationException {
+    public static ReviewManager getReviewManagerInstance() throws InvalidConfigurationException {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
-        Extension extension = configurationManager.getExtension(Extension.Name.CommentsManager);
-        return getInstance(extension, CommentsManager.class);
+        Extension extension = configurationManager.getExtension(Extension.Name.ReviewManager);
+        return getInstance(extension, ReviewManager.class);
     }
 
     public static UnrestrictedRoleManager getVisibilityManagerInstance() throws InvalidConfigurationException {

@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiResponses;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.Comment;
+import org.wso2.carbon.device.application.mgt.common.Review;
 import javax.validation.Valid;
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
@@ -62,7 +62,7 @@ import java.util.List;
                 }
         ),
         tags = {
-                @Tag(name = "store_management", description = "Comment Management related "
+                @Tag(name = "store_management", description = "Review Management related "
                         + "APIs")
         }
 )
@@ -75,20 +75,20 @@ import java.util.List;
                         permissions = {"/device-mgt/comment/get"}
                 ),
                 @Scope(
-                        name = "Add a Comment",
+                        name = "Add a Review",
                         description = "Add a comment",
                         key = "perm:comment:add",
                         permissions = {"/device-mgt/comment/add"}
                 ),
                 @Scope(
-                        name = "Update a Comment",
-                        description = "Update a Comment",
+                        name = "Update a Review",
+                        description = "Update a Review",
                         key = "perm:comment:update",
                         permissions = {"/device-mgt/comment/update"}
                 ),
 
                 @Scope(
-                        name = "Delete a Comment",
+                        name = "Delete a Review",
                         description = "Delete a comment",
                         key = "perm:comment:delete",
                         permissions = {"/device-mgt/comment/delete"}
@@ -96,7 +96,7 @@ import java.util.List;
         }
 )
 
-@Path("/reviews")
+@Path("/review")
 @Api(value = "Comments Management", description = "This API carries all comments management related operations " +
         "such as get all the comments, add comment, etc.")
 @Produces(MediaType.APPLICATION_JSON)
@@ -137,7 +137,7 @@ public interface ReviewManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response getAllComments(
+    Response getAllReviews(
             @ApiParam(
                     name="uuid",
                     value="uuid of the released version of application.",
@@ -165,8 +165,8 @@ public interface ReviewManagementAPI {
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
-            value = "Add a comment",
-            notes = "This will add a new comment",
+            value = "Add a review",
+            notes = "This will add a new review",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
@@ -179,41 +179,39 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 201,
-                            message = "OK. \n Successfully add a comment.",
-                            response = Comment.class),
+                            message = "OK. \n Successfully add a review.",
+                            response = Review.class),
                     @ApiResponse(
                             code = 400,
                             message =
                                     "Bad Request. \n"),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred adding a comment.",
+                            message = "Internal Server Error. \n Error occurred adding a review.",
                             response = ErrorResponse.class)
             })
 
-    Response addComment(
+    Response addReview(
             @ApiParam(
-                    name = "comment",
-                    value = "Comment details",
-                    required = true)
-                    Comment comment,
+                    name = "review",
+                    value = "Review details",
+                    required = true) Review review,
             @ApiParam(
                     name="uuid",
                     value="uuid of the release version of the application",
                     required=true)
-            @PathParam("uuid")
-                    String uuid);
+            @PathParam("uuid") String uuid);
 
     @PUT
-    @Path("/{CommentId}")
+    @Path("/{uuid}/{reviewId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
-            value = "Edit a comment",
-            notes = "This will edit the comment",
+            value = "Edit a review",
+            notes = "This will edit the review",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
@@ -225,8 +223,8 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 201,
-                            message = "OK. \n Successfully updated comment.",
-                            response = Comment.class),
+                            message = "OK. \n Successfully updated review.",
+                            response = Review.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error."),
@@ -236,24 +234,28 @@ public interface ReviewManagementAPI {
                             response = ErrorResponse.class),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while updating the new comment.",
+                            message = "Internal Server Error. \n Error occurred while updating the new review.",
                             response = ErrorResponse.class)
             })
-    Response updateComment(
+    Response updateReview(
             @ApiParam(
-                    name = "comment",
-                    value = "The comment that need to be updated.",
+                    name = "review",
+                    value = "The review that need to be updated.",
                     required = true)
-            @Valid Comment comment,
+            @Valid Review review,
             @ApiParam(
-                    name="commentId",
-                    value = "comment id of the updating comment.",
+                    name="uuid",
+                    value = "uuid of the application release",
                     required = true)
-            @QueryParam("commentId")
-            int commentId);
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="reviewId",
+                    value = "review id of the updating review.",
+                    required = true)
+            @PathParam("reviewId") int reviewId);
 
     @DELETE
-    @Path("/{CommentId}")
+    @Path("/{commentId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -291,7 +293,12 @@ public interface ReviewManagementAPI {
                             value="Id of the comment.",
                             required = true)
                     @PathParam("commentId")
-                            int commentId);
+                            int commentId,
+            @ApiParam(
+                    name="username",
+                    value="logged in username",
+                    required = true)
+            @QueryParam("username") String username);
 
     @GET
     @Path("/{uuid}/{stars}")
@@ -327,90 +334,6 @@ public interface ReviewManagementAPI {
                     name = "uuid",
                     value = "uuid of the application release",
                     required = true)
-            @PathParam("uuid")
-                    String uuid);
-
-    @GET
-    @Path("/{uuid}/{stars}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "get rated users",
-            notes = "Get all users",
-            tags = "Store Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:user:get")
-                    })
-            }
-    )
-
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully retrieved user.",
-                            response = List.class,
-                            responseContainer = "List"),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Error occurred while getting the comment list.",
-                            response = ErrorResponse.class)
-            })
-
-    Response getNumOfRatedUsers(
-            @ApiParam(
-                    name = "uuid",
-                    value = "uuid of the application release",
-                    required = true)
-            @PathParam("uuid")
-                    String uuid);
-
-    @POST
-    @Path("/uuid/{uuid}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
-            value = "Add a star value",
-            notes = "This will add star value",
-            tags = "Store Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:stars:add")
-                    })
-            }
-    )
-
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 201,
-                            message = "OK. \n Successfully rated to the application.",
-                            response = Comment.class),
-                    @ApiResponse(
-                            code = 304,
-                            message = "Not Modified. \n " +
-                                    "Empty body because the client already has the latest rating of the requested resource."),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Error occurred rating for the application.",
-                            response = ErrorResponse.class)
-            })
-
-    Response updateRatings(
-            @ApiParam(
-                    name = "stars",
-                    value = "ratings for the application",
-                    required = true)
-                    int stars,
-            @ApiParam(
-                    name="uuid",
-                    value="uuid of the release version of the application",
-                    required=true)
             @PathParam("uuid")
                     String uuid);
 }

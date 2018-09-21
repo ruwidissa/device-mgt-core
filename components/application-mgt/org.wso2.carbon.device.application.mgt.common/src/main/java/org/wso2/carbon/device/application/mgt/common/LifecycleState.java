@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(value = "LifecycleState", description = "LifecycleState represents the an Lifecycle state for an application release")
+@ApiModel(value = "LifecycleState", description = "LifecycleState represents the Lifecycle state for an application release")
 public class LifecycleState {
 
     @ApiModelProperty(name = "id",

@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.UnsupportedDatabaseEngineException;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.*;
-import org.wso2.carbon.device.application.mgt.core.dao.impl.Comment.CommentDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.Comment.ReviewDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.GenericApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.GenericApplicationReleaseDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.OracleApplicationDAOImpl;
@@ -162,13 +162,13 @@ public class ApplicationManagementDAOFactory {
         throw new IllegalStateException("Database engine has not initialized properly.");
     }
 
-    public static CommentDAO getCommentDAO() {
+    public static ReviewDAO getCommentDAO() {
         if (databaseEngine != null) {
             switch (databaseEngine) {
             case Constants.DataBaseTypes.DB_TYPE_H2:
             case Constants.DataBaseTypes.DB_TYPE_MYSQL:
             case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
-                return new CommentDAOImpl();
+                return new ReviewDAOImpl();
             default:
                 throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }

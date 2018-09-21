@@ -448,7 +448,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.addLifecycleState(applicationId, applicationUuid, state);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while adding lifecycle state.";
             log.error(msg, e);

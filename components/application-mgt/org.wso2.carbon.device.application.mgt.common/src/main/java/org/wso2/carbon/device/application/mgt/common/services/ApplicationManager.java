@@ -150,7 +150,7 @@ public interface ApplicationManager {
      * @param applicationUuid UUID of the Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void addLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws ApplicationManagementException;
+    void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws ApplicationManagementException;
 
     /**
      * Get the application if application is an accessible one.

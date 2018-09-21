@@ -17,36 +17,34 @@
  */
 package org.wso2.carbon.device.application.mgt.store.api.services.util;
 
-import org.wso2.carbon.device.application.mgt.common.Comment;
+import org.wso2.carbon.device.application.mgt.common.Review;
 
 /**
- * Helper class for Comment Management API test cases.
+ * Helper class for Review Management API test cases.
  */
 
 public class CommentMgtTestHelper {
 
-    private static final String COMMENT_TEXT = "Dummy Comment";
+    private static final String COMMENT_TEXT = "Dummy Review";
     private static final String CREATED_BY = "TEST_CREATED_BY";
     private static final String MODIFIED_BY = "TEST_MODIFIED_BY";
     private static final int PARENT_ID = 123;
     private static final int COMMENT_ID = 1;
 
     /**
-     * Creates a Comment with given text and given uuid.
-     * If the text is null, the COMMENT_TEXT will be used as the Dummy Comment.
+     * Creates a Review with given text and given uuid.
+     * If the text is null, the COMMENT_TEXT will be used as the Dummy Review.
      *
-     * @param commentText : Text of the Comment
-     * @return Comment
+     * @param commentText : Text of the Review
+     * @return Review
      */
-    public static Comment getDummyComment(String commentText, String uuid) {
-        Comment comment = new Comment();
-        comment.setId(COMMENT_ID);
-        comment.setCreatedBy(CREATED_BY);
-        comment.setModifiedBy(MODIFIED_BY);
-        comment.setParent(PARENT_ID);
-        comment.setCommentText(commentText != null ? commentText : COMMENT_TEXT);
+    public static Review getDummyComment(String commentText, String uuid) {
+        Review review = new Review();
+        review.setId(COMMENT_ID);
+        review.setUsername(CREATED_BY);
+        review.setComment(commentText != null ? commentText : COMMENT_TEXT);
 
-        return comment;
+        return review;
     }
 }
 

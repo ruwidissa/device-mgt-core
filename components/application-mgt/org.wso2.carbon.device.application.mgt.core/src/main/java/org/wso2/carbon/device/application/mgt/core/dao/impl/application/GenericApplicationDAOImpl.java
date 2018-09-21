@@ -380,7 +380,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Boolean isAppExist = false;
         try {
             conn = this.getDBConnection();
             String sql =
@@ -396,13 +395,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved basic details of the application with the application ID " + appId);
             }
-
-            if (rs.next()) {
-                isAppExist = true;
-            }
-
-            return isAppExist;
-
+            return rs.next();
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app ID " + appId + " While executing query ",

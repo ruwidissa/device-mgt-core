@@ -25,18 +25,21 @@ import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
+import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.naming.NamingException;
+import java.util.List;
 
 /**
  * @scr.component name="org.wso2.carbon.application.mgt.service" immediate="true"
@@ -60,23 +63,28 @@ import javax.naming.NamingException;
  * bind="setDataSourceService"
  * unbind="unsetDataSourceService"
  */
-public class ServiceComponent {
+public class ApplicationManagementServiceComponent {
 
-    private static Log log = LogFactory.getLog(ServiceComponent.class);
+    private static Log log = LogFactory.getLog(ApplicationManagementServiceComponent.class);
 
 
-    protected void activate(ComponentContext componentContext) throws NamingException {
+    @SuppressWarnings("unused")
+    protected void activate(ComponentContext componentContext) {
+
+        log.info("CALLING ACTIVATE   .............");
         BundleContext bundleContext = componentContext.getBundleContext();
         try {
-            String datasourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
+            String dataSourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
+            ApplicationManagementDAOFactory.init(dataSourceName);
+//            ApplicationManagementDAOFactory.initDatabases();
 
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             DataHolder.getInstance().setApplicationManager(applicationManager);
             bundleContext.registerService(ApplicationManager.class.getName(), applicationManager, null);
 
-            CommentsManager commentsManager = ApplicationManagementUtil.getCommentsManagerInstance();
-            DataHolder.getInstance().setCommentsManager(commentsManager);
-            bundleContext.registerService(CommentsManager.class.getName(), commentsManager, null);
+            ReviewManager reviewManager = ApplicationManagementUtil.getReviewManagerInstance();
+            DataHolder.getInstance().setReviewManager(reviewManager);
+            bundleContext.registerService(ReviewManager.class.getName(), reviewManager, null);
 
             SubscriptionManager subscriptionManager = ApplicationManagementUtil.getSubscriptionManagerInstance();
             DataHolder.getInstance().setSubscriptionManager(subscriptionManager);
@@ -91,13 +99,14 @@ public class ServiceComponent {
             DataHolder.getInstance().setApplicationStorageManager(applicationStorageManager);
             bundleContext.registerService(ApplicationStorageManager.class.getName(), applicationStorageManager, null);
 
-            ApplicationManagementDAOFactory.init(datasourceName);
-            ApplicationManagementDAOFactory.initDatabases();
+            List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
+                    getConfiguration().getLifecycleStates();
+            LifecycleStateManger lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
+            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
+
             log.info("ApplicationManagement core bundle has been successfully initialized");
-        } catch (InvalidConfigurationException e) {
-            log.error("Error while activating Application Management core component. ", e);
-        } catch (ApplicationManagementDAOException e) {
-            log.error("Error while activating Application Management core component.Failed to create the database ", e);
+        } catch (Throwable e) {
+            log.error("Error occurred while initializing app management core bundle", e);
         }
     }
 

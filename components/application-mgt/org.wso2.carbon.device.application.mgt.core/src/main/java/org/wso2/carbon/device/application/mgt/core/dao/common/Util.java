@@ -25,7 +25,7 @@ import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
-import org.wso2.carbon.device.application.mgt.common.exception.CommentManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 
@@ -202,14 +202,14 @@ public class Util {
     }
 
     public static PaginationRequest validateCommentListPageSize(PaginationRequest paginationRequest) throws
-                                                                                                     CommentManagementException {
+            ReviewManagementException {
         if (paginationRequest.getLimit() == 0) {
             Configuration commentManagementConfig = ConfigurationManager.getInstance().getConfiguration();
             if (commentManagementConfig != null) {
                 paginationRequest.setLimit(
                         commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
             } else {
-                throw new CommentManagementException(
+                throw new ReviewManagementException(
                         "Application Management configuration has not initialized. Please check the application-mgt.xml file.");
             }
         }

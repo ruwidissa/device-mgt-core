@@ -20,9 +20,10 @@ package org.wso2.carbon.device.application.mgt.core.internal;
 
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
+import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleManager;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -37,13 +38,15 @@ public class DataHolder {
 
     private ApplicationManager applicationManager;
 
-    private CommentsManager commentsManager;
+    private ReviewManager reviewManager;
 
     private SubscriptionManager subscriptionManager;
 
     private UnrestrictedRoleManager unrestrictedRoleManager;
 
     private ApplicationStorageManager applicationStorageManager;
+
+    private LifecycleStateManger lifecycleStateManger;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -71,12 +74,12 @@ public class DataHolder {
         this.applicationManager = applicationManager;
     }
 
-    public CommentsManager getCommentsManager() {
-        return commentsManager;
+    public ReviewManager getReviewManager() {
+        return reviewManager;
     }
 
-    public void setCommentsManager(CommentsManager commentsManager) {
-        this.commentsManager = commentsManager;
+    public void setReviewManager(ReviewManager reviewManager) {
+        this.reviewManager = reviewManager;
     }
 
     public SubscriptionManager getSubscriptionManager() {
@@ -109,5 +112,13 @@ public class DataHolder {
 
     public ApplicationStorageManager getApplicationStorageManager() {
         return applicationStorageManager;
+    }
+
+    public LifecycleStateManger getLifecycleStateManager() {
+        return lifecycleStateManger;
+    }
+
+    public void setLifecycleStateManger(LifecycleStateManger lifecycleStateManger) {
+        this.lifecycleStateManger = lifecycleStateManger;
     }
 }

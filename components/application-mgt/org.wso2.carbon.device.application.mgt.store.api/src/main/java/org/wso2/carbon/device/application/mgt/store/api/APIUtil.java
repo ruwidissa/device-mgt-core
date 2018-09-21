@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.store.api;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.services.CommentsManager;
+import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
@@ -87,20 +87,20 @@ public class APIUtil {
     }
 
     /**
-     * To get the Comment Manager from the osgi context.
+     * To get the Review Manager from the osgi context.
      *
-     * @return CommentsManager instance in the current osgi context.
+     * @return ReviewManager instance in the current osgi context.
      */
 
-    public static CommentsManager getCommentsManager() {
+    public static ReviewManager getReviewManager() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        CommentsManager commentsManager = (CommentsManager) ctx.getOSGiService(CommentsManager.class, null);
-        if (commentsManager == null) {
+        ReviewManager reviewManager = (ReviewManager) ctx.getOSGiService(ReviewManager.class, null);
+        if (reviewManager == null) {
             String msg = "Comments Manager service has not initialized.";
             log.error(msg);
             throw new IllegalStateException(msg);
         }
-        return commentsManager;
+        return reviewManager;
     }
 
     public static Response getResponse(Exception ex, Response.Status status) {
