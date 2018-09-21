@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.core.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.AppOperation;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -250,7 +251,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
             }
             subscriptionDAO.subscribeDeviceToApplication(tenantId, subscriber, deviceList, application.getId(),
-                    applicationReleaseId);
+                    applicationReleaseId, String.valueOf(AppOperation.InstallState.UNINSTALLED));
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
