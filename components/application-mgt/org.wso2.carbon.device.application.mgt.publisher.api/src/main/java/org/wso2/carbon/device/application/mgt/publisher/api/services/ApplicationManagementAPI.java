@@ -226,7 +226,7 @@ public interface ApplicationManagementAPI {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes("multipart/mixed")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -260,7 +260,7 @@ public interface ApplicationManagementAPI {
                     name = "application",
                     value = "The application that need to be created.",
                     required = true)
-            @Valid Application application,
+            @Multipart("application") Application application,
             @ApiParam(
                     name = "binaryFile",
                     value = "Binary file of uploading application",
@@ -277,10 +277,20 @@ public interface ApplicationManagementAPI {
                     required = true)
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
-                    name = "screenshot",
+                    name = "screenshot1",
                     value = "Screen Shots of the uploading application",
                     required = true)
-            @Multipart(value = "screenshot") List<Attachment> attachmentList
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
     @DELETE

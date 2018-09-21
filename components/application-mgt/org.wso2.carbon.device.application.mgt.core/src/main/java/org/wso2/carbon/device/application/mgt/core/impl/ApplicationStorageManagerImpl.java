@@ -201,11 +201,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                 "application UUID " + applicationRelease.getUuid());
             }
 
-            if (DeviceType.ANDROID.toString().equals(deviceType)) {
+            if (DeviceType.ANDROID.toString().equalsIgnoreCase(deviceType)) {
                 ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(binaryFile);
                 applicationRelease.setVersion(apkMeta.getVersionName());
                 applicationRelease.setPackageName(apkMeta.getPackageName());
-            } else if (DeviceType.IOS.toString().equals(deviceType)) {
+            } else if (DeviceType.IOS.toString().equalsIgnoreCase(deviceType)) {
                 NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
                 applicationRelease
                         .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
