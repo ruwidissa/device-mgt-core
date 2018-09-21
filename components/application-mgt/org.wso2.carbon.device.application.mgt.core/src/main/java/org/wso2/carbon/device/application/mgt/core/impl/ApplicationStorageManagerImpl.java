@@ -32,6 +32,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
+import org.wso2.carbon.device.application.mgt.common.DeviceType;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
@@ -200,12 +201,16 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                 "application UUID " + applicationRelease.getUuid());
             }
 
-            if (ApplicationType.ANDROID.toString().equals(deviceType)) {
+            if (DeviceType.ANDROID.toString().equals(deviceType)) {
                 ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(binaryFile);
                 applicationRelease.setVersion(apkMeta.getVersionName());
-            } else if (ApplicationType.IOS.toString().equals(deviceType)) {
+                applicationRelease.setPackageName(apkMeta.getPackageName());
+            } else if (DeviceType.IOS.toString().equals(deviceType)) {
                 NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
-                applicationRelease.setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
+                applicationRelease
+                        .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
+                applicationRelease
+                        .setPackageName(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_IDENTIFIER_KEY).toString());
             } else {
                 throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
                         "application types " + applicationRelease.getUuid());

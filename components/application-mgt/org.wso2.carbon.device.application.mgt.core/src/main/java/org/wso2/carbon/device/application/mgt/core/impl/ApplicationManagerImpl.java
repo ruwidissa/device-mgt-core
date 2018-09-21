@@ -225,7 +225,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Error occured while adding application release into IoTS app management Application id of the "
+                    "Error occurred while adding application release into IoTS app management Application id of the "
                             + "application release: " + applicationId, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
