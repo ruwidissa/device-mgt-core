@@ -37,14 +37,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
     @Override
     public void subscribeDeviceToApplication(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
-            int releaseId) throws ApplicationManagementDAOException {
+            int releaseId, String installStatus) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         try {
             conn = this.getDBConnection();
             long time = System.currentTimeMillis() / 1000;
             String sql = "INSERT INTO AP_DEVICE_SUBSCRIPTION(TENANT_ID, SUBSCRIBED_BY, SUBSCRIBED_TIMESTAMP, "
-                    + "DM_DEVICE_ID, AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?, ?, ?, ?, ?, ?)";
+                    + "DM_DEVICE_ID, AP_APP_RELEASE_ID, AP_APP_ID, INSTALL_STATUS) VALUES (?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql);
             for (Device device : deviceList) {
                 stmt.setInt(1, tenantId);
@@ -53,6 +53,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setInt(4, device.getId());
                 stmt.setInt(5, releaseId);
                 stmt.setInt(6, appId);
+                stmt.setString(7, installStatus);
                 stmt.addBatch();
                 if (log.isDebugEnabled()) {
                     log.debug("Adding a mapping to device ID[" + device.getId() + "] to the application [" + appId

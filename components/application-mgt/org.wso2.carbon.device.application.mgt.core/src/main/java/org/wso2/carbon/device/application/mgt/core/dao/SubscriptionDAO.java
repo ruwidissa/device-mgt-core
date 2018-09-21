@@ -42,7 +42,7 @@ public interface SubscriptionDAO {
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
     void subscribeDeviceToApplication(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
-            int releaseId) throws ApplicationManagementDAOException;
+            int releaseId,  String installStatus) throws ApplicationManagementDAOException;
 
     /**
      * Adds a mapping between user and the application which the application is installed on. This mapping will be
