@@ -110,30 +110,30 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully retrieved comments.",
+                            message = "OK. \n Successfully retrieved reviews.",
                             response = PaginationResult.class,
                             responseContainer = "PaginationResult"),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while getting the comment list.",
+                            message = "Internal Server Error. \n Error occurred while getting the review list.",
                             response = ErrorResponse.class)
             })
 
     Response getAllReviews(
             @ApiParam(
                     name="uuid",
-                    value="uuid of the released version of application.",
+                    value="uuid of the application release.",
                     required = true)
             @PathParam("uuid")
                     String uuid,
             @ApiParam(
                     name="offSet",
-                    value="Starting comment number.",defaultValue = "0")
+                    value="Starting review number.",defaultValue = "0")
             @QueryParam("offSet")
                     int offSet,
             @ApiParam(
                     name="limit",
-                    value = "Limit of paginated comments",defaultValue = "20")
+                    value = "Limit of paginated reviews",defaultValue = "20")
             @QueryParam("limit")
                     int limit);
 
@@ -202,16 +202,12 @@ public interface ReviewManagementAPI {
     @ApiResponses(
             value = {
                     @ApiResponse(
-                            code = 201,
+                            code = 200,
                             message = "OK. \n Successfully updated review.",
                             response = Review.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error."),
-                    @ApiResponse(
-                            code = 404,
-                            message = "Not Found. \n No activity found with the given ID.",
-                            response = ErrorResponse.class),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while updating the new review.",
@@ -247,7 +243,7 @@ public interface ReviewManagementAPI {
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:store:remove")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:update")
                     })
             }
     )
@@ -256,14 +252,14 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully deleted the comment"),
+                            message = "OK. \n Successfully deleted the review"),
                     @ApiResponse(
                             code = 404,
                             message = "Not Found. \n No activity found with the given ID.",
                             response = ErrorResponse.class),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while deleting the comment.",
+                            message = "Internal Server Error. \n Error occurred while deleting the review.",
                             response = ErrorResponse.class)
             })
 
@@ -280,17 +276,17 @@ public interface ReviewManagementAPI {
             @PathParam("reviewId") int reviewId);
 
     @GET
-    @Path("/{uuid}/{stars}")
+    @Path("/{uuid}/rating")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "get stars",
-            notes = "Get all stars",
+            value = "get ratings",
+            notes = "Get all ratings",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:stars:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:view")
                     })
             }
     )
@@ -299,12 +295,12 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully retrieved stars.",
+                            message = "OK. \n Successfully retrieved ratings.",
                             response = List.class,
                             responseContainer = "List"),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while getting the stars",
+                            message = "Internal Server Error. \n Error occurred while getting ratings",
                             response = ErrorResponse.class)
             })
 
