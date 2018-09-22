@@ -22,15 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.application.mgt.common.exception.InvalidConfigurationException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
@@ -38,7 +35,6 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import javax.naming.NamingException;
 import java.util.List;
 
 /**
@@ -89,10 +85,6 @@ public class ApplicationManagementServiceComponent {
             SubscriptionManager subscriptionManager = ApplicationManagementUtil.getSubscriptionManagerInstance();
             DataHolder.getInstance().setSubscriptionManager(subscriptionManager);
             bundleContext.registerService(SubscriptionManager.class.getName(), subscriptionManager, null);
-
-            UnrestrictedRoleManager unrestrictedRoleManager = ApplicationManagementUtil.getVisibilityManagerInstance();
-            DataHolder.getInstance().setVisibilityManager(unrestrictedRoleManager);
-            bundleContext.registerService(UnrestrictedRoleManager.class.getName(), unrestrictedRoleManager, null);
 
             ApplicationStorageManager applicationStorageManager = ApplicationManagementUtil
                     .getApplicationStorageManagerInstance();

@@ -25,38 +25,20 @@
         <Extension name="ApplicationManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
         </Extension>
-        <Extension name="ApplicationReleaseManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationReleaseManagerImpl</ClassName>
-        </Extension>
-        <Extension name="CategoryManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.CategoryManagerImpl</ClassName>
-        </Extension>
         <Extension name="ReviewManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ReviewManagerImpl</ClassName>
         </Extension>
         <Extension name="LifecycleStateManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.LifecycleStateManagerImpl</ClassName>
-        </Extension>
-        <Extension name="PlatformManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.PlatformManagerImpl</ClassName>
+            <ClassName>org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger</ClassName>
         </Extension>
         <Extension name="SubscriptionManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
-        </Extension>
-        <Extension name="VisibilityManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.UnrestrictedRoleManagerImpl</ClassName>
         </Extension>
         <Extension name="ApplicationStorageManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
             <Parameters>
                 <Parameter name="StoragePath">repository/resources/apps</Parameter>
                 <Parameter name="MaxScreenShotCount">6</Parameter>
-            </Parameters>
-        </Extension>
-        <Extension name="PlatformStorageManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.PlatformStorageManagerImpl</ClassName>
-            <Parameters>
-                <Parameter name="StoragePath">repository/resources/platforms</Parameter>
             </Parameters>
         </Extension>
     </Extensions>

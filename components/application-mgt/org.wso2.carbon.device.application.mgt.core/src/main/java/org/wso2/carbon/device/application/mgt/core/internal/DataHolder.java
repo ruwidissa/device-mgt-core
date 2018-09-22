@@ -22,7 +22,6 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.common.services.UnrestrictedRoleManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -41,8 +40,6 @@ public class DataHolder {
     private ReviewManager reviewManager;
 
     private SubscriptionManager subscriptionManager;
-
-    private UnrestrictedRoleManager unrestrictedRoleManager;
 
     private ApplicationStorageManager applicationStorageManager;
 
@@ -88,14 +85,6 @@ public class DataHolder {
 
     public void setSubscriptionManager(SubscriptionManager subscriptionManager) {
         this.subscriptionManager = subscriptionManager;
-    }
-
-    public UnrestrictedRoleManager getVisibilityManager() {
-        return unrestrictedRoleManager;
-    }
-
-    public void setVisibilityManager(UnrestrictedRoleManager unrestrictedRoleManager) {
-        this.unrestrictedRoleManager = unrestrictedRoleManager;
     }
 
     public RealmService getRealmService() {
