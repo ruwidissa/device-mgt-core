@@ -66,7 +66,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, SUB_TYPE, RESTRICTED, "
-                            + "TENANT_ID, DM_DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            + "TENANT_ID, DM_DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
             stmt.setString(2, application.getType());
@@ -159,7 +159,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         }
 
-        sql += " LIMIT ? OFFSET ? ORDER BY " + filter.getSortBy() + " APP_ID;";
+        String defaultSortOrder = "ASC";
+        if (filter.getSortBy() != null && !filter.getSortBy().isEmpty()) {
+            defaultSortOrder = filter.getSortBy();
+        }
+        sql += " ORDER BY APP_ID " + defaultSortOrder +" LIMIT ? OFFSET ? ";
 
         pagination.setLimit(filter.getLimit());
         pagination.setOffset(filter.getOffset());
@@ -167,7 +171,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(paramIndex, tenantId);
+            stmt.setInt(paramIndex++, tenantId);
             stmt.setString(paramIndex++, AppLifecycleState.REMOVED.toString());
 
             if (filter.getAppType() != null) {
@@ -181,7 +185,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 }
             }
 
-            stmt.setInt(paramIndex++, filter.getLimit());
+            if (filter.getLimit() == 0) {
+                stmt.setInt(paramIndex++, 100);
+            } else {
+                stmt.setInt(paramIndex++, filter.getLimit());
+            }
             stmt.setInt(paramIndex, filter.getOffset());
             rs = stmt.executeQuery();
             applicationList.setApplications(Util.loadApplications(rs));

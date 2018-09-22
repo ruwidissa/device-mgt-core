@@ -48,6 +48,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -106,13 +107,15 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     }
 
     @POST
-    @Consumes("application/json")
+    @Consumes("multipart/mixed")
     public Response createApplication(
-            @Valid Application application,
+            @Multipart("application") Application application,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
-            @Multipart("screenshot") List<Attachment> attachmentList) {
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         InputStream iconFileStream;
@@ -120,6 +123,15 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         List<InputStream> attachments = new ArrayList<>();
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         ApplicationRelease applicationRelease;
+        List<Attachment> attachmentList = new ArrayList<>();
+        attachmentList.add(screenshot1);
+        if(screenshot2 != null) {
+            attachmentList.add(screenshot2);
+        }
+        if(screenshot3 != null) {
+            attachmentList.add(screenshot3);
+        }
+
         try {
             if (!isValidAppCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application)) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
