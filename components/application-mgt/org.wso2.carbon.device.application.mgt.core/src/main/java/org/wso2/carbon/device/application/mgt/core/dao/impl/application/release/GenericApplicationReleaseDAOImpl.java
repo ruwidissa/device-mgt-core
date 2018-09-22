@@ -66,7 +66,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         String sql = "INSERT INTO AP_APP_RELEASE (VERSION,TENANT_ID,UUID,RELEASE_TYPE, PACKAGE_NAME, APP_PRICE,"
                 + "STORED_LOCATION, BANNER_LOCATION, SC_1_LOCATION,SC_2_LOCATION,SC_3_LOCATION, APP_HASH_VALUE,"
                 + "SHARED_WITH_ALL_TENANTS, APP_META_INFO,CREATED_BY,AP_APP_ID) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
         int index = 0;
         String generatedColumns[] = {"ID"};
@@ -80,6 +80,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             statement.setString(++index, String.valueOf(applicationRelease.getPackageName()));
             statement.setDouble(++index, applicationRelease.getPrice());
             statement.setString(++index, applicationRelease.getAppStoredLoc());
+            statement.setString(++index, applicationRelease.getBannerLoc());
             statement.setString(++index, applicationRelease.getScreenshotLoc1());
             statement.setString(++index, applicationRelease.getScreenshotLoc2());
             statement.setString(++index, applicationRelease.getScreenshotLoc3());

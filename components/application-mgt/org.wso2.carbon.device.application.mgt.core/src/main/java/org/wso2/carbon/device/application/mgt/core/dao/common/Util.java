@@ -119,31 +119,32 @@ public class Util {
         Application application = null;
         int applicatioId;
         int iteration = 0;
+        if (rs != null) {
+            while (rs.next()) {
+                if (iteration == 0) {
+                    application = new Application();
+                    applicatioId = rs.getInt("APP_ID");
+                    application.setId(applicatioId);
+                    application.setName(rs.getString("APP_NAME"));
+                    application.setType(rs.getString("APP_TYPE"));
+                    application.setAppCategory(rs.getString("APP_CATEGORY"));
+                    application.setSubType(rs.getString("SUB_TYPE"));
+                    application.setPaymentCurrency(rs.getString("CURRENCY"));
+                    application.setIsRestricted(rs.getBoolean("RESTRICTED"));
+                }
 
-        while (rs.next()) {
-            if (iteration == 0) {
-                application = new Application();
-                applicatioId = rs.getInt("APP_ID");
-                application.setId(applicatioId);
-                application.setName(rs.getString("APP_NAME"));
-                application.setType(rs.getString("APP_TYPE"));
-                application.setAppCategory(rs.getString("APP_CATEGORY"));
-                application.setSubType(rs.getString("SUB_TYPE"));
-                application.setPaymentCurrency(rs.getString("CURRENCY"));
-                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
+                Tag tag = new Tag();
+                tag.setTagName(rs.getString("APP_TAG"));
+                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
+                unrestrictedRole.setRole(rs.getString("ROLE"));
+                if (application.getTags().contains(tag)) {
+                    application.getTags().add(tag);
+                }
+                if (application.getUnrestrictedRoles().contains(unrestrictedRole)) {
+                    application.getUnrestrictedRoles().add(unrestrictedRole);
+                }
+                iteration++;
             }
-
-            Tag tag = new Tag();
-            tag.setTagName(rs.getString("APP_TAG"));
-            UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
-            unrestrictedRole.setRole(rs.getString("ROLE"));
-            if (application.getTags().contains(tag)) {
-                application.getTags().add(tag);
-            }
-            if (application.getUnrestrictedRoles().contains(unrestrictedRole)) {
-                application.getUnrestrictedRoles().add(unrestrictedRole);
-            }
-            iteration++;
         }
         return application;
 

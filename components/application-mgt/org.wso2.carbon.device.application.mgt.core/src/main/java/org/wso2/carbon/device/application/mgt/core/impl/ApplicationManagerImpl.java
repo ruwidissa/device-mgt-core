@@ -50,6 +50,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.ValidationException
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -105,8 +106,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationRelease applicationRelease;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         try {
+            ConnectionManagerUtil.openDBConnection();
             ConnectionManagerUtil.beginDBTransaction();
-            deviceType = this.deviceTypeDAO.getDeviceType(application.getDeviceType(), tenantId);
+            MAMDeviceConnectorImpl mamDeviceConnector = new MAMDeviceConnectorImpl();
+            deviceType = mamDeviceConnector.getDeviceManagementService().getDeviceType(application.getDeviceType());
 
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
@@ -136,12 +139,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = this.applicationReleaseDAO
-                        .createRelease(applicationRelease, application.getId(), tenantId);
+                        .createRelease(applicationRelease, appId, tenantId);
 
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-                changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+                changeLifecycleState(appId, applicationRelease.getUuid(), lifecycleState);
 
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
@@ -152,19 +155,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             return application;
 
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while getting device type id of " + application.getType();
-            log.error(msg, e);
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while adding application";
             log.error(msg, e);
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            e.printStackTrace();
         } finally {
-            ConnectionManagerUtil.closeDBConnection();
+            //ConnectionManagerUtil.closeDBConnection(); //todo: check this again
         }
+        return  null;
     }
 
     @Override
@@ -546,14 +547,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
         Application application;
         boolean isAppAllowed = false;
         try {
-            ConnectionManagerUtil.openDBConnection();
             application = ApplicationManagementDAOFactory.getApplicationDAO()
                     .getApplicationById(applicationId, tenantId);
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                 return application;
             }
 
-            if (!application.getUnrestrictedRoles().isEmpty()) {
+            if (application != null && !application.getUnrestrictedRoles().isEmpty()) {
                 if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
                     isAppAllowed = true;
                 }
@@ -569,8 +569,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while getting application with the " + "application id " + applicationId, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
@@ -707,7 +705,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state)
             throws ApplicationManagementException {
         try {
-            ConnectionManagerUtil.openDBConnection();
             Application application = getApplicationIfAccessible(applicationId);
             ApplicationRelease applicationRelease = getAppReleaseIfExists(applicationId, applicationUuid);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -728,8 +725,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException("Failed to add lifecycle state", e);
         } catch (ApplicationManagementException e) {
             throw new ApplicationManagementException("Lifecycle State Validation failed", e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
@@ -808,10 +803,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private Filter validateFilter(Filter filter) {
         if (filter != null) {
-            if (!SortingOrder.ASC.toString().equals(filter.getSortBy()) &&
-                    !SortingOrder.DESC.toString().equals(filter.getSortBy())) {
-                return null;
-            }
             if (filter.getAppType() != null) {
                 boolean isValidRequest = false;
                 for (ApplicationType applicationType : ApplicationType.values()) {

@@ -193,6 +193,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             String artifactDirectoryPath;
             String md5OfApp;
+            InputStream[] cloneInputStream = cloneInputStream(binaryFile);
             md5OfApp = getMD5(binaryFile);
 
             if (md5OfApp == null) {
@@ -202,7 +203,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             }
 
             if (DeviceType.ANDROID.toString().equalsIgnoreCase(deviceType)) {
-                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(binaryFile);
+                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(cloneInputStream[2]);
                 applicationRelease.setVersion(apkMeta.getVersionName());
                 applicationRelease.setPackageName(apkMeta.getPackageName());
             } else if (DeviceType.IOS.toString().equalsIgnoreCase(deviceType)) {
@@ -223,8 +224,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                   + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
             }
 
-            String artifactPath = artifactDirectoryPath + Constants.RELEASE_ARTIFACT;
-            saveFile(binaryFile, artifactPath);
+            String artifactPath = artifactDirectoryPath + File.separator + Constants.RELEASE_ARTIFACT +".apk";
+            saveFile(cloneInputStream[1], artifactPath);
             applicationRelease.setAppStoredLoc(artifactPath);
             applicationRelease.setAppHashValue(md5OfApp);
 
@@ -239,6 +240,38 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         }
 
         return applicationRelease;
+    }
+
+    public InputStream[] cloneInputStream(InputStream inputStream) throws ApplicationStorageManagementException {
+
+        ByteArrayOutputStream byteArrayOutputStream = null;
+
+        try {
+            byteArrayOutputStream = new ByteArrayOutputStream();
+
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int len;
+            while ((len = inputStream.read(buffer)) > -1 ) {
+                byteArrayOutputStream.write(buffer, 0, len);
+            }
+            byteArrayOutputStream.flush();
+
+            InputStream stream1 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            InputStream stream2 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            InputStream stream3 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+
+            return new InputStream[]{stream1, stream2, stream3};
+        } catch (IOException e) {
+            throw new ApplicationStorageManagementException("Error occurred while cloning input stream ", e);
+        } finally {
+            if (byteArrayOutputStream != null) {
+                try {
+                    byteArrayOutputStream.close();
+                } catch (IOException e) {
+
+                }
+            }
+        }
     }
 
     @Override
