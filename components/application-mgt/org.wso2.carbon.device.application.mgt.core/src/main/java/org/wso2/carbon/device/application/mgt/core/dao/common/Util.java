@@ -137,10 +137,11 @@ public class Util {
                 tag.setTagName(rs.getString("APP_TAG"));
                 UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
                 unrestrictedRole.setRole(rs.getString("ROLE"));
-                if (application.getTags().contains(tag)) {
+                if (application.getTags() != null && application.getTags().contains(tag)) {
                     application.getTags().add(tag);
                 }
-                if (application.getUnrestrictedRoles().contains(unrestrictedRole)) {
+                if (application.getUnrestrictedRoles() != null && application.getUnrestrictedRoles()
+                        .contains(unrestrictedRole)) {
                     application.getUnrestrictedRoles().add(unrestrictedRole);
                 }
                 iteration++;

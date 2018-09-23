@@ -136,6 +136,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             if (!isValidAppCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application)) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
+
+            // The application executable artifacts such as apks are uploaded.
             if (!ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = applicationStorageManager
@@ -157,11 +159,15 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             for (Attachment screenshot : attachmentList) {
                 attachments.add(screenshot.getDataHandler().getInputStream());
             }
+
+            // Upload images
             applicationRelease = applicationStorageManager.uploadImageArtifacts(applicationRelease, iconFileStream,
                     bannerFileStream, attachments);
             applicationRelease.setUuid(UUID.randomUUID().toString());
             applicationReleases.add(applicationRelease);
             application.setApplicationReleases(applicationReleases);
+
+            // Created new application entry
             Application createdApplication = applicationManager.createApplication(application);
             if (createdApplication != null) {
                 return Response.status(Response.Status.CREATED).entity(createdApplication).build();
@@ -460,7 +466,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true, 0);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while adding lifecycle state.";
             log.error(msg, e);

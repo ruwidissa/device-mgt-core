@@ -99,15 +99,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
         }
 
+
+        ConnectionManagerUtil.openDBConnection();
         validateAppCreatingRequest(application);
         validateAppReleasePayload(application.getApplicationReleases().get(0));
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         try {
-            ConnectionManagerUtil.openDBConnection();
             ConnectionManagerUtil.beginDBTransaction();
             MAMDeviceConnectorImpl mamDeviceConnector = new MAMDeviceConnectorImpl();
+            // Getting the device type details to get device type ID for internal mappings
             deviceType = mamDeviceConnector.getDeviceManagementService().getDeviceType(application.getDeviceType());
 
             if (deviceType == null) {
@@ -115,6 +117,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
             }
+            // Insert to application table
             int appId = this.applicationDAO.createApplication(application, deviceType.getId());
 
             if (appId == -1) {
@@ -122,13 +125,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
             } else {
+                if(log.isDebugEnabled()){
+                    log.debug("New Application entry added to AP_APP table. App Id:" + appId);
+                }
                 if (!application.getTags().isEmpty()) {
                     this.applicationDAO.addTags(application.getTags(), appId, tenantId);
+                    if(log.isDebugEnabled()){
+                        log.debug("New tags entry added to AP_APP_TAG table. App Id:" + appId);
+                    }
                 }
                 if (!application.getUnrestrictedRoles().isEmpty()) {
                     application.setIsRestricted(true);
                     this.visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), appId, tenantId);
+                    if(log.isDebugEnabled()){
+                        log.debug("New restricted roles to app ID mapping added to AP_UNRESTRICTED_ROLE table." +
+                                " App Id:" + appId);
+                    }
                 } else {
+                    if(log.isDebugEnabled()){
+                        log.debug("App is not restricted to role. App Id:" + appId);
+                    }
                     application.setIsRestricted(false);
                 }
                 if (application.getApplicationReleases().size() > 1 ){
@@ -136,14 +152,22 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             "Invalid payload. Application creating payload should contains one application release, but "
                                     + "the payload contains more than one");
                 }
+
+                if(log.isDebugEnabled()){
+                    log.debug("Creating a new release. App Id:" + appId);
+                }
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = this.applicationReleaseDAO
                         .createRelease(applicationRelease, appId, tenantId);
 
+                if(log.isDebugEnabled()){
+                    log.debug("Changing lifecycle state. App Id:" + appId);
+                }
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-                changeLifecycleState(appId, applicationRelease.getUuid(), lifecycleState);
+                changeLifecycleState(appId, applicationRelease.getUuid(), lifecycleState, false,
+                        applicationRelease.getId());
 
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
@@ -160,12 +184,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
         } catch (DeviceManagementException e) {
+
             String msg = "Error occurred while getting device type id of " + application.getType();
             log.error(msg, e);
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Unknown exception while creating application.";
+            log.error(msg, e);
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(msg, e);
         } finally {
-            //ConnectionManagerUtil.closeDBConnection(); //todo: check this again
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
@@ -182,14 +212,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         try {
-            ConnectionManagerUtil.openDBConnection();
+            ConnectionManagerUtil.getDBConnection();
             applicationList = applicationDAO.getApplications(filter, tenantId);
-            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationList = getRoleRestrictedApplicationList(applicationList, userName);
-            }
-            for (Application application : applicationList.getApplications()) {
-                applicationReleases = getReleases(application.getId());
-                application.setApplicationReleases(applicationReleases);
+            if(applicationList != null && applicationList.getApplications() != null && applicationList
+                    .getApplications().size() > 0) {
+                if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
+                    applicationList = getRoleRestrictedApplicationList(applicationList, userName);
+                }
+                for (Application application : applicationList.getApplications()) {
+                    applicationReleases = getReleases(application.getId());
+                    application.setApplicationReleases(applicationReleases);
+                }
             }
             return applicationList;
         } catch (UserStoreException e) {
@@ -199,8 +232,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ApplicationManagementDAOException e) {
             throw new ApplicationManagementException(
                     "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
@@ -220,7 +251,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             LifecycleState lifecycleState = new LifecycleState();
             lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
             lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-            changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState);
+            changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState, true, 0);
 
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
@@ -365,12 +396,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.debug("Request is received to retrieve all the releases related with the application " + application
                     .toString());
         }
-        try {
-            ConnectionManagerUtil.openDBConnection();
-            applicationReleases = this.applicationReleaseDAO.getReleases(application.getName(), application.getType(), tenantId);
-            for (ApplicationRelease applicationRelease : applicationReleases) {
-                LifecycleState lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
-                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
+        ConnectionManagerUtil.getDBConnection();
+        applicationReleases = this.applicationReleaseDAO.getReleases(application.getName(), application.getType(), tenantId);
+        for (ApplicationRelease applicationRelease : applicationReleases) {
+            LifecycleState lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
+                    getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
+            if (lifecycleState != null) {
                 applicationRelease.setLifecycleState(lifecycleState);
 
                 if (!AppLifecycleState.REMOVED.toString()
@@ -378,10 +409,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     filteredApplicationReleases.add(applicationRelease);
                 }
             }
-            return filteredApplicationReleases;
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
+        return filteredApplicationReleases;
+
     }
 
     @Override
@@ -410,7 +440,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = new LifecycleState();
                 newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
                 newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState, true, 0);
                 storedLocations.add(applicationRelease.getAppHashValue());
             }
             ConnectionManagerUtil.openDBConnection();
@@ -441,7 +471,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             LifecycleState newAppLifecycleState = new LifecycleState();
             newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
             newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-            changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState);
+            changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState, true, 0);
         }else{
             throw new ApplicationManagementException("Can't delete the application release, You have to move the " +
                                                              "lifecycle state from "+ currentState + " to acceptable " +
@@ -583,27 +613,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                                                                                     ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationRelease applicationRelease;
-        try {
-            if (applicationId <= 0) {
-                throw new ApplicationManagementException(
-                        "Application id could,t be a negative integer. Hence please add " +
-                                "valid application id.");
-            }
-            if (applicationUuid == null) {
-                throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
-                                                                 + "parameter to get the relevant application.");
-            }
-            ConnectionManagerUtil.openDBConnection();
-            applicationRelease = this.applicationReleaseDAO.getReleaseByIds(applicationId, applicationUuid, tenantId);
-            if (applicationRelease == null) {
-                throw new ApplicationManagementException("Doesn't exist a application release for application ID: " +
-                                                                 applicationId + "and application UUID: " +
-                                                                 applicationUuid);
-            }
-            return applicationRelease;
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
+
+        if (applicationId <= 0) {
+            throw new ApplicationManagementException(
+                    "Application id could,t be a negative integer. Hence please add " +
+                            "valid application id.");
         }
+        if (applicationUuid == null) {
+            throw new ApplicationManagementException("Application UUID is null. Application UUID is a required "
+                    + "parameter to get the relevant application.");
+        }
+        ConnectionManagerUtil.getDBConnection();
+        applicationRelease = this.applicationReleaseDAO.getReleaseByIds(applicationId, applicationUuid, tenantId);
+        if (applicationRelease == null) {
+            throw new ApplicationManagementException("Doesn't exist a application release for application ID: " +
+                    applicationId + "and application UUID: " +
+                    applicationUuid);
+        }
+        return applicationRelease;
 
     }
 
@@ -703,19 +730,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state)
-            throws ApplicationManagementException {
+    public void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state, Boolean
+            checkExist, int releaseId) throws ApplicationManagementException {
         try {
-            Application application = getApplicationIfAccessible(applicationId);
-            ApplicationRelease applicationRelease = getAppReleaseIfExists(applicationId, applicationUuid);
+            if (checkExist) {
+                getApplicationIfAccessible(applicationId);
+            }
+            if (releaseId < 1) {
+                releaseId = getAppReleaseIfExists(applicationId, applicationUuid).getId();
+            }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
             String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
+
+                if (getLifecycleManagementService().isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
                     this.lifecycleStateDAO
-                            .addLifecycleState(state, application.getId(), applicationRelease.getId(), tenantId);
+                            .addLifecycleState(state, applicationId, releaseId, tenantId);
                 } else {
                     log.error("Invalid lifecycle state transition from '" + state.getPreviousState() + "'"
                               + " to '" + state.getCurrentState() + "'");
@@ -828,5 +860,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
         }
         return list;
+    }
+
+    public LifecycleStateManger getLifecycleManagementService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        LifecycleStateManger deviceManagementProviderService =
+                (LifecycleStateManger) ctx.getOSGiService(LifecycleStateManger.class, null);
+        if (deviceManagementProviderService == null) {
+            String msg = "DeviceImpl Management provider service has not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return deviceManagementProviderService;
     }
 }
