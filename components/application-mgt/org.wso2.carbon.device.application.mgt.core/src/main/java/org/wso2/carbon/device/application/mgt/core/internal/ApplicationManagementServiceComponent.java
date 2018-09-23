@@ -103,6 +103,7 @@ public class ApplicationManagementServiceComponent {
                     getConfiguration().getLifecycleStates();
             LifecycleStateManger lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
             DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
+            bundleContext.registerService(LifecycleStateManger.class.getName(), lifecycleStateManger, null);
 
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (Throwable e) {

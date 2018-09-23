@@ -100,13 +100,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                               + " the user : " + application.getUser().getUserName());
         }
 
+
+        ConnectionManagerUtil.openDBConnection();
         validateAppCreatingRequest(application);
         validateAppReleasePayload(application.getApplicationReleases().get(0));
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         try {
-            ConnectionManagerUtil.getDBConnection();
             ConnectionManagerUtil.beginDBTransaction();
             MAMDeviceConnectorImpl mamDeviceConnector = new MAMDeviceConnectorImpl();
             // Getting the device type details to get device type ID for internal mappings
@@ -188,7 +189,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
-        }  catch (Exception e) {
+        } catch (Exception e) {
             String msg = "Unknown exception while creating application.";
             log.error(msg, e);
             ConnectionManagerUtil.rollbackDBTransaction();
@@ -743,7 +744,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
+
+                if (getLifecycleManagementService().isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
                     this.lifecycleStateDAO
                             .addLifecycleState(state, applicationId, releaseId, tenantId);
                 } else {
@@ -858,5 +860,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
         }
         return list;
+    }
+
+    public LifecycleStateManger getLifecycleManagementService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        LifecycleStateManger deviceManagementProviderService =
+                (LifecycleStateManger) ctx.getOSGiService(LifecycleStateManger.class, null);
+        if (deviceManagementProviderService == null) {
+            String msg = "DeviceImpl Management provider service has not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return deviceManagementProviderService;
     }
 }
