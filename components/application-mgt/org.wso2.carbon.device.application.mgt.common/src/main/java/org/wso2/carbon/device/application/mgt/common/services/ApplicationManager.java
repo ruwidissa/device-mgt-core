@@ -148,9 +148,13 @@ public interface ApplicationManager {
      *
      * @param applicationId ID of the Application.
      * @param applicationUuid UUID of the Application Release.
+     * @param state Lifecycle state to change the app
+     * @param checkExist whether it is needed to check if the app and release already exist in the database
+     * @param releaseId The release ID of the application(optional)
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state) throws ApplicationManagementException;
+    void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state, Boolean checkExist,
+                              int releaseId) throws ApplicationManagementException;
 
     /**
      * Get the application if application is an accessible one.
