@@ -45,7 +45,7 @@ import java.util.List;
     boolean addReview(Review review, String uuid, int tenantId) throws ReviewManagementDAOException;
 
    /**
-    * To verify whether review is exists or not.
+    * To verify whether user has already commented for the application release or not.
     *
     * @param uuid   UUID of the application release.
     * @param username   username of the logged in user.
@@ -58,33 +58,33 @@ import java.util.List;
     /**
      * To update already added comment.
      *
-     * @return {@link Review}Updated comment
-     * @throws ReviewManagementException Exceptions of the comment management.
-     * @throws DBConnectionException      db connection exception
-     * @throws SQLException               sql exception
+     * @param review Updating review
+     * @param reviewId id of the updating review
+     * @param username review owner
+     * @param tenantId tenant id
+     * @return row count if updating is succeed otherwise 0
+     * @throws ReviewManagementDAOException Exceptions of the review management.
      */
-    boolean updateReview(Review review, int reviewId, int tenantId)
-            throws ReviewManagementException, DBConnectionException, SQLException;
+    int updateReview(Review review, int reviewId, String username, int tenantId)
+            throws ReviewManagementDAOException;
 
 
     /**
      * To get the comment with id.
      *
-     * @param commentId id of the comment
+     * @param reviewId id of the review
      * @return {@link Review}Review
-     * @throws ReviewManagementException Exceptions of the comment management.
-     * @throws DBConnectionException      db connection exception
-     * @throws SQLException               sql exception
+     * @throws ReviewManagementDAOException Exceptions of the review management DAO.
      */
-    Review getReview(int commentId) throws ReviewManagementException, SQLException, DBConnectionException;
+    Review getReview(int reviewId) throws ReviewManagementDAOException;
 
     /**
-     * To get all the comments
+     * To get all reviews
      *
      * @param uuid    uuid of the application
      * @param request {@link PaginationRequest}pagination request with offSet and limit
      * @param tenantId Tenant id
-     * @return {@link List}List of all the comments in an application
+     * @return {@link List}List of all reviews for the application release
      * @throws ReviewManagementDAOException      Review management DAO exception
      **/
     List<Review> getAllReviews(String uuid, PaginationRequest request, int tenantId)
@@ -92,11 +92,12 @@ import java.util.List;
 
     /**
      * To get list of comments using release id and application id.
-     *
+     * @param uuid UUID of the application release
+     * @param tenantId tenant id
      * @return {@link List}List of comments
-     * @throws ReviewManagementException Exceptions of the comment management.
+     * @throws ReviewManagementDAOException Exceptions of the review management DAO.
      */
-    List<Integer> getAllRatingValues(String uuid)throws SQLException, DBConnectionException;
+    List<Integer> getAllRatingValues(String uuid, int tenantId) throws ReviewManagementDAOException;
 
     /**
      * To get count of comments by application details.
@@ -122,15 +123,6 @@ import java.util.List;
      */
     int deleteReview(String username, int reviewId) throws ReviewManagementDAOException;
 
-   /**
-    * To delete review using review id, in this case, it doesn't check whether user is review owner or not.
-    *
-    * @param reviewId id of the review
-    * @return If review is successfully deleted return 1, otherwise returns 0.
-    * @throws ReviewManagementDAOException Review management DAO exception.
-    */
-   int deleteReviewByAdmin(int reviewId) throws ReviewManagementDAOException;
-
     /**
      * To delete comments using application details.
      *
@@ -142,12 +134,11 @@ import java.util.List;
     void deleteReviews(String appType, String appName, String version) throws ReviewManagementException;
 
     /**
-     * To get comment count for pagination
+     * To get review count for a specific application release
      *
-     * @param request pagination request
      * @param uuid uuid of the application release
      * @return Review count
-     * @throws ReviewManagementException
+     * @throws ReviewManagementDAOException Review management DAO exception
      */
-    int getReviewCount(PaginationRequest request, String uuid) throws ReviewManagementException;
+    int getReviewCount(String uuid) throws ReviewManagementDAOException;
 }

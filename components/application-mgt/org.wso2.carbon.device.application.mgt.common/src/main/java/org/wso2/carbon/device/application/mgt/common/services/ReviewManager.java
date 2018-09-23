@@ -22,7 +22,11 @@ import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
+import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
+
+
 
 /**
  * ReviewManager is responsible for handling all the add/update/delete/get operations related with
@@ -30,17 +34,17 @@ import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementE
 public interface ReviewManager {
 
     /**
-     * To add a review to a application
+     * To add a review to an application release
      *
      * @param review  review of the application.
      * @param uuid     uuid of the application release.
      * @return {@link Review} Review added
      * @throws ReviewManagementException Exceptions of the review management.
      */
-    boolean addReview(Review review, String uuid) throws ReviewManagementException;
+    boolean addReview(Review review, String uuid) throws ReviewManagementException, RequestValidatingException;
 
     /**
-     * Get all comments to pagination
+     * Get all review with pagination
      *
      * @param request Pagination request {@link PaginationRequest}
      * @param uuid    uuid of the application release
@@ -50,15 +54,6 @@ public interface ReviewManager {
     PaginationResult getAllReviews(PaginationRequest request, String uuid) throws ReviewManagementException;
 
     /**
-     * To get the comment with id.
-     *
-     * @param commentId id of the comment
-     * @return {@link Review}Review of the comment id
-     * @throws ReviewManagementException Exceptions of the comment management.
-     */
-    Review getReview(int commentId) throws ReviewManagementException;
-
-    /**
      * To delete review using review id.
      *
      * @param uuid UUID of the application release
@@ -66,7 +61,8 @@ public interface ReviewManager {
      * @return If review is successfully deleted return true, otherwise returns false
      * @throws ReviewManagementException Exceptions of the comment management
      */
-    boolean deleteReview(String uuid, int commentId) throws ReviewManagementException;
+    boolean deleteReview(String uuid, int commentId)
+            throws ReviewManagementException, ReviewDoesNotExistException;
 
     /**
      * To update a review.
@@ -74,12 +70,13 @@ public interface ReviewManager {
      * @param review   review of the application.
      * @param reviewId id of the review
      * @param uuid UUID of the application release
-     * @param checkExistence Pass true if it is required to check the existence of the review, otherwise pass false
+     * @param existingReview Pass existing review when same user adding a review for same application release,
+     *                       otherwise pass null
      * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the review management
      */
-    boolean updateReview(Review review, int reviewId, String uuid, boolean checkExistence)
-            throws ReviewManagementException;
+    boolean updateReview(Review review, int reviewId, String uuid, Review existingReview)
+            throws ReviewManagementException, RequestValidatingException;
 
     /**
      * To get the overall rating for a application release

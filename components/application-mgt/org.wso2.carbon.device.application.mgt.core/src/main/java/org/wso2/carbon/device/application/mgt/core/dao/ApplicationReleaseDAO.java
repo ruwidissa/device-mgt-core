@@ -81,19 +81,21 @@ public interface ApplicationReleaseDAO {
 
     /**
      * To update an Application release.
-     * @param id id of the ApplicationRelease that need to be updated.
+     * @param uuid UUID of the ApplicationRelease that need to be updated.
      * @param rating given stars for the application.
      * @param ratedUsers number of users who has rated for the application release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception
      */
-    int updateRatingValue(int id, double rating, int ratedUsers) throws ApplicationManagementDAOException;
+    void updateRatingValue(String uuid, double rating, int ratedUsers) throws ApplicationManagementDAOException;
 
     /**
      * To retrieve rating of an application release.
+     *
      * @param uuid UUID of the application Release.
+     * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    Rating getRating(String uuid) throws ApplicationManagementDAOException;
+    Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
 
     /**

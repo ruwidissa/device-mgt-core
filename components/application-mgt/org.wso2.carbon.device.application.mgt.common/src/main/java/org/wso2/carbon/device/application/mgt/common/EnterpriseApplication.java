@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-import com.google.gson.Gson;
-
 import java.io.Serializable;
 
 /**

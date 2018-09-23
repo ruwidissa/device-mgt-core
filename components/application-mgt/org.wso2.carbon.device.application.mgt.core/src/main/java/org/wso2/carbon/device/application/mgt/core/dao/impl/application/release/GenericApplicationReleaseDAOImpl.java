@@ -279,28 +279,28 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     /**
      * To Update starts of an application release.
      *
-     * @param id Id of the application Release.
+     * @param uuid UUID of the application Release.
      * @param rating given stars for the application release.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public int updateRatingValue(int id, double rating, int ratedUsers) throws ApplicationManagementDAOException {
+    public void updateRatingValue(String uuid, double rating, int ratedUsers) throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
-        String sql = "UPDATE AP_APP_RELEASE SET RATING = ? AND RATED_USERS = ? WHERE ID = ?;";
+        String sql = "UPDATE AP_APP_RELEASE SET RATING = ? AND RATED_USERS = ? WHERE UUID = ?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
             statement.setDouble(1, rating);
             statement.setInt(2, ratedUsers);
-            statement.setInt(2, id);
-            return statement.executeUpdate();
+            statement.setString(3, uuid);
+            statement.executeUpdate();
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
-                    "Database connection exception while trying to update the application release", e);
+                    "Database connection exception while trying to update the application release rating value", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
-                    "SQL exception while updating the release ,while executing the query " + sql, e);
+                    "SQL exception while updating the release rating value ,while executing the query " + sql, e);
         } finally {
             Util.cleanupResources(statement, null);
         }
@@ -313,16 +313,17 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public Rating getRating(String uuid) throws ApplicationManagementDAOException {
+    public Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         Rating rating = null;
-        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE UUID = ?;";
+        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE UUID = ? AND TENANT_D=?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, uuid);
+            statement.setInt(2, tenantId);
             resultSet = statement.executeQuery();
 
             if (resultSet.next()){

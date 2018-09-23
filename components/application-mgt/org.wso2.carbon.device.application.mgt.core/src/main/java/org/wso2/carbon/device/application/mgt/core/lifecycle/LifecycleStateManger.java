@@ -26,9 +26,6 @@ public class LifecycleStateManger {
     }
 
     public boolean isValidStateChange(String currentState, String nextState) {
-        if (lifecycleStates.get(currentState).getProceedingStates().contains(nextState)) {
-            return true;
-        }
-        return false;
+        return lifecycleStates.get(currentState).getProceedingStates().contains(nextState);
     }
 }

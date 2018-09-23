@@ -23,18 +23,16 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.EnterpriseInstallationDetails;
 import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
-import org.wso2.carbon.device.application.mgt.publisher.api.services.SubscriptionManagementAPI;
+import org.wso2.carbon.device.application.mgt.store.api.services.SubscriptionManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.InstallationDetails;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
 import javax.validation.Valid;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.List;
 
 /**
