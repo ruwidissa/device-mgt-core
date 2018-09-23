@@ -96,8 +96,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         application.setUser(new User(userName, tenantId));
         if (log.isDebugEnabled()) {
-            log.debug("Create Application received for the tenant : " + application.getUser().getTenantId() + " From"
-                              + " the user : " + application.getUser().getUserName());
+            log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
         }
 
         validateAppCreatingRequest(application);
@@ -161,11 +160,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
         } catch (DeviceManagementException e) {
-            e.printStackTrace();
+            String msg = "Error occurred while getting device type id of " + application.getType();
+            log.error(msg, e);
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(msg, e);
         } finally {
             //ConnectionManagerUtil.closeDBConnection(); //todo: check this again
         }
-        return  null;
     }
 
     @Override

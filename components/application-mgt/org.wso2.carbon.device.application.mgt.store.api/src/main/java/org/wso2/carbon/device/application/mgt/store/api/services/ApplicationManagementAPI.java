@@ -28,23 +28,16 @@ import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.publisher.api.beans.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 
-import java.util.List;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -53,22 +46,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * APIs to handle application management related tasks.
+ * APIs to handle application storage management related tasks.
  */
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "Application Management Service",
+                title = "Application Storage Management Service",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = "name", value = "ApplicationManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/applications"),
+                                @ExtensionProperty(name = "name", value = "ApplicationStorageManagementService"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/store-applications"),
                         })
                 }
         ),
         tags = {
-                @Tag(name = "application_management, device_management", description = "Application Management related "
-                        + "APIs")
+                @Tag(name = "application_management, device_management", description = "Application Storage Management "
+                        + "related APIs")
         }
 )
 @Scopes(
