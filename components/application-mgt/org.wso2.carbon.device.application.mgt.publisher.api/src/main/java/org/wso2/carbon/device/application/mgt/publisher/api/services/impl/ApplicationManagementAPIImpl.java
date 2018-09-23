@@ -85,23 +85,23 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
+
     @GET
     @Consumes("application/json")
-    @Path("/{appType}")
+    @Path("/{appId}")
     public Response getApplication(
-            @PathParam("appType") String appType,
-            @QueryParam("appName") String appName) {
+            @PathParam("appId") int appId) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            Application application = applicationManager.getApplication(appType, appName);
+            Application application = applicationManager.getApplicationById(appId);
             if (application == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity
-                        ("Application with application type: " + appType + " not found").build();
+                        ("Application with application id: " + appId + " not found").build();
             }
 
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (ApplicationManagementException e) {
-            log.error("Error occurred while getting application with the uuid " + appType, e);
+            log.error("Error occurred while getting application with the id " + appId, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }

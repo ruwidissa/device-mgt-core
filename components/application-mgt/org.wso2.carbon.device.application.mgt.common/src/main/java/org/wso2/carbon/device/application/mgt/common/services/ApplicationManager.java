@@ -87,14 +87,13 @@ public interface ApplicationManager {
     String getUuidOfLatestRelease(int appId) throws ApplicationManagementException;
 
     /**
-     * To get Application with the given UUID.
+     * To get Application with the given Id.
      *
-     * @param appType type of the Application
-     * @param appName name of the Application
+     * @param id id of the Application
      * @return the Application identified by the UUID
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Application getApplication(String appType, String appName) throws ApplicationManagementException;
+    Application getApplicationById(int id) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
