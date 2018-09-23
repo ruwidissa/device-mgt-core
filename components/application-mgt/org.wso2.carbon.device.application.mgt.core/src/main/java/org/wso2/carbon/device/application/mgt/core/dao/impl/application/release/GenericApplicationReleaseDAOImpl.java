@@ -66,7 +66,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         String sql = "INSERT INTO AP_APP_RELEASE (VERSION,TENANT_ID,UUID,RELEASE_TYPE, PACKAGE_NAME, APP_PRICE,"
                 + "STORED_LOCATION, BANNER_LOCATION, SC_1_LOCATION,SC_2_LOCATION,SC_3_LOCATION, APP_HASH_VALUE,"
                 + "SHARED_WITH_ALL_TENANTS, APP_META_INFO,CREATED_BY,AP_APP_ID) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?);";
 
         int index = 0;
         String generatedColumns[] = {"ID"};
@@ -230,7 +230,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 + " AR.STORED_LOCATION, AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS "
                 + "SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, "
                 + "AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO, AR.CREATED_BY, AR.CREATED_AT, "
-                + "AR.PUBLISHED_BY, AR.PUBLISHED_AT, AR.STARS FROM AP_APP_RELEASE AS "
+                + "AR.PUBLISHED_BY, AR.PUBLISHED_AT, AR.STARS, AR.RATING FROM AP_APP_RELEASE AS "
                 + "AR where AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE NAME = ? AND TYPE = ? "
                 + "AND TENANT_ID = ?) AND AR.TENANT_ID = ? ;";
 
