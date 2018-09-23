@@ -177,7 +177,6 @@ public class ApplicationRelease {
         this.price = price;
     }
 
-
     public String getAppHashValue() {
         return appHashValue;
     }

@@ -24,7 +24,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-
 @ApiModel(value = "Application", description = "Application represents the an Application in Application Store")
 public class Application {
 

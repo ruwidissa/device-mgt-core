@@ -37,7 +37,6 @@ public class APIUtil {
     private static ApplicationManager applicationManager;
     private static ApplicationStorageManager applicationStorageManager;
     private static SubscriptionManager subscriptionManager;
-    private static UnrestrictedRoleManager unrestrictedRoleManager;
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {
@@ -116,26 +115,4 @@ public class APIUtil {
         return subscriptionManager;
     }
 
-    /**
-     * To get the Unrestricted Role manager from the osgi context.
-     * @return Unrestricted Role manager instance in the current osgi context.
-     */
-    public static UnrestrictedRoleManager getUnrestrictedRoleManager() {
-        if (unrestrictedRoleManager == null) {
-            synchronized (APIUtil.class) {
-                if (unrestrictedRoleManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    unrestrictedRoleManager =
-                            (UnrestrictedRoleManager) ctx.getOSGiService(UnrestrictedRoleManager.class, null);
-                    if (unrestrictedRoleManager == null) {
-                        String msg = "Subscription Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
-            }
-        }
-
-        return unrestrictedRoleManager;
-    }
 }

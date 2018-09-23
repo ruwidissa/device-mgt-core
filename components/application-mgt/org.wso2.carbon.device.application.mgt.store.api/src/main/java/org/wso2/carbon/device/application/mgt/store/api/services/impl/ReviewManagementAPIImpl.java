@@ -25,6 +25,8 @@ import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.Review;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
+import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
@@ -106,6 +108,10 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error("Error occured while getting the application for application UUID: " + uuid);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("").build();
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while adding for application release. UUID of the application release: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -119,7 +125,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("reviewId") int reviewId) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.updateReview(review, reviewId, uuid, true)) {
+            if (reviewManager.updateReview(review, reviewId, uuid, null)) {
                 return Response.status(Response.Status.OK).entity(review).build();
             } else {
                 String msg = "Review updating failed. Please contact the administrator";
@@ -130,6 +136,10 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             String msg = "Error occurred while retrieving comments.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while updating review. Review id: " + reviewId;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -142,9 +152,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
 
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewId == 0) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Review not found").build();
-            } else if (reviewManager.deleteReview(uuid, reviewId)) {
+            if (reviewManager.deleteReview(uuid, reviewId)) {
                 return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
             } else {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Review deleting is failed.")
@@ -154,6 +162,10 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             String msg = "Error occurred while deleting the comment.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ReviewDoesNotExistException e) {
+            String msg = "Couldn't find a review for review-id: " + reviewId + " to delete.";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 
