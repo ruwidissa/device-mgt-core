@@ -338,6 +338,48 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public Application getApplicationById(String id, int tenantId) throws
+            ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting application with the id:" + id);
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            String sql =
+                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
+                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY,"
+                            + " AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
+                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE WHERE AP_APP.NAME=? AND "
+                            + "AP_APP.APP_ID= ? AND AP_APP.TENANT_ID=?;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, id);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully retrieved basic details of the application with the id:" + id);
+            }
+
+            return Util.loadApplication(rs);
+
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while getting application details with app id " + id +
+                            " While executing query ", e);
+        } catch (JSONException e) {
+            throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
     public Application getApplicationById(int applicationId, int tenantId) throws
                                                                            ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -420,7 +462,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
-        Application existingApplication = this.getApplication(application.getName(), application.getType(), tenantId);
+        Application existingApplication = this.getApplicationById(application.getId(), tenantId);
 
         if (existingApplication == null) {
             throw new ApplicationManagementException("There doesn't have an application for updating");
