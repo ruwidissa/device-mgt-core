@@ -276,6 +276,46 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     }
 
+    @Override
+    public Application getApplicationById(int id) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        Application application;
+        boolean isAppAllowed = false;
+        List<ApplicationRelease> applicationReleases;
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            application = ApplicationManagementDAOFactory.getApplicationDAO()
+                    .getApplicationById(id, tenantId);
+            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
+                applicationReleases = getReleases(application.getId());
+                application.setApplicationReleases(applicationReleases);
+                return application;
+            }
+
+            if (!application.getUnrestrictedRoles().isEmpty()) {
+                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                    isAppAllowed = true;
+                }
+            } else {
+                isAppAllowed = true;
+            }
+
+            if (!isAppAllowed) {
+                return null;
+            }
+
+            applicationReleases = getReleases(application.getId());
+            application.setApplicationReleases(applicationReleases);
+            return application;
+        } catch (UserStoreException e) {
+            throw new ApplicationManagementException(
+                    "User-store exception while getting application with the application id " + id);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
     private boolean isRoleExists(Collection<UnrestrictedRole> unrestrictedRoleList, String userName)
             throws UserStoreException {
         String[] roleList;
@@ -301,7 +341,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return roleList;
     }
 
-    @Override
     public Application getApplication(String appType, String appName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -311,7 +350,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             application = ApplicationManagementDAOFactory.getApplicationDAO()
-                    .getApplication(appType, appName, tenantId);
+                    .getApplication(appName, appType, tenantId);
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                 applicationReleases = getReleases(application.getId());
                 application.setApplicationReleases(applicationReleases);

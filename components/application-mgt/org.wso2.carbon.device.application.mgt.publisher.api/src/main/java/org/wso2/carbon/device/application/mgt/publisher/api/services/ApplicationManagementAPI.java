@@ -174,15 +174,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplication(
             @ApiParam(
-                    name = "appType",
-                    value = "Type of the application",
+                    name = "appId",
+                    value = "application Id",
                     required = true)
-            @PathParam("appType") String appType,
-            @ApiParam(
-                    name = "appName",
-                    value = "Application name",
-                    required = true)
-            @QueryParam("isWithImages") String appName
+            @PathParam("appId") int appId
     );
 
     @PUT
