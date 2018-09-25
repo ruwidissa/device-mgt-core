@@ -202,19 +202,4 @@ public class Util {
             }
         }
     }
-
-    public static PaginationRequest validateCommentListPageSize(PaginationRequest paginationRequest) throws
-            ReviewManagementException {
-        if (paginationRequest.getLimit() == 0) {
-            Configuration commentManagementConfig = ConfigurationManager.getInstance().getConfiguration();
-            if (commentManagementConfig != null) {
-                paginationRequest.setLimit(
-                        commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
-            } else {
-                throw new ReviewManagementException(
-                        "Application Management configuration has not initialized. Please check the application-mgt.xml file.");
-            }
-        }
-        return paginationRequest;
-    }
 }

@@ -34,7 +34,6 @@ import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
@@ -176,7 +175,7 @@ public class ReviewManagerImpl implements ReviewManager {
         }
         try {
             ConnectionManagerUtil.openDBConnection();
-            reviews = this.reviewDAO.getAllReviews(uuid, Util.validateCommentListPageSize(request), tenantId);
+            reviews = this.reviewDAO.getAllReviews(uuid, request, tenantId);
 
             for (Review review : reviews) {
                 if (hierarchicalReviewSet.containsKey(review.getParentId())) {

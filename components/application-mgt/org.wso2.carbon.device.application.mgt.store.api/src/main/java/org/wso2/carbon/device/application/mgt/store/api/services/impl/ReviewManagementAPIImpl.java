@@ -35,6 +35,7 @@ import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PathParam;
@@ -58,8 +59,8 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @Path("/{uuid}")
     public Response getAllReviews(
             @PathParam("uuid") String uuid,
-            @QueryParam("offset") int offSet,
-            @QueryParam("limit") int limit) {
+            @DefaultValue("0") @QueryParam("offset") int offSet,
+            @DefaultValue("20") @QueryParam("limit") int limit) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         PaginationRequest request = new PaginationRequest(offSet, limit);
         try {

@@ -2100,7 +2100,7 @@
         <jersey.version>1.9</jersey.version>
 
         <!-- Neethi version-->
-        <neethi.version>2.0.4</neethi.version>
+        <neethi.version>3.1.1</neethi.version>
         <neethi.wso2.version>2.0.4.wso2v4</neethi.wso2.version>
 
         <!-- Release plugin ID for github-->

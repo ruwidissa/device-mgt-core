@@ -205,11 +205,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         try {
             conn = this.getDBConnection();
             sql = "SELECT AP_APP_REVIEW.ID AS ID, AP_APP_REVIEW.COMMENT AS COMMENT, "
-                    + "AP_APP_REVIEW.CREATED_BY AS CREATED_BY, AP_APP_REVIEW.MODIFIED_BY AS MODIFIED_BY, "
-                    + "AP_APP_REVIEW.PARENT_ID AS PARENT_ID FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE "
-                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? AND "
-                    + "AP_APP_REVIEW.TENANT_ID = ? AND AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
-                    + "LIMIT ? OFFSET ?;";
+                    + "AP_APP_REVIEW.CREATED_AT AS CREATED_AT, AP_APP_REVIEW.MODIFIED_AT AS MODIFIED_AT, "
+                    + "AP_APP_REVIEW.USERNAME AS USERNAME AP_APP_REVIEW.PARENT_ID AS PARENT_ID "
+                    + "FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND "
+                    + "AP_APP_RELEASE.UUID =? AND AP_APP_REVIEW.TENANT_ID = ? AND "
+                    + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
             statement.setInt(2, tenantId);
@@ -219,8 +219,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             while (rs.next()) {
                 Review review = new Review();
                 review.setId(rs.getInt("ID"));
-                review.setComment(rs.getString("COMMENT_TEXT"));
-                review.setUsername(rs.getString("CREATED_BY"));
+                review.setComment(rs.getString("COMMENT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                review.setParentId(rs.getInt("PARENT_ID"));
+                review.setUsername(rs.getString("USERNAME"));
                 reviews.add(review);
             }
         }  catch (DBConnectionException e) {
