@@ -116,7 +116,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException(
                     "Error occurred while obtaining the DB connection when verifying application existence", e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding unrestricted roles", e);
+            throw new ApplicationManagementDAOException(
+                    "DB connection error occured while checking whether application exist or not.", e);
         } finally {
             Util.cleanupResources(stmt, rs);
         }
