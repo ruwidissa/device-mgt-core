@@ -40,6 +40,8 @@ public class Filter {
             required = false)
     private String appType;
 
+    private String appCategory;
+
     @ApiModelProperty(
             name = "isFullMatch",
             value = "Checking the application name matches fully with given name",
@@ -110,5 +112,13 @@ public class Filter {
 
     public void setAppType(String appType) {
         this.appType = appType;
+    }
+
+    public String getAppCategory() {
+        return appCategory;
+    }
+
+    public void setAppCategory(String appCategory) {
+        this.appCategory = appCategory;
     }
 }

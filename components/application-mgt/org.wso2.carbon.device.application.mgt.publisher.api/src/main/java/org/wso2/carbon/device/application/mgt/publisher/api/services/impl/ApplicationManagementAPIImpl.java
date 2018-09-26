@@ -41,6 +41,7 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -64,14 +65,30 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Override
     @Consumes("application/json")
     public Response getApplications(
-            @Valid Filter filter,
-            @QueryParam("offset") int offset,
-            @QueryParam("limit") int limit) {
+            @QueryParam("name") String appName,
+            @QueryParam("type") String appType,
+            @QueryParam("category") String appCategory,
+            @QueryParam("exact-match") boolean isFullMatch,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("20") @QueryParam("limit") int limit,
+            @DefaultValue("ASC") @QueryParam("sort") String sortBy) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
+            Filter filter = new Filter();
             filter.setOffset(offset);
             filter.setLimit(limit);
+            filter.setSortBy(sortBy);
+            filter.setFullMatch(isFullMatch);
+            if (appName != null && !appName.isEmpty()) {
+                filter.setAppName(appName);
+            }
+            if (appType != null && !appType.isEmpty()) {
+                filter.setAppType(appType);
+            }
+            if (appCategory != null && !appCategory.isEmpty()) {
+                filter.setAppCategory(appCategory);
+            }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity

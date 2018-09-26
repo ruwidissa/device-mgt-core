@@ -215,7 +215,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.getDBConnection();
             applicationList = applicationDAO.getApplications(filter, tenantId);
             if(applicationList != null && applicationList.getApplications() != null && applicationList
-                    .getApplications().size() > 0) {
+                    .getApplications().isEmpty()) {
                 if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                     applicationList = getRoleRestrictedApplicationList(applicationList, userName);
                 }

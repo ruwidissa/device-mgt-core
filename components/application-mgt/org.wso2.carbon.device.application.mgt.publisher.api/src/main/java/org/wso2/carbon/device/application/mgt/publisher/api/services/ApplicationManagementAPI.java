@@ -39,6 +39,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -125,10 +126,21 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
-                    name = "filter",
-                    value = "Filter to get application list",
-                    required = true)
-            @Valid Filter filter,
+                    name = "name",
+                    value = "Name of the application")
+            @QueryParam("name") String appName,
+            @ApiParam(
+                    name = "type",
+                    value = "Type of the application")
+            @QueryParam("type") String appType,
+            @ApiParam(
+                    name = "category",
+                    value = "Category of the application")
+            @QueryParam("category") String appCategory,
+            @ApiParam(
+                    name = "exact-match",
+                    value = "Is it requesting exactly matching application or partially matching application.")
+            @QueryParam("exact-match") boolean isFullMatch,
             @ApiParam(
                     name = "offset",
                     value = "offset",
@@ -138,11 +150,16 @@ public interface ApplicationManagementAPI {
                     name = "limit",
                     value = "limit",
                     defaultValue = "20")
-            @QueryParam("limit") int limit
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "sort",
+                    value = "Sorting type",
+                    defaultValue = "AES")
+            @QueryParam("sort") String sortBy
     );
 
     @GET
-    @Path("/{appType}")
+    @Path("/{appId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
