@@ -46,7 +46,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         ResultSet rs = null;
         try {
             conn = this.getDBConnection();
-            String sql = "SELECT ID, CURRENT_STATE, PREVIOUSE_STATE, TENANT_ID, UPDATED_AT, UPDATED_BY FROM "
+            String sql = "SELECT ID, CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_AT, UPDATED_BY FROM "
                     + "AP_APP_LIFECYCLE_STATE WHERE AP_APP_RELEASE_ID=? ORDER BY UPDATED_AT DESC;";
 
             stmt = conn.prepareStatement(sql);
@@ -58,7 +58,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 lifecycleState = new LifecycleState();
                 lifecycleState.setId(rs.getInt("ID"));
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
-                lifecycleState.setPreviousState(rs.getString("PREVIOUSE_STATE"));
+                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
                 lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
             }
@@ -82,7 +82,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         ResultSet rs = null;
         try {
             conn = this.getDBConnection();
-            String sql = "SELECT ID, CURRENT_STATE, PREVIOUSE_STATE, TENANT_ID, UPDATED_AT, UPDATED_BY FROM "
+            String sql = "SELECT ID, CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_AT, UPDATED_BY FROM "
                     + "AP_APP_LIFECYCLE_STATE WHERE AP_APP_RELEASE_ID = ? ORDER BY UPDATED_AT ASC;";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1,appReleaseId);
@@ -91,7 +91,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setId(rs.getInt("ID"));
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
-                lifecycleState.setPreviousState(rs.getString("PREVIOUSE_STATE"));
+                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
                 lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
                 lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
                 lifecycleStates.add(lifecycleState);
@@ -113,7 +113,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         PreparedStatement stmt = null;
         try {
             conn = this.getDBConnection();
-            String sql = "INSERT INTO AP_APP_LIFECYCLE_STATE (CURRENT_STATE, PREVIOUSE_STATE, TENANT_ID, UPDATED_BY, "
+            String sql = "INSERT INTO AP_APP_LIFECYCLE_STATE (CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_BY, "
                     + "AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?, ?, ?,?,?);";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, state.getCurrentState());

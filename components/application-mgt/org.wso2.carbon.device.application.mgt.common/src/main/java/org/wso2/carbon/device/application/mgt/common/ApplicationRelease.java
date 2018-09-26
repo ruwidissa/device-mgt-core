@@ -60,10 +60,6 @@ public class ApplicationRelease {
             value = "icon file storing location")
     private String iconLoc;
 
-    @ApiModelProperty(name = "applicationCreator",
-            value = "Application release creator")
-    private String applicationCreator;
-
     @ApiModelProperty(name = "releaseType",
             value = "Release type of the application release",
             required = true,
@@ -227,14 +223,6 @@ public class ApplicationRelease {
 
     public void setScreenshotLoc3(String screenshotLoc3) {
         this.screenshotLoc3 = screenshotLoc3;
-    }
-
-    public String getApplicationCreator() {
-        return applicationCreator;
-    }
-
-    public void setApplicationCreator(String applicationCreator) {
-        this.applicationCreator = applicationCreator;
     }
 
     public String getIconLoc() {
