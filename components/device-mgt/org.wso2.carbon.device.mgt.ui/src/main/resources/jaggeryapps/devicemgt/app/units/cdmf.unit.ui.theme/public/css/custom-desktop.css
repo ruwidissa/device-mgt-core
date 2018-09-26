@@ -895,7 +895,7 @@ header .fw-user:before{
     padding: 0 8px;
     line-height: 50px;
     font-size: 18px;
-    background: #F47415;
+    background: #ff5000;
     color: #ffffff;
 }
 
@@ -905,7 +905,7 @@ header .fw-user:before{
 }
 
 .navbar-menu-toggle[aria-expanded=true] {
-    background: #D56613;
+    background: #ff5000;
 }
 
 .navbar-toggle {
@@ -967,7 +967,7 @@ header .fw-user:before{
 }
 
 .navbar-collapse.dropdown {
-    background: #132D45;
+    background: #5e6165 !important;
     margin-right: -10px;
     margin-left: -10px;
     padding-bottom: 0;
@@ -999,7 +999,7 @@ header .fw-user:before{
     width: 150px;
     height: 120px;
     padding: 15px;
-    background: #11375B;
+    background: #2f6292 !important;
     display: block;
     overflow: hidden;
     line-height: 1.4em;
@@ -1317,7 +1317,7 @@ footer {
     min-height: 40px;
     overflow: hidden;
     color: #cbcbcb;
-    background: #222;
+    background: #008ba6 !important;
     z-index: 1000;
 }
 
@@ -3686,7 +3686,7 @@ a.btn-operations {
     font-weight: normal;
     font-size: 13px;
     color: #fff;
-    background: #11375B;
+    background: #2f6292;
     padding: 5px 20px;
     display: inline-block;
     margin-right: 2px;
@@ -4044,7 +4044,7 @@ a.wr-side-panel-toggle-btn.selected {
 
 /* stats */
 .wr-stats-board-tile {
-    background: #393939;
+    background: #0c3b42;
     color: #fff;
     padding: 15px;
     height: 110px;
@@ -6264,7 +6264,7 @@ body.inverse .fade-edge:after {
 .thumbnail.icon {
     border: none;
     margin: 0;
-    background: #11375B;
+    background: #638bb1 !important;
     color: #fff;
     text-align: center;
     position: relative;
@@ -6948,7 +6948,7 @@ select > option:hover {
  */
 
 header.header-default {
-    background: #181e22 !important;
+    background: #008ba6 !important;
     height: 50px;
 }
 
@@ -7013,3 +7013,14 @@ header.header-default {
     color: #333 !important;
 }
 
+header .brand h1 {
+    font-size: 15px !important;
+}
+
+header .brand img.logo {
+    height: 30px !important;
+}
+
+try-device-image {
+    background: #638bb1 !important;
+}

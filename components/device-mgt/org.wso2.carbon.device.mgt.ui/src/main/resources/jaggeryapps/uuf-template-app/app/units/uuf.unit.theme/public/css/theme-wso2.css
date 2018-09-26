@@ -7175,7 +7175,7 @@ body.inverse .fade-edge:after {
 }
 
 .navbar-collapse.dropdown {
-  background: #132D45;
+  background: #5e6165;
   margin-right: -10px;
   margin-left: -10px;
   padding-bottom: 0;
@@ -7207,7 +7207,7 @@ body.inverse .fade-edge:after {
   width: 150px;
   height: 120px;
   padding: 15px;
-  background: #11375B;
+  background: #2f6292;
   display: block;
   overflow: hidden;
   line-height: 1.4em;
