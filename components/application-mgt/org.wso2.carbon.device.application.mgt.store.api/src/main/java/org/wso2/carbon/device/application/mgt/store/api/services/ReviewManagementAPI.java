@@ -63,7 +63,7 @@ import java.util.List;
                 }
         ),
         tags = {
-                @Tag(name = "store_management", description = "Review Management related APIs")
+                @Tag(name = "review_management", description = "Review Management related APIs")
         }
 )
 @Scopes(
