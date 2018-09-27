@@ -18,7 +18,11 @@ public class LifecycleStateManger {
     public LifecycleStateManger(List<LifecycleState> states) {
         lifecycleStates = new HashMap<>();
         for (LifecycleState s : states) {
-            lifecycleStates.put(s.getName(), new State(s.getName(), s.getProceedingStates()));
+            if (s.getProceedingStates() != null) {
+                s.getProceedingStates().replaceAll(String::toUpperCase);
+            }
+            lifecycleStates.put(s.getName().toUpperCase(), new State(s.getName().toUpperCase(), s.getProceedingStates()));
+
         }
     }
 

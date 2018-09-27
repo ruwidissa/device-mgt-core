@@ -67,7 +67,6 @@ import java.util.List;
 public class ApplicationManagerImpl implements ApplicationManager {
 
     private static final Log log = LogFactory.getLog(ApplicationManagerImpl.class);
-    private DeviceTypeDAO deviceTypeDAO;
     private VisibilityDAO visibilityDAO;
     private ApplicationDAO applicationDAO;
     private ApplicationReleaseDAO applicationReleaseDAO;
@@ -81,7 +80,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     private void initDataAccessObjects() {
-        this.deviceTypeDAO = ApplicationManagementDAOFactory.getDeviceTypeDAO();
         this.visibilityDAO = ApplicationManagementDAOFactory.getVisibilityDAO();
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
         this.lifecycleStateDAO =  ApplicationManagementDAOFactory.getLifecycleStateDAO();
@@ -422,35 +420,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-//    todo
-//    public List<ApplicationRelease> getinstallableReleases(int applicationId) throws ApplicationManagementException {
-//        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-//
-//        Application application = getApplicationIfAccessible(applicationId);
-//        List<ApplicationRelease> applicationReleases;
-//        List<ApplicationRelease> filteredApplicationReleases = new ArrayList<>();
-//        if (log.isDebugEnabled()) {
-//            log.debug("Request is received to retrieve all the releases related with the application " + application
-//                    .toString());
-//        }
-//        ConnectionManagerUtil.getDBConnection();
-//        applicationReleases = this.applicationReleaseDAO.getReleases(application.getName(), application.getType(), tenantId);
-//        for (ApplicationRelease applicationRelease : applicationReleases) {
-//            LifecycleState lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
-//                    getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
-//            if (lifecycleState != null) {
-//                applicationRelease.setLifecycleState(lifecycleState);
-//
-//                if (!AppLifecycleState.REMOVED.toString()
-//                        .equals(applicationRelease.getLifecycleState().getCurrentState())) {
-//                    filteredApplicationReleases.add(applicationRelease);
-//                }
-//            }
-//        }
-//        return filteredApplicationReleases;
-//
-//    }
-
     private List<ApplicationRelease> getReleases(Application application, boolean requirePublishedRelease)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -785,19 +754,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public LifecycleState getLifecycleState(int applicationId, String applicationUuid) throws
+    public LifecycleState getLifecycleState(int applicationId, String releaseUuid) throws
                                                                                        ApplicationManagementException {
         LifecycleState lifecycleState;
         try {
             ConnectionManagerUtil.openDBConnection();
-            lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationId);
+            lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
             if (lifecycleState == null) {
                 throw new NotFoundException(
                         "Couldn't find the lifecycle data for appid: " + applicationId + " and app release UUID: "
-                                + applicationUuid);
+                                + releaseUuid);
 
             }
-            lifecycleState.setNextStates(new ArrayList<>(lifecycleStateManger.
+            lifecycleState.setNextStates(new ArrayList<>(getLifecycleManagementService().
                     getNextLifecycleStates(lifecycleState.getCurrentState())));
         } catch (ApplicationManagementDAOException e) {
             throw new ApplicationManagementException("Failed to get lifecycle state", e);

@@ -122,25 +122,15 @@ public interface ApplicationManager {
      */
     Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName) throws ApplicationManagementException;
 
-//    todo
-//    /**
-//     * To get all the releases of a particular Application.
-//     *
-//     * @param applicationId ID of the Application to get all the releases.
-//     * @return the List of the Application releases related with the particular Application.
-//     * @throws ApplicationManagementException Application Management Exception.
-//     */
-//    List<ApplicationRelease> getinstallableReleases(int applicationId) throws ApplicationManagementException;
-
     /**
      * To get all the releases of a particular Application.
      *
      * @param applicationId ID of the Application .
-     * @param applicationUuid UUID of the Application Release.
+     * @param releaseUuid UUID of the Application Release.
      * @return the LifecycleState of the Application releases related with the particular Application.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    LifecycleState getLifecycleState(int applicationId, String applicationUuid) throws ApplicationManagementException;
+    LifecycleState getLifecycleState(int applicationId, String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get all the releases of a particular Application.

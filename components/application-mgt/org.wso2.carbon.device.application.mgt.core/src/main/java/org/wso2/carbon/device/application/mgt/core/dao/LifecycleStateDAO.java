@@ -31,6 +31,8 @@ public interface LifecycleStateDAO {
 
     LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws ApplicationManagementDAOException;
 
+    LifecycleState getLatestLifeCycleState(int appId, String uuid) throws ApplicationManagementDAOException;
+
     List<LifecycleState> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException;
 
     void addLifecycleState(LifecycleState state, int appId, int releaseId, int tenantId) throws LifeCycleManagementDAOException;

@@ -16,9 +16,9 @@ public class LifecycleManagementTest {
     private List<LifecycleState> lifecycleStates;
     private LifecycleStateManger lifecycleStateManger;
 
-    private final String CURRENT_STATE = "Approved";
-    private final String NEXT_STATE = "Published";
-    private final String BOGUS_STATE = "Removed";
+    private final String CURRENT_STATE = "APPROVED";
+    private final String NEXT_STATE = "PUBLISHED";
+    private final String BOGUS_STATE = "REMOVED";
 
     @BeforeClass
     public void init() {
