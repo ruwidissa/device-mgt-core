@@ -49,7 +49,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -69,6 +68,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @QueryParam("type") String appType,
             @QueryParam("category") String appCategory,
             @QueryParam("exact-match") boolean isFullMatch,
+            @QueryParam("published-release") boolean requirePublishedReleases,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("20") @QueryParam("limit") int limit,
             @DefaultValue("ASC") @QueryParam("sort") String sortBy) {
@@ -80,6 +80,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             filter.setLimit(limit);
             filter.setSortBy(sortBy);
             filter.setFullMatch(isFullMatch);
+            filter.setRequirePublishedRelease(requirePublishedReleases);
             if (appName != null && !appName.isEmpty()) {
                 filter.setAppName(appName);
             }
@@ -107,10 +108,11 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Consumes("application/json")
     @Path("/{appId}")
     public Response getApplication(
+            @QueryParam("published-release") boolean requirePublishedReleases,
             @PathParam("appId") int appId) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            Application application = applicationManager.getApplicationById(appId);
+            Application application = applicationManager.getApplicationById(appId,  requirePublishedReleases);
             if (application == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity
                         ("Application with application id: " + appId + " not found").build();

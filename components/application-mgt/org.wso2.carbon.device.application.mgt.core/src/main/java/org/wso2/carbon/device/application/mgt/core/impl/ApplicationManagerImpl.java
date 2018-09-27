@@ -218,7 +218,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     applicationList = getRoleRestrictedApplicationList(applicationList, userName);
                 }
                 for (Application application : applicationList.getApplications()) {
-                    applicationReleases = getReleases(application, false);
+                    applicationReleases = getReleases(application, filter.isRequirePublishedRelease());
                     application.setApplicationReleases(applicationReleases);
                 }
             }
@@ -275,7 +275,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public Application getApplicationById(int id) throws ApplicationManagementException {
+    public Application getApplicationById(int id, boolean requirePublishedReleases) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         Application application;
@@ -286,7 +286,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             application = ApplicationManagementDAOFactory.getApplicationDAO()
                     .getApplicationById(id, tenantId);
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationReleases = getReleases(application, false);
+                applicationReleases = getReleases(application, requirePublishedReleases);
                 application.setApplicationReleases(applicationReleases);
                 return application;
             }
@@ -303,7 +303,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 return null;
             }
 
-            applicationReleases = getReleases(application, false);
+            applicationReleases = getReleases(application, requirePublishedReleases);
             application.setApplicationReleases(applicationReleases);
             return application;
         } catch (UserStoreException e) {

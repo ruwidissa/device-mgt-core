@@ -90,10 +90,11 @@ public interface ApplicationManager {
      * To get Application with the given Id.
      *
      * @param id id of the Application
+     * @param requirePublishedReleases If it is required to have only published application release set to True, otherwise set to false
      * @return the Application identified by the UUID
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Application getApplicationById(int id) throws ApplicationManagementException;
+    Application getApplicationById(int id, boolean requirePublishedReleases) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.

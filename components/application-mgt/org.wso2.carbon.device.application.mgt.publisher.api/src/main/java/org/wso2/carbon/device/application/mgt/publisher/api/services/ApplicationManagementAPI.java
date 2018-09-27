@@ -142,6 +142,10 @@ public interface ApplicationManagementAPI {
                     value = "Is it requesting exactly matching application or partially matching application.")
             @QueryParam("exact-match") boolean isFullMatch,
             @ApiParam(
+                    name = "published-release",
+                    value = "If set to True, only get published release for the application")
+            @QueryParam("published-release") boolean requirePublishedReleases,
+            @ApiParam(
                     name = "offset",
                     value = "offset",
                     defaultValue = "0")
@@ -190,6 +194,10 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response getApplication(
+            @ApiParam(
+                    name = "published-release",
+                    value = "If set to True, only get published release for the application")
+            @QueryParam("published-release") boolean requirePublishedReleases,
             @ApiParam(
                     name = "appId",
                     value = "application Id",
