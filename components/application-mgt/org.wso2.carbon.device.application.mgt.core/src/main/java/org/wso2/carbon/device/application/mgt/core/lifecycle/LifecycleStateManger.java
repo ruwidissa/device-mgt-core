@@ -27,7 +27,7 @@ public class LifecycleStateManger {
     }
 
     public Set<String> getNextLifecycleStates(String currentLifecycleState) {
-        return lifecycleStates.get(currentLifecycleState).getProceedingStates();
+        return lifecycleStates.get(currentLifecycleState.toUpperCase()).getProceedingStates();
     }
 
     public boolean isValidStateChange(String currentState, String nextState) {

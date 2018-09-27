@@ -432,8 +432,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ConnectionManagerUtil.getDBConnection();
         applicationReleases = this.applicationReleaseDAO.getReleases(application.getId(), tenantId);
         for (ApplicationRelease applicationRelease : applicationReleases) {
-            LifecycleState lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
-                    getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
+            LifecycleState lifecycleState = null;
+            try {
+                lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
+                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
+            } catch (LifeCycleManagementDAOException e) {
+                throw new ApplicationManagementException(
+                        "Error occurred while getting the latest lifecycle state for the application release UUID: "
+                                + applicationRelease.getUuid(), e);
+            }
             if (lifecycleState != null) {
                 applicationRelease.setLifecycleState(lifecycleState);
 
@@ -768,10 +775,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             lifecycleState.setNextStates(new ArrayList<>(getLifecycleManagementService().
                     getNextLifecycleStates(lifecycleState.getCurrentState())));
-        } catch (ApplicationManagementDAOException e) {
-            throw new ApplicationManagementException("Failed to get lifecycle state", e);
-        } catch (ApplicationManagementException e) {
-            throw new ApplicationManagementException("Failed to get application and application management", e);
+        } catch (LifeCycleManagementDAOException e) {
+            throw new ApplicationManagementException("Failed to get lifecycle state from database", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

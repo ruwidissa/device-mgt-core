@@ -23,7 +23,6 @@ import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionExcep
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 
 import java.sql.Connection;
@@ -39,7 +38,7 @@ import java.util.List;
 public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements LifecycleStateDAO {
 
     @Override
-    public LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws ApplicationManagementDAOException {
+    public LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException {
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -52,29 +51,18 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, applicationReleaseId);
             rs = stmt.executeQuery();
-            LifecycleState lifecycleState = null;
-
-            if (rs.next()) {
-                lifecycleState = new LifecycleState();
-                lifecycleState.setId(rs.getInt("ID"));
-                lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
-                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
-                lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
-            }
-            return lifecycleState;
-
+            return constructLifecycle(rs);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while getting application List", e);
+            throw new LifeCycleManagementDAOException("Error occurred while getting application List", e);
         }  catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection to get latest"
+            throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
                     + " lifecycle state for a specific application", e);
         } finally {
             Util.cleanupResources(stmt, rs);
         }
     }
 
-    public LifecycleState getLatestLifeCycleState(int appId, String uuid) throws ApplicationManagementDAOException{
+    public LifecycleState getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException{
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -88,22 +76,11 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt.setInt(1, appId);
             stmt.setString(2, uuid);
             rs = stmt.executeQuery();
-            LifecycleState lifecycleState = null;
-
-            if (rs.next()) {
-                lifecycleState = new LifecycleState();
-                lifecycleState.setId(rs.getInt("ID"));
-                lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
-                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
-                lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
-            }
-            return lifecycleState;
-
+            return constructLifecycle(rs);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while getting application List", e);
+            throw new LifeCycleManagementDAOException("Error occurred while getting application List", e);
         }  catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection to get latest"
+            throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
                     + " lifecycle state for a specific application", e);
         } finally {
             Util.cleanupResources(stmt, rs);
@@ -190,5 +167,24 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } finally {
             Util.cleanupResources(stmt, rs);
         }
+    }
+
+    private LifecycleState constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
+        LifecycleState lifecycleState = null;
+        try {
+            if (rs.next()) {
+                lifecycleState = new LifecycleState();
+                lifecycleState.setId(rs.getInt("ID"));
+                lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
+                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
+                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
+                lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
+            }
+        } catch (SQLException e) {
+            throw new LifeCycleManagementDAOException(
+                    "Error occurred while construct lifecycle state by retrieving data from SQL query", e);
+        }
+        return lifecycleState;
+
     }
 }

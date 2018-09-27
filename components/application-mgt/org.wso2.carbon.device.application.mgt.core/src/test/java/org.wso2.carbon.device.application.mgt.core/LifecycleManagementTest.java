@@ -16,9 +16,9 @@ public class LifecycleManagementTest {
     private List<LifecycleState> lifecycleStates;
     private LifecycleStateManger lifecycleStateManger;
 
-    private final String CURRENT_STATE = "APPROVED";
-    private final String NEXT_STATE = "PUBLISHED";
-    private final String BOGUS_STATE = "REMOVED";
+    private final String CURRENT_STATE = "Approved";
+    private final String NEXT_STATE = "Published";
+    private final String BOGUS_STATE = "Removed";
 
     @BeforeClass
     public void init() {
@@ -32,14 +32,14 @@ public class LifecycleManagementTest {
     public void checkValidNextLifecycleState() {
         Set<String> proceedingStates = lifecycleStateManger.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertTrue("Invalid proceeding state of: " + CURRENT_STATE,
-                          proceedingStates.contains(NEXT_STATE));
+                          proceedingStates.contains(NEXT_STATE.toUpperCase()));
     }
 
     @Test
     public void checkInvalidNextLifecycleState() {
         Set<String> proceedingStates = lifecycleStateManger.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
-                          proceedingStates.contains(BOGUS_STATE));
+                          proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
 
     @Test
