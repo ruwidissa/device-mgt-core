@@ -118,7 +118,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        String sql = "SELECT AR.ID AS RELESE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID AS UUID, AR.RELEASE_TYPE AS "
+        String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID AS UUID, AR.RELEASE_TYPE AS "
                 + "RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE AS APP_PRICE, AR.STORED_LOCATION AS "
                 + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, "
                 + "AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS "
@@ -169,7 +169,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        String sql = "SELECT AR.ID AS RELESE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE, AR.APP_PRICE,"
+        String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE, AR.APP_PRICE,"
                 + " AR.STORED_LOCATION, AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, "
                 + "AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS " +
                 "HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO, AR.CREATED_BY, AR.CREATED_AT, AR" +
@@ -208,33 +208,29 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     /**
      * To insert the application release properties.
      *
-     * @param applicationName Name of the application.
-     * @param applicationType Type of the application.
+     * @param applicationId Id of the application.
      * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     @Override
-    public List<ApplicationRelease> getReleases(String applicationName, String applicationType, int tenantId)
+    public List<ApplicationRelease> getReleases(int applicationId, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
-        String sql = "SELECT AR.ID AS RELESE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE "
+        String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE "
                 + "AS RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, "
                 + "AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, "
                 + "AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, "
                 + "AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO AS APP_META_INFO, "
-                + "AR.RATING AS RATING FROM AP_APP_RELEASE AS AR where AR.AP_APP_ID=(SELECT ID FROM AP_APP "
-                + "WHERE NAME = ? AND TYPE = ? AND TENANT_ID = ?) AND AR.TENANT_ID = ?;";
+                + "AR.RATING AS RATING FROM AP_APP_RELEASE AS AR where AR.AP_APP_ID=? AND AR.TENANT_ID = ?;";
 
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, applicationName);
-            statement.setString(2, applicationType);
-            statement.setInt(3, tenantId);
-            statement.setInt(4, tenantId);
+            statement.setInt(1, applicationId);
+            statement.setInt(2, tenantId);
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -245,10 +241,10 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             return applicationReleases;
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Database connection exception while trying to get the "
-                    + "release details of the application with Name " + applicationName, e);
+                    + "release details of the application with app ID: " + applicationId, e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
-                    "Error while getting all the release details of the " + applicationName + " application"
+                    "Error while getting all the release details of the app ID: " + applicationId
                             + ", while executing the query " + sql, e);
         } finally {
             Util.cleanupResources(statement, resultSet);

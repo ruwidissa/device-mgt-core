@@ -121,14 +121,15 @@ public interface ApplicationManager {
      */
     Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName) throws ApplicationManagementException;
 
-    /**
-     * To get all the releases of a particular Application.
-     *
-     * @param applicationId ID of the Application to get all the releases.
-     * @return the List of the Application releases related with the particular Application.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    List<ApplicationRelease> getReleases(int applicationId) throws ApplicationManagementException;
+//    todo
+//    /**
+//     * To get all the releases of a particular Application.
+//     *
+//     * @param applicationId ID of the Application to get all the releases.
+//     * @return the List of the Application releases related with the particular Application.
+//     * @throws ApplicationManagementException Application Management Exception.
+//     */
+//    List<ApplicationRelease> getinstallableReleases(int applicationId) throws ApplicationManagementException;
 
     /**
      * To get all the releases of a particular Application.
