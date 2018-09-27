@@ -147,11 +147,17 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException("Filter need to be instantiated");
         }
 
-        if (filter.getAppType() != null) {
+        if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
             sql += " AND AP_APP.TYPE ";
             sql += "= ?";
         }
-        if (filter.getAppName() != null) {
+
+        if (filter.getAppCategory() != null && !filter.getAppCategory().isEmpty()) {
+            sql += " AND AP_APP.APP_CATEGORY ";
+            sql += "= ?";
+        }
+
+        if (filter.getAppName() != null && !filter.getAppName().isEmpty()) {
             sql += " AND LOWER (AP_APP.NAME) ";
             if (filter.isFullMatch()) {
                 sql += "= ?";
@@ -175,10 +181,13 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             stmt.setInt(paramIndex++, tenantId);
             stmt.setString(paramIndex++, AppLifecycleState.REMOVED.toString());
 
-            if (filter.getAppType() != null) {
+            if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
                 stmt.setString(paramIndex++, filter.getAppType());
             }
-            if (filter.getAppName() != null) {
+            if (filter.getAppCategory() != null && !filter.getAppCategory().isEmpty()) {
+                stmt.setString(paramIndex++, filter.getAppCategory());
+            }
+            if (filter.getAppName() != null && !filter.getAppName().isEmpty()) {
                 if (filter.isFullMatch()) {
                     stmt.setString(paramIndex++, filter.getAppName().toLowerCase());
                 } else {

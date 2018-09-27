@@ -18,51 +18,50 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Filter represents a criteria that can be used for searching applications.
  */
-
-@ApiModel(value = "Filter", description = "This is related to the application filtering.")
 public class Filter {
 
-    @ApiModelProperty(
-            name = "appName",
-            value = "Name of the application",
-            required = false)
+    /**
+     * Name of the application
+     */
     private String appName;
 
-    @ApiModelProperty(
-            name = "appType",
-            value = "Type of the application",
-            required = false)
+    /**
+     * Type of the application
+     */
     private String appType;
 
-    @ApiModelProperty(
-            name = "isFullMatch",
-            value = "Checking the application name matches fully with given name",
-            required = false)
+    /**
+     * Category of the application
+     */
+    private String appCategory;
+
+    /**
+     * Checking the application name matches fully with given name
+     */
     private boolean isFullMatch;
 
-    @ApiModelProperty(
-            name = "limit",
-            value = "Limit of the applications",
-            required = false)
+    /**
+     * Limit of the applications
+     */
     private int limit;
 
-    @ApiModelProperty(
-            name = "offset",
-            value = "Started from",
-            required = false)
+    /**
+     * Started from
+     */
     private int offset;
 
-    @ApiModelProperty(
-            name = "sortBy",
-            value = "Ascending or descending order",
-            required = false)
+    /**
+     * Ascending or descending order
+     */
     private String sortBy;
+
+    /**
+     * Set as True if required to have only published application release, otherwise set to False
+     */
+    private boolean requirePublishedRelease;
 
     public int getLimit() {
         return limit;
@@ -110,5 +109,21 @@ public class Filter {
 
     public void setAppType(String appType) {
         this.appType = appType;
+    }
+
+    public String getAppCategory() {
+        return appCategory;
+    }
+
+    public void setAppCategory(String appCategory) {
+        this.appCategory = appCategory;
+    }
+
+    public boolean isRequirePublishedRelease() {
+        return requirePublishedRelease;
+    }
+
+    public void setRequirePublishedRelease(boolean requirePublishedRelease) {
+        this.requirePublishedRelease = requirePublishedRelease;
     }
 }
