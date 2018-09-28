@@ -109,10 +109,11 @@ public interface ApplicationDAO {
      * To get the application with the given uuid
      *
      * @param appId ID of the application
+     * @param tenantId Tenant Id
      * @return the boolean value
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    Boolean verifyApplicationExistenceById(int appId) throws ApplicationManagementDAOException;
+    boolean verifyApplicationExistenceById(int appId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get the application id of the application specified by the UUID

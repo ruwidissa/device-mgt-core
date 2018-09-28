@@ -58,14 +58,14 @@ public interface LifecycleStateDAO {
 
     /**
      * To add new lifecycle states for the given application release.
-     * @param releaseId Id of the application release.
+     * @param uuid Id of the application release.
      * @param appId Id of the application.
      * @param state LifecycleState.
      * @param tenantId Tenant id
      *
      * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
      */
-    void addLifecycleState(LifecycleState state, int appId, int releaseId, int tenantId)
+    void addLifecycleState(LifecycleState state, int appId, String  uuid, int tenantId)
             throws LifeCycleManagementDAOException;
 
     /**

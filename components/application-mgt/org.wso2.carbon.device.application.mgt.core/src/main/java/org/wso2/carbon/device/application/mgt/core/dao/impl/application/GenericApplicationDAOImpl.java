@@ -433,7 +433,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public Boolean verifyApplicationExistenceById(int appId) throws ApplicationManagementDAOException {
+    public boolean verifyApplicationExistenceById(int appId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the application ID(" + appId + " ) from the database");
         }
@@ -443,13 +443,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP_TAG.TAG AS TAG, "
-                            + "AP_UNRESTRICTED_ROLE.ROLE AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE "
-                            + "WHERE AP_APP.ID = ?;";
+                    "SELECT AP_APP.ID AS APP_ID FROM AP_APP WHERE AP_APP.ID = ? AND AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, appId);
+            stmt.setInt(2, tenantId);
             rs = stmt.executeQuery();
 
             if (log.isDebugEnabled()) {

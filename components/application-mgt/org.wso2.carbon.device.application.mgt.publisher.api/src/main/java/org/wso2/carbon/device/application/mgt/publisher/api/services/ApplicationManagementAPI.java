@@ -530,6 +530,10 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully add a lifecycle state.",
                             response = Application.class),
                     @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Error occurred while adding new lifecycle state.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred adding a lifecycle state.",
                             response = ErrorResponse.class)

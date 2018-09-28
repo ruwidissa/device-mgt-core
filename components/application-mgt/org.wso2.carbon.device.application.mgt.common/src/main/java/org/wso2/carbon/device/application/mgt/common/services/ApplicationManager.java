@@ -112,7 +112,7 @@ public interface ApplicationManager {
      * @return the boolean value, whether application exist or not
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Boolean verifyApplicationExistenceById(int appId) throws ApplicationManagementException;
+    boolean verifyApplicationExistenceById(int appId) throws ApplicationManagementException;
 
     /**
      * To get Application with the given UUID.
@@ -136,14 +136,13 @@ public interface ApplicationManager {
      * To get all the releases of a particular Application.
      *
      * @param applicationId ID of the Application.
-     * @param applicationUuid UUID of the Application Release.
+     * @param releaseUuid UUID of the Application Release.
      * @param state Lifecycle state to change the app
      * @param checkExist whether it is needed to check if the app and release already exist in the database
-     * @param releaseId The release ID of the application(optional)
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void changeLifecycleState(int applicationId, String applicationUuid, LifecycleState state, Boolean checkExist,
-                              int releaseId) throws ApplicationManagementException;
+    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist)
+            throws ApplicationManagementException;
 
     /**
      * Get the application if application is an accessible one.

@@ -123,19 +123,19 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     }
 
     @Override
-    public void addLifecycleState(LifecycleState state, int appId, int releaseId, int tenantId) throws LifeCycleManagementDAOException {
+    public void addLifecycleState(LifecycleState state, int appId, String uuid, int tenantId) throws LifeCycleManagementDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
             conn = this.getDBConnection();
             String sql = "INSERT INTO AP_APP_LIFECYCLE_STATE (CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_BY, "
-                    + "AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?, ?, ?,?,?);";
+                    + "AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?, ?, ?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID=?),?);";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, state.getCurrentState().toUpperCase());
             stmt.setString(2, state.getPreviousState().toUpperCase());
             stmt.setInt(3, tenantId);
             stmt.setString(4, state.getUpdatedBy());
-            stmt.setInt(5, releaseId);
+            stmt.setString(5, uuid);
             stmt.setInt(6, appId);
             stmt.executeUpdate();
 
@@ -172,7 +172,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     private LifecycleState constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
         LifecycleState lifecycleState = null;
         try {
-            if (rs.next()) {
+            if (rs !=null && rs.next()) {
                 lifecycleState = new LifecycleState();
                 lifecycleState.setId(rs.getInt("ID"));
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
@@ -185,6 +185,5 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                     "Error occurred while construct lifecycle state by retrieving data from SQL query", e);
         }
         return lifecycleState;
-
     }
 }
