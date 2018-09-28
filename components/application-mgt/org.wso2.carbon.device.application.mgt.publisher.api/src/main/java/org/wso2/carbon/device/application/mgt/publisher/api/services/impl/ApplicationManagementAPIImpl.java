@@ -414,7 +414,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @DELETE
     @Path("/{appid}")
-    public Response deleteApplication(@PathParam("appid") int applicationId) {
+    public Response deleteApplication(
+            @PathParam("appid") int applicationId) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
@@ -435,7 +436,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @DELETE
     @Path("/{appid}/{uuid}")
-    public Response deleteApplicationRelease(@PathParam("appid") int applicationId, @PathParam("uuid") String releaseUuid) {
+    public Response deleteApplicationRelease(
+            @PathParam("appid") int applicationId,
+            @PathParam("uuid") String releaseUuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
@@ -485,7 +488,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true, 0);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
+        } catch (NotFoundException e) {
+            String msg = "Could,t find application release for application id: " + applicationId
+                    + " and application release uuid: " + applicationUuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while adding lifecycle state.";
             log.error(msg, e);

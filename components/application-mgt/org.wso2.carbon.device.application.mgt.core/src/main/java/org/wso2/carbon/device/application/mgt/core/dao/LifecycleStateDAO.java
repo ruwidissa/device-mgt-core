@@ -19,7 +19,6 @@
 package org.wso2.carbon.device.application.mgt.core.dao;
 
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 
 import java.util.List;
@@ -29,12 +28,51 @@ import java.util.List;
  */
 public interface LifecycleStateDAO {
 
-    LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws ApplicationManagementDAOException;
+    /**
+     * To get the latest lifecycle state for the given application release id.
+     * @param applicationReleaseId id of the application release.
+     *
+     * @return Latest Lifecycle State for the given application release
+     * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
+     */
+    LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException;
 
+    /**
+     * To get the latest lifecycle state for the given application id and the application release UUID.
+     * @param appId id of the application.
+     * @param uuid UUID of the application release
+     *
+     * @return Latest Lifecycle State for the given application release
+     * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
+     */
+    LifecycleState getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException;
+
+    /**
+     * To get all changed lifecycle states for the given application release id.
+     * @param appReleaseId id of the application release.
+     *
+     * @return Lifecycle States for the given application release
+     * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
+     */
     List<LifecycleState> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException;
 
-    void addLifecycleState(LifecycleState state, int appId, int releaseId, int tenantId) throws LifeCycleManagementDAOException;
+    /**
+     * To add new lifecycle states for the given application release.
+     * @param uuid Id of the application release.
+     * @param appId Id of the application.
+     * @param state LifecycleState.
+     * @param tenantId Tenant id
+     *
+     * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
+     */
+    void addLifecycleState(LifecycleState state, int appId, String  uuid, int tenantId)
+            throws LifeCycleManagementDAOException;
 
+    /**
+     * To delete a specific lifecycle state for application release.
+     * @param identifier Id of the LifecycleState.
+     *
+     * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
+     */
     void deleteLifecycleState(int identifier) throws LifeCycleManagementDAOException;
-
 }

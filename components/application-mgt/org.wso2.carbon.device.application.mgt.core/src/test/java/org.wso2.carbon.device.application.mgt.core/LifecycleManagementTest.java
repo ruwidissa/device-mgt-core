@@ -32,14 +32,14 @@ public class LifecycleManagementTest {
     public void checkValidNextLifecycleState() {
         Set<String> proceedingStates = lifecycleStateManger.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertTrue("Invalid proceeding state of: " + CURRENT_STATE,
-                          proceedingStates.contains(NEXT_STATE));
+                          proceedingStates.contains(NEXT_STATE.toUpperCase()));
     }
 
     @Test
     public void checkInvalidNextLifecycleState() {
         Set<String> proceedingStates = lifecycleStateManger.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
-                          proceedingStates.contains(BOGUS_STATE));
+                          proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
 
     @Test
