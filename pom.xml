@@ -1668,9 +1668,9 @@
     </dependencyManagement>
 
     <scm>
-        <url>https://github.com/wso2/carbon-device-mgt.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/carbon-device-mgt.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/carbon-device-mgt.git</connection>
+        <url>https://gitlab.com/entgra/carbon-device-mgt.git</url>
+        <developerConnection>scm:git:https://gitlab.com/entgra/carbon-device-mgt.git</developerConnection>
+        <connection>scm:git:https://gitlab.com/entgra/carbon-device-mgt.git</connection>
         <tag>HEAD</tag>
     </scm>
 
@@ -2149,7 +2149,7 @@
     	</snapshotRepository>
     	<repository>
             <id>maven-release</id>
-            <url>http://nexus.entgra.io/repository/maven-release/</url>
+            <url>http://nexus.entgra.io/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
