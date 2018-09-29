@@ -46,6 +46,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
@@ -732,6 +733,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationRelease = getAppReleaseIfExists(appId, uuid);
             if (applicationRelease == null) {
                 throw new NotFoundException("No App release associated with the app Id " + appId + "and UUID "+ uuid);
+            }
+            LifecycleState lifecycleState = getLifecycleState(appId, applicationRelease.getUuid());
+            if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState()) ||
+                    AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
+                throw new ForbiddenException("Can't Update the application release in " +
+                        "PUBLISHED or DEPRECATED state. Hence please demote the application and update " +
+                        "the application release");
             }
             ApplicationRelease updatedRelease = applicationStorageManager
                     .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
