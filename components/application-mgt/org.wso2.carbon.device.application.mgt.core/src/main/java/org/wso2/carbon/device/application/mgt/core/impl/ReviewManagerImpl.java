@@ -34,7 +34,6 @@ import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
@@ -71,7 +70,7 @@ public class ReviewManagerImpl implements ReviewManager {
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         boolean isSuccess = false;
         try {
-            ConnectionManagerUtil.beginDBTransaction();
+            ConnectionManagerUtil.openDBConnection();
             Review existingReview = reviewDAO.haveUerCommented(uuid, username, tenantId);
             if (existingReview != null && isAuthorizedUser(username, existingReview.getUsername(), tenantId)
                     && review.getRating() > 0 && review.getRating() != existingReview.getRating()) {
@@ -82,12 +81,13 @@ public class ReviewManagerImpl implements ReviewManager {
                 Runnable task = () -> calculateRating(review.getRating(), -12345, uuid);
                 new Thread(task).start();
                 review.setUsername(username);
+                ConnectionManagerUtil.beginDBTransaction();
                 isSuccess = this.reviewDAO.addReview(review, uuid, tenantId);
-            }
-            if (isSuccess) {
-                ConnectionManagerUtil.commitDBTransaction();
-            } else {
-                ConnectionManagerUtil.rollbackDBTransaction();
+                if (isSuccess) {
+                    ConnectionManagerUtil.commitDBTransaction();
+                } else {
+                    ConnectionManagerUtil.rollbackDBTransaction();
+                }
             }
             return isSuccess;
         } catch (DBConnectionException e) {
@@ -116,8 +116,8 @@ public class ReviewManagerImpl implements ReviewManager {
             log.debug("Review updating request is received for the review id " + reviewId);
         }
         try {
-            ConnectionManagerUtil.openDBConnection();
             if (existingReview == null) {
+                ConnectionManagerUtil.openDBConnection();
                 existingReview = this.reviewDAO.getReview(reviewId);
                 if (existingReview != null && isAuthorizedUser(username, existingReview.getUsername(), tenantId)) {
                     if (review.getRating() > 0 && review.getRating() != existingReview.getRating()) {
@@ -176,7 +176,7 @@ public class ReviewManagerImpl implements ReviewManager {
         }
         try {
             ConnectionManagerUtil.openDBConnection();
-            reviews = this.reviewDAO.getAllReviews(uuid, Util.validateCommentListPageSize(request), tenantId);
+            reviews = this.reviewDAO.getAllReviews(uuid, request, tenantId);
 
             for (Review review : reviews) {
                 if (hierarchicalReviewSet.containsKey(review.getParentId())) {

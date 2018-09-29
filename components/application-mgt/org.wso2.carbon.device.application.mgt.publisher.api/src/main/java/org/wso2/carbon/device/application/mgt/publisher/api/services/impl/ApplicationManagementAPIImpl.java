@@ -42,6 +42,7 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -65,14 +66,32 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Override
     @Consumes("application/json")
     public Response getApplications(
-            @Valid Filter filter,
-            @QueryParam("offset") int offset,
-            @QueryParam("limit") int limit) {
+            @QueryParam("name") String appName,
+            @QueryParam("type") String appType,
+            @QueryParam("category") String appCategory,
+            @QueryParam("exact-match") boolean isFullMatch,
+            @QueryParam("published-release") boolean requirePublishedReleases,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("20") @QueryParam("limit") int limit,
+            @DefaultValue("ASC") @QueryParam("sort") String sortBy) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
+            Filter filter = new Filter();
             filter.setOffset(offset);
             filter.setLimit(limit);
+            filter.setSortBy(sortBy);
+            filter.setFullMatch(isFullMatch);
+            filter.setRequirePublishedRelease(requirePublishedReleases);
+            if (appName != null && !appName.isEmpty()) {
+                filter.setAppName(appName);
+            }
+            if (appType != null && !appType.isEmpty()) {
+                filter.setAppType(appType);
+            }
+            if (appCategory != null && !appCategory.isEmpty()) {
+                filter.setAppCategory(appCategory);
+            }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity
@@ -390,7 +409,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @DELETE
     @Path("/{appid}")
-    public Response deleteApplication(@PathParam("appid") int applicationId) {
+    public Response deleteApplication(
+            @PathParam("appid") int applicationId) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
@@ -411,7 +431,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @DELETE
     @Path("/{appid}/{uuid}")
-    public Response deleteApplicationRelease(@PathParam("appid") int applicationId, @PathParam("uuid") String releaseUuid) {
+    public Response deleteApplicationRelease(
+            @PathParam("appid") int applicationId,
+            @PathParam("uuid") String releaseUuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
@@ -461,7 +483,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true, 0);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
+        } catch (NotFoundException e) {
+            String msg = "Could,t find application release for application id: " + applicationId
+                    + " and application release uuid: " + applicationUuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while adding lifecycle state.";
             log.error(msg, e);

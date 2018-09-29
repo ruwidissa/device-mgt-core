@@ -58,13 +58,12 @@ public interface ApplicationReleaseDAO {
     /**
      * To get all the releases of a particular application.
      *
-     * @param applicationName Name of the Application
-     * @param applicationType Type of the Application
+     * @param applicationId Id of the Application
      * @param tenantId tenant id of the application
      * @return list of the application releases
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    List<ApplicationRelease> getReleases(String applicationName, String applicationType, int tenantId) throws
+    List<ApplicationRelease> getReleases(int applicationId, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**
@@ -128,6 +127,16 @@ public interface ApplicationReleaseDAO {
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     ApplicationRelease getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
-                                                                                            ApplicationManagementDAOException;
+            ApplicationManagementDAOException;
 
-}
+    /**
+     * To verify whether application release exist or not.
+     *
+     * @param appId ID of the application.
+     * @param uuid UUID of the application release.
+     * @param tenantId Tenant Id
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    boolean verifyReleaseExistence(int appId, String uuid, int tenantId) throws ApplicationManagementDAOException;
+
+    }

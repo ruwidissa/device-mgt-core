@@ -18,29 +18,51 @@
   -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
-       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:cxf="http://cxf.apache.org/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+         http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd">
 
     <jaxrs:server id="applicationMgtService" address="/">
         <jaxrs:serviceBeans>
             <ref bean="applicationMgtServiceBean"/>
-            <ref bean="lifecycleMgtServiceBean"/>
+            <ref bean="reviewMgtServiceBean"/>
             <ref bean="subscriptionMgtServiceBean"/>
+            <ref bean="swaggerResource"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jsonProvider"/>
             <ref bean="multipartProvider"/>
+            <ref bean="swaggerWriter"/>
         </jaxrs:providers>
     </jaxrs:server>
 
-    <bean id="applicationMgtServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.ApplicationManagementAPIImpl"/>
-    <bean id="lifecycleMgtServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.LifecycleManagementAPIImpl" />
-    <bean id="subscriptionMgtServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.SubscriptionManagementAPIImpl"/>
-    <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.publisher.api.JSONMessageHandler"/>
-    <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.publisher.api.MultipartCustomProvider"/>
+    <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
+        <property name="resourcePackage" value="org.wso2.carbon.device.application.mgt.store.api"/>
+        <property name="version" value="1.0"/>
+        <property name="host" value="localhost:9443"/>
+        <property name="schemes" value="https" />
+        <property name="basePath" value="/api/application-mgt-store/v1.0"/>
+        <property name="title" value="App Store Management Service API Definitions"/>
+        <property name="contact" value="dev@wso2.org"/>
+        <property name="license" value="Apache 2.0"/>
+        <property name="licenseUrl" value="http://www.apache.org/licenses/LICENSE-2.0.html"/>
+        <property name="scan" value="true"/>
+    </bean>
+
+    <bean id="ValidationInterceptor" class="org.wso2.carbon.device.application.mgt.store.api.ValidationInterceptor"/>
+    <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
+    <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
+
+    <bean id="applicationMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.ApplicationManagementAPIImpl"/>
+    <bean id="reviewMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.ReviewManagementAPIImpl" />
+    <bean id="subscriptionMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.SubscriptionManagementAPIImpl"/>
+    <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.store.api.JSONMessageHandler"/>
+    <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.store.api.MultipartCustomProvider"/>
+
+    <cxf:bus>
+        <cxf:inInterceptors>
+            <ref bean="ValidationInterceptor"/>
+        </cxf:inInterceptors>
+    </cxf:bus>
 
 </beans>
-
-

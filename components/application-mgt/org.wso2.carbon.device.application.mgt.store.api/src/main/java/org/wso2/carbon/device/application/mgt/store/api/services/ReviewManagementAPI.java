@@ -63,7 +63,7 @@ import java.util.List;
                 }
         ),
         tags = {
-                @Tag(name = "store_management", description = "Review Management related APIs")
+                @Tag(name = "review_management", description = "Review Management related APIs")
         }
 )
 @Scopes(
@@ -124,18 +124,17 @@ public interface ReviewManagementAPI {
                     name="uuid",
                     value="uuid of the application release.",
                     required = true)
-            @PathParam("uuid")
-                    String uuid,
+            @PathParam("uuid") String uuid,
             @ApiParam(
-                    name="offSet",
-                    value="Starting review number.",defaultValue = "0")
-            @QueryParam("offSet")
-                    int offSet,
+                    name="offset",
+                    value="Starting review number.",
+                    defaultValue = "0")
+            @QueryParam("offSet") int offSet,
             @ApiParam(
                     name="limit",
-                    value = "Limit of paginated reviews",defaultValue = "20")
-            @QueryParam("limit")
-                    int limit);
+                    value = "Limit of paginated reviews",
+                    defaultValue = "20")
+            @QueryParam("limit") int limit);
 
     @POST
     @Path("/{uuid}")

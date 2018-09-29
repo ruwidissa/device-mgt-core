@@ -34,7 +34,9 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -53,18 +55,23 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         }
         PreparedStatement statement = null;
         ResultSet rs = null;
-        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, USERNAME, AP_APP_RELEASE_ID, AP_APP_ID) "
-                + "VALUES (?,?,?,?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID= ?),"
+        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, USERNAME,CREATED_AT, MODIFIES_AT,"
+                + " AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?,?,?,?,?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID= ?),"
                 + "(SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID=?));";
         try {
+            Calendar calendar = Calendar.getInstance();
+            Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+
             Connection conn = this.getDBConnection();
             statement = conn.prepareStatement(sql, new String[] { "id" });
             statement.setInt(1, tenantId);
             statement.setString(2, review.getComment());
             statement.setInt(3, review.getParentId());
             statement.setString(4, review.getUsername());
-            statement.setString(5,uuid);
-            statement.setString(6,uuid);
+            statement.setTimestamp(5,timestamp);
+            statement.setTimestamp(6,timestamp);
+            statement.setString(7,uuid);
+            statement.setString(8,uuid);
             statement.executeUpdate();
             rs = statement.getGeneratedKeys();
             return rs.next();
@@ -134,15 +141,19 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        sql = "UPDATE AP_APP_REVIEW SET COMMENT=?, RATING=? WHERE ID=? AND USERNAME=? AND TENANT_ID=?;";
+        sql = "UPDATE AP_APP_REVIEW SET COMMENT=?, RATING=?, MODIFIED_AT=? WHERE ID=? AND USERNAME=? AND TENANT_ID=?;";
         try {
+            Calendar calendar = Calendar.getInstance();
+            Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
             statement.setString(1, review.getComment());
             statement.setInt(2, review.getRating());
-            statement.setInt(3, reviewId);
-            statement.setString(4, username);
-            statement.setInt(5, tenantId);
+            statement.setTimestamp(3, timestamp);
+            statement.setInt(4, reviewId);
+            statement.setString(5, username);
+            statement.setInt(6, tenantId);
             return statement.executeUpdate();
         } catch (SQLException e) {
             throw new ReviewManagementDAOException("Error occurred while executing review updating query");
@@ -205,11 +216,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         try {
             conn = this.getDBConnection();
             sql = "SELECT AP_APP_REVIEW.ID AS ID, AP_APP_REVIEW.COMMENT AS COMMENT, "
-                    + "AP_APP_REVIEW.CREATED_BY AS CREATED_BY, AP_APP_REVIEW.MODIFIED_BY AS MODIFIED_BY, "
-                    + "AP_APP_REVIEW.PARENT_ID AS PARENT_ID FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE "
-                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? AND "
-                    + "AP_APP_REVIEW.TENANT_ID = ? AND AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
-                    + "LIMIT ? OFFSET ?;";
+                    + "AP_APP_REVIEW.CREATED_AT AS CREATED_AT, AP_APP_REVIEW.MODIFIED_AT AS MODIFIED_AT, "
+                    + "AP_APP_REVIEW.USERNAME AS USERNAME, AP_APP_REVIEW.PARENT_ID AS PARENT_ID "
+                    + "FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND "
+                    + "AP_APP_RELEASE.UUID =? AND AP_APP_REVIEW.TENANT_ID = ? AND "
+                    + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
             statement.setInt(2, tenantId);
@@ -219,15 +230,18 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             while (rs.next()) {
                 Review review = new Review();
                 review.setId(rs.getInt("ID"));
-                review.setComment(rs.getString("COMMENT_TEXT"));
-                review.setUsername(rs.getString("CREATED_BY"));
+                review.setComment(rs.getString("COMMENT"));
+                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                review.setParentId(rs.getInt("PARENT_ID"));
+                review.setUsername(rs.getString("USERNAME"));
                 reviews.add(review);
             }
         }  catch (DBConnectionException e) {
             throw new ReviewManagementDAOException(
                     "Error occurred while obtaining the DB connection when verifying application existence", e);
         } catch (SQLException e) {
-            throw new ReviewManagementDAOException("Error occurred while adding unrestricted roles", e);
+            throw new ReviewManagementDAOException("DB connection error occurred while getting all reviews", e);
         }finally {
             Util.cleanupResources(statement, rs);
         }

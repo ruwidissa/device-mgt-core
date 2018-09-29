@@ -98,32 +98,41 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @GET
     @Consumes("application/json")
     @Path("/{appType}")
-    public Response getApplication(
-            @PathParam("appType") String appType,
+    public Response getApplication(@PathParam("appType") String appType,
             @QueryParam("appName") String appName) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<ApplicationRelease> publishedApplicationRelease = new ArrayList<>();
+        List<Application> filteredApps = new ArrayList<>();
+        Filter filter;
         try {
-            Application application = applicationManager.getApplication(appType, appName);
-            if (application == null) {
+            filter = new Filter();
+            filter.setOffset(0);
+            filter.setLimit(20);
+            filter.setAppType(appType);
+            filter.setAppName(appName);
+            ApplicationList applications = applicationManager.getApplications(filter);
+            if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Application with application type: " + appType + " not found").build();
             }
-
-            for (ApplicationRelease appRelease : application.getApplicationReleases()) {
-                if (AppLifecycleState.PUBLISHED.toString().equals(appRelease.getLifecycleState().getCurrentState())){
-                    publishedApplicationRelease.add(appRelease);
+            for (Application application : applications.getApplications()) {
+                List<ApplicationRelease> publishedApplicationRelease = new ArrayList<>();
+                for (ApplicationRelease appRelease : application.getApplicationReleases()) {
+                    if (AppLifecycleState.PUBLISHED.toString()
+                            .equals(appRelease.getLifecycleState().getCurrentState())) {
+                        publishedApplicationRelease.add(appRelease);
+                    }
                 }
+                if (publishedApplicationRelease.size() > 1) {
+                    String msg = "Application " + application.getName()
+                            + " has more than one PUBLISHED application releases";
+                    log.error(msg);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                }
+                application.setApplicationReleases(publishedApplicationRelease);
+                filteredApps.add(application);
             }
-            if (publishedApplicationRelease.size() > 1) {
-                String msg =
-                        "Application " + application.getName() + " has more than one PUBLISHED application releases";
-                log.error(msg);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-            application.setApplicationReleases(publishedApplicationRelease);
-
-            return Response.status(Response.Status.OK).entity(application).build();
+            applications.setApplications(filteredApps);
+            return Response.status(Response.Status.OK).entity(applications).build();
         } catch (NotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {

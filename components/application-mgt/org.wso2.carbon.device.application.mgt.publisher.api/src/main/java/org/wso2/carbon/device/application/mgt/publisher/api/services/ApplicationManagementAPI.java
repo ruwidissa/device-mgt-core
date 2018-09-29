@@ -39,6 +39,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -125,10 +126,25 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
-                    name = "filter",
-                    value = "Filter to get application list",
-                    required = true)
-            @Valid Filter filter,
+                    name = "name",
+                    value = "Name of the application")
+            @QueryParam("name") String appName,
+            @ApiParam(
+                    name = "type",
+                    value = "Type of the application")
+            @QueryParam("type") String appType,
+            @ApiParam(
+                    name = "category",
+                    value = "Category of the application")
+            @QueryParam("category") String appCategory,
+            @ApiParam(
+                    name = "exact-match",
+                    value = "Is it requesting exactly matching application or partially matching application.")
+            @QueryParam("exact-match") boolean isFullMatch,
+            @ApiParam(
+                    name = "published-release",
+                    value = "If set to True, only get published release for the application")
+            @QueryParam("published-release") boolean requirePublishedReleases,
             @ApiParam(
                     name = "offset",
                     value = "offset",
@@ -138,7 +154,12 @@ public interface ApplicationManagementAPI {
                     name = "limit",
                     value = "limit",
                     defaultValue = "20")
-            @QueryParam("limit") int limit
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "sort",
+                    value = "Sorting type",
+                    defaultValue = "AES")
+            @QueryParam("sort") String sortBy
     );
 
     @GET
@@ -537,6 +558,10 @@ public interface ApplicationManagementAPI {
                             code = 201,
                             message = "OK. \n Successfully add a lifecycle state.",
                             response = Application.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Error occurred while adding new lifecycle state.",
+                            response = ErrorResponse.class),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred adding a lifecycle state.",
