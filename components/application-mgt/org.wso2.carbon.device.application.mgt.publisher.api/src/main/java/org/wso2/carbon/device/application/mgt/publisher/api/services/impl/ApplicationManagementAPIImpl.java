@@ -32,6 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagemen
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
+import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +50,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -108,11 +110,11 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Consumes("application/json")
     @Path("/{appId}")
     public Response getApplication(
-            @QueryParam("published-release") boolean requirePublishedReleases,
-            @PathParam("appId") int appId) {
+            @PathParam("appId") int appId,
+            @QueryParam("state") String state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            Application application = applicationManager.getApplicationById(appId,  requirePublishedReleases);
+            Application application = applicationManager.getApplicationById(appId, state, true);
             if (application == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity
                         ("Application with application id: " + appId + " not found").build();
@@ -217,22 +219,22 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @Override
     @PUT
+    @Consumes("multipart/mixed")
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/image-artifacts/{appId}/{uuid}")
     public Response updateApplicationImageArtifacts(
             @PathParam("appId") int appId,
             @PathParam("uuid") String applicationUuid,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
-            @Multipart("screenshot") List<Attachment> attachmentList) {
-
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationRelease applicationRelease;
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
 
         try {
             InputStream iconFileStream = null;
             InputStream bannerFileStream = null;
-            List<InputStream> attachments = new ArrayList<>();
+            List<InputStream> attachments = new ArrayList<>();;
 
             if (iconFile != null) {
                 iconFileStream = iconFile.getDataHandler().getInputStream();
@@ -240,29 +242,22 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             if (bannerFile != null) {
                 bannerFileStream = bannerFile.getDataHandler().getInputStream();
             }
-            if (attachmentList != null && !attachmentList.isEmpty()) {
-                for (Attachment screenshot : attachmentList) {
-                    attachments.add(screenshot.getDataHandler().getInputStream());
-                }
+
+            attachments.add(screenshot1.getDataHandler().getInputStream());
+            if(screenshot2 != null) {
+                attachments.add(screenshot2.getDataHandler().getInputStream());
             }
-            applicationRelease = applicationManager.getAppReleaseIfExists(appId, applicationUuid);
-            LifecycleState lifecycleState = applicationManager.getLifecycleState(appId, applicationRelease.getUuid());
-            if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState()) ||
-                    AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
-                return Response.status(Response.Status.FORBIDDEN).entity("Can't Update the application release in " +
-                        "PUBLISHED or DEPRECATED state. Hence please demote the application and update the application " +
-                        "release").build();
+            if(screenshot3 != null) {
+                attachments.add(screenshot3.getDataHandler().getInputStream());
             }
-            applicationRelease = applicationStorageManager
-                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            applicationManager.updateRelease(appId, applicationRelease);
-            return Response.status(Response.Status.OK)
-                    .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
+            ApplicationManager applicationManager = APIUtil.getApplicationManager();
+            applicationManager.updateApplicationImageArtifact(appId,
+                    applicationUuid, iconFileStream, bannerFileStream, attachments);
+
+            return Response.status(Response.Status.OK).entity("Successfully uploaded artifacts for the application "
+                    + applicationUuid).build();
         } catch (NotFoundException e) {
-            String msg =
-                    "Couldn't found application release details or storage details or lifecycle details. Application id: "
-                            + appId + " App release uuid: " + applicationUuid;
-            log.error(msg, e);
+            log.error(e.getMessage(), e);
             return APIUtil.getResponse(e, Response.Status.NOT_FOUND);
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while updating the application.";
@@ -282,6 +277,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @Override
     @PUT
+    @Consumes("multipart/mixed")
     @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
     public Response updateApplicationArtifact(
             @PathParam("deviceType") String deviceType,
@@ -289,9 +285,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUuid,
             @Multipart("binaryFile") Attachment binaryFile) {
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationRelease applicationRelease;
 
         try {
 
@@ -299,16 +292,14 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 return APIUtil.getResponse("Uploading artifacts for the application is failed " + applicationUuid,
                         Response.Status.BAD_REQUEST);
             }
-            applicationRelease = applicationManager.getAppReleaseIfExists(applicationId, applicationUuid);
-            applicationRelease = applicationStorageManager
-                    .updateReleaseArtifacts(applicationRelease, appType, deviceType,
-                            binaryFile.getDataHandler().getInputStream());
-            applicationManager.updateRelease(applicationId, applicationRelease);
+            APIUtil.getApplicationManager().updateApplicationArtifact(applicationId, applicationUuid,
+                    binaryFile.getDataHandler().getInputStream());
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application release. UUID is " + applicationUuid).build();
         } catch (IOException e) {
             String msg =
-                    "Error occured while trying to read icon, banner files for the application release" + applicationUuid;
+                    "Error occurred while trying to read icon, banner files for the application release" +
+                            applicationUuid;
             log.error(msg);
             return APIUtil.getResponse(new ApplicationManagementException(msg, e),
                     Response.Status.BAD_REQUEST);
@@ -324,6 +315,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error("Error occured while handling the application artifact updating request. application release UUID:  "
                     + applicationUuid);
             return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
+        } catch (DeviceManagementException e) {
+            log.error("Error occurred while updating the image artifacts of the application with the uuid "
+                    + applicationUuid, e);
+            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -388,9 +383,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 }
             }
 
-            applicationRelease = applicationStorageManager
-                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
+//            applicationRelease = applicationStorageManager
+//                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
+//            applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
 
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (ApplicationManagementException e) {
@@ -442,7 +437,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
-            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
+            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid, true);
             applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
             String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
             return Response.status(Response.Status.OK).entity(responseMsg).build();
@@ -488,7 +483,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true, true);
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application id: " + applicationId
                     + " and application release uuid: " + applicationUuid;

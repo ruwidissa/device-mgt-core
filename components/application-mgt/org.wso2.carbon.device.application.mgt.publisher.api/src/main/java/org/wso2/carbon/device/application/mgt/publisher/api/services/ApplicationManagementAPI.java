@@ -170,8 +170,8 @@ public interface ApplicationManagementAPI {
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "get the application of requesting application type",
-            notes = "This will get the application identified by the application type and name, if exists",
+            value = "get the application of requesting application id and  state",
+            notes = "This will get the application identified by the application id and state, if exists",
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
@@ -195,14 +195,15 @@ public interface ApplicationManagementAPI {
             })
     Response getApplication(
             @ApiParam(
-                    name = "published-release",
-                    value = "If set to True, only get published release for the application")
-            @QueryParam("published-release") boolean requirePublishedReleases,
-            @ApiParam(
                     name = "appId",
                     value = "application Id",
                     required = true)
-            @PathParam("appId") int appId
+            @PathParam("appId") int appId,
+            @ApiParam(
+                    name = "state",
+                    value = "state",
+                    defaultValue = "PUBLISHED")
+            @QueryParam("state") String state
     );
 
     @PUT
@@ -348,10 +349,10 @@ public interface ApplicationManagementAPI {
             @PathParam("appid") int applicationId
     );
 
-    @POST
+    @PUT
     @Path("/image-artifacts/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes("multipart/mixed")
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -383,19 +384,47 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationImageArtifacts(
-            @ApiParam(name = "appId", value = "ID of the application", required = true)
+            @ApiParam(
+                    name = "appId",
+                    value = "ID of the application",
+                    required = true)
             @PathParam("appId") int applicatioId,
-            @ApiParam(name = "uuid", value = "UUID of the application", required = true)
+            @ApiParam(
+                    name = "uuid",
+                    value = "UUID of the application",
+                    required = true)
             @PathParam("uuid") String applicationUUID,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon of the uploading application",
+                    required = true)
             @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "Banner of the uploading application",
+                    required = true)
             @Multipart(value = "banner") Attachment bannerFile,
-            @Multipart(value = "screenshot") List<Attachment> screenshots
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "Screen Shots of the uploading application",
+                    required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
     @PUT
     @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Consumes("multipart/mixed")
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,

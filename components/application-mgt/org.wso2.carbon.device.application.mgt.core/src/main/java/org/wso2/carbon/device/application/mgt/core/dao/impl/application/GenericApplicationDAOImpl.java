@@ -401,11 +401,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY, "
-                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
-                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE WHERE AP_APP.ID=? AND "
-                            + "AP_APP.TENANT_ID=?;";
+                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, " +
+                            "AP_APP.APP_CATEGORY AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ," +
+                            "AP_APP.CURRENCY AS CURRENCY, AP_APP.RESTRICTED AS RESTRICTED, " +
+                            "DM_DEVICE_TYPE_ID AS DEVICE_TYPE_ID " +
+                            "FROM AP_APP  " +
+                            "WHERE AP_APP.ID=? AND AP_APP.TENANT_ID=?;";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, applicationId);

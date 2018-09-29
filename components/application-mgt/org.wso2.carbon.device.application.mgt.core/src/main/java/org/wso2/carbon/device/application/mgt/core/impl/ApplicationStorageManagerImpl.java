@@ -133,8 +133,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationRelease updateImageArtifacts(ApplicationRelease applicationRelease, InputStream iconFileStream,
-                                                   InputStream bannerFileStream, List<InputStream> screenShotStreams)
+     public ApplicationRelease updateImageArtifacts(ApplicationRelease applicationRelease, InputStream
+            iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -164,9 +164,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     count++;
                 }
             }
-            return uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, screenShotStreams);
+            return applicationRelease;
         } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationStorageManagementException("Application Storage exception while trying to"
                     + " update the screen-shot count for the application Release " + applicationRelease.getUuid() +
                     " for the tenant " + tenantId, e);
@@ -235,7 +234,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                             + applicationRelease.getUuid(), e);
         } catch (ParsingException e) {
             throw new ApplicationStorageManagementException(
-                    "Error occured while parsing the artifact file. Application release UUID is " + applicationRelease
+                    "Error occurred while parsing the artifact file. Application release UUID is " + applicationRelease
                             .getUuid(), e);
         }
 
@@ -295,8 +294,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException {
-        String artifactPath = storagePath + directoryPath;
-        File artifact = new File(artifactPath);
+        File artifact = new File(directoryPath);
 
         if (artifact.exists()) {
             try {

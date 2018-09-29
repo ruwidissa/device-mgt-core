@@ -76,6 +76,10 @@ public class Application {
             value = "If unrestricted roles are defined then isRestricted value is true otherwise it is false")
     private boolean isRestricted;
 
+    @ApiModelProperty(name = "deviceTypeId",
+            value = "Id of the Related device type of the application",
+            example = "1, 2, 3")
+    private int deviceTypeId;
     @ApiModelProperty(name = "deviceType",
             value = "Related device type of the application",
             required = true,
@@ -179,5 +183,13 @@ public class Application {
 
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
+    }
+
+    public int getDeviceTypeId() {
+        return deviceTypeId;
+    }
+
+    public void setDeviceTypeId(int deviceTypeId) {
+        this.deviceTypeId = deviceTypeId;
     }
 }
