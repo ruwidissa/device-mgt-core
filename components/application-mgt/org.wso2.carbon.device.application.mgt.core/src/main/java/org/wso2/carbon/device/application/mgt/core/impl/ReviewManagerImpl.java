@@ -240,7 +240,7 @@ public class ReviewManagerImpl implements ReviewManager {
             }
 
             List<Integer> ratingValues = this.reviewDAO.getAllRatingValues(appReleaseUuuid, tenantId);
-            TreeMap<Integer, Integer> ratingVariety = rating.getRatingVariety();
+            TreeMap<Integer, Integer> ratingVariety = new TreeMap<>();
             for (Integer ratingVal : ratingValues) {
                 if (ratingVariety.containsKey(ratingVal)) {
                     ratingVariety.replace(ratingVal, ratingVariety.get(ratingVal) + 1);
@@ -277,18 +277,26 @@ public class ReviewManagerImpl implements ReviewManager {
                 log.error("Couldn't find rating for application release uuid: " + uuid);
             } else {
                 double updatedRating;
+                double newTotalRating;
                 int numOfUsers = rating.getNoOfUsers();
                 double currentRating = rating.getRatingValue() * numOfUsers;
+
                 if (oldRatingVal == -12345) {
+                    newTotalRating = currentRating + newRatingVal;
                     numOfUsers++;
-                    updatedRating = (currentRating + newRatingVal) / numOfUsers;
                 } else if (newRatingVal == 0) {
+                    newTotalRating = currentRating - newRatingVal;
                     numOfUsers--;
-                    updatedRating = (currentRating - newRatingVal) / numOfUsers;
                 } else {
                     double tmpVal;
                     tmpVal = currentRating - oldRatingVal;
-                    updatedRating = (tmpVal + newRatingVal) / numOfUsers;
+                    newTotalRating = tmpVal + newRatingVal;
+                }
+
+                if (numOfUsers == 0) {
+                    updatedRating = 0;
+                } else {
+                    updatedRating = newTotalRating / numOfUsers;
                 }
                 this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers);
             }

@@ -55,8 +55,8 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         }
         PreparedStatement statement = null;
         ResultSet rs = null;
-        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, USERNAME,CREATED_AT, MODIFIED_AT,"
-                + " AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?,?,?,?,?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID= ?),"
+        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, RATING, USERNAME,CREATED_AT, MODIFIED_AT, "
+                + "AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?,?,?,?,?,?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID= ?),"
                 + "(SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID=?));";
         try {
             Calendar calendar = Calendar.getInstance();
@@ -67,11 +67,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             statement.setInt(1, tenantId);
             statement.setString(2, review.getComment());
             statement.setInt(3, review.getParentId());
-            statement.setString(4, review.getUsername());
-            statement.setTimestamp(5,timestamp);
-            statement.setTimestamp(6,timestamp);
-            statement.setString(7,uuid);
+            statement.setInt(4, review.getRating());
+            statement.setString(5, review.getUsername());
+            statement.setTimestamp(6, timestamp);
+            statement.setTimestamp(7,timestamp);
             statement.setString(8,uuid);
+            statement.setString(9,uuid);
             statement.executeUpdate();
             rs = statement.getGeneratedKeys();
             return rs.next();
@@ -173,18 +174,18 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        Review review = new Review();
+        Review review = null;
         try {
             conn = this.getDBConnection();
-            sql = "SELECT ID, COMMENT, CREATED_AT, MODIFIED_AT, RATING, USERNAME FROM AP_APP_REVIEWE WHERE ID=?;";
+            sql = "SELECT ID, COMMENT, CREATED_AT, MODIFIED_AT, RATING, USERNAME FROM AP_APP_REVIEW WHERE ID=?;";
             statement = conn.prepareStatement(sql);
             statement.setInt(1, reviewId);
             rs = statement.executeQuery();
             if (rs.next()) {
+                review = new Review();
                 review.setId(rs.getInt("ID"));
                 review.setComment(rs.getString("COMMENT"));
                 review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                review.setUsername(rs.getString("CREATED_BY"));
                 review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
                 review.setRating(rs.getInt("RATING"));
                 review.setUsername(rs.getString("USERNAME"));
@@ -262,9 +263,9 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         List<Integer> reviews = new ArrayList<>();
         try {
             conn = this.getDBConnection();
-            sql = "SELECT AP_APP_COMMENT.RATING AS RATING FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE "
+            sql = "SELECT AP_APP_REVIEW.RATING AS RATING FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE "
                     + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? AND "
-                    + "AP_APP_COMMENT.TENANT_ID = AP_APP_RELEASE.TENANT_ID AND AP_APP_COMMENT.TENANT_ID = ?;";
+                    + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID AND AP_APP_REVIEW.TENANT_ID = ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
             statement.setInt(2, tenantId);
@@ -355,7 +356,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         PreparedStatement statement = null;
         try {
             conn = this.getDBConnection();
-            sql = "DELETE FROM AP_APP_REVIEW WHERE ID=? AND USERNAME = ?);";
+            sql = "DELETE FROM AP_APP_REVIEW WHERE ID=? AND USERNAME = ?;";
             statement = conn.prepareStatement(sql);
             statement.setInt(1, reviewId);
             statement.setString(2, username);
