@@ -55,7 +55,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         }
         PreparedStatement statement = null;
         ResultSet rs = null;
-        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, USERNAME,CREATED_AT, MODIFIES_AT,"
+        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, USERNAME,CREATED_AT, MODIFIED_AT,"
                 + " AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?,?,?,?,?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID= ?),"
                 + "(SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID=?));";
         try {
@@ -99,7 +99,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         PreparedStatement statement = null;
         ResultSet rs = null;
         Review review = null;
-        sql = "SELECT ID, COMMENT, CREATED_AT, MODEFIED_AT, USERNAME, PARENT_ID, RATING FROM AP_APP_REVIEW WHERE "
+        sql = "SELECT ID, COMMENT, CREATED_AT, MODIFIED_AT, USERNAME, PARENT_ID, RATING FROM AP_APP_REVIEW WHERE "
                 + "AP_APP_RELEASE_ID = (SELECT ID FROM AP_APP_RELEASE WHERE UUID=?) AND USERNAME = ? AND TENANT_ID = ?;";
         try {
             conn = this.getDBConnection();
@@ -217,9 +217,10 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             conn = this.getDBConnection();
             sql = "SELECT AP_APP_REVIEW.ID AS ID, AP_APP_REVIEW.COMMENT AS COMMENT, "
                     + "AP_APP_REVIEW.CREATED_AT AS CREATED_AT, AP_APP_REVIEW.MODIFIED_AT AS MODIFIED_AT, "
-                    + "AP_APP_REVIEW.USERNAME AS USERNAME, AP_APP_REVIEW.PARENT_ID AS PARENT_ID "
-                    + "FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND "
-                    + "AP_APP_RELEASE.UUID =? AND AP_APP_REVIEW.TENANT_ID = ? AND "
+                    + "AP_APP_REVIEW.USERNAME AS USERNAME, AP_APP_REVIEW.PARENT_ID AS PARENT_ID, "
+                    + "AP_APP_REVIEW.RATING AS RATING FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE "
+                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? "
+                    + "AND AP_APP_REVIEW.TENANT_ID = ? AND "
                     + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
@@ -235,6 +236,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
                 review.setParentId(rs.getInt("PARENT_ID"));
                 review.setUsername(rs.getString("USERNAME"));
+                review.setRating(rs.getInt("RATING"));
                 reviews.add(review);
             }
         }  catch (DBConnectionException e) {
