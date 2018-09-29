@@ -25,7 +25,11 @@ import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
+import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -90,10 +94,14 @@ public interface ApplicationManager {
      * To get Application with the given Id.
      *
      * @param id id of the Application
-     * @return the Application identified by the UUID
+     * @param state state of the Application
+     * @param handleConnections Whether it is required to handle DB connections within(true), or if there are
+     *                          existing connection(false)
+     * @return the Application identified by the ID
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Application getApplicationById(int id) throws ApplicationManagementException;
+    Application getApplicationById(int id, String state, boolean handleConnections) throws
+            ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
@@ -131,6 +139,16 @@ public interface ApplicationManager {
     List<ApplicationRelease> getReleases(int applicationId) throws ApplicationManagementException;
 
     /**
+     * To get the release of a particular Application.
+     *
+     * @param applicationId ID of the Application.
+     * @param state state of the Application.
+     * @return the List of the Application releases related with the particular Application.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    List<ApplicationRelease> getReleaseInState(int applicationId, String state) throws ApplicationManagementException;
+
+    /**
      * To get all the releases of a particular Application.
      *
      * @param applicationId ID of the Application .
@@ -162,24 +180,33 @@ public interface ApplicationManager {
     Application getApplicationIfAccessible(int applicationId) throws ApplicationManagementException;
 
     /**
-     * Get the application release for given UUID if application release is exists and application id is valid one.
-     *
-     * @param releaseUuid UUID of the Application Release.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    ApplicationRelease getAppReleaseIfExists(int applicationId, String releaseUuid) throws
-                                                                                   ApplicationManagementException;
-
-    /**
-     * To update with a new release for an Application.
+     * To update release images such as icons, banner and screenshots.
      *
      * @param appId    ID of the Application
-     * @param applicationRelease ApplicationRelease
+     * @param uuid    uuid of the Application
+     * @param iconFileStream    icon file of the release
+     * @param bannerFileStream    bannerFileStream of the release.
+     * @param attachments    screenshot attachments of the release
      * @return Updated Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    ApplicationRelease updateRelease(int appId, ApplicationRelease applicationRelease)
-            throws ApplicationManagementException;
+    ApplicationRelease updateApplicationImageArtifact(int appId, String uuid, InputStream iconFileStream, InputStream
+            bannerFileStream, List<InputStream> attachments)
+            throws ApplicationManagementException, ResourceManagementException;
+
+
+    /**
+     * To update release images.
+     *
+     * @param appId    ID of the Application
+     * @param uuid    uuid of the Application
+     * @param binaryFile    binaryFile of the release.
+     * @return Updated Application Release.
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    ApplicationRelease updateApplicationArtifact(int appId, String uuid, InputStream binaryFile)
+            throws ApplicationManagementException, ResourceManagementException, RequestValidatingException, DeviceManagementException;
+
 
     /**
      * To verify whether application release is acceptable to update or not.
