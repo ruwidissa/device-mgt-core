@@ -733,10 +733,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (applicationRelease == null) {
                 throw new NotFoundException("No App release associated with the app Id " + appId + "and UUID "+ uuid);
             }
-            applicationStorageManager
+            ApplicationRelease updatedRelease = applicationStorageManager
                     .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            updateRelease(appId, applicationRelease);
-            return applicationRelease;
+            return updateRelease(appId, updatedRelease);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

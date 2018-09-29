@@ -133,7 +133,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-     public void updateImageArtifacts(ApplicationRelease applicationRelease, InputStream
+     public ApplicationRelease updateImageArtifacts(ApplicationRelease applicationRelease, InputStream
             iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
 
@@ -164,6 +164,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     count++;
                 }
             }
+            return applicationRelease;
         } catch (ApplicationStorageManagementException e) {
             throw new ApplicationStorageManagementException("Application Storage exception while trying to"
                     + " update the screen-shot count for the application Release " + applicationRelease.getUuid() +

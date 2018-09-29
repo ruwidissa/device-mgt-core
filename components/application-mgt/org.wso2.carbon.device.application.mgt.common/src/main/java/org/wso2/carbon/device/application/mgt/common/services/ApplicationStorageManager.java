@@ -52,7 +52,7 @@ public interface ApplicationStorageManager {
      * @param screenshots   Input Streams of screenshots
      * @throws ResourceManagementException Resource Management Exception.
      */
-    void updateImageArtifacts(ApplicationRelease applicationRelease, InputStream iconFile,
+    ApplicationRelease updateImageArtifacts(ApplicationRelease applicationRelease, InputStream iconFile,
             InputStream bannerFile, List<InputStream> screenshots)
             throws ResourceManagementException, ApplicationManagementException;
 
