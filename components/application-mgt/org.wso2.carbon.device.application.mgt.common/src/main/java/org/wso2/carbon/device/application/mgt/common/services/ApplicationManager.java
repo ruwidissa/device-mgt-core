@@ -68,9 +68,11 @@ public interface ApplicationManager {
      *
      * @param applicationId ID of tha application
      * @param releaseUuid UUID of tha application release
+     * @param handleConnections Whether it is necessary handle DB connections.
      * @throws ApplicationManagementException Application Management Exception
      */
-    String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
+    String deleteApplicationRelease(int applicationId, String releaseUuid, boolean handleConnections) throws
+            ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.
@@ -156,9 +158,11 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of the Application Release.
      * @param state Lifecycle state to change the app
      * @param checkExist whether it is needed to check if the app and release already exist in the database
+     * @param handleDBConnections Whether it is necessary to open connections
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist)
+    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist,
+                              Boolean handleDBConnections)
             throws ApplicationManagementException;
 
     /**

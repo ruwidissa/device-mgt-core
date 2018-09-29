@@ -437,7 +437,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
-            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
+            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid, true);
             applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
             String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
             return Response.status(Response.Status.OK).entity(responseMsg).build();
@@ -483,7 +483,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true, true);
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application id: " + applicationId
                     + " and application release uuid: " + applicationUuid;
