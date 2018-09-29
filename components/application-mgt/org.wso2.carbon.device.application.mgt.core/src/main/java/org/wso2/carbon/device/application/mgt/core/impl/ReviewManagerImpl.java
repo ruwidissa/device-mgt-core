@@ -28,7 +28,6 @@ import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
-import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
@@ -84,20 +83,7 @@ public class ReviewManagerImpl implements ReviewManager {
                 Runnable task = () -> calculateRating(review.getRating(), -12345, uuid, tenantId);
                 new Thread(task).start();
                 review.setUsername(username);
-                try {
-                    ConnectionManagerUtil.beginDBTransaction();
-                    isSuccess = this.reviewDAO.addReview(review, uuid, tenantId);
-                    if (isSuccess) {
-                        ConnectionManagerUtil.commitDBTransaction();
-                    } else {
-                        ConnectionManagerUtil.rollbackDBTransaction();
-                    }
-                } catch (TransactionManagementException e) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    throw new ReviewManagementException(
-                            "Transaction Management Exception occurs,Review for application release with UUID:" + uuid
-                                    + " is failed ", e);
-                }
+                isSuccess = this.reviewDAO.addReview(review, uuid, tenantId);
             }
             return isSuccess;
         } catch (DBConnectionException e) {
@@ -147,24 +133,7 @@ public class ReviewManagerImpl implements ReviewManager {
             if (review.getRating() == 0) {
                 review.setRating(existingReview.getRating());
             }
-            try {
-                ConnectionManagerUtil.beginDBTransaction();
-                if (this.reviewDAO.updateReview(review, reviewId, username, tenantId) == 1) {
-                    ConnectionManagerUtil.commitDBTransaction();
-                    return true;
-                }
-                ConnectionManagerUtil.rollbackDBTransaction();
-                return false;
-            } catch (TransactionManagementException e) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                throw new ReviewManagementException(
-                        "Transaction management error occurs when updating review with review id " + reviewId + ".", e);
-            } catch (ReviewManagementDAOException e) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                throw new ReviewManagementException(
-                        "Error occured while  updating review with review id " + reviewId + ".", e);
-            }
-
+            return this.reviewDAO.updateReview(review, reviewId, username, tenantId) == 1;
         } catch (ReviewManagementDAOException e) {
             throw new ReviewManagementException("Error occured while  getting review with review id " + reviewId + ".",
                     e);
@@ -242,23 +211,14 @@ public class ReviewManagerImpl implements ReviewManager {
             }
             Runnable task = () -> calculateRating(0, existingReview.getRating(), uuid, tenantId);
             new Thread(task).start();
-            ConnectionManagerUtil.beginDBTransaction();
-            if (isAuthorizedUser(username, existingReview.getUsername(), tenantId)
-                    && this.reviewDAO.deleteReview(username, reviewId) == 1) {
-                ConnectionManagerUtil.commitDBTransaction();
-                return true;
-            }
-            ConnectionManagerUtil.rollbackDBTransaction();
-            return false;
+            return isAuthorizedUser(username, existingReview.getUsername(), tenantId)
+                    && this.reviewDAO.deleteReview(username, reviewId) == 1;
         } catch (DBConnectionException e) {
             throw new ReviewManagementException(
                     "DB Connection error occurs deleting review with review id " + reviewId + ".", e);
         } catch (ReviewManagementDAOException e) {
             throw new ReviewManagementException("Error occured while deleting review with review id " + reviewId + ".",
                     e);
-        } catch (TransactionManagementException e) {
-            throw new ReviewManagementException(
-                    "Transaction Management Exception occurs deleting review with review id " + reviewId + ".", e);
         } catch (UserStoreException e) {
             throw new ReviewManagementException(
                     "User-store exception while checking whether the user " + username + " of tenant " + tenantId
@@ -330,20 +290,7 @@ public class ReviewManagerImpl implements ReviewManager {
                     tmpVal = currentRating - oldRatingVal;
                     updatedRating = (tmpVal + newRatingVal) / numOfUsers;
                 }
-                try {
-                    ConnectionManagerUtil.beginDBTransaction();
-                    this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers);
-                    ConnectionManagerUtil.commitDBTransaction();
-                } catch (TransactionManagementException e) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    log.error(
-                            "Transaction Management Exception occured while updated the rating value of the application release UUID: "
-                                    + uuid, e);
-                } catch (ApplicationManagementDAOException e) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    log.error("Error occured while updated the rating value of the application release UUID: " + uuid,
-                            e);
-                }
+                this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers);
             }
         } catch (ApplicationManagementDAOException e) {
             log.error("Error occured while getting the rating value of the application release UUID: " + uuid, e);
