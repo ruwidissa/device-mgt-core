@@ -21,13 +21,18 @@ package org.wso2.carbon.device.application.mgt.core.dao.common;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
+import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
+import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
+import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -131,19 +136,20 @@ public class Util {
                     application.setSubType(rs.getString("SUB_TYPE"));
                     application.setPaymentCurrency(rs.getString("CURRENCY"));
                     application.setIsRestricted(rs.getBoolean("RESTRICTED"));
+                    application.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
                 }
 
-                Tag tag = new Tag();
-                tag.setTagName(rs.getString("APP_TAG"));
-                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
-                unrestrictedRole.setRole(rs.getString("ROLE"));
-                if (application.getTags() != null && application.getTags().contains(tag)) {
-                    application.getTags().add(tag);
-                }
-                if (application.getUnrestrictedRoles() != null && application.getUnrestrictedRoles()
-                        .contains(unrestrictedRole)) {
-                    application.getUnrestrictedRoles().add(unrestrictedRole);
-                }
+//                Tag tag = new Tag();
+//                tag.setTagName(rs.getString("APP_TAG"));
+//                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
+//                unrestrictedRole.setRole(rs.getString("ROLE"));
+//                if (application.getTags() != null && application.getTags().contains(tag)) {
+//                    application.getTags().add(tag);
+//                }
+//                if (application.getUnrestrictedRoles() != null && application.getUnrestrictedRoles()
+//                        .contains(unrestrictedRole)) {
+//                    application.getUnrestrictedRoles().add(unrestrictedRole);
+//                }
                 iteration++;
             }
         }
@@ -216,5 +222,85 @@ public class Util {
             }
         }
         return paginationRequest;
+    }
+
+    private static ApplicationManager applicationManager;
+    private static ApplicationStorageManager applicationStorageManager;
+    private static SubscriptionManager subscriptionManager;
+
+    public static ApplicationManager getApplicationManager() {
+        if (applicationManager == null) {
+            synchronized (Util.class) {
+                if (applicationManager == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    applicationManager =
+                            (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
+                    if (applicationManager == null) {
+                        String msg = "Application Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return applicationManager;
+    }
+
+    /**
+     * To get the Application Storage Manager from the osgi context.
+     * @return ApplicationStoreManager instance in the current osgi context.
+     */
+    public static ApplicationStorageManager getApplicationStorageManager() {
+        if (applicationStorageManager == null) {
+            synchronized (Util.class) {
+                if (applicationStorageManager == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    applicationStorageManager = (ApplicationStorageManager) ctx
+                            .getOSGiService(ApplicationStorageManager.class, null);
+                    if (applicationStorageManager == null) {
+                        String msg = "Application Storage Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return applicationStorageManager;
+    }
+
+
+    /**
+     * To get the Subscription Manager from the osgi context.
+     * @return SubscriptionManager instance in the current osgi context.
+     */
+    public static SubscriptionManager getSubscriptionManager() {
+        if (subscriptionManager == null) {
+            synchronized (Util.class) {
+                if (subscriptionManager == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    subscriptionManager =
+                            (SubscriptionManager) ctx.getOSGiService(SubscriptionManager.class, null);
+                    if (subscriptionManager == null) {
+                        String msg = "Subscription Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+
+        return subscriptionManager;
+    }
+
+    public static DeviceManagementProviderService getDeviceManagementService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        DeviceManagementProviderService deviceManagementProviderService =
+                (DeviceManagementProviderService) ctx.getOSGiService(DeviceManagementProviderService.class, null);
+        if (deviceManagementProviderService == null) {
+            String msg = "DeviceImpl Management provider service has not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return deviceManagementProviderService;
     }
 }

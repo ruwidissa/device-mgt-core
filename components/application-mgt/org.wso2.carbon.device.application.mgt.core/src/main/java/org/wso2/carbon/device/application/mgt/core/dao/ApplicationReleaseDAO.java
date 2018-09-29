@@ -68,6 +68,18 @@ public interface ApplicationReleaseDAO {
             ApplicationManagementDAOException;
 
     /**
+     * To get the release by state.
+     *
+     * @param appId Id of the Application
+     * @param tenantId tenant id of the application
+     * @param state state of the application
+     * @return list of the application releases
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    List<ApplicationRelease> getReleaseByState(int appId, int tenantId,  String state)
+            throws ApplicationManagementDAOException;
+
+    /**
      * To update an Application release.
      *
      * @param applicationRelease ApplicationRelease that need to be updated.
