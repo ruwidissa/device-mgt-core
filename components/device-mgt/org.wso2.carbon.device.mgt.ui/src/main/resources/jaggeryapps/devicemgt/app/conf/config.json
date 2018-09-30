@@ -57,11 +57,11 @@
   },
   "generalConfig": {
     "host": "https://%iot.manager.host%:%iot.manager.https.port%",
-    "companyName": "WSO2 Carbon Device Manager",
-    "browserTitle": "WSO2 Device Manager",
+    "companyName": "Entgra Carbon Device Manager",
+    "browserTitle": "Entgra Device Manager",
     "copyrightPrefix": "\u00A9 %date-year%, ",
-    "copyrightOwner": "WSO2 Inc.",
-    "copyrightOwnersSite": "http://www.wso2.org",
+    "copyrightOwner": "Entgra",
+    "copyrightOwnersSite": "https://www.entgra.io/",
     "copyrightSuffix": " All Rights Reserved."
   },
   "scopes": [

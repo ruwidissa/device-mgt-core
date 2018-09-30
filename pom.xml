@@ -23,7 +23,7 @@
     <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>carbon-devicemgt</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.40-SNAPSHOT</version>
+    <version>3.2.1-SNAPSHOT</version>
     <name>WSO2 Carbon - Device Management - Parent</name>
     <url>http://wso2.org</url>
     <description>WSO2 Connected Device Manager Components</description>
@@ -1761,9 +1761,9 @@
     </dependencyManagement>
 
     <scm>
-        <url>https://github.com/wso2/carbon-device-mgt.git</url>
-        <developerConnection>scm:git:https://github.com/wso2/carbon-device-mgt.git</developerConnection>
-        <connection>scm:git:https://github.com/wso2/carbon-device-mgt.git</connection>
+        <url>https://gitlab.com/entgra/carbon-device-mgt.git</url>
+        <developerConnection>scm:git:https://gitlab.com/entgra/carbon-device-mgt.git</developerConnection>
+        <connection>scm:git:https://gitlab.com/entgra/carbon-device-mgt.git</connection>
         <tag>HEAD</tag>
     </scm>
 
@@ -1980,6 +1980,38 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>entgra-nexus</id>
+            <name>Entgra internal Repository</name>
+            <url>http://nexus.entgra.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>entgra.releases</id>
+            <name>Entgra internal Repository</name>
+            <url>http://nexus.entgra.io/repository/maven-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>entgra.snapshots</id>
+            <name>Entgra Snapshot Repository</name>
+            <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
     </repositories>
 
     <properties>
@@ -2050,7 +2082,7 @@
         <axiom.wso2.version>1.2.11.wso2v10</axiom.wso2.version>
 
         <!-- Carbon Device Management -->
-        <carbon.device.mgt.version>3.1.40-SNAPSHOT</carbon.device.mgt.version>
+        <carbon.device.mgt.version>3.2.1-SNAPSHOT</carbon.device.mgt.version>
 
         <!-- Carbon Commons -->
         <carbon.commons.version>4.6.21</carbon.commons.version>
@@ -2206,5 +2238,16 @@
         <javax.websocket.version>1.0</javax.websocket.version>
         <glassfish.tyrus.version>1.13.1</glassfish.tyrus.version>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
+    	</snapshotRepository>
+    	<repository>
+            <id>maven-release</id>
+            <url>http://nexus.entgra.io/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 
 </project>
