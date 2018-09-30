@@ -30,8 +30,8 @@
     <artifactId>org.wso2.carbon.device.application.mgt.store.api</artifactId>
     <version>3.1.40-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>WSO2 Carbon - Application Management API</name>
-    <description>WSO2 Carbon - Application Management API</description>
+    <name>WSO2 Carbon - Application Management Store API</name>
+    <description>WSO2 Carbon - Application Management Store API</description>
     <url>http://wso2.org</url>
 
     <build>
@@ -175,6 +175,10 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.application.mgt.addons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -231,10 +235,6 @@
         <dependency>
             <groupId>org.wso2.orbit.com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>

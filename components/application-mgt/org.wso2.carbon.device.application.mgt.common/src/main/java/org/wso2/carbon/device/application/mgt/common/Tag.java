@@ -19,17 +19,11 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-
-import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
-
-import java.util.Date;
-
 /**
  * Application represents the an Application in Application Store.
  */
 public class Tag {
 
-    @Exclude
     private int id;
 
     private String tenantId;

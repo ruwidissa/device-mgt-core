@@ -37,6 +37,7 @@
     <modules>
         <module>org.wso2.carbon.device.application.mgt.core</module>
         <module>org.wso2.carbon.device.application.mgt.common</module>
+        <module>org.wso2.carbon.device.application.mgt.addons</module>
         <module>org.wso2.carbon.device.application.mgt.publisher.api</module>
         <module>org.wso2.carbon.device.application.mgt.store.api</module>
         <module>org.wso2.carbon.device.application.mgt.publisher.ui</module>
@@ -69,6 +70,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
-
 </project>
