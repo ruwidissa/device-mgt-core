@@ -348,6 +348,10 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             String errorMessage = "Invalid values for from/to";
             return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
         }
+        if (limit == 0) {
+            String errorMessage = "Invalid values for offset/limit";
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
+        }
         String fromDate = String.valueOf(from);
         String toDate = String.valueOf(to);
         String query = DEFAULT_META_DEVICE_ID_ATTRIBUTE + ":" + deviceId
