@@ -22,27 +22,11 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.testng.Assert;
-import org.testng.IObjectFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.ObjectFactory;
-import org.testng.annotations.Test;
-import org.wso2.carbon.device.application.mgt.common.Review;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
-import org.wso2.carbon.device.application.mgt.store.api.services.impl.ReviewManagementAPIImpl;
-import org.wso2.carbon.device.application.mgt.store.api.services.util.CommentMgtTestHelper;
-
-import javax.ws.rs.core.Response;
-
-import static org.mockito.MockitoAnnotations.initMocks;
+import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 
 @PowerMockIgnore("javax.ws.rs.*")
 @SuppressStaticInitializationFor({

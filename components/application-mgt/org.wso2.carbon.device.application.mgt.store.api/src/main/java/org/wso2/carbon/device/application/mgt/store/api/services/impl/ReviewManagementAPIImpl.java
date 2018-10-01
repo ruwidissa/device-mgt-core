@@ -21,19 +21,18 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.store.api.APIUtil;
+import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.store.api.services.ReviewManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
+import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.Path;
@@ -81,18 +80,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @ApiParam Review review,
             @PathParam("uuid") String uuid) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        Application application;
         try {
-            application = applicationManager.getApplicationByRelease(uuid);
-            if (application.getApplicationReleases().isEmpty()){
-                String msg = "Couldn't Found an one application release for the UUID: " + uuid;
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-            if (application.getApplicationReleases().size()>1){
-                String msg = "Found more than one application release for the UUID: " + uuid;
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
             boolean isReviewCreated = reviewManager.addReview(review, uuid);
             if (isReviewCreated) {
                 return Response.status(Response.Status.CREATED).entity(review).build();
@@ -101,18 +89,23 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
+        } catch (NotFoundException e) {
+            String msg = "Couldn't find an application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ReviewManagementException e) {
             String msg = "Error occurred while creating the review";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            log.error("Error occured while getting the application for application UUID: " + uuid);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("").build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while adding for application release. UUID of the application release: " + uuid;
+            String msg =
+                    "Error occurred while adding for application release. UUID of the application release: " + uuid;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occured while accessing application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 

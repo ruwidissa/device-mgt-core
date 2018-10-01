@@ -25,16 +25,15 @@ import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
-import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
-import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
@@ -64,44 +63,38 @@ public class ReviewManagerImpl implements ReviewManager {
         this.applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
     }
 
-    @Override public boolean addReview(Review review, String uuid)
-            throws ReviewManagementException, RequestValidatingException {
+    @Override
+    public boolean addReview(Review review, String uuid) throws ReviewManagementException, NotFoundException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         boolean isSuccess = false;
         try {
             ConnectionManagerUtil.openDBConnection();
-            Review existingReview = reviewDAO.haveUerCommented(uuid, username, tenantId);
+            if (!this.applicationReleaseDAO.verifyReleaseExistenceByUuid(uuid, tenantId)){
+                throw new NotFoundException("Couldn't find application release for the application UUID: " + uuid);
+            }
+            Review existingReview = this.reviewDAO.haveUerCommented(uuid, username, tenantId);
             if (existingReview != null && isAuthorizedUser(username, existingReview.getUsername(), tenantId)
                     && review.getRating() > 0 && review.getRating() != existingReview.getRating()) {
-                Runnable task = () -> calculateRating(review.getRating(), existingReview.getRating(), uuid);
+                Runnable task = () -> calculateRating(review.getRating(), existingReview.getRating(), uuid, tenantId);
                 new Thread(task).start();
                 isSuccess = updateReview(review, existingReview.getId(), uuid, existingReview);
             } else if (review.getRating() > 0) {
-                Runnable task = () -> calculateRating(review.getRating(), -12345, uuid);
+                Runnable task = () -> calculateRating(review.getRating(), -12345, uuid, tenantId);
                 new Thread(task).start();
                 review.setUsername(username);
-                ConnectionManagerUtil.beginDBTransaction();
                 isSuccess = this.reviewDAO.addReview(review, uuid, tenantId);
-                if (isSuccess) {
-                    ConnectionManagerUtil.commitDBTransaction();
-                } else {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                }
             }
             return isSuccess;
         } catch (DBConnectionException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
             throw new ReviewManagementException(
                     "DB Connection error occurs ,Review for application release with UUID: " + uuid +  " is failed", e);
-        } catch (TransactionManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ReviewManagementException(
-                    "Transaction Management Exception occurs,Review for application release with UUID:" + uuid +
-                            " is failed ", e);
-        } catch (UserStoreException e) {
+        }  catch (UserStoreException e) {
             throw new ReviewManagementException("Error occured while verifying user's permission to update the review.",
                     e);
+        } catch (ApplicationManagementDAOException e) {
+            throw new ReviewManagementException(
+                    "Error occured while verifying whether application release is exists or not.", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -112,18 +105,20 @@ public class ReviewManagerImpl implements ReviewManager {
             throws ReviewManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        boolean isConnectionOpen = false;
         if (log.isDebugEnabled()) {
             log.debug("Review updating request is received for the review id " + reviewId);
         }
         try {
             if (existingReview == null) {
                 ConnectionManagerUtil.openDBConnection();
+                isConnectionOpen = true;
                 existingReview = this.reviewDAO.getReview(reviewId);
                 if (existingReview != null && isAuthorizedUser(username, existingReview.getUsername(), tenantId)) {
                     if (review.getRating() > 0 && review.getRating() != existingReview.getRating()) {
                         Review finalExistingReview = existingReview;
                         Runnable task = () -> calculateRating(review.getRating(), finalExistingReview.getRating(),
-                                uuid);
+                                uuid, tenantId);
                         new Thread(task).start();
                     }
                 } else {
@@ -138,28 +133,21 @@ public class ReviewManagerImpl implements ReviewManager {
             if (review.getRating() == 0) {
                 review.setRating(existingReview.getRating());
             }
-            ConnectionManagerUtil.beginDBTransaction();
-            if (this.reviewDAO.updateReview(review, reviewId, username, tenantId) == 1) {
-                ConnectionManagerUtil.commitDBTransaction();
-                return true;
-            }
-            ConnectionManagerUtil.rollbackDBTransaction();
-            return false;
+            return this.reviewDAO.updateReview(review, reviewId, username, tenantId) == 1;
         } catch (ReviewManagementDAOException e) {
-            throw new ReviewManagementException("Error occured while  updating review with review id " + reviewId + ".",
+            throw new ReviewManagementException("Error occured while  getting review with review id " + reviewId + ".",
                     e);
         } catch (DBConnectionException e) {
             throw new ReviewManagementException(
                     "DB Connection error occurs updating review with review id " + reviewId + ".", e);
-        } catch (TransactionManagementException e) {
-            throw new ReviewManagementException(
-                    "Transaction management error occurs when updating review with review id " + reviewId + ".", e);
         } catch (UserStoreException e) {
             throw new ReviewManagementException(
                     "Error occured while verifying user's permission to update the review. review id: " + reviewId
                             + ".", e);
         } finally {
-            ConnectionManagerUtil.closeDBConnection();
+            if (isConnectionOpen) {
+                ConnectionManagerUtil.closeDBConnection();
+            }
         }
     }
 
@@ -221,25 +209,16 @@ public class ReviewManagerImpl implements ReviewManager {
                 throw new ReviewDoesNotExistException(
                         "Cannot delete a non-existing review for the application with review id" + reviewId);
             }
-            Runnable task = () -> calculateRating(0, existingReview.getRating(), uuid);
+            Runnable task = () -> calculateRating(0, existingReview.getRating(), uuid, tenantId);
             new Thread(task).start();
-            ConnectionManagerUtil.beginDBTransaction();
-            if (isAuthorizedUser(username, existingReview.getUsername(), tenantId)
-                    && this.reviewDAO.deleteReview(username, reviewId) == 1) {
-                ConnectionManagerUtil.commitDBTransaction();
-                return true;
-            }
-            ConnectionManagerUtil.rollbackDBTransaction();
-            return false;
+            return isAuthorizedUser(username, existingReview.getUsername(), tenantId)
+                    && this.reviewDAO.deleteReview(username, reviewId) == 1;
         } catch (DBConnectionException e) {
             throw new ReviewManagementException(
                     "DB Connection error occurs deleting review with review id " + reviewId + ".", e);
         } catch (ReviewManagementDAOException e) {
             throw new ReviewManagementException("Error occured while deleting review with review id " + reviewId + ".",
                     e);
-        } catch (TransactionManagementException e) {
-            throw new ReviewManagementException(
-                    "Transaction Management Exception occurs deleting review with review id " + reviewId + ".", e);
         } catch (UserStoreException e) {
             throw new ReviewManagementException(
                     "User-store exception while checking whether the user " + username + " of tenant " + tenantId
@@ -261,7 +240,7 @@ public class ReviewManagerImpl implements ReviewManager {
             }
 
             List<Integer> ratingValues = this.reviewDAO.getAllRatingValues(appReleaseUuuid, tenantId);
-            TreeMap<Integer, Integer> ratingVariety = rating.getRatingVariety();
+            TreeMap<Integer, Integer> ratingVariety = new TreeMap<>();
             for (Integer ratingVal : ratingValues) {
                 if (ratingVariety.containsKey(ratingVal)) {
                     ratingVariety.replace(ratingVal, ratingVariety.get(ratingVal) + 1);
@@ -290,43 +269,42 @@ public class ReviewManagerImpl implements ReviewManager {
         }
     }
 
-    private void calculateRating(int newRatingVal, int oldRatingVal, String uuid) {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+    private void calculateRating(int newRatingVal, int oldRatingVal, String uuid, int tenantId) {
         try {
-            ConnectionManagerUtil.beginDBTransaction();
+            ConnectionManagerUtil.openDBConnection();
             Rating rating = this.applicationReleaseDAO.getRating(uuid, tenantId);
             if (rating == null) {
                 log.error("Couldn't find rating for application release uuid: " + uuid);
             } else {
                 double updatedRating;
+                double newTotalRating;
                 int numOfUsers = rating.getNoOfUsers();
                 double currentRating = rating.getRatingValue() * numOfUsers;
+
                 if (oldRatingVal == -12345) {
-                    updatedRating = (currentRating + newRatingVal) / (numOfUsers + 1);
-                    this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers + 1);
+                    newTotalRating = currentRating + newRatingVal;
+                    numOfUsers++;
                 } else if (newRatingVal == 0) {
-                    updatedRating = (currentRating - newRatingVal) / (numOfUsers - 1);
-                    this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers - 1);
+                    newTotalRating = currentRating - newRatingVal;
+                    numOfUsers--;
                 } else {
                     double tmpVal;
                     tmpVal = currentRating - oldRatingVal;
-                    updatedRating = (tmpVal + newRatingVal) / numOfUsers;
-                    this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers);
+                    newTotalRating = tmpVal + newRatingVal;
                 }
+
+                if (numOfUsers == 0) {
+                    updatedRating = 0;
+                } else {
+                    updatedRating = newTotalRating / numOfUsers;
+                }
+                this.applicationReleaseDAO.updateRatingValue(uuid, updatedRating, numOfUsers);
             }
-            ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            log.error("Error occured while updated the rating value of the application release UUID: " + uuid);
-        } catch (TransactionManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            log.error(
-                    "Transaction Management Exception occured while updated the rating value of the application release UUID: "
-                            + uuid);
+            log.error("Error occured while getting the rating value of the application release UUID: " + uuid, e);
         } catch (DBConnectionException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
             log.error("DB Connection error occured while updated the rating value of the application release UUID: "
-                    + uuid + " can not get.");
+                    + uuid + " can not get.", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

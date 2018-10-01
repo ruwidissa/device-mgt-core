@@ -18,14 +18,15 @@
  */
 package org.wso2.carbon.device.application.mgt.common.services;
 
+import javassist.NotFoundException;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
-
 
 
 /**
@@ -41,7 +42,8 @@ public interface ReviewManager {
      * @return {@link Review} Review added
      * @throws ReviewManagementException Exceptions of the review management.
      */
-    boolean addReview(Review review, String uuid) throws ReviewManagementException, RequestValidatingException;
+    boolean addReview(Review review, String uuid)
+            throws ReviewManagementException, RequestValidatingException, ApplicationManagementException;
 
     /**
      * Get all review with pagination

@@ -22,16 +22,16 @@
     <parent>
         <artifactId>application-mgt</artifactId>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <version>3.1.40-SNAPSHOT</version>
+        <version>3.2.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.device.application.mgt.publisher.api</artifactId>
-    <version>3.1.40-SNAPSHOT</version>
+    <version>3.2.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>WSO2 Carbon - Application Management API</name>
-    <description>WSO2 Carbon - Application Management API</description>
+    <name>WSO2 Carbon - Application Management Publisher API</name>
+    <description>WSO2 Carbon - Application Management Publisher API</description>
     <url>http://wso2.org</url>
 
     <build>
@@ -218,12 +218,8 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.application.mgt.addons</artifactId>
         </dependency>
     </dependencies>
 </project>

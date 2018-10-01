@@ -19,15 +19,11 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-
-import org.wso2.carbon.device.application.mgt.common.jaxrs.Exclude;
-
 /**
  * Application represents the an Application in Application Store.
  */
 public class UnrestrictedRole {
 
-    @Exclude
     private int id;
 
     private int tenantId;

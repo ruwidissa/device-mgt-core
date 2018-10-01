@@ -297,7 +297,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
-        String sql = "UPDATE AP_APP_RELEASE SET RATING = ?,RATED_USERS = ? WHERE UUID = ?;";
+        String sql = "UPDATE AP_APP_RELEASE SET RATING = ?, RATED_USERS = ? WHERE UUID = ?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
@@ -327,7 +327,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         Rating rating = null;
-        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE UUID = ? AND TENANT_D=?;";
+        String sql = "SELECT RATING, RATED_USERS FROM AP_APP_RELEASE WHERE UUID = ? AND TENANT_ID=?;";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
@@ -459,6 +459,40 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application release details with app ID: " + appId
                             + " App release uuid: " + uuid + " While executing query ", e);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public boolean verifyReleaseExistenceByUuid(String uuid, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Verifying application release existence by application release uuid: " + uuid);
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            String sql =
+                    "SELECT AR.ID AS RELEASE_ID FROM AP_APP_RELEASE AS AR WHERE AR.UUID = ? AND AR.TENANT_ID = ?;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, uuid);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully retrieved basic details of the application release with the application UUID: "
+                        + uuid);
+            }
+            return rs.next();
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when executing query to get application release details for App release uuid: "
+                            + uuid, e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {

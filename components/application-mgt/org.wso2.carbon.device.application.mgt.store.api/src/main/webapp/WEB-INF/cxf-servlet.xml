@@ -49,19 +49,19 @@
         <property name="scan" value="true"/>
     </bean>
 
-    <bean id="ValidationInterceptor" class="org.wso2.carbon.device.application.mgt.store.api.ValidationInterceptor"/>
+    <bean id="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor" class="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor"/>
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 
     <bean id="applicationMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.ApplicationManagementAPIImpl"/>
     <bean id="reviewMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.ReviewManagementAPIImpl" />
     <bean id="subscriptionMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.SubscriptionManagementAPIImpl"/>
-    <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.store.api.JSONMessageHandler"/>
-    <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.store.api.MultipartCustomProvider"/>
+    <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.addons.JSONMessageHandler"/>
+    <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.addons.MultipartCustomProvider"/>
 
     <cxf:bus>
         <cxf:inInterceptors>
-            <ref bean="ValidationInterceptor"/>
+            <ref bean="org.wso2.carbon.device.application.mgt.addons.ValidationInterceptor"/>
         </cxf:inInterceptors>
     </cxf:bus>
 
