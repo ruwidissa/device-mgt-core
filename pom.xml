@@ -37,7 +37,7 @@
     <modules>
         <module>components/device-mgt</module>
         <module>components/device-mgt-extensions</module>
-		<module>components/identity-extensions</module>
+	<module>components/identity-extensions</module>
         <module>components/apimgt-extensions</module>
         <module>components/policy-mgt</module>
         <module>components/certificate-mgt</module>
@@ -2147,10 +2147,10 @@
             <id>maven-snapshots</id>
             <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
     	</snapshotRepository>
-    	<repository>
+    	<!--repository>
             <id>maven-release</id>
             <url>http://nexus.entgra.io/repository/maven-releases/</url>
-        </repository>
+        </repository-->
     </distributionManagement>
 
 </project>
