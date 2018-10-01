@@ -644,7 +644,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
             Application application = null;
             while (rs.next()) {
-                ApplicationRelease appRelease = Util.readApplicationRelease(rs);
+                ApplicationRelease appRelease = Util.loadApplicationRelease(rs);
                 application = new Application();
 
                 application.setId(rs.getInt("APP_ID"));

@@ -131,15 +131,6 @@ public interface ApplicationManager {
      */
     Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName) throws ApplicationManagementException;
 
-    /**
-     * To get the release of a particular Application.
-     *
-     * @param applicationId ID of the Application.
-     * @param state state of the Application.
-     * @return the List of the Application releases related with the particular Application.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    List<ApplicationRelease> getReleaseInState(int applicationId, String state) throws ApplicationManagementException;
 
     /**
      * To get all the releases of a particular Application.
