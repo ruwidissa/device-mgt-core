@@ -2147,10 +2147,10 @@
             <id>maven-snapshots</id>
             <url>http://nexus.entgra.io/repository/maven-snapshots/</url>
     	</snapshotRepository>
-    	<!--repository>
+    	<repository>
             <id>maven-release</id>
             <url>http://nexus.entgra.io/repository/maven-releases/</url>
-        </repository-->
+        </repository>
     </distributionManagement>
 
 </project>
