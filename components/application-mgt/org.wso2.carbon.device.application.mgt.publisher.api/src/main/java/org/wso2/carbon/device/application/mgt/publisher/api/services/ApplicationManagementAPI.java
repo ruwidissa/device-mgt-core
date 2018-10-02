@@ -141,9 +141,9 @@ public interface ApplicationManagementAPI {
                     value = "Is it requesting exactly matching application or partially matching application.")
             @QueryParam("exact-match") boolean isFullMatch,
             @ApiParam(
-                    name = "published-release",
-                    value = "If set to True, only get published release for the application")
-            @QueryParam("published-release") boolean requirePublishedReleases,
+                    name = "release-state",
+                    value = "Current state of the application release")
+            @QueryParam("release-state") String releaseState,
             @ApiParam(
                     name = "offset",
                     value = "offset",

@@ -26,8 +26,6 @@ public class Tag {
 
     private int id;
 
-    private String tenantId;
-
     private String tagName;
 
     private Application application;
@@ -38,14 +36,6 @@ public class Tag {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
     }
 
     public String getTagName() {

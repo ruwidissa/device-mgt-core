@@ -182,14 +182,6 @@ public class Util {
         applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
         applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
         applicationRelease.setRating(resultSet.getDouble("RATING"));
-
-        LifecycleState lifecycleState = new LifecycleState();
-        lifecycleState.setCurrentState(resultSet.getString("CURRENT_STATE"));
-        lifecycleState.setPreviousState(resultSet.getString("PREVIOUS_STATE"));
-        lifecycleState.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-        lifecycleState.setUpdatedAt(resultSet.getTimestamp("UPDATED_AT"));
-
-        applicationRelease.setLifecycleState(lifecycleState);
         return applicationRelease;
     }
 

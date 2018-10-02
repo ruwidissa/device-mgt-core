@@ -29,7 +29,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -129,14 +131,20 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         try {
             conn = this.getDBConnection();
             String sql = "INSERT INTO AP_APP_LIFECYCLE_STATE (CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_BY, "
-                    + "AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?, ?, ?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID=?),?);";
+                    + "UPDATED_AT, AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?, ?, ?, ?, "
+                    + "(SELECT ID FROM AP_APP_RELEASE WHERE UUID=?),?);";
+
+            Calendar calendar = Calendar.getInstance();
+            Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, state.getCurrentState().toUpperCase());
             stmt.setString(2, state.getPreviousState().toUpperCase());
             stmt.setInt(3, tenantId);
             stmt.setString(4, state.getUpdatedBy());
-            stmt.setString(5, uuid);
-            stmt.setInt(6, appId);
+            stmt.setTimestamp(5, timestamp);
+            stmt.setString(6, uuid);
+            stmt.setInt(7, appId);
             stmt.executeUpdate();
 
         } catch (DBConnectionException e) {

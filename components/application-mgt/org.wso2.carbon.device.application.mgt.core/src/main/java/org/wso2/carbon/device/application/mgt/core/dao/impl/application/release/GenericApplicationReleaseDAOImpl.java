@@ -112,20 +112,20 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      */
     @Override public ApplicationRelease getRelease(String applicationName, String applicationType, String versionName,
             String releaseType, int tenantId) throws ApplicationManagementDAOException {
-
+        //todo no usage
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID AS UUID, AR.RELEASE_TYPE AS "
                 + "RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE AS APP_PRICE, AR.STORED_LOCATION AS "
-                + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, ICON_LOCATION, AR.SC_1_LOCATION AS " +
-                "SCREEN_SHOT_1, "
-                + "AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS "
-                + "HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO AS APP_META_INFO , "
-                + "AR.RATING AS RATING, AL.CURRENT_STATE, AL.PREVIOUS_STATE, AL.UPDATED_BY, AL.UPDATED_AT FROM "
-                + "AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE AS AL WHERE AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE "
-                + "NAME=? AND TYPE=? AND TENANT_ID=?) AND AR.VERSION=? AND AR.RELEASE_TYPE=? AND "
-                + "AL.AP_APP_RELEASE_ID=AR.ID AND AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
+                + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, AR.ICON_LOCATION AS "
+                + "ICON_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, "
+                + "AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS "
+                + "AS SHARED, AR.APP_META_INFO AS APP_META_INFO, AR.RATING AS RATING, AL.CURRENT_STATE, "
+                + "AL.PREVIOUS_STATE, AL.UPDATED_BY, AL.UPDATED_AT FROM AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE "
+                + "AS AL WHERE AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE NAME=? AND TYPE=? AND TENANT_ID=?) "
+                + "AND AR.VERSION=? AND AR.RELEASE_TYPE=? AND AL.AP_APP_RELEASE_ID=AR.ID "
+                + "AND AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
 
         try {
             connection = this.getDBConnection();
@@ -215,14 +215,11 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         ResultSet resultSet = null;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE "
-                + "AS RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, ICON_LOCATION"
+                + "AS RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, AR.ICON_LOCATION, "
                 + "AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, "
                 + "AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, "
                 + "AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO AS APP_META_INFO, "
-                + "AR.RATING AS RATING AL.CURRENT_STATE AS CURRENT_STATE, AL.PREVIOUS_STATE AS PREVIOUSE_STATE, "
-                + "AL.UPDATED_BY AS UPDATED_BY, AL.UPDATED_AT AS UPDATED_AT FROM AP_APP_RELEASE "
-                + "AS AR, AP_APP_LIFECYCLE_STATE AS AL WHERE AR.AP_APP_ID=? AND AL.AP_APP_RELEASE_ID=AR.ID AND "
-                + "AR.TENANT_ID=? AND AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC LIMIT 1;";
+                + "AR.RATING AS RATING FROM AP_APP_RELEASE AS AR where AR.AP_APP_ID=? AND AR.TENANT_ID = ?;";
 
         try {
             connection = this.getDBConnection();
@@ -248,6 +245,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         }
     }
 
+    //todo this has to be removed
     @Override
     public List<ApplicationRelease> getReleaseByState(int appId, int tenantId, String state) throws
             ApplicationManagementDAOException {

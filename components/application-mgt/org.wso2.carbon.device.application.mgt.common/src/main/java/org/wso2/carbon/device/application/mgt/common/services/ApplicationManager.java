@@ -97,13 +97,10 @@ public interface ApplicationManager {
      *
      * @param id id of the Application
      * @param state state of the Application
-     * @param handleConnections Whether it is required to handle DB connections within(true), or if there are
-     *                          existing connection(false)
      * @return the Application identified by the ID
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Application getApplicationById(int id, String state, boolean handleConnections) throws
-            ApplicationManagementException;
+    Application getApplicationById(int id, String state) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
