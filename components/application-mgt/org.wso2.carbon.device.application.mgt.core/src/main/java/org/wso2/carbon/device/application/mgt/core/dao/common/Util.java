@@ -59,17 +59,17 @@ public class Util {
 
         List<Application> applications = new ArrayList<>();
         Application application = null;
-        int applicatioId = -1;
+        int applicationId = -1;
 
         while (rs.next()) {
-            if (applicatioId != rs.getInt("APP_ID")) {
+            if (applicationId != rs.getInt("APP_ID")) {
 
                 if (application != null) {
                     applications.add(application);
                 }
-                applicatioId = rs.getInt("APP_ID");
+                applicationId = rs.getInt("APP_ID");
                 application = new Application();
-                application.setId(applicatioId);
+                application.setId(applicationId);
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
                 application.setAppCategory(rs.getString("APP_CATEGORY"));
@@ -160,29 +160,29 @@ public class Util {
     /**
      * Populates {@link ApplicationRelease} object with the result obtained from the database.
      *
-     * @param rs {@link ResultSet} from obtained from the database
+     * @param resultSet {@link ResultSet} from obtained from the database
      * @return {@link ApplicationRelease} object populated with the data
      * @throws SQLException If unable to populate {@link ApplicationRelease} object with the data
      */
-    public static ApplicationRelease readApplicationRelease(ResultSet rs) throws SQLException {
-        ApplicationRelease appRelease = new ApplicationRelease();
-
-        appRelease.setId(rs.getInt("RELEASE_ID"));
-        appRelease.setVersion(rs.getString("VERSION"));
-        appRelease.setUuid(rs.getString("UUID"));
-        appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
-        appRelease.setPrice(rs.getDouble("APP_PRICE"));
-        appRelease.setAppHashValue(rs.getString("APP_HASH_VALUE"));
-        appRelease.setAppStoredLoc(rs.getString("STORED_LOCATION"));
-        appRelease.setBannerLoc(rs.getString("BANNER_LOCATION"));
-        appRelease.setRating(rs.getDouble("RATING"));
-        appRelease.setIsSharedWithAllTenants(rs.getInt("SHARED_WITH_ALL_TENANTS"));
-        appRelease.setMetaData(rs.getString("APP_META_INFO"));
-        appRelease.setScreenshotLoc1(rs.getString("SC_1_LOCATION"));
-        appRelease.setScreenshotLoc2(rs.getString("SC_2_LOCATION"));
-        appRelease.setScreenshotLoc3(rs.getString("SC_3_LOCATION"));
-
-        return appRelease;
+    public static ApplicationRelease loadApplicationRelease(ResultSet resultSet) throws SQLException {
+        ApplicationRelease applicationRelease = new ApplicationRelease();
+        applicationRelease.setId(resultSet.getInt("RELEASE_ID"));
+        applicationRelease.setVersion(resultSet.getString("RELEASE_VERSION"));
+        applicationRelease.setUuid(resultSet.getString("UUID"));
+        applicationRelease.setReleaseType(resultSet.getString("RELEASE_TYPE"));
+        applicationRelease.setPackageName(resultSet.getString("PACKAGE_NAME"));
+        applicationRelease.setPrice(resultSet.getDouble("APP_PRICE"));
+        applicationRelease.setAppStoredLoc(resultSet.getString("STORED_LOCATION"));
+        applicationRelease.setBannerLoc(resultSet.getString("BANNER_LOCATION"));
+        applicationRelease.setIconLoc(resultSet.getString("ICON_LOCATION"));
+        applicationRelease.setScreenshotLoc1(resultSet.getString("SCREEN_SHOT_1"));
+        applicationRelease.setScreenshotLoc2(resultSet.getString("SCREEN_SHOT_2"));
+        applicationRelease.setScreenshotLoc3(resultSet.getString("SCREEN_SHOT_3"));
+        applicationRelease.setAppHashValue(resultSet.getString("HASH_VALUE"));
+        applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
+        applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
+        applicationRelease.setRating(resultSet.getDouble("RATING"));
+        return applicationRelease;
     }
 
     /**

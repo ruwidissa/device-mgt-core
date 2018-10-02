@@ -101,7 +101,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         ConnectionManagerUtil.openDBConnection();
-        validateAppCreatingRequest(application);
+        validateAppCreatingRequest(application, tenantId);
         validateAppReleasePayload(application.getApplicationReleases().get(0));
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
@@ -116,6 +116,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error("Device type is not matched with application type");
                 ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
+            }
+            if (!application.getUnrestrictedRoles().isEmpty()) {
+                application.setIsRestricted(true);
+            } else {
+                application.setIsRestricted(false);
             }
             // Insert to application table
             int appId = this.applicationDAO.createApplication(application, deviceType.getId());
@@ -134,18 +139,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         log.debug("New tags entry added to AP_APP_TAG table. App Id:" + appId);
                     }
                 }
-                if (!application.getUnrestrictedRoles().isEmpty()) {
-                    application.setIsRestricted(true);
+                if (application.getIsRestricted()) {
                     this.visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), appId, tenantId);
                     if(log.isDebugEnabled()){
                         log.debug("New restricted roles to app ID mapping added to AP_UNRESTRICTED_ROLE table." +
                                 " App Id:" + appId);
                     }
-                } else {
-                    if(log.isDebugEnabled()){
-                        log.debug("App is not restricted to role. App Id:" + appId);
-                    }
-                    application.setIsRestricted(false);
                 }
                 if (application.getApplicationReleases().size() > 1 ){
                     throw new ApplicationManagementException(
@@ -211,7 +210,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         try {
-            ConnectionManagerUtil.getDBConnection();
+            ConnectionManagerUtil.openDBConnection();
             applicationList = applicationDAO.getApplications(filter, tenantId);
             if(applicationList != null && applicationList.getApplications() != null && !applicationList
                     .getApplications().isEmpty()) {
@@ -219,7 +218,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     applicationList = getRoleRestrictedApplicationList(applicationList, userName);
                 }
                 for (Application application : applicationList.getApplications()) {
-                    applicationReleases = getReleases(application, filter.isRequirePublishedRelease());
+                    applicationReleases = getReleases(application, filter.getCurrentAppReleaseState());
                     application.setApplicationReleases(applicationReleases);
                 }
             }
@@ -231,6 +230,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ApplicationManagementDAOException e) {
             throw new ApplicationManagementException(
                     "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
@@ -274,20 +275,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public Application getApplicationById(int appId, String state, boolean handleConnections) throws ApplicationManagementException {
+    public Application getApplicationById(int appId, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         Application application;
         boolean isAppAllowed = false;
+        boolean isOpenConnection = false;
         List<ApplicationRelease> applicationReleases = null;
         try {
-            if (handleConnections) {
+            if (state != null) {
                 ConnectionManagerUtil.openDBConnection();
+                isOpenConnection = true;
             }
-            application = ApplicationManagementDAOFactory.getApplicationDAO()
-                    .getApplicationById(appId, tenantId);
+            application = this.applicationDAO.getApplicationById(appId, tenantId);
+            if (application == null) {
+                throw new NotFoundException("Couldn't find an application for application Id: " + appId);
+            }
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationReleases = getReleaseInState(appId, state);
+                applicationReleases = getReleases(application, state);
                 application.setApplicationReleases(applicationReleases);
                 return application;
             }
@@ -303,16 +308,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!isAppAllowed) {
                 return null;
             }
-            if (state != null) {
-                applicationReleases = getReleaseInState(appId, state);
-            }
+            applicationReleases = getReleases(application, state);
             application.setApplicationReleases(applicationReleases);
             return application;
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while getting application with the application id " + appId);
         } finally {
-            if (handleConnections) {
+            if (isOpenConnection) {
                 ConnectionManagerUtil.closeDBConnection();
             }
         }
@@ -353,7 +356,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplication(appName, appType, tenantId);
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationReleases = getReleases(application, false);
+                applicationReleases = getReleases(application, null);
                 application.setApplicationReleases(applicationReleases);
                 return application;
             }
@@ -370,7 +373,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 return null;
             }
 
-            applicationReleases = getReleases(application, false);
+            applicationReleases = getReleases(application, null);
             application.setApplicationReleases(applicationReleases);
             return application;
         } catch (UserStoreException e) {
@@ -425,22 +428,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private List<ApplicationRelease> getReleases(Application application, boolean requirePublishedRelease)
+    private List<ApplicationRelease> getReleases(Application application, String releaseState)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         List<ApplicationRelease> applicationReleases;
-        List<ApplicationRelease> filteredApplicationReleases = new ArrayList<>();
         if (log.isDebugEnabled()) {
             log.debug("Request is received to retrieve all the releases related with the application " + application
                     .toString());
         }
-        ConnectionManagerUtil.getDBConnection();
         applicationReleases = this.applicationReleaseDAO.getReleases(application.getId(), tenantId);
         for (ApplicationRelease applicationRelease : applicationReleases) {
             LifecycleState lifecycleState = null;
             try {
-                lifecycleState = ApplicationManagementDAOFactory.getLifecycleStateDAO().
-                        getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
+                lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
             } catch (LifeCycleManagementDAOException e) {
                 throw new ApplicationManagementException(
                         "Error occurred while getting the latest lifecycle state for the application release UUID: "
@@ -448,43 +448,29 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             if (lifecycleState != null) {
                 applicationRelease.setLifecycleState(lifecycleState);
-
-                if (!AppLifecycleState.REMOVED.toString()
-                        .equals(applicationRelease.getLifecycleState().getCurrentState())) {
-                    if (requirePublishedRelease){
-                        if (AppLifecycleState.PUBLISHED.toString()
-                                .equals(applicationRelease.getLifecycleState().getCurrentState())){
-                            filteredApplicationReleases.add(applicationRelease);
-                        }
-                    }else{
-                        filteredApplicationReleases.add(applicationRelease);
-                    }
-                }
             }
         }
-
-        if (requirePublishedRelease && filteredApplicationReleases.size() > 1) {
-            log.error("There are more than one published application releases for application ID: " + application
-                    .getId());
-        }
-        return filteredApplicationReleases;
-
+        return filterAppReleaseByCurrentState(applicationReleases, releaseState);
     }
 
+    private List<ApplicationRelease> filterAppReleaseByCurrentState(List<ApplicationRelease> applicationReleases,
+            String state) {
+        List<ApplicationRelease> filteredReleases = new ArrayList<>();
 
+        if (state != null && !state.isEmpty()) {
+            for (ApplicationRelease applicationRelease : applicationReleases) {
+                if (state.equals(applicationRelease.getLifecycleState().getCurrentState())) {
+                    filteredReleases.add(applicationRelease);
+                }
+            }
 
-    @Override
-    public List<ApplicationRelease> getReleaseInState(int applicationId, String state) throws
-            ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-
-        Application application = getApplicationIfAccessible(applicationId);
-        if (log.isDebugEnabled()) {
-            log.debug("Request is received to retrieve all the releases related with the application " + application
-                    .toString());
+            if (AppLifecycleState.PUBLISHED.toString()
+                    .equals(state) && filteredReleases.size() > 1) {
+                log.warn("There are more than one application releases is found which is in PUBLISHED state");
+            }
+            return filteredReleases;
         }
-        ConnectionManagerUtil.getDBConnection();
-        return this.applicationReleaseDAO.getReleaseByState(applicationId, tenantId, state);
+        return applicationReleases;
     }
 
     @Override
@@ -505,7 +491,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if ( application == null) {
                 throw new ApplicationManagementException("Invalid Application");
             }
-            List<ApplicationRelease> applicationReleases = getReleases(application, false);
+            List<ApplicationRelease> applicationReleases = getReleases(application, null);
             if (log.isDebugEnabled()) {
                 log.debug("Request is received to delete applications which are related with the application id " +
                                   applicationId);
@@ -587,7 +573,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param application Application that need to be created
      * @throws ValidationException Validation Exception
      */
-    private void validateAppCreatingRequest(Application application) throws ValidationException {
+    private void validateAppCreatingRequest(Application application, int tenantId) throws ValidationException {
 
         Boolean isValidApplicationType;
         try {
@@ -609,7 +595,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         "App Type contains in the application creating payload doesn't match with supported app types");
             }
 
-            validateApplicationExistence(application);
+            validateApplicationExistence(application, tenantId);
         } catch (ApplicationManagementException e) {
             throw new ValidationException("Error occured while validating whether there is already an application "
                                                   + "registered with same name.", e);
@@ -631,14 +617,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param application Application that need to be validated
      * @throws ValidationException Validation Exception
      */
-    private void validateApplicationExistence(Application application) throws ApplicationManagementException {
+    private void validateApplicationExistence(Application application, int tenantId) throws ApplicationManagementException {
         Filter filter = new Filter();
         filter.setFullMatch(true);
         filter.setAppName(application.getName().trim());
         filter.setOffset(0);
         filter.setLimit(1);
 
-        ApplicationList applicationList = getApplications(filter);
+        ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
         if (applicationList != null && applicationList.getApplications() != null && !applicationList.getApplications()
                 .isEmpty()) {
             throw new ApplicationManagementException(
@@ -763,10 +749,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         ApplicationRelease applicationRelease;
         try {
-            ConnectionManagerUtil.getDBConnection();
+            ConnectionManagerUtil.openDBConnection();
             applicationRelease = getAppReleaseIfExists(appId, uuid);
 
-            Application application = getApplicationById(appId, null, false);
+            Application application = getApplicationById(appId, null);
 
             List<DeviceType> deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
             for (DeviceType deviceType:deviceTypes) {

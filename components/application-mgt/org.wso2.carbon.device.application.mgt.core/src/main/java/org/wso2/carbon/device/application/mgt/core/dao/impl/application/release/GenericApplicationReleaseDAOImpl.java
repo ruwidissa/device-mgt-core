@@ -112,20 +112,20 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      */
     @Override public ApplicationRelease getRelease(String applicationName, String applicationType, String versionName,
             String releaseType, int tenantId) throws ApplicationManagementDAOException {
-
+        //todo no usage
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID AS UUID, AR.RELEASE_TYPE AS "
                 + "RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE AS APP_PRICE, AR.STORED_LOCATION AS "
-                + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, ICON_LOCATION, AR.SC_1_LOCATION AS " +
-                "SCREEN_SHOT_1, "
-                + "AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS "
-                + "HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO AS APP_META_INFO , "
-                + "AR.RATING AS RATING, AL.CURRENT_STATE, AL.PREVIOUS_STATE, AL.UPDATED_BY, AL.UPDATED_AT FROM "
-                + "AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE AS AL WHERE AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE "
-                + "NAME=? AND TYPE=? AND TENANT_ID=?) AND AR.VERSION=? AND AR.RELEASE_TYPE=? AND "
-                + "AL.AP_APP_RELEASE_ID=AR.ID AND AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
+                + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, AR.ICON_LOCATION AS "
+                + "ICON_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, "
+                + "AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS "
+                + "AS SHARED, AR.APP_META_INFO AS APP_META_INFO, AR.RATING AS RATING, AL.CURRENT_STATE, "
+                + "AL.PREVIOUS_STATE, AL.UPDATED_BY, AL.UPDATED_AT FROM AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE "
+                + "AS AL WHERE AR.AP_APP_ID=(SELECT ID FROM AP_APP WHERE NAME=? AND TYPE=? AND TENANT_ID=?) "
+                + "AND AR.VERSION=? AND AR.RELEASE_TYPE=? AND AL.AP_APP_RELEASE_ID=AR.ID "
+                + "AND AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
 
         try {
             connection = this.getDBConnection();
@@ -138,7 +138,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                return constructApplicationRelease(resultSet);
+                return Util.loadApplicationRelease(resultSet);
             }
             return null;
         } catch (DBConnectionException e) {
@@ -185,7 +185,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                return constructApplicationRelease(resultSet);
+                return Util.loadApplicationRelease(resultSet);
             }
             return null;
         } catch (DBConnectionException e) {
@@ -215,7 +215,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         ResultSet resultSet = null;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE "
-                + "AS RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, ICON_LOCATION"
+                + "AS RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, AR.ICON_LOCATION, "
                 + "AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, "
                 + "AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, "
                 + "AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO AS APP_META_INFO, "
@@ -229,9 +229,8 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                ApplicationRelease applicationRelease = constructApplicationRelease(resultSet);
+                ApplicationRelease applicationRelease = Util.loadApplicationRelease(resultSet);
                 applicationReleases.add(applicationRelease);
-
             }
             return applicationReleases;
         } catch (DBConnectionException e) {
@@ -246,6 +245,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         }
     }
 
+    //todo this has to be removed
     @Override
     public List<ApplicationRelease> getReleaseByState(int appId, int tenantId, String state) throws
             ApplicationManagementDAOException {
@@ -253,24 +253,26 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
-        String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE, AR.APP_PRICE,"
-                + " AR.STORED_LOCATION, AR.ICON_LOCATION, AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR" +
-                ".SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, AR.APP_HASH_VALUE AS HASH_VALUE, "
-                + "AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO, AR.RATING FROM AP_APP_RELEASE AS "
-                + "AR where AR.TENANT_ID = ? AND AR.AP_APP_ID=(SELECT AP_APP_ID" +
-                " FROM AP_APP_LIFECYCLE_STATE WHERE AP_APP_ID = ? AND CURRENT_STATE = ? AND TENANT_ID = ?);";
+        String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID AS UUID, AR.RELEASE_TYPE AS "
+                + "RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE AS APP_PRICE, AR.STORED_LOCATION AS "
+                + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, ICON_LOCATION, AR.SC_1_LOCATION AS "
+                + "SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, AR.SC_3_LOCATION AS SCREEN_SHOT_3, "
+                + "AR.APP_HASH_VALUE AS HASH_VALUE, AR.SHARED_WITH_ALL_TENANTS AS SHARED, AR.APP_META_INFO AS "
+                + "APP_META_INFO , AR.RATING AS RATING, AL.CURRENT_STATE, AL.PREVIOUS_STATE, AL.UPDATED_BY, "
+                + "AL.UPDATED_AT FROM AP_APP_RELEASE AS AR, AP_APP_LIFECYCLE_STATE AS AL "
+                + "WHERE AR.AP_APP_ID=? AND AL.AP_APP_RELEASE_ID=AR.ID AND AL.CURRENT_STATE=? AND AR.TENANT_ID=? AND "
+                + "AL.TENANT_ID=AR.TENANT_ID ORDER BY AL.UPDATED_AT DESC;";
 
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
-            statement.setInt(1, tenantId);
-            statement.setInt(2, appId);
-            statement.setString(3, state);
-            statement.setInt(4, tenantId);
+            statement.setInt(1, appId);
+            statement.setString(2, state);
+            statement.setInt(3, tenantId);
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                ApplicationRelease appRelease = constructApplicationRelease(resultSet);
+                ApplicationRelease appRelease = Util.loadApplicationRelease(resultSet);
                 applicationReleases.add(appRelease);
             }
             return applicationReleases;
@@ -498,32 +500,5 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } finally {
             Util.cleanupResources(stmt, rs);
         }
-    }
-
-    /**
-     * This method is capable to construct {@link ApplicationRelease} and return the object
-     *
-     * @param resultSet result set obtained from the query executing.
-     * @throws SQLException SQL exception while accessing result set data.
-     */
-    private ApplicationRelease constructApplicationRelease(ResultSet resultSet) throws SQLException {
-        ApplicationRelease applicationRelease = new ApplicationRelease();
-        applicationRelease.setId(resultSet.getInt("RELEASE_ID"));
-        applicationRelease.setVersion(resultSet.getString("RELEASE_VERSION"));
-        applicationRelease.setUuid(resultSet.getString("UUID"));
-        applicationRelease.setReleaseType(resultSet.getString("RELEASE_TYPE"));
-        applicationRelease.setPackageName(resultSet.getString("PACKAGE_NAME"));
-        applicationRelease.setPrice(resultSet.getDouble("APP_PRICE"));
-        applicationRelease.setAppStoredLoc(resultSet.getString("STORED_LOCATION"));
-        applicationRelease.setBannerLoc(resultSet.getString("BANNER_LOCATION"));
-        applicationRelease.setIconLoc(resultSet.getString("ICON_LOCATION"));
-        applicationRelease.setScreenshotLoc1(resultSet.getString("SCREEN_SHOT_1"));
-        applicationRelease.setScreenshotLoc2(resultSet.getString("SCREEN_SHOT_2"));
-        applicationRelease.setScreenshotLoc3(resultSet.getString("SCREEN_SHOT_3"));
-        applicationRelease.setAppHashValue(resultSet.getString("HASH_VALUE"));
-        applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
-        applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
-        applicationRelease.setRating(resultSet.getDouble("RATING"));
-        return applicationRelease;
     }
 }

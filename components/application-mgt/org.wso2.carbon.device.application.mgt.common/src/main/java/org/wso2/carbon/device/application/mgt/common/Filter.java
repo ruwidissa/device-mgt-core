@@ -61,7 +61,7 @@ public class Filter {
     /**
      * Set as True if required to have only published application release, otherwise set to False
      */
-    private boolean requirePublishedRelease;
+    private String currentAppReleaseState;
 
     public int getLimit() {
         return limit;
@@ -119,11 +119,11 @@ public class Filter {
         this.appCategory = appCategory;
     }
 
-    public boolean isRequirePublishedRelease() {
-        return requirePublishedRelease;
+    public String getCurrentAppReleaseState() {
+        return currentAppReleaseState;
     }
 
-    public void setRequirePublishedRelease(boolean requirePublishedRelease) {
-        this.requirePublishedRelease = requirePublishedRelease;
+    public void setCurrentAppReleaseState(String currentAppReleaseState) {
+        this.currentAppReleaseState = currentAppReleaseState;
     }
 }

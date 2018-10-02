@@ -70,7 +70,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @QueryParam("type") String appType,
             @QueryParam("category") String appCategory,
             @QueryParam("exact-match") boolean isFullMatch,
-            @QueryParam("published-release") boolean requirePublishedReleases,
+            @QueryParam("release-state") String releaseState,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("20") @QueryParam("limit") int limit,
             @DefaultValue("ASC") @QueryParam("sort") String sortBy) {
@@ -82,7 +82,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             filter.setLimit(limit);
             filter.setSortBy(sortBy);
             filter.setFullMatch(isFullMatch);
-            filter.setRequirePublishedRelease(requirePublishedReleases);
             if (appName != null && !appName.isEmpty()) {
                 filter.setAppName(appName);
             }
@@ -91,6 +90,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
             if (appCategory != null && !appCategory.isEmpty()) {
                 filter.setAppCategory(appCategory);
+            }
+            if (releaseState != null && !releaseState.isEmpty()) {
+                filter.setCurrentAppReleaseState(releaseState);
             }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
@@ -105,25 +107,24 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
-
     @GET
     @Consumes("application/json")
     @Path("/{appId}")
     public Response getApplication(
             @PathParam("appId") int appId,
-            @QueryParam("state") String state) {
+            @DefaultValue("PUBLISHED") @QueryParam("state") String state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            Application application = applicationManager.getApplicationById(appId, state, true);
-            if (application == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity
-                        ("Application with application id: " + appId + " not found").build();
-            }
-
+            Application application = applicationManager.getApplicationById(appId, state);
             return Response.status(Response.Status.OK).entity(application).build();
+        } catch (NotFoundException e) {
+            String msg = "Application with application id: " + appId + " not found";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            log.error("Error occurred while getting application with the id " + appId, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            String msg = "Error occurred while getting application with the id " + appId;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 

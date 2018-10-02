@@ -97,13 +97,10 @@ public interface ApplicationManager {
      *
      * @param id id of the Application
      * @param state state of the Application
-     * @param handleConnections Whether it is required to handle DB connections within(true), or if there are
-     *                          existing connection(false)
      * @return the Application identified by the ID
      * @throws ApplicationManagementException Application Management Exception.
      */
-    Application getApplicationById(int id, String state, boolean handleConnections) throws
-            ApplicationManagementException;
+    Application getApplicationById(int id, String state) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
@@ -131,15 +128,6 @@ public interface ApplicationManager {
      */
     Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName) throws ApplicationManagementException;
 
-    /**
-     * To get the release of a particular Application.
-     *
-     * @param applicationId ID of the Application.
-     * @param state state of the Application.
-     * @return the List of the Application releases related with the particular Application.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    List<ApplicationRelease> getReleaseInState(int applicationId, String state) throws ApplicationManagementException;
 
     /**
      * To get all the releases of a particular Application.

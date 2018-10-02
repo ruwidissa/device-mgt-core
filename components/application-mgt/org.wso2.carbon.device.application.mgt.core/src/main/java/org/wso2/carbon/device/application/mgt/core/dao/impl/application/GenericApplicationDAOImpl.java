@@ -66,7 +66,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, SUB_TYPE, RESTRICTED, "
-                            + "TENANT_ID, DM_DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            + "TENANT_ID, DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
             stmt.setString(2, application.getType());
@@ -401,16 +401,18 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             conn = this.getDBConnection();
             String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, " +
-                            "AP_APP.APP_CATEGORY AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ," +
-                            "AP_APP.CURRENCY AS CURRENCY, AP_APP.RESTRICTED AS RESTRICTED, " +
-                            "DM_DEVICE_TYPE_ID AS DEVICE_TYPE_ID " +
-                            "FROM AP_APP  " +
-                            "WHERE AP_APP.ID=? AND AP_APP.TENANT_ID=?;";
+                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
+                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
+                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP.DEVICE_TYPE_ID AS DEVICE_TYPE_ID, "
+                            + "AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE AS ROLE FROM "
+                            + "((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
+                            + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) WHERE "
+                            + "AP_APP.ID = ? AND AP_APP.TENANT_ID =  ? AND AP_APP.STATUS != ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, applicationId);
             stmt.setInt(2, tenantId);
+            stmt.setString(3, AppLifecycleState.REMOVED.toString());
             rs = stmt.executeQuery();
 
             if (log.isDebugEnabled()) {
@@ -644,7 +646,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
             Application application = null;
             while (rs.next()) {
-                ApplicationRelease appRelease = Util.readApplicationRelease(rs);
+                ApplicationRelease appRelease = Util.loadApplicationRelease(rs);
                 application = new Application();
 
                 application.setId(rs.getInt("APP_ID"));
