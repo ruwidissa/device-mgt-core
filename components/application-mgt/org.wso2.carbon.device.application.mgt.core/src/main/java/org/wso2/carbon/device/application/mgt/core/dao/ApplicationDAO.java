@@ -96,7 +96,7 @@ public interface ApplicationDAO {
             ApplicationManagementDAOException;
 
     /**
-     * To get the application with the given uuid
+     * To get the application with the given id
      *
      * @param applicationId Id of the application to be retrieved.
      * @param tenantId ID of the tenant.
@@ -104,6 +104,16 @@ public interface ApplicationDAO {
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
     Application getApplicationById(int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * To get the application with the given uuid
+     *
+     * @param releaseUuid UUID of the application release.
+     * @param tenantId ID of the tenant.
+     * @return the application
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    Application getApplicationByUUID(String releaseUuid, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get the application with the given uuid

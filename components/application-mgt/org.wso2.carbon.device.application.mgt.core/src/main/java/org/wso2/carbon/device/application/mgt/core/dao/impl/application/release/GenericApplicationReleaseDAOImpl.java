@@ -432,6 +432,43 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
+    public boolean verifyReleaseExistenceByHash(int appId, String hashVal, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Verifying application release existence by application id:" + appId
+                    + " and application hash value: " + hashVal);
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            String sql =
+                    "SELECT AR.ID AS RELEASE_ID FROM AP_APP_RELEASE AS AR WHERE AR.AP_APP_ID = ? AND "
+                            + "AR.APP_HASH_VALUE = ? AND AR.TENANT_ID = ?;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, appId);
+            stmt.setString(2, hashVal);
+            stmt.setInt(3, tenantId);
+            rs = stmt.executeQuery();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully retrieved basic details of the application release with the application ID "
+                        + appId + " Application release hash value: " + hashVal);
+            }
+            return rs.next();
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while getting application release details with app ID: " + appId
+                            + " App release hash value: " + hashVal + " While executing query ", e);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
     public boolean verifyReleaseExistence(int appId, String uuid, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence by application id:" + appId

@@ -93,7 +93,7 @@ public interface ApplicationManager {
     String getUuidOfLatestRelease(int appId) throws ApplicationManagementException;
 
     /**
-     * To get Application with the given Id.
+     * To get the Application for given Id.
      *
      * @param id id of the Application
      * @param state state of the Application
@@ -101,6 +101,16 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException Application Management Exception.
      */
     Application getApplicationById(int id, String state) throws ApplicationManagementException;
+
+    /**
+     * To get the Application for given application relase UUID.
+     *
+     * @param uuid UUID of the Application
+     * @param state state of the Application
+     * @return the Application identified by the ID
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
@@ -146,11 +156,9 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of the Application Release.
      * @param state Lifecycle state to change the app
      * @param checkExist whether it is needed to check if the app and release already exist in the database
-     * @param handleDBConnections Whether it is necessary to open connections
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist,
-                              Boolean handleDBConnections)
+    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist)
             throws ApplicationManagementException;
 
     /**

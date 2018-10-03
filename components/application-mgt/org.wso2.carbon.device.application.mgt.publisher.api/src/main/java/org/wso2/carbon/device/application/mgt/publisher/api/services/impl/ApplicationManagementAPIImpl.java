@@ -484,7 +484,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             LifecycleState state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true, true);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application id: " + applicationId
                     + " and application release uuid: " + applicationUuid;

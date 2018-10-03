@@ -46,6 +46,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -165,7 +166,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-                changeLifecycleState(appId, applicationRelease.getUuid(), lifecycleState, false, false);
+                changeLifecycleState(appId, applicationRelease.getUuid(), lifecycleState, false);
 
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
@@ -245,14 +246,22 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.debug("Application release request is received for the application " + application.toString());
         }
         try {
-            ConnectionManagerUtil.getDBConnection();
+            ConnectionManagerUtil.openDBConnection();
+            if (!this.applicationDAO.verifyApplicationExistenceById(applicationId, tenantId)){
+                throw new NotFoundException(
+                        "Couldn't found application for the application Id: " + applicationId);
+            }
+            if (this.applicationReleaseDAO
+                    .verifyReleaseExistenceByHash(applicationId, applicationRelease.getAppHashValue(), tenantId)) {
+                throw new BadRequestException("Application release exists for the application Id: " + applicationId
+                        + " and uploaded binary file");
+            }
             applicationRelease = this.applicationReleaseDAO
                     .createRelease(applicationRelease, application.getId(), tenantId);
             LifecycleState lifecycleState = new LifecycleState();
             lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
             lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-            changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState, true,
-                    false);
+            changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState, false);
             return applicationRelease;
         } catch (ApplicationManagementDAOException e) {
             throw new ApplicationManagementException(
@@ -314,6 +323,53 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while getting application with the application id " + appId);
+        } finally {
+            if (isOpenConnection) {
+                ConnectionManagerUtil.closeDBConnection();
+            }
+        }
+    }
+
+    @Override
+    public Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        Application application;
+        boolean isAppAllowed = false;
+        boolean isOpenConnection = false;
+        List<ApplicationRelease> applicationReleases = null;
+        try {
+            if (state != null) {
+                ConnectionManagerUtil.openDBConnection();
+                isOpenConnection = true;
+            }
+            application = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
+            if (application == null) {
+                throw new NotFoundException("Couldn't find an application for application release UUID:: " + uuid);
+            }
+            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
+                applicationReleases = getReleases(application, state);
+                application.setApplicationReleases(applicationReleases);
+                return application;
+            }
+
+            if (!application.getUnrestrictedRoles().isEmpty()) {
+                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                    isAppAllowed = true;
+                }
+            } else {
+                isAppAllowed = true;
+            }
+
+            if (!isAppAllowed) {
+                return null;
+            }
+            applicationReleases = getReleases(application, state);
+            application.setApplicationReleases(applicationReleases);
+            return application;
+        } catch (UserStoreException e) {
+            throw new ApplicationManagementException(
+                    "User-store exception while getting application with the application release UUID " + uuid);
         } finally {
             if (isOpenConnection) {
                 ConnectionManagerUtil.closeDBConnection();
@@ -467,6 +523,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (AppLifecycleState.PUBLISHED.toString()
                     .equals(state) && filteredReleases.size() > 1) {
                 log.warn("There are more than one application releases is found which is in PUBLISHED state");
+                filteredReleases.sort((r1, r2) -> {
+                    if (r1.getLifecycleState().getUpdatedAt().after(r2.getLifecycleState().getUpdatedAt())) {
+                        return -1;
+                    } else if (r2.getLifecycleState().getUpdatedAt().after(r1.getLifecycleState().getUpdatedAt())) {
+                        return 1;
+                    }
+                    return 0;
+                });
             }
             return filteredReleases;
         }
@@ -502,7 +566,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = new LifecycleState();
                 newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
                 newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState, true, false);
+                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState, false);
                 storedLocations.add(applicationRelease.getAppHashValue());
             }
             this.applicationDAO.deleteApplication(applicationId);
@@ -537,7 +601,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = new LifecycleState();
                 newAppLifecycleState.setPreviousState(appLifecycleState.getCurrentState());
                 newAppLifecycleState.setCurrentState(AppLifecycleState.REMOVED.toString());
-                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState, true, false);
+                changeLifecycleState(applicationId, applicationRelease.getUuid(), newAppLifecycleState, false);
             } else {
                 throw new ApplicationManagementException("Can't delete the application release, You have to move the " +
                         "lifecycle state from " + currentState + " to acceptable " +
@@ -849,15 +913,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return lifecycleState;
     }
 
-    @Override
-    public void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist,
-                                     Boolean handleDBConnections) throws ApplicationManagementException {
+    @Override public void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state,
+            Boolean checkExist) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        boolean handleDBConnection = false;
         try {
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
             if (checkExist) {
-                if (handleDBConnections) {
-                    ConnectionManagerUtil.openDBConnection();
-                }
+                ConnectionManagerUtil.openDBConnection();
+                handleDBConnection = true;
                 if (!this.applicationDAO.verifyApplicationExistenceById(applicationId, tenantId)){
                     throw new NotFoundException(
                             "Couldn't found application for the application Id: " + applicationId);
@@ -890,7 +953,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     "Failed to add lifecycle state. Application Id: " + applicationId + " Application release UUID: "
                             + releaseUuid, e);
         } finally {
-            if (handleDBConnections) {
+            if (handleDBConnection) {
                 ConnectionManagerUtil.closeDBConnection();
             }
         }
