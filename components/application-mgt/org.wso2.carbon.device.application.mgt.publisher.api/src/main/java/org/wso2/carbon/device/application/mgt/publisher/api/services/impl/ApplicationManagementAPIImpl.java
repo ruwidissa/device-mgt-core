@@ -96,8 +96,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).entity
-                        ("Couldn't find any application for requested query.").build();
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Couldn't find any application for requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch (ApplicationManagementException e) {
@@ -147,10 +147,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationRelease applicationRelease;
         List<Attachment> attachmentList = new ArrayList<>();
         attachmentList.add(screenshot1);
-        if(screenshot2 != null) {
+        if (screenshot2 != null) {
             attachmentList.add(screenshot2);
         }
-        if(screenshot3 != null) {
+        if (screenshot3 != null) {
             attachmentList.add(screenshot3);
         }
 
@@ -183,8 +183,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
 
             // Upload images
-            applicationRelease = applicationStorageManager.uploadImageArtifacts(applicationRelease, iconFileStream,
-                    bannerFileStream, attachments);
+            applicationRelease = applicationStorageManager
+                    .uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
             applicationRelease.setUuid(UUID.randomUUID().toString());
             applicationReleases.add(applicationRelease);
             application.setApplicationReleases(applicationReleases);
@@ -202,13 +202,102 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ResourceManagementException e) {
-            log.error("Error occurred while uploading the releases artifacts of the application "
-                    + application.getName(), e);
+            log.error(
+                    "Error occurred while uploading the releases artifacts of the application " + application.getName(),
+                    e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
             String errorMessage =
                     "Error while uploading binary file and resources for the application release of the application "
                             + application.getName();
+            log.error(errorMessage, e);
+            return APIUtil.getResponse(new ApplicationManagementException(errorMessage, e),
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (RequestValidatingException e) {
+            log.error("Error occurred while handling the application creating request");
+            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @POST
+    @Consumes("multipart/mixed")
+    @Path("/{deviceType}/{appType}/{appId}")
+    public Response createRelease(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("appId") String appType,
+            @PathParam("appId") int appId,
+            @Multipart("applicationRelease") ApplicationRelease applicationRelease,
+            @Multipart("binaryFile") Attachment binaryFile,
+            @Multipart("icon") Attachment iconFile,
+            @Multipart("banner") Attachment bannerFile,
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
+        InputStream iconFileStream;
+        InputStream bannerFileStream;
+        List<InputStream> attachments = new ArrayList<>();
+        List<Attachment> attachmentList = new ArrayList<>();
+        attachmentList.add(screenshot1);
+        if (screenshot2 != null) {
+            attachmentList.add(screenshot2);
+        }
+        if (screenshot3 != null) {
+            attachmentList.add(screenshot3);
+        }
+
+        try {
+            if (!isValidReleaseCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, appType)) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
+            // The application executable artifacts such as apks are uploaded.
+            if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
+                applicationRelease = applicationStorageManager
+                        .uploadReleaseArtifact(applicationRelease, appType, deviceType, null);
+            } else {
+                applicationRelease = applicationStorageManager
+                        .uploadReleaseArtifact(applicationRelease, appType, deviceType,
+                                binaryFile.getDataHandler().getInputStream());
+                if (applicationRelease.getAppStoredLoc() == null || applicationRelease.getAppHashValue() == null) {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                }
+            }
+
+            iconFileStream = iconFile.getDataHandler().getInputStream();
+            bannerFileStream = bannerFile.getDataHandler().getInputStream();
+
+            for (Attachment screenshot : attachmentList) {
+                attachments.add(screenshot.getDataHandler().getInputStream());
+            }
+
+            // Upload images
+            applicationRelease = applicationStorageManager
+                    .uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
+            applicationRelease.setUuid(UUID.randomUUID().toString());
+
+            // Created new application release entry
+            ApplicationRelease release = applicationManager.createRelease(appId, applicationRelease);
+            if (release != null) {
+                return Response.status(Response.Status.CREATED).entity(release).build();
+            } else {
+                log.error("Application Creation Failed");
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating the application";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (ResourceManagementException e) {
+            log.error(
+                    "Error occurred while uploading the releases artifacts of the application ID: " + appId,
+                    e);
+            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } catch (IOException e) {
+            String errorMessage =
+                    "Error while uploading binary file and resources for the application release of the application ID: "
+                            + appId;
             log.error(errorMessage, e);
             return APIUtil.getResponse(new ApplicationManagementException(errorMessage, e),
                     Response.Status.INTERNAL_SERVER_ERROR);
@@ -224,18 +313,15 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/image-artifacts/{appId}/{uuid}")
     public Response updateApplicationImageArtifacts(
-            @PathParam("appId") int appId,
-            @PathParam("uuid") String applicationUuid,
-            @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
-            @Multipart("screenshot1") Attachment screenshot1,
-            @Multipart("screenshot2") Attachment screenshot2,
+            @PathParam("appId") int appId, @PathParam("uuid") String applicationUuid,
+            @Multipart("icon") Attachment iconFile, @Multipart("banner") Attachment bannerFile,
+            @Multipart("screenshot1") Attachment screenshot1, @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
 
         try {
             InputStream iconFileStream = null;
             InputStream bannerFileStream = null;
-            List<InputStream> attachments = new ArrayList<>();;
+            List<InputStream> attachments = new ArrayList<>();
 
             if (iconFile != null) {
                 iconFileStream = iconFile.getDataHandler().getInputStream();
@@ -245,18 +331,18 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
 
             attachments.add(screenshot1.getDataHandler().getInputStream());
-            if(screenshot2 != null) {
+            if (screenshot2 != null) {
                 attachments.add(screenshot2.getDataHandler().getInputStream());
             }
-            if(screenshot3 != null) {
+            if (screenshot3 != null) {
                 attachments.add(screenshot3.getDataHandler().getInputStream());
             }
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            applicationManager.updateApplicationImageArtifact(appId,
-                    applicationUuid, iconFileStream, bannerFileStream, attachments);
+            applicationManager.updateApplicationImageArtifact(appId, applicationUuid, iconFileStream, bannerFileStream,
+                    attachments);
 
-            return Response.status(Response.Status.OK).entity("Successfully uploaded artifacts for the application "
-                    + applicationUuid).build();
+            return Response.status(Response.Status.OK)
+                    .entity("Successfully uploaded artifacts for the application " + applicationUuid).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
             return APIUtil.getResponse(e, Response.Status.NOT_FOUND);
@@ -267,8 +353,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         } catch (IOException e) {
             String msg = "Exception while trying to read icon, banner files for the application " + applicationUuid;
             log.error(msg);
-            return APIUtil.getResponse(new ApplicationManagementException(msg, e),
-                    Response.Status.INTERNAL_SERVER_ERROR);
+            return APIUtil
+                    .getResponse(new ApplicationManagementException(msg, e), Response.Status.INTERNAL_SERVER_ERROR);
         } catch (ResourceManagementException e) {
             log.error("Error occurred while uploading the image artifacts of the application with the uuid "
                     + applicationUuid, e);
@@ -296,14 +382,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             APIUtil.getApplicationManager().updateApplicationArtifact(applicationId, applicationUuid,
                     binaryFile.getDataHandler().getInputStream());
             return Response.status(Response.Status.OK)
-                    .entity("Successfully uploaded artifacts for the application release. UUID is " + applicationUuid).build();
+                    .entity("Successfully uploaded artifacts for the application release. UUID is " + applicationUuid)
+                    .build();
         } catch (IOException e) {
-            String msg =
-                    "Error occurred while trying to read icon, banner files for the application release" +
-                            applicationUuid;
+            String msg = "Error occurred while trying to read icon, banner files for the application release"
+                    + applicationUuid;
             log.error(msg);
-            return APIUtil.getResponse(new ApplicationManagementException(msg, e),
-                    Response.Status.BAD_REQUEST);
+            return APIUtil.getResponse(new ApplicationManagementException(msg, e), Response.Status.BAD_REQUEST);
         } catch (ResourceManagementException e) {
             log.error("Error occurred while uploading the image artifacts of the application with the uuid "
                     + applicationUuid, e);
@@ -313,8 +398,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     + applicationUuid, e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         } catch (RequestValidatingException e) {
-            log.error("Error occured while handling the application artifact updating request. application release UUID:  "
-                    + applicationUuid);
+            log.error(
+                    "Error occured while handling the application artifact updating request. application release UUID:  "
+                            + applicationUuid);
             return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         } catch (DeviceManagementException e) {
             log.error("Error occurred while updating the image artifacts of the application with the uuid "
@@ -360,8 +446,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         try {
             Application application = applicationManager.getApplicationIfAccessible(applicationId);
 
-            if (!applicationManager.isAcceptableAppReleaseUpdate(application.getId(),
-                                                                         applicationRelease.getUuid())) {
+            if (!applicationManager.isAcceptableAppReleaseUpdate(application.getId(), applicationRelease.getUuid())) {
                 String msg = "Application release is in the " + applicationRelease.getLifecycleState().getCurrentState()
                         + " state. Hence updating is not acceptable when application in this state";
                 log.error(msg);
@@ -384,9 +469,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 }
             }
 
-//            applicationRelease = applicationStorageManager
-//                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-//            applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
+            //            applicationRelease = applicationStorageManager
+            //                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
+            //            applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
 
             return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (ApplicationManagementException e) {
@@ -402,8 +487,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     + applicationUUID + " for the release " + applicationRelease.getVersion(), e);
             return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
         } catch (RequestValidatingException e) {
-            log.error("Error occured while handling the application release updating request. application release UUID:  "
-                    + applicationUUID);
+            log.error(
+                    "Error occured while handling the application release updating request. application release UUID:  "
+                            + applicationUUID);
             return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
         }
     }
@@ -462,13 +548,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             String msg = "Couldn't found application lifecycle details for appid: " + applicationId
                     + " and app release UUID: " + applicationUuid;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        catch (ApplicationManagementException e) {
+        } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting lifecycle state.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -481,9 +566,16 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     public Response addLifecycleState(
             @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUuid,
-            LifecycleState state) {
+            @QueryParam("action") String action) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
+            if (action == null || action.isEmpty()) {
+                String msg = "The Action is null or empty. Please check the request";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+            LifecycleState state = new LifecycleState();
+            state.setCurrentState(action);
             applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application id: " + applicationId
@@ -499,37 +591,62 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     }
 
     private boolean isValidAppCreatingRequest(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
-            List<Attachment> attachmentList, Application application){
+            List<Attachment> attachmentList, Application application) {
 
         if (application.getApplicationReleases().size() > 1) {
-            log.error(
-                    "Invalid application creating request. Application creating request must have single application "
-                            + "release.  Application name:" + application.getName() + " and type: " +
-                            application.getType());
+            log.error("Invalid application creating request. Application creating request must have single application "
+                    + "release.  Application name:" + application.getName() + " and type: " + application.getType());
             return false;
         }
 
         if (iconFile == null) {
-            log.error("Icon file is not found for the application release. Application name: " +
-                    application.getName() + " and type: " + application.getType());
+            log.error("Icon file is not found for the application release. Application name: " + application.getName()
+                    + " and type: " + application.getType());
             return false;
         }
 
         if (bannerFile == null) {
-            log.error("Banner file is not found for the application release. Application name: " +
-                    application.getName() + " and application type: " + application.getType());
+            log.error("Banner file is not found for the application release. Application name: " + application.getName()
+                    + " and application type: " + application.getType());
             return false;
         }
 
         if (attachmentList == null || attachmentList.isEmpty()) {
-            log.error("Screenshots are not found for the application release. Application name: " +
-                    application.getName() + " Application type: " + application.getType());
+            log.error(
+                    "Screenshots are not found for the application release. Application name: " + application.getName()
+                            + " Application type: " + application.getType());
             return false;
         }
 
         if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
-            log.error("Binary file is not found for the application release. Application name: "
-                    + application.getName() + " Application type: " + application.getType());
+            log.error("Binary file is not found for the application release. Application name: " + application.getName()
+                    + " Application type: " + application.getType());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidReleaseCreatingRequest(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
+            List<Attachment> attachmentList, String appType) {
+
+        if (iconFile == null) {
+            log.error("Icon file is not found with the application release creating request.");
+            return false;
+        }
+
+        if (bannerFile == null) {
+            log.error("Banner file is not found with the application release creating request.");
+            return false;
+        }
+
+        if (attachmentList == null || attachmentList.isEmpty()) {
+            log.error("Screenshots are not found with the application release creating request.");
+            return false;
+        }
+
+        if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(appType)) {
+            log.error("Binary file is not found with the application release creating request. Application type: "
+                    + appType);
             return false;
         }
         return true;

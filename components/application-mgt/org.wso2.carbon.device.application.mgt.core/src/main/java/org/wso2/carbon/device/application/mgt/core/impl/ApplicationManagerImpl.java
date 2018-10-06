@@ -35,8 +35,10 @@ import org.wso2.carbon.device.application.mgt.common.Tag;
 import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
@@ -247,7 +249,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         try {
             ConnectionManagerUtil.openDBConnection();
-            if (!this.applicationDAO.verifyApplicationExistenceById(applicationId, tenantId)){
+            Application existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            if (existingApplication == null){
                 throw new NotFoundException(
                         "Couldn't found application for the application Id: " + applicationId);
             }
@@ -256,13 +259,31 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new BadRequestException("Application release exists for the application Id: " + applicationId
                         + " and uploaded binary file");
             }
+            String packageName = this.applicationReleaseDAO.getPackageName(applicationId, tenantId);
+            if (packageName != null && !packageName.equals(applicationRelease.getPackageName())) {
+                throw new BadRequestException(
+                        "Package name in the payload is different from the existing package name of other application releases.");
+            }
+            ConnectionManagerUtil.beginDBTransaction();
             applicationRelease = this.applicationReleaseDAO
                     .createRelease(applicationRelease, application.getId(), tenantId);
             LifecycleState lifecycleState = new LifecycleState();
             lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
             lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
             changeLifecycleState(application.getId(), applicationRelease.getUuid(), lifecycleState, false);
+            ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
+        } catch (TransactionManagementException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(
+                    "Error occurred while staring application release creating transaction for application Id: "
+                            + applicationId, e);
+        } catch (DBConnectionException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(
+                    "Error occurred while adding application release into IoTS app management Application id of the "
+                            + "application release: " + applicationId, e);
+
         } catch (ApplicationManagementDAOException e) {
             throw new ApplicationManagementException(
                     "Error occurred while adding application release into IoTS app management Application id of the "
@@ -930,6 +951,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             "Couldn't found application release for the application Id: " + applicationId
                                     + " application release uuid: " + releaseUuid);
                 }
+                LifecycleState currentState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
+                if (currentState == null){
+                    throw new ApplicationManagementException(
+                            "Couldn't found latest lifecycle state for the appId: " + applicationId
+                                    + " and application release UUID: " + releaseUuid);
+                }
+                state.setPreviousState(currentState.getCurrentState());
             }
 
             String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();

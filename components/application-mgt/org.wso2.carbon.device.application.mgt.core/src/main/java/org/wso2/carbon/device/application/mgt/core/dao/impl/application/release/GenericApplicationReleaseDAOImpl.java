@@ -469,6 +469,43 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
+    public String getPackageName(int appId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting package name of the application release by application id:" + appId);
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            String sql = "SELECT AR.PACKAGE_NAME AS PACKAGE_NAME FROM AP_APP_RELEASE AS AR WHERE AR.AP_APP_ID = ? "
+                    + "AND AR.TENANT_ID = ? LIMIT 1;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, appId);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully retrieved package name of the application release with the application ID "
+                        + appId);
+            }
+            if (rs.next()){
+                return rs.getString("PACKAGE_NAME");
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while getting package name of the application release with app ID: " + appId, e);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection to get application release package name.", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
     public boolean verifyReleaseExistence(int appId, String uuid, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence by application id:" + appId

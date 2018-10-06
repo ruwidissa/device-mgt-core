@@ -146,7 +146,17 @@ public interface ApplicationReleaseDAO {
      * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    boolean verifyReleaseExistenceByHash(int appId, String hashVal, int tenantId) throws ApplicationManagementDAOException;
+    boolean verifyReleaseExistenceByHash(int appId, String hashVal, int tenantId)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * To verify whether application release exist or not for the given app release version.
+     *
+     * @param appId ID of the application.
+     * @param tenantId Tenant Id
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     */
+    String getPackageName(int appId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To verify whether application release exist or not for given application release uuid.
