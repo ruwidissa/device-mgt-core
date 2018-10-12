@@ -67,6 +67,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     private static final String POLICY_OPERATION_CODE = "POLICY-TEST";
     private static final String CONFIG_OPERATION_CODE = "CONFIG-TEST";
     private static final String PROFILE_OPERATION_CODE = "PROFILE-TEST";
+    private static final String PROFILE_NOTIFICATION_CODE = "NOTIFICATION";
     private static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
     private static final int NO_OF_DEVICES = 5;
     private static final String ADMIN_USER = "admin";
@@ -101,14 +102,14 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
         }
         this.deviceMgmtProvider = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider();
         deviceManagementService = new TestDeviceManagementService(DEVICE_TYPE,
-                                                                  MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         this.operationMgtService = PowerMockito.spy(new OperationManagerImpl(DEVICE_TYPE, deviceManagementService));
         PowerMockito.when(this.operationMgtService, "getNotificationStrategy").thenReturn(new TestNotificationStrategy());
     }
 
     @Test
     public void addCommandOperation() throws DeviceManagementException, OperationManagementException,
-                                             InvalidDeviceException {
+            InvalidDeviceException {
         OperationManager operationManager = PowerMockito.spy(
                 new OperationManagerImpl(DEVICE_TYPE, deviceManagementService));
         try {
@@ -154,7 +155,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     public void addEmptyDevicesCommandOperation() throws DeviceManagementException, OperationManagementException,
             InvalidDeviceException {
         this.operationMgtService.addOperation(getOperation(new CommandOperation(), Operation.Type.COMMAND,
-                                                           COMMAND_OPERATION_CODE), new ArrayList<>());
+                COMMAND_OPERATION_CODE), new ArrayList<>());
     }
 
     @Test(expectedExceptions = InvalidDeviceException.class)
@@ -205,8 +206,10 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     @Test(dependsOnMethods = "addConfigOperation")
     public void addProfileOperation() throws DeviceManagementException, OperationManagementException,
             InvalidDeviceException {
-        Activity activity = this.operationMgtService.addOperation(getOperation(new ProfileOperation(),
-                Operation.Type.PROFILE, PROFILE_OPERATION_CODE),
+        Operation opp = getOperation(new ProfileOperation(),
+                Operation.Type.PROFILE, PROFILE_NOTIFICATION_CODE);
+        opp.setPayLoad("{\"messageText\":\"xyz\",\"messageTitle\":\"abc\"}");
+        Activity activity = this.operationMgtService.addOperation(opp ,
                 this.deviceIds);
         validateOperationResponse(activity, ActivityStatus.Status.PENDING);
     }
@@ -531,7 +534,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
             expectedExceptions = OperationManagementException.class)
     public void getUpdateOperationForInvalidDevice() throws DeviceManagementException, OperationManagementException {
         this.operationMgtService.updateOperation(new DeviceIdentifier(INVALID_DEVICE, DEVICE_TYPE),
-                                                 getOperation(new CommandOperation(), Operation.Type.COMMAND, COMMAND_OPERATION_CODE));
+                getOperation(new CommandOperation(), Operation.Type.COMMAND, COMMAND_OPERATION_CODE));
     }
 
     @Test(dependsOnMethods = "getUpdateOperationForInvalidDevice",
