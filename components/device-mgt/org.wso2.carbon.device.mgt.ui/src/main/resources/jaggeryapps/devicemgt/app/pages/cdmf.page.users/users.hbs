@@ -75,10 +75,25 @@
                id="user-grid">
             <thead>
             <tr class="sort-row">
+                <th class="no-sort"></th>
+                <th class="no-sort"></th>
                 <th>By Username</th>
+                <th>By First Name</th>
+                <th>By Last Name</th>
+                <th>By Email</th>
+                <th class="no-sort"></th>
+            </tr>
+            <tr class="filter-row filter-box">
+                <th class="no-sort"></th>
+                <th class="no-sort"></th>
+                <th data-for="By Username" class="text-filter"></th>
+                <th data-for="By First Name" class="text-filter"></th>
+                <th data-for="By Last Name" class="text-filter"></th>
+                <th data-for="By Email" class="text-filter"></th>
+                <th class="no-sort"></th>
             </tr>
             <tr class="bulk-action-row hidden">
-                <th colspan="3">
+                <th colspan="7">
                     <ul class="tiles">
                         <li class="square">
                             <a id="invite-user-link" href="#" data-click-event="remove-form" class="btn square-element"
@@ -101,6 +116,9 @@
         <div class="sort-title">Sort By</div>
         <div class="sort-options">
             <a href="#">By Username</a>
+            <a href="#">By First Name</a>
+            <a href="#">By Last Name</a>
+            <a href="#">By Email</a>
         </div>
     </div>
 

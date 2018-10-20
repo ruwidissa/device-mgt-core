@@ -427,6 +427,104 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @GET
+    @Path("/search")
+    @Override
+    public Response getUsers(@QueryParam("username") String username, @QueryParam("firstName") String firstName,
+            @QueryParam("lastName") String lastName, @QueryParam("emailAddress") String emailAddress,
+            @HeaderParam("If-Modified-Since") String timestamp, @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit) {
+
+        if (RequestValidationUtil.isNonFilterRequest(username,firstName, lastName, emailAddress)) {
+            return getUsers(null, timestamp, offset, limit);
+        }
+
+        RequestValidationUtil.validatePaginationParameters(offset, limit);
+
+        if(log.isDebugEnabled()) {
+            log.debug("Filtering users - filter: {username: " + username  +", firstName: " + firstName + ", lastName: "
+                    + lastName + ", emailAddress: " + emailAddress + "}");
+        }
+
+        if (limit == 0) {
+            limit = Constants.DEFAULT_PAGE_LIMIT;
+        }
+
+        List<BasicUserInfo> filteredUserList = new ArrayList<>();
+        List<String> commonUsers = null, tempList;
+
+        try {
+            if (StringUtils.isNotEmpty(username)) {
+                commonUsers = getUserList(null, username);
+            }
+
+            if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(firstName)) {
+                tempList = getUserList(Constants.USER_CLAIM_FIRST_NAME, firstName);
+                if (commonUsers == null) {
+                    commonUsers = tempList;
+                } else {
+                    commonUsers.retainAll(tempList);
+                }
+            }
+
+            if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(lastName)) {
+                tempList = getUserList(Constants.USER_CLAIM_LAST_NAME, lastName);
+                if (commonUsers == null || commonUsers.size() == 0) {
+                    commonUsers = tempList;
+                } else if (tempList.size() > 0){
+                    commonUsers.retainAll(tempList);
+                }
+            }
+
+            if (!skipSearch(commonUsers) && StringUtils.isNotEmpty(emailAddress)) {
+                tempList = getUserList(Constants.USER_CLAIM_EMAIL_ADDRESS, emailAddress);
+                if (commonUsers == null || commonUsers.size() == 0) {
+                    commonUsers = tempList;
+                } else if (tempList.size() > 0) {
+                    commonUsers.retainAll(tempList);
+                }
+            }
+
+            BasicUserInfo basicUserInfo;
+            if (commonUsers != null) {
+                for (String user : commonUsers) {
+                    basicUserInfo = new BasicUserInfo();
+                    basicUserInfo.setUsername(user);
+                    basicUserInfo.setEmailAddress(getClaimValue(user, Constants.USER_CLAIM_EMAIL_ADDRESS));
+                    basicUserInfo.setFirstname(getClaimValue(user, Constants.USER_CLAIM_FIRST_NAME));
+                    basicUserInfo.setLastname(getClaimValue(user, Constants.USER_CLAIM_LAST_NAME));
+                    filteredUserList.add(basicUserInfo);
+                }
+            }
+
+            int toIndex = offset + limit;
+            int listSize = filteredUserList.size();
+            int lastIndex = listSize - 1;
+
+            List<BasicUserInfo> offsetList;
+            if (offset <= lastIndex) {
+                if (toIndex <= listSize) {
+                    offsetList = filteredUserList.subList(offset, toIndex);
+                } else {
+                    offsetList = filteredUserList.subList(offset, listSize);
+                }
+            } else {
+                offsetList = new ArrayList<>();
+            }
+
+            BasicUserInfoList result = new BasicUserInfoList();
+            result.setList(offsetList);
+            result.setCount(commonUsers != null ? commonUsers.size() : 0);
+
+            return Response.status(Response.Status.OK).entity(result).build();
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving the list of users.";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
     @Path("/count")
     @Override
     public Response getUserCount() {
@@ -700,4 +798,47 @@ public class UserManagementServiceImpl implements UserManagementService {
         return DeviceManagementConstants.EmailAttributes.DEFAULT_ENROLLMENT_TEMPLATE;
     }
 
+    /**
+     * Searches users which matches a given filter based on a claim
+     *
+     * @param claim the claim value to apply the filter. If <code>null</code> users will be filtered by username.
+     * @param filter the search query.
+     * @return <code>List<String></code> of users which matches.
+     * @throws UserStoreException If unable to search users.
+     */
+    private ArrayList<String> getUserList(String claim, String filter) throws UserStoreException {
+        String defaultFilter = "*";
+
+        org.wso2.carbon.user.core.UserStoreManager userStoreManager =
+                (org.wso2.carbon.user.core.UserStoreManager) DeviceMgtAPIUtils.getUserStoreManager();
+
+        String appliedFilter = filter + defaultFilter;
+
+        String[] users;
+        if (log.isDebugEnabled()) {
+            log.debug("Searching Users - claim: " + claim + " filter: " + appliedFilter);
+        }
+        if (StringUtils.isEmpty(claim)) {
+            users = userStoreManager.listUsers(appliedFilter, -1);
+        } else {
+            users = userStoreManager.getUserList(claim, appliedFilter, null);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Returned user count: " + users.length);
+        }
+
+        return new ArrayList<>(Arrays.asList(users));
+    }
+
+    /**
+     * User search provides an AND search result and if either of the filter returns an empty set of users, there is no
+     * need to carry on the search further. This method decides whether to carry on the search or not.
+     *
+     * @param commonUsers current filtered user list.
+     * @return <code>true</code> if further search is needed.
+     */
+    private boolean skipSearch(List<String> commonUsers) {
+        return commonUsers != null && commonUsers.size() == 0;
+    }
 }
