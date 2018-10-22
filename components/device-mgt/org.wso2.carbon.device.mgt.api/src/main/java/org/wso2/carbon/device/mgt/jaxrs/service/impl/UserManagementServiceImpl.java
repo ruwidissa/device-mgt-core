@@ -470,7 +470,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 tempList = getUserList(Constants.USER_CLAIM_LAST_NAME, lastName);
                 if (commonUsers == null || commonUsers.size() == 0) {
                     commonUsers = tempList;
-                } else if (tempList.size() > 0){
+                } else {
                     commonUsers.retainAll(tempList);
                 }
             }
@@ -479,7 +479,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                 tempList = getUserList(Constants.USER_CLAIM_EMAIL_ADDRESS, emailAddress);
                 if (commonUsers == null || commonUsers.size() == 0) {
                     commonUsers = tempList;
-                } else if (tempList.size() > 0) {
+                } else {
                     commonUsers.retainAll(tempList);
                 }
             }
