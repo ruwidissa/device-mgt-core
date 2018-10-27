@@ -275,10 +275,11 @@ function loadUsers() {
 
         $(data.users).each(function (index) {
             objects.push({
-                filter: htmlspecialchars(data.users[index].username),
-                firstname: htmlspecialchars(data.users[index].firstname) ? htmlspecialchars(data.users[index].firstname) : "",
-                lastname: htmlspecialchars(data.users[index].lastname) ? htmlspecialchars(data.users[index].lastname) : "",
+                username: htmlspecialchars(data.users[index].username),
+                firstName: htmlspecialchars(data.users[index].firstname) ? htmlspecialchars(data.users[index].firstname) : "",
+                lastName: htmlspecialchars(data.users[index].lastname) ? htmlspecialchars(data.users[index].lastname) : "",
                 emailAddress: htmlspecialchars(data.users[index].emailAddress) ? htmlspecialchars(data.users[index].emailAddress) : "",
+                namePattern: htmlspecialchars(data.users[index].firstname) + ' ' + htmlspecialchars(data.users[index].lastname),
                 DT_RowId: "user-" + htmlspecialchars(data.users[index].username)
             })
         });
@@ -304,49 +305,78 @@ function loadUsers() {
     //noinspection JSUnusedLocalSymbols
     var columns = [
         {
+            targets: 0,
             class: "remove-padding icon-only content-fill",
-            data: null,
-            render: function (data, type, row, meta) {
-                return '<div class="thumbnail icon viewEnabledIcon" data-url="' + context + '/user/view?username=' + data.filter + '">' +
+            data: 'username',
+            render: function (username, type, row, meta) {
+                return '<div class="thumbnail icon viewEnabledIcon" data-url="' + context + '/user/view?username=' + username + '">' +
                     '<i class="square-element text fw fw-user" style="font-size: 74px;"></i>' +
                     '</div>';
             }
         },
         {
+            targets: 1,
             class: "",
-            data: null,
-            render: function (data, type, row, meta) {
-                if (!data.firstname && !data.lastname) {
-                    return "";
-                } else if (data.firstname && data.lastname) {
-                    return "<h4>" + data.firstname + " " + data.lastname + "</h4>";
-                }
-            }
-        },
-        {
-            class: "remove-padding-top",
-            data: 'filter',
-            render: function (filter, type, row, meta) {
-                return '<i class="fw-user"></i>' + filter;
-            }
-        },
-        {
-            class: "remove-padding-top",
-            data: null,
-            render: function (data, type, row, meta) {
-                if (!data.emailAddress) {
+            data: 'namePattern',
+            render: function (namePattern, type, row, meta) {
+                if (!namePattern) {
                     return "";
                 } else {
-                    return "<a href='mailto:" + data.emailAddress + "' ><i class='fw-mail'></i>" + data.emailAddress + "</a>";
+                    return "<h4>" + namePattern + "</h4>";
                 }
             }
         },
         {
+            targets: 2,
+            class: "remove-padding-top",
+            data: 'username',
+            render: function (username, type, row, meta) {
+                return '<i class="fw-user"></i>' + username;
+            }
+        },
+        {
+            targets: 3,
+            class: "hidden",
+            data: 'firstName',
+            render: function (firstName, type, row, meta) {
+                if (!firstName) {
+                    return "";
+                } else if (firstName) {
+                    return "<h4>" + firstName + "</h4>";
+                }
+            }
+        },
+        {
+            targets: 4,
+            class: "hidden",
+            data: 'lastName',
+            render: function (lastName, type, row, meta) {
+                if (!lastName) {
+                    return "";
+                } else if (lastName) {
+                    return "<h4>" + lastName + "</h4>";
+                }
+            }
+        },
+        {
+            targets: 5,
+            class: "remove-padding-top",
+            data: 'emailAddress',
+            render: function (emailAddress, type, row, meta) {
+                if (!emailAddress) {
+                    return "";
+                } else {
+                    return "<a href='mailto:" + emailAddress + "' ><i class='fw-mail'></i>" + emailAddress + "</a>";
+                }
+            }
+        },
+        {
+            targets: 6,
             class: "text-right content-fill text-left-on-grid-view no-wrap tooltip-overflow-fix",
             data: null,
             render: function (data, type, row, meta) {
                 var editbtn = '<a data-toggle="tooltip" data-placement="top" title="Edit User"href="' + context +
-                    '/user/edit?username=' + encodeURIComponent(data.filter) + '" data-username="' + data.filter + '" ' +
+                    '/user/edit?username=' + encodeURIComponent(data.username) + '" data-username="' + data.username + '" ' +
                     'data-click-event="edit-form" ' +
                     'class="btn padding-reduce-on-grid-view edit-user-link" data-placement="top" data-toggle="tooltip" data-original-title="Edit"> ' +
                     '<span class="fw-stack"> ' +
@@ -354,18 +384,18 @@ function loadUsers() {
                     '<i class="fw fw-edit fw-stack-1x"></i>' +
                     '</span><span class="hidden-xs hidden-on-grid-view">Edit</span></a>';
 
-                var resetPasswordbtn = '<a data-toggle="tooltip" data-placement="top" title="Reset Password" href="#" data-username="' + data.filter + '" data-userid="' + data.filter + '" ' +
+                var resetPasswordbtn = '<a data-toggle="tooltip" data-placement="top" title="Reset Password" href="#" data-username="' + data.username + '" data-userid="' + data.username + '" ' +
                     'data-click-event="edit-form" ' +
-                    'onclick="javascript:resetPassword(\'' + data.filter + '\')" ' +
+                    'onclick="javascript:resetPassword(\'' + data.username + '\')" ' +
                     'class="btn padding-reduce-on-grid-view remove-user-link" data-placement="top" data-toggle="tooltip" data-original-title="Reset Password">' +
                     '<span class="fw-stack">' +
                     '<i class="fw fw-circle-outline fw-stack-2x"></i>' +
                     '<i class="fw fw-key fw-stack-1x"></i>' +
                     '</span><span class="hidden-xs hidden-on-grid-view">Reset Password</span></a>';
 
-                var removebtn = '<a data-toggle="tooltip" data-placement="top" title="Remove User" href="#" data-username="' + data.filter + '" data-userid="' + data.filter + '" ' +
+                var removebtn = '<a data-toggle="tooltip" data-placement="top" title="Remove User" href="#" data-username="' + data.username + '" data-userid="' + data.username + '" ' +
                     'data-click-event="remove-form" ' +
-                    'onclick="javascript:removeUser(\'' + data.filter + '\')" ' +
+                    'onclick="javascript:removeUser(\'' + data.username + '\')" ' +
                     'class="btn padding-reduce-on-grid-view remove-user-link" data-placement="top" data-toggle="tooltip" data-original-title="Remove">' +
                     '<span class="fw-stack">' +
                     '<i class="fw fw-circle-outline fw-stack-2x"></i>' +
@@ -375,20 +405,19 @@ function loadUsers() {
                 var returnbtnSet = '';
                 var adminUser = $("#user-table").data("user");
                 var currentUser = $("#user-table").data("logged-user");
-                if ($("#can-edit").length > 0 && adminUser !== data.filter) {
+                if ($("#can-edit").length > 0 && adminUser !== data.username) {
                     returnbtnSet = returnbtnSet + editbtn;
                 }
-                if ($("#can-reset-password").length > 0 && adminUser !== data.filter) {
+                if ($("#can-reset-password").length > 0 && adminUser !== data.username) {
                     returnbtnSet = returnbtnSet + resetPasswordbtn;
                 }
-                if ($("#can-remove").length > 0 && adminUser !== data.filter && currentUser !== data.filter) {
+                if ($("#can-remove").length > 0 && adminUser !== data.username && currentUser !== data.username) {
                     returnbtnSet = returnbtnSet + removebtn;
                 }
 
                 return returnbtnSet;
             }
         }
-
     ];
 
     var options = {
@@ -400,18 +429,31 @@ function loadUsers() {
         "sorting": false
     };
 
-    $('#user-grid').datatables_extended_serverside_paging(settings, '/api/device-mgt/v1.0/users', dataFilter, columns, fnCreatedRow, null, options);
+    $('#user-grid').datatables_extended_serverside_paging(
+        settings,
+        '/api/device-mgt/v1.0/users/search',
+        dataFilter,
+        columns,
+        fnCreatedRow,
+        null,
+        options
+    );
+
     $(loadingContentView).hide();
 
 }
 
 $(document).ready(function () {
     loadUsers();
+
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     });
+
     if (!$("#can-invite").val()) {
         $("#invite-user-button").remove();
     }
+
+    $("#user-grid_filter").hide();
 
 });
