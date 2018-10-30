@@ -36,8 +36,8 @@
 
     <modules>
         <module>components/device-mgt</module>
-        <module>components/device-mgt-extensions</module>
-	<module>components/identity-extensions</module>
+        <module>components/device-mgt-extensions</module><module>components/identity-extensions</module>
+	    <module>components/identity-extensions</module>
         <module>components/apimgt-extensions</module>
         <module>components/policy-mgt</module>
         <module>components/certificate-mgt</module>
