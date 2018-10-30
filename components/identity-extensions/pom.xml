@@ -27,7 +27,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>identity-extensions</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Identity Extensions Component</name>
