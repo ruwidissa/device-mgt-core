@@ -36,17 +36,13 @@ import org.wso2.carbon.device.mgt.core.task.DeviceTaskManager;
 import org.wso2.carbon.device.mgt.core.task.Utils;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DeviceTaskManagerImpl implements DeviceTaskManager {
 
     private static Log log = LogFactory.getLog(DeviceTaskManagerImpl.class);
     private String deviceType;
-    private static Map<Integer, Map<String, Long>> map = new HashMap<>();
+    static volatile Map<Integer, Map<String, Map<String, Long>>> map = new HashMap<>();
     private OperationMonitoringTaskConfig operationMonitoringTaskConfig;
 
     public DeviceTaskManagerImpl(String deviceType,
@@ -126,7 +122,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
         List<String> opNames = new ArrayList<>();
         Long milliseconds = System.currentTimeMillis();
         int frequency = this.getTaskFrequency();
-        Map<String, Long> mp = Utils.getTenantedTaskOperationMap(map);
+        Map<String, Long> mp = Utils.getTenantedTaskOperationMap(map, deviceType);
 
         for (MonitoringOperation top : monitoringOperations) {
             if (!mp.containsKey(top.getTaskName())) {
