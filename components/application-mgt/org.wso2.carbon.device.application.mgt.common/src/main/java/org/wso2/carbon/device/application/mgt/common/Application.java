@@ -45,7 +45,7 @@ public class Application {
     @ApiModelProperty(name = "type",
             value = "Type of the application",
             required = true,
-            example = "Mobile, Web, Web Clip etc")
+            example = "ENTERPRISE, PUBLIC, WEB, WEB_CLIP etc")
     private String type;
 
     @ApiModelProperty(name = "subType",

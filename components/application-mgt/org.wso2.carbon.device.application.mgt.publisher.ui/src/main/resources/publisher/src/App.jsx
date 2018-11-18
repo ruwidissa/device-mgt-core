@@ -68,6 +68,7 @@ class Base extends Component {
 
     render() {
         if (this.state.user !== null) {
+            console.log(sessionStorage);
             return (
                 <div>
                     <BaseLayout user={this.state.user}>

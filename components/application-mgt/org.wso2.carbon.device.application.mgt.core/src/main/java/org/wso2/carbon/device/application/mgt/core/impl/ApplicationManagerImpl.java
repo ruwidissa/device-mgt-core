@@ -111,9 +111,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            MAMDeviceConnectorImpl mamDeviceConnector = new MAMDeviceConnectorImpl();
             // Getting the device type details to get device type ID for internal mappings
-            deviceType = mamDeviceConnector.getDeviceManagementService().getDeviceType(application.getDeviceType());
+            deviceType = Util.getDeviceManagementService().getDeviceType(application.getDeviceType());
 
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
@@ -836,7 +835,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             applicationRelease = getAppReleaseIfExists(appId, uuid);
-
             Application application = getApplicationById(appId, null);
 
             List<DeviceType> deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
@@ -923,8 +921,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + releaseUuid);
 
             }
-            lifecycleState.setNextStates(new ArrayList<>(getLifecycleManagementService().
-                    getNextLifecycleStates(lifecycleState.getCurrentState())));
+            lifecycleState.setNextStates(new ArrayList<>(lifecycleStateManger.getNextLifecycleStates(lifecycleState.getCurrentState())));
 
         } catch (ApplicationManagementException e) {
             throw new ApplicationManagementException("Failed to get application and application management", e);
@@ -964,8 +961,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (getLifecycleManagementService()
-                        .isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
+                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
                     //todo if current state of the adding lifecycle state is PUBLISHED, need to check whether is there
                     //todo any other application release in PUBLISHED state for the application( i.e for the appid)
                     this.lifecycleStateDAO.addLifecycleState(state, applicationId, releaseUuid, tenantId);
@@ -1088,15 +1084,4 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return list;
     }
 
-    public LifecycleStateManger getLifecycleManagementService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        LifecycleStateManger deviceManagementProviderService =
-                (LifecycleStateManger) ctx.getOSGiService(LifecycleStateManger.class, null);
-        if (deviceManagementProviderService == null) {
-            String msg = "DeviceImpl Management provider service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return deviceManagementProviderService;
-    }
 }
