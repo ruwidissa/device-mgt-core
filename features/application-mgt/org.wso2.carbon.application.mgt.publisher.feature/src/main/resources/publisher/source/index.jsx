@@ -1,0 +1,78 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+// import React from 'react';
+// import Publisher from './src/app/App';
+// import ReactDOM from 'react-dom';
+// import 'bootstrap/dist/css/bootstrap.css';
+// import registerServiceWorker from './src/registerServiceWorker';
+// import {addLocaleData, defineMessages, IntlProvider} from 'react-intl';
+// import Axios from 'axios';
+// import Constants from './src/app/common/constants';
+// import Configuration from './src/app/common/configuration';
+//
+// function loadPublisher() {
+//     const possibleLocale = navigator.language.split("-")[0];
+//     let loadLocaleFile = Axios.create({
+//         baseURL: Configuration.hostConstants.baseURL + "/" + Configuration.hostConstants.appContext + "/locales/"
+//         + possibleLocale + ".json"
+//     }).get();
+//     console.log(Configuration.hostConstants.baseURL + "/" + Configuration.hostConstants.appContext + "/locales/"
+//     + possibleLocale + ".json");
+//
+//
+//
+//   /**
+//      * This is the base js file of the app. All the content will be rendered in the root element.
+//      * */
+//     loadLocaleFile.then(response => {
+//         const messages = defineMessages(response.data);
+//         addLocaleData(require('react-intl/locale-data/' + possibleLocale));
+//         ReactDOM.render(<IntlProvider locale={possibleLocale}
+//                                       messages={messages}><Publisher/></IntlProvider>, document.getElementById('root'));
+//         registerServiceWorker();
+//     }).catch(error => {
+//         addLocaleData(require('react-intl/locale-data/en'));
+//         let defaultLocale = Axios.create({
+//             baseURL: Configuration.hostConstants.baseURL + "/" + Configuration.hostConstants.appContext + "/locales"
+//             + Constants.defaultLocale + ".json"
+//         }).get();
+//         defaultLocale.then(response => {
+//             const messages = defineMessages(response.data);
+//             ReactDOM.render(<IntlProvider locale={possibleLocale}
+//                                           messages={messages}><Publisher/></IntlProvider>, document.getElementById('root'));
+//             registerServiceWorker();
+//         }).catch(error => {
+//         });
+//     });
+// }
+//
+// Configuration.loadConfiguration(loadPublisher);
+
+// import 'typeface-roboto';
+
+import ReactDOM from 'react-dom';
+import React from 'react';
+import Publisher from './src/App.jsx';
+import './index.css';
+
+ReactDOM.render(
+  <Publisher />,
+  document.getElementById('react-root'),
+);
+

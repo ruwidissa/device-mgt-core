@@ -1,0 +1,1 @@
+/home/lasantha/Documents/NEW_APPM_DEV/wso2iot-3.3.0-update1-SNAPSHOT/repository/deployment/server/jaggeryapps/publisher/dist/index.js

@@ -337,7 +337,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app name " + appName +
-                            " While executing query ", e);
+                            " while executing query.", e);
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
@@ -379,7 +379,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app id " + id +
-                            " While executing query ", e);
+                            " while executing query.", e);
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
@@ -426,7 +426,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app release uuid " + releaseUuid +
-                            " While executing query ", e);
+                            " while executing query.", e);
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
@@ -472,7 +472,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app id " + applicationId +
-                            " While executing query ", e);
+                            " while executing query.", e);
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
@@ -506,7 +506,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             return rs.next();
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application details with app ID " + appId + " While executing query ",
+                    "Error occurred while getting application details with app ID " + appId + " while executing query.",
                     e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
@@ -719,7 +719,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             return application;
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while getting application details with UUID "
-                                                                + appReleaseUUID + " While executing query ", e);
+                                                                + appReleaseUUID + " while executing query.", e);
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
