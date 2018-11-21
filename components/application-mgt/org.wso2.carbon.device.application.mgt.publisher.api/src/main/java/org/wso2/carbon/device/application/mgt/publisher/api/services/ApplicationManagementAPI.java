@@ -313,6 +313,79 @@ public interface ApplicationManagementAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes("multipart/mixed")
+    @Path("/{deviceType}/{appType}/{appId}")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Create an application",
+            notes = "This will create a new application",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully created an application.",
+                            response = Application.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application creating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while creating the application.",
+                            response = ErrorResponse.class)
+            })
+    Response createRelease(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("appId") String appType,
+            @PathParam("appId") int appId,
+            @ApiParam(
+                    name = "applicationRelease",
+                    value = "The application release that need to be created.",
+                    required = true)
+            @Multipart("applicationRelease") ApplicationRelease applicationRelease,
+            @ApiParam(
+                    name = "binaryFile",
+                    value = "Binary file of uploading application",
+                    required = true)
+            @Multipart(value = "binaryFile") Attachment binaryFile,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon of the uploading application",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "Banner of the uploading application",
+                    required = true)
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "Screen Shots of the uploading application",
+                    required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot3") Attachment screenshot3
+    );
+
     @DELETE
     @Consumes("application/json")
     @Path("/{appid}")
@@ -558,6 +631,10 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully add a lifecycle state.",
                             response = Application.class),
                     @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Lifecycle State changing request contains unacceptable or vulnerable data"),
+                    @ApiResponse(
                             code = 404,
                             message = "NOT FOUND. \n Error occurred while adding new lifecycle state.",
                             response = ErrorResponse.class),
@@ -566,7 +643,21 @@ public interface ApplicationManagementAPI {
                             message = "Internal Server Error. \n Error occurred adding a lifecycle state.",
                             response = ErrorResponse.class)
             })
-    Response addLifecycleState(@PathParam("appId") int applicationId,
-                               @PathParam("uuid") String applicationUuid,
-                               LifecycleState state);
+    Response addLifecycleState(
+            @ApiParam(
+                    name = "appId",
+                    value = "Identifier of the Application",
+                    required = true)
+            @PathParam("appId") int applicationId,
+            @ApiParam(
+                    name = "uuid",
+                    value = "UUID of the Application Release",
+                    required = true)
+            @PathParam("uuid") String applicationUuid,
+            @ApiParam(
+                    name = "action",
+                    value = "Changing lifecycle state",
+                    required = true)
+            @QueryParam("action") String action
+    );
 }

@@ -30,12 +30,10 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -69,52 +67,14 @@ import javax.ws.rs.core.Response;
                 @Scope(
                         name = "Get Application Details",
                         description = "Get application details",
-                        key = "perm:application:get",
+                        key = "perm:app:store:view",
                         permissions = {"/device-mgt/application/get"}
-                ),
-                @Scope(
-                        name = "Create an Application",
-                        description = "Create an application",
-                        key = "perm:application:create",
-                        permissions = {"/device-mgt/application/create"}
-                ),
-                @Scope(
-                        name = "Update an Application",
-                        description = "Update an application",
-                        key = "perm:application:update",
-                        permissions = {"/device-mgt/application/update"}
-                ),
-                @Scope(
-                        name = "Create an Application",
-                        description = "Create an application",
-                        key = "perm:application-mgt:login",
-                        permissions = {"/device-mgt/application-mgt/login"}
-                ),
-                @Scope(
-                        name = "Delete an Application",
-                        description = "Delete an application",
-                        key = "perm:application:delete",
-                        permissions = {"/device-mgt/application/delete"}
-                ),
-                @Scope(
-                        name = "Create an application category",
-                        description = "Create an application category",
-                        key = "perm:application-category:create",
-                        permissions = {"/device-mgt/application/category/create"}
-                ),
-                @Scope(
-                        name = "Delete an Application category",
-                        description = "Delete an application category",
-                        key = "perm:application-category:delete",
-                        permissions = {"/device-mgt/application/category/delete"}
                 )
-
-
         }
 )
 @Path("/store/applications")
-@Api(value = "Application Management", description = "This API carries all application management related operations " +
-        "such as get all the applications, add application, etc.")
+@Api(value = "Application Management", description = "This API carries all app store management related operations " +
+        "such as get all the applications etc.")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementAPI {
 
@@ -143,9 +103,8 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully got application list.",
                             response = ApplicationList.class),
                     @ApiResponse(
-                            code = 304,
-                            message = "Not Modified. Empty body because the client already has the latest version "
-                                    + "of the requested resource."),
+                            code = 404,
+                            message = "Not Found. Not Found Applications."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
@@ -153,10 +112,21 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
-                    name = "filter",
-                    value = "Filter to get application list",
-                    required = true)
-            @Valid Filter filter,
+                    name = "name",
+                    value = "Name of the application")
+            @QueryParam("name") String appName,
+            @ApiParam(
+                    name = "type",
+                    value = "Type of the application")
+            @QueryParam("type") String appType,
+            @ApiParam(
+                    name = "category",
+                    value = "Category of the application")
+            @QueryParam("category") String appCategory,
+            @ApiParam(
+                    name = "exact-match",
+                    value = "Is it requesting exactly matching application or partially matching application.")
+            @QueryParam("exact-match") boolean isFullMatch,
             @ApiParam(
                     name = "offset",
                     value = "Provide from which position apps should return", defaultValue = "0")
@@ -164,12 +134,16 @@ public interface ApplicationManagementAPI {
             @ApiParam(
                     name = "limit",
                     value = "Provide how many apps it should return", defaultValue = "20")
-            @QueryParam("limit") int limit
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many apps it should return", defaultValue = "ASC")
+            @QueryParam("sort") String sortBy
 
     );
 
     @GET
-    @Path("/{appType}")
+    @Path("/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -201,15 +175,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplication(
             @ApiParam(
-                    name = "appType",
+                    name = "uuid",
                     value = "Type of the application",
                     required = true)
-            @PathParam("appType") String appType,
-            @ApiParam(
-                    name = "appName",
-                    value = "Application name",
-                    required = true)
-            @QueryParam("appName") String appName
+            @PathParam("uuid") String uuid
     );
 
 

@@ -279,10 +279,12 @@ var getProviderData = function (timeFrom, timeTo) {
         var serviceUrl = '/api/device-mgt/v1.0/geo-services/stats/' + deviceType + '/' + deviceId + '?from=' + timeFrom + '&to=' + timeTo;
         invokerUtil.get(serviceUrl,
                         function (data) {
-                            if(data === ""){showCurrentLocation(tableData);}
+                            if (data === "") {
+                                showCurrentLocation(tableData);
+                            }
                             tableData = JSON.parse(data);
                             if (tableData.length === 0) {
-                            showCurrentLocation(tableData);
+                                showCurrentLocation(tableData);
                             }
                         }, function (message) {
                             showCurrentLocation(tableData);
@@ -552,5 +554,5 @@ function formatDate(date) {
     hours = hours ? hours : 12; // the hour '0' should be '12'
     minutes = minutes < 10 ? '0'+minutes : minutes;
     var strTime = hours + ':' + minutes + ' ' + ampm;
-    return date.getDate()  + "/"  + date.getMonth()+1 + "/" + date.getFullYear() + " " + strTime;
+    return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + " " + strTime;
 }

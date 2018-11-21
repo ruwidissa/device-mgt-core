@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -351,6 +352,11 @@ public class RequestValidationUtil {
                     new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request parameter owner should" +
                             " be non empty.").build());
         }
+    }
+
+    public static boolean isNonFilterRequest(String username, String firstName, String lastName, String emailAddress) {
+        return StringUtils.isEmpty(username) && StringUtils.isEmpty(firstName) && StringUtils.isEmpty(lastName)
+                && StringUtils.isEmpty(emailAddress);
     }
 
 }

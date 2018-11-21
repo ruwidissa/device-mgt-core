@@ -390,8 +390,55 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public Application getApplicationById(int applicationId, int tenantId) throws
+    public Application getApplicationByUUID(String releaseUuid, int tenantId) throws
                                                                            ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting application with the release UUID: " + releaseUuid + " from the database");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            String sql =
+                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
+                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
+                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP.DEVICE_TYPE_ID AS DEVICE_TYPE_ID, "
+                            + "AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE AS "
+                            + "ROLE FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
+                            + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
+                            + "WHERE AP_APP.ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID =? ) AND "
+                            + "AP_APP.TENANT_ID = ? AND AP_APP.STATUS != ?;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, releaseUuid);
+            stmt.setInt(2, tenantId);
+            stmt.setString(3, AppLifecycleState.REMOVED.toString());
+            rs = stmt.executeQuery();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully retrieved basic details of the application for the application release UUID:  "
+                                  + releaseUuid);
+            }
+
+            return Util.loadApplication(rs);
+
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while getting application details with app release uuid " + releaseUuid +
+                            " While executing query ", e);
+        } catch (JSONException e) {
+            throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public Application getApplicationById(int applicationId, int tenantId) throws
+            ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the id (" + applicationId + ") from the database");
         }
@@ -417,7 +464,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved basic details of the application with the id "
-                                  + applicationId);
+                        + applicationId);
             }
 
             return Util.loadApplication(rs);

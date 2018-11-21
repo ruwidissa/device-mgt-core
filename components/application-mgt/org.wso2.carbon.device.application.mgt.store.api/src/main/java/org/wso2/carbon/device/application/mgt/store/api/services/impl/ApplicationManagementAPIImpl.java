@@ -21,7 +21,6 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.Filter;
@@ -31,117 +30,84 @@ import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.ApplicationManagementAPI;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Implementation of Application Management related APIs.
  */
-@Produces({"application/json"})
+@Produces({ "application/json" })
 @Path("/store/applications")
 public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
 
     @GET
-    @Consumes("application/json")
     @Override
+    @Consumes("application/json")
     public Response getApplications(
-            @Valid Filter filter,
-            @QueryParam("offset") int offset,
-            @QueryParam("limit") int limit) {
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+            @QueryParam("name") String appName,
+            @QueryParam("type") String appType,
+            @QueryParam("category") String appCategory,
+            @QueryParam("exact-match") boolean isFullMatch,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("20") @QueryParam("limit") int limit,
+            @DefaultValue("ASC") @QueryParam("sort") String sortBy) {
 
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
+            Filter filter = new Filter();
             filter.setOffset(offset);
             filter.setLimit(limit);
-
+            filter.setSortBy(sortBy);
+            filter.setFullMatch(isFullMatch);
+            filter.setCurrentAppReleaseState(AppLifecycleState.PUBLISHED.toString());
+            if (appName != null && !appName.isEmpty()) {
+                filter.setAppName(appName);
+            }
+            if (appType != null && !appType.isEmpty()) {
+                filter.setAppType(appType);
+            }
+            if (appCategory != null && !appCategory.isEmpty()) {
+                filter.setAppCategory(appCategory);
+            }
             ApplicationList applications = applicationManager.getApplications(filter);
-            List<ApplicationRelease> publishedApplicationRelease = new ArrayList<>();
-
-            for (Application application : applications.getApplications()) {
-
-                for (ApplicationRelease appRelease: application.getApplicationReleases()){
-                    if (AppLifecycleState.PUBLISHED.toString()
-                            .equals(appRelease.getLifecycleState().getCurrentState())) {
-                        publishedApplicationRelease.add(appRelease);
-                    }
-                }
-                if (publishedApplicationRelease.size()>1){
-                    String msg = "Application " + application.getName()
-                            + " has more than one PUBLISHED application releases";
-                    log.error(msg);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                            .entity(msg).build();
-                }
-                application.setApplicationReleases(publishedApplicationRelease);
-                publishedApplicationRelease.clear();
+            if (applications.getApplications().isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Couldn't find any application for requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
-        } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting the application list";
+            String msg = "Error occurred while getting the application list for publisher ";
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
     @GET
     @Consumes("application/json")
-    @Path("/{appType}")
-    public Response getApplication(@PathParam("appType") String appType,
-            @QueryParam("appName") String appName) {
+    @Path("/{uuid}")
+    public Response getApplication(
+            @PathParam("uuid") String uuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Application> filteredApps = new ArrayList<>();
-        Filter filter;
         try {
-            filter = new Filter();
-            filter.setOffset(0);
-            filter.setLimit(20);
-            filter.setAppType(appType);
-            filter.setAppName(appName);
-            ApplicationList applications = applicationManager.getApplications(filter);
-            if (applications.getApplications().isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Application with application type: " + appType + " not found").build();
-            }
-            for (Application application : applications.getApplications()) {
-                List<ApplicationRelease> publishedApplicationRelease = new ArrayList<>();
-                for (ApplicationRelease appRelease : application.getApplicationReleases()) {
-                    if (AppLifecycleState.PUBLISHED.toString()
-                            .equals(appRelease.getLifecycleState().getCurrentState())) {
-                        publishedApplicationRelease.add(appRelease);
-                    }
-                }
-                if (publishedApplicationRelease.size() > 1) {
-                    String msg = "Application " + application.getName()
-                            + " has more than one PUBLISHED application releases";
-                    log.error(msg);
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-                }
-                application.setApplicationReleases(publishedApplicationRelease);
-                filteredApps.add(application);
-            }
-            applications.setApplications(filteredApps);
-            return Response.status(Response.Status.OK).entity(applications).build();
+            Application application = applicationManager
+                    .getApplicationByUuid(uuid, AppLifecycleState.PUBLISHED.toString());
+            return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            String msg = "Application with application release UUID: " + uuid + " is not found";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            log.error("Error occurred while getting application with the application type: " + appType
-                    + " and application name: " + appName, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            String msg = "Error occurred while getting application with the application release uuid: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
-
-//    todo --> get applications by category
-
 }

@@ -1452,8 +1452,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public Operation getNextPendingOperation(DeviceIdentifier deviceId) throws OperationManagementException {
+        // // setting notNowOperationFrequency to -1 to avoid picking notnow operations
         return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId())
-                .getNextPendingOperation(deviceId);
+                .getNextPendingOperation(deviceId, -1);
+    }
+
+    public Operation getNextPendingOperation(DeviceIdentifier deviceId, long notNowOperationFrequency)
+            throws OperationManagementException {
+        return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId())
+                .getNextPendingOperation(deviceId, notNowOperationFrequency);
     }
 
     @Override
@@ -1595,6 +1602,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
         OperationMonitoringTaskConfig operationMonitoringTaskConfig = dms.getOperationMonitoringConfig();
         return operationMonitoringTaskConfig.getFrequency();
+    }
+
+    @Override
+    public OperationMonitoringTaskConfig getDeviceMonitoringConfig(String deviceType) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
+        return dms.getOperationMonitoringConfig();
     }
 
     @Override
