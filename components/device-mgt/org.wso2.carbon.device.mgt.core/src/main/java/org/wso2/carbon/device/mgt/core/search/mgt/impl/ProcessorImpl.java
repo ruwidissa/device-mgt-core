@@ -256,7 +256,6 @@ public class ProcessorImpl implements Processor {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Device> devices = new ArrayList<>();
-        Map<Integer, Integer> devs = new HashMap<>();
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement(queryHolder.getQuery());
@@ -281,59 +280,57 @@ public class ProcessorImpl implements Processor {
 
             rs = stmt.executeQuery();
             while (rs.next()) {
-                if (!devs.containsKey(rs.getInt("ID"))) {
-                    Device device = new Device();
-                    device.setId(rs.getInt("ID"));
-                    device.setDescription(rs.getString("DESCRIPTION"));
-                    device.setName(rs.getString("NAME"));
-                    device.setType(rs.getString("DEVICE_TYPE_NAME"));
-                    device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
+                Device device = new Device();
+                device.setId(rs.getInt("ID"));
+                device.setDescription(rs.getString("DESCRIPTION"));
+                device.setName(rs.getString("NAME"));
+                device.setType(rs.getString("DEVICE_TYPE_NAME"));
+                device.setDeviceIdentifier(rs.getString("DEVICE_IDENTIFICATION"));
 
-                    EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
-                    enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("DE_STATUS")));
-                    enrolmentInfo.setOwner(rs.getString("OWNER"));
-                    enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
-                    device.setEnrolmentInfo(enrolmentInfo);
+                EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
+                enrolmentInfo.setId(rs.getInt("ENROLLMENT_ID"));
+                enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("DE_STATUS")));
+                enrolmentInfo.setOwner(rs.getString("OWNER"));
+                enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
+                device.setEnrolmentInfo(enrolmentInfo);
 
-                    DeviceIdentifier identifier = new DeviceIdentifier();
-                    identifier.setType(rs.getString("DEVICE_TYPE_NAME"));
-                    identifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
+                DeviceIdentifier identifier = new DeviceIdentifier();
+                identifier.setType(rs.getString("DEVICE_TYPE_NAME"));
+                identifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
 
-                    DeviceInfo deviceInfo = new DeviceInfo();
-                    deviceInfo.setAvailableRAMMemory(rs.getDouble("AVAILABLE_RAM_MEMORY"));
-                    deviceInfo.setBatteryLevel(rs.getDouble("BATTERY_LEVEL"));
-                    deviceInfo.setConnectionType(rs.getString("CONNECTION_TYPE"));
-                    deviceInfo.setCpuUsage(rs.getDouble("CPU_USAGE"));
-                    deviceInfo.setDeviceModel(rs.getString("DEVICE_MODEL"));
-                    deviceInfo.setExternalAvailableMemory(rs.getDouble("EXTERNAL_AVAILABLE_MEMORY"));
-                    deviceInfo.setExternalTotalMemory(rs.getDouble("EXTERNAL_TOTAL_MEMORY"));
-                    deviceInfo.setInternalAvailableMemory(rs.getDouble("INTERNAL_AVAILABLE_MEMORY"));
-                    deviceInfo.setInternalTotalMemory(rs.getDouble("EXTERNAL_TOTAL_MEMORY"));
-                    deviceInfo.setOsVersion(rs.getString("OS_VERSION"));
-                    deviceInfo.setOsBuildDate(rs.getString("OS_BUILD_DATE"));
-                    deviceInfo.setPluggedIn(rs.getBoolean("PLUGGED_IN"));
-                    deviceInfo.setSsid(rs.getString("SSID"));
-                    deviceInfo.setTotalRAMMemory(rs.getDouble("TOTAL_RAM_MEMORY"));
-                    deviceInfo.setVendor(rs.getString("VENDOR"));
-                    deviceInfo.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
+                DeviceInfo deviceInfo = new DeviceInfo();
+                deviceInfo.setAvailableRAMMemory(rs.getDouble("AVAILABLE_RAM_MEMORY"));
+                deviceInfo.setBatteryLevel(rs.getDouble("BATTERY_LEVEL"));
+                deviceInfo.setConnectionType(rs.getString("CONNECTION_TYPE"));
+                deviceInfo.setCpuUsage(rs.getDouble("CPU_USAGE"));
+                deviceInfo.setDeviceModel(rs.getString("DEVICE_MODEL"));
+                deviceInfo.setExternalAvailableMemory(rs.getDouble("EXTERNAL_AVAILABLE_MEMORY"));
+                deviceInfo.setExternalTotalMemory(rs.getDouble("EXTERNAL_TOTAL_MEMORY"));
+                deviceInfo.setInternalAvailableMemory(rs.getDouble("INTERNAL_AVAILABLE_MEMORY"));
+                deviceInfo.setInternalTotalMemory(rs.getDouble("EXTERNAL_TOTAL_MEMORY"));
+                deviceInfo.setOsVersion(rs.getString("OS_VERSION"));
+                deviceInfo.setOsBuildDate(rs.getString("OS_BUILD_DATE"));
+                deviceInfo.setPluggedIn(rs.getBoolean("PLUGGED_IN"));
+                deviceInfo.setSsid(rs.getString("SSID"));
+                deviceInfo.setTotalRAMMemory(rs.getDouble("TOTAL_RAM_MEMORY"));
+                deviceInfo.setVendor(rs.getString("VENDOR"));
+                deviceInfo.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
 
-                    DeviceLocation deviceLocation = new DeviceLocation();
-                    deviceLocation.setLatitude(rs.getDouble("LATITUDE"));
-                    deviceLocation.setLongitude(rs.getDouble("LONGITUDE"));
-                    deviceLocation.setStreet1(rs.getString("STREET1"));
-                    deviceLocation.setStreet2(rs.getString("STREET2"));
-                    deviceLocation.setCity(rs.getString("CITY"));
-                    deviceLocation.setState(rs.getString("STATE"));
-                    deviceLocation.setZip(rs.getString("ZIP"));
-                    deviceLocation.setCountry(rs.getString("COUNTRY"));
-                    deviceLocation.setDeviceId(rs.getInt("ID"));
-                    deviceLocation.setUpdatedTime(new java.util.Date(rs.getLong("DL_UPDATED_TIMESTAMP")));
+                DeviceLocation deviceLocation = new DeviceLocation();
+                deviceLocation.setLatitude(rs.getDouble("LATITUDE"));
+                deviceLocation.setLongitude(rs.getDouble("LONGITUDE"));
+                deviceLocation.setStreet1(rs.getString("STREET1"));
+                deviceLocation.setStreet2(rs.getString("STREET2"));
+                deviceLocation.setCity(rs.getString("CITY"));
+                deviceLocation.setState(rs.getString("STATE"));
+                deviceLocation.setZip(rs.getString("ZIP"));
+                deviceLocation.setCountry(rs.getString("COUNTRY"));
+                deviceLocation.setDeviceId(rs.getInt("ID"));
+                deviceLocation.setUpdatedTime(new java.util.Date(rs.getLong("DL_UPDATED_TIMESTAMP")));
 
-                    deviceInfo.setLocation(deviceLocation);
-                    device.setDeviceInfo(deviceInfo);
-                    devices.add(device);
-                    devs.put(device.getId(), device.getId());
-                }
+                deviceInfo.setLocation(deviceLocation);
+                device.setDeviceInfo(deviceInfo);
+                devices.add(device);
             }
         } catch (SQLException e) {
             throw new SearchDAOException("Error occurred while aquiring the device details.", e);
