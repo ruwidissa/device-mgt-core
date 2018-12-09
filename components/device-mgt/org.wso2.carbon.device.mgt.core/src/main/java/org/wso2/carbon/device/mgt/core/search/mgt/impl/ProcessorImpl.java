@@ -25,8 +25,6 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
-import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
@@ -34,11 +32,21 @@ import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
-import org.wso2.carbon.device.mgt.core.search.mgt.*;
+import org.wso2.carbon.device.mgt.core.search.mgt.Constants;
+import org.wso2.carbon.device.mgt.core.search.mgt.InvalidOperatorException;
+import org.wso2.carbon.device.mgt.core.search.mgt.Processor;
+import org.wso2.carbon.device.mgt.core.search.mgt.QueryBuilder;
+import org.wso2.carbon.device.mgt.core.search.mgt.QueryHolder;
+import org.wso2.carbon.device.mgt.core.search.mgt.ResultSetAggregator;
+import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
+import org.wso2.carbon.device.mgt.core.search.mgt.ValueType;
 import org.wso2.carbon.device.mgt.core.search.mgt.dao.SearchDAOException;
 
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,17 +55,9 @@ import java.util.Map;
 public class ProcessorImpl implements Processor {
     private ApplicationDAO applicationDAO;
     private static final Log log = LogFactory.getLog(ProcessorImpl.class);
-    private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
 
     public ProcessorImpl() {
         applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
-        deviceAccessAuthorizationService = DeviceManagementDataHolder.getInstance()
-                .getDeviceAccessAuthorizationService();
-        if (deviceAccessAuthorizationService == null) {
-            String msg = "DeviceAccessAuthorization service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
     }
 
     @Override
@@ -115,33 +115,8 @@ public class ProcessorImpl implements Processor {
         devices.put(Constants.LOCATION, locationDevices);
 
         List<Device> finalDevices = aggregator.aggregate(devices);
-        finalDevices = authorizedDevices(finalDevices);
         this.setApplicationListOfDevices(finalDevices);
         return finalDevices;
-    }
-
-    /**
-     * To get the authorized devices for a particular user
-     *
-     * @param devices Devices that satisfy search results
-     * @return Devices that satisfy search results and authorized to be viewed by particular user
-     */
-    private List<Device> authorizedDevices(List<Device> devices) throws SearchMgtException {
-        List<Device> filteredList = new ArrayList<>();
-        try {
-            for (Device device : devices) {
-                DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(),
-                        device.getType());
-                if (deviceAccessAuthorizationService != null && deviceAccessAuthorizationService
-                        .isUserAuthorized(deviceIdentifier)) {
-                    filteredList.add(device);
-                }
-            }
-            return filteredList;
-        } catch (DeviceAccessAuthorizationException e) {
-            log.error("Error getting authorized search results for logged in user");
-            throw new SearchMgtException(e);
-        }
     }
 
     @Override
