@@ -37,8 +37,6 @@ import java.util.Map;
 
 public class ResultSetAggregatorImpl implements ResultSetAggregator {
     private static Log log = LogFactory.getLog(ResultSetAggregatorImpl.class);
-    private final static String ANY_DEVICE_PERMISSION = "/device-mgt/devices/any-device";
-    private static final String UI_EXECUTE = "ui.execute";
 
     @Override
     public List<Device> aggregate(Map<String, List<Device>> devices) {
@@ -130,7 +128,8 @@ public class ResultSetAggregatorImpl implements ResultSetAggregator {
         UserRealm userRealm = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
         return userRealm != null && userRealm.getAuthorizationManager() != null &&
                 userRealm.getAuthorizationManager().isUserAuthorized(username,
-                        PermissionUtils.getAbsolutePermissionPath(ANY_DEVICE_PERMISSION), UI_EXECUTE);
+                        PermissionUtils.getAbsolutePermissionPath(Constants.ANY_DEVICE_PERMISSION), 
+                        Constants.UI_EXECUTE);
     }
 
 }
