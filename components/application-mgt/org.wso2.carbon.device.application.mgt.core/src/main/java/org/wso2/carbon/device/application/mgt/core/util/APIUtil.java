@@ -38,6 +38,7 @@ public class APIUtil {
     private static ApplicationStorageManager applicationStorageManager;
     private static SubscriptionManager subscriptionManager;
     private static ReviewManager reviewManager;
+    private static ConfigManager configManager;
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {
@@ -137,6 +138,29 @@ public class APIUtil {
         }
 
         return reviewManager;
+    }
+
+    /**
+     * To get the Config Manager from the osgi context.
+     * @return ConfigManager instance in the current osgi context.
+     */
+    public static ConfigManager getConfigManager() {
+        if (configManager == null) {
+            synchronized (APIUtil.class) {
+                if (configManager == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    configManager =
+                            (ConfigManager) ctx.getOSGiService(ConfigManager.class, null);
+                    if (configManager == null) {
+                        String msg = "Config Manager service has not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+
+        return configManager;
     }
 
 }

@@ -40,9 +40,9 @@
         <module>org.wso2.carbon.device.application.mgt.addons</module>
         <module>org.wso2.carbon.device.application.mgt.publisher.api</module>
         <module>org.wso2.carbon.device.application.mgt.store.api</module>
-        <module>org.wso2.carbon.device.application.mgt.publisher.ui</module>
         <module>org.wso2.carbon.device.application.mgt.store.ui</module>
-        <module>org.wso2.carbon.device.application.mgt.authhandler</module>
+        <module>org.wso2.carbon.device.application.mgt.handler</module>
+        <module>org.wso2.carbon.device.application.mgt.api</module>
     </modules>
 
     <build>

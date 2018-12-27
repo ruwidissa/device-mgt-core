@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.core.internal;
 
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
+import org.wso2.carbon.device.application.mgt.common.services.ConfigManager;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
@@ -44,6 +45,8 @@ public class DataHolder {
     private ApplicationStorageManager applicationStorageManager;
 
     private LifecycleStateManger lifecycleStateManger;
+
+    private ConfigManager configManager;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -109,5 +112,13 @@ public class DataHolder {
 
     public void setLifecycleStateManger(LifecycleStateManger lifecycleStateManger) {
         this.lifecycleStateManger = lifecycleStateManger;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public void setConfigManager(ConfigManager configManager) {
+        this.configManager = configManager;
     }
 }

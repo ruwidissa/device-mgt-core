@@ -16,19 +16,19 @@
  * under the License.
  */
 var path = require('path');
+const HtmlWebPackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const config = {
-    entry: {
-        index: './source/index.jsx'
-    },
-    output: {
-        path: path.resolve(__dirname, 'public/dist'),
-        filename: '[name].js',
-        publicPath: 'public/app/dist/',
-    },
     devtool: "source-map",
-    plugins: [],
     watch: false,
+    resolve: {
+        alias: {
+            AppData: path.resolve(__dirname, 'source/src/app/common/'),
+            AppComponents: path.resolve(__dirname, 'source/src/app/components/')
+        },
+        extensions: ['.jsx', '.js', '.ttf', '.woff', '.woff2', '.svg']
+    },
     module: {
         rules: [
             {
@@ -36,17 +36,31 @@ const config = {
                 exclude: /node_modules/,
                 use: [
                     {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: ['es2015', 'react'],
-                            plugins: ['transform-class-properties']
-                        }
+                        loader: 'babel-loader'
+                    }
+                ]
+            },
+            {
+                test: /\.html$/,
+                use: [
+                    {
+                        loader: "html-loader",
+                        options: { minimize: true }
                     }
                 ]
             },
             {
                 test: /\.css$/,
-                use: [ 'style-loader', 'css-loader' ]
+                use: [MiniCssExtractPlugin.loader, "css-loader"]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                MiniCssExtractPlugin.loader,
+                    "css-loader",
+                    "postcss-loader",
+                    "sass-loader"
+                ]
             },
             {
                 test: /\.scss$/,
@@ -61,13 +75,41 @@ const config = {
                 }, {
                     loader: "less-loader" // compiles Less to CSS
                 }]
+            },
+            {
+                test: /\.(woff|woff2|eot|ttf|svg)$/,
+                loader: 'url-loader?limit=100000',
+            },
+            {
+                test: /\.(png|jpe?g)/i,
+                use: [
+                  {
+                    loader: "url-loader",
+                        options: {
+                        name: "./img/[name].[ext]",
+                          limit: 10000
+                        }
+                  },
+                  {
+                    loader: "img-loader"
+                  }
+                ]
             }
         ]
     },
-    resolve: {
-        extensions: ['.jsx', '.js', '.ttf', '.woff', '.woff2', '.svg']
+    plugins: [
+        new HtmlWebPackPlugin({
+            template: "./src/index.html",
+            filename: "./index.html"
+        }),
+        new MiniCssExtractPlugin({
+            filename: "[name].css",
+            chunkFilename: "[id].css"
+        })
+    ],
+    externals: {
+        'Config': JSON.stringify(require('./public/conf/config.json'))
     }
-
 };
 
 if (process.env.NODE_ENV === "development") {
