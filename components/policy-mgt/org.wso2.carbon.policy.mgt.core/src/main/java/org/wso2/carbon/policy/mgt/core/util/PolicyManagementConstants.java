@@ -31,6 +31,8 @@ public final class PolicyManagementConstants {
     public static final String WARN = "WARN";
     public static final String BLOCK = "BLOCK";
 
+    public static final String ENROLLMENT_APP_INSTALL_FEATURE_CODE = "ENROLLMENT_APP_INSTALL";
+
     public static final String MONITORING_TASK_TYPE = "MONITORING_TASK";
     public static final String MONITORING_TASK_NAME = "MONITORING";
     public static final String MONITORING_TASK_CLAZZ = "org.wso2.carbon.policy.mgt.core.task.MonitoringTask";
