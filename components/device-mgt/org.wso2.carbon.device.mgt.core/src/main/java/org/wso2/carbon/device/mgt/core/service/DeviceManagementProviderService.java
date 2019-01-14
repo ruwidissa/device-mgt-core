@@ -465,6 +465,29 @@ public interface DeviceManagementProviderService {
      */
     int getDeviceCount() throws DeviceManagementException;
 
+    /**
+     * Method to get the count of devices with given status and type.
+     *
+     * @param deviceType Device type name
+     * @param status Device status
+     *
+     * @return device count
+     * @throws DeviceManagementException If some unusual behaviour is observed while counting
+     *                                   the devices
+     */
+    int getDeviceCount(String deviceType, EnrolmentInfo.Status status) throws DeviceManagementException;
+
+    /**
+     * Method to get the count of all types of devices with given status.
+     *
+     * @param status Device status
+     *
+     * @return device count
+     * @throws DeviceManagementException If some unusual behaviour is observed while counting
+     *                                   the devices
+     */
+    int getDeviceCount(EnrolmentInfo.Status status) throws DeviceManagementException;
+
     HashMap<Integer, Device> getTenantedDevice(DeviceIdentifier deviceIdentifier) throws DeviceManagementException;
 
     void sendEnrolmentInvitation(String templateName, EmailMetaInfo metaInfo) throws DeviceManagementException,

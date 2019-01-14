@@ -77,6 +77,17 @@ public interface DeviceDAO {
     int getDeviceCountByStatus(String status, int tenantId) throws DeviceManagementDAOException;
 
     /**
+     * This method is used to get the device count by status and type.
+     *
+     * @param deviceType device type name.
+     * @param status enrollment status.
+     * @param tenantId tenant id.
+     * @return returns the device count of given status.
+     * @throws DeviceManagementDAOException
+     */
+    int getDeviceCountByStatus(String deviceType, String status, int tenantId) throws DeviceManagementDAOException;
+
+    /**
      * This method is used to get the device count by ownership.
      *
      * @param ownerShip Ownership of devices.

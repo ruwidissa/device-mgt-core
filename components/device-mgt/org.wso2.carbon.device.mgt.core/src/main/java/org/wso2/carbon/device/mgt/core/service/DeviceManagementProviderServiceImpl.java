@@ -1923,6 +1923,57 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public int getDeviceCount(String deviceType, EnrolmentInfo.Status status) throws DeviceManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices count for type '" + deviceType + "' and status: " + status.toString());
+        }
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDeviceCountByStatus(deviceType, status.toString(), this.getTenantId());
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the device count for type '" + deviceType +
+                    "' and status: " + status.toString();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDeviceCount for type '" + deviceType + "' and status: " + status.toString();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getDeviceCount(EnrolmentInfo.Status status) throws DeviceManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get devices count status: " + status.toString());
+        }
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDeviceCountByStatus(status.toString(), this.getTenantId());
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the device count";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDeviceCount status: " + status.toString();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
     public List<Device> getDevicesByNameAndType(PaginationRequest request, boolean requireDeviceInfo)
             throws DeviceManagementException {
         if (request == null) {
