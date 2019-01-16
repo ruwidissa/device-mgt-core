@@ -25,7 +25,7 @@ import java.util.List;
 
 public interface EnrollmentDAO {
 
-    int addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
+    EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
 
     int updateEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
                          int tenantId) throws DeviceManagementDAOException;
