@@ -2710,12 +2710,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public Integer getDeviceCountByStatus(String deviceType, String deviceStatus) throws DeviceManagementException {
+    public int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException {
         int tenantId = this.getTenantId();
-        int count = 0;
         try {
             DeviceManagementDAOFactory.openConnection();
-            count = deviceDAO.getDeviceCount(deviceType, deviceStatus, tenantId);
+            return deviceDAO.getDeviceCount(deviceType, deviceStatus, tenantId);
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred in while retrieving device count by status for deviceType :" +deviceType + " status : " + deviceStatus;
             log.error(msg, e);
@@ -2727,7 +2726,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
-        return count;
     }
 
     @Override

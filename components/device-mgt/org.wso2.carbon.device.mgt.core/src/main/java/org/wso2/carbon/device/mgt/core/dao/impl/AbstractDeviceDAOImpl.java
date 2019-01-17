@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -31,13 +30,15 @@ import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
-import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
@@ -583,18 +584,22 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         PreparedStatement stmt = null;
         try {
             conn = this.getConnection();
-//            Array arr = conn.createArrayOf("varchar", devices.toArray());
-            String sql = "UPDATE DM_ENROLMENT SET STATUS = ? WHERE DEVICE_ID IN " +
-                    "(SELECT d.ID FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.ID IN (";
-
-            StringBuffer bf = new StringBuffer(sql);
-            bf.append(DeviceManagementDAOUtil.makeString(devices));
-            bf.append(") AND t.NAME = ? AND d.TENANT_ID = ?) AND TENANT_ID = ?");
-            stmt = conn.prepareStatement(bf.toString());
+            StringBuilder sql = new StringBuilder("UPDATE DM_ENROLMENT SET STATUS = ? WHERE DEVICE_ID IN " +
+                    "(SELECT d.ID FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.ID IN (");
+            for (int i = 0; i < devices.size(); i++) {
+                sql.append("?,");
+            }
+            sql.deleteCharAt(sql.length() - 1);
+            sql.append(") AND t.NAME = ? AND d.TENANT_ID = ?) AND TENANT_ID = ?");
+            stmt = conn.prepareStatement(sql.toString());
             stmt.setString(1, status);
-            stmt.setString(2, deviceType);
-            stmt.setInt(3, tenantId);
-            stmt.setInt(4, tenantId);
+            int index = 1;
+            for (String device : devices) {
+                stmt.setString(++index, device);
+            }
+            stmt.setString(++index, deviceType);
+            stmt.setInt(++index, tenantId);
+            stmt.setInt(++index, tenantId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while updating enrollment status in bulk", e);

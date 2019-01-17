@@ -32,10 +32,12 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 public final class DeviceManagementDAOUtil {
@@ -242,15 +244,6 @@ public final class DeviceManagementDAOUtil {
         deviceInfo.setPluggedIn(rs.getBoolean("PLUGGED_IN"));
         deviceInfo.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
         return deviceInfo;
-    }
-
-    public static String makeString(List<String> values) {
-        StringBuilder buff = new StringBuilder();
-        for (String value : values) {
-            buff.append(value).append(",");
-        }
-        buff.deleteCharAt(buff.length() - 1);
-        return buff.toString();
     }
 
 }

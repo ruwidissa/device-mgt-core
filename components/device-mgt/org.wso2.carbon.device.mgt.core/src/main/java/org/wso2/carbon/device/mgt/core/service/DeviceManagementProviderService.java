@@ -652,7 +652,7 @@ public interface DeviceManagementProviderService {
     List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
                                             int geohashLength) throws DeviceManagementException;
 
-    Integer getDeviceCountByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
+    int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
 
     List<String> getDeviceIdentifiersByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
 

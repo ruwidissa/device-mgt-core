@@ -1,7 +1,7 @@
 /*
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
  *   in compliance with the License.
  *   You may obtain a copy of the License at
@@ -18,17 +18,20 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.DeviceCount;
-import org.wso2.carbon.device.mgt.common.DeviceIDList;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceStatusManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -45,32 +48,32 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     @Path("/count/{type}/{status}")
     public Response getDeviceCountByStatus(@PathParam("type") String type, @PathParam("status") String status,
                                            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
-        DeviceCount deviceCount = new DeviceCount();
+        int deviceCount;
         try {
-            deviceCount.setCount(DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCountByStatus(type, status));
+            deviceCount = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCountOfTypeByStatus(type, status);
+            return Response.status(Response.Status.OK).entity(deviceCount).build();
         } catch (DeviceManagementException e) {
             String errorMessage = "Error while retrieving device count.";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
         }
-        return Response.status(Response.Status.OK).entity(deviceCount).build();
     }
 
     @GET
     @Override
     @Path("/ids/{type}/{status}")
     public Response getDeviceIdentifiersByStatus(@PathParam("type") String type, @PathParam("status") String status, String ifModifiedSince) {
-        DeviceIDList deviceList = new DeviceIDList();
+        List<String> deviceIds;
         try {
-            deviceList.setIds(DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(type, status));
+            deviceIds = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(type, status);
+            return Response.status(Response.Status.OK).entity(deviceIds.toArray(new String[0])).build();
         } catch (DeviceManagementException e) {
             String errorMessage = "Error while obtaining list of devices";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
         }
-        return Response.status(Response.Status.OK).entity(deviceList).build();
     }
 
     @PUT
