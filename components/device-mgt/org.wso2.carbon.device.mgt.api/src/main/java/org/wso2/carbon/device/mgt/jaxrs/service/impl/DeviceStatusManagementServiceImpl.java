@@ -63,7 +63,7 @@ public class DeviceStatusManagementServiceImpl implements DeviceStatusManagement
     public Response getDeviceIdentifiersByStatus(@PathParam("type") String type, @PathParam("status") String status, String ifModifiedSince) {
         DeviceIDList deviceList = new DeviceIDList();
         try {
-            deviceList.setIds(DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(status, type));
+            deviceList.setIds(DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(type, status));
         } catch (DeviceManagementException e) {
             String errorMessage = "Error while obtaining list of devices";
             log.error(errorMessage, e);
