@@ -57,6 +57,18 @@
         <method>GET</method>
     </Permission>
     <Permission>
+        <name>Get device Count</name>
+        <path>/device-mgt/devices/Status-Observer</path>
+        <url>/device-status/*/*</url>
+        <method>GET</method>
+    </Permission>
+    <Permission>
+        <name>Update device status</name>
+        <path>/device-mgt/devices/Status-Update</path>
+        <url>/device-status/update/*</url>
+        <method>PUT</method>
+    </Permission>
+    <Permission>
         <name>Search devices</name>
         <path>/device-mgt/devices/Search</path>
         <url>/devices/search-devices</url>

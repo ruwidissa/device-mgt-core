@@ -268,6 +268,11 @@ public interface DeviceDAO {
      */
     int getDeviceCount(String username, int tenantId) throws DeviceManagementDAOException;
 
+    int getDeviceCount(String type, String status, int tenantId) throws DeviceManagementDAOException;
+
+    List<String> getDeviceIdentifiers(String type, String status, int tenantId) throws DeviceManagementDAOException;
+
+    boolean setEnrolmentStatusInBulk(String deviceType, String status, int tenantId, List<String> devices) throws DeviceManagementDAOException;
     /**
      * This method is used to retrieve the device count of a given tenant.
      *
