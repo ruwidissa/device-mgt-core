@@ -556,7 +556,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         List<String> deviceIDs = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql = "SELECT d.ID AS DEVICE_IDS FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
+            String sql = "SELECT d.DEVICE_IDENTIFICATION AS DEVICE_IDS FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
                     "TENANT_ID = ? AND STATUS = ?) e, DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND " +
                     "d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? AND t.NAME=?";
             stmt = conn.prepareStatement(sql);
@@ -585,7 +585,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             StringBuilder sql = new StringBuilder("UPDATE DM_ENROLMENT SET STATUS = ? WHERE DEVICE_ID IN " +
-                    "(SELECT d.ID FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.ID IN (");
+                    "(SELECT d.ID FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.DEVICE_IDENTIFICATION IN (");
             for (int i = 0; i < devices.size(); i++) {
                 sql.append("?,");
             }
