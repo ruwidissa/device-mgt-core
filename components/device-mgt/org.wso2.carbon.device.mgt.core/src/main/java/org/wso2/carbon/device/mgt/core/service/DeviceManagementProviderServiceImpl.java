@@ -2756,6 +2756,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         try {
             DeviceManagementDAOFactory.openConnection();
             success = deviceDAO.setEnrolmentStatusInBulk(deviceType, status, tenantId, deviceList);
+            DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred in while updating status of devices :" +deviceType + " status : " + deviceList.toString();
             log.error(msg, e);
