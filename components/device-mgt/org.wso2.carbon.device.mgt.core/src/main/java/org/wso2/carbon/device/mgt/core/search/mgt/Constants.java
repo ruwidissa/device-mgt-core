@@ -25,4 +25,7 @@ public class Constants {
     public static final String PROP_AND = "PROP_AND";
     public static final String PROP_OR = "PROP_OR";
     public static final String LOCATION = "LOCATION";
+
+    public static final String ANY_DEVICE_PERMISSION = "/device-mgt/devices/any-device";
+    public static final String UI_EXECUTE = "ui.execute";
 }

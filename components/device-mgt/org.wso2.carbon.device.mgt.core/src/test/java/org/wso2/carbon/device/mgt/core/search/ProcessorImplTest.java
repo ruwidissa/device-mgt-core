@@ -17,14 +17,11 @@
  */
 package org.wso2.carbon.device.mgt.core.search;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.search.Condition;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.core.TestDeviceManagementService;
@@ -41,7 +38,6 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,16 +46,12 @@ import java.util.List;
  */
 public class ProcessorImplTest extends BaseDeviceManagementTest {
 
-    private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
-    private static final Log log = LogFactory.getLog(SearchManagementServiceTest.class);
     private static List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
     private static final String DEVICE_ID_PREFIX = "SEARCH-DEVICE-ID-";
     private static final String DEVICE_TYPE = "SEARCH_TYPE";
 
     @BeforeClass
     public void init() throws Exception {
-        deviceAccessAuthorizationService = DeviceManagementDataHolder.getInstance()
-                .getDeviceAccessAuthorizationService();
         for (int i = 0; i < 5; i++) {
             deviceIdentifiers.add(new DeviceIdentifier(DEVICE_ID_PREFIX + i, DEVICE_TYPE));
         }
@@ -81,27 +73,59 @@ public class ProcessorImplTest extends BaseDeviceManagementTest {
         }
     }
 
-    @Test(description = "Test the Search Processor")
-    public void testWithNoDeviceAccessAuthorization() throws NoSuchFieldException, IllegalAccessException,
-            SearchMgtException {
+    @Test (description = "Search for device with and condition")
+    public void testSearchDevicesWIthAndCondition() throws SearchMgtException {
         SearchContext context = new SearchContext();
         List<Condition> conditions = new ArrayList<>();
-        Condition cond = new Condition();
-        cond.setKey("batteryLevel");
-        cond.setOperator("=");
-        cond.setValue("40");
-        cond.setState(Condition.State.AND);
-        conditions.add(cond);
+
+        Condition condition = new Condition();
+        condition.setKey("IMEI");
+        condition.setOperator("=");
+        condition.setValue("e6f236ac82537a8e");
+        condition.setState(Condition.State.AND);
+        conditions.add(condition);
+
         context.setConditions(conditions);
         ProcessorImpl processor = new ProcessorImpl();
-        Field deviceAccessAuthorizationServiceField = ProcessorImpl.class.getDeclaredField
-                ("deviceAccessAuthorizationService");
-        deviceAccessAuthorizationServiceField.setAccessible(true);
-        deviceAccessAuthorizationServiceField.set(processor, null);
-        List<Device> searchedDevices = processor.execute(context);
-        Assert.assertEquals(0, searchedDevices.size());
+        List<Device> devices = processor.execute(context);
+        Assert.assertEquals(5, devices.size(), "There should be exactly 5 devices with matching search criteria");
     }
 
+    @Test (description = "Search for device with or condition")
+    public void testSearchDevicesWIthORCondition() throws SearchMgtException {
+        SearchContext context = new SearchContext();
+        List<Condition> conditions = new ArrayList<>();
+
+        Condition condition = new Condition();
+        condition.setKey("IMSI");
+        condition.setOperator("=");
+        condition.setValue("432659632123654845");
+        condition.setState(Condition.State.OR);
+        conditions.add(condition);
+
+        context.setConditions(conditions);
+        ProcessorImpl processor = new ProcessorImpl();
+        List<Device> devices = processor.execute(context);
+        Assert.assertEquals(5, devices.size(), "There should be exactly 5 devices with matching search criteria");
+    }
+
+    @Test (description = "Search for device with wrong condition")
+    public void testSearchDevicesWIthWrongCondition() throws SearchMgtException {
+        SearchContext context = new SearchContext();
+        List<Condition> conditions = new ArrayList<>();
+
+        Condition condition = new Condition();
+        condition.setKey("IMSI");
+        condition.setOperator("=");
+        condition.setValue("43265963212378466");
+        condition.setState(Condition.State.OR);
+        conditions.add(condition);
+
+        context.setConditions(conditions);
+        ProcessorImpl processor = new ProcessorImpl();
+        List<Device> devices = processor.execute(context);
+        Assert.assertEquals(0, devices.size(), "There should be no devices with matching search criteria");
+    }
 
     @Test(description = "Test for invalid state")
     public void testInvalidState() throws SearchMgtException {
@@ -140,17 +164,5 @@ public class ProcessorImplTest extends BaseDeviceManagementTest {
                 throw e;
             }
         }
-    }
-
-    @Test(description = "Test when Device Access Authorization is null", expectedExceptions = {IllegalStateException
-            .class}, dependsOnMethods = {"testWithNoDeviceAccessAuthorization", "testInvalidState"})
-    public void testProcessorInitializationError() throws ClassNotFoundException, NoSuchMethodException,
-            NoSuchFieldException, IllegalAccessException, SearchMgtException {
-        DeviceManagementDataHolder deviceManagementDataHolder = DeviceManagementDataHolder.getInstance();
-        Field field = DeviceManagementDataHolder.class.getDeclaredField("deviceAccessAuthorizationService");
-        field.setAccessible(true);
-        field.set(deviceManagementDataHolder, null);
-        ProcessorImpl processor = new ProcessorImpl();
-        processor.execute(null);
     }
 }
