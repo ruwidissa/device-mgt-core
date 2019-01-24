@@ -2947,14 +2947,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
             DeviceEnrollmentInfoNotification deviceEnrollmentInfoNotification = new DeviceEnrollmentInfoNotification();
-            deviceEnrollmentInfoNotification.setId(device.getEnrolmentInfo().getId());
             deviceEnrollmentInfoNotification.setOwner(device.getEnrolmentInfo().getOwner());
             deviceEnrollmentInfoNotification.setDateOfEnrolment(device.getEnrolmentInfo().getDateOfEnrolment());
             deviceEnrollmentInfoNotification.setDateOfLastUpdate(device.getEnrolmentInfo().getDateOfLastUpdate());
             deviceEnrollmentInfoNotification.setOwnership(device.getEnrolmentInfo().getOwnership().toString());
             deviceEnrollmentInfoNotification.setStatus(device.getEnrolmentInfo().getStatus().toString());
 
-            DeviceNotification deviceNotification = new DeviceNotification(device.getId(), device.getName(),
+            DeviceNotification deviceNotification = new DeviceNotification(device.getDeviceIdentifier(), device.getName(),
                     device.getType(), device.getDescription(), devicePropertyNotification,
                     deviceEnrollmentInfoNotification);
 

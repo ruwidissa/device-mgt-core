@@ -20,10 +20,6 @@ package org.wso2.carbon.device.mgt.common;
 public class DeviceEnrollmentInfoNotification {
 
     /***
-     * Enrollment Id
-     */
-    private int id;
-    /***
      * Enrollment timestamp
      */
     private Long dateOfEnrolment;
@@ -43,14 +39,6 @@ public class DeviceEnrollmentInfoNotification {
      * Owner of the device
      */
     private String owner;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public Long getDateOfEnrolment() {
         return dateOfEnrolment;

@@ -26,7 +26,7 @@ public class DeviceNotification {
 
 
     @XmlAttribute(name = "id")
-    private int deviceId;
+    private String identifier;
     @XmlElement(name = "name")
     private String deviceName;
     @XmlElement(name = "type")
@@ -40,10 +40,10 @@ public class DeviceNotification {
 
     public DeviceNotification(){}
 
-    public DeviceNotification(int deviceId, String deviceName, String deviceType, String description,
+    public DeviceNotification(String identifier, String deviceName, String deviceType, String description,
             DevicePropertyNotification devicePropertyNotification,
             DeviceEnrollmentInfoNotification deviceEnrollmentInfoNotification) {
-        this.deviceId = deviceId;
+        this.identifier = identifier;
         this.deviceName = deviceName;
         this.deviceType = deviceType;
         this.description = description;
