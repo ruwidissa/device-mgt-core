@@ -86,6 +86,10 @@ public class DeviceDetailsRetrieverTask implements Task {
         try {
             List<Integer> tenants = DeviceManagementDataHolder.getInstance().
                     getDeviceManagementProvider().getDeviceEnrolledTenants();
+            if (log.isDebugEnabled()) {
+                log.debug("Task is running for " + tenants.size() + " tenants and the device type is " + deviceType);
+            }
+
             for (Integer tenant : tenants) {
                 String tenantDomain = DeviceManagementDataHolder.getInstance().
                         getRealmService().getTenantManager().getDomain(tenant);
