@@ -36,31 +36,35 @@ import java.util.List;
 public class EnrollmentDAOImpl implements EnrollmentDAO {
 
     @Override
-    public int addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
+    public EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
                              int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int enrolmentId = -1;
         try {
             conn = this.getConnection();
             String sql = "INSERT INTO DM_ENROLMENT(DEVICE_ID, OWNER, OWNERSHIP, STATUS, " +
                     "DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE, TENANT_ID) VALUES(?, ?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql, new String[] {"id"});
+            Timestamp enrollmentTime = new Timestamp(new Date().getTime());
             stmt.setInt(1, deviceId);
             stmt.setString(2, enrolmentInfo.getOwner());
             stmt.setString(3, enrolmentInfo.getOwnership().toString());
             stmt.setString(4, enrolmentInfo.getStatus().toString());
-            stmt.setTimestamp(5, new Timestamp(new Date().getTime()));
-            stmt.setTimestamp(6, new Timestamp(new Date().getTime()));
+            stmt.setTimestamp(5, enrollmentTime);
+            stmt.setTimestamp(6, enrollmentTime);
             stmt.setInt(7, tenantId);
             stmt.execute();
 
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                enrolmentId = rs.getInt(1);
+                int enrolmentId = rs.getInt(1);
+                enrolmentInfo.setId(enrolmentId);
+                enrolmentInfo.setDateOfEnrolment(enrollmentTime.getTime());
+                enrolmentInfo.setDateOfLastUpdate(enrollmentTime.getTime());
+                return enrolmentInfo;
             }
-            return enrolmentId;
+            return null;
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while adding enrolment configuration", e);
         } finally {
