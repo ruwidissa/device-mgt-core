@@ -300,8 +300,6 @@ public class DeviceTypeManagerServiceTest {
         License newLicense = arduinoDeviceTypeManagerService.getDeviceManager().getLicense("eu");
         Assert.assertEquals(newLicense.getText(), license.getText(),
                 "The retrieved license is different from added license");
-        Assert.assertNull(arduinoDeviceTypeManagerService.getDeviceManager().getLicense("tn"),
-                "License is retrieved for a non-existing language code");
     }
 
     /**
