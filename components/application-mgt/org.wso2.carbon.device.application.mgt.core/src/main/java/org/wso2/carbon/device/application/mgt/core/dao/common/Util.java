@@ -63,12 +63,13 @@ public class Util {
 
         while (rs.next()) {
             if (applicationId != rs.getInt("APP_ID")) {
-
                 if (application != null) {
                     applications.add(application);
                 }
                 applicationId = rs.getInt("APP_ID");
                 application = new Application();
+                application.setTags(new ArrayList<>());
+                application.setUnrestrictedRoles(new ArrayList<>());
                 application.setId(applicationId);
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
@@ -76,22 +77,24 @@ public class Util {
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getBoolean("RESTRICTED"));
-
-                List<String> tags = new ArrayList<>();
-                tags.add(rs.getString("APP_TAG").toLowerCase());
-                application.setTags(tags);
-
-                List<String> unrestrictedRoles = new ArrayList<>();
-                unrestrictedRoles.add(rs.getString("ROLE").toLowerCase());
-                application.setUnrestrictedRoles(unrestrictedRoles);
-            } else {
-                String tag = rs.getString("APP_TAG").toLowerCase();
-                String unrestrictedRole = rs.getString("ROLE").toLowerCase();
-                if (application != null && !application.getTags().contains(tag)) {
+                String tag = rs.getString("APP_TAG");
+                String unrestrictedRole = rs.getString("ROLE");
+                if (tag != null) {
                     application.getTags().add(tag);
                 }
-                if (application != null && !application.getUnrestrictedRoles().contains(unrestrictedRole)) {
+                if (unrestrictedRole != null) {
                     application.getUnrestrictedRoles().add(unrestrictedRole);
+                }
+            } else {
+                String tag = rs.getString("APP_TAG");
+                String unrestrictedRole = rs.getString("ROLE");
+                if (application != null) {
+                    if (tag != null && !application.getTags().contains(tag)) {
+                        application.getTags().add(tag);
+                    }
+                    if (unrestrictedRole != null && !application.getUnrestrictedRoles().contains(unrestrictedRole)) {
+                        application.getUnrestrictedRoles().add(unrestrictedRole);
+                    }
                 }
             }
             if (rs.last()) {
@@ -119,6 +122,8 @@ public class Util {
             while (rs.next()) {
                 if (iteration == 0) {
                     application = new Application();
+                    application.setTags(new ArrayList<>());
+                    application.setUnrestrictedRoles(new ArrayList<>());
                     applicatioId = rs.getInt("APP_ID");
                     application.setId(applicatioId);
                     application.setName(rs.getString("APP_NAME"));
@@ -130,13 +135,12 @@ public class Util {
                     application.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
                 }
 
-                String tag = rs.getString("APP_TAG").toLowerCase();
-                String unrestrictedRole = rs.getString("ROLE").toLowerCase();
-                if (application.getTags() != null && application.getTags().contains(tag)) {
+                String tag = rs.getString("APP_TAG");
+                String unrestrictedRole = rs.getString("ROLE");
+                if (tag != null && !application.getTags().contains(tag)) {
                     application.getTags().add(tag);
                 }
-                if (application.getUnrestrictedRoles() != null && application.getUnrestrictedRoles()
-                        .contains(unrestrictedRole)) {
+                if (unrestrictedRole != null && !application.getUnrestrictedRoles().contains(unrestrictedRole)) {
                     application.getUnrestrictedRoles().add(unrestrictedRole);
                 }
                 iteration++;

@@ -100,17 +100,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (log.isDebugEnabled()) {
             log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
         }
-
-        ConnectionManagerUtil.openDBConnection();
         validateAppCreatingRequest(application, tenantId);
         validateAppReleasePayload(application.getApplicationReleases().get(0));
         DeviceType deviceType;
         ApplicationRelease applicationRelease;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         try {
-            ConnectionManagerUtil.beginDBTransaction();
             // Getting the device type details to get device type ID for internal mappings
             deviceType = Util.getDeviceManagementService().getDeviceType(application.getDeviceType());
+            ConnectionManagerUtil.beginDBTransaction();
 
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
@@ -165,7 +163,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(AppLifecycleState.CREATED.toString());
                 lifecycleState.setPreviousState(AppLifecycleState.CREATED.toString());
-                changeLifecycleState(appId, applicationRelease.getUuid(), lifecycleState, false);
+                lifecycleState.setUpdatedBy(userName);
+                this.lifecycleStateDAO.addLifecycleState(lifecycleState, appId, applicationRelease.getUuid(), tenantId);
 
                 applicationRelease.setLifecycleState(lifecycleState);
                 applicationReleases.add(applicationRelease);
@@ -192,8 +191,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg, e);
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(msg, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
@@ -693,19 +690,30 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param application Application that need to be validated
      * @throws ValidationException Validation Exception
      */
-    private void validateApplicationExistence(Application application, int tenantId) throws ApplicationManagementException {
+    private void validateApplicationExistence(Application application, int tenantId)
+            throws ApplicationManagementException {
         Filter filter = new Filter();
         filter.setFullMatch(true);
         filter.setAppName(application.getName().trim());
         filter.setOffset(0);
         filter.setLimit(1);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
+            if (applicationList != null && applicationList.getApplications() != null && !applicationList
+                    .getApplications().isEmpty()) {
+                throw new ApplicationManagementException(
+                        "Already an application registered with same name - " + applicationList.getApplications().get(0)
+                                .getName());
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementException("test 1");
 
-        ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
-        if (applicationList != null && applicationList.getApplications() != null && !applicationList.getApplications()
-                .isEmpty()) {
-            throw new ApplicationManagementException(
-                    "Already an application registered with same name - " + applicationList.getApplications().get(0)
-                            .getName());
+        } catch (ApplicationManagementDAOException e) {
+            throw new ApplicationManagementException("test 2");
+
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
