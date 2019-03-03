@@ -99,4 +99,41 @@
         </LifecycleState>
     </LifecycleStates>
 
+    <UIConfigs>
+        <EnableOAuth>true</EnableOAuth>
+        <EnableSSO>false</EnableSSO>
+        <EnableSSO>false</EnableSSO>
+        <AppRegistration>
+            <Tags>
+                <Tag>application_management</Tag>
+                <Tag>device_management</Tag>
+                <Tag>subscription_management</Tag>
+                <Tag>review_management</Tag>
+            </Tags>
+            <AllowToAllDomains>true</AllowToAllDomains>
+        </AppRegistration>
+        <Scopes>
+            <Scope>perm:app:review:view</Scope>
+            <Scope>perm:app:review:update</Scope>
+            <Scope>perm:app:publisher:view</Scope>
+            <Scope>perm:app:publisher:update</Scope>
+        </Scopes>
+        <SSOConfiguration>
+            <Issuer>app-mgt</Issuer>
+        </SSOConfiguration>
+        <LoginResponse>
+            <SuccessCallback>/application-mgt</SuccessCallback>
+            <FailureCallback>
+                <BadRequest>/pages/error/client-errors/400</BadRequest>
+                <Unauthorized>/pages/error/client-errors/401</Unauthorized>
+                <Forbidden>/pages/error/client-errors/403</Forbidden>
+                <NotFound>/pages/error/client-errors/404</NotFound>
+                <MethodNotAllowed>/pages/error/client-errors/405</MethodNotAllowed>
+                <NotAcceptable>/pages/error/client-errors/406</NotAcceptable>
+                <UnsupportedMediaType>/pages/error/client-errors/415</UnsupportedMediaType>
+                <InternalServerError>/pages/error/server-errors/500</InternalServerError>
+                <DefaultPage>/pages/error/default</DefaultPage>
+            </FailureCallback>
+        </LoginResponse>
+    </UIConfigs>
 </ApplicationManagementConfiguration>

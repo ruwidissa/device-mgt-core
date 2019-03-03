@@ -464,8 +464,7 @@
                     </exclusion>
                     <exclusion>
                         <groupId>javax.servlet</groupId>
-                        <artifactId>servlet-api</artifactId>
-                    </exclusion>
+                        <artifactId>javax.servlet-api</artifactId>                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -566,8 +565,7 @@
                     </exclusion>
                     <exclusion>
                         <groupId>javax.servlet</groupId>
-                        <artifactId>servlet-api</artifactId>
-                    </exclusion>
+                        <artifactId>javax.servlet-api</artifactId>                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -1308,8 +1306,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
-                <version>${apache.http.compnents.core}</version>
-                <scope>test</scope>
+                <version>${apache.http.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang.wso2</groupId>
@@ -1344,7 +1341,7 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
-                <version>${apache.http.version}</version>
+                <version>${apache.http.client.version}</version>
             </dependency>
             <!-- Removing neethi configs from webapp-->
             <dependency>
@@ -1524,7 +1521,7 @@
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
+                <artifactId>javax.servlet-api</artifactId>
                 <version>${servlet-api.version}</version>
             </dependency>
             <dependency>
@@ -1792,7 +1789,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                     <source>1.8</source>
@@ -2021,6 +2018,7 @@
         <carbon.kernel.version.range>[4.4.0, 5.0.0)</carbon.kernel.version.range>
         <carbon.p2.plugin.version>1.5.4</carbon.p2.plugin.version>
         <maven-buildnumber-plugin.version>1.3</maven-buildnumber-plugin.version>
+        <carbon.feature.plugin.version>3.1.3</carbon.feature.plugin.version>
 
         <!-- Axis2 -->
         <axis2.osgi.version.range>[1.6.1.wso2v11, 1.7.0)</axis2.osgi.version.range>
@@ -2125,6 +2123,7 @@
         <!-- Nimbus Jose-->
         <nimbus.orbit.version>2.26.1.wso2v3</nimbus.orbit.version>
 
+        <!--<org-json.version>20180813</org-json.version>-->
         <commons-json.version>3.0.0.wso2v1</commons-json.version>
         <json.smart.version>1.3</json.smart.version>
         <google.gson.version>2.3.1</google.gson.version>
@@ -2133,7 +2132,9 @@
         <github.openfeign.version>9.3.1</github.openfeign.version>
         <jsr311.version>1.1.1</jsr311.version>
         <commons.logging.version>1.2</commons.logging.version>
-        <apache.http.version>4.5.1</apache.http.version>
+        <apache.http.client.version>4.5.6</apache.http.client.version>
+        <!-- apache http components core -->
+        <apache.http.core.version>4.4.10</apache.http.core.version>
         <jersey.version>1.9</jersey.version>
 
         <!-- Neethi version-->
@@ -2176,7 +2177,7 @@
         <javax.ws.rs.version>2.0.1</javax.ws.rs.version>
         <swagger.version>1.5.10</swagger.version>
         <swagger.annotations.version>1.5.10</swagger.annotations.version>
-        <servlet-api.version>2.5</servlet-api.version>
+        <servlet-api.version>4.0.1</servlet-api.version>
 
         <!--JWT grant type extension feature-->
         <identity.jwt.extension.version>1.0.10</identity.jwt.extension.version>
@@ -2199,9 +2200,6 @@
 
         <!--apache osgi mock version-->
         <apache.osgi.mock.version>2.3.2</apache.osgi.mock.version>
-
-        <!-- apache http components core -->
-        <apache.http.compnents.core>4.4.3</apache.http.compnents.core>
 
         <!-- api-mgt handler version properties -->
         <org.apache.synapse.version>2.1.7-wso2v7</org.apache.synapse.version>
@@ -2230,8 +2228,8 @@
         <slf4j.nop.version>1.7.25</slf4j.nop.version>
 
         <!-- app management related versions -->
-        <googlecode.plist.version>1.8</googlecode.plist.version>
-        <net.dongliu.version>2.4.2</net.dongliu.version>
+        <googlecode.plist.version>1.21</googlecode.plist.version>
+        <net.dongliu.version>2.6.5</net.dongliu.version>
         
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>

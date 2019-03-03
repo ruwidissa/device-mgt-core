@@ -19,7 +19,6 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.visibility;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
@@ -41,7 +40,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
     private static final Log log = LogFactory.getLog(GenericVisibilityDAOImpl.class);
 
     @Override
-    public void addUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles, int applicationId, int tenantId) throws
+    public void addUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws
             VisibilityManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to add unrestricted roles");
@@ -54,8 +53,8 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
-            for (UnrestrictedRole role : unrestrictedRoles) {
-                stmt.setString(1, role.getRole());
+            for (String role : unrestrictedRoles) {
+                stmt.setString(1, role);
                 stmt.setInt(2, tenantId);
                 stmt.setInt(3, applicationId);
                 stmt.addBatch();
@@ -72,15 +71,14 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
     }
 
     @Override
-    public List<UnrestrictedRole> getUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException {
+    public List<String> getUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get unrestricted roles");
         }
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<UnrestrictedRole> unrestrictedRoles = new ArrayList<>();
-        UnrestrictedRole unrestrictedRole;
+        List<String> unrestrictedRoles = new ArrayList<>();
         String sql = "SELECT ID, ROLE FROM AP_UNRESTRICTED_ROLE WHERE AP_APP_ID = ? AND TENANT_ID = ?;";
         try{
             conn = this.getDBConnection();
@@ -91,10 +89,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
             rs = stmt.executeQuery();
 
             while (rs.next()){
-                unrestrictedRole = new UnrestrictedRole();
-                unrestrictedRole.setId(rs.getInt("ID"));
-                unrestrictedRole.setRole(rs.getString("ROLE"));
-                unrestrictedRoles.add(unrestrictedRole);
+                unrestrictedRoles.add(rs.getString("ROLE").toLowerCase());
             }
             return unrestrictedRoles;
 
@@ -108,7 +103,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
     }
 
     @Override
-    public void deleteUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles, int applicationId, int tenantId) throws VisibilityManagementDAOException {
+    public void deleteUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws VisibilityManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to delete unrestricted roles");
         }
@@ -121,10 +116,10 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
 
-            for (UnrestrictedRole role : unrestrictedRoles) {
+            for (String role : unrestrictedRoles) {
                 stmt.setInt(1, applicationId);
-                stmt.setString(2, role.getRole());
-                stmt.setInt(3, role.getTenantId());
+                stmt.setString(2, role);
+                stmt.setInt(3, tenantId);
                 stmt.addBatch();
             }
             stmt.executeBatch();

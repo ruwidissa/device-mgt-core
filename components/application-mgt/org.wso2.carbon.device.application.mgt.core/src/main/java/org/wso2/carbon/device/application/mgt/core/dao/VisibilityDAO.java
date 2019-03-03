@@ -18,7 +18,6 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagementDAOException;
 
 import java.util.List;
@@ -36,12 +35,12 @@ public interface VisibilityDAO {
      * @param unrestrictedRoles unrestrictedRoles that could available the application.
      * @throws VisibilityManagementDAOException Visiblity Management DAO Exception.
      */
-    void addUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles, int applicationId, int tenantId) throws
+    void addUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws
             VisibilityManagementDAOException;
 
-    List<UnrestrictedRole> getUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException;
+    List<String> getUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException;
 
-    void deleteUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles, int applicationId, int tenantId) throws
+    void deleteUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws
             VisibilityManagementDAOException;
 
 }

@@ -55,7 +55,8 @@
                             com.google.gson,
                             io.swagger.annotations.*;resolution:=optional,
                             com.fasterxml.jackson.annotation,
-                            javax.validation.constraints
+                            javax.validation.constraints,
+                            javax.xml.bind.annotation.*
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.device.application.mgt.common.*

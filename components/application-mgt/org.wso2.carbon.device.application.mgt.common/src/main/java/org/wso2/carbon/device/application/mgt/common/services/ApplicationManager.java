@@ -23,7 +23,6 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
-import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
@@ -136,7 +135,7 @@ public interface ApplicationManager {
      * @return the boolean value, whether user has assigned unrestricted roles to access the application
      * * @throws ApplicationManagementException Application Management Exception.
      */
-    Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName) throws ApplicationManagementException;
+    Boolean isUserAllowable(List<String> unrestrictedRoles, String userName) throws ApplicationManagementException;
 
 
     /**

@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.config;
 
+import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 
 import java.util.List;
@@ -40,6 +41,8 @@ public class Configuration {
     private PaginationConfiguration paginationConfiguration;
 
     private List<LifecycleState> lifecycleStates;
+
+    private UIConfiguration uiConfiguration;
 
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
@@ -75,6 +78,14 @@ public class Configuration {
             List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
-}
 
+    public UIConfiguration getUiConfiguration() {
+        return uiConfiguration;
+    }
+
+    @XmlElement(name = "UIConfigs")
+    public void setUiConfiguration(UIConfiguration uiConfiguration) {
+        this.uiConfiguration = uiConfiguration;
+    }
+}
 

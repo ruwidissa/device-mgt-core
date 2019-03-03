@@ -24,10 +24,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
+import org.wso2.carbon.device.application.mgt.common.services.ConfigManager;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
+import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
+import org.wso2.carbon.device.application.mgt.core.impl.ConfigManagerImpl;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
@@ -96,6 +99,12 @@ public class ApplicationManagementServiceComponent {
             LifecycleStateManger lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
             DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
             bundleContext.registerService(LifecycleStateManger.class.getName(), lifecycleStateManger, null);
+
+            UIConfiguration uiConfiguration = ConfigurationManager.getInstance().
+                    getConfiguration().getUiConfiguration();
+            ConfigManager configManager = new ConfigManagerImpl(uiConfiguration);
+            DataHolder.getInstance().setConfigManager(configManager);
+            bundleContext.registerService(ConfigManager.class.getName(), configManager, null);
 
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (Throwable e) {

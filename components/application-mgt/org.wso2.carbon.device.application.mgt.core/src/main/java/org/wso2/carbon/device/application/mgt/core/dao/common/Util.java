@@ -77,37 +77,28 @@ public class Util {
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getBoolean("RESTRICTED"));
 
-                List<Tag> tags = new ArrayList<>();
-                Tag tag = new Tag();
-                tag.setTagName(rs.getString("APP_TAG"));
-                tags.add(tag);
+                List<String> tags = new ArrayList<>();
+                tags.add(rs.getString("APP_TAG").toLowerCase());
                 application.setTags(tags);
 
-                List<UnrestrictedRole> unrestrictedRoles = new ArrayList<>();
-                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
-                unrestrictedRole.setRole(rs.getString("ROLE"));
-                unrestrictedRoles.add(unrestrictedRole);
+                List<String> unrestrictedRoles = new ArrayList<>();
+                unrestrictedRoles.add(rs.getString("ROLE").toLowerCase());
                 application.setUnrestrictedRoles(unrestrictedRoles);
             } else {
-                Tag tag = new Tag();
-                tag.setTagName(rs.getString("APP_TAG"));
-                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
-                unrestrictedRole.setRole(rs.getString("ROLE"));
-                if (application != null && application.getTags().contains(tag)) {
+                String tag = rs.getString("APP_TAG").toLowerCase();
+                String unrestrictedRole = rs.getString("ROLE").toLowerCase();
+                if (application != null && !application.getTags().contains(tag)) {
                     application.getTags().add(tag);
                 }
-                if (application != null && application.getUnrestrictedRoles().contains(unrestrictedRole)) {
+                if (application != null && !application.getUnrestrictedRoles().contains(unrestrictedRole)) {
                     application.getUnrestrictedRoles().add(unrestrictedRole);
                 }
-
             }
             if (rs.last()) {
                 applications.add(application);
             }
         }
-
         return applications;
-
     }
 
 
@@ -139,10 +130,8 @@ public class Util {
                     application.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
                 }
 
-                Tag tag = new Tag();
-                tag.setTagName(rs.getString("APP_TAG"));
-                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
-                unrestrictedRole.setRole(rs.getString("ROLE"));
+                String tag = rs.getString("APP_TAG").toLowerCase();
+                String unrestrictedRole = rs.getString("ROLE").toLowerCase();
                 if (application.getTags() != null && application.getTags().contains(tag)) {
                     application.getTags().add(tag);
                 }

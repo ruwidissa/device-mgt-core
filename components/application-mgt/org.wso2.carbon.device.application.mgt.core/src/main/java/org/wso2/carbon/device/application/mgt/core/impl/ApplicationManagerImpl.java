@@ -31,8 +31,6 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationSubscriptionType
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
-import org.wso2.carbon.device.application.mgt.common.Tag;
-import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
@@ -251,7 +249,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             Application existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
             if (existingApplication == null){
                 throw new NotFoundException(
-                        "Couldn't found application for the application Id: " + applicationId);
+                        "Couldn't find application for the application Id: " + applicationId);
             }
             if (this.applicationReleaseDAO
                     .verifyReleaseExistenceByHash(applicationId, applicationRelease.getAppHashValue(), tenantId)) {
@@ -356,13 +354,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         Application application;
         boolean isAppAllowed = false;
-        boolean isOpenConnection = false;
-        List<ApplicationRelease> applicationReleases = null;
+        List<ApplicationRelease> applicationReleases;
         try {
-            if (state != null) {
-                ConnectionManagerUtil.openDBConnection();
-                isOpenConnection = true;
-            }
+            ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
             if (application == null) {
                 throw new NotFoundException("Couldn't find an application for application release UUID:: " + uuid);
@@ -391,19 +385,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(
                     "User-store exception while getting application with the application release UUID " + uuid);
         } finally {
-            if (isOpenConnection) {
-                ConnectionManagerUtil.closeDBConnection();
-            }
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
-    private boolean isRoleExists(Collection<UnrestrictedRole> unrestrictedRoleList, String userName)
+    private boolean isRoleExists(Collection<String> unrestrictedRoleList, String userName)
             throws UserStoreException {
         String[] roleList;
         roleList = getRolesOfUser(userName);
-        for (UnrestrictedRole unrestrictedRole : unrestrictedRoleList) {
+        for (String unrestrictedRole : unrestrictedRoleList) {
             for (String role : roleList) {
-                if (unrestrictedRole.getRole().equals(role)) {
+                if (unrestrictedRole.equals(role)) {
                     return true;
                 }
             }
@@ -494,7 +486,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    public Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName)
+    public Boolean isUserAllowable(List<String> unrestrictedRoles, String userName)
             throws ApplicationManagementException {
         try {
             return isRoleExists(unrestrictedRoles, userName);
@@ -941,17 +933,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 handleDBConnection = true;
                 if (!this.applicationDAO.verifyApplicationExistenceById(applicationId, tenantId)){
                     throw new NotFoundException(
-                            "Couldn't found application for the application Id: " + applicationId);
+                            "Couldn't find application for the application Id: " + applicationId);
                 }
                 if (!this.applicationReleaseDAO.verifyReleaseExistence(applicationId, releaseUuid, tenantId)){
                     throw new NotFoundException(
-                            "Couldn't found application release for the application Id: " + applicationId
+                            "Couldn't find application release for the application Id: " + applicationId
                                     + " application release uuid: " + releaseUuid);
                 }
                 LifecycleState currentState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
                 if (currentState == null){
                     throw new ApplicationManagementException(
-                            "Couldn't found latest lifecycle state for the appId: " + applicationId
+                            "Couldn't find latest lifecycle state for the appId: " + applicationId
                                     + " and application release UUID: " + releaseUuid);
                 }
                 state.setPreviousState(currentState.getCurrentState());
@@ -988,10 +980,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application existingApplication = getApplicationIfAccessible(application.getId());
-        List<UnrestrictedRole> addingRoleList;
-        List<UnrestrictedRole> removingRoleList;
-        List<Tag> addingTags;
-        List<Tag> removingTags;
+        List<String> addingRoleList;
+        List<String> removingRoleList;
+        List<String> addingTags;
+        List<String> removingTags;
 
 
         if (existingApplication == null) {
