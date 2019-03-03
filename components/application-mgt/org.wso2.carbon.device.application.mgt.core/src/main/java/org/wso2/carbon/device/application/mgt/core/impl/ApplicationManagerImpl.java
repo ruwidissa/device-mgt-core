@@ -31,8 +31,6 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationSubscriptionType
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
-import org.wso2.carbon.device.application.mgt.common.Tag;
-import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
@@ -391,13 +389,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private boolean isRoleExists(Collection<UnrestrictedRole> unrestrictedRoleList, String userName)
+    private boolean isRoleExists(Collection<String> unrestrictedRoleList, String userName)
             throws UserStoreException {
         String[] roleList;
         roleList = getRolesOfUser(userName);
-        for (UnrestrictedRole unrestrictedRole : unrestrictedRoleList) {
+        for (String unrestrictedRole : unrestrictedRoleList) {
             for (String role : roleList) {
-                if (unrestrictedRole.getRole().equals(role)) {
+                if (unrestrictedRole.equals(role)) {
                     return true;
                 }
             }
@@ -488,7 +486,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    public Boolean isUserAllowable(List<UnrestrictedRole> unrestrictedRoles, String userName)
+    public Boolean isUserAllowable(List<String> unrestrictedRoles, String userName)
             throws ApplicationManagementException {
         try {
             return isRoleExists(unrestrictedRoles, userName);
@@ -982,10 +980,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         Application existingApplication = getApplicationIfAccessible(application.getId());
-        List<UnrestrictedRole> addingRoleList;
-        List<UnrestrictedRole> removingRoleList;
-        List<Tag> addingTags;
-        List<Tag> removingTags;
+        List<String> addingRoleList;
+        List<String> removingRoleList;
+        List<String> addingTags;
+        List<String> removingTags;
 
 
         if (existingApplication == null) {

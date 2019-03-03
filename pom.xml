@@ -2228,8 +2228,8 @@
         <slf4j.nop.version>1.7.25</slf4j.nop.version>
 
         <!-- app management related versions -->
-        <googlecode.plist.version>1.8</googlecode.plist.version>
-        <net.dongliu.version>2.4.2</net.dongliu.version>
+        <googlecode.plist.version>1.21</googlecode.plist.version>
+        <net.dongliu.version>2.6.5</net.dongliu.version>
         
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>

@@ -27,8 +27,6 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
-import org.wso2.carbon.device.application.mgt.common.Tag;
-import org.wso2.carbon.device.application.mgt.common.UnrestrictedRole;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
@@ -599,7 +597,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void addTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+    public void addTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to add tags");
         }
@@ -610,8 +608,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
-            for (Tag tag : tags) {
-                stmt.setString(1, tag.getTagName());
+            for (String tag : tags) {
+                stmt.setString(1, tag);
                 stmt.setInt(2, tenantId);
                 stmt.setInt(3, applicationId);
                 stmt.addBatch();
@@ -629,18 +627,18 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void deleteTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+    public void deleteTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
 
-            String sql = "DELETE FROM AP_APP_TAG WHERE ID = ? AND AP_APP_ID = ? AND TENANT_ID = ?;";
+            String sql = "DELETE FROM AP_APP_TAG WHERE TAG = ? AND AP_APP_ID = ? AND TENANT_ID = ?;";
             try{
                 conn = this.getDBConnection();
                 conn.setAutoCommit(false);
                 stmt = conn.prepareStatement(sql);
 
-                for (Tag tag : tags) {
-                    stmt.setInt(1, tag.getId());
+                for (String tag : tags) {
+                    stmt.setString(1, tag);
                     stmt.setInt(2, applicationId);
                     stmt.setInt(3, tenantId);
                     stmt.addBatch();
@@ -704,9 +702,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getBoolean("RESTRICTED"));
 
-                UnrestrictedRole unrestrictedRole = new UnrestrictedRole();
-                unrestrictedRole.setRole(rs.getString("ROLE"));
-                List<UnrestrictedRole> unrestrictedRoleList = new ArrayList<>();
+                String unrestrictedRole = rs.getString("ROLE").toLowerCase();
+                List<String> unrestrictedRoleList = new ArrayList<>();
                 unrestrictedRoleList.add(unrestrictedRole);
 
                 application.setUnrestrictedRoles(unrestrictedRoleList);

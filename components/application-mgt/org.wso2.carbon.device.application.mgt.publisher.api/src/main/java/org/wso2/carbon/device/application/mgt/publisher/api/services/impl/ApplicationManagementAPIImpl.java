@@ -155,7 +155,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
 
         try {
-            if (!isValidAppCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application)) {
+            if (!isValidAppCreatingRequest(iconFile, bannerFile, attachmentList, application)) {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
@@ -166,6 +166,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                         .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
                                 null);
             } else {
+                if (binaryFile == null){
+                    String msg = "Binary file is not found for the application release. Application name: " + application.getName()
+                            + " Application type: " + application.getType();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(new ApplicationManagementException(msg))
+                            .build();
+                }
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = applicationStorageManager
                         .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
@@ -194,28 +200,33 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             if (createdApplication != null) {
                 return Response.status(Response.Status.CREATED).entity(createdApplication).build();
             } else {
-                log.error("Application Creation Failed");
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                String msg = "Application creation is failed";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ApplicationManagementException(msg, e)).build();
         } catch (ResourceManagementException e) {
-            log.error(
-                    "Error occurred while uploading the releases artifacts of the application " + application.getName(),
-                    e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            String msg =
+                    "Error occurred while uploading the releases artifacts of the application " + application.getName();
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ApplicationManagementException(msg, e)).build();
         } catch (IOException e) {
-            String errorMessage =
+            String msg =
                     "Error while uploading binary file and resources for the application release of the application "
                             + application.getName();
-            log.error(errorMessage, e);
-            return APIUtil.getResponse(new ApplicationManagementException(errorMessage, e),
-                    Response.Status.INTERNAL_SERVER_ERROR);
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ApplicationManagementException(msg, e)).build();
         } catch (RequestValidatingException e) {
-            log.error("Error occurred while handling the application creating request");
-            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
+            String msg = "Error occurred while handling the application creating request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ApplicationManagementException(msg, e))
+                    .build();
         }
     }
 
@@ -288,22 +299,20 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ResourceManagementException e) {
-            log.error(
-                    "Error occurred while uploading the releases artifacts of the application ID: " + appId,
-                    e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            String msg = "Error occurred while uploading the releases artifacts of the application ID: " + appId;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (IOException e) {
-            String errorMessage =
-                    "Error while uploading binary file and resources for the application release of the application ID: "
-                            + appId;
-            log.error(errorMessage, e);
-            return APIUtil.getResponse(new ApplicationManagementException(errorMessage, e),
-                    Response.Status.INTERNAL_SERVER_ERROR);
+            String msg = "Error while uploading binary file and resources for the application release of the "
+                    + "application ID: " + appId;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            log.error("Error occurred while handling the application creating request");
-            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
+            String msg = "Error occurred while handling the application creating request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -590,7 +599,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         return Response.status(Response.Status.CREATED).entity("Lifecycle state added successfully.").build();
     }
 
-    private boolean isValidAppCreatingRequest(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
+    private boolean isValidAppCreatingRequest(Attachment iconFile, Attachment bannerFile,
             List<Attachment> attachmentList, Application application) {
 
         if (application.getApplicationReleases().size() > 1) {
@@ -618,11 +627,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return false;
         }
 
-        if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
-            log.error("Binary file is not found for the application release. Application name: " + application.getName()
-                    + " Application type: " + application.getType());
-            return false;
-        }
         return true;
     }
 

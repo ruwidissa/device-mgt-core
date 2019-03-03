@@ -43,7 +43,7 @@ public interface ApplicationDAO {
      * @param tags tags that need to be added for a application.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    void addTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+    void addTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To check application existence.
@@ -173,7 +173,7 @@ public interface ApplicationDAO {
      * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    void deleteTags(List<Tag> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+    void deleteTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get an {@link Application} associated with the given release

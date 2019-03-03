@@ -62,7 +62,7 @@ public class Application {
 
     @ApiModelProperty(name = "tags",
             value = "List of application tags")
-    private List<Tag> tags;
+    private List<String> tags;
 
     @ApiModelProperty(name = "user",
             value = "Application creating user")
@@ -70,7 +70,7 @@ public class Application {
 
     @ApiModelProperty(name = "unrestrictedRoles",
             value = "List of roles that users should have to access the application")
-    private List<UnrestrictedRole> unrestrictedRoles;
+    private List<String> unrestrictedRoles;
 
     @ApiModelProperty(name = "isRestricted",
             value = "If unrestricted roles are defined then isRestricted value is true otherwise it is false")
@@ -113,11 +113,9 @@ public class Application {
         this.appCategory = appCategory;
     }
 
-    public List<Tag> getTags() {
-        return tags;
-    }
+    public List<String> getTags() { return tags; }
 
-    public void setTags(List<Tag> tags) {
+    public void setTags(List<String> tags) {
         this.tags = tags;
     }
 
@@ -169,11 +167,11 @@ public class Application {
         this.applicationReleases = applicationReleases;
     }
 
-    public List<UnrestrictedRole> getUnrestrictedRoles() {
+    public List<String> getUnrestrictedRoles() {
         return unrestrictedRoles;
     }
 
-    public void setUnrestrictedRoles(List<UnrestrictedRole> unrestrictedRoles) {
+    public void setUnrestrictedRoles(List<String> unrestrictedRoles) {
         this.unrestrictedRoles = unrestrictedRoles;
     }
 
