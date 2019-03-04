@@ -77,6 +77,13 @@ public class ApplicationManagementServiceComponent {
             ApplicationManagementDAOFactory.init(dataSourceName);
 //            ApplicationManagementDAOFactory.initDatabases();
 
+            List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
+                    getConfiguration().getLifecycleStates();
+            LifecycleStateManger lifecycleStateManger = ApplicationManagementUtil.getLifecycleStateMangerInstance();
+            lifecycleStateManger.init(lifecycleStates);
+            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
+            bundleContext.registerService(LifecycleStateManger.class.getName(), lifecycleStateManger, null);
+
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             DataHolder.getInstance().setApplicationManager(applicationManager);
             bundleContext.registerService(ApplicationManager.class.getName(), applicationManager, null);
@@ -93,12 +100,6 @@ public class ApplicationManagementServiceComponent {
                     .getApplicationStorageManagerInstance();
             DataHolder.getInstance().setApplicationStorageManager(applicationStorageManager);
             bundleContext.registerService(ApplicationStorageManager.class.getName(), applicationStorageManager, null);
-
-            List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
-                    getConfiguration().getLifecycleStates();
-            LifecycleStateManger lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
-            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
-            bundleContext.registerService(LifecycleStateManger.class.getName(), lifecycleStateManger, null);
 
             UIConfiguration uiConfiguration = ConfigurationManager.getInstance().
                     getConfiguration().getUiConfiguration();

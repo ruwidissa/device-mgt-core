@@ -15,7 +15,7 @@ public class LifecycleStateManger {
 
     private Map<String, State> lifecycleStates;
 
-    public LifecycleStateManger(List<LifecycleState> states) {
+    public void init(List<LifecycleState> states){
         lifecycleStates = new HashMap<>();
         for (LifecycleState s : states) {
             if (s.getProceedingStates() != null) {

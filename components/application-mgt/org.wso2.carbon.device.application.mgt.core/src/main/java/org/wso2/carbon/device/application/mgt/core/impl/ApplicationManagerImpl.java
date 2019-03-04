@@ -927,6 +927,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException("Failed to get application and application management", e);
         } catch (LifeCycleManagementDAOException e) {
             throw new ApplicationManagementException("Failed to get lifecycle state from database", e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
         return lifecycleState;
     }
