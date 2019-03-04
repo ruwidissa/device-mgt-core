@@ -60,8 +60,9 @@ public class Util {
         List<Application> applications = new ArrayList<>();
         Application application = null;
         int applicationId = -1;
+        boolean hasNext = rs.next();
 
-        while (rs.next()) {
+        while (hasNext) {
             if (applicationId != rs.getInt("APP_ID")) {
                 if (application != null) {
                     applications.add(application);
@@ -97,7 +98,8 @@ public class Util {
                     }
                 }
             }
-            if (rs.last()) {
+            hasNext = rs.next();
+            if (!hasNext) {
                 applications.add(application);
             }
         }
