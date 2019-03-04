@@ -25,7 +25,8 @@ public class LifecycleManagementTest {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
         Configuration configuration = configurationManager.getConfiguration();
         lifecycleStates = configuration.getLifecycleStates();
-        lifecycleStateManger = new LifecycleStateManger(lifecycleStates);
+        lifecycleStateManger = new LifecycleStateManger();
+        lifecycleStateManger.init(lifecycleStates);
     }
 
     @Test
