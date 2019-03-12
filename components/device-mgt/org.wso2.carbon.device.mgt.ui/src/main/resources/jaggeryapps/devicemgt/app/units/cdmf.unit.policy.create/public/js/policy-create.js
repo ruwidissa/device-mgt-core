@@ -202,7 +202,7 @@ function getStoreApps(storeApps, deviceType) {
     var selectedApps = [];
     var i;
     for (i=0; i<storeApps.length; i++) {
-        if (deviceType === storeApps[i].platform) {
+        if (deviceType === storeApps[i].platform || "webapp" === storeApps[i].platform) {
             selectedApps.push(storeApps[i]);
         }
     }
