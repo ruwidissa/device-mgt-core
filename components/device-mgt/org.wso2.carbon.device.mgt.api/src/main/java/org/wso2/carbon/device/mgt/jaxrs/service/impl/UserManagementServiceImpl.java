@@ -15,12 +15,29 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *   Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ *   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.eclipse.wst.common.uriresolver.internal.util.URIEncoder;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -31,11 +48,13 @@ import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.beans.Credential;
 import org.wso2.carbon.device.mgt.jaxrs.beans.EnrollmentInvitation;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
+import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.UserManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
@@ -45,9 +64,12 @@ import org.wso2.carbon.identity.user.store.count.UserStoreCountRetriever;
 import org.wso2.carbon.identity.user.store.count.exception.UserStoreCounterException;
 import org.wso2.carbon.user.api.Permission;
 import org.wso2.carbon.user.api.RealmConfiguration;
+import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -736,6 +758,44 @@ public class UserManagementServiceImpl implements UserManagementService {
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
         return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
+    }
+
+    @POST
+    @Path("/validate")
+    @Override
+    public Response validateUser(Credential credential) {
+        try {
+            credential.validateRequest();
+            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
+            String tenant = credential.getTenantDomain();
+            int tenantId;
+            if (tenant == null || tenant.trim().isEmpty()) {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            } else {
+                tenantId = realmService.getTenantManager().getTenantId(tenant);
+            }
+            if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                String msg = "Error occurred while validating the user. Invalid tenant domain " + tenant;
+                log.error(msg);
+                throw new BadRequestException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg)
+                                .build());
+            }
+            UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
+            JsonObject result = new JsonObject();
+            if (userRealm.getUserStoreManager().authenticate(credential.getUsername(), credential.getPassword())) {
+                result.addProperty("valid", true);
+                return Response.status(Response.Status.OK).entity(result).build();
+            } else {
+                result.addProperty("valid", false);
+                return Response.status(Response.Status.OK).entity(result).build();
+            }
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving user store to validate user";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
     }
 
     private Map<String, String> buildDefaultUserClaims(String firstName, String lastName, String emailAddress) {
