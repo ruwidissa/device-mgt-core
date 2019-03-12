@@ -202,31 +202,27 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             } else {
                 String msg = "Application creation is failed";
                 log.error(msg);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApplicationManagementException(msg, e)).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ResourceManagementException e) {
             String msg =
                     "Error occurred while uploading the releases artifacts of the application " + application.getName();
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApplicationManagementException(msg, e)).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (IOException e) {
             String msg =
                     "Error while uploading binary file and resources for the application release of the application "
                             + application.getName();
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ApplicationManagementException(msg, e)).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (RequestValidatingException e) {
             String msg = "Error occurred while handling the application creating request";
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(new ApplicationManagementException(msg, e))
-                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
     }
 
@@ -585,7 +581,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
             LifecycleState state = new LifecycleState();
             state.setCurrentState(action);
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state, true);
+            applicationManager.changeLifecycleState(applicationId, applicationUuid, state);
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application id: " + applicationId
                     + " and application release uuid: " + applicationUuid;
@@ -602,11 +598,11 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     private boolean isValidAppCreatingRequest(Attachment iconFile, Attachment bannerFile,
             List<Attachment> attachmentList, Application application) {
 
-        if (application.getApplicationReleases().size() > 1) {
-            log.error("Invalid application creating request. Application creating request must have single application "
-                    + "release.  Application name:" + application.getName() + " and type: " + application.getType());
-            return false;
-        }
+//        if (application.getApplicationReleases().size() > 1) {
+//            log.error("Invalid application creating request. Application creating request must have single application "
+//                    + "release.  Application name:" + application.getName() + " and type: " + application.getType());
+//            return false;
+//        }
 
         if (iconFile == null) {
             log.error("Icon file is not found for the application release. Application name: " + application.getName()

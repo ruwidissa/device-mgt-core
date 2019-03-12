@@ -43,7 +43,8 @@ public interface ApplicationManager {
      * @return Created application
      * @throws ApplicationManagementException Application Management Exception
      */
-    Application createApplication(Application application) throws ApplicationManagementException;
+    Application createApplication(Application application)
+            throws ApplicationManagementException, RequestValidatingException;
 
     /**
      * Updates an already existing application.
@@ -154,10 +155,9 @@ public interface ApplicationManager {
      * @param applicationId ID of the Application.
      * @param releaseUuid UUID of the Application Release.
      * @param state Lifecycle state to change the app
-     * @param checkExist whether it is needed to check if the app and release already exist in the database
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state, Boolean checkExist)
+    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state)
             throws ApplicationManagementException;
 
     /**
