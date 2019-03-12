@@ -25,11 +25,10 @@ target
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-features/application-mgt/org.wso2.carbon.application.mgt.publisher.feature/src/main/resources/publisher/node_modules/
-features/application-mgt/org.wso2.carbon.application.mgt.publisher.feature/src/main/resources/publisher/build/
-features/application-mgt/org.wso2.carbon.application.mgt.publisher.feature/src/main/resources/publisher/package-lock.json
-features/application-mgt/org.wso2.carbon.application.mgt.publisher.feature/src/main/resources/publisher/npm-debug.log
-features/application-mgt/org.wso2.carbon.application.mgt.publisher.feature/src/main/resources/publisher/dist/
+features/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui.feature/react-app/node_modules/
+features/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui.feature/react-app/package-lock.json
+features/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui.feature/react-app/npm-debug.log
+features/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui.feature/react-app/dist/
 components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/src/main/resources/store/node_modules/
 components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/src/main/resources/store/public/dist/
 components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/src/main/resources/store/package-lock.json
