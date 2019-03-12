@@ -29,121 +29,92 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.device.application.mgt.publisher.ui.feature</artifactId>
     <version>3.2.2-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>pom</packaging>
     <name>WSO2 Carbon - Application Management Publisher UI Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains Application Management publisher UI</description>
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <packagingExcludes>WEB-INF/lib/*cxf*.jar</packagingExcludes>
-                    <warName>publisher##${version}</warName>
-                    <webResources>
-                        <resource>
-                            <directory>${npm.output.directory}/dist</directory>
-                        </resource>
-                        <resource>
-                            <directory>${npm.output.directory}/public</directory>
-                            <targetPath>public</targetPath>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.wso2.carbon.maven</groupId>-->
-                <!--<artifactId>carbon-feature-plugin</artifactId>-->
-                <!--<version>${carbon.feature.plugin.version}</version>-->
-                <!--<extensions>true</extensions>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>1-p2-feature-generation</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<id>org.wso2.carbon.device.application.mgt.publisher.ui</id>-->
-                            <!--<propertyFile>../../etc/feature.properties</propertyFile>-->
-                            <!--<adviceFileContents>-->
-                                <!--<advice>-->
-                                    <!--<name>org.wso2.carbon.p2.category.type</name>-->
-                                    <!--<value>server</value>-->
-                                <!--</advice>-->
-                                <!--<advice>-->
-                                    <!--<name>org.eclipse.equinox.p2.type.group</name>-->
-                                    <!--<value>server</value>-->
-                                <!--</advice>-->
-                            <!--</adviceFileContents>-->
-                            <!--<bundles>-->
-                            <!--</bundles>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.5.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>npm install (initialize)</id>
+                        <id>copy</id>
+                        <phase>package</phase>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>copy</goal>
                         </goals>
-                        <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>react-app</workingDirectory>
-                            <executable>${npm.executable}</executable>
-                            <arguments>
-                                <argument>install</argument>
-                                <argument>--silent</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm run build (compile)</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <phase>compile</phase>
-                        <configuration>
-                            <workingDirectory>react-app</workingDirectory>
-                            <executable>${npm.executable}</executable>
-                            <arguments>
-                                <argument>run</argument>
-                                <argument>${npm.build.command}</argument>
-                            </arguments>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.devicemgt</groupId>
+                                    <artifactId>org.wso2.carbon.device.application.mgt.publisher.ui</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>
+                                        ${project.build.directory}/maven-shared-archive-resources/webapps
+                                    </outputDirectory>
+                                    <destFileName>publisher.war</destFileName>
+                                    <includes>**/*</includes>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <workingDirectory>${npm.working.dir}</workingDirectory>
-                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>resources</directory>
+                                    <includes>
+                                        <include>build.properties</include>
+                                        <include>p2.inf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.wso2.maven</groupId>
+                <artifactId>carbon-p2-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>p2-feature-generation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>p2-feature-gen</goal>
+                        </goals>
+                        <configuration>
+                            <id>org.wso2.carbon.device.application.mgt.publisher.ui</id>
+                            <propertiesFile>../../../features/etc/feature.properties
+                            </propertiesFile>
+                            <adviceFile>
+                                <properties>
+                                    <propertyDef>org.wso2.carbon.p2.category.type:server
+                                    </propertyDef>
+                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
+                                    </propertyDef>
+                                </properties>
+                            </adviceFile>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>platform-windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <!-- Override the executable names for Windows -->
-                <npm.executable>npm.cmd</npm.executable>
-            </properties>
-        </profile>
-    </profiles>
-    <properties>
-        <maven.test.skip>false</maven.test.skip>
-        <npm.executable>npm</npm.executable>
-        <npm.build.command>build_prod</npm.build.command>
-        <npm.working.dir>./react-app</npm.working.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <npm.output.directory>react-app</npm.output.directory>
-    </properties>
 </project>
