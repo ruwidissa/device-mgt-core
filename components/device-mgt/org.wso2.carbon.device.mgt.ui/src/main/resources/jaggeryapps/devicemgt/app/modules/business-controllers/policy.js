@@ -223,7 +223,13 @@ policyModule = function () {
                             appObjectToView = {};
                             appObjectToView["appName"] = appObjectFromRestEndpoint["name"];
                             appObjectToView["appId"] = appObjectFromRestEndpoint["id"];
-                            appObjectToView["packageName"] = appObjectFromRestEndpoint["appmeta"]["package"];
+                            if ("webapp" === appObjectFromRestEndpoint["platform"]) {
+                                appObjectToView["packageName"] = appObjectFromRestEndpoint["appmeta"]["weburl"];
+                                appObjectToView["type"] = "Web Clip"
+                            } else {
+                                appObjectToView["packageName"] = appObjectFromRestEndpoint["appmeta"]["package"];
+                                appObjectToView["type"] = "Mobile App"
+                            }
                             appObjectToView["version"] = appObjectFromRestEndpoint["version"];
                             appObjectToView["platform"] = appObjectFromRestEndpoint["platform"];
                             storeApps.push(appObjectToView);
