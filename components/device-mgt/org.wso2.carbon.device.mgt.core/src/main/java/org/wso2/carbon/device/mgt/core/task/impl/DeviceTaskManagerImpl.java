@@ -22,6 +22,7 @@ package org.wso2.carbon.device.mgt.core.task.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
@@ -84,18 +85,26 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
         try {
             List<Device> devices;
             List<String> operations;
-
+            List<DeviceIdentifier> validDeviceIdentifiers;
             operations = this.getValidOperationNames(); //list operations for each device type
             devices = deviceManagementProviderService.getAllDevices(deviceType, false);//list devices for each type
+
             if (!devices.isEmpty()) {
-                if (operations != null && DeviceManagerUtil.getValidDeviceIdentifiers(devices).size() != 0) {
+                if (log.isDebugEnabled() && deviceType != null) {
+                    log.info("Devices exist to add operations and the total number of devices are " + devices.size());
+                }
+                validDeviceIdentifiers = DeviceManagerUtil.getValidDeviceIdentifiers(devices);
+                if (!validDeviceIdentifiers.isEmpty()) {
+                    if (log.isDebugEnabled() && deviceType != null) {
+                        log.debug("Number of valid device identifier size to add operations: " + validDeviceIdentifiers
+                                .size());
+                    }
                     for (String str : operations) {
                         CommandOperation operation = new CommandOperation();
                         operation.setEnabled(true);
                         operation.setType(Operation.Type.COMMAND);
                         operation.setCode(str);
-                        deviceManagementProviderService.addOperation(deviceType, operation,
-                                DeviceManagerUtil.getValidDeviceIdentifiers(devices));
+                        deviceManagementProviderService.addOperation(deviceType, operation, validDeviceIdentifiers);
                     }
                 } else {
                     if (log.isDebugEnabled()) {
@@ -174,4 +183,3 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
     }
 
 }
-

@@ -147,8 +147,7 @@ public class OperationManagerImpl implements OperationManager {
     }
 
     @Override
-    public Activity addOperation(Operation operation,
-                                 List<DeviceIdentifier> deviceIds)
+    public Activity addOperation(Operation operation, List<DeviceIdentifier> deviceIds)
             throws OperationManagementException, InvalidDeviceException {
         if (log.isDebugEnabled()) {
             log.debug("operation:[" + operation.toString() + "]");
@@ -160,7 +159,13 @@ public class OperationManagerImpl implements OperationManager {
         try {
             DeviceIDHolder deviceValidationResult = DeviceManagerUtil.validateDeviceIdentifiers(deviceIds);
             List<DeviceIdentifier> validDeviceIds = deviceValidationResult.getValidDeviceIDList();
-            if (validDeviceIds.size() > 0) {
+            if (!validDeviceIds.isEmpty()) {
+                if (log.isDebugEnabled() && deviceIds.get(0).getType() != null) {
+                    log.debug("Adding operation for Device type : " + deviceIds.get(0).getType() + ", tenant ID:"
+                            + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() + ", domain:"
+                            + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain()
+                            + ", device count:" + deviceIds.size() + " operation type:" + operation.getCode());
+                }
                 DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
                 List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
                 if (authorizedDeviceIds.size() <= 0) {
@@ -285,6 +290,11 @@ public class OperationManagerImpl implements OperationManager {
     }
 
     private void sendNotification(Operation operation, Device device) {
+        if (log.isDebugEnabled()) {
+            log.debug("Sending notification for device id: " + device.getDeviceIdentifier() + ", type:" + device
+                    .getType() + ", tenant:" + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId()
+                    + ", domain:" + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        }
         NotificationStrategy notificationStrategy = getNotificationStrategy();
         /*
          * If notification strategy has not enable to send push notification using scheduler task we will send
@@ -315,6 +325,9 @@ public class OperationManagerImpl implements OperationManager {
                     log.error("Error occurred while setting push notification status to SCHEDULED.", ex);
                     OperationManagementDAOFactory.rollbackTransaction();
                 }
+            } catch (Exception e) {
+                log.error("Error occurred while sending notifications to " + device.getType() + " device carrying id '"
+                        + device.getDeviceIdentifier() + "'", e);
             }
         }
     }

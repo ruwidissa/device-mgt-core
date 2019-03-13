@@ -44,17 +44,18 @@ import java.util.Locale;
 @SuppressWarnings("unused")
 public class RegistryBasedLicenseManager implements LicenseManager {
 
-    private GenericArtifactManager artifactManager;
     private static final Log log = LogFactory.getLog(RegistryBasedLicenseManager.class);
 
-    public RegistryBasedLicenseManager() {
+    public RegistryBasedLicenseManager() {}
+
+    private GenericArtifactManager getArtifactManager() {
         Registry registry = CarbonContext.getThreadLocalCarbonContext().getRegistry(RegistryType.SYSTEM_GOVERNANCE);
         if (registry == null) {
             throw new IllegalArgumentException("Registry instance retrieved is null. Hence, " +
                     "'Registry based license manager cannot be initialized'");
         }
         try {
-            this.artifactManager = GenericArtifactManagerFactory.getTenantAwareGovernanceArtifactManager(registry);
+            return GenericArtifactManagerFactory.getTenantAwareGovernanceArtifactManager(registry);
         } catch (LicenseManagementException e) {
             throw new IllegalStateException("Failed to initialize generic artifact manager bound to " +
                     "Registry based license manager", e);
@@ -63,14 +64,17 @@ public class RegistryBasedLicenseManager implements LicenseManager {
 
     @Override
     public License getLicense(final String deviceType, final String languageCode) throws LicenseManagementException {
+        GenericArtifactManager artifactManager = getArtifactManager();
         try {
-            GenericArtifact artifact = this.getGenericArtifact(deviceType, languageCode);
-            if (artifact == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Generic artifact is null for '" + deviceType + "' device type. Hence license does not " +
-                            "have content");
-                }
-                return null;
+            GenericArtifact artifact = this.getGenericArtifact(artifactManager, deviceType, languageCode);
+            if (artifact == null) { //Adding a default license
+                License license = new License();
+                license.setName(deviceType);
+                license.setVersion("1.0.0");
+                license.setLanguage("en_US");
+                license.setText("This is license text");
+                addLicense(deviceType, license);
+                return license;
             }
             return this.populateLicense(artifact);
         } catch (GovernanceException e) {
@@ -104,8 +108,9 @@ public class RegistryBasedLicenseManager implements LicenseManager {
 
     @Override
     public void addLicense(final String deviceType, final License license) throws LicenseManagementException {
+        GenericArtifactManager artifactManager = getArtifactManager();
         try {
-            GenericArtifact artifact = this.getGenericArtifact(deviceType, license.getLanguage());
+            GenericArtifact artifact = this.getGenericArtifact(artifactManager, deviceType, license.getLanguage());
             if(artifact != null) {
                 artifact.setAttribute(DeviceManagementConstants.LicenseProperties.NAME, license.getName());
                 artifact.setAttribute(DeviceManagementConstants.LicenseProperties.VERSION, license.getVersion());
@@ -147,8 +152,8 @@ public class RegistryBasedLicenseManager implements LicenseManager {
         }
     }
 
-    private GenericArtifact getGenericArtifact(final String deviceType, final String languageCode)
-            throws GovernanceException {
+    private GenericArtifact getGenericArtifact(GenericArtifactManager artifactManager, final String deviceType, final
+    String languageCode) throws GovernanceException {
         GenericArtifact[] artifacts = artifactManager.findGenericArtifacts(new GenericArtifactFilter() {
             @Override
             public boolean matches(GenericArtifact artifact) throws GovernanceException {

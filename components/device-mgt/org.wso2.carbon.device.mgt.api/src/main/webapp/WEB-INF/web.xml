@@ -45,6 +45,13 @@
         <param-value>true</param-value>
     </context-param>
 
+    <context-param>
+        <param-name>nonSecuredEndPoints</param-name>
+        <param-value>
+            /api/device-mgt/v1.0/users/validate
+        </param-value>
+    </context-param>
+
     <!--publish to apim-->
     <context-param>
         <param-name>managed-api-enabled</param-name>
