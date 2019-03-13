@@ -39,7 +39,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
@@ -516,6 +515,101 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     /**
+     * Get device count of user.
+     *
+     * @return device count
+     * @throws DeviceManagementDAOException
+     */
+    @Override
+    public int getDeviceCount(String type, String status, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int deviceCount = 0;
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT COUNT(d.ID) AS DEVICE_COUNT FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
+                    "TENANT_ID = ? AND STATUS = ?) e, DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND " +
+                    "d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? AND t.NAME=?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            stmt.setString(2, status);
+            stmt.setInt(3, tenantId);
+            stmt.setString(4, type);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                deviceCount = rs.getInt("DEVICE_COUNT");
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while getting the device count", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return deviceCount;
+    }
+
+
+    public List<String> getDeviceIdentifiers(String type, String status, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<String> deviceIDs = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT d.DEVICE_IDENTIFICATION AS DEVICE_IDS FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
+                    "TENANT_ID = ? AND STATUS = ?) e, DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND " +
+                    "d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ? AND t.NAME=?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            stmt.setString(2, status);
+            stmt.setInt(3, tenantId);
+            stmt.setString(4, type);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                deviceIDs.add(rs.getString("DEVICE_IDS"));
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving tenants which have " +
+                    "device registered.", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return deviceIDs;
+    }
+
+    @Override
+    public boolean setEnrolmentStatusInBulk(String deviceType, String status,
+                                      int tenantId, List<String> devices) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        try {
+            conn = this.getConnection();
+            StringBuilder sql = new StringBuilder("UPDATE DM_ENROLMENT SET STATUS = ? WHERE DEVICE_ID IN " +
+                    "(SELECT d.ID FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.DEVICE_IDENTIFICATION IN (");
+            for (int i = 0; i < devices.size(); i++) {
+                sql.append("?,");
+            }
+            sql.deleteCharAt(sql.length() - 1);
+            sql.append(") AND t.NAME = ? AND d.TENANT_ID = ?) AND TENANT_ID = ?");
+            stmt = conn.prepareStatement(sql.toString());
+            stmt.setString(1, status);
+            int index = 1;
+            for (String device : devices) {
+                stmt.setString(++index, device);
+            }
+            stmt.setString(++index, deviceType);
+            stmt.setInt(++index, tenantId);
+            stmt.setInt(++index, tenantId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while updating enrollment status in bulk", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return true;
+    }
+
+    /**
      * Get device count of all devices.
      *
      * @return device count
@@ -769,8 +863,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d.ID) AS DEVICE_COUNT FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
-                         "TENANT_ID = ? AND STATUS = ?) e, DM_DEVICE d, " +
-                         "DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
+                    "TENANT_ID = ? AND STATUS = ?) e, DM_DEVICE d, " +
+                    "DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             stmt.setString(2, status);
@@ -782,7 +876,36 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while fetching the list of devices that matches to status " +
-                                                   "'" + status + "'", e);
+                    "'" + status + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return deviceCount;
+    }
+
+    @Override
+    public int getDeviceCountByStatus(String deviceType, String status, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        int deviceCount = 0;
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT COUNT(d.ID) AS DEVICE_COUNT FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
+                    "TENANT_ID = ? AND STATUS = ?) e, DM_DEVICE d, " +
+                    "DM_DEVICE_TYPE t WHERE t.NAME = ? AND d.ID = e.DEVICE_ID AND d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            stmt.setString(2, status);
+            stmt.setString(3, deviceType);
+            stmt.setInt(4, tenantId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                deviceCount = rs.getInt("DEVICE_COUNT");
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices that matches to status " +
+                    "'" + status + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }

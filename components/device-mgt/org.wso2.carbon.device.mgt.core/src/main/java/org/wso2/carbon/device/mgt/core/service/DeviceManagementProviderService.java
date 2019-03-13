@@ -27,7 +27,6 @@ import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.app.mgt.DeviceApplicationMapping;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
@@ -466,6 +465,29 @@ public interface DeviceManagementProviderService {
      */
     int getDeviceCount() throws DeviceManagementException;
 
+    /**
+     * Method to get the count of devices with given status and type.
+     *
+     * @param deviceType Device type name
+     * @param status Device status
+     *
+     * @return device count
+     * @throws DeviceManagementException If some unusual behaviour is observed while counting
+     *                                   the devices
+     */
+    int getDeviceCount(String deviceType, EnrolmentInfo.Status status) throws DeviceManagementException;
+
+    /**
+     * Method to get the count of all types of devices with given status.
+     *
+     * @param status Device status
+     *
+     * @return device count
+     * @throws DeviceManagementException If some unusual behaviour is observed while counting
+     *                                   the devices
+     */
+    int getDeviceCount(EnrolmentInfo.Status status) throws DeviceManagementException;
+
     HashMap<Integer, Device> getTenantedDevice(DeviceIdentifier deviceIdentifier) throws DeviceManagementException;
 
     void sendEnrolmentInvitation(String templateName, EmailMetaInfo metaInfo) throws DeviceManagementException,
@@ -638,4 +660,10 @@ public interface DeviceManagementProviderService {
 
     List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
                                             int geohashLength) throws DeviceManagementException;
+
+    int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
+
+    List<String> getDeviceIdentifiersByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
+
+    boolean bulkUpdateDeviceStatus(String deviceType, List<String> deviceList, String status) throws DeviceManagementException;
 }

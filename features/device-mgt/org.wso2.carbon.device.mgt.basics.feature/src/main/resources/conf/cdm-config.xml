@@ -148,5 +148,11 @@
         <MaximumMessageBufferSize>640</MaximumMessageBufferSize>
     </RemoteSessionConfiguration>
     <DefaultGroupsConfiguration>BYOD,COPE</DefaultGroupsConfiguration>
+    <EnrolmentNotificationConfiguration>
+        <Enabled>false</Enabled>
+        <NotifyThroughExtension>false</NotifyThroughExtension>
+        <ExtensionClass>org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier</ExtensionClass>
+        <NotifyingInternalHost>http://localhost:8280</NotifyingInternalHost>
+    </EnrolmentNotificationConfiguration>
 </DeviceMgtConfiguration>
 

@@ -1,12 +1,13 @@
-image: shinyay/docker-mvn-jdk8:3.5.0
+image: charithag/docker-mvn-jdk8:latest
 
 variables:
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode --errors --show-version"
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
 
 cache:
   paths:
     - .m2/repository/
+    - target/
 
 build:
   stage: build
@@ -23,4 +24,4 @@ deploy:
   script:
     - mvn $MAVEN_CLI_OPTS deploy -Dmaven.test.skip=true
   only:
-    - master
+    - master@entgra/carbon-device-mgt

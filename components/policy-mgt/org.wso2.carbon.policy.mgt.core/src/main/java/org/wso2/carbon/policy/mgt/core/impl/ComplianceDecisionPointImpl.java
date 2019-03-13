@@ -14,6 +14,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2018, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 
@@ -123,71 +140,69 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
     public void reEnforcePolicy(DeviceIdentifier deviceIdentifier, NonComplianceData complianceData) throws
             PolicyComplianceException {
 
-        try {
-            Policy policy = complianceData.getPolicy();
-            if (policy != null) {
-                List<DeviceIdentifier> deviceIdentifiers = new ArrayList<DeviceIdentifier>();
-                deviceIdentifiers.add(deviceIdentifier);
+        // do not re-enforce policy if the only feature to be applied is enrollment app install
+        if (complianceData.getComplianceFeatures().size() != 1 || !PolicyManagementConstants
+                .ENROLLMENT_APP_INSTALL_FEATURE_CODE.equals(complianceData.getComplianceFeatures().get(0)
+                        .getFeatureCode())) {
+            try {
+                Policy policy = complianceData.getPolicy();
+                if (policy != null) {
+                    List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
+                    deviceIdentifiers.add(deviceIdentifier);
 
+                    List<ProfileOperation> profileOperationList = new ArrayList<>();
 
-                List<ProfileOperation> profileOperationList = new ArrayList<ProfileOperation>();
+                    PolicyOperation policyOperation = new PolicyOperation();
+                    policyOperation.setEnabled(true);
+                    policyOperation.setType(Operation.Type.POLICY);
+                    policyOperation.setCode(PolicyOperation.POLICY_OPERATION_CODE);
 
-                PolicyOperation policyOperation = new PolicyOperation();
-                policyOperation.setEnabled(true);
-                policyOperation.setType(Operation.Type.POLICY);
-                policyOperation.setCode(PolicyOperation.POLICY_OPERATION_CODE);
-
-
-                if (complianceData.isCompletePolicy()) {
-                    List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
-
-                    for (ProfileFeature feature : effectiveFeatures) {
-                        ProfileOperation profileOperation = new ProfileOperation();
-
-                        profileOperation.setCode(feature.getFeatureCode());
-                        profileOperation.setEnabled(true);
-                        profileOperation.setStatus(Operation.Status.PENDING);
-                        profileOperation.setType(Operation.Type.PROFILE);
-                        profileOperation.setPayLoad(feature.getContent());
-                        profileOperationList.add(profileOperation);
-                    }
-                } else {
-                    List<ComplianceFeature> noneComplianceFeatures = complianceData.getComplianceFeatures();
-                    List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
-                    for (ComplianceFeature feature : noneComplianceFeatures) {
-
-                        for (ProfileFeature pf : effectiveFeatures) {
-                            if (pf.getFeatureCode().equalsIgnoreCase(feature.getFeatureCode())) {
-
-                                ProfileOperation profileOperation = new ProfileOperation();
-
-                                profileOperation.setCode(feature.getFeatureCode());
-                                profileOperation.setEnabled(true);
-                                profileOperation.setStatus(Operation.Status.PENDING);
-                                profileOperation.setType(Operation.Type.PROFILE);
-                                profileOperation.setPayLoad(pf.getContent());
-                                profileOperationList.add(profileOperation);
+                    if (complianceData.isCompletePolicy()) {
+                        List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
+                        for (ProfileFeature feature : effectiveFeatures) {
+                            ProfileOperation profileOperation = new ProfileOperation();
+                            profileOperation.setCode(feature.getFeatureCode());
+                            profileOperation.setEnabled(true);
+                            profileOperation.setStatus(Operation.Status.PENDING);
+                            profileOperation.setType(Operation.Type.PROFILE);
+                            profileOperation.setPayLoad(feature.getContent());
+                            profileOperationList.add(profileOperation);
+                        }
+                    } else {
+                        List<ComplianceFeature> noneComplianceFeatures = complianceData.getComplianceFeatures();
+                        List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
+                        for (ComplianceFeature feature : noneComplianceFeatures) {
+                            for (ProfileFeature pf : effectiveFeatures) {
+                                if (pf.getFeatureCode().equalsIgnoreCase(feature.getFeatureCode())) {
+                                    ProfileOperation profileOperation = new ProfileOperation();
+                                    profileOperation.setCode(feature.getFeatureCode());
+                                    profileOperation.setEnabled(true);
+                                    profileOperation.setStatus(Operation.Status.PENDING);
+                                    profileOperation.setType(Operation.Type.PROFILE);
+                                    profileOperation.setPayLoad(pf.getContent());
+                                    profileOperationList.add(profileOperation);
+                                }
                             }
                         }
                     }
-                }
-                policyOperation.setProfileOperations(profileOperationList);
-                policyOperation.setPayLoad(policyOperation.getProfileOperations());
+                    policyOperation.setProfileOperations(profileOperationList);
+                    policyOperation.setPayLoad(policyOperation.getProfileOperations());
 
-                //TODO: Fix this properly later adding device type to be passed in when the task manage executes "addOperations()"
-                String type = null;
-                if (deviceIdentifiers.size() > 0) {
-                    type = deviceIdentifiers.get(0).getType();
-                }
-                PolicyManagementDataHolder.getInstance().getDeviceManagementService().
-                        addOperation(type, policyOperation, deviceIdentifiers);
+                    //TODO: Fix this properly later adding device type to be passed in when the task manage executes "addOperations()"
+                    String type = null;
+                    if (deviceIdentifiers.size() > 0) {
+                        type = deviceIdentifiers.get(0).getType();
+                    }
+                    PolicyManagementDataHolder.getInstance().getDeviceManagementService().
+                            addOperation(type, policyOperation, deviceIdentifiers);
 
+                }
+            } catch (InvalidDeviceException e) {
+                throw new PolicyComplianceException("Invalid Device identifiers found.", e);
+            } catch (OperationManagementException e) {
+                throw new PolicyComplianceException("Error occurred while re-enforcing the policy to device " + deviceIdentifier.getId() + " - " +
+                        deviceIdentifier.getType(), e);
             }
-        } catch (InvalidDeviceException e) {
-            throw new PolicyComplianceException("Invalid Device identifiers found.", e);
-        } catch (OperationManagementException e) {
-            throw new PolicyComplianceException("Error occurred while re-enforcing the policy to device " + deviceIdentifier.getId() + " - " +
-                    deviceIdentifier.getType(), e);
         }
     }
 

@@ -301,7 +301,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
 
     @Test(expectedExceptions = DeviceManagementException.class)
     public void testGetDeviceCountForNullUser() throws DeviceManagementException {
-        deviceMgtService.getDeviceCount(null);
+        deviceMgtService.getDeviceCount((String) null);
     }
 
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})

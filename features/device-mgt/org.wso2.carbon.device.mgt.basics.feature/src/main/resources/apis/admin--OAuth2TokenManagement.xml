@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><api xmlns="http://ws.apache.org/ns/synapse" name="admin--OAuth2TokenManagement" context="/oauth2" version="1.0.0" version-type="context">
+    <resource methods="POST" uri-template="/introspect" faultSequence="fault">
+        <inSequence>
+            <property name="uri.var.portnum" expression="get-property('system','iot.core.https.port')"/>
+            <property name="uri.var.hostname" expression="get-property('system','iot.core.host')"/>
+            <property name="api.ut.backendRequestTime" expression="get-property('SYSTEM_TIME')"/>
+            <property name="AM_KEY_TYPE" value="PRODUCTION" scope="default"/>
+            <filter source="$ctx:AM_KEY_TYPE" regex="PRODUCTION">
+                <then>
+                    <send>
+                        <endpoint name="admin--OAuth2TokenManagement_APIproductionEndpoint_0">
+                            <http uri-template="https://{uri.var.hostname}:{uri.var.portnum}/oauth2"/>
+                            <property name="ENDPOINT_ADDRESS" value="https://{uri.var.hostname}:{uri.var.portnum}/oauth2"/>
+                        </endpoint>
+                    </send>
+                </then>
+                <else>
+                    <sequence key="_sandbox_key_error_"/>
+                </else>
+            </filter>
+        </inSequence>
+        <outSequence>
+            <class name="org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtResponseHandler"/>
+            <send/>
+        </outSequence>
+    </resource>
+</api>

@@ -788,4 +788,52 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GET
+    @Override
+    @Path("/status/count/{type}/{status}")
+    public Response getDeviceCountByStatus(@PathParam("type") String type, @PathParam("status") String status) {
+        int deviceCount;
+        try {
+            deviceCount = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCountOfTypeByStatus(type, status);
+            return Response.status(Response.Status.OK).entity(deviceCount).build();
+        } catch (DeviceManagementException e) {
+            String errorMessage = "Error while retrieving device count.";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/status/ids/{type}/{status}")
+    public Response getDeviceIdentifiersByStatus(@PathParam("type") String type, @PathParam("status") String status) {
+        List<String> deviceIds;
+        try {
+            deviceIds = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(type, status);
+            return Response.status(Response.Status.OK).entity(deviceIds.toArray(new String[0])).build();
+        } catch (DeviceManagementException e) {
+            String errorMessage = "Error while obtaining list of devices";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
+        }
+    }
+
+    @PUT
+    @Override
+    @Path("/status/update/{type}/{status}")
+    public Response bulkUpdateDeviceStatus(@PathParam("type") String type, @PathParam("status") String status,
+                                           @Valid List<String> deviceList) {
+        try {
+            DeviceMgtAPIUtils.getDeviceManagementService().bulkUpdateDeviceStatus(type, deviceList, status);
+        } catch (DeviceManagementException e) {
+            String errorMessage = "Error while updating device status in bulk.";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
+        }
+        return Response.status(Response.Status.OK).build();
+    }
 }

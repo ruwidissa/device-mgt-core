@@ -1,7 +1,9 @@
 {{#zone "content"}}
     {{#if isAuthorized}}
         <span id="logged-in-user" class="hidden" data-username="{{@user.username}}" data-domain="{{@user.domain}}"
-              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}" data-isDeviceOwnerEnabled="{{isDeviceOwnerEnabled}}"></span>
+              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}"
+              data-isDeviceOwnerEnabled="{{isDeviceOwnerEnabled}}" data-storeapps="{{storeApps}}">
+        </span>
         <div class="row">
             <div class="col-md-12">
 
