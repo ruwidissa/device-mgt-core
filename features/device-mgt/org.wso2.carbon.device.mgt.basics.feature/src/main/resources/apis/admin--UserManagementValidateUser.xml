@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><api xmlns="http://ws.apache.org/ns/synapse" name="admin--UserValidateManagement" context="/api/device-mgt/v1.0/users/validate" version="1.0.0" version-type="context">
+<?xml version="1.0" encoding="UTF-8"?><api xmlns="http://ws.apache.org/ns/synapse" name="admin--UserManagementValidateUser" context="/api/device-mgt/v1.0/users/validate" version="1.0.0" version-type="context">
     <resource methods="POST" uri-template="/" faultSequence="fault">
         <inSequence>
             <property name="uri.var.portnum" expression="get-property('system','iot.core.https.port')"/>
