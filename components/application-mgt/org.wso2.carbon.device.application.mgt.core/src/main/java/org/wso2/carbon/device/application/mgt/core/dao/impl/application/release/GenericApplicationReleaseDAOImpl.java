@@ -360,7 +360,8 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * @param applicationRelease Application Release the properties of which that need to be inserted.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    @Override public ApplicationRelease updateRelease(int applicationId, ApplicationRelease applicationRelease, int tenantId)
+    @Override
+    public ApplicationRelease updateRelease(int applicationId, ApplicationRelease applicationRelease, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
@@ -389,7 +390,9 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             statement.setInt(15, applicationId);
             statement.setInt(16, tenantId);
             statement.setInt(17, applicationRelease.getId());
-            statement.executeUpdate();
+            if (statement.executeUpdate() == 0) {
+                return null;
+            }
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
                     "Database connection exception while trying to update the application release", e);

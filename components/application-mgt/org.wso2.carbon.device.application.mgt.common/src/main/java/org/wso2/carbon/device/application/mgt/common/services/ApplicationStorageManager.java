@@ -53,8 +53,7 @@ public interface ApplicationStorageManager {
      * @throws ResourceManagementException Resource Management Exception.
      */
     ApplicationRelease updateImageArtifacts(ApplicationRelease applicationRelease, InputStream iconFile,
-            InputStream bannerFile, List<InputStream> screenshots)
-            throws ResourceManagementException, ApplicationManagementException;
+            InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
 
     /**
      * To upload release artifacts for an Application.

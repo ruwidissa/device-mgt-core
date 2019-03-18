@@ -164,6 +164,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     count++;
                 }
             }
+            applicationRelease = uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream,
+                    screenShotStreams);
             return applicationRelease;
         } catch (ApplicationStorageManagementException e) {
             throw new ApplicationStorageManagementException("Application Storage exception while trying to"
@@ -241,16 +243,13 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         return applicationRelease;
     }
 
-    public InputStream[] cloneInputStream(InputStream inputStream) throws ApplicationStorageManagementException {
+    private InputStream[] cloneInputStream(InputStream inputStream) throws ApplicationStorageManagementException {
 
-        ByteArrayOutputStream byteArrayOutputStream = null;
-
-        try {
-            byteArrayOutputStream = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
             byte[] buffer = new byte[BUFFER_SIZE];
             int len;
-            while ((len = inputStream.read(buffer)) > -1 ) {
+            while ((len = inputStream.read(buffer)) > -1) {
                 byteArrayOutputStream.write(buffer, 0, len);
             }
             byteArrayOutputStream.flush();
@@ -259,17 +258,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             InputStream stream2 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             InputStream stream3 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 
-            return new InputStream[]{stream1, stream2, stream3};
+            return new InputStream[] { stream1, stream2, stream3 };
         } catch (IOException e) {
             throw new ApplicationStorageManagementException("Error occurred while cloning input stream ", e);
-        } finally {
-            if (byteArrayOutputStream != null) {
-                try {
-                    byteArrayOutputStream.close();
-                } catch (IOException e) {
-
-                }
-            }
         }
     }
 
@@ -312,7 +303,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     @Override public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths)
             throws ApplicationStorageManagementException {
         for (String directoryBasePath : directoryPaths) {
-            deleteApplicationReleaseArtifacts(directoryBasePath);
+            deleteApplicationReleaseArtifacts(storagePath + directoryBasePath);
         }
     }
 

@@ -176,25 +176,23 @@ public interface ApplicationManager {
      * @param iconFileStream    icon file of the release
      * @param bannerFileStream    bannerFileStream of the release.
      * @param attachments    screenshot attachments of the release
-     * @return Updated Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    ApplicationRelease updateApplicationImageArtifact(int appId, String uuid, InputStream iconFileStream, InputStream
-            bannerFileStream, List<InputStream> attachments)
-            throws ApplicationManagementException, ResourceManagementException;
+    void updateApplicationImageArtifact(int appId, String uuid, InputStream iconFileStream, InputStream
+            bannerFileStream, List<InputStream> attachments) throws ApplicationManagementException;
 
 
     /**
      * To update release images.
      *
      * @param appId    ID of the Application
+     * @param appType   Application type
      * @param uuid    uuid of the Application
      * @param binaryFile    binaryFile of the release.
-     * @return Updated Application Release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    ApplicationRelease updateApplicationArtifact(int appId, String uuid, InputStream binaryFile)
-            throws ApplicationManagementException, ResourceManagementException, RequestValidatingException, DeviceManagementException;
+    void updateApplicationArtifact(int appId, String appType, String uuid, InputStream binaryFile)
+            throws ApplicationManagementException;
 
 
     /**

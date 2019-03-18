@@ -444,6 +444,10 @@ public interface ApplicationManagementAPI {
                             code = 200,
                             message = "OK. \n Successfully updated artifacts."),
                     @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Requesting to update image artifacts with invalid application "
+                                    + "or application release data."),
+                    @ApiResponse(
                             code = 403,
                             message = "FORBIDDEN. \n Can't Update the application release in PUBLISHED or DEPRECATED "
                                     + "state. Hence please demote the application and update the application release"),
@@ -519,6 +523,9 @@ public interface ApplicationManagementAPI {
                             code = 400,
                             message = "Bad Request. \n " +
                                     "Application artifact updating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found application/application release to update applocation release artifact."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
