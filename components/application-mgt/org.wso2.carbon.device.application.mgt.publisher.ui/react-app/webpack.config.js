@@ -68,13 +68,22 @@ const config = {
             },
             {
                 test: /\.less$/,
-                use: [{
-                    loader: "style-loader" // creates style nodes from JS strings
-                }, {
-                    loader: "css-loader" // translates CSS into CommonJS
-                }, {
-                    loader: "less-loader" // compiles Less to CSS
-                }]
+                use: [
+                    {
+                        loader: "style-loader" // creates style nodes from JS strings
+                    },
+                    {
+                        loader: "css-loader", // translates CSS into CommonJS
+                        options: {
+                            sourceMap: true,
+                            modules: true,
+                            localIdentName: "[local]___[hash:base64:5]"
+                        }
+                    },
+                    {
+                        loader: "less-loader" // compiles Less to CSS
+                    }
+                ]
             },
             {
                 test: /\.(woff|woff2|eot|ttf|svg)$/,
