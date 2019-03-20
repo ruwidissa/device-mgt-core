@@ -551,12 +551,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
 
             if (application == null) {
-                throw new ApplicationManagementException("Invalid Application");
+                throw new NotFoundException("Couldn't found an application for Application ID: " + applicationId);
             }
 
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
                     .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
-                throw new ApplicationManagementException(
+                throw new ForbiddenException(
                         "You don't have permission to delete this application. In order to delete an application you "
                                 + "need to have required permission. Application ID: " + applicationId);
             }
@@ -723,7 +723,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             ConnectionManagerUtil.rollbackDBTransaction();
                             throw new ApplicationManagementException(
                                     "Can't delete the application release, You have to move the "
-                                            + "lifecycle state from " + currentState + " to acceptable state");
+                                            + "lifecycle state from " + currentState + " to " + nextState);
                         }
                         currentState = nextState;
                     }
@@ -740,7 +740,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementDAOException(
                     "Error ocured when getting application data or application release data for application id of "
                             + applicationId + " application release UUID of the " + releaseUuid);
-
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
@@ -1123,7 +1122,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 isExistingAppRestricted = true;
             }
 
-            //todo check whether user is application owner
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !(
                     isExistingAppRestricted && isRoleExists(existingApplication.getUnrestrictedRoles(), userName))) {
                 ConnectionManagerUtil.rollbackDBTransaction();

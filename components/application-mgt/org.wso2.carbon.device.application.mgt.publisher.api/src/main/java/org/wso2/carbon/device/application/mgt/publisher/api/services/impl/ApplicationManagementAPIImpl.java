@@ -499,11 +499,16 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             String msg = "Invalid request to update application release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        } catch(NotFoundException e){
+        } catch (NotFoundException e) {
             String msg = "Couldn't found application or application release for application id: " + applicationId
                     + " and application release UUID " + applicationUUID;
-            log.error(msg,e);
+            log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "You don't have require permission to update the application release which has UUID "
+                    + applicationUUID;
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         }
         catch (ApplicationManagementException e) {
             String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
@@ -527,14 +532,23 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationStorageManager.deleteAllApplicationReleaseArtifacts(storedLocations);
             String responseMsg = "Successfully deleted the application and application releases: " + applicationId;
             return Response.status(Response.Status.OK).entity(responseMsg).build();
+        } catch (NotFoundException e) {
+            String msg =
+                    "Couldn't found application for application id: " + applicationId + " to delete the application";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "You don't have require permission to delete the application which has ID " + applicationId;
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while deleting the application: " + applicationId;
             log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationStorageManagementException e) {
             String msg = "Error occurred while deleting the application storage: " + applicationId;
             log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
@@ -550,14 +564,25 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
             String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
             return Response.status(Response.Status.OK).entity(responseMsg).build();
-        } catch (ApplicationManagementException e) {
+        }  catch (NotFoundException e) {
+            String msg = "Couldn't found application release which is having application id: " + applicationId
+                    + " and application release UUID:" + releaseUuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg =
+                    "You don't have require permission to delete the application release which has UUID " + releaseUuid
+                            + " and application ID " + applicationId;
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        }catch (ApplicationManagementException e) {
             String msg = "Error occurred while deleting the application: " + applicationId;
             log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationStorageManagementException e) {
             String msg = "Error occurred while deleting the application storage: " + applicationId;
             log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
