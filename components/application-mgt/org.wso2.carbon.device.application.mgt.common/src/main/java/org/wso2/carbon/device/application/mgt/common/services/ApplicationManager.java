@@ -67,11 +67,9 @@ public interface ApplicationManager {
      *
      * @param applicationId ID of tha application
      * @param releaseUuid UUID of tha application release
-     * @param handleConnections Whether it is necessary handle DB connections.
      * @throws ApplicationManagementException Application Management Exception
      */
-    String deleteApplicationRelease(int applicationId, String releaseUuid, boolean handleConnections) throws
-            ApplicationManagementException;
+    String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.
@@ -131,14 +129,6 @@ public interface ApplicationManager {
      */
     void changeLifecycleState(int applicationId, String releaseUuid, LifecycleState state)
             throws ApplicationManagementException;
-
-    /**
-     * Get the application if application is an accessible one.
-     *
-     * @param applicationId ID of the Application.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    Application getApplicationIfAccessible(int applicationId) throws ApplicationManagementException;
 
     /**
      * To update release images such as icons, banner and screenshots.

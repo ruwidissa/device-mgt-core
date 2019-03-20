@@ -484,6 +484,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+//    todo rethink about this method
     private List<ApplicationRelease> getReleases(Application application, String releaseState)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -545,15 +546,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
         Application application;
 
         try {
-            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                throw new ApplicationManagementException(
-                        "You don't have permission to delete this application. In order to delete an application you "
-                                + "need to have admin permission");
-            }
             ConnectionManagerUtil.beginDBTransaction();
-            application = getApplicationIfAccessible(applicationId);
+            application = this.applicationDAO.getApplicationById(applicationId, tenantId);
+
+
             if (application == null) {
                 throw new ApplicationManagementException("Invalid Application");
+            }
+
+            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
+                    .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                throw new ApplicationManagementException(
+                        "You don't have permission to delete this application. In order to delete an application you "
+                                + "need to have required permission. Application ID: " + applicationId);
             }
             List<ApplicationRelease> applicationReleases = getReleases(application, null);
             if (log.isDebugEnabled()) {
@@ -580,6 +585,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
                                             tenantId);
+                        } else {
+                            ConnectionManagerUtil.rollbackDBTransaction();
+                            throw new ApplicationManagementException(
+                                    "Can't delete application release which has the UUID:" + applicationRelease
+                                            .getUuid() + " and its belongs to the  application which has application ID:"
+                                            + applicationId + " You have to move the lifecycle state from "
+                                            + currentState + " to acceptable state");
                         }
                         currentState = nextState;
                     }
@@ -652,21 +664,44 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public String deleteApplicationRelease(int applicationId, String releaseUuid, boolean handleConnections)
+    public String deleteApplicationRelease(int applicationId, String releaseUuid)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        Application application = getApplicationIfAccessible(applicationId);
-        if (application == null) {
-            throw new ApplicationManagementException("Invalid Application ID is received");
-        }
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        Application application;
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationRelease applicationRelease = getAppReleaseIfExists(applicationId, releaseUuid);
-            LifecycleState appLifecycleState = getLifecycleState(applicationId, applicationRelease.getUuid());
+            application = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            if (application == null) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                throw new NotFoundException("Couldn't find an application for application ID: " + applicationId);
+            }
+            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
+                    .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                throw new ForbiddenException(
+                        "You don't have permission for deleting application release. Application id: " + applicationId
+                                + " and release UUID: " + releaseUuid);
+            }
+
+            ApplicationRelease applicationRelease = this.applicationReleaseDAO
+                    .getReleaseByIds(applicationId, releaseUuid, tenantId);
+            if (applicationRelease == null) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                throw new NotFoundException("Couldn't find an application release for application ID: " + applicationId
+                        + " and release UUID: " + releaseUuid);
+            }
+            LifecycleState appLifecycleState = this.lifecycleStateDAO
+                    .getLatestLifeCycleState(applicationId, releaseUuid);
+            if (appLifecycleState == null) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                throw new NotFoundException(
+                        "Couldn't find an lifecycle sate for application ID: " + applicationId + " and UUID: "
+                                + releaseUuid);
+            }
             String currentState = appLifecycleState.getCurrentState();
-            if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState
-                    .REJECTED.toString().equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals
-                    (currentState)) {
+            if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState.REJECTED.toString()
+                    .equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals(currentState)) {
                 LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
@@ -676,23 +711,46 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                     tenantId);
                     ConnectionManagerUtil.commitDBTransaction();
                 } else {
-//                    todo
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    throw new ApplicationManagementException("Lifecycle State Validation failed. Application Id: " +
-                            applicationId + " Application release UUID: "  + releaseUuid);                }
+                    List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
+                            AppLifecycleState.REMOVED.toString());
+                    for (String nextState : lifecycleFlow) {
+                        LifecycleState lifecycleState = getLifecycleStateInstant(nextState, currentState);
+                        if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
+                            this.lifecycleStateDAO
+                                    .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
+                                            tenantId);
+                        } else {
+                            ConnectionManagerUtil.rollbackDBTransaction();
+                            throw new ApplicationManagementException(
+                                    "Can't delete the application release, You have to move the "
+                                            + "lifecycle state from " + currentState + " to acceptable state");
+                        }
+                        currentState = nextState;
+                    }
+                }
             } else {
                 ConnectionManagerUtil.rollbackDBTransaction();
-                throw new ApplicationManagementException("Can't delete the application release, You have to move the " +
-                        "lifecycle state from " + currentState + " to acceptable " +
-                        "state");
+                throw new ApplicationManagementException(
+                        "Can't delete the application release, You have to move the " + "lifecycle state from "
+                                + currentState + " to acceptable " + "state");
             }
             return applicationRelease.getAppHashValue();
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementDAOException(
+                    "Error ocured when getting application data or application release data for application id of "
+                            + applicationId + " application release UUID of the " + releaseUuid);
+
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-//            todo
-            throw new ApplicationManagementException("Can't delete the application release, You have to move the " +
-                    "lifecycle state from " + "" + " to acceptable " +
-                    "state");
+            throw new ApplicationManagementException(
+                    "Error occured when deleting application release for application ID of " + applicationId
+                            + " and application release UUID of " + releaseUuid, e);
+        } catch (UserStoreException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            throw new ApplicationManagementException(
+                    "Error occured when checking permission for executing application release update. Application ID: "
+                            + applicationId + " and Application UUID: " + releaseUuid);
         }
     }
 
@@ -789,74 +847,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
         }
         return false;
-    }
-
-    /**
-     * Get the application if application is an accessible one.
-     *
-     * @param applicationId ID of the Application.
-     * @return Application related with the UUID
-     */
-    public Application getApplicationIfAccessible(int applicationId) throws ApplicationManagementException {
-        if (applicationId <= 0) {
-            throw new ApplicationManagementException("Application id could,t be a negative integer. Hence please add " +
-                                                             "valid application id.");
-        }
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        Application application;
-        boolean isAppAllowed = false;
-        try {
-            application = this.applicationDAO.getApplicationById(applicationId, tenantId);
-            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                return application;
-            }
-
-            if (application != null && !application.getUnrestrictedRoles().isEmpty()) {
-                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
-                    isAppAllowed = true;
-                }
-            } else {
-                isAppAllowed = true;
-            }
-
-            if (!isAppAllowed) {
-                throw new NotFoundException("Application of the " + applicationId
-                        + " does not exist. Please check whether user have permissions to access the application.");
-            }
-            return application;
-        } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while getting application with the " + "application id " + applicationId, e);
-        }
-    }
-
-    /**
-     * Get the application release for given UUID if application release is exists and application id is valid one.
-     *
-     * @param applicationUuid UUID of the Application.
-     * @return Application related with the UUID
-     */
-    private ApplicationRelease getAppReleaseIfExists(int applicationId, String applicationUuid)
-            throws ValidationException, NotFoundException, ApplicationManagementDAOException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationRelease applicationRelease;
-
-        if (applicationId <= 0) {
-            throw new ValidationException(
-                    "Application id could,t be a negative integer. Hence please add " +
-                            "valid application id.");
-        }
-        if (applicationUuid == null) {
-            throw new ValidationException("Application UUID is null. Application UUID is a required "
-                    + "parameter to get the relevant application.");
-        }
-        applicationRelease = this.applicationReleaseDAO.getReleaseByIds(applicationId, applicationUuid, tenantId);
-        if (applicationRelease == null) {
-            throw new NotFoundException("Doesn't exist a application release for application ID:  " + applicationId
-                    + "and application UUID: " + applicationUuid);
-        }
-        return applicationRelease;
     }
 
     //todo check whether user is whether admin user or application owner, otherwise throw an exception

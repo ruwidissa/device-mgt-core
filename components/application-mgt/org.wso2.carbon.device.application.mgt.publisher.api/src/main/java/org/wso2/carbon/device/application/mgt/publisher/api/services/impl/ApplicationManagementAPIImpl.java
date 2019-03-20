@@ -546,7 +546,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
-            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid, true);
+            String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
             applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
             String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
             return Response.status(Response.Status.OK).entity(responseMsg).build();
