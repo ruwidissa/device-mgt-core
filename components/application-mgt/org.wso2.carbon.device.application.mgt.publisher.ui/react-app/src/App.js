@@ -1,18 +1,20 @@
 import React from "react";
 import "antd/dist/antd.css";
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
-import Dashboard from "./pages/dashboard"
-import Login from "./pages/Login"
+import { renderRoutes } from "react-router-config";
 
 class App extends React.Component {
+    constructor(props) {
+        super(props);
+       this.state = {
+           route : props.route
+        }
+    }
   render() {
     return (
-        <BrowserRouter>
-            <Switch>
-                <Route path="/publisher" component={Dashboard} exact/>
-                <Route path="/publisher/login" component={Login}/>
-            </Switch>
-        </BrowserRouter>
+        <div>
+            {renderRoutes(this.state.route.routes)}
+        </div>
+
     );
   }
 }
