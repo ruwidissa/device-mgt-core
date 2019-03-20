@@ -75,6 +75,7 @@ public class ApplicationRelease {
             value = "Hash value of the application release")
     private String appHashValue;
 
+//    todo change this to boolean
     @ApiModelProperty(name = "isSharedWithAllTenants",
             value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
             required = true)

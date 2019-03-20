@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
@@ -34,7 +35,6 @@ import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagemen
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -396,7 +396,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                         + ", therefore you don't have application release artifact to update for application release UUID: "
                         + applicationReleaseUuid).build();
             }
-            APIUtil.getApplicationManager().updateApplicationArtifact(applicationId, appType, applicationReleaseUuid,
+            APIUtil.getApplicationManager().updateApplicationArtifact(applicationId, deviceType, applicationReleaseUuid,
                     binaryFile.getDataHandler().getInputStream());
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application release. UUID is "
@@ -405,7 +405,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             String msg = "Error occurred while trying to read icon, banner files for the application release"
                     + applicationReleaseUuid;
             log.error(msg);
-            return APIUtil.getResponse(new ApplicationManagementException(msg, e), Response.Status.BAD_REQUEST);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
@@ -415,92 +415,104 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         } catch (ApplicationManagementException e) {
             log.error("Error occurred while updating the image artifacts of the application with the uuid "
                     + applicationReleaseUuid, e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
 
     @PUT
     @Consumes("application/json")
-    public Response updateApplication(@Valid Application application) {
+    @Path("/{appId}")
+    public Response updateApplication(
+            @PathParam("appId") int applicationId,
+            @Valid Application application) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            application = applicationManager.updateApplication(application);
+            application = applicationManager.updateApplication(applicationId, application);
         } catch (NotFoundException e) {
-            return APIUtil.getResponse(e, Response.Status.NOT_FOUND);
+            log.error(e.getMessage());
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (ForbiddenException e) {
+            log.error(e.getMessage());
+            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while modifying the application";
             log.error(msg, e);
-            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
         return Response.status(Response.Status.OK).entity(application).build();
     }
 
     @Override
     @PUT
-    @Path("/{appId}/{uuid}")
+    @Path("/{deviceType}/{appId}/{uuid}")
     public Response updateApplicationRelease(
+            @PathParam("deviceType") String deviceType,
             @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUUID,
             @Multipart("applicationRelease") ApplicationRelease applicationRelease,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
-            @Multipart("screenshot") List<Attachment> attachmentList) {
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        InputStream iconFileStream = null;
-        InputStream bannerFileStream = null;
+        InputStream iconFileStream;
+        InputStream bannerFileStream;
+        InputStream binaryFileStram;
         List<InputStream> attachments = new ArrayList<>();
+        List<Attachment> attachmentList = new ArrayList<>();
+        if (screenshot1 != null){
+            attachmentList.add(screenshot1);
+        }
+        if (screenshot2 != null) {
+            attachmentList.add(screenshot2);
+        }
+        if (screenshot3 != null) {
+            attachmentList.add(screenshot3);
+        }
+        if (iconFile == null || bannerFile == null || binaryFile == null || attachmentList.isEmpty()){
+            String msg = "Invalid data is received for application release updating. application id: " + applicationId
+                    + " and application release UUID: " + applicationUUID;
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
 
         try {
-            Application application = applicationManager.getApplicationIfAccessible(applicationId);
-
-            if (!applicationManager.isAcceptableAppReleaseUpdate(application.getId(), applicationRelease.getUuid())) {
-                String msg = "Application release is in the " + applicationRelease.getLifecycleState().getCurrentState()
-                        + " state. Hence updating is not acceptable when application in this state";
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            binaryFileStram = binaryFile.getDataHandler().getInputStream();
+            iconFileStream = iconFile.getDataHandler().getInputStream();
+            bannerFileStream = bannerFile.getDataHandler().getInputStream();
+            for (Attachment screenshot : attachmentList) {
+                attachments.add(screenshot.getDataHandler().getInputStream());
             }
-            if (binaryFile != null) {
-                applicationRelease = applicationStorageManager
-                        .updateReleaseArtifacts(applicationRelease, application.getType(), application.getDeviceType(),
-                                binaryFile.getDataHandler().getInputStream());
+            boolean status = applicationManager
+                    .updateRelease(applicationId, applicationUUID, deviceType, applicationRelease, binaryFileStram,
+                            iconFileStream, bannerFileStream, attachments);
+            if (!status){
+                log.error("Application release updating is failed. Please contact the administrator. Application id: "
+                        + applicationId + ", Application release UUID: " + applicationUUID + ", Supported device type: "
+                        + deviceType);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(applicationRelease).build();
             }
-            if (iconFile != null) {
-                iconFileStream = iconFile.getDataHandler().getInputStream();
-            }
-            if (bannerFile != null) {
-                bannerFileStream = bannerFile.getDataHandler().getInputStream();
-            }
-            if (!attachmentList.isEmpty()) {
-                for (Attachment screenshot : attachmentList) {
-                    attachments.add(screenshot.getDataHandler().getInputStream());
-                }
-            }
-
-            //            applicationRelease = applicationStorageManager
-            //                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            //            applicationRelease = applicationManager.updateRelease(applicationId, applicationRelease);
-
-            return Response.status(Response.Status.OK).entity(applicationRelease).build();
-        } catch (ApplicationManagementException e) {
-            log.error("Error while updating the application release of the application with UUID " + applicationUUID);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
+            return Response.status(Response.Status.OK).entity("Application release is successfully updated.").build();
+        } catch(BadRequestException e){
+            String msg = "Invalid request to update application release for application release UUID " + applicationUUID;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch(NotFoundException e){
+            String msg = "Couldn't found application or application release for application id: " + applicationId
+                    + " and application release UUID " + applicationUUID;
+            log.error(msg,e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        }
+        catch (ApplicationManagementException e) {
+            String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (IOException e) {
-            log.error("Error while updating the release artifacts of the application with UUID " + applicationUUID);
-            return APIUtil.getResponse(new ApplicationManagementException(
-                            "Error while updating the release artifacts of the application with UUID " + applicationUUID),
-                    Response.Status.INTERNAL_SERVER_ERROR);
-        } catch (ResourceManagementException e) {
-            log.error("Error occurred while updating the releases artifacts of the application with the uuid "
-                    + applicationUUID + " for the release " + applicationRelease.getVersion(), e);
-            return APIUtil.getResponse(e, Response.Status.INTERNAL_SERVER_ERROR);
-        } catch (RequestValidatingException e) {
-            log.error(
-                    "Error occured while handling the application release updating request. application release UUID:  "
-                            + applicationUUID);
-            return APIUtil.getResponse(e, Response.Status.BAD_REQUEST);
+            String msg = "Error while updating the release artifacts of the application with UUID " + applicationUUID;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 

@@ -514,14 +514,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public Application editApplication(Application application, int tenantId) throws ApplicationManagementException {
+    public Application editApplication(Application application, int tenantId) throws ApplicationManagementDAOException {
         int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
         Application existingApplication = this.getApplicationById(application.getId(), tenantId);
 
         if (existingApplication == null) {
-            throw new ApplicationManagementException("There doesn't have an application for updating");
+            throw new ApplicationManagementDAOException("There doesn't have an application for updating");
         }
         try {
             conn = this.getDBConnection();

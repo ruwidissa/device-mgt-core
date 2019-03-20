@@ -75,4 +75,14 @@ public interface LifecycleStateDAO {
      * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
      */
     void deleteLifecycleState(int identifier) throws LifeCycleManagementDAOException;
-}
+
+    /***
+     *
+     * @param appId ID of the application
+     * @param uuid UUID of the application release
+     * @return Username of the application release creator
+     * @throws LifeCycleManagementDAOException {@link LifeCycleManagementDAOException}
+     */
+    String getAppReleaseCreatedUsername(int appId, String uuid, int tenantId) throws LifeCycleManagementDAOException;
+
+    }

@@ -144,8 +144,7 @@ public interface ApplicationDAO {
      * @return Updated Application.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    Application editApplication(Application application, int tenantId) throws ApplicationManagementDAOException,
-            ApplicationManagementException;
+    Application editApplication(Application application, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To delete the application

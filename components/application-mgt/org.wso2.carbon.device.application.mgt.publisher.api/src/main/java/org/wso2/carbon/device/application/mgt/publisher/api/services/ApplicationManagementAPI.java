@@ -206,6 +206,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
+    @Path("/{appId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -237,6 +238,11 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplication(
+            @ApiParam(
+                    name = "appId",
+                    value = "application Id",
+                    required = true)
+            @PathParam("appId") int appId,
             @ApiParam(
                     name = "application",
                     value = "The application that need to be edited.",
@@ -544,7 +550,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
-    @Path("/{appId}/{uuid}")
+    @Path("/{deviceType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -576,13 +582,22 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationRelease(
-            @ApiParam(name = "appId", value = "Identifier of the Application", required = true) @PathParam("appId") int applicationId,
-            @ApiParam(name = "UUID", value = "Unique identifier of the Application Release", required = true) @PathParam("uuid") String applicationUUID,
+            @ApiParam(name = "deviceType", value = "Supported device type of the application", required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(name = "appId", value = "Identifier of the Application", required = true)
+            @PathParam("appId") int applicationId,
+            @ApiParam(name = "UUID", value = "Unique identifier of the Application Release", required = true)
+            @PathParam("uuid") String applicationUUID,
             @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationRelease applicationRelease,
             @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
             @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @Multipart(value = "screenshot", required = false) List<Attachment> attachmentList);
+            @ApiParam(name = "screenshot1", value = "Screen Shots of the uploading application", required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(name = "screenshot2", value = "Screen Shots of the uploading application")
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(name = "screenshot3", value = "Screen Shots of the uploading application")
+            @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @GET
     @Path("/lifecycle/{appId}/{uuid}")

@@ -25,8 +25,6 @@ import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
-import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
 import java.io.InputStream;
 import java.util.List;
@@ -50,10 +48,11 @@ public interface ApplicationManager {
      * Updates an already existing application.
      *
      * @param application Application that need to be updated.
+     * @param applicationId ID of the application
      * @return Updated Application
      * @throws ApplicationManagementException Application Management Exception
      */
-    Application updateApplication(Application application) throws ApplicationManagementException;
+    Application updateApplication(int applicationId, Application application) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
@@ -84,15 +83,6 @@ public interface ApplicationManager {
     ApplicationList getApplications(Filter filter) throws ApplicationManagementException;
 
     /**
-     * To get the applications based on the search filter.
-     *
-     * @param appId id of the application
-     * @return Application release which is published and release of the Application(appId).
-     * @throws ApplicationManagementException Application Management Exception
-     */
-    String getUuidOfLatestRelease(int appId) throws ApplicationManagementException;
-
-    /**
      * To get the Application for given Id.
      *
      * @param id id of the Application
@@ -120,24 +110,6 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException If unable to retrieve {@link Application} associated with the given UUID
      */
     Application getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException;
-
-    /**
-     * To get Application with the given UUID.
-     *
-     * @param appId ID of the Application
-     * @return the boolean value, whether application exist or not
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    boolean verifyApplicationExistenceById(int appId) throws ApplicationManagementException;
-
-    /**
-     * To get Application with the given UUID.
-     *
-     * @return the boolean value, whether user has assigned unrestricted roles to access the application
-     * * @throws ApplicationManagementException Application Management Exception.
-     */
-    Boolean isUserAllowable(List<String> unrestrictedRoles, String userName) throws ApplicationManagementException;
-
 
     /**
      * To get all the releases of a particular Application.
@@ -186,24 +158,12 @@ public interface ApplicationManager {
      * To update release images.
      *
      * @param appId    ID of the Application
-     * @param appType   Application type
+     * @param deviceType   Applicable device type of the application
      * @param uuid    uuid of the Application
      * @param binaryFile    binaryFile of the release.
      * @throws ApplicationManagementException Application Management Exception.
      */
-    void updateApplicationArtifact(int appId, String appType, String uuid, InputStream binaryFile)
-            throws ApplicationManagementException;
-
-
-    /**
-     * To verify whether application release is acceptable to update or not.
-     *
-     * @param appId    ID of the Application
-     * @param appReleaseUuid UUID of the ApplicationRelease
-     * @return Updated Application Release.
-     * @throws ApplicationManagementException Application Management Exception.
-     */
-    boolean isAcceptableAppReleaseUpdate(int appId, String appReleaseUuid)
+    void updateApplicationArtifact(int appId, String deviceType, String uuid, InputStream binaryFile)
             throws ApplicationManagementException;
 
     /**
@@ -215,5 +175,21 @@ public interface ApplicationManager {
      */
     ApplicationRelease createRelease(int applicationId, ApplicationRelease applicationRelease)
             throws ApplicationManagementException;
+
+    /***
+     *
+     * @param applicationId ID of the application
+     * @param releaseUuid UUID of the application release
+     * @param deviceType Supported device type of the application
+     * @param applicationRelease {@link ApplicationRelease}
+     * @param binaryFileStram {@link InputStream} of the binary file
+     * @param iconFileStream {@link InputStream} of the icon
+     * @param bannerFileStream {@link InputStream} of the banner
+     * @param attachments {@link List} of {@link InputStream} of attachments
+     * @return If the application release is updated correctly True returns, otherwise retuen False
+     */
+    boolean updateRelease(int applicationId, String releaseUuid, String deviceType, ApplicationRelease applicationRelease,
+            InputStream binaryFileStram, InputStream iconFileStream, InputStream bannerFileStream,
+            List<InputStream> attachments) throws ApplicationManagementException;
 
 }

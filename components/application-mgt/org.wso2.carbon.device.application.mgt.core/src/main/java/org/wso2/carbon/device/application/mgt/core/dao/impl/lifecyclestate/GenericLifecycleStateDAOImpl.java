@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate;
 
+import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
@@ -87,9 +88,38 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } finally {
             Util.cleanupResources(stmt, rs);
         }
-
     }
 
+
+    public String getAppReleaseCreatedUsername(int appId, String uuid, int tenantId) throws LifeCycleManagementDAOException{
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            String sql = "SELECT UPDATED_BY FROM AP_APP_LIFECYCLE_STATE WHERE AP_APP_ID=? AND "
+                    + "AP_APP_RELEASE_ID=(SELECT ID FROM AP_APP_RELEASE WHERE UUID=?) AND CURRENT_STATE = ? AND TENANT_ID = ?;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, appId);
+            stmt.setString(2, uuid);
+            stmt.setString(3, AppLifecycleState.CREATED.toString());
+            stmt.setInt(4, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("UPDATED_BY");
+
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new LifeCycleManagementDAOException("Error occurred while getting application List", e);
+        }  catch (DBConnectionException e) {
+            throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
+                    + " lifecycle state for a specific application", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
 
     @Override
     public List<LifecycleState> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException {
