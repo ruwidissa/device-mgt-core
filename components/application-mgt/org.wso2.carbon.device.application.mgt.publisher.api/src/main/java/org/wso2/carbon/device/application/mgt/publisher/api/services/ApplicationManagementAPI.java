@@ -125,6 +125,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
+                    name = "deviceType",
+                    value = "Supporting device Type of the application")
+            @QueryParam("device-type") String deviceType,
+            @ApiParam(
                     name = "name",
                     value = "Name of the application")
             @QueryParam("name") String appName,

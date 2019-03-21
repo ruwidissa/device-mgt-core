@@ -32,14 +32,13 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
-import org.wso2.carbon.device.application.mgt.common.DeviceType;
+import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
 import org.wso2.carbon.device.application.mgt.core.util.ArtifactsParser;
-import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 import org.xml.sax.SAXException;
@@ -203,11 +202,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                 "application UUID " + applicationRelease.getUuid());
             }
 
-            if (DeviceType.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+            if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
                 ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(cloneInputStream[2]);
                 applicationRelease.setVersion(apkMeta.getVersionName());
                 applicationRelease.setPackageName(apkMeta.getPackageName());
-            } else if (DeviceType.IOS.toString().equalsIgnoreCase(deviceType)) {
+            } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
                 applicationRelease
                         .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());

@@ -1,5 +1,5 @@
 package org.wso2.carbon.device.application.mgt.common;
 
-public enum DeviceType {
+public enum DeviceTypes {
     ANDROID, IOS
 }

@@ -80,11 +80,18 @@ public class Application {
             value = "Id of the Related device type of the application",
             example = "1, 2, 3")
     private int deviceTypeId;
+
     @ApiModelProperty(name = "deviceType",
             value = "Related device type of the application",
             required = true,
             example = "IoS, Android, Arduino, RaspberryPi etc")
     private String deviceType;
+
+    @ApiModelProperty(name = "status",
+            value = "Application status",
+            required = true,
+            example = "REMOVED, ACTIVE")
+    private String status;
 
     @ApiModelProperty(name = "applicationReleases",
             value = "List of application releases",
@@ -190,4 +197,8 @@ public class Application {
     public void setDeviceTypeId(int deviceTypeId) {
         this.deviceTypeId = deviceTypeId;
     }
+
+    public String getStatus() { return status; }
+
+    public void setStatus(String status) { this.status = status; }
 }

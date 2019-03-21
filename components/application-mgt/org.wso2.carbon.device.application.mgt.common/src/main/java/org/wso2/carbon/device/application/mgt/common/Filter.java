@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+
 /**
  * Filter represents a criteria that can be used for searching applications.
  */
@@ -62,6 +64,11 @@ public class Filter {
      * Set as True if required to have only published application release, otherwise set to False
      */
     private String currentAppReleaseState;
+
+    /***
+     * Supported device type for the application. i.e Android, iOS, Windows etc
+     */
+    private DeviceType deviceType;
 
     public int getLimit() {
         return limit;
@@ -119,11 +126,13 @@ public class Filter {
         this.appCategory = appCategory;
     }
 
-    public String getCurrentAppReleaseState() {
-        return currentAppReleaseState;
-    }
+    public String getCurrentAppReleaseState() { return currentAppReleaseState; }
 
     public void setCurrentAppReleaseState(String currentAppReleaseState) {
         this.currentAppReleaseState = currentAppReleaseState;
     }
+
+    public DeviceType getDeviceType() { return deviceType; }
+
+    public void setDeviceType(DeviceType deviceType) { this.deviceType = deviceType; }
 }

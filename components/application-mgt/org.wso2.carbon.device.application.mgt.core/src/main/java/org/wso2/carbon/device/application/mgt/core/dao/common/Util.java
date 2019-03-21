@@ -78,6 +78,7 @@ public class Util {
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
                 application.setIsRestricted(rs.getBoolean("RESTRICTED"));
+                application.setStatus(rs.getString("STATUS"));
                 String tag = rs.getString("APP_TAG");
                 String unrestrictedRole = rs.getString("ROLE");
                 if (tag != null) {

@@ -35,6 +35,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagemen
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +69,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Override
     @Consumes("application/json")
     public Response getApplications(
+            @QueryParam("device-type") String deviceType,
             @QueryParam("name") String appName,
             @QueryParam("type") String appType,
             @QueryParam("category") String appCategory,
@@ -96,13 +98,22 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             if (releaseState != null && !releaseState.isEmpty()) {
                 filter.setCurrentAppReleaseState(releaseState);
             }
+            if (deviceType != null && !deviceType.isEmpty()) {
+                DeviceType dt = new DeviceType();
+                dt.setName(deviceType);
+                filter.setDeviceType(dt);
+            }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Couldn't find any application for requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
-        } catch (ApplicationManagementException e) {
+        } catch(BadRequestException e){
+            String msg = "Couldn't found a device type for " + deviceType;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting the application list for publisher ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
@@ -158,6 +169,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
         try {
             if (isInvalidReleaseCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application.getType())) {
+//                todo add msg
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
@@ -210,6 +222,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
+//            todo add msg into return
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ResourceManagementException e) {
             String msg =

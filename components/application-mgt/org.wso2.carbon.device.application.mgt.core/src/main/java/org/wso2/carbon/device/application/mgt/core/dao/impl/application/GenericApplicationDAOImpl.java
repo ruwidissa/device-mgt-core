@@ -133,28 +133,32 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ResultSet rs = null;
         ApplicationList applicationList = new ApplicationList();
         Pagination pagination = new Pagination();
-        String sql = "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY"
-                + " AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
-                + "AS ROLE FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
+        String sql = "SELECT "
+                + "AP_APP.ID AS APP_ID,"
+                + " AP_APP.NAME AS APP_NAME,"
+                + " AP_APP.TYPE AS APP_TYPE,"
+                + " AP_APP.APP_CATEGORY AS APP_CATEGORY,"
+                + " AP_APP.SUB_TYPE AS SUB_TYPE,"
+                + " AP_APP.CURRENCY AS CURRENCY, "
+                + "AP_APP.RESTRICTED AS RESTRICTED,"
+                + " AP_APP_TAG.TAG AS APP_TAG,"
+                + " AP_UNRESTRICTED_ROLE.ROLE AS ROLE "
+                + "FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
                 + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
-                + "WHERE AP_APP.TENANT_ID =  ? AND AP_APP.STATUS != ?";
+                + "WHERE AP_APP.TENANT_ID =  ?";
 
 
         if (filter == null) {
             throw new ApplicationManagementDAOException("Filter need to be instantiated");
         }
-
         if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
             sql += " AND AP_APP.TYPE ";
             sql += "= ?";
         }
-
         if (filter.getAppCategory() != null && !filter.getAppCategory().isEmpty()) {
             sql += " AND AP_APP.APP_CATEGORY ";
             sql += "= ?";
         }
-
         if (filter.getAppName() != null && !filter.getAppName().isEmpty()) {
             sql += " AND LOWER (AP_APP.NAME) ";
             if (filter.isFullMatch()) {
@@ -162,6 +166,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             } else {
                 sql += "LIKE ?";
             }
+        }
+        if (filter.getDeviceType() != null ) {
+            sql += " AND AP_APP.DEVICE_TYPE_ID ";
+            sql += "= ?";
         }
 
         String defaultSortOrder = "ASC";
@@ -177,7 +185,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(paramIndex++, tenantId);
-            stmt.setString(paramIndex++, AppLifecycleState.REMOVED.toString());
 
             if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
                 stmt.setString(paramIndex++, filter.getAppType());
@@ -192,6 +199,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     stmt.setString(paramIndex++, "%" + filter.getAppName().toLowerCase() + "%");
                 }
             }
+            if (filter.getDeviceType() != null ) {
+                stmt.setInt(paramIndex++, filter.getDeviceType().getId());
+            }
+
 
             if (filter.getLimit() == 0) {
                 stmt.setInt(paramIndex++, 100);
