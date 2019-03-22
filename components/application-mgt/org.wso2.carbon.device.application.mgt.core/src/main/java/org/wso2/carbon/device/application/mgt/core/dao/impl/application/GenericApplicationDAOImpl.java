@@ -79,6 +79,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             if (rs.next()) {
                 applicationId = rs.getInt(1);
             }
+
+            // TODO : throw error if applicationId = -1
             return applicationId;
 
         } catch (DBConnectionException e) {

@@ -224,12 +224,14 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                                   + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
             }
 
+            // TODO : handle ios
             String artifactPath = artifactDirectoryPath + File.separator + Constants.RELEASE_ARTIFACT +".apk";
             saveFile(cloneInputStream[1], artifactPath);
             applicationRelease.setAppStoredLoc(artifactPath);
             applicationRelease.setAppHashValue(md5OfApp);
 
         } catch (IOException e) {
+            // TODO :
             throw new ApplicationStorageManagementException(
                     "IO Exception while saving the release artifacts in the server for the application UUID "
                             + applicationRelease.getUuid(), e);
