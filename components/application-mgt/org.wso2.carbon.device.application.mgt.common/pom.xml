@@ -57,7 +57,8 @@
                             io.swagger.annotations.*;resolution:=optional,
                             com.fasterxml.jackson.annotation,
                             javax.validation.constraints,
-                            javax.xml.bind.annotation.*
+                            javax.xml.bind.annotation.*,
+                            org.wso2.carbon.device.mgt.core.dto
                         </Import-Package>
                         <Export-Package>
                             org.wso2.carbon.device.application.mgt.common.*

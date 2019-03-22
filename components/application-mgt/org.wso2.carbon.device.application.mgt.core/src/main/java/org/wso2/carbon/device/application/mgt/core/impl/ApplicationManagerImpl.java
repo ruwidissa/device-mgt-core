@@ -126,7 +126,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.beginDBTransaction();
             if (deviceType == null) {
                 log.error("Device type is not matched with application type");
-                ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
             }
             if (!application.getUnrestrictedRoles().isEmpty()) {
@@ -166,7 +165,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("Changing lifecycle state. App Id:" + appId);
                 }
-                LifecycleState lifecycleState = getLifecycleStateInstant(AppLifecycleState.CREATED.toString(),
+                //todo get initial state from lifecycle manager and set current state to Release object
+                LifecycleState lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
                         AppLifecycleState.CREATED.toString());
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, appId, applicationRelease.getUuid(), tenantId);
                 applicationRelease.setLifecycleState(lifecycleState);
@@ -306,7 +306,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             applicationRelease = this.applicationReleaseDAO
                     .createRelease(applicationRelease, existingApplication.getId(), tenantId);
-            LifecycleState lifecycleState = getLifecycleStateInstant(AppLifecycleState.CREATED.toString(),
+            LifecycleState lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
                     AppLifecycleState.CREATED.toString());
             this.lifecycleStateDAO
                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(), tenantId);
@@ -584,7 +584,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             for (ApplicationRelease applicationRelease : applicationReleases) {
                 LifecycleState appLifecycleState = this.lifecycleStateDAO
                         .getLatestLifeCycleState(applicationId, applicationRelease.getUuid());
-                LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
+                LifecycleState newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
                         newAppLifecycleState.getCurrentState())) {
@@ -596,7 +596,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
                             AppLifecycleState.REMOVED.toString());
                     for (String nextState : lifecycleFlow) {
-                        LifecycleState lifecycleState = getLifecycleStateInstant(nextState, currentState);
+                        LifecycleState lifecycleState = getLifecycleStateInstance(nextState, currentState);
                         if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
@@ -713,7 +713,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String currentState = appLifecycleState.getCurrentState();
             if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState.REJECTED.toString()
                     .equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals(currentState)) {
-                LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
+                LifecycleState newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
                         newAppLifecycleState.getCurrentState())) {
@@ -725,7 +725,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
                             AppLifecycleState.REMOVED.toString());
                     for (String nextState : lifecycleFlow) {
-                        LifecycleState lifecycleState = getLifecycleStateInstant(nextState, currentState);
+                        LifecycleState lifecycleState = getLifecycleStateInstance(nextState, currentState);
                         if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
@@ -1238,7 +1238,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param previousState Previouse state of the Lifecycle
      * @return {@link LifecycleState}
      */
-    private LifecycleState getLifecycleStateInstant(String currentState, String previousState) {
+    private LifecycleState getLifecycleStateInstance(String currentState, String previousState) {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         LifecycleState lifecycleState = new LifecycleState();
         lifecycleState.setCurrentState(currentState);

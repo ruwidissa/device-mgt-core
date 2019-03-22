@@ -148,6 +148,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
 
         try {
+            //TODO : catch the error message
             if (isInvalidReleaseCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application.getType())) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity("Invalid request for creating an application.").build();
@@ -155,6 +156,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
             // The application executable artifacts such as apks are uploaded.
             if (!ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
+                // TODO Null check
                 applicationRelease = application.getApplicationReleases().get(0);
                 applicationRelease = applicationStorageManager
                         .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),

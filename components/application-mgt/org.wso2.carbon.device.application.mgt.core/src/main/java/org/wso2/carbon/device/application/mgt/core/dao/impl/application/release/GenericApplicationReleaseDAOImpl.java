@@ -62,6 +62,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 + "APP_HASH_VALUE, SHARED_WITH_ALL_TENANTS, APP_META_INFO,AP_APP_ID) "
                 + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
+        // TODO : make this readable
         int index = 0;
         String generatedColumns[] = { "ID" };
         try {
