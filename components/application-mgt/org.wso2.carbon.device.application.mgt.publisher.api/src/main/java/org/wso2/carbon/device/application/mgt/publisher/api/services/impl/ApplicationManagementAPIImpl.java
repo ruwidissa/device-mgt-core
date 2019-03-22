@@ -35,7 +35,6 @@ import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagemen
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,32 +80,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
-            Filter filter = new Filter();
-            filter.setOffset(offset);
-            filter.setLimit(limit);
-            filter.setSortBy(sortBy);
-            filter.setFullMatch(isFullMatch);
-            if (appName != null && !appName.isEmpty()) {
-                filter.setAppName(appName);
-            }
-            if (appType != null && !appType.isEmpty()) {
-                filter.setAppType(appType);
-            }
-            if (appCategory != null && !appCategory.isEmpty()) {
-                filter.setAppCategory(appCategory);
-            }
-            if (releaseState != null && !releaseState.isEmpty()) {
-                filter.setCurrentAppReleaseState(releaseState);
-            }
-            if (deviceType != null && !deviceType.isEmpty()) {
-                DeviceType dt = new DeviceType();
-                dt.setName(deviceType);
-                filter.setDeviceType(dt);
-            }
+            Filter filter = APIUtil
+                    .constructFilter(deviceType, appName, appType, appCategory, isFullMatch, releaseState, offset,
+                            limit, sortBy);
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Couldn't find any application for requested query.").build();
+                        .entity("Couldn't find any application for the requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch(BadRequestException e){
@@ -169,8 +149,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
         try {
             if (isInvalidReleaseCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application.getType())) {
-//                todo add msg
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Invalid request for creating an application.").build();
             }
 
             // The application executable artifacts such as apks are uploaded.
@@ -673,4 +653,5 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
         return false;
     }
+
 }

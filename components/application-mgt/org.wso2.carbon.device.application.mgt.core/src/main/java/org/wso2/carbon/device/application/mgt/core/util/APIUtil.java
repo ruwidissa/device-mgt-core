@@ -21,8 +21,10 @@ package org.wso2.carbon.device.application.mgt.core.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import javax.ws.rs.core.Response;
 
@@ -161,6 +163,33 @@ public class APIUtil {
         }
 
         return configManager;
+    }
+
+    public static Filter constructFilter(String deviceType, String appName, String appType, String appCategory,
+            boolean isFullMatch, String releaseState, int offset, int limit, String sortBy) {
+        Filter filter = new Filter();
+        filter.setOffset(offset);
+        filter.setLimit(limit);
+        filter.setSortBy(sortBy);
+        filter.setFullMatch(isFullMatch);
+        if (appName != null && !appName.isEmpty()) {
+            filter.setAppName(appName);
+        }
+        if (appType != null && !appType.isEmpty()) {
+            filter.setAppType(appType);
+        }
+        if (appCategory != null && !appCategory.isEmpty()) {
+            filter.setAppCategory(appCategory);
+        }
+        if (releaseState != null && !releaseState.isEmpty()) {
+            filter.setCurrentAppReleaseState(releaseState);
+        }
+        if (deviceType != null && !deviceType.isEmpty()) {
+            DeviceType dt = new DeviceType();
+            dt.setName(deviceType);
+            filter.setDeviceType(dt);
+        }
+        return filter;
     }
 
 }

@@ -21,6 +21,7 @@ package org.wso2.carbon.device.application.mgt.common;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import java.util.List;
 
@@ -35,6 +36,11 @@ public class Application {
             value = "Name of the application",
             required = true)
     private String name;
+
+    @ApiModelProperty(name = "description",
+            value = "Description of the application",
+            required = true)
+    private String description;
 
     @ApiModelProperty(name = "appCategory",
             value = "Category of the application",
@@ -81,6 +87,10 @@ public class Application {
             example = "1, 2, 3")
     private int deviceTypeId;
 
+    @ApiModelProperty(name = "appRating",
+            value = "Rating of the aplication")
+    private int appRating;
+
     @ApiModelProperty(name = "deviceType",
             value = "Related device type of the application",
             required = true,
@@ -92,6 +102,8 @@ public class Application {
             required = true,
             example = "REMOVED, ACTIVE")
     private String status;
+
+    private DeviceType deviceTypeObj;
 
     @ApiModelProperty(name = "applicationReleases",
             value = "List of application releases",
@@ -186,9 +198,7 @@ public class Application {
         return deviceType;
     }
 
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
+    public void setDeviceType(String deviceType) { this.deviceType = deviceType; }
 
     public int getDeviceTypeId() {
         return deviceTypeId;
@@ -201,4 +211,16 @@ public class Application {
     public String getStatus() { return status; }
 
     public void setStatus(String status) { this.status = status; }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public int getAppRating() { return appRating; }
+
+    public void setAppRating(int appRating) { this.appRating = appRating; }
+
+    public DeviceType getDeviceTypeObj() { return deviceTypeObj; }
+
+    public void setDeviceTypeObj(DeviceType deviceTypeObj) { this.deviceTypeObj = deviceTypeObj; }
 }

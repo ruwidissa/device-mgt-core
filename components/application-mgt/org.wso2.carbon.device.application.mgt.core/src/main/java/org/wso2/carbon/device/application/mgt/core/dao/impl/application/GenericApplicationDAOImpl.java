@@ -121,6 +121,117 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
     }
 
+//    @Override
+//    public ApplicationList getApplications(Filter filter, int tenantId) throws ApplicationManagementDAOException {
+//        if (log.isDebugEnabled()) {
+//            log.debug("Getting application data from the database");
+//            log.debug(String.format("Filter: limit=%s, offset=%s", filter.getLimit(), filter.getOffset()));
+//        }
+//        int paramIndex = 1;
+//        Connection conn;
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//        ApplicationList applicationList = new ApplicationList();
+//        Pagination pagination = new Pagination();
+//        String sql = "SELECT "
+//                + "AP_APP.ID AS APP_ID,"
+//                + " AP_APP.NAME AS APP_NAME,"
+//                + " AP_APP.TYPE AS APP_TYPE,"
+//                + " AP_APP.APP_CATEGORY AS APP_CATEGORY,"
+//                + " AP_APP.SUB_TYPE AS SUB_TYPE,"
+//                + " AP_APP.CURRENCY AS CURRENCY, "
+//                + "AP_APP.RESTRICTED AS RESTRICTED,"
+//                + " AP_APP_TAG.TAG AS APP_TAG,"
+//                + " AP_UNRESTRICTED_ROLE.ROLE AS ROLE "
+//                + "FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
+//                + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
+//                + "WHERE AP_APP.TENANT_ID =  ?";
+//
+//
+//        if (filter == null) {
+//            throw new ApplicationManagementDAOException("Filter need to be instantiated");
+//        }
+//        if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
+//            sql += " AND AP_APP.TYPE ";
+//            sql += "= ?";
+//        }
+//        if (filter.getAppCategory() != null && !filter.getAppCategory().isEmpty()) {
+//            sql += " AND AP_APP.APP_CATEGORY ";
+//            sql += "= ?";
+//        }
+//        if (filter.getAppName() != null && !filter.getAppName().isEmpty()) {
+//            sql += " AND LOWER (AP_APP.NAME) ";
+//            if (filter.isFullMatch()) {
+//                sql += "= ?";
+//            } else {
+//                sql += "LIKE ?";
+//            }
+//        }
+//        if (filter.getDeviceType() != null ) {
+//            sql += " AND AP_APP.DEVICE_TYPE_ID ";
+//            sql += "= ?";
+//        }
+//
+//        String defaultSortOrder = "ASC";
+//        if (filter.getSortBy() != null && !filter.getSortBy().isEmpty()) {
+//            defaultSortOrder = filter.getSortBy();
+//        }
+//        sql += " ORDER BY APP_ID " + defaultSortOrder +" LIMIT ? OFFSET ? ";
+//
+//        pagination.setLimit(filter.getLimit());
+//        pagination.setOffset(filter.getOffset());
+//
+//        try {
+//            conn = this.getDBConnection();
+//            stmt = conn.prepareStatement(sql);
+//            stmt.setInt(paramIndex++, tenantId);
+//
+//            if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
+//                stmt.setString(paramIndex++, filter.getAppType());
+//            }
+//            if (filter.getAppCategory() != null && !filter.getAppCategory().isEmpty()) {
+//                stmt.setString(paramIndex++, filter.getAppCategory());
+//            }
+//            if (filter.getAppName() != null && !filter.getAppName().isEmpty()) {
+//                if (filter.isFullMatch()) {
+//                    stmt.setString(paramIndex++, filter.getAppName().toLowerCase());
+//                } else {
+//                    stmt.setString(paramIndex++, "%" + filter.getAppName().toLowerCase() + "%");
+//                }
+//            }
+//            if (filter.getDeviceType() != null ) {
+//                stmt.setInt(paramIndex++, filter.getDeviceType().getId());
+//            }
+//
+//
+//            if (filter.getLimit() == 0) {
+//                stmt.setInt(paramIndex++, 100);
+//            } else {
+//                stmt.setInt(paramIndex++, filter.getLimit());
+//            }
+//            stmt.setInt(paramIndex, filter.getOffset());
+//            rs = stmt.executeQuery();
+//            applicationList.setApplications(Util.loadApplications(rs));
+//            applicationList.setPagination(pagination);
+//            applicationList.getPagination().setSize(filter.getOffset());
+//            applicationList.getPagination().setCount(applicationList.getApplications().size());
+//
+//        } catch (SQLException e) {
+//            throw new ApplicationManagementDAOException("Error occurred while getting application list for the tenant"
+//                                                                + " " + tenantId + ". While executing " + sql, e);
+//        } catch (DBConnectionException e) {
+//            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection while "
+//                                                                + "getting application list for the tenant " + tenantId,
+//                                                        e);
+//        } catch (JSONException e) {
+//            throw new ApplicationManagementDAOException("Error occurred while parsing JSON ", e);
+//        } finally {
+//            Util.cleanupResources(stmt, rs);
+//        }
+//        return applicationList;
+//    }
+
+
     @Override
     public ApplicationList getApplications(Filter filter, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -134,19 +245,35 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ApplicationList applicationList = new ApplicationList();
         Pagination pagination = new Pagination();
         String sql = "SELECT "
-                + "AP_APP.ID AS APP_ID,"
-                + " AP_APP.NAME AS APP_NAME,"
-                + " AP_APP.TYPE AS APP_TYPE,"
-                + " AP_APP.APP_CATEGORY AS APP_CATEGORY,"
-                + " AP_APP.SUB_TYPE AS SUB_TYPE,"
-                + " AP_APP.CURRENCY AS CURRENCY, "
-                + "AP_APP.RESTRICTED AS RESTRICTED,"
-                + " AP_APP_TAG.TAG AS APP_TAG,"
-                + " AP_UNRESTRICTED_ROLE.ROLE AS ROLE "
-                + "FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
-                + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
-                + "WHERE AP_APP.TENANT_ID =  ?";
-
+                + "AP_APP.ID AS APP_ID, "
+                + "AP_APP.NAME AS APP_NAME, "
+                + "AP_APP.DESCRIPTION AS APP_DESCRIPTION, "
+                + "AP_APP.TYPE AS APP_TYPE, "
+                + "AP_APP.STATUS AS APP_STATUS, "
+                + "AP_APP.SUB_TYPE AS APP_SUB_TYPE, "
+                + "AP_APP.CURRENCY AS APP_CURRENCY, "
+                + "AP_APP.RATING AS APP_RATING, "
+                + "AP_APP.DEVICE_TYPE_ID AS APP_DEVICE_TYPE_ID, "
+                + "AP_APP_RELEASE.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                + "AP_APP_RELEASE.VERSION AS RELEASE_VERSION, "
+                + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
+                + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
+                + "AP_APP_RELEASE.STORED_LOCATION AS AP_RELEASE_STORED_LOC, "
+                + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
+                + "AP_APP_RELEASE.APP_META_INFO AS RELEASE.META_INFO, "
+                + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
+                + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                + "FROM AP_APP "
+                + "INNER JOIN AP_APP_RELEASE ON "
+                + "APP_APP.ID = APP_APP_RELEASE.AP_APP_ID AND "
+                + "AP_APP.TENANT_ID = ? AND "
+                + "AP_APP.TENANT_ID = APP_APP_RELEASE.TENANT_ID";
 
         if (filter == null) {
             throw new ApplicationManagementDAOException("Filter need to be instantiated");
@@ -218,11 +345,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while getting application list for the tenant"
-                                                                + " " + tenantId + ". While executing " + sql, e);
+                    + " " + tenantId + ". While executing " + sql, e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection while "
-                                                                + "getting application list for the tenant " + tenantId,
-                                                        e);
+                    + "getting application list for the tenant " + tenantId,
+                    e);
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON ", e);
         } finally {

@@ -232,6 +232,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
             ConnectionManagerUtil.openDBConnection();
+//            todo modify this logic, join app n release tables
             applicationList = applicationDAO.getApplications(filter, tenantId);
             apps = applicationList.getApplications();
             for ( Application app : apps){

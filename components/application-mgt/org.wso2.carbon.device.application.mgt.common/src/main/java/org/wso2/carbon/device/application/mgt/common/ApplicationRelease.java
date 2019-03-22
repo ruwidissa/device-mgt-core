@@ -18,15 +18,21 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "ApplicationRelease", description = "This class holds the details when releasing an Application to application store")
 public class ApplicationRelease {
 
+    @JsonIgnore
     @ApiModelProperty(name = "id",
             value = "ID of the application release")
     private int id;
+
+    @ApiModelProperty(name = "description",
+            value = "Description of the application release")
+    private String description;
 
     @ApiModelProperty(name = "version",
             value = "Version of the application release")
@@ -98,13 +104,25 @@ public class ApplicationRelease {
             value = "URL which is used for WEB-CLIP")
     private String url;
 
+    //todo remove and add string called current state
     @ApiModelProperty(name = "lifecycleState",
             value = "Latest Lifecycle state of the application release")
     private LifecycleState lifecycleState;
 
+    @ApiModelProperty(name = "supportedOsVersions",
+            value = "Application release supported OS versions")
+    private String supportedOsVersions;
+
+    @ApiModelProperty(name = "currentState",
+            value = "Current state of the application release")
+    private String currentState;
+
     @ApiModelProperty(name = "packageName",
             value = "Application bundle identifier")
     private String packageName;
+
+    public ApplicationRelease() {
+    }
 
     public int getRatedUsers() {
         return ratedUsers;
@@ -257,4 +275,16 @@ public class ApplicationRelease {
     public String getPackageName() {
         return packageName;
     }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public String getSupportedOsVersions() { return supportedOsVersions; }
+
+    public void setSupportedOsVersions(String supportedOsVersions) { this.supportedOsVersions = supportedOsVersions; }
+
+    public String getCurrentState() { return currentState; }
+
+    public void setCurrentState(String currentState) { this.currentState = currentState; }
 }

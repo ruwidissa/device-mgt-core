@@ -52,6 +52,7 @@
                         <Bundle-Description>Application Management Common Bundle</Bundle-Description>
                         <Import-Package>
                             org.wso2.carbon.device.mgt.common.*;version="${carbon.device.mgt.version}",
+                            org.wso2.carbon.device.mgt.core.dto;version="${carbon.device.mgt.version}",
                             com.google.gson,
                             io.swagger.annotations.*;resolution:=optional,
                             com.fasterxml.jackson.annotation,
