@@ -19,7 +19,6 @@
 package org.wso2.carbon.device.application.mgt.core.dao;
 
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public interface ApplicationDAO {
      * @return Created Application.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    int createApplication(Application application, int deviceId) throws ApplicationManagementDAOException;
+    int createApplication(Application application, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To add tags for a particular application.
@@ -43,7 +42,26 @@ public interface ApplicationDAO {
      * @param tags tags that need to be added for a application.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    void addTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+    void addTags(List<String> tags, int tenantId) throws ApplicationManagementDAOException;
+
+    List<Tag> getAllTags(int tenantId) throws ApplicationManagementDAOException;
+
+    List<Integer> getTagIdsForTagNames (List<String> tagNames, int tenantId) throws ApplicationManagementDAOException;
+
+    void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+
+    List<Category> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
+
+    void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException;
+
+    void addCategoryMapping (List<Integer>  categoryIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+
+
+
+
+
 
     /**
      * To check application existence.

@@ -132,14 +132,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        InputStream iconFileStream;
-        InputStream bannerFileStream;
-        List<InputStream> attachments = new ArrayList<>();
-        List<ApplicationRelease> applicationReleases = new ArrayList<>();
-        ApplicationRelease applicationRelease;
         List<Attachment> attachmentList = new ArrayList<>();
-        attachmentList.add(screenshot1);
+        if (screenshot1 != null){
+            attachmentList.add(screenshot1);
+        }
         if (screenshot2 != null) {
             attachmentList.add(screenshot2);
         }
@@ -148,52 +144,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
 
         try {
-            //TODO : catch the error message
-            if (isInvalidReleaseCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, application.getType())) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Invalid request for creating an application.").build();
-            }
-
-            // The application executable artifacts such as apks are uploaded.
-            if (!ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
-                // TODO Null check
-                applicationRelease = application.getApplicationReleases().get(0);
-                applicationRelease = applicationStorageManager
-                        .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
-                                null);
-            } else {
-                if (application.getApplicationReleases().size() > 1) {
-                    String msg =
-                            "Invalid application creating request. Application creating request must have single application "
-                                    + "release.  Application name:" + application.getName() + " and type: "
-                                    + application.getType();
-                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-                }
-                applicationRelease = application.getApplicationReleases().get(0);
-                applicationRelease = applicationStorageManager
-                        .uploadReleaseArtifact(applicationRelease, application.getType(), application.getDeviceType(),
-                                binaryFile.getDataHandler().getInputStream());
-                if (applicationRelease.getAppStoredLoc() == null || applicationRelease.getAppHashValue() == null) {
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-                }
-            }
-
-            iconFileStream = iconFile.getDataHandler().getInputStream();
-            bannerFileStream = bannerFile.getDataHandler().getInputStream();
-
-            for (Attachment screenshot : attachmentList) {
-                attachments.add(screenshot.getDataHandler().getInputStream());
-            }
-
-            // Upload images
-            applicationRelease = applicationStorageManager
-                    .uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            applicationRelease.setUuid(UUID.randomUUID().toString());
-            applicationReleases.add(applicationRelease);
-            application.setApplicationReleases(applicationReleases);
-
             // Created new application entry
-            Application createdApplication = applicationManager.createApplication(application);
+            Application createdApplication = applicationManager
+                    .createApplication(application, binaryFile, iconFile, bannerFile, attachmentList);
             if (createdApplication != null) {
                 return Response.status(Response.Status.CREATED).entity(createdApplication).build();
             } else {
@@ -204,23 +157,24 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
-//            todo add msg into return
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (ResourceManagementException e) {
-            String msg =
-                    "Error occurred while uploading the releases artifacts of the application " + application.getName();
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (IOException e) {
-            String msg =
-                    "Error while uploading binary file and resources for the application release of the application "
-                            + application.getName();
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (RequestValidatingException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+//        catch (ResourceManagementException e) {
+//            String msg =
+//                    "Error occurred while uploading the releases artifacts of the application " + application.getName();
+//            log.error(msg, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//        } catch (IOException e) {
+//            String msg =
+//                    "Error while uploading binary file and resources for the application release of the application "
+//                            + application.getName();
+//            log.error(msg, e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+//        }
+        catch (RequestValidatingException e) {
             String msg = "Error occurred while handling the application creating request";
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 
@@ -253,9 +207,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
 
         try {
-            if (isInvalidReleaseCreatingRequest(binaryFile, iconFile, bannerFile, attachmentList, appType)) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
+            applicationManager
+                    .validateReleaseCreatingRequest(applicationRelease, appType, binaryFile, iconFile, bannerFile,
+                            attachmentList);
 
             // The application executable artifacts such as apks are uploaded.
             if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
@@ -631,29 +585,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.CREATED).entity("Lifecycle state added successfully.").build();
-    }
-
-    private boolean isInvalidReleaseCreatingRequest(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
-            List<Attachment> attachmentList, String appType) {
-
-        if (iconFile == null) {
-            log.error("Icon file is not found with the application release creating request.");
-            return true;
-        }
-        if (bannerFile == null) {
-            log.error("Banner file is not found with the application release creating request.");
-            return true;
-        }
-        if (attachmentList == null || attachmentList.isEmpty()) {
-            log.error("Screenshots are not found with the application release creating request.");
-            return true;
-        }
-        if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(appType)) {
-            log.error("Binary file is not found with the application release creating request. Application type: "
-                    + appType);
-            return true;
-        }
-        return false;
     }
 
 }

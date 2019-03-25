@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
@@ -29,8 +31,10 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.ApplicationSubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
+import org.wso2.carbon.device.application.mgt.common.Category;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.Tag;
 import org.wso2.carbon.device.application.mgt.common.User;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
@@ -65,6 +69,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,6 +78,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Default Concrete implementation of Application Management related implementations.
@@ -105,35 +111,87 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @throws RequestValidatingException if application creating request is invalid, returns {@link RequestValidatingException}
      * @throws ApplicationManagementException Catch all other throwing exceptions and returns {@link ApplicationManagementException}
      */
-    @Override public Application createApplication(Application application)
+    @Override
+    public Application createApplication(Application application, Attachment binaryFile, Attachment iconFile,
+            Attachment bannerFile, List<Attachment> attachmentList)
             throws RequestValidatingException, ApplicationManagementException {
+
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         application.setUser(new User(userName, tenantId));
         if (log.isDebugEnabled()) {
             log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
         }
-        validateAppCreatingRequest(application, tenantId);
-        //todo throw different exception
-        validateAppReleasePayload(application.getApplicationReleases().get(0));
-        DeviceType deviceType;
+        DeviceType deviceType = null;
+        List<DeviceType> deviceTypes;
         ApplicationRelease applicationRelease;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
-        try {
-            // Getting the device type details to get device type ID for internal mappings
-            deviceType = Util.getDeviceManagementService().getDeviceType(application.getDeviceType());
 
-            ConnectionManagerUtil.beginDBTransaction();
+        try {
+            validateAppCreatingRequest(application, binaryFile, iconFile, bannerFile, attachmentList);
+            // Getting the device type details to get device type ID for internal mappings
+            //            deviceType = Util.getDeviceManagementService().getDeviceType(application.getDeviceType());
+
+            deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
+            for (DeviceType dt : deviceTypes) {
+                if (dt.getName().equals(application.getDeviceType())) {
+                    deviceType = dt;
+                    application.setDeviceTypeObj(dt);
+                    break;
+                }
+            }
+
             if (deviceType == null) {
-                log.error("Device type is not matched with application type");
+                log.error("Invalid device type is found with the request. Requested Device Type is: " + application
+                        .getDeviceType());
                 return null;
             }
-            if (!application.getUnrestrictedRoles().isEmpty()) {
-                application.setIsRestricted(true);
+
+            applicationRelease = application.getApplicationReleases().get(0);
+            // The application executable artifacts such as apks are uploaded.
+            if (!ApplicationType.ENTERPRISE.toString().equals(application.getType())) {
+                applicationRelease = applicationStorageManager
+                        .uploadReleaseArtifactTmp(applicationRelease, application.getType(),
+                                application.getDeviceType(), null);
+            } else {
+                applicationRelease = applicationStorageManager
+                        .uploadReleaseArtifactTmp(applicationRelease, application.getType(),
+                                application.getDeviceType(), binaryFile);
+            }
+
+            // Upload images
+            applicationRelease = applicationStorageManager
+                    .uploadImageArtifactsTmp(applicationRelease, iconFile, bannerFile, attachmentList);
+            applicationRelease.setUuid(UUID.randomUUID().toString());
+            applicationReleases.add(applicationRelease);
+            application.setApplicationReleases(applicationReleases);
+        } catch (ResourceManagementException e) {
+            throw new ApplicationManagementException("");
+        } catch (DeviceManagementException e) {
+            throw new ApplicationManagementException(
+                    "Error occurred while getting device type id of " + application.getType(), e);
+        }
+
+        try {
+            Filter filter = new Filter();
+            filter.setFullMatch(true);
+            filter.setAppName(application.getName().trim());
+            filter.setDeviceType(deviceType);
+            filter.setOffset(0);
+            filter.setLimit(1);
+
+            ConnectionManagerUtil.beginDBTransaction();
+
+            ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
+            if (!applicationList.getApplications().isEmpty()) {
+                throw new RequestValidatingException(
+                        "Already an application registered with same name - " + applicationList.getApplications().get(0)
+                                .getName());
             }
 
             // Insert to application table
-            int appId = this.applicationDAO.createApplication(application, deviceType.getId());
+            int appId = this.applicationDAO.createApplication(application, tenantId);
 
             if (appId == -1) {
                 log.error("Application creation is Failed");
@@ -143,19 +201,78 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("New Application entry added to AP_APP table. App Id:" + appId);
                 }
-                if (!application.getTags().isEmpty()) {
-                    this.applicationDAO.addTags(application.getTags(), appId, tenantId);
-                    if (log.isDebugEnabled()) {
-                        log.debug("New tags entry added to AP_APP_TAG table. App Id:" + appId);
+
+                //adding application unrestricted roles
+                if (!application.getUnrestrictedRoles().isEmpty()) {
+                    if (!isValidRestrictedRole(application.getUnrestrictedRoles())) {
+                        String msg = "Unrestricted role list contain role/roles which are not in the user store.";
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
                     }
-                }
-                if (application.getIsRestricted()) {
                     this.visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), appId, tenantId);
                     if (log.isDebugEnabled()) {
                         log.debug("New restricted roles to app ID mapping added to AP_UNRESTRICTED_ROLE table."
                                 + " App Id:" + appId);
                     }
                 }
+
+                List<Category> registeredCatehgories = this.applicationDAO.getAllCategories(tenantId);
+
+                if (registeredCatehgories.isEmpty() || !registeredCatehgories.contains(application.getAppCategory())) {
+                    ConnectionManagerUtil.rollbackDBTransaction();
+                    String msg = "Registered application category set is empty.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+
+                boolean isValidAppCategory = false;
+
+                for (Category category : registeredCatehgories) {
+                    if (category.getCategoryName().equals(application.getAppCategory())) {
+                        isValidAppCategory = true;
+                        break;
+                    }
+                }
+
+                //                if (!isValidAppCategory){
+                //                    ConnectionManagerUtil.rollbackDBTransaction();
+                //                    String msg = "Invalid category type is found. Category: " + application. getAppCategory();
+                //                    log.error(msg);
+                //                    throw new RequestValidatingException(msg);
+                //                }
+
+                //                todo add categories
+
+                //adding application tags
+                if (!application.getTags().isEmpty()) {
+                    List<Tag> allRegisteredTags = applicationDAO.getAllTags(tenantId);
+                    List<String> allRegisteredTagNames = new ArrayList<>();
+                    List<Integer> tagIds = new ArrayList<>();
+
+                    for (Tag tag : allRegisteredTags) {
+                        allRegisteredTagNames.add(tag.getTagName());
+                    }
+                    List<String> newTags = getDifference(application.getTags(), allRegisteredTagNames);
+                    if (!newTags.isEmpty()) {
+                        this.applicationDAO.addTags(newTags, tenantId);
+                        if (log.isDebugEnabled()) {
+                            log.debug("New tags entry added to AP_APP_TAG table. App Id:" + appId);
+                        }
+                        tagIds = this.applicationDAO.getTagIdsForTagNames(application.getTags(), tenantId);
+                    } else {
+
+                        for (Tag tag : allRegisteredTags) {
+                            for (String tagName : application.getTags()) {
+                                if (tagName.equals(tag.getTagName())) {
+                                    tagIds.add(tag.getId());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    this.applicationDAO.addTagMapping(tagIds, appId, tenantId);
+                }
+
                 if (log.isDebugEnabled()) {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
@@ -176,9 +293,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 ConnectionManagerUtil.commitDBTransaction();
             }
             return application;
-        } catch (DeviceManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while getting device type id of " + application.getType(), e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
@@ -197,6 +311,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     "Error occured while adding unrestricted roles. application name: " + application.getName()
                             + " application type: " + application.getType(), e);
         } catch (TransactionManagementException e) {
+            throw new ApplicationManagementException("Error occured while disabling AutoCommit. ", e);
+        } catch (UserStoreException e) {
             throw new ApplicationManagementException("Error occured while disabling AutoCommit. ", e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
@@ -271,7 +387,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        validateAppReleasePayload(applicationRelease);
+//        validateAppReleasePayload(applicationRelease);
         if (log.isDebugEnabled()) {
             log.debug("Application release request is received for the application id: " + applicationId);
         }
@@ -433,13 +549,32 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return false;
     }
 
+    private boolean isValidRestrictedRole(Collection<String> unrestrictedRoleList) throws UserStoreException {
+        List<String> roleList = new ArrayList<>(Arrays.asList(getRoleNames()));
+        return roleList.containsAll(unrestrictedRoleList);
+    }
+
+    private String[] getRoleNames() throws UserStoreException {
+        UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+        if (userRealm != null) {
+            return userRealm.getUserStoreManager().getRoleNames();
+        } else {
+            String msg = "User realm is not initiated.";
+            log.error(msg);
+            throw new UserStoreException(msg);
+        }
+    }
+
     private String[] getRolesOfUser(String userName) throws UserStoreException {
         UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
         String[] roleList = {};
         if (userRealm != null) {
+            userRealm.getUserStoreManager().getRoleNames();
             roleList = userRealm.getUserStoreManager().getRoleListOfUser(userName);
         } else {
-            log.error("role list is empty of user :" + userName);
+            String msg = "User realm is not initiated. Logged in user: " + userName;
+            log.error(msg);
+            throw new UserStoreException(msg);
         }
         return roleList;
     }
@@ -780,74 +915,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         CarbonConstants.UI_PERMISSION_ACTION);
     }
 
-    /**
-     * To validate the application creating request
-     *
-     * @param application Application that need to be created
-     * @throws RequestValidatingException Validation Exception
-     */
-    private void validateAppCreatingRequest(Application application, int tenantId) throws RequestValidatingException {
-
-        Boolean isValidApplicationType;
-        Filter filter = new Filter();
-        try {
-            filter.setFullMatch(true);
-            filter.setAppName(application.getName().trim());
-            filter.setOffset(0);
-            filter.setLimit(1);
-            if (application.getName() == null) {
-                throw new RequestValidatingException("Application name cannot be empty");
-            }
-            if (application.getUser() == null || application.getUser().getUserName() == null
-                    || application.getUser().getTenantId() == -1) {
-                throw new RequestValidatingException("Username and tenant Id cannot be empty");
-            }
-            if (application.getAppCategory() == null) {
-                throw new RequestValidatingException("Application category can't be empty");
-            }
-
-            isValidApplicationType = isValidAppType(application.getType());
-
-            if (!isValidApplicationType) {
-                throw new RequestValidatingException(
-                        "App Type contains in the application creating payload doesn't match with supported app types");
-            }
-
-            if (application.getApplicationReleases().size() > 1) {
-                throw new RequestValidatingException(
-                        "Invalid payload. Application creating payload should contains one application release, but "
-                                + "the payload contains more than one");
-            }
-
-            //Check whether application is already existing one or not
-            ConnectionManagerUtil.openDBConnection();
-            ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
-            if (applicationList != null && applicationList.getApplications() != null && !applicationList
-                    .getApplications().isEmpty()) {
-                throw new RequestValidatingException(
-                        "Already an application registered with same name - " + applicationList.getApplications().get(0)
-                                .getName());
-            }
-        } catch (ApplicationManagementDAOException e) {
-            throw new RequestValidatingException(
-                    "Error occured while getting existing applications for application name: " + application.getName()
-                            + " and application type " + application.getType() + ". Tenant ID is " + tenantId, e);
-        } catch (DBConnectionException e) {
-            throw new RequestValidatingException(
-                    "Error occured while getting database connection to get existing applications for application name: "
-                            + application.getName() + " and application type: " + application.getType()
-                            + ". Tenant id is " + tenantId, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
-        }
-    }
-
     /***
      * To verify whether application type is valid one or not
      * @param appType application type {@link ApplicationType}
      * @return true returns if appType is valid on, otherwise returns false
      */
-    private Boolean isValidAppType(String appType) {
+    private boolean isValidAppType(String appType) {
         if (appType == null) {
             return false;
         }
@@ -1173,7 +1246,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             addingTags = getDifference(existingApplication.getTags(), application.getTags());
             removingTags = getDifference(application.getTags(), existingApplication.getTags());
             if (!addingTags.isEmpty()) {
-                applicationDAO.addTags(addingTags, application.getId(), tenantId);
+//                applicationDAO.addTags(addingTags, application.getId(), tenantId);
             }
             if (!removingTags.isEmpty()) {
                 applicationDAO.deleteTags(removingTags, application.getId(), tenantId);
@@ -1374,6 +1447,107 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     "Error occured when validating application release artifact for device type " + deviceType
                             + " And application type " + app.getType() + ". Applicationn ID: " + applicationId
                             + " Application release UUID: " + releaseUuid);
+        }
+    }
+
+    /***
+     * To validate the application creating request
+     *
+     * @param application {@link Application}
+     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
+     * @param iconFile Icon file for the application.
+     * @param bannerFile Banner file for the application.
+     * @param attachmentList Screenshot list.
+     * @throws RequestValidatingException
+     */
+    private void validateAppCreatingRequest(Application application, Attachment binaryFile, Attachment iconFile,
+            Attachment bannerFile, List<Attachment> attachmentList) throws RequestValidatingException{
+
+        boolean isValidApplicationType;
+        String applicationType = application.getType();
+
+        if (StringUtils.isEmpty(application.getName())) {
+            String msg = "";
+            log.error(msg);
+            throw new RequestValidatingException("Application name cannot be empty");
+        }
+        if (StringUtils.isEmpty(application.getAppCategory())) {
+            throw new RequestValidatingException("Application category can't be empty");
+        }
+        if (StringUtils.isEmpty(applicationType)) {
+            throw new RequestValidatingException("Application type can't be empty");
+        }
+        if (StringUtils.isEmpty(application.getDeviceType())) {
+            throw new RequestValidatingException("Device type can't be empty for the application");
+        }
+
+        isValidApplicationType = isValidAppType(application.getType());
+        if (!isValidApplicationType) {
+            throw new RequestValidatingException(
+                    "App Type contains in the application creating payload doesn't match with supported app types");
+        }
+
+        List<ApplicationRelease> appReleases;
+        appReleases = application.getApplicationReleases();
+
+        if (appReleases == null || appReleases.size() != 1) {
+            String msg =
+                    "Invalid application creating request. Application creating request must have single application "
+                            + "release.  Application name:" + application.getName() + " and type: " + application
+                            .getType();
+            throw new RequestValidatingException(msg);
+        }
+        validateReleaseCreatingRequest(appReleases.get(0), applicationType, binaryFile, iconFile, bannerFile,
+                attachmentList);
+    }
+
+    /***
+     *
+     * @param release {@link ApplicationRelease}
+     * @param applicationType Type of the application
+     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
+     * @param iconFile Icon file for the application.
+     * @param bannerFile Banner file for the application.
+     * @param attachmentList Screenshot list.
+     * @throws RequestValidatingException
+     */
+    public void validateReleaseCreatingRequest(ApplicationRelease release, String applicationType,
+            Attachment binaryFile, Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
+            throws RequestValidatingException {
+
+        if (ApplicationType.WEB_CLIP.toString().equals(applicationType) && release.getUrl() == null){
+            String msg = "URL should't be null for the application release creating request for application type: "
+                    + applicationType;
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
+
+        validateArtifacts(binaryFile, iconFile, bannerFile, attachmentList, applicationType);
+
+    }
+
+    private void validateArtifacts(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
+            List<Attachment> attachmentList, String applicationType) throws RequestValidatingException {
+        if (iconFile == null) {
+            String msg = "Icon file is not found with the application release creating request.";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
+        if (bannerFile == null) {
+            String msg = "Banner file is not found with the application release creating request.";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
+        if (attachmentList == null || attachmentList.isEmpty()) {
+            String msg = "Screenshots are not found with the application release creating request.";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
+        if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(applicationType)) {
+            String msg = "Binary file is not found with the application release creating request. Application type: "
+                    + applicationType;
+            log.error(msg);
+            throw new RequestValidatingException(msg);
         }
     }
 }

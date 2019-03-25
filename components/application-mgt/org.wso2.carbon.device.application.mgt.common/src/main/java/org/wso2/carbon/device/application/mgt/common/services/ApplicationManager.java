@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.common.services;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
@@ -41,7 +42,8 @@ public interface ApplicationManager {
      * @return Created application
      * @throws ApplicationManagementException Application Management Exception
      */
-    Application createApplication(Application application)
+    Application createApplication(Application application, Attachment binaryFile, Attachment iconFile,
+            Attachment bannerFile, List<Attachment> attachmentList)
             throws ApplicationManagementException, RequestValidatingException;
 
     /**
@@ -182,4 +184,17 @@ public interface ApplicationManager {
             InputStream binaryFileStram, InputStream iconFileStream, InputStream bannerFileStream,
             List<InputStream> attachments) throws ApplicationManagementException;
 
+    /***
+     *
+     * @param release {@link ApplicationRelease}
+     * @param applicationType Type of the application
+     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
+     * @param iconFile Icon file for the application.
+     * @param bannerFile Banner file for the application.
+     * @param attachmentList Screenshot list.
+     * @throws RequestValidatingException
+     */
+    void validateReleaseCreatingRequest(ApplicationRelease release, String applicationType, Attachment binaryFile,
+            Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
+            throws RequestValidatingException;
 }

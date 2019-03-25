@@ -19,8 +19,8 @@
 
 package org.wso2.carbon.device.application.mgt.common.services;
 
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
@@ -42,6 +42,9 @@ public interface ApplicationStorageManager {
      */
     ApplicationRelease uploadImageArtifacts(ApplicationRelease applicationRelease,
             InputStream iconFile, InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
+
+    ApplicationRelease uploadImageArtifactsTmp(ApplicationRelease applicationRelease,
+            Attachment iconFile, Attachment bannerFile, List<Attachment> screenshots) throws ResourceManagementException;
 
     /**
      * To upload image artifacts related with an Application.
@@ -66,6 +69,9 @@ public interface ApplicationStorageManager {
      */
     ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType, String deviceType,
             InputStream binaryFile) throws ResourceManagementException, RequestValidatingException;
+
+    ApplicationRelease uploadReleaseArtifactTmp(ApplicationRelease applicationRelease, String appType, String deviceType,
+            Attachment binaryFile) throws ResourceManagementException, RequestValidatingException;
 
     /**
      * To upload release artifacts for an Application.

@@ -25,15 +25,17 @@ import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.Application;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.Category;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.application.mgt.common.Tag;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,7 +52,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     private static final Log log = LogFactory.getLog(GenericApplicationDAOImpl.class);
 
     @Override
-    public int createApplication(Application application, int deviceId) throws ApplicationManagementDAOException {
+    public int createApplication(Application application, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to create an application");
             log.debug("Application Details : ");
@@ -63,26 +65,26 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         int applicationId = -1;
         try {
             conn = this.getDBConnection();
-            stmt = conn.prepareStatement("INSERT INTO AP_APP (NAME, TYPE, APP_CATEGORY, SUB_TYPE, RESTRICTED, "
-                            + "TENANT_ID, DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement("INSERT INTO AP_APP "
+                            + "(NAME, "
+                            + "DESCRIPTION, "
+                            + "TYPE, "
+                            + "SUB_TYPE, "
+                            + "TENANT_ID, "
+                            + "DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
-            stmt.setString(2, application.getType());
-            stmt.setString(3, application.getAppCategory());
+            stmt.setString(2, application.getDescription());
+            stmt.setString(3, application.getType());
             stmt.setString(4, application.getSubType());
-            stmt.setBoolean(5, application.getIsRestricted());
-            stmt.setInt(6, application.getUser().getTenantId());
-            stmt.setInt(7, deviceId);
+            stmt.setInt(5, tenantId);
+            stmt.setInt(6, application.getDeviceTypeObj().getId());
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 applicationId = rs.getInt(1);
             }
-
-            // TODO : throw error if applicationId = -1
             return applicationId;
-
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while obtaining the DB connection when application creation", e);
@@ -737,21 +739,22 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void addTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+    public void addTags(List<String> tags, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to add tags");
         }
         Connection conn;
         PreparedStatement stmt = null;
-        String sql = "INSERT INTO AP_APP_TAG (TAG, TENANT_ID, AP_APP_ID) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO AP_APP_TAG "
+                + "(TAG,"
+                + " TENANT_ID) "
+                + "VALUES (?, ?)";
         try {
             conn = this.getDBConnection();
-            conn.setAutoCommit(false);
             stmt = conn.prepareStatement(sql);
             for (String tag : tags) {
                 stmt.setString(1, tag);
                 stmt.setInt(2, tenantId);
-                stmt.setInt(3, applicationId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -765,6 +768,212 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             Util.cleanupResources(stmt, null);
         }
     }
+
+    @Override
+    public List<Tag> getAllTags(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get all tags");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            List<Tag> tags = new ArrayList<>();
+            String sql = "SELECT "
+                    + "AP_APP_TAG.ID AS ID, "
+                    + "AP_APP_TAG.TAG AS TAG "
+                    + "FROM AP_APP_TAG "
+                    + "WHERE TENANT_ID = ?";
+            conn = this.getDBConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            rs = stmt.executeQuery();
+
+            while(rs.next()){
+                Tag tag = new Tag();
+                tag.setId(rs.getInt("ID"));
+                tag.setTagName(rs.getString("TAG"));
+                tags.add(tag);
+            }
+            return tags;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when adding tags", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public List<Category> getAllCategories(int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get all tags");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            List<Category> categories = new ArrayList<>();
+            String sql = "SELECT "
+                    + "AP_APP_CATEGORY.ID AS ID, "
+                    + "AP_APP_CATEGORY.CATEGORY AS CATEGORY "
+                    + "FROM AP_APP_CATEGORY "
+                    + "WHERE TENANT_ID = ?";
+            conn = this.getDBConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, tenantId);
+            rs = stmt.executeQuery();
+
+            while(rs.next()){
+                Category category = new Category();
+                category.setId(rs.getInt("ID"));
+                category.setCategoryName(rs.getString("CATEGORY"));
+                categories.add(category);
+            }
+            return categories;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting categories", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while getting categories", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to add tags");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        String sql = "INSERT INTO AP_APP_CATEGORY "
+                + "(CATEGORY,"
+                + " TENANT_ID) "
+                + "VALUES (?, ?)";
+        try {
+            conn = this.getDBConnection();
+            stmt = conn.prepareStatement(sql);
+            for (String category : categories) {
+                stmt.setString(1, category);
+                stmt.setInt(2, tenantId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when adding categories.", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while adding categories.", e);
+        } finally {
+            Util.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void addCategoryMapping (List<Integer>  categoryIds, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to add categories");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        String sql = "INSERT INTO AP_APP_CATEGORY_MAPPING "
+                + "(AP_APP_CATEGORY_ID, "
+                + "AP_APP_ID, "
+                + " TENANT_ID) "
+                + "VALUES (?, ?, ?)";
+        try {
+            conn = this.getDBConnection();
+            stmt = conn.prepareStatement(sql);
+            for (Integer categoryId : categoryIds) {
+                stmt.setInt(1, categoryId);
+                stmt.setInt(2, applicationId);
+                stmt.setInt(3, tenantId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when adding data into category mapping.", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while adding data into category mapping.", e);
+        } finally {
+            Util.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public List<Integer> getTagIdsForTagNames(List<String> tagNames, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get tag ids for given tag names");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            List<Integer> tagIds = new ArrayList<>();
+            String sql = "SELECT "
+                    + "AP_APP_TAG.ID AS ID "
+                    + "FROM AP_APP_TAG "
+                    + "WHERE AP_APP_TAG..NAME IN ( ? ) AND TENANT_ID = ?";
+            conn = this.getDBConnection();
+            Array array = conn.createArrayOf("VARCHAR", new List[] { tagNames });
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setArray(1, array);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+            while(rs.next()){
+                tagIds.add(rs.getInt("ID"));
+            }
+            return tagIds;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when adding tags", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        } finally {
+            Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    public void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to add tags");
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        String sql = "INSERT INTO AP_APP_TAG_MAPPING "
+                + "(AP_APP_TAG_ID, "
+                + "AP_APP_ID, "
+                + " TENANT_ID) "
+                + "VALUES (?, ?, ?)";
+        try {
+            conn = this.getDBConnection();
+            stmt = conn.prepareStatement(sql);
+            for (Integer tagId : tagIds) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, applicationId);
+                stmt.setInt(3, tenantId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when adding tags", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        } finally {
+            Util.cleanupResources(stmt, null);
+        }
+    }
+
 
     @Override
     public void deleteTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException {
@@ -784,9 +993,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
-
-
-
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } catch (SQLException e) {
