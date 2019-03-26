@@ -1,19 +1,26 @@
 import React from "react";
 import "antd/dist/antd.css";
-import { renderRoutes } from "react-router-config";
+import RouteWithSubRoutes from "./components/RouteWithSubRoutes";
+import {
+    BrowserRouter as Router,
+    Link,
+} from 'react-router-dom';
 
 class App extends React.Component {
+    routes;
     constructor(props) {
         super(props);
-       this.state = {
-           route : props.route
-        }
+        this.routes = props.routes;
     }
   render() {
     return (
-        <div>
-            {renderRoutes(this.state.route.routes)}
-        </div>
+        <Router>
+            <div>
+                {this.routes.map((route) => (
+                    <RouteWithSubRoutes key={route.path} {...route} />
+                ))}
+            </div>
+        </Router>
 
     );
   }

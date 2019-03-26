@@ -21,6 +21,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const config = {
     devtool: "source-map",
+    output: {
+        publicPath: '/publisher/' // <---- this
+    },
     watch: false,
     resolve: {
         alias: {
