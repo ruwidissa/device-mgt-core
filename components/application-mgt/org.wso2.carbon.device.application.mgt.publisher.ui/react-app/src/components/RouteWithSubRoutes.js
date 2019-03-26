@@ -4,7 +4,6 @@ class RouteWithSubRoutes extends React.Component{
     props;
     constructor(props){
         super(props);
-        console.log(props);
         this.props = props;
     }
     render() {

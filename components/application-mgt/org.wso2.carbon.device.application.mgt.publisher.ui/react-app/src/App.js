@@ -16,11 +16,6 @@ class App extends React.Component {
     return (
         <Router>
             <div>
-                <ul>
-                    <li><Link to="/publisher/tacos">Tacos</Link></li>
-                    <li><Link to="/publisher/sandwiches">Sandwiches</Link></li>
-                </ul>
-
                 {this.routes.map((route) => (
                     <RouteWithSubRoutes key={route.path} {...route} />
                 ))}
