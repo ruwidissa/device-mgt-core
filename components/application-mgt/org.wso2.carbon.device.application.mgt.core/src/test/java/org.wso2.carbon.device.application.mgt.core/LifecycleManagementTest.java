@@ -20,6 +20,7 @@ public class LifecycleManagementTest {
     private final String NEXT_STATE = "Published";
     private final String BOGUS_STATE = "Removed";
 
+
     @BeforeClass
     public void init() {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
@@ -43,7 +44,7 @@ public class LifecycleManagementTest {
                           proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
 
-    @Test
+    /*@Test
     public void checkValidStateChange() {
         Assert.assertTrue("Invalid state transition from: " + CURRENT_STATE + " to: " + NEXT_STATE,
                            lifecycleStateManger.isValidStateChange(CURRENT_STATE, NEXT_STATE));
@@ -52,7 +53,7 @@ public class LifecycleManagementTest {
     @Test
     public void checkInvalidStateChange() {
         Assert.assertFalse("Invalid state transition from: " + CURRENT_STATE + " to: " + BOGUS_STATE,
-                          lifecycleStateManger.isValidStateChange(CURRENT_STATE, BOGUS_STATE));
-    }
+                          lifecycleStateManger.isValidStateChange(CURRENT_STATE, BOGUS_STATE,));
+    }*/
 
 }

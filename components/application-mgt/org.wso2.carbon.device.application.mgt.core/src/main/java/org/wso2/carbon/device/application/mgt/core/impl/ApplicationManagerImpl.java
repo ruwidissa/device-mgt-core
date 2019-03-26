@@ -984,7 +984,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
+                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState(),userName,tenantId)) {
                     //todo if current state of the adding lifecycle state is PUBLISHED, need to check whether is there
                     //todo any other application release in PUBLISHED state for the application( i.e for the appid)
                     this.lifecycleStateDAO.addLifecycleState(state, applicationId, releaseUuid, tenantId);

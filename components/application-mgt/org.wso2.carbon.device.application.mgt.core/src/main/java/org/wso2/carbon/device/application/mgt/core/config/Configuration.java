@@ -87,5 +87,6 @@ public class Configuration {
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
     }
+
 }
 
