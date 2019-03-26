@@ -39,11 +39,13 @@ import org.wso2.carbon.device.application.mgt.common.exception.RequestValidating
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
+import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.util.ArtifactsParser;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 import org.xml.sax.SAXException;
 
+import javax.activation.DataHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.ParseException;
@@ -140,35 +142,35 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         InputStream bannerFileStream;
         List<InputStream> screenshotStreams = new ArrayList<>();
         List<String> scFileExtensions = new ArrayList<>();
-        String iconFileExtension;
-        String bannerFileExtension;
-
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        DataHandler iconFileDataHandler;
+        DataHandler bannerFileDataHandler;
         String artifactDirectoryPath;
         String iconStoredLocation;
         String bannerStoredLocation;
         String scStoredLocation;
 
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
+            iconFileDataHandler = iconFile.getDataHandler();
+            bannerFileDataHandler = bannerFile.getDataHandler();
 
-            iconFileStream = iconFile.getDataHandler().getInputStream();
-            iconFileExtension = iconFile.getDataHandler().getContentType();
-            bannerFileExtension = bannerFile.getDataHandler().getContentType();
-            bannerFileStream = bannerFile.getDataHandler().getInputStream();
+            iconFileStream = iconFileDataHandler.getInputStream();
+            bannerFileStream = bannerFileDataHandler.getInputStream();
             for (Attachment screenshot : screenshots) {
-                screenshotStreams.add(screenshot.getDataHandler().getInputStream());
-                scFileExtensions.add(screenshot.getDataHandler().getContentType());
+                DataHandler scDataHandler = screenshot.getDataHandler();
+                screenshotStreams.add(scDataHandler.getInputStream());
+                scFileExtensions.add(scDataHandler.getName());
             }
             artifactDirectoryPath = storagePath + applicationRelease.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            iconStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[0] + iconFileExtension;
-            bannerStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[1] + bannerFileExtension;
 
             if (iconFileStream != null) {
+                iconStoredLocation = artifactDirectoryPath + File.separator + iconFileDataHandler.getName();
                 saveFile(iconFileStream, iconStoredLocation);
                 applicationRelease.setIconLoc(iconStoredLocation);
             }
             if (bannerFileStream != null) {
+                bannerStoredLocation = artifactDirectoryPath + File.separator + bannerFileDataHandler.getName();
                 saveFile(bannerFileStream, bannerStoredLocation);
                 applicationRelease.setBannerLoc(bannerStoredLocation);
             }
@@ -178,8 +180,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 }
                 int count = 0;
                 for (InputStream screenshotStream : screenshotStreams) {
-                    scStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[2] + count
-                            + scFileExtensions.get(count);
+                    scStoredLocation = artifactDirectoryPath + File.separator + scFileExtensions.get(count);
                     count ++;
                     if (count == 1) {
                         applicationRelease.setScreenshotLoc1(scStoredLocation);
@@ -202,7 +203,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     + "update the screen-shot count for the application " + applicationRelease.getUuid() +
                     " for the tenant id " + tenantId, e);
         }
-
     }
 
     @Override
@@ -298,9 +298,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 throw new ApplicationStorageManagementException(msg);
             }
 
-
-
-
             if (log.isDebugEnabled()) {
                 log.debug("Artifact Directory Path for saving the application release related artifacts related with "
                         + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
@@ -329,8 +326,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             Attachment binaryFileAttachment) throws ResourceManagementException, RequestValidatingException{
 
         try {
-            InputStream binaryFile = binaryFileAttachment.getDataHandler().getInputStream();
-            String installerExtension = binaryFileAttachment.getDataHandler().getContentType();
             if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
                 applicationRelease.setVersion(Constants.DEFAULT_VERSION);
                 UrlValidator urlValidator = new UrlValidator();
@@ -346,6 +341,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String artifactDirectoryPath;
             String md5OfApp;
             String artifactPath;
+            DataHandler binaryDataHandler = binaryFileAttachment.getDataHandler();
+            String fileName = binaryDataHandler.getName();
+            InputStream binaryFile = binaryDataHandler.getInputStream();
             InputStream[] cloneInputStream = cloneInputStream(binaryFile);
             md5OfApp = getMD5(binaryFile);
             if (md5OfApp == null) {
@@ -375,12 +373,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 throw new ApplicationStorageManagementException(msg);
             }
 
-            artifactPath = artifactDirectoryPath + File.separator + Constants.RELEASE_ARTIFACT
-                    + installerExtension;
-
-
-
-
+            artifactPath = artifactDirectoryPath + File.separator + fileName;
             if (log.isDebugEnabled()) {
                 log.debug("Artifact Directory Path for saving the application release related artifacts related with "
                         + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
@@ -403,7 +396,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             throw new ApplicationStorageManagementException(msg, e);
         }
         return applicationRelease;
-
     }
 
     private InputStream[] cloneInputStream(InputStream inputStream) throws ApplicationStorageManagementException {

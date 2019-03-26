@@ -76,6 +76,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -120,19 +121,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         application.setUser(new User(userName, tenantId));
-        if (log.isDebugEnabled()) {
-            log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
-        }
         DeviceType deviceType = null;
         List<DeviceType> deviceTypes;
         ApplicationRelease applicationRelease;
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
+        }
         try {
             validateAppCreatingRequest(application, binaryFile, iconFile, bannerFile, attachmentList);
-            // Getting the device type details to get device type ID for internal mappings
-            //            deviceType = Util.getDeviceManagementService().getDeviceType(application.getDeviceType());
-
             deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
             for (DeviceType dt : deviceTypes) {
                 if (dt.getName().equals(application.getDeviceType())) {
@@ -141,11 +139,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     break;
                 }
             }
-
             if (deviceType == null) {
-                log.error("Invalid device type is found with the request. Requested Device Type is: " + application
-                        .getDeviceType());
-                return null;
+                String msg = "Invalid device type is found with the request. Requested Device Type is: " + application
+                        .getDeviceType();
+                log.error(msg);
+                throw new RequestValidatingException(msg);
             }
 
             applicationRelease = application.getApplicationReleases().get(0);
@@ -167,10 +165,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationReleases.add(applicationRelease);
             application.setApplicationReleases(applicationReleases);
         } catch (ResourceManagementException e) {
-            throw new ApplicationManagementException("");
+            String msg = "Error Occured when uploading artifacts of the application.: " + application.getName();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (DeviceManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while getting device type id of " + application.getType(), e);
+            String msg = "Error occurred while getting device type id of " + application.getType();
+            throw new ApplicationManagementException(msg, e);
         }
 
         try {
@@ -185,14 +185,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
             if (!applicationList.getApplications().isEmpty()) {
-                throw new RequestValidatingException(
+                String msg =
                         "Already an application registered with same name - " + applicationList.getApplications().get(0)
-                                .getName());
+                                .getName();
+                log.error(msg);
+                throw new RequestValidatingException(msg);
             }
 
             // Insert to application table
             int appId = this.applicationDAO.createApplication(application, tenantId);
-
             if (appId == -1) {
                 log.error("Application creation is Failed");
                 ConnectionManagerUtil.rollbackDBTransaction();
@@ -201,15 +202,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("New Application entry added to AP_APP table. App Id:" + appId);
                 }
-
                 //adding application unrestricted roles
-                if (!application.getUnrestrictedRoles().isEmpty()) {
-                    if (!isValidRestrictedRole(application.getUnrestrictedRoles())) {
+                List<String> unrestrictedRoles = application.getUnrestrictedRoles();
+                if (!unrestrictedRoles.isEmpty()) {
+                    if (!isValidRestrictedRole(unrestrictedRoles)) {
                         String msg = "Unrestricted role list contain role/roles which are not in the user store.";
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
-                    this.visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), appId, tenantId);
+                    this.visibilityDAO.addUnrestrictedRoles(unrestrictedRoles, appId, tenantId);
                     if (log.isDebugEnabled()) {
                         log.debug("New restricted roles to app ID mapping added to AP_UNRESTRICTED_ROLE table."
                                 + " App Id:" + appId);
@@ -217,34 +218,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
 
                 List<Category> registeredCatehgories = this.applicationDAO.getAllCategories(tenantId);
+                String categoryName = application.getAppCategory();
+                Optional<Category> category = registeredCatehgories.stream().filter(obj -> obj.getCategoryName().equals(categoryName)).findAny();
 
-                if (registeredCatehgories.isEmpty() || !registeredCatehgories.contains(application.getAppCategory())) {
+                if (registeredCatehgories.isEmpty()) {
                     ConnectionManagerUtil.rollbackDBTransaction();
-                    String msg = "Registered application category set is empty.";
+                    String msg = "Registered application category set is empty category: " + categoryName;
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
+                if (!category.isPresent()){
+                    ConnectionManagerUtil.rollbackDBTransaction();
+                    String msg = "Request contains invalid category: " + categoryName;
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
 
-                boolean isValidAppCategory = false;
-
-                for (Category category : registeredCatehgories) {
-                    if (category.getCategoryName().equals(application.getAppCategory())) {
-                        isValidAppCategory = true;
-                        break;
-                    }
                 }
 
-                //                if (!isValidAppCategory){
-                //                    ConnectionManagerUtil.rollbackDBTransaction();
-                //                    String msg = "Invalid category type is found. Category: " + application. getAppCategory();
-                //                    log.error(msg);
-                //                    throw new RequestValidatingException(msg);
-                //                }
+                /*
+                In current flow, allow to add one category for an application. If it is required to add multiple
+                categories DAO layer is implemented to match with that requirement. Hence logic is also implemented
+                this way.
+                */
+                List<Integer> categoryIds = new ArrayList<>();
+                categoryIds.add(category.get().getId());
+                this.applicationDAO.addCategoryMapping(categoryIds,appId,tenantId);
 
-                //                todo add categories
 
                 //adding application tags
-                if (!application.getTags().isEmpty()) {
+                List<String> tags = application.getTags();
+                if (!tags.isEmpty()) {
                     List<Tag> allRegisteredTags = applicationDAO.getAllTags(tenantId);
                     List<String> allRegisteredTagNames = new ArrayList<>();
                     List<Integer> tagIds = new ArrayList<>();
@@ -252,17 +255,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     for (Tag tag : allRegisteredTags) {
                         allRegisteredTagNames.add(tag.getTagName());
                     }
-                    List<String> newTags = getDifference(application.getTags(), allRegisteredTagNames);
+                    List<String> newTags = getDifference(tags, allRegisteredTagNames);
                     if (!newTags.isEmpty()) {
                         this.applicationDAO.addTags(newTags, tenantId);
                         if (log.isDebugEnabled()) {
                             log.debug("New tags entry added to AP_APP_TAG table. App Id:" + appId);
                         }
-                        tagIds = this.applicationDAO.getTagIdsForTagNames(application.getTags(), tenantId);
+                        tagIds = this.applicationDAO.getTagIdsForTagNames(tags, tenantId);
                     } else {
 
                         for (Tag tag : allRegisteredTags) {
-                            for (String tagName : application.getTags()) {
+                            for (String tagName : tags) {
                                 if (tagName.equals(tag.getTagName())) {
                                     tagIds.add(tag.getId());
                                     break;
@@ -295,25 +298,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return application;
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured while adding lifecycle state. application name: " + application.getName()
-                            + " application type: is " + application.getType(), e);
+            String msg = "Error occured while adding lifecycle state. application name: " + application.getName()
+                    + " application type: is " + application.getType();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
+            String msg =
                     "Error occured while adding application or application release. application name: " + application
-                            .getName() + " application type: " + application.getType(), e);
+                            .getName() + " application type: " + application.getType();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException("Error occured while getting database connection. ", e);
+            String msg = "Error occured while getting database connection.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (VisibilityManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured while adding unrestricted roles. application name: " + application.getName()
-                            + " application type: " + application.getType(), e);
+            String msg = "Error occured while adding unrestricted roles. application name: " + application.getName()
+                    + " application type: " + application.getType();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            throw new ApplicationManagementException("Error occured while disabling AutoCommit. ", e);
+            String msg = "Error occured while disabling AutoCommit.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
-            throw new ApplicationManagementException("Error occured while disabling AutoCommit. ", e);
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occured when validating the unrestricted roles given for the application";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1363,7 +1377,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             String releaseType = updateRelease.getReleaseType();
             Double price = updateRelease.getPrice();
-            int isSharedWithTenants = updateRelease.getIsSharedWithAllTenants();
             String metaData = updateRelease.getMetaData();
 
             if (price < 0.0 || (price == 0.0 && ApplicationSubscriptionType.PAID.toString().equals(app.getSubType()))
@@ -1378,10 +1391,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             release.setPrice(price);
             if (releaseType != null) {
                 release.setReleaseType(releaseType);
-            }
-            //todo change this when isShared with field change to boolean
-            if (isSharedWithTenants == 0 || isSharedWithTenants == 1) {
-                release.setIsSharedWithAllTenants(isSharedWithTenants);
             }
             if (metaData != null) {
                 release.setMetaData(metaData);
@@ -1467,24 +1476,31 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String applicationType = application.getType();
 
         if (StringUtils.isEmpty(application.getName())) {
-            String msg = "";
+            String msg = "Application name cannot be empty";
             log.error(msg);
-            throw new RequestValidatingException("Application name cannot be empty");
+            throw new RequestValidatingException(msg);
         }
         if (StringUtils.isEmpty(application.getAppCategory())) {
-            throw new RequestValidatingException("Application category can't be empty");
+            String msg = "Application category can't be empty";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
         }
         if (StringUtils.isEmpty(applicationType)) {
-            throw new RequestValidatingException("Application type can't be empty");
+            String msg = "Application type can't be empty";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
         }
         if (StringUtils.isEmpty(application.getDeviceType())) {
-            throw new RequestValidatingException("Device type can't be empty for the application");
+            String msg = "Device type can't be empty for the application";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
         }
 
         isValidApplicationType = isValidAppType(application.getType());
         if (!isValidApplicationType) {
-            throw new RequestValidatingException(
-                    "App Type contains in the application creating payload doesn't match with supported app types");
+            String msg = "App Type contains in the application creating payload doesn't match with supported app types";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
         }
 
         List<ApplicationRelease> appReleases;
@@ -1495,6 +1511,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     "Invalid application creating request. Application creating request must have single application "
                             + "release.  Application name:" + application.getName() + " and type: " + application
                             .getType();
+            log.error(msg);
             throw new RequestValidatingException(msg);
         }
         validateReleaseCreatingRequest(appReleases.get(0), applicationType, binaryFile, iconFile, bannerFile,

@@ -49,22 +49,23 @@ CREATE TABLE IF NOT EXISTS `APP_MANAGER`.`AP_APP_RELEASE` (
   `TENANT_ID` VARCHAR(45) NOT NULL,
   `UUID` VARCHAR(200) NOT NULL,
   `RELEASE_TYPE` VARCHAR(45) NOT NULL,
-  `APP_PRICE` DECIMAL(6,2) NULL DEFAULT NULL,
-  `STORED_LOCATION` VARCHAR(45) NOT NULL,
-  `BANNER_LOCATION` VARCHAR(45) NOT NULL,
-  `SC_1_LOCATION` VARCHAR(45) NOT NULL,
-  `SC_2_LOCATION` VARCHAR(45) NULL DEFAULT NULL,
-  `SC_3_LOCATION` VARCHAR(45) NULL DEFAULT NULL,
-  `APP_HASH_VALUE` VARCHAR(1000) NOT NULL,
-  `SHARED_WITH_ALL_TENANTS` TINYINT(1) NULL DEFAULT NULL,
-  `APP_META_INFO` TEXT NULL DEFAULT NULL,
   `PACKAGE_NAME` VARCHAR(45) NOT NULL,
-  `SUPPORTED_OS_VERSIONS` VARCHAR(45) NULL,
+  `APP_PRICE` DECIMAL(6,2) NULL DEFAULT NULL,
+  `STORED_LOCATION` VARCHAR(100) NOT NULL,
+  `ICON_LOCATION` VARCHAR(100) NOT NULL,
+  `BANNER_LOCATION` VARCHAR(100) NOT NULL,
+  `SC_1_LOCATION` VARCHAR(100) NOT NULL,
+  `SC_2_LOCATION` VARCHAR(100) NULL DEFAULT NULL,
+  `SC_3_LOCATION` VARCHAR(100) NULL DEFAULT NULL,
+  `APP_HASH_VALUE` VARCHAR(1000) NOT NULL,
+  `SHARED_WITH_ALL_TENANTS` TINYINT(1) NOT NULL,
+  `APP_META_INFO` TEXT NULL DEFAULT NULL,
+  `SUPPORTED_OS_VERSIONS` VARCHAR(45) NOT NULL,
   `RATING` DOUBLE NULL DEFAULT NULL,
-  `CURRENT_STATE` VARCHAR(45) NULL,
+  `CURRENT_STATE` VARCHAR(45) NOT NULL,
   `RATED_USERS` INT(11) NULL,
   `AP_APP_ID` INT(11) NOT NULL,
-  PRIMARY KEY (`ID`, `AP_APP_ID`),
+  PRIMARY KEY (`ID`),
   INDEX `fk_AP_APP_RELEASE_AP_APP1_idx` (`AP_APP_ID` ASC),
   CONSTRAINT `fk_AP_APP_RELEASE_AP_APP1`
     FOREIGN KEY (`AP_APP_ID`)
@@ -73,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `APP_MANAGER`.`AP_APP_RELEASE` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
-COMMENT = '																																																																																																																																																																																																																																																																																																																																																																																																																																																																			';
+COMMENT = '																																																																																																																																																																																																																																																																																																																																																																																																																																																																		';
 
 
 -- -----------------------------------------------------

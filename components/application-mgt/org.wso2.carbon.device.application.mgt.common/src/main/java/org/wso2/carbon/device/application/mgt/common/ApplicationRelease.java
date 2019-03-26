@@ -85,7 +85,7 @@ public class ApplicationRelease {
     @ApiModelProperty(name = "isSharedWithAllTenants",
             value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
             required = true)
-    private int isSharedWithAllTenants;
+    private boolean isSharedWithAllTenants;
 
     @ApiModelProperty(name = "metaData",
             value = "Meta data of the application release",
@@ -168,7 +168,7 @@ public class ApplicationRelease {
         this.appHashValue = appHashValue;
     }
 
-    public void setIsSharedWithAllTenants(int isSharedWithAllTenants) {
+    public void setIsSharedWithAllTenants(boolean isSharedWithAllTenants) {
         this.isSharedWithAllTenants = isSharedWithAllTenants;
     }
 
@@ -196,9 +196,7 @@ public class ApplicationRelease {
         return appHashValue;
     }
 
-    public int getIsSharedWithAllTenants() {
-        return isSharedWithAllTenants;
-    }
+    public boolean getIsSharedWithAllTenants() { return isSharedWithAllTenants; }
 
     public String getMetaData() {
         return metaData;

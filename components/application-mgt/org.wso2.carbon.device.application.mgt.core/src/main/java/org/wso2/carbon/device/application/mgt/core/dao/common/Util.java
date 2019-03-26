@@ -238,7 +238,7 @@ public class Util {
         applicationRelease.setScreenshotLoc2(resultSet.getString("SCREEN_SHOT_2"));
         applicationRelease.setScreenshotLoc3(resultSet.getString("SCREEN_SHOT_3"));
         applicationRelease.setAppHashValue(resultSet.getString("HASH_VALUE"));
-        applicationRelease.setIsSharedWithAllTenants(resultSet.getInt("SHARED"));
+        applicationRelease.setIsSharedWithAllTenants(resultSet.getBoolean("SHARED"));
         applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
         applicationRelease.setRating(resultSet.getDouble("RATING"));
         return applicationRelease;

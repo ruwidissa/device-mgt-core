@@ -133,7 +133,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> attachmentList = new ArrayList<>();
-        if (screenshot1 != null){
+        if (screenshot1 != null) {
             attachmentList.add(screenshot1);
         }
         if (screenshot2 != null) {
@@ -158,20 +158,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-//        catch (ResourceManagementException e) {
-//            String msg =
-//                    "Error occurred while uploading the releases artifacts of the application " + application.getName();
-//            log.error(msg, e);
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-//        } catch (IOException e) {
-//            String msg =
-//                    "Error while uploading binary file and resources for the application release of the application "
-//                            + application.getName();
-//            log.error(msg, e);
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-//        }
-        catch (RequestValidatingException e) {
+        } catch (RequestValidatingException e) {
             String msg = "Error occurred while handling the application creating request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();

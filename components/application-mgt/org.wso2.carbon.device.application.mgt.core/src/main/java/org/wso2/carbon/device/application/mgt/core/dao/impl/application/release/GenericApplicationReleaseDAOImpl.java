@@ -57,33 +57,51 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
-        String sql = "INSERT INTO AP_APP_RELEASE (VERSION,TENANT_ID,UUID,RELEASE_TYPE, PACKAGE_NAME, APP_PRICE, "
-                + "STORED_LOCATION, ICON_LOCATION, BANNER_LOCATION, SC_1_LOCATION,SC_2_LOCATION,SC_3_LOCATION,"
-                + "APP_HASH_VALUE, SHARED_WITH_ALL_TENANTS, APP_META_INFO,AP_APP_ID) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        String sql = "INSERT INTO AP_APP_RELEASE "
+                + "(DESCRIPTION,"
+                + "VERSION,"
+                + "TENANT_ID,"
+                + "UUID,"
+                + "RELEASE_TYPE,"
+                + "PACKAGE_NAME,"
+                + "APP_PRICE, "
+                + "STORED_LOCATION,"
+                + "ICON_LOCATION,"
+                + "BANNER_LOCATION,"
+                + "SC_1_LOCATION,"
+                + "SC_2_LOCATION,"
+                + "SC_3_LOCATION,"
+                + "APP_HASH_VALUE,"
+                + "SHARED_WITH_ALL_TENANTS,"
+                + "APP_META_INFO,"
+                + "SUPPORTED_OS_VERSIONS,"
+                + "CURRENT_STATE,"
+                + "AP_APP_ID) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
-        // TODO : make this readable
-        int index = 0;
         String generatedColumns[] = { "ID" };
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql, generatedColumns);
-            statement.setString(++index, applicationRelease.getVersion());
-            statement.setInt(++index, tenantId);
-            statement.setString(++index, applicationRelease.getUuid());
-            statement.setString(++index, String.valueOf(applicationRelease.getReleaseType()));
-            statement.setString(++index, String.valueOf(applicationRelease.getPackageName()));
-            statement.setDouble(++index, applicationRelease.getPrice());
-            statement.setString(++index, applicationRelease.getAppStoredLoc());
-            statement.setString(++index, applicationRelease.getIconLoc());
-            statement.setString(++index, applicationRelease.getBannerLoc());
-            statement.setString(++index, applicationRelease.getScreenshotLoc1());
-            statement.setString(++index, applicationRelease.getScreenshotLoc2());
-            statement.setString(++index, applicationRelease.getScreenshotLoc3());
-            statement.setString(++index, applicationRelease.getAppHashValue());
-            statement.setInt(++index, applicationRelease.getIsSharedWithAllTenants());
-            statement.setString(++index, applicationRelease.getMetaData());
-            statement.setInt(++index, appId);
+            statement.setString(1, applicationRelease.getDescription());
+            statement.setString(2, applicationRelease.getVersion());
+            statement.setInt(3, tenantId);
+            statement.setString(4, applicationRelease.getUuid());
+            statement.setString(5, String.valueOf(applicationRelease.getReleaseType()));
+            statement.setString(6, String.valueOf(applicationRelease.getPackageName()));
+            statement.setDouble(7, applicationRelease.getPrice());
+            statement.setString(8, applicationRelease.getAppStoredLoc());
+            statement.setString(9, applicationRelease.getIconLoc());
+            statement.setString(10, applicationRelease.getBannerLoc());
+            statement.setString(11, applicationRelease.getScreenshotLoc1());
+            statement.setString(12, applicationRelease.getScreenshotLoc2());
+            statement.setString(13, applicationRelease.getScreenshotLoc3());
+            statement.setString(14, applicationRelease.getAppHashValue());
+            statement.setBoolean(15, applicationRelease.getIsSharedWithAllTenants());
+            statement.setString(16, applicationRelease.getMetaData());
+            statement.setString(17, applicationRelease.getSupportedOsVersions());
+            statement.setString(18, applicationRelease.getCurrentState());
+            statement.setInt(19, appId);
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -386,7 +404,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             statement.setString(10, applicationRelease.getScreenshotLoc2());
             statement.setString(11, applicationRelease.getScreenshotLoc3());
             statement.setString(12, applicationRelease.getAppHashValue());
-            statement.setInt(13, applicationRelease.getIsSharedWithAllTenants());
+            statement.setBoolean(13, applicationRelease.getIsSharedWithAllTenants());
             statement.setString(14, applicationRelease.getMetaData());
             statement.setInt(15, applicationId);
             statement.setInt(16, tenantId);
