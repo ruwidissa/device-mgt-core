@@ -106,7 +106,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         application.setUser(new User(userName, tenantId));
         if (log.isDebugEnabled()) {
-            log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " + userName);
+            log.debug("Create Application received for the tenant : " + tenantId + " From" + " the user : " +
+                    userName);
         }
         validateAppCreatingRequest(application, tenantId);
         //todo throw different exception
@@ -576,7 +577,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
-                        newAppLifecycleState.getCurrentState())) {
+                        newAppLifecycleState.getCurrentState(),userName,tenantId)) {
                     this.lifecycleStateDAO
                             .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
                                     tenantId);
@@ -621,8 +622,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     (currentState)) {
                 LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
+                String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
-                        newAppLifecycleState.getCurrentState())) {
+                        newAppLifecycleState.getCurrentState(),userName,tenantId)) {
                     this.lifecycleStateDAO
                             .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
                                     tenantId);
@@ -979,12 +981,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + " and application release UUID: " + releaseUuid);
             }
             state.setPreviousState(currentState.getCurrentState());
-
             String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState(),userName,tenantId)) {
+                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState(),userName,
+                        tenantId)) {
                     //todo if current state of the adding lifecycle state is PUBLISHED, need to check whether is there
                     //todo any other application release in PUBLISHED state for the application( i.e for the appid)
                     this.lifecycleStateDAO.addLifecycleState(state, applicationId, releaseUuid, tenantId);

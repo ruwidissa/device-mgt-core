@@ -1,5 +1,7 @@
 package org.wso2.carbon.device.application.mgt.core.lifecycle;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
@@ -23,6 +25,7 @@ import java.util.Set;
 public class LifecycleStateManger {
 
     private Map<String, State> lifecycleStates;
+    private static Log log = LogFactory.getLog(LifecycleStateManger.class);
 
     public void init(List<LifecycleState> states) throws LifecycleManagementException {
         lifecycleStates = new HashMap<>();
@@ -33,11 +36,11 @@ public class LifecycleStateManger {
             lifecycleStates.put(s.getName().toUpperCase(), new State(s.getName().toUpperCase(),
                     s.getProceedingStates(), s.getPermission(),s.isAppUpdatable(),s.isAppInstallable(),
                     s.isInitialState(),s.isEndState()));
-            Permission permissionOfState = new Permission();
-            permissionOfState.setPath(s.getPermission());
             try {
-                PermissionUtils.putPermission(permissionOfState);
+                PermissionUtils.putPermission(s.getPermission());
             } catch (PermissionManagementException e) {
+                log.error("Error when adding permission " + s.getPermission() + "  related to the state: "
+                        + s.getName(), e);
                 throw new LifecycleManagementException (
                         "Error when adding permission " + s.getPermission() + "  related to the state: "
                                 + s.getName(), e);
@@ -54,26 +57,31 @@ public class LifecycleStateManger {
 
         UserRealm userRealm = null;
         String permission = getPermissionForStateChange(nextState);
-        try {
-            userRealm = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
-            if(userRealm != null && userRealm.getAuthorizationManager() != null &&
-                    userRealm.getAuthorizationManager().isUserAuthorized(username,
-                            PermissionUtils.getAbsolutePermissionPath(permission),
-                            Constants.UI_EXECUTE)){
-                if (currentState.equalsIgnoreCase(nextState)) {
-                    return true;
-                }
-                State state = getMatchingState(currentState);
-                if (state != null) {
-                    return getMatchingNextState(state.getProceedingStates(), nextState);
+        if(permission != null) {
+            try {
+                userRealm = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
+                if (userRealm != null && userRealm.getAuthorizationManager() != null &&
+                        userRealm.getAuthorizationManager().isUserAuthorized(username,
+                                PermissionUtils.getAbsolutePermissionPath(permission),
+                                Constants.UI_EXECUTE)) {
+                    if (currentState.equalsIgnoreCase(nextState)) {
+                        return true;
+                    }
+                    State state = getMatchingState(currentState);
+                    if (state != null) {
+                        return getMatchingNextState(state.getProceedingStates(), nextState);
+                    }
+                    return false;
                 }
                 return false;
+            } catch (UserStoreException e) {
+                throw new LifecycleManagementException(
+                        "UserStoreException exception from changing the state from : " + currentState + "  to: "
+                                + nextState + " with username : " + username + " and tenant Id : " + tenantId, e);
             }
-            return false;
-        } catch (UserStoreException e) {
-            throw new LifecycleManagementException (
-                    "UserStoreException exception from changing the state from : " + currentState + "  to: "
-                            + nextState+" with username : "+ username+" and tenant Id : "+tenantId, e);
+        }else{
+            throw new LifecycleManagementException(
+                    "Required permissions cannot be found for the state : "+nextState);
         }
     }
 

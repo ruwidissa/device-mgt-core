@@ -3,6 +3,7 @@ package org.wso2.carbon.device.application.mgt.core;
 import org.junit.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
@@ -22,7 +23,7 @@ public class LifecycleManagementTest {
 
 
     @BeforeClass
-    public void init() {
+    public void init() throws LifecycleManagementException {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
         Configuration configuration = configurationManager.getConfiguration();
         lifecycleStates = configuration.getLifecycleStates();
@@ -43,17 +44,5 @@ public class LifecycleManagementTest {
         Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
                           proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
-
-    /*@Test
-    public void checkValidStateChange() {
-        Assert.assertTrue("Invalid state transition from: " + CURRENT_STATE + " to: " + NEXT_STATE,
-                           lifecycleStateManger.isValidStateChange(CURRENT_STATE, NEXT_STATE));
-    }
-
-    @Test
-    public void checkInvalidStateChange() {
-        Assert.assertFalse("Invalid state transition from: " + CURRENT_STATE + " to: " + BOGUS_STATE,
-                          lifecycleStateManger.isValidStateChange(CURRENT_STATE, BOGUS_STATE,));
-    }*/
 
 }
