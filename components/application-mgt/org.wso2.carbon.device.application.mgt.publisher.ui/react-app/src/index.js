@@ -1,10 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import * as serviceWorker from './serviceWorker';
-import App from "./App"
-import Login from "./pages/Login"
-import Dashboard from "./pages/dashboard/Dashboard"
+import App from "./App";
+import Login from "./pages/Login";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Apps from "./pages/dashboard/apps/Apps";
+import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
+import './index.css';
 
 
 
@@ -15,7 +17,17 @@ const routes = [
     },
     {
         path: '/publisher/dashboard',
-        component: Dashboard
+        component: Dashboard,
+        routes: [
+            {
+                path: '/publisher/dashboard/apps',
+                component: Apps
+            },
+            {
+                path: '/publisher/dashboard/new-app',
+                component: AddNewApp
+            }
+        ]
     }
 ]
 
