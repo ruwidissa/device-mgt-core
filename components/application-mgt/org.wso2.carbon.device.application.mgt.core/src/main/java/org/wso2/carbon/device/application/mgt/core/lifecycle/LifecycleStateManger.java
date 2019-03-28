@@ -3,11 +3,9 @@ package org.wso2.carbon.device.application.mgt.core.lifecycle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
+import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
-import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.mgt.common.permission.mgt.Permission;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
-import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.device.mgt.core.search.mgt.Constants;
 import org.wso2.carbon.user.api.UserRealm;
@@ -59,7 +57,7 @@ public class LifecycleStateManger {
         String permission = getPermissionForStateChange(nextState);
         if(permission != null) {
             try {
-                userRealm = DeviceManagementDataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
+                userRealm = DataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
                 if (userRealm != null && userRealm.getAuthorizationManager() != null &&
                         userRealm.getAuthorizationManager().isUserAuthorized(username,
                                 PermissionUtils.getAbsolutePermissionPath(permission),
