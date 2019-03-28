@@ -599,6 +599,12 @@ var formatRepoSelection = function (user) {
 
 
 $(document).ready(function () {
+    
+    // Handlebar helper to convert JSON to String
+    Handlebars.registerHelper("json", function (jsonObject) {
+        return JSON.stringify(jsonObject);
+    });
+
     // Adding initial state of wizard-steps.
     $("#users-input").select2({
         multiple: true,
@@ -755,5 +761,4 @@ $(document).ready(function () {
             $("." + nextStep).removeClass("hidden");
         }
     });
-
 });
