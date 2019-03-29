@@ -1,3 +1,39 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/*
+ * Copyright (c) 2019, Entgra Inc. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.device.application.mgt.core.lifecycle;
 
 import org.apache.commons.logging.Log;
@@ -32,16 +68,15 @@ public class LifecycleStateManger {
                 s.getProceedingStates().replaceAll(String::toUpperCase);
             }
             lifecycleStates.put(s.getName().toUpperCase(), new State(s.getName().toUpperCase(),
-                    s.getProceedingStates(), s.getPermission(),s.isAppUpdatable(),s.isAppInstallable(),
-                    s.isInitialState(),s.isEndState()));
+                    s.getProceedingStates(), s.getPermission(), s.isAppUpdatable(), s.isAppInstallable(),
+                    s.isInitialState(), s.isEndState()));
             try {
                 PermissionUtils.putPermission(s.getPermission());
             } catch (PermissionManagementException e) {
-                log.error("Error when adding permission " + s.getPermission() + "  related to the state: "
-                        + s.getName(), e);
-                throw new LifecycleManagementException (
-                        "Error when adding permission " + s.getPermission() + "  related to the state: "
-                                + s.getName(), e);
+                String msg = "Error when adding permission " + s.getPermission() + "  related to the state: "
+                        + s.getName();
+                log.error(msg, e);
+                throw new LifecycleManagementException(msg, e);
             }
         }
     }
@@ -53,9 +88,9 @@ public class LifecycleStateManger {
     public boolean isValidStateChange(String currentState, String nextState, String username,
                                       int tenantId) throws LifecycleManagementException {
 
-        UserRealm userRealm = null;
+        UserRealm userRealm;
         String permission = getPermissionForStateChange(nextState);
-        if(permission != null) {
+        if (permission != null) {
             try {
                 userRealm = DataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
                 if (userRealm != null && userRealm.getAuthorizationManager() != null &&
@@ -77,17 +112,17 @@ public class LifecycleStateManger {
                         "UserStoreException exception from changing the state from : " + currentState + "  to: "
                                 + nextState + " with username : " + username + " and tenant Id : " + tenantId, e);
             }
-        }else{
+        } else {
             throw new LifecycleManagementException(
-                    "Required permissions cannot be found for the state : "+nextState);
+                    "Required permissions cannot be found for the state : " + nextState);
         }
     }
 
     private State getMatchingState(String currentState) {
         Iterator it = lifecycleStates.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            if(pair.getKey().toString().equalsIgnoreCase(currentState)) {
+            Map.Entry pair = (Map.Entry) it.next();
+            if (pair.getKey().toString().equalsIgnoreCase(currentState)) {
                 return lifecycleStates.get(pair.getKey().toString());
             }
             it.remove();
@@ -97,7 +132,7 @@ public class LifecycleStateManger {
 
 
     private boolean getMatchingNextState(Set<String> proceedingStates, String nextState) {
-        for (String state: proceedingStates) {
+        for (String state : proceedingStates) {
             if (state.equalsIgnoreCase(nextState)) {
                 return true;
             }
@@ -105,12 +140,12 @@ public class LifecycleStateManger {
         return false;
     }
 
-    private String getPermissionForStateChange(String nextState){
+    private String getPermissionForStateChange(String nextState) {
         Iterator it = lifecycleStates.entrySet().iterator();
         State nextLifecycleState;
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            if(pair.getKey().toString().equalsIgnoreCase(nextState)) {
+            Map.Entry pair = (Map.Entry) it.next();
+            if (pair.getKey().toString().equalsIgnoreCase(nextState)) {
                 nextLifecycleState = lifecycleStates.get(nextState);
                 return nextLifecycleState.getPermission();
             }

@@ -56,20 +56,8 @@
     If there is a requirement to introduce a new state to the lifecycle, please refer above
     diagram and add relevant state to the below configuration appropriately.
     -->
-    <LifecycleStates>
 
-        <LifecycleState name="Created">
-            <IsAppInstallable>false</IsAppInstallable>
-            <IsAppUpdatable>true</IsAppUpdatable>
-            <IsInitialState>true</IsInitialState>
-            <IsEndState>false</IsEndState>
-            <Permission>
-                /device-mgt/applications/life-cycle/create
-            </Permission>
-            <ProceedingStates>
-                <State>In-Review</State>
-            </ProceedingStates>
-        </LifecycleState>
+    <!-- a lifecyclestate can have following properties
         <LifecycleState name="In-Review">
             <IsAppInstallable>false</IsAppInstallable>
             <IsAppUpdatable>true</IsAppUpdatable>
@@ -83,38 +71,49 @@
                 <State>Approved</State>
             </ProceedingStates>
         </LifecycleState>
-        <LifecycleState name="Approved">
-            <IsAppInstallable>false</IsAppInstallable>
-            <IsAppUpdatable>false</IsAppUpdatable>
-            <IsInitialState>false</IsInitialState>
-            <IsEndState>false</IsEndState>
+    -->
+    <LifecycleStates>
+        <LifecycleState name="Created">
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>true</IsInitialState>
             <Permission>
-                /device-mgt/applications/life-cycle/approved
-            </Permission>
-            <ProceedingStates>
-                <State>Published</State>
-            </ProceedingStates>
-        </LifecycleState>
-        <LifecycleState name="Rejected">
-            <IsAppInstallable>false</IsAppInstallable>
-            <IsAppUpdatable>false</IsAppUpdatable>
-            <IsInitialState>false</IsInitialState>
-            <IsEndState>false</IsEndState>
-            <Permission>
-                /device-mgt/applications/life-cycle/rejected
+                /device-mgt/applications/life-cycle/create
             </Permission>
             <ProceedingStates>
                 <State>In-Review</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="In-Review">
+            <Permission>
+                /device-mgt/applications/life-cycle/in-review
+            </Permission>
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Approved">
+            <Permission>
+                /device-mgt/applications/life-cycle/approve
+            </Permission>
+            <ProceedingStates>
+                <State>Published</State>
+                <State>Created</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Rejected">
+            <Permission>
+                /device-mgt/applications/life-cycle/reject
+            </Permission>
+            <ProceedingStates>
+                <State>Created</State>
                 <State>Removed</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Published">
             <IsAppInstallable>true</IsAppInstallable>
-            <IsAppUpdatable>false</IsAppUpdatable>
-            <IsInitialState>false</IsInitialState>
-            <IsEndState>false</IsEndState>
             <Permission>
-                /device-mgt/applications/life-cycle/published
+                /device-mgt/applications/life-cycle/publish
             </Permission>
             <ProceedingStates>
                 <State>Unpublished</State>
@@ -122,36 +121,28 @@
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Unpublished">
-            <IsAppInstallable>false</IsAppInstallable>
-            <IsAppUpdatable>false</IsAppUpdatable>
-            <IsInitialState>false</IsInitialState>
-            <IsEndState>false</IsEndState>
             <Permission>
-                /device-mgt/applications/life-cycle/unpublished
+                /device-mgt/applications/life-cycle/unpublish
             </Permission>
             <ProceedingStates>
+                <State>Published</State>
+                <State>In-Review</State>
                 <State>Removed</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Deprecated">
-            <IsAppInstallable>false</IsAppInstallable>
-            <IsAppUpdatable>false</IsAppUpdatable>
-            <IsInitialState>false</IsInitialState>
-            <IsEndState>false</IsEndState>
             <Permission>
-                /device-mgt/applications/life-cycle/deprecated
+                /device-mgt/applications/life-cycle/deprecate
             </Permission>
             <ProceedingStates>
                 <State>Removed</State>
+                <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Removed">
-            <IsAppInstallable>false</IsAppInstallable>
-            <IsAppUpdatable>false</IsAppUpdatable>
-            <IsInitialState>false</IsInitialState>
             <IsEndState>true</IsEndState>
             <Permission>
-                /device-mgt/applications/life-cycle/removed
+                /device-mgt/applications/life-cycle/remove
             </Permission>
         </LifecycleState>
     </LifecycleStates>

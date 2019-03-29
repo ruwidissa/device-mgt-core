@@ -37,35 +37,49 @@ public class LifecycleState {
         this.proceedingStates = proceedingStates;
     }
 
-    @XmlElement(name="Permission")
-    public String getPermission(){return permission;}
-
-    public void setPermission(String permission){
-        this.permission=permission;
+    @XmlElement(name = "Permission")
+    public String getPermission() {
+        return permission;
     }
 
-    @XmlElement(name="IsAppInstallable")
-    public boolean isAppInstallable(){
-         return isAppInstallable;
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
-    public void setAppInstallable(boolean isAppInstallable){ this.isAppInstallable =isAppInstallable;}
 
-    @XmlElement(name="IsAppUpdatable")
-    public boolean isAppUpdatable(){
+    @XmlElement(name = "IsAppInstallable")
+    public boolean isAppInstallable() {
+        return isAppInstallable;
+    }
+
+    public void setAppInstallable(boolean isAppInstallable) {
+        this.isAppInstallable = isAppInstallable;
+    }
+
+    @XmlElement(name = "IsAppUpdatable")
+    public boolean isAppUpdatable() {
         return isAppUpdatable;
     }
-    public void setAppUpdatable(boolean isAppUpdatable){ this.isAppUpdatable=isAppUpdatable;}
 
-    @XmlElement(name="IsInitialState")
-    public boolean isInitialState(){
+    public void setAppUpdatable(boolean isAppUpdatable) {
+        this.isAppUpdatable = isAppUpdatable;
+    }
+
+    @XmlElement(name = "IsInitialState")
+    public boolean isInitialState() {
         return isInitialState;
     }
-    public void setInitialState(boolean isInitialState){ this.isInitialState=isInitialState;}
 
-    @XmlElement(name="IsEndState")
-    public boolean isEndState(){
+    public void setInitialState(boolean isInitialState) {
+        this.isInitialState = isInitialState;
+    }
+
+    @XmlElement(name = "IsEndState")
+    public boolean isEndState() {
         return isEndState;
     }
-    public void setEndState(boolean isEndState){ this.isEndState=isEndState;}
+
+    public void setEndState(boolean isEndState) {
+        this.isEndState = isEndState;
+    }
 
 }
