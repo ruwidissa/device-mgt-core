@@ -18,8 +18,6 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
-
 /**
  * Filter represents a criteria that can be used for searching applications.
  */
@@ -68,7 +66,7 @@ public class Filter {
     /***
      * Supported device type for the application. i.e Android, iOS, Windows etc
      */
-    private DeviceType deviceType;
+    private int deviceTypeId;
 
     public int getLimit() {
         return limit;
@@ -132,7 +130,7 @@ public class Filter {
         this.currentAppReleaseState = currentAppReleaseState;
     }
 
-    public DeviceType getDeviceType() { return deviceType; }
+    public int getDeviceTypeId() { return deviceTypeId; }
 
-    public void setDeviceType(DeviceType deviceType) { this.deviceType = deviceType; }
+    public void setDeviceTypeId(int deviceTypeId) { this.deviceTypeId = deviceTypeId; }
 }

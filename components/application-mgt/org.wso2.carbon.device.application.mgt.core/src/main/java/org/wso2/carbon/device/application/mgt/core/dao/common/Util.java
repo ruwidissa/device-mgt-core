@@ -22,17 +22,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.Application;
+import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
+import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 
 import java.sql.PreparedStatement;
@@ -56,10 +55,10 @@ public class Util {
 //     * @throws SQLException  SQL Exception
 //     * @throws JSONException JSONException.
 //     */
-//    public static List<Application> loadApplications(ResultSet rs) throws SQLException, JSONException {
+//    public static List<ApplicationEntity> loadApplications(ResultSet rs) throws SQLException, JSONException {
 //
-//        List<Application> applications = new ArrayList<>();
-//        Application application = null;
+//        List<ApplicationEntity> applications = new ArrayList<>();
+//        ApplicationEntity application = null;
 //        int applicationId = -1;
 //        boolean hasNext = rs.next();
 //
@@ -69,7 +68,7 @@ public class Util {
 //                    applications.add(application);
 //                }
 //                applicationId = rs.getInt("APP_ID");
-//                application = new Application();
+//                application = new ApplicationEntity();
 //                application.setTags(new ArrayList<>());
 //                application.setUnrestrictedRoles(new ArrayList<>());
 //                application.setId(applicationId);
@@ -116,10 +115,10 @@ public class Util {
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static List<Application> loadApplications(ResultSet rs) throws SQLException, JSONException {
+    public static List<ApplicationEntity> loadApplications(ResultSet rs) throws SQLException, JSONException {
 
-        List<Application> applications = new ArrayList<>();
-        Application application = null;
+        List<ApplicationEntity> applications = new ArrayList<>();
+        ApplicationEntity application = null;
         int applicationId = -1;
         boolean hasNext = rs.next();
 
@@ -128,7 +127,7 @@ public class Util {
                 if (application != null) {
                     applications.add(application);
                 }
-                application = new Application();
+                application = new ApplicationEntity();
                 application.setApplicationReleases(new ArrayList<>());
                 applicationId = rs.getInt("APP_ID");
                 application.setId(applicationId);
@@ -139,19 +138,18 @@ public class Util {
                 application.setPaymentCurrency(rs.getString("APP_CURRENCY"));
                 application.setStatus(rs.getString("APP_STATUS"));
                 application.setAppRating(rs.getInt("APP_RATING)"));
-                DeviceType deviceType = new DeviceType();
-                application.setDeviceTypeObj(deviceType);
+                application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
             } else {
-                ApplicationRelease appRelease = new ApplicationRelease();
+                ApplicationReleaseEntity appRelease = new ApplicationReleaseEntity();
                 appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
                 appRelease.setUuid(rs.getString("RELEASE_UUID"));
                 appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
                 appRelease.setVersion(rs.getString("RELEASE_VERSION"));
-                appRelease.setAppStoredLoc(rs.getString("AP_RELEASE_STORED_LOC"));
-                appRelease.setBannerLoc(rs.getString("RELEASE_BANNER_LOC"));
-                appRelease.setScreenshotLoc1("RELEASE_SC1");
-                appRelease.setScreenshotLoc2("RELEASE_SC2");
-                appRelease.setScreenshotLoc3("RELEASE_SC3");
+                appRelease.setInstallerName(rs.getString("AP_RELEASE_STORED_LOC"));
+                appRelease.setBannerName(rs.getString("RELEASE_BANNER_LOC"));
+                appRelease.setScreenshotName1("RELEASE_SC1");
+                appRelease.setScreenshotName2("RELEASE_SC2");
+                appRelease.setScreenshotName3("RELEASE_SC3");
                 appRelease.setPrice(rs.getDouble(" RELEASE_PRICE"));
                 appRelease.setMetaData(rs.getString("RELEASE.META_INFO"));
                 appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
@@ -175,19 +173,19 @@ public class Util {
      * To create application object from the result set retrieved from the Database.
      *
      * @param rs ResultSet
-     * @return Application that is retrieved from the Database.
+     * @return ApplicationEntity that is retrieved from the Database.
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static Application loadApplication(ResultSet rs) throws SQLException, JSONException {
+    public static ApplicationEntity loadApplication(ResultSet rs) throws SQLException, JSONException {
 
-        Application application = null;
+        ApplicationEntity application = null;
         int applicatioId;
         int iteration = 0;
         if (rs != null) {
             while (rs.next()) {
                 if (iteration == 0) {
-                    application = new Application();
+                    application = new ApplicationEntity();
                     application.setTags(new ArrayList<>());
                     application.setUnrestrictedRoles(new ArrayList<>());
                     applicatioId = rs.getInt("APP_ID");
@@ -197,7 +195,7 @@ public class Util {
                     application.setAppCategory(rs.getString("APP_CATEGORY"));
                     application.setSubType(rs.getString("SUB_TYPE"));
                     application.setPaymentCurrency(rs.getString("CURRENCY"));
-                    application.setIsRestricted(rs.getBoolean("RESTRICTED"));
+//                    application.setIsRestricted(rs.getBoolean("RESTRICTED"));
                     application.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
                 }
 
@@ -217,26 +215,26 @@ public class Util {
     }
 
     /**
-     * Populates {@link ApplicationRelease} object with the result obtained from the database.
+     * Populates {@link ApplicationReleaseEntity} object with the result obtained from the database.
      *
      * @param resultSet {@link ResultSet} from obtained from the database
-     * @return {@link ApplicationRelease} object populated with the data
-     * @throws SQLException If unable to populate {@link ApplicationRelease} object with the data
+     * @return {@link ApplicationReleaseEntity} object populated with the data
+     * @throws SQLException If unable to populate {@link ApplicationReleaseEntity} object with the data
      */
-    public static ApplicationRelease loadApplicationRelease(ResultSet resultSet) throws SQLException {
-        ApplicationRelease applicationRelease = new ApplicationRelease();
+    public static ApplicationReleaseEntity loadApplicationRelease(ResultSet resultSet) throws SQLException {
+        ApplicationReleaseEntity applicationRelease = new ApplicationReleaseEntity();
         applicationRelease.setId(resultSet.getInt("RELEASE_ID"));
         applicationRelease.setVersion(resultSet.getString("RELEASE_VERSION"));
         applicationRelease.setUuid(resultSet.getString("UUID"));
         applicationRelease.setReleaseType(resultSet.getString("RELEASE_TYPE"));
         applicationRelease.setPackageName(resultSet.getString("PACKAGE_NAME"));
         applicationRelease.setPrice(resultSet.getDouble("APP_PRICE"));
-        applicationRelease.setAppStoredLoc(resultSet.getString("STORED_LOCATION"));
-        applicationRelease.setBannerLoc(resultSet.getString("BANNER_LOCATION"));
-        applicationRelease.setIconLoc(resultSet.getString("ICON_LOCATION"));
-        applicationRelease.setScreenshotLoc1(resultSet.getString("SCREEN_SHOT_1"));
-        applicationRelease.setScreenshotLoc2(resultSet.getString("SCREEN_SHOT_2"));
-        applicationRelease.setScreenshotLoc3(resultSet.getString("SCREEN_SHOT_3"));
+        applicationRelease.setInstallerName(resultSet.getString("STORED_LOCATION"));
+        applicationRelease.setBannerName(resultSet.getString("BANNER_LOCATION"));
+        applicationRelease.setIconName(resultSet.getString("ICON_LOCATION"));
+        applicationRelease.setScreenshotName1(resultSet.getString("SCREEN_SHOT_1"));
+        applicationRelease.setScreenshotName2(resultSet.getString("SCREEN_SHOT_2"));
+        applicationRelease.setScreenshotName3(resultSet.getString("SCREEN_SHOT_3"));
         applicationRelease.setAppHashValue(resultSet.getString("HASH_VALUE"));
         applicationRelease.setIsSharedWithAllTenants(resultSet.getBoolean("SHARED"));
         applicationRelease.setMetaData(resultSet.getString("APP_META_INFO"));
@@ -276,7 +274,7 @@ public class Util {
                         commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
             } else {
                 throw new ReviewManagementException(
-                        "Application Management configuration has not initialized. Please check the application-mgt.xml file.");
+                        "ApplicationEntity Management configuration has not initialized. Please check the application-mgt.xml file.");
             }
         }
         return paginationRequest;
@@ -294,7 +292,7 @@ public class Util {
                     applicationManager =
                             (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
                     if (applicationManager == null) {
-                        String msg = "Application Manager service has not initialized.";
+                        String msg = "ApplicationEntity Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -305,7 +303,7 @@ public class Util {
     }
 
     /**
-     * To get the Application Storage Manager from the osgi context.
+     * To get the ApplicationEntity Storage Manager from the osgi context.
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
@@ -316,7 +314,7 @@ public class Util {
                     applicationStorageManager = (ApplicationStorageManager) ctx
                             .getOSGiService(ApplicationStorageManager.class, null);
                     if (applicationStorageManager == null) {
-                        String msg = "Application Storage Manager service has not initialized.";
+                        String msg = "ApplicationEntity Storage Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }

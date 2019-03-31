@@ -44,6 +44,8 @@ public class Configuration {
 
     private UIConfiguration uiConfiguration;
 
+    private List<String> appCategories;
+
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
         return datasourceName;
@@ -74,8 +76,7 @@ public class Configuration {
         return lifecycleStates;
     }
 
-    public void setLifecycleStates(
-            List<LifecycleState> lifecycleStates) {
+    public void setLifecycleStates(List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
 
@@ -86,6 +87,16 @@ public class Configuration {
     @XmlElement(name = "UIConfigs")
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
+    }
+
+    @XmlElementWrapper(name = "AppCategories")
+    @XmlElement(name = "Category")
+    public List<String> getAppCategories() {
+        return appCategories;
+    }
+
+    public void setAppCategories(List<String> appCategories) {
+        this.appCategories = appCategories;
     }
 }
 

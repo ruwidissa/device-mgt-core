@@ -74,7 +74,7 @@ public class MAMDeviceConnectorImpl implements DeviceConnector{
                 for (String username: userList) {
                     List<Device> devices = getDeviceManagementService().getDevicesOfUser(username);
                     List<DeviceIdentifier> deviceIdentifiers = convertDeviceToDeviceIdentifier(devices);
-//                    getDeviceManagementService().addOperation(appOperation.getApplication().getDeviceType(),
+//                    getDeviceManagementService().addOperation(appOperation.getApplication().getDeviceTypeName(),
 //                            operationEKA, devices);
                     subscriptionDAO.subscribeDeviceToApplication(appOperation.getTenantId(), appOperation.getSubscribedBy(),
                             devices, appOperation.getApplication().getId(), appOperation.getAppReleaseId(),

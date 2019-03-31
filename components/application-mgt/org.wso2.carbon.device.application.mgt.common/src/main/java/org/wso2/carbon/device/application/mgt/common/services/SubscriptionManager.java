@@ -25,7 +25,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import java.util.List;
 
 /**
- * This interface manages all the operations related with Application Subscription.
+ * This interface manages all the operations related with ApplicationEntity Subscription.
  */
 public interface SubscriptionManager {
     /**
@@ -70,10 +70,10 @@ public interface SubscriptionManager {
 
     /**
      * To uninstall an application from a given list of devices.
-     * @param applicationUUID Application ID
+     * @param applicationUUID ApplicationEntity ID
      * @param deviceList Device list
      * @return Failed Device List which the application was unable to uninstall
-     * @throws ApplicationManagementException Application Management Exception
+     * @throws ApplicationManagementException ApplicationEntity Management Exception
      */
     List<DeviceIdentifier> uninstallApplication(String applicationUUID, List<DeviceIdentifier> deviceList)
             throws ApplicationManagementException;

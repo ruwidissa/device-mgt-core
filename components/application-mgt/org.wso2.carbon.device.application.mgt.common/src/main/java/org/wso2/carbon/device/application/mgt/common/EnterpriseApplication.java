@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.common;
 import java.io.Serializable;
 
 /**
- * This class represents the Enterprise Application information.
+ * This class represents the Enterprise ApplicationEntity information.
  */
 public class EnterpriseApplication extends AndroidApplication implements Serializable {
 

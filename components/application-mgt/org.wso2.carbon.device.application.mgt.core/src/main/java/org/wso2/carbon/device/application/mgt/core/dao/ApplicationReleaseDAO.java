@@ -18,25 +18,26 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
+import org.wso2.carbon.device.application.mgt.common.ApplicationReleaseArtifactPaths;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
 import java.util.List;
 
 /**
- * This is responsible for Application Release related DAO operations.
+ * This is responsible for ApplicationEntity Release related DAO operations.
  */
 public interface ApplicationReleaseDAO {
 
     /**
-     * To create an Application release.
+     * To create an ApplicationEntity release.
      *
-     * @param applicationRelease Application Release that need to be created.
+     * @param applicationRelease ApplicationEntity Release that need to be created.
      * @return Unique ID of the relevant release.
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
-    ApplicationRelease createRelease(ApplicationRelease applicationRelease, int appId, int tenantId) throws
+    ApplicationReleaseEntity createRelease(ApplicationReleaseEntity applicationRelease, int appId, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**
@@ -47,54 +48,54 @@ public interface ApplicationReleaseDAO {
      * @param releaseType type of the release
      * @param tenantId tenantId of the application
 
-     * @return ApplicationRelease for the particular version of the given application
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @return ApplicationReleaseEntity for the particular version of the given application
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
-    ApplicationRelease getRelease(String applicationName,String applicationType, String versionName,
+    ApplicationReleaseEntity getRelease(String applicationName,String applicationType, String versionName,
             String releaseType, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**
      * To get all the releases of a particular application.
      *
-     * @param applicationId Id of the Application
+     * @param applicationId Id of the ApplicationEntity
      * @param tenantId tenant id of the application
      * @return list of the application releases
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
-    List<ApplicationRelease> getReleases(int applicationId, int tenantId) throws
+    List<ApplicationReleaseEntity> getReleases(int applicationId, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**
      * To get the release by state.
      *
-     * @param appId Id of the Application
+     * @param appId Id of the ApplicationEntity
      * @param tenantId tenant id of the application
      * @param state state of the application
      * @return list of the application releases
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
-    List<ApplicationRelease> getReleaseByState(int appId, int tenantId,  String state)
+    List<ApplicationReleaseEntity> getReleaseByState(int appId, int tenantId,  String state)
             throws ApplicationManagementDAOException;
 
     /**
-     * To update an Application release.
+     * To update an ApplicationEntity release.
      *
-     * @param applicationRelease ApplicationRelease that need to be updated.
+     * @param applicationRelease ApplicationReleaseEntity that need to be updated.
      * @param applicationId      Id of the application.
      * @param tenantId           Id of the tenant
-     * @return the updated Application Release
-     * @throws ApplicationManagementDAOException Application Management DAO Exception
+     * @return the updated ApplicationEntity Release
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception
      */
-    ApplicationRelease updateRelease(int applicationId, ApplicationRelease applicationRelease, int tenantId) throws
+    ApplicationReleaseEntity updateRelease(int applicationId, ApplicationReleaseEntity applicationRelease, int tenantId) throws
                                                                                                              ApplicationManagementDAOException;
 
     /**
-     * To update an Application release.
-     * @param uuid UUID of the ApplicationRelease that need to be updated.
+     * To update an ApplicationEntity release.
+     * @param uuid UUID of the ApplicationReleaseEntity that need to be updated.
      * @param rating given stars for the application.
      * @param ratedUsers number of users who has rated for the application release.
-     * @throws ApplicationManagementDAOException Application Management DAO Exception
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception
      */
     void updateRatingValue(String uuid, double rating, int ratedUsers) throws ApplicationManagementDAOException;
 
@@ -103,7 +104,7 @@ public interface ApplicationReleaseDAO {
      *
      * @param uuid UUID of the application Release.
      * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
     Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
@@ -111,9 +112,9 @@ public interface ApplicationReleaseDAO {
     /**
      * To delete a particular release.
      *
-     * @param id      ID of the Application which the release need to be deleted.
-     * @param version Version of the Application Release
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @param id      ID of the ApplicationEntity which the release need to be deleted.
+     * @param version Version of the ApplicationEntity Release
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
     void deleteRelease(int id, String version) throws ApplicationManagementDAOException;
 
@@ -123,9 +124,9 @@ public interface ApplicationReleaseDAO {
      * @param applicationId ID of the application.
      * @param releaseUuid UUID of the application release.
      * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
-    ApplicationRelease getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
+    ApplicationReleaseEntity getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
             ApplicationManagementDAOException;
 
     /**
@@ -134,7 +135,7 @@ public interface ApplicationReleaseDAO {
      * @param appId ID of the application.
      * @param uuid UUID of the application release.
      * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
     boolean verifyReleaseExistence(int appId, String uuid, int tenantId) throws ApplicationManagementDAOException;
 
@@ -144,7 +145,7 @@ public interface ApplicationReleaseDAO {
      * @param appId ID of the application.
      * @param hashVal Hash value of the application release.
      * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
     boolean verifyReleaseExistenceByHash(int appId, String hashVal, int tenantId)
             throws ApplicationManagementDAOException;
@@ -154,7 +155,7 @@ public interface ApplicationReleaseDAO {
      *
      * @param appId ID of the application.
      * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
     String getPackageName(int appId, int tenantId) throws ApplicationManagementDAOException;
 
@@ -163,8 +164,10 @@ public interface ApplicationReleaseDAO {
      *
      * @param uuid UUID of the application release.
      * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
      */
     boolean verifyReleaseExistenceByUuid(String uuid, int tenantId) throws ApplicationManagementDAOException;
+
+    ApplicationReleaseArtifactPaths getReleaseArtifactPaths(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     }

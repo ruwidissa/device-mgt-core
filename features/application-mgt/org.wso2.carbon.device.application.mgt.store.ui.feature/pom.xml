@@ -41,10 +41,10 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack</id>
+                        <id>copy</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>unpack</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
                             <artifactItems>
@@ -52,11 +52,12 @@
                                     <groupId>org.wso2.carbon.devicemgt</groupId>
                                     <artifactId>org.wso2.carbon.device.application.mgt.store.ui</artifactId>
                                     <version>${project.version}</version>
-                                    <type>jar</type>
+                                    <type>war</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>
-                                        ${project.build.directory}/maven-shared-archive-resources
+                                        ${project.build.directory}/maven-shared-archive-resources/webapps
                                     </outputDirectory>
+                                    <destFileName>store.war</destFileName>
                                     <includes>**/*</includes>
                                 </artifactItem>
                             </artifactItems>

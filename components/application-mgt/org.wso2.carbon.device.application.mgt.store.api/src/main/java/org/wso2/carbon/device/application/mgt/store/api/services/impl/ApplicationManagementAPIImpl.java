@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.Application;
+import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -77,7 +77,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             if (appCategory != null && !appCategory.isEmpty()) {
                 filter.setAppCategory(appCategory);
             }
-            ApplicationList applications = applicationManager.getApplications(filter);
+            ApplicationList applications = applicationManager.getApplications(filter, null);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Couldn't find any application for requested query.").build();
@@ -97,7 +97,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @PathParam("uuid") String uuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            Application application = applicationManager
+            ApplicationEntity application = applicationManager
                     .getApplicationByUuid(uuid, AppLifecycleState.PUBLISHED.toString());
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {

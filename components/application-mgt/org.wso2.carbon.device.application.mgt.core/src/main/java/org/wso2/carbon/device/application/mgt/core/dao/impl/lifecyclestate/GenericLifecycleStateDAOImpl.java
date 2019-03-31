@@ -19,7 +19,7 @@
 package org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate;
 
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.entity.LifecycleStateEntity;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
@@ -41,7 +41,7 @@ import java.util.List;
 public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements LifecycleStateDAO {
 
     @Override
-    public LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException {
+    public LifecycleStateEntity getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException {
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -65,7 +65,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         }
     }
 
-    public LifecycleState getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException{
+    public LifecycleStateEntity getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException{
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -122,8 +122,8 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     }
 
     @Override
-    public List<LifecycleState> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException {
-        List<LifecycleState> lifecycleStates = new ArrayList<>();
+    public List<LifecycleStateEntity> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException {
+        List<LifecycleStateEntity> lifecycleStates = new ArrayList<>();
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -135,7 +135,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt.setInt(1,appReleaseId);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                LifecycleState lifecycleState = new LifecycleState();
+                LifecycleStateEntity lifecycleState = new LifecycleStateEntity();
                 lifecycleState.setId(rs.getInt("ID"));
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
@@ -155,7 +155,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     }
 
     @Override
-    public void addLifecycleState(LifecycleState state, int appId, String uuid, int tenantId) throws LifeCycleManagementDAOException {
+    public void addLifecycleState(LifecycleStateEntity state, int appId, String uuid, int tenantId) throws LifeCycleManagementDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -207,11 +207,11 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         }
     }
 
-    private LifecycleState constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
-        LifecycleState lifecycleState = null;
+    private LifecycleStateEntity constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
+        LifecycleStateEntity lifecycleState = null;
         try {
             if (rs !=null && rs.next()) {
-                lifecycleState = new LifecycleState();
+                lifecycleState = new LifecycleStateEntity();
                 lifecycleState.setId(rs.getInt("ID"));
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));

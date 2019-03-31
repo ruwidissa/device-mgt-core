@@ -24,13 +24,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import javax.ws.rs.core.Response;
 
 
 /**
- * Holds util methods required for Application-Mgt API component.
+ * Holds util methods required for ApplicationEntity-Mgt API component.
  */
 public class APIUtil {
 
@@ -40,7 +39,7 @@ public class APIUtil {
     private static ApplicationStorageManager applicationStorageManager;
     private static SubscriptionManager subscriptionManager;
     private static ReviewManager reviewManager;
-    private static ConfigManager configManager;
+    private static AppmDataHandler appmDataHandler;
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {
@@ -50,7 +49,7 @@ public class APIUtil {
                     applicationManager =
                             (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
                     if (applicationManager == null) {
-                        String msg = "Application Manager service has not initialized.";
+                        String msg = "ApplicationEntity Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -61,7 +60,7 @@ public class APIUtil {
     }
 
     /**
-     * To get the Application Storage Manager from the osgi context.
+     * To get the ApplicationEntity Storage Manager from the osgi context.
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
@@ -72,7 +71,7 @@ public class APIUtil {
                     applicationStorageManager = (ApplicationStorageManager) ctx
                             .getOSGiService(ApplicationStorageManager.class, null);
                     if (applicationStorageManager == null) {
-                        String msg = "Application Storage Manager service has not initialized.";
+                        String msg = "ApplicationEntity Storage Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -143,17 +142,17 @@ public class APIUtil {
     }
 
     /**
-     * To get the Config Manager from the osgi context.
-     * @return ConfigManager instance in the current osgi context.
+     * To get the DataHandler from the osgi context.
+     * @return AppmDataHandler instance in the current osgi context.
      */
-    public static ConfigManager getConfigManager() {
-        if (configManager == null) {
+    public static AppmDataHandler getDataHandler() {
+        if (appmDataHandler == null) {
             synchronized (APIUtil.class) {
-                if (configManager == null) {
+                if (appmDataHandler == null) {
                     PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    configManager =
-                            (ConfigManager) ctx.getOSGiService(ConfigManager.class, null);
-                    if (configManager == null) {
+                    appmDataHandler =
+                            (AppmDataHandler) ctx.getOSGiService(AppmDataHandler.class, null);
+                    if (appmDataHandler == null) {
                         String msg = "Config Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
@@ -162,10 +161,10 @@ public class APIUtil {
             }
         }
 
-        return configManager;
+        return appmDataHandler;
     }
 
-    public static Filter constructFilter(String deviceType, String appName, String appType, String appCategory,
+    public static Filter constructFilter( String appName, String appType, String appCategory,
             boolean isFullMatch, String releaseState, int offset, int limit, String sortBy) {
         Filter filter = new Filter();
         filter.setOffset(offset);
@@ -183,11 +182,6 @@ public class APIUtil {
         }
         if (releaseState != null && !releaseState.isEmpty()) {
             filter.setCurrentAppReleaseState(releaseState);
-        }
-        if (deviceType != null && !deviceType.isEmpty()) {
-            DeviceType dt = new DeviceType();
-            dt.setName(deviceType);
-            filter.setDeviceType(dt);
         }
         return filter;
     }
