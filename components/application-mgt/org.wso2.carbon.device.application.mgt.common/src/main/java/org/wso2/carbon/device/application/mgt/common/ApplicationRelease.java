@@ -21,7 +21,8 @@ package org.wso2.carbon.device.application.mgt.common;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(value = "ApplicationRelease", description = "This class holds the details when releasing an Application to application store")
+@ApiModel(value = "ApplicationRelease", description = "This class holds the details when releasing an Application to " +
+        "application store")
 public class ApplicationRelease {
 
     @ApiModelProperty(name = "id",
