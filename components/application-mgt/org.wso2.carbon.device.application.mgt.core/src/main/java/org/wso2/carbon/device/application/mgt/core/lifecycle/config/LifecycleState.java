@@ -3,11 +3,13 @@ package org.wso2.carbon.device.application.mgt.core.lifecycle.config;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
  * This class represents the lifecycle state config
  */
+@XmlRootElement(name = "LifecycleState")
 public class LifecycleState {
 
     private String name;

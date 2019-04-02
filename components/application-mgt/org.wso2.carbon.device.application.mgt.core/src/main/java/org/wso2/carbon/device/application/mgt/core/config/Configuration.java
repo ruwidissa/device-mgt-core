@@ -74,8 +74,7 @@ public class Configuration {
         return lifecycleStates;
     }
 
-    public void setLifecycleStates(
-            List<LifecycleState> lifecycleStates) {
+    public void setLifecycleStates(List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
 

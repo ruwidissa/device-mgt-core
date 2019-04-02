@@ -76,35 +76,27 @@
         <LifecycleState name="Created">
             <IsAppUpdatable>true</IsAppUpdatable>
             <IsInitialState>true</IsInitialState>
-            <Permission>
-                /device-mgt/applications/life-cycle/create
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/create</Permission>
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="In-Review">
-            <Permission>
-                /device-mgt/applications/life-cycle/in-review
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/in-review</Permission>
             <ProceedingStates>
                 <State>Rejected</State>
                 <State>Approved</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Approved">
-            <Permission>
-                /device-mgt/applications/life-cycle/approve
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/approve</Permission>
             <ProceedingStates>
                 <State>Published</State>
                 <State>Created</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Rejected">
-            <Permission>
-                /device-mgt/applications/life-cycle/reject
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/reject</Permission>
             <ProceedingStates>
                 <State>Created</State>
                 <State>Removed</State>
@@ -112,18 +104,14 @@
         </LifecycleState>
         <LifecycleState name="Published">
             <IsAppInstallable>true</IsAppInstallable>
-            <Permission>
-                /device-mgt/applications/life-cycle/publish
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/publish</Permission>
             <ProceedingStates>
                 <State>Unpublished</State>
                 <State>Deprecated</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Unpublished">
-            <Permission>
-                /device-mgt/applications/life-cycle/unpublish
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/unpublish</Permission>
             <ProceedingStates>
                 <State>Published</State>
                 <State>In-Review</State>
@@ -131,9 +119,7 @@
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Deprecated">
-            <Permission>
-                /device-mgt/applications/life-cycle/deprecate
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/deprecate</Permission>
             <ProceedingStates>
                 <State>Removed</State>
                 <State>In-Review</State>
@@ -141,9 +127,7 @@
         </LifecycleState>
         <LifecycleState name="Removed">
             <IsEndState>true</IsEndState>
-            <Permission>
-                /device-mgt/applications/life-cycle/remove
-            </Permission>
+            <Permission>/device-mgt/applications/life-cycle/remove</Permission>
         </LifecycleState>
     </LifecycleStates>
 
