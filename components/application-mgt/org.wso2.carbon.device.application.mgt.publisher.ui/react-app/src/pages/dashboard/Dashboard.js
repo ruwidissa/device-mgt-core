@@ -23,7 +23,9 @@ class Dashboard extends React.Component {
         return (
             <Layout className="layout">
                 <Header>
-                    <div style={{backgroundImage: "url(" + { Logo} + ")"}} className={styles.logo}/>
+                    <div className={styles.logo}>
+                        <img src={Logo}/>
+                    </div>
                     <Menu
                         theme="light"
                         mode="horizontal"
