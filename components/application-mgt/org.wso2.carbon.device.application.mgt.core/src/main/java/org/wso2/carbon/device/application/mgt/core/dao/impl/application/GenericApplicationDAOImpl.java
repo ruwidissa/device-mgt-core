@@ -268,16 +268,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
                 + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
                 + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
-                + "AP_APP_RELEASE.APP_META_INFO AS RELEASE.META_INFO, "
+                + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
                 + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                 + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
                 + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
                 + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
-                + "APP_APP.ID = APP_APP_RELEASE.AP_APP_ID AND "
+                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
                 + "AP_APP.TENANT_ID = ? AND "
-                + "AP_APP.TENANT_ID = APP_APP_RELEASE.TENANT_ID";
+                + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID";
 
         if (filter == null) {
             throw new ApplicationManagementDAOException("Filter need to be instantiated");

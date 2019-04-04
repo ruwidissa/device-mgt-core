@@ -155,19 +155,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationReleaseEntity.setBannerName(applicationArtifact.getBannername());
 
             Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
-            List<String> scrrenshotnames = new ArrayList<>(screenshots.keySet());
+            List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
 
-            for (int i = 1; i <= scrrenshotnames.size(); i++) {
-                if (i == 1) {
-                    applicationReleaseEntity.setScreenshotName1(scrrenshotnames.get(i));
-                } else if (i == 2) {
-                    applicationReleaseEntity.setScreenshotName2(scrrenshotnames.get(i));
+            int counter = 1;
+            for (String scName : screenshotNames) {
+                if (counter == 1) {
+                    applicationReleaseEntity.setScreenshotName1(scName);
+                } else if (counter == 2) {
+                    applicationReleaseEntity.setScreenshotName2(scName);
 
-                } else if (i == 3) {
-                    applicationReleaseEntity.setScreenshotName3(scrrenshotnames.get(i));
-
+                } else if (counter == 3) {
+                    applicationReleaseEntity.setScreenshotName3(scName);
                 }
+                counter++;
             }
+
             // Upload images
             applicationReleaseEntity = applicationStorageManager
                     .uploadImageArtifacts(applicationReleaseEntity, applicationArtifact.getIconStream(),

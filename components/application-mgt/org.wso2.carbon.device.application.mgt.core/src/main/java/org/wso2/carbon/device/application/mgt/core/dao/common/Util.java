@@ -151,7 +151,7 @@ public class Util {
                 appRelease.setScreenshotName2("RELEASE_SC2");
                 appRelease.setScreenshotName3("RELEASE_SC3");
                 appRelease.setPrice(rs.getDouble(" RELEASE_PRICE"));
-                appRelease.setMetaData(rs.getString("RELEASE.META_INFO"));
+                appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
                 appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
                 appRelease.setRating(rs.getDouble("RELEASE_RATING"));
                 appRelease.setCurrentState(rs.getString("RELEASE_CURRENT_STATE"));
