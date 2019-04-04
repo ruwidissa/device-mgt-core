@@ -5,8 +5,6 @@ const { Header, Content, Footer } = Layout;
 
 import styles from './Dashboard.less';
 import Logo from "../../../public/images/logo.svg";
-import Login from "../Login";
-import {renderRoutes} from "react-router-config";
 import {Link, NavLink} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 
