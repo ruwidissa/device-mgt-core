@@ -33,10 +33,10 @@ public class LifecycleManagementTest {
         Configuration configuration = configurationManager.getConfiguration();
         lifecycleStates = configuration.getLifecycleStates();
         lifecycleStateManger = new LifecycleStateManger();
-        lifecycleStateManger.init(lifecycleStates);
+        lifecycleStateManger.initializeLifeCycleDetails(lifecycleStates);
     }
 
-    @Test
+   @Test
     public void checkValidNextLifecycleState() {
         Set<String> proceedingStates = lifecycleStateManger.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertTrue("Invalid proceeding state of: " + CURRENT_STATE,
@@ -53,10 +53,11 @@ public class LifecycleManagementTest {
     @Test
     public void CheckUpdatableState() {
         Boolean isUpdatable = lifecycleStateManger.isUpdatable(UPDATABLE_STATE);
-        Assert.assertTrue("Updatable state: " + CURRENT_STATE, isUpdatable);
+        System.out.println(isUpdatable);
+        Assert.assertTrue("Updatable state: " + UPDATABLE_STATE, isUpdatable);
     }
 
-    @Test
+   @Test
     public void CheckNonUpdatableState() {
         Boolean isUpdatable = lifecycleStateManger.isUpdatable(NON_UPDATABLE_STATE);
         Assert.assertFalse("Non Updatable state: " + CURRENT_STATE, isUpdatable);

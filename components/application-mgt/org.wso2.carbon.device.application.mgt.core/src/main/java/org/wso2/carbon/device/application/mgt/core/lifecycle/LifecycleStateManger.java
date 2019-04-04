@@ -80,6 +80,18 @@ public class LifecycleStateManger {
         }
     }
 
+    public void initializeLifeCycleDetails(List<LifecycleState> states){
+        lifecycleStates = new HashMap<>();
+        for (LifecycleState s : states) {
+            if (s.getProceedingStates() != null) {
+                s.getProceedingStates().replaceAll(String::toUpperCase);
+            }
+            lifecycleStates.put(s.getName().toUpperCase(), new State(s.getName().toUpperCase(),
+                    s.getProceedingStates(), s.getPermission(), s.isAppUpdatable(), s.isAppInstallable(),
+                    s.isInitialState(), s.isEndState()));
+        }
+    }
+
     public Set<String> getNextLifecycleStates(String currentLifecycleState) {
         return lifecycleStates.get(currentLifecycleState.toUpperCase()).getProceedingStates();
     }
@@ -124,7 +136,7 @@ public class LifecycleStateManger {
             if (pair.getKey().toString().equalsIgnoreCase(currentState)) {
                 return lifecycleStates.get(pair.getKey().toString());
             }
-            it.remove();
+            //it.remove();
         }
         return null;
     }
