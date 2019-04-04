@@ -55,10 +55,10 @@ import java.util.Set;
 /**
  * This class represents the activities related to lifecycle management
  */
-public class LifecycleStateManger {
+public class LifecycleStateManager {
 
     private Map<String, State> lifecycleStates;
-    private static Log log = LogFactory.getLog(LifecycleStateManger.class);
+    private static Log log = LogFactory.getLog(LifecycleStateManager.class);
 
     public void init(List<LifecycleState> states) throws LifecycleManagementException {
         lifecycleStates = new HashMap<>();
@@ -80,17 +80,6 @@ public class LifecycleStateManger {
         }
     }
 
-    public void initializeLifeCycleDetails(List<LifecycleState> states){
-        lifecycleStates = new HashMap<>();
-        for (LifecycleState s : states) {
-            if (s.getProceedingStates() != null) {
-                s.getProceedingStates().replaceAll(String::toUpperCase);
-            }
-            lifecycleStates.put(s.getName().toUpperCase(), new State(s.getName().toUpperCase(),
-                    s.getProceedingStates(), s.getPermission(), s.isAppUpdatable(), s.isAppInstallable(),
-                    s.isInitialState(), s.isEndState()));
-        }
-    }
 
     public Set<String> getNextLifecycleStates(String currentLifecycleState) {
         return lifecycleStates.get(currentLifecycleState.toUpperCase()).getProceedingStates();
@@ -136,7 +125,6 @@ public class LifecycleStateManger {
             if (pair.getKey().toString().equalsIgnoreCase(currentState)) {
                 return lifecycleStates.get(pair.getKey().toString());
             }
-            //it.remove();
         }
         return null;
     }
@@ -165,19 +153,23 @@ public class LifecycleStateManger {
         return null;
     }
 
-    public boolean isUpdatable(String state){
+    public boolean isUpdatable(String state) {
         State currentState = getMatchingState(state);
-        if(currentState.getIsAppUpdatable()){
+        if (currentState.getIsAppUpdatable()) {
             return true;
         }
         return false;
     }
 
-    public boolean isInstallable(String state){
+    public boolean isInstallable(String state) {
         State currentState = getMatchingState(state);
-        if(currentState.getIsAppInstallable()){
+        if (currentState.getIsAppInstallable()) {
             return true;
         }
         return false;
+    }
+
+    public void setLifecycleStates(Map<String, State> lifecycleStates) {
+        this.lifecycleStates = lifecycleStates;
     }
 }

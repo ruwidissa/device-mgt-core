@@ -31,7 +31,7 @@ import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.impl.ConfigManagerImpl;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -79,10 +79,10 @@ public class ApplicationManagementServiceComponent {
 
             List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
                     getConfiguration().getLifecycleStates();
-            LifecycleStateManger lifecycleStateManger = ApplicationManagementUtil.getLifecycleStateMangerInstance();
-            lifecycleStateManger.init(lifecycleStates);
-            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
-            bundleContext.registerService(LifecycleStateManger.class.getName(), lifecycleStateManger, null);
+            LifecycleStateManager lifecycleStateManager = ApplicationManagementUtil.getLifecycleStateMangerInstance();
+            lifecycleStateManager.init(lifecycleStates);
+            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManager);
+            bundleContext.registerService(LifecycleStateManager.class.getName(), lifecycleStateManager, null);
 
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             DataHolder.getInstance().setApplicationManager(applicationManager);

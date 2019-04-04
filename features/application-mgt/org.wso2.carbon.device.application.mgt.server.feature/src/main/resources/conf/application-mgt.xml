@@ -29,7 +29,7 @@
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ReviewManagerImpl</ClassName>
         </Extension>
         <Extension name="LifecycleStateManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger</ClassName>
+            <ClassName>org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
         </Extension>
         <Extension name="SubscriptionManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>

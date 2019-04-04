@@ -27,7 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.config.Extension;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 
 import java.lang.reflect.Constructor;
 
@@ -64,10 +64,10 @@ public class ApplicationManagementUtil {
         return getInstance(extension, ApplicationStorageManager.class);
     }
 
-    public static LifecycleStateManger getLifecycleStateMangerInstance() throws InvalidConfigurationException {
+    public static LifecycleStateManager getLifecycleStateMangerInstance() throws InvalidConfigurationException {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
         Extension extension = configurationManager.getExtension(Extension.Name.LifecycleStateManager);
-        return getInstance(extension, LifecycleStateManger.class);
+        return getInstance(extension, LifecycleStateManager.class);
     }
 
     private static <T> T getInstance(Extension extension, Class<T> cls) throws InvalidConfigurationException {

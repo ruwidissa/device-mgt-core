@@ -52,7 +52,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagement
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
@@ -77,12 +77,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ApplicationDAO applicationDAO;
     private ApplicationReleaseDAO applicationReleaseDAO;
     private LifecycleStateDAO lifecycleStateDAO;
-    private LifecycleStateManger lifecycleStateManger;
+    private LifecycleStateManager lifecycleStateManager;
 
 
     public ApplicationManagerImpl() {
         initDataAccessObjects();
-        lifecycleStateManger = DataHolder.getInstance().getLifecycleStateManager();
+        lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
     }
 
     private void initDataAccessObjects() {
@@ -576,7 +576,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState appLifecycleState = getLifecycleState(applicationId, applicationRelease.getUuid());
                 LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
-                if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
+                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
                         newAppLifecycleState.getCurrentState(),userName,tenantId)) {
                     this.lifecycleStateDAO
                             .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
@@ -623,7 +623,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 LifecycleState newAppLifecycleState = getLifecycleStateInstant(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-                if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
+                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
                         newAppLifecycleState.getCurrentState(),userName,tenantId)) {
                     this.lifecycleStateDAO
                             .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
@@ -949,7 +949,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + releaseUuid);
 
             }
-            lifecycleState.setNextStates(new ArrayList<>(lifecycleStateManger.getNextLifecycleStates(lifecycleState.getCurrentState())));
+            lifecycleState.setNextStates(new ArrayList<>(lifecycleStateManager.getNextLifecycleStates(lifecycleState.getCurrentState())));
 
         } catch (ApplicationManagementException e) {
             throw new ApplicationManagementException("Failed to get application and application management", e);
@@ -985,7 +985,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState(),userName,
+                if (lifecycleStateManager.isValidStateChange(state.getPreviousState(), state.getCurrentState(),userName,
                         tenantId)) {
                     //todo if current state of the adding lifecycle state is PUBLISHED, need to check whether is there
                     //todo any other application release in PUBLISHED state for the application( i.e for the appid)
