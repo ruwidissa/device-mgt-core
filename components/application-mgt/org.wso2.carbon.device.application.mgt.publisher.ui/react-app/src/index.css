@@ -21,3 +21,7 @@
 .steps-action {
     margin-top: 24px;
 }
+
+.ant-input-affix-wrapper .ant-input{
+    min-height: 0;
+}
