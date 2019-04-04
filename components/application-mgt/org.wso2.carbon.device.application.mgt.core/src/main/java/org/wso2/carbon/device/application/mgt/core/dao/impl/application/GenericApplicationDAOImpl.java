@@ -56,8 +56,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to create an application");
             log.debug("ApplicationEntity Details : ");
-//            log.debug("App Name : " + application.getName() + " App Type : "
-//                              + application.getType() + " User Name : " + application.getUser().getUserName());
+            log.debug("App Name : " + application.getName() + " App Type : " + application.getType());
         }
         Connection conn;
         PreparedStatement stmt = null;
@@ -71,13 +70,13 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                             + "TYPE, "
                             + "SUB_TYPE, "
                             + "TENANT_ID, "
-                            + "DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                            + "DEVICE_TYPE_ID) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, application.getName());
             stmt.setString(2, application.getDescription());
             stmt.setString(3, application.getType());
             stmt.setString(4, application.getSubType());
             stmt.setInt(5, tenantId);
-//            stmt.setInt(6, application.getDeviceTypeObj().getId());
+            stmt.setInt(6, application.getDeviceTypeId());
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();
