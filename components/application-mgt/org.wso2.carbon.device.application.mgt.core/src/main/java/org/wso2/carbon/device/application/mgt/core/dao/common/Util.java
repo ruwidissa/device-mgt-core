@@ -137,7 +137,7 @@ public class Util {
                 application.setSubType(rs.getString("APP_SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("APP_CURRENCY"));
                 application.setStatus(rs.getString("APP_STATUS"));
-                application.setAppRating(rs.getInt("APP_RATING)"));
+                application.setAppRating(rs.getInt("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
             } else {
                 ApplicationReleaseEntity appRelease = new ApplicationReleaseEntity();
