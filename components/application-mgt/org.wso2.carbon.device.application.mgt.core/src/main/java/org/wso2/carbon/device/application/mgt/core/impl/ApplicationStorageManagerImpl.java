@@ -196,8 +196,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String artifactDirectoryPath;
             String md5OfApp;
             String artifactPath;
-            InputStream[] cloneInputStream = cloneInputStream(binaryFile);
-            md5OfApp = getMD5(binaryFile);
+            byte [] content = IOUtils.toByteArray(binaryFile);
+
+            md5OfApp = getMD5(new ByteArrayInputStream(content));
             if (md5OfApp == null) {
                 String msg =
                         "Error occurred while md5sum value retrieving process: application UUID " + applicationRelease
@@ -208,7 +209,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             artifactDirectoryPath = storagePath + md5OfApp;
             if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
-                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(cloneInputStream[2]);
+                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(new ByteArrayInputStream(content));
                 applicationRelease.setVersion(apkMeta.getVersionName());
                 applicationRelease.setPackageName(apkMeta.getPackageName());
             } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
@@ -231,7 +232,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             artifactPath = artifactDirectoryPath + File.separator + applicationRelease.getInstallerName();
-            saveFile(cloneInputStream[1], artifactPath);
+            saveFile(new ByteArrayInputStream(content), artifactPath);
             applicationRelease.setInstallerName(artifactPath);
             applicationRelease.setAppHashValue(md5OfApp);
         } catch (IOException e) {
@@ -249,27 +250,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         return applicationRelease;
     }
 
-    private InputStream[] cloneInputStream(InputStream inputStream) throws ApplicationStorageManagementException {
-
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int len;
-            while ((len = inputStream.read(buffer)) > -1) {
-                byteArrayOutputStream.write(buffer, 0, len);
-            }
-            byteArrayOutputStream.flush();
-
-            InputStream stream1 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            InputStream stream2 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            InputStream stream3 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-
-            return new InputStream[] { stream1, stream2, stream3 };
-        } catch (IOException e) {
-            throw new ApplicationStorageManagementException("Error occurred while cloning input stream ", e);
-        }
-    }
-
     @Override
     public ApplicationReleaseEntity updateReleaseArtifacts(ApplicationReleaseEntity applicationRelease, String appType,
             String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException,
@@ -283,12 +263,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         } catch (ResourceManagementException e) {
             throw new ApplicationStorageManagementException("ApplicationEntity Artifact Updating failed", e);
         }
-
         return applicationRelease;
-
     }
-
-
+    
     @Override
     public void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException {
         File artifact = new File(directoryPath);
@@ -327,7 +304,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     private String getMD5(InputStream binaryFile) throws ApplicationStorageManagementException {
         String md5;
         try {
-            md5 = DigestUtils.md5Hex(IOUtils.toByteArray(binaryFile));
+            md5 = DigestUtils.md5Hex(binaryFile);
         } catch (IOException e) {
             throw new ApplicationStorageManagementException
                     ("IO Exception while trying to get the md5sum value of application");
