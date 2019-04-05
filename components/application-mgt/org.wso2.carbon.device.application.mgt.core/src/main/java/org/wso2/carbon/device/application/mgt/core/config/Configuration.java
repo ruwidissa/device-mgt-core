@@ -74,7 +74,8 @@ public class Configuration {
         return lifecycleStates;
     }
 
-    public void setLifecycleStates(List<LifecycleState> lifecycleStates) {
+    public void setLifecycleStates(
+            List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
 
@@ -86,6 +87,5 @@ public class Configuration {
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
     }
-
 }
 

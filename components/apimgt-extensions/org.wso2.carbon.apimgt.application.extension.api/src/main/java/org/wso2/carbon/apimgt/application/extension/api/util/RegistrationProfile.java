@@ -47,7 +47,9 @@ public class RegistrationProfile {
         this.applicationName = apiApplicationName;
     }
 
-    public String[] getTags() { return tags; }
+    public String[] getTags() {
+        return tags;
+    }
 
     public void setTags(String[] tags) {
         this.tags = tags;
