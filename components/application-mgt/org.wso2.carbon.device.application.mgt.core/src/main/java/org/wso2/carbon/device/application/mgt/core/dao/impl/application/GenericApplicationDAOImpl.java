@@ -43,6 +43,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * This handles ApplicationDAO related operations.
@@ -911,34 +912,59 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get tag ids for given tag names");
         }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+//        Connection conn;
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
         try {
+            Connection conn = this.getDBConnection();
+            int index = 1;
             List<Integer> tagIds = new ArrayList<>();
-            String sql = "SELECT "
-                    + "AP_APP_TAG.ID AS ID "
-                    + "FROM AP_APP_TAG "
-                    + "WHERE AP_APP_TAG..NAME IN ( ? ) AND TENANT_ID = ?";
-            conn = this.getDBConnection();
-            Array array = conn.createArrayOf("VARCHAR", new List[] { tagNames });
+//            String sql = "SELECT "
+//                    + "AP_APP_TAG.ID AS ID "
+//                    + "FROM AP_APP_TAG "
+//                    + "WHERE AP_APP_TAG..NAME IN ( ? ) AND TENANT_ID = ?";
+//            conn = this.getDBConnection();
 
-            stmt = conn.prepareStatement(sql);
-            stmt.setArray(1, array);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-            while(rs.next()){
-                tagIds.add(rs.getInt("ID"));
+            //
+            StringJoiner joiner = new StringJoiner(",", "SELECT AP_APP_TAG.ID AS ID FROM AP_APP_TAG "
+                    + "WHERE AP_APP_TAG.TAG IN (", ") AND TENANT_ID = ?");
+            tagNames.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+//                for (int c = 0; c < tagNames.size(); c++) {
+//                    ps.setObject(c + 1, tagNames.get(c));
+//                }
+                for (String tagName : tagNames) {
+                    ps.setObject(index++, tagName);
+                }
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while(rs.next()){
+                        tagIds.add(rs.getInt("ID"));
+                    }
+                }
             }
+            //
+//            Array array = conn.createArrayOf("VARCHAR", new List[] { tagNames });
+//
+//            stmt = conn.prepareStatement(sql);
+//            stmt.setArray(1, array);
+//            stmt.setInt(2, tenantId);
+//            rs = stmt.executeQuery();
+//            while(rs.next()){
+//                tagIds.add(rs.getInt("ID"));
+//            }
             return tagIds;
-        } catch (DBConnectionException e) {
+        }
+        catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while obtaining the DB connection when adding tags", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
-        } finally {
-            Util.cleanupResources(stmt, rs);
         }
+//        finally {
+//            Util.cleanupResources(stmt, rs);
+//        }
     }
 
     public void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException {

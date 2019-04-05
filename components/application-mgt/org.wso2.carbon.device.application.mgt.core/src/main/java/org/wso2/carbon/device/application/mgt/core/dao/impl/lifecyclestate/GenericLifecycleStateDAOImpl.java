@@ -160,9 +160,15 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         PreparedStatement stmt = null;
         try {
             conn = this.getDBConnection();
-            String sql = "INSERT INTO AP_APP_LIFECYCLE_STATE (CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_BY, "
-                    + "UPDATED_AT, AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?, ?, ?, ?, "
-                    + "(SELECT ID FROM AP_APP_RELEASE WHERE UUID=?),?);";
+            String sql = "INSERT INTO AP_APP_LIFECYCLE_STATE "
+                    + "(CURRENT_STATE, "
+                    + "PREVIOUS_STATE, "
+                    + "TENANT_ID, "
+                    + "UPDATED_BY, "
+                    + "UPDATED_AT, "
+                    + "AP_APP_RELEASE_ID, "
+                    + "AP_APP_ID) "
+                    + "VALUES (?,?, ?, ?, ?, (SELECT ID FROM AP_APP_RELEASE WHERE UUID=?),?);";
 
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());

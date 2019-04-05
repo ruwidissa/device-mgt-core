@@ -294,6 +294,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
                 applicationReleaseEntity = applicationEntity.getApplicationReleases().get(0);
+                applicationReleaseEntity.setCurrentState(AppLifecycleState.CREATED.toString());
                 applicationReleaseEntity = this.applicationReleaseDAO.createRelease(applicationReleaseEntity, appId, tenantId);
 
                 if (log.isDebugEnabled()) {
