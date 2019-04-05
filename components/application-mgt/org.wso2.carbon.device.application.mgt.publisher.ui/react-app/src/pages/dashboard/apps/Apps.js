@@ -1,9 +1,10 @@
 import React from "react";
 import "antd/dist/antd.css";
-import {Table, Divider, Tag, Card, PageHeader, Typography, Avatar,Input, Button, Icon} from "antd";
+import {Table, Divider, Tag, Card, PageHeader, Typography, Avatar,Input, Button, Icon, Row, Col} from "antd";
 import Highlighter from 'react-highlight-words';
 
 const Paragraph = Typography;
+const Search = Input.Search;
 
 const routes = [
     {
@@ -189,7 +190,18 @@ class Apps extends React.Component {
                     breadcrumb={{routes}}
                 />
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
+
                     <Card>
+                        <Row style={{padding:10}}>
+                            <Col span={6} offset={18}>
+                                <Search
+                                    placeholder="search"
+                                    onSearch={value => console.log(value)}
+                                    style={{ width: 200}}
+                                />
+                                <Button style={{margin:5}}>Advanced Search</Button>
+                            </Col>
+                        </Row>
                         <Table columns={columns} dataSource={data}/>
                     </Card>
                 </div>

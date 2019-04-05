@@ -1,6 +1,9 @@
 import React from "react";
 import "antd/dist/antd.css";
-import {PageHeader, Typography, Card, Steps, Button, message} from "antd";
+import {PageHeader, Typography, Card, Steps, Button, message, Row, Col} from "antd";
+import Step1 from "./Step1"
+import Step2 from "./Step2"
+import Step3 from "./Step3"
 
 const Paragraph = Typography;
 
@@ -23,13 +26,13 @@ const Step = Steps.Step;
 
 const steps = [{
     title: 'First',
-    content: 'First-content',
+    content: Step1
 }, {
     title: 'Second',
-    content: 'Second-content',
+    content: Step2,
 }, {
     title: 'Last',
-    content: 'Last-content',
+    content: Step3,
 }];
 
 
@@ -54,7 +57,8 @@ class AddNewApp extends React.Component {
 
 
     render() {
-        const { current } = this.state;
+        const {current} = this.state;
+        const Content = steps[current].content;
         return (
             <div>
                 <PageHeader
@@ -70,33 +74,38 @@ class AddNewApp extends React.Component {
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-                    <Card>
-                        <div>
-                            <Steps current={current}>
-                                {steps.map(item => <Step key={item.title} title={item.title}/>)}
-                            </Steps>
-                            <div className="steps-content">{steps[current].content}</div>
-                            <div className="steps-action">
-                                {
-                                    current < steps.length - 1
-                                    && <Button type="primary" onClick={() => this.next()}>Next</Button>
-                                }
-                                {
-                                    current === steps.length - 1
-                                    && <Button type="primary"
-                                               onClick={() => message.success('Processing complete!')}>Done</Button>
-                                }
-                                {
-                                    current > 0
-                                    && (
-                                        <Button style={{marginLeft: 8}} onClick={() => this.prev()}>
-                                            Previous
-                                        </Button>
-                                    )
-                                }
-                            </div>
-                        </div>
-                    </Card>
+                    <Row>
+                        <Col span={16} offset={4}>
+                            <Card>
+                                <div>
+                                    <Steps current={current}>
+                                        {steps.map(item => <Step key={item.title} title={item.title}/>)}
+                                    </Steps>
+                                    <Content/>
+                                    <div className="steps-action">
+                                        {
+                                            current < steps.length - 1
+                                            && <Button type="primary" onClick={() => this.next()}>Next</Button>
+                                        }
+                                        {
+                                            current === steps.length - 1
+                                            && <Button type="primary"
+                                                       onClick={() => message.success('Processing complete!')}>Done</Button>
+                                        }
+                                        {
+                                            current > 0
+                                            && (
+                                                <Button style={{marginLeft: 8}} onClick={() => this.prev()}>
+                                                    Previous
+                                                </Button>
+                                            )
+                                        }
+                                    </div>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+
                 </div>
 
             </div>
