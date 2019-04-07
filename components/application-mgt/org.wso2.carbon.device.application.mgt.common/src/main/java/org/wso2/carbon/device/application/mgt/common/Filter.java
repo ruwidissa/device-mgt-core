@@ -68,6 +68,11 @@ public class Filter {
      */
     private int deviceTypeId;
 
+    /***
+     * Package Name of the application release. i.e org.wso2.iot.agent etc
+     */
+    private String packageName;
+
     public int getLimit() {
         return limit;
     }
@@ -133,4 +138,8 @@ public class Filter {
     public int getDeviceTypeId() { return deviceTypeId; }
 
     public void setDeviceTypeId(int deviceTypeId) { this.deviceTypeId = deviceTypeId; }
+
+    public String getPackageName() { return packageName; }
+
+    public void setPackageName(String packageName) { this.packageName = packageName; }
 }

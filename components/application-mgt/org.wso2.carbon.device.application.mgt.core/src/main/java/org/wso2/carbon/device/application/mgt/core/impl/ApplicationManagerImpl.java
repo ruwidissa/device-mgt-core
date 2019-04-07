@@ -42,10 +42,13 @@ import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionExcep
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
+import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
@@ -63,6 +66,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagemen
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -117,75 +121,32 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @throws ApplicationManagementException Catch all other throwing exceptions and returns {@link ApplicationManagementException}
      */
     @Override
-    public ApplicationEntity createApplication(ApplicationWrapper applicationWrapper,
+    public Application createApplication(ApplicationWrapper applicationWrapper,
             ApplicationArtifact applicationArtifact) throws RequestValidatingException, ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         ApplicationEntity applicationEntity;
-        try {
-            applicationEntity = appWrapperToAppEntity(applicationWrapper);
-        } catch (UnexpectedServerErrorException e) {
-            throw new ApplicationManagementException(e.getMessage(), e);
-        }
-
+        Application application;
         if (log.isDebugEnabled()) {
             log.debug("Application create request is received for the tenant : " + tenantId + " From" + " the user : "
                     + userName);
         }
-        ApplicationReleaseEntity applicationReleaseEntity;
-        List<ApplicationReleaseEntity> applicationReleaseEntities = new ArrayList<>();
-
         try {
-            applicationReleaseEntity = applicationEntity.getApplicationReleases().get(0);
-            // The application executable artifacts such as apks are uploaded.
-            if (!ApplicationType.ENTERPRISE.toString().equals(applicationWrapper.getType())) {
-                applicationReleaseEntity = applicationStorageManager
-                        .uploadReleaseArtifact(applicationReleaseEntity, applicationEntity.getType(),
-                                applicationEntity.getDeviceTypeName(), null);
-            } else {
-                applicationReleaseEntity.setInstallerName(applicationArtifact.getInstallerName());
-                applicationReleaseEntity = applicationStorageManager
-                        .uploadReleaseArtifact(applicationReleaseEntity, applicationEntity.getType(),
-                                applicationEntity.getDeviceTypeName(), applicationArtifact.getInstallerStream());
-            }
-
-            applicationReleaseEntity.setIconName(applicationArtifact.getIconName());
-            applicationReleaseEntity.setBannerName(applicationArtifact.getBannername());
-
-            Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
-            List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
-
-            int counter = 1;
-            for (String scName : screenshotNames) {
-                if (counter == 1) {
-                    applicationReleaseEntity.setScreenshotName1(scName);
-                } else if (counter == 2) {
-                    applicationReleaseEntity.setScreenshotName2(scName);
-
-                } else if (counter == 3) {
-                    applicationReleaseEntity.setScreenshotName3(scName);
-                }
-                counter++;
-            }
-
-            // Upload images
-            applicationReleaseEntity = applicationStorageManager
-                    .uploadImageArtifacts(applicationReleaseEntity, applicationArtifact.getIconStream(),
-                            applicationArtifact.getBannerStream(),
-                            new ArrayList<>(screenshots.values()));
-            applicationReleaseEntity.setUuid(UUID.randomUUID().toString());
-            applicationReleaseEntities.add(applicationReleaseEntity);
-            applicationEntity.setApplicationReleases(applicationReleaseEntities);
-        } catch (ResourceManagementException e) {
+            applicationEntity = addApplicationReleaseArtifacts(appWrapperToAppEntity(applicationWrapper), applicationArtifact);
+        } catch (UnexpectedServerErrorException e) {
+            throw new ApplicationManagementException(e.getMessage(), e);
+        }  catch (ResourceManagementException e) {
             String msg = "Error Occured when uploading artifacts of the application.: " + applicationWrapper.getName();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         }
 
         try {
+            List<ApplicationReleaseEntity> applicationReleaseEntities = new ArrayList<>();
+            ApplicationReleaseEntity applicationReleaseEntity;
             Filter filter = new Filter();
+
             filter.setFullMatch(true);
             filter.setAppName(applicationEntity.getName().trim());
             filter.setDeviceTypeId(applicationEntity.getDeviceTypeId());
@@ -307,10 +268,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationReleaseEntity.setCurrentState(AppLifecycleState.CREATED.toString());
                 applicationReleaseEntities.add(applicationReleaseEntity);
                 applicationEntity.setApplicationReleases(applicationReleaseEntities);
-
+                application = appDtoToAppResponse(applicationEntity);
                 ConnectionManagerUtil.commitDBTransaction();
             }
-            return applicationEntity;
+            return application;
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured while adding lifecycle state. application name: " + applicationWrapper.getName()
@@ -345,6 +306,60 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    private ApplicationEntity addApplicationReleaseArtifacts(ApplicationEntity applicationEntity,
+            ApplicationArtifact applicationArtifact) throws ResourceManagementException {
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        List<ApplicationReleaseEntity> applicationReleaseEntities = new ArrayList<>();
+        ApplicationReleaseEntity applicationReleaseEntity;
+        try {
+            applicationReleaseEntity = applicationEntity.getApplicationReleases().get(0);
+            // The application executable artifacts such as apks are uploaded.
+            if (!ApplicationType.ENTERPRISE.toString().equals(applicationEntity.getType())) {
+                applicationReleaseEntity = applicationStorageManager
+                        .uploadReleaseArtifact(applicationReleaseEntity, applicationEntity.getType(),
+                                applicationEntity.getDeviceTypeName(), null);
+            } else {
+                applicationReleaseEntity.setInstallerName(applicationArtifact.getInstallerName());
+                applicationReleaseEntity = applicationStorageManager
+                        .uploadReleaseArtifact(applicationReleaseEntity, applicationEntity.getType(),
+                                applicationEntity.getDeviceTypeName(), applicationArtifact.getInstallerStream());
+            }
+
+            applicationReleaseEntity.setIconName(applicationArtifact.getIconName());
+            applicationReleaseEntity.setBannerName(applicationArtifact.getBannername());
+
+            Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
+            List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
+
+            int counter = 1;
+            for (String scName : screenshotNames) {
+                if (counter == 1) {
+                    applicationReleaseEntity.setScreenshotName1(scName);
+                } else if (counter == 2) {
+                    applicationReleaseEntity.setScreenshotName2(scName);
+
+                } else if (counter == 3) {
+                    applicationReleaseEntity.setScreenshotName3(scName);
+                }
+                counter++;
+            }
+
+            // Upload images
+            applicationReleaseEntity = applicationStorageManager
+                    .uploadImageArtifacts(applicationReleaseEntity, applicationArtifact.getIconStream(),
+                            applicationArtifact.getBannerStream(), new ArrayList<>(screenshots.values()));
+            applicationReleaseEntity.setUuid(UUID.randomUUID().toString());
+            applicationReleaseEntities.add(applicationReleaseEntity);
+            applicationEntity.setApplicationReleases(applicationReleaseEntities);
+            return applicationEntity;
+        } catch (RequestValidatingException e) {
+            //            todo remove this exception cath, do this validation in the request validate method
+            String msg = "Error Occured when uploading artifacts of the application.: " + applicationEntity.getName();
+            log.error(msg);
+            throw new ResourceManagementException(msg, e);
         }
     }
 
@@ -1650,6 +1665,55 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationReleaseEntity.setUrl(applicationReleaseWrapper.getUrl());
         applicationReleaseEntity.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
         return applicationReleaseEntity;
+    }
+
+    private Application appDtoToAppResponse(ApplicationEntity applicationEntity) {
+
+        Application application = new Application();
+        application.setId(applicationEntity.getId());
+        application.setName(applicationEntity.getName());
+        application.setDescription(applicationEntity.getDescription());
+        application.setAppCategory(applicationEntity.getAppCategory());
+        application.setType(applicationEntity.getType());
+        application.setSubType(applicationEntity.getSubType());
+        application.setPaymentCurrency(applicationEntity.getPaymentCurrency());
+        application.setTags(applicationEntity.getTags());
+        application.setUnrestrictedRoles(applicationEntity.getUnrestrictedRoles());
+        application.setDeviceType(applicationEntity.getDeviceTypeName());
+        List<ApplicationRelease> applicationReleases = applicationEntity.getApplicationReleases()
+                .stream().map(this::releaseDtoToRelease).collect(Collectors.toList());
+        application.setApplicationReleases(applicationReleases);
+        return application;
+    }
+
+    private ApplicationRelease releaseDtoToRelease(ApplicationReleaseEntity applicationReleaseEntity){
+        String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration().getArtifactDownloadEndpoint();
+        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseEntity.getUuid();
+        ApplicationRelease applicationRelease = new ApplicationRelease();
+        applicationRelease.setDescription(applicationReleaseEntity.getDescription());
+        applicationRelease.setReleaseType(applicationReleaseEntity.getReleaseType());
+        applicationRelease.setPrice(applicationReleaseEntity.getPrice());
+        applicationRelease.setIsSharedWithAllTenants(applicationReleaseEntity.getIsSharedWithAllTenants());
+        applicationRelease.setMetaData(applicationReleaseEntity.getMetaData());
+        applicationRelease.setUrl(applicationReleaseEntity.getUrl());
+        applicationRelease.setSupportedOsVersions(applicationReleaseEntity.getSupportedOsVersions());
+        applicationRelease.setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getInstallerName());
+        applicationRelease.setIconPath(basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getIconName());
+        applicationRelease.setBannerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getBannerName());
+
+        if (!StringUtils.isEmpty(applicationReleaseEntity.getScreenshotName1())) {
+            applicationRelease.setScreenshotPath1(
+                    basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getScreenshotName1());
+        }
+        if (!StringUtils.isEmpty(applicationReleaseEntity.getScreenshotName2())) {
+            applicationRelease.setScreenshotPath2(
+                    basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getScreenshotName2());
+        }
+        if (!StringUtils.isEmpty(applicationReleaseEntity.getScreenshotName3())) {
+            applicationRelease.setScreenshotPath3(
+                    basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getScreenshotName3());
+        }
+        return applicationRelease;
     }
 
     private <T> DeviceType getDevceTypeData( T deviceTypeAttr)

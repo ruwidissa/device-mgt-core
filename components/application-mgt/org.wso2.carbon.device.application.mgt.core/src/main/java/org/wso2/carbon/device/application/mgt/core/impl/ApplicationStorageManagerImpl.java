@@ -233,7 +233,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             artifactPath = artifactDirectoryPath + File.separator + applicationRelease.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
-            applicationRelease.setInstallerName(artifactPath);
             applicationRelease.setAppHashValue(md5OfApp);
         } catch (IOException e) {
             String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
@@ -265,7 +264,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         }
         return applicationRelease;
     }
-    
+
     @Override
     public void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException {
         File artifact = new File(directoryPath);

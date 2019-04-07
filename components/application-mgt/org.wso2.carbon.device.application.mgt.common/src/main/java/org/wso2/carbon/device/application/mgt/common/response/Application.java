@@ -20,6 +20,11 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 public class Application {
+    @ApiModelProperty(name = "id",
+            value = "ID of the application",
+            required = true)
+    private int id;
+
     @ApiModelProperty(name = "name",
             value = "Name of the application",
             required = true)
@@ -68,12 +73,14 @@ public class Application {
             example = "IoS, Android, Arduino, RaspberryPi etc")
     private String deviceType;
 
-
     @ApiModelProperty(name = "applicationReleases",
             value = "List of application releases",
             required = true)
     private List<ApplicationRelease> applicationReleases;
 
+    public int getId() { return id; }
+
+    public void setId(int id) { this.id = id; }
 
     public String getName() {
         return name;

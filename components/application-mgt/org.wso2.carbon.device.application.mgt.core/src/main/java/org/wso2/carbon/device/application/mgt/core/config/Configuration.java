@@ -46,6 +46,8 @@ public class Configuration {
 
     private List<String> appCategories;
 
+    private String artifactDownloadEndpoint;
+
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
         return datasourceName;
@@ -87,6 +89,15 @@ public class Configuration {
     @XmlElement(name = "UIConfigs")
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
+    }
+
+    @XmlElement(name = "ArtifactDownloadEndpoint", required = true)
+    public String getArtifactDownloadEndpoint() {
+        return artifactDownloadEndpoint;
+    }
+
+    public void setArtifactDownloadEndpoint(String artifactDownloadEndpoint) {
+        this.artifactDownloadEndpoint = artifactDownloadEndpoint;
     }
 
     @XmlElementWrapper(name = "AppCategories")

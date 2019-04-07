@@ -18,14 +18,14 @@
  */
 package org.wso2.carbon.device.application.mgt.common.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @ApiModel(value = "ApplicationReleaseEntity", description = "This class holds the details when releasing an ApplicationEntity to application store")
+@JsonIgnoreProperties({"appHashValue"})
 public class ApplicationReleaseEntity {
 
-    @JsonIgnore
     @ApiModelProperty(name = "id",
             value = "ID of the application release")
     private int id;

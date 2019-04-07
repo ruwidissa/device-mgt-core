@@ -27,6 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.entity.LifecycleStateEntity;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
@@ -46,7 +47,7 @@ public interface ApplicationManager {
      * @return Created application
      * @throws ApplicationManagementException ApplicationEntity Management Exception
      */
-    ApplicationEntity createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
+    Application createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException, RequestValidatingException;
 
     /**

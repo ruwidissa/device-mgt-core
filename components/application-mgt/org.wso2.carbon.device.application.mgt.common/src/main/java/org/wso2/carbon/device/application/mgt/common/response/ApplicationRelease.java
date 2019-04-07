@@ -28,6 +28,38 @@ public class ApplicationRelease {
             value = "Description of the application release")
     private String description;
 
+    @ApiModelProperty(name = "version",
+            value = "Version of the application release")
+    private String version;
+
+    @ApiModelProperty(name = "uuid",
+            value = "UUID of the application release")
+    private String uuid;
+
+    @ApiModelProperty(name = "installerPath",
+            value = "ApplicationEntity storing location")
+    private String installerPath;
+
+    @ApiModelProperty(name = "bannerPath",
+            value = "Banner file storing location")
+    private String bannerPath;
+
+    @ApiModelProperty(name = "iconPath",
+            value = "icon file storing location")
+    private String iconPath;
+
+    @ApiModelProperty(name = "screenshotPath1",
+            value = "Screenshot storing location")
+    private String screenshotPath1;
+
+    @ApiModelProperty(name = "screenshotPath2",
+            value = "Screenshot storing location")
+    private String screenshotPath2;
+
+    @ApiModelProperty(name = "screenshotPath3",
+            value = "Screenshot storing location")
+    private String screenshotPath3;
+
     @ApiModelProperty(name = "releaseType",
             value = "Release type of the application release",
             required = true,
@@ -100,6 +132,42 @@ public class ApplicationRelease {
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public String getVersion() { return version; }
+
+    public void setVersion(String version) { this.version = version; }
+
+    public String getUuid() { return uuid; }
+
+    public void setUuid(String uuid) { this.uuid = uuid; }
+
+    public String getInstallerPath() { return installerPath; }
+
+    public void setInstallerPath(String installerPath) { this.installerPath = installerPath; }
+
+    public String getBannerPath() { return bannerPath; }
+
+    public void setBannerPath(String bannerPath) { this.bannerPath = bannerPath; }
+
+    public String getIconPath() { return iconPath; }
+
+    public void setIconPath(String iconPath) { this.iconPath = iconPath; }
+
+    public String getScreenshotPath1() { return screenshotPath1; }
+
+    public void setScreenshotPath1(String screenshotPath1) { this.screenshotPath1 = screenshotPath1; }
+
+    public String getScreenshotPath2() { return screenshotPath2; }
+
+    public void setScreenshotPath2(String screenshotPath2) { this.screenshotPath2 = screenshotPath2; }
+
+    public String getScreenshotPath3() { return screenshotPath3; }
+
+    public void setScreenshotPath3(String screenshotPath3) { this.screenshotPath3 = screenshotPath3; }
+
+    public boolean isSharedWithAllTenants() { return isSharedWithAllTenants; }
+
+    public void setSharedWithAllTenants(boolean sharedWithAllTenants) { isSharedWithAllTenants = sharedWithAllTenants; }
 
     public String getSupportedOsVersions() { return supportedOsVersions; }
 

@@ -28,6 +28,7 @@ import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEn
 import org.wso2.carbon.device.application.mgt.common.entity.LifecycleStateEntity;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
@@ -153,7 +154,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationManager
                     .validateAppCreatingRequest(applicationWrapper, binaryFile, iconFile, bannerFile, attachmentList);
             // Created new application entry
-            ApplicationEntity createdApplication = applicationManager.createApplication(applicationWrapper,
+            Application createdApplication = applicationManager.createApplication(applicationWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
             if (createdApplication != null) {
                 return Response.status(Response.Status.CREATED).entity(createdApplication).build();

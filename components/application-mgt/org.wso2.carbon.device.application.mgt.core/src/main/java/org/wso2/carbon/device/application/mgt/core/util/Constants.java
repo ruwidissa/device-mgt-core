@@ -37,8 +37,7 @@ public class Constants {
     public static final String CF_BUNDLE_VERSION = "CFBundleVersion";
     public static final String APP_EXTENSION = ".app";
 
-    public static final String ANDROID_INSTALLER_EXT = ".apk";
-    public static final String IOS_INSTALLER_EXT = ".ipa";
+    public static final String FORWARD_SLASH = "/";
 
     /**
      * Database types supported by Application Management.
