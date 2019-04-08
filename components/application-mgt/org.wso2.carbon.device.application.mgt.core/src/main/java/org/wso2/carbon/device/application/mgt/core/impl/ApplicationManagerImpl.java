@@ -67,7 +67,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErr
 import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
@@ -104,11 +104,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ApplicationDAO applicationDAO;
     private ApplicationReleaseDAO applicationReleaseDAO;
     private LifecycleStateDAO lifecycleStateDAO;
-    private LifecycleStateManger lifecycleStateManger;
+    private LifecycleStateManager lifecycleStateManager;
 
     public ApplicationManagerImpl() {
         initDataAccessObjects();
-        lifecycleStateManger = DataHolder.getInstance().getLifecycleStateManager();
+        lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
     }
 
     private void initDataAccessObjects() {
@@ -122,8 +122,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * The responsbility of this method is the creating an application.
      * @param applicationWrapper ApplicationDTO that need to be created.
      * @return {@link ApplicationDTO}
-     * @throws RequestValidatingException if application creating request is invalid, returns {@link RequestValidatingException}
-     * @throws ApplicationManagementException Catch all other throwing exceptions and returns {@link ApplicationManagementException}
+     * @throws RequestValidatingException if application creating request is invalid,
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
      */
     @Override
     public Application createApplication(ApplicationWrapper applicationWrapper,
@@ -504,7 +504,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String packageName = this.applicationReleaseDAO.getPackageName(applicationId, tenantId);
             if (packageName != null && !packageName.equals(applicationRelease.getPackageName())) {
                 throw new BadRequestException(
-                        "Package name in the payload is different from the existing package name of other application releases.");
+                        "Package name in the payload is different from the existing package name of other application" +
+                                " releases.");
             }
             applicationRelease = this.applicationReleaseDAO
                     .createRelease(applicationRelease, existingApplication.getId(), tenantId);
@@ -810,8 +811,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         .getLatestLifeCycleState(applicationId, applicationRelease.getUuid());
                 LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
-                if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
-                        newAppLifecycleState.getCurrentState())) {
+                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
+                        newAppLifecycleState.getCurrentState(), userName, tenantId)) {
                     this.lifecycleStateDAO
                             .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
                                     tenantId);
@@ -821,7 +822,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             AppLifecycleState.REMOVED.toString());
                     for (String nextState : lifecycleFlow) {
                         LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
-                        if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
+                        if (lifecycleStateManager.isValidStateChange(currentState, nextState, userName, tenantId)) {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
                                             tenantId);
@@ -871,7 +872,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (currentNode.equals(finish)) {
                 break;
             } else {
-                Set<String> nextStates = lifecycleStateManger.getNextLifecycleStates(currentNode);
+                Set<String> nextStates = lifecycleStateManager.getNextLifecycleStates(currentNode);
                 if (nextStates.contains(finish)) {
                     queue = new LinkedList<>();
                     queue.add(finish);
@@ -940,8 +941,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     .equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals(currentState)) {
                 LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
-                if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
-                        newAppLifecycleState.getCurrentState())) {
+                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
+                        newAppLifecycleState.getCurrentState(), userName, tenantId)) {
                     this.lifecycleStateDAO
                             .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
                                     tenantId);
@@ -951,7 +952,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             AppLifecycleState.REMOVED.toString());
                     for (String nextState : lifecycleFlow) {
                         LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
-                        if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
+                        if (lifecycleStateManager.isValidStateChange(currentState, nextState, userName, tenantId)) {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
                                             tenantId);
@@ -1187,7 +1188,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     /**
-     * To validate a app release creating request and app updating request to make sure all the pre-conditions satisfied.
+     * To validate a app release creating request and app updating request to make sure all the pre-conditions
+     * satisfied.
      *
      * @param applicationRelease ApplicationReleaseDTO that need to be created.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
@@ -1210,8 +1212,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (lifecycleState == null) {
                 return null;
             }
-            lifecycleState.setNextStates(
-                    new ArrayList<>(lifecycleStateManger.getNextLifecycleStates(lifecycleState.getCurrentState())));
+            lifecycleState.setNextStates(new ArrayList<>(lifecycleStateManager.getNextLifecycleStates(lifecycleState.getCurrentState())));
 
         } catch (LifeCycleManagementDAOException e) {
             throw new ApplicationManagementException("Failed to get lifecycle state from database", e);
@@ -1241,12 +1242,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + " and application release UUID: " + releaseUuid);
             }
             state.setPreviousState(currentState.getCurrentState());
-
             String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
             state.setUpdatedBy(userName);
 
             if (state.getCurrentState() != null && state.getPreviousState() != null) {
-                if (lifecycleStateManger.isValidStateChange(state.getPreviousState(), state.getCurrentState())) {
+                if (lifecycleStateManager.isValidStateChange(state.getPreviousState(), state.getCurrentState(),
+                        userName, tenantId)) {
                     //todo if current state of the adding lifecycle state is PUBLISHED, need to check whether is there
                     //todo any other application release in PUBLISHED state for the application( i.e for the appid)
                     this.lifecycleStateDAO.addLifecycleState(state, applicationId, releaseUuid, tenantId);
