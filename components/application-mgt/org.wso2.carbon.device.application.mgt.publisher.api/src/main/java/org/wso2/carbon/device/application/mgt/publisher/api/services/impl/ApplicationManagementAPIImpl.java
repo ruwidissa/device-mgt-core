@@ -655,7 +655,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            applicationArtifact.setBannername(bannerFileName);
+            applicationArtifact.setBannerName(bannerFileName);
             applicationArtifact.setBannerStream(bannerStream);
 
             Map<String, InputStream> scrrenshotData = new HashMap<>();

@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.device.application.mgt.common.services;
 
+import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
@@ -53,6 +54,10 @@ public interface ApplicationStorageManager {
      */
     ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFile,
             InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
+
+    ApplicationInstaller getAppInstallerData(InputStream binaryFile, String deviceType)
+            throws ApplicationStorageManagementException;
+
 
     /**
      * To upload release artifacts for an ApplicationDTO.

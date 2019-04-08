@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
@@ -175,17 +176,37 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         }
     }
 
+    public ApplicationInstaller getAppInstallerData(InputStream binaryFile, String deviceType)
+            throws ApplicationStorageManagementException {
+        ApplicationInstaller applicationInstaller = new ApplicationInstaller();
+        try {
+            if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(binaryFile);
+                applicationInstaller.setVersion(apkMeta.getVersionName());
+                applicationInstaller.setPackageName(apkMeta.getPackageName());
+            } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
+                NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
+                applicationInstaller
+                        .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
+                applicationInstaller
+                        .setPackageName(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_IDENTIFIER_KEY).toString());
+            } else {
+                String msg = "Application Type doesn't match with supporting application types " + deviceType;
+                log.error(msg);
+                throw new ApplicationStorageManagementException(msg);
+            }
+        } catch (ParsingException e){
+            String msg = "Application Type doesn't match with supporting application types " + deviceType;
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg);
+        }
+        return applicationInstaller;
+    }
+
     @Override
     public ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO, String appType,
             String deviceType, InputStream binaryFile) throws ResourceManagementException {
         try {
-            // move version and package getting code into separate method and check whether package exist in db
-            if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
-                applicationReleaseDTO.setVersion(Constants.DEFAULT_VERSION);
-                applicationReleaseDTO.setInstallerName(applicationReleaseDTO.getUrl());
-                applicationReleaseDTO.setAppHashValue(null);
-                return applicationReleaseDTO;
-            }
             String artifactDirectoryPath;
             String md5OfApp;
             String artifactPath;
@@ -199,29 +220,11 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 throw new ApplicationStorageManagementException(msg);
             }
 
-            artifactDirectoryPath = storagePath + md5OfApp;
-            if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
-                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(new ByteArrayInputStream(content));
-                applicationReleaseDTO.setVersion(apkMeta.getVersionName());
-                applicationReleaseDTO.setPackageName(apkMeta.getPackageName());
-            } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
-                NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
-                applicationReleaseDTO
-                        .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
-                applicationReleaseDTO
-                        .setPackageName(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_IDENTIFIER_KEY).toString());
-            } else {
-                String msg = "Application Type doesn't match with supporting application types " + applicationReleaseDTO
-                        .getUuid();
-                log.error(msg);
-                throw new ApplicationStorageManagementException(msg);
-            }
-
             if (log.isDebugEnabled()) {
-                log.debug("Artifact Directory Path for saving the application release related artifacts related with "
-                        + "application UUID " + applicationReleaseDTO.getUuid() + " is " + artifactDirectoryPath);
+                log.debug("Artifact Directory Path for saving the application release is " + artifactDirectoryPath
+                        + ". ApplicationUUID: " + applicationReleaseDTO.getUuid());
             }
-
+            artifactDirectoryPath = storagePath + md5OfApp;
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
@@ -231,19 +234,13 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     + applicationReleaseDTO.getUuid();
             log.error(msg);
             throw new ApplicationStorageManagementException( msg, e);
-        } catch (ParsingException e) {
-            String msg = "Error occurred while parsing the artifact file. Application release UUID is "
-                    + applicationReleaseDTO.getUuid();
-            log.error(msg);
-            throw new ApplicationStorageManagementException(msg, e);
         }
         return applicationReleaseDTO;
     }
 
     @Override
-    public ApplicationReleaseDTO updateReleaseArtifacts(ApplicationReleaseDTO applicationRelease, String appType,
-            String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException,
-            RequestValidatingException {
+    public ApplicationReleaseDTO updateReleaseArtifacts(ApplicationReleaseDTO applicationRelease,
+            String appType, String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException {
 
         try {
             deleteApplicationReleaseArtifacts(applicationRelease.getInstallerName());

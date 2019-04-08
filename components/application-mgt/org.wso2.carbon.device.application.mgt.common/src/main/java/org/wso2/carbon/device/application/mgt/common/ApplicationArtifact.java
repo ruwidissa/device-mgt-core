@@ -24,7 +24,7 @@ public class ApplicationArtifact {
 
     private InputStream installerStream;
 
-    private String bannername;
+    private String bannerName;
 
     private InputStream bannerStream;
 
@@ -50,12 +50,12 @@ public class ApplicationArtifact {
         this.installerStream = installerStream;
     }
 
-    public String getBannername() {
-        return bannername;
+    public String getBannerName() {
+        return bannerName;
     }
 
-    public void setBannername(String bannername) {
-        this.bannername = bannername;
+    public void setBannerName(String bannerName) {
+        this.bannerName = bannerName;
     }
 
     public InputStream getBannerStream() {

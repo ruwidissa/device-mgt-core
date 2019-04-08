@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -28,6 +29,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
+import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
@@ -75,6 +77,8 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -317,25 +321,70 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     private ApplicationDTO addApplicationReleaseArtifacts(ApplicationDTO applicationDTO,
-            ApplicationArtifact applicationArtifact) throws ResourceManagementException {
+            ApplicationArtifact applicationArtifact) throws ResourceManagementException,
+            ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
         ApplicationReleaseDTO applicationReleaseDTO;
         applicationReleaseDTO = applicationDTO.getApplicationReleases().get(0);
+
+        String uuid = UUID.randomUUID().toString();
+        applicationReleaseDTO.setUuid(uuid);
+
         // The application executable artifacts such as apks are uploaded.
-        if (!ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
-            applicationReleaseDTO = applicationStorageManager
-                    .uploadReleaseArtifact(applicationReleaseDTO, applicationDTO.getType(),
-                            applicationDTO.getDeviceTypeName(), null);
-        } else {
-            applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
-            applicationReleaseDTO = applicationStorageManager
-                    .uploadReleaseArtifact(applicationReleaseDTO, applicationDTO.getType(),
-                            applicationDTO.getDeviceTypeName(), applicationArtifact.getInstallerStream());
+        if (ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
+            try {
+                byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
+
+                applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
+
+                try (ByteArrayInputStream binary = new ByteArrayInputStream(content)) {
+                    ApplicationInstaller applicationInstaller = applicationStorageManager
+                            .getAppInstallerData(binary, applicationDTO.getDeviceTypeName());
+                    String packagename = applicationInstaller.getPackageName();
+
+                    ConnectionManagerUtil.getDBConnection();
+                    if (applicationReleaseDAO.isAppExisitForPackageName(packagename, tenantId)) {
+                        String msg = "Application release is already exist for the package name: " + packagename;
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
+                    applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
+                    applicationReleaseDTO.setPackageName(packagename);
+                    try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
+                        applicationReleaseDTO = applicationStorageManager
+                                .uploadReleaseArtifact(applicationReleaseDTO, applicationDTO.getType(),
+                                        applicationDTO.getDeviceTypeName(), binaryDuplicate);
+                    }
+                }
+            } catch (IOException e) {
+                String msg =
+                        "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
+                                .getInstallerName();
+                log.error(msg);
+                throw new ApplicationStorageManagementException(msg);
+            } catch (DBConnectionException e) {
+                String msg = "Error occurred when getting database connection for verifying application package existence.";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            } catch (ApplicationManagementDAOException e) {
+                String msg = "Error occurred when executing the query for verifying application release existence for "
+                        + "the package.";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
+        } else if (ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
+            applicationReleaseDTO.setVersion(Constants.DEFAULT_VERSION);
+            applicationReleaseDTO.setInstallerName(applicationReleaseDTO.getUrl());
+            // Since WEB CLIP doesn't have an installer, set uuid as has value for WEB CLIP
+            applicationReleaseDTO.setAppHashValue(uuid);
         }
 
         applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
-        applicationReleaseDTO.setBannerName(applicationArtifact.getBannername());
+        applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
 
         Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
         List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
@@ -357,7 +406,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationReleaseDTO = applicationStorageManager
                 .uploadImageArtifacts(applicationReleaseDTO, applicationArtifact.getIconStream(),
                         applicationArtifact.getBannerStream(), new ArrayList<>(screenshots.values()));
-        applicationReleaseDTO.setUuid(UUID.randomUUID().toString());
         applicationReleaseEntities.add(applicationReleaseDTO);
         applicationDTO.setApplicationReleases(applicationReleaseEntities);
         return applicationDTO;
