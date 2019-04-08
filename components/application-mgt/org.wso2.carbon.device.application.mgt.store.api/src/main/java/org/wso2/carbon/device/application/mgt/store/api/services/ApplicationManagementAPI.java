@@ -31,7 +31,7 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 
 import javax.ws.rs.Consumes;
@@ -49,7 +49,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationEntity Storage Management Service",
+                title = "ApplicationDTO Storage Management Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationStorageManagementService"),
@@ -58,14 +58,14 @@ import javax.ws.rs.core.Response;
                 }
         ),
         tags = {
-                @Tag(name = "application_management, device_management", description = "ApplicationEntity Storage Management "
+                @Tag(name = "application_management, device_management", description = "ApplicationDTO Storage Management "
                         + "related APIs")
         }
 )
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "Get ApplicationEntity Details",
+                        name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:store:view",
                         permissions = {"/device-mgt/application/get"}
@@ -73,7 +73,7 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/store/applications")
-@Api(value = "ApplicationEntity Management", description = "This API carries all app store management related operations " +
+@Api(value = "ApplicationDTO Management", description = "This API carries all app store management related operations " +
         "such as get all the applications etc.")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementAPI {
@@ -89,7 +89,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get all applications",
             notes = "This will get all applications",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:application:get")
@@ -121,7 +121,7 @@ public interface ApplicationManagementAPI {
             @QueryParam("type") String appType,
             @ApiParam(
                     name = "category",
-                    value = "CategoryEntity of the application")
+                    value = "CategoryDTO of the application")
             @QueryParam("category") String appCategory,
             @ApiParam(
                     name = "exact-match",
@@ -152,7 +152,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get the application of requesting application type",
             notes = "This will get the application identified by the application type and name, if exists",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:application:get")
@@ -164,10 +164,10 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully retrieved relevant application.",
-                            response = ApplicationEntity.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 404,
-                            message = "ApplicationEntity not found"),
+                            message = "ApplicationDTO not found"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application.",

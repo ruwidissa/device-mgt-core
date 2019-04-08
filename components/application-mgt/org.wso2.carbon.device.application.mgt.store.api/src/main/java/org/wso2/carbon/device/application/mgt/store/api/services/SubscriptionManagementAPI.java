@@ -28,7 +28,7 @@ import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.EnterpriseInstallationDetails;
 import org.wso2.carbon.device.application.mgt.common.InstallationDetails;
@@ -65,13 +65,13 @@ import javax.ws.rs.core.Response;
 @Scopes(
         scopes = {
                 @org.wso2.carbon.apimgt.annotations.api.Scope(
-                        name = "Install an ApplicationEntity",
+                        name = "Install an ApplicationDTO",
                         description = "Install an application",
                         key = "perm:subscription:install",
                         permissions = {"/device-mgt/subscription/install"}
                 ),
                 @org.wso2.carbon.apimgt.annotations.api.Scope(
-                        name = "Install an ApplicationEntity",
+                        name = "Install an ApplicationDTO",
                         description = "Install an application",
                         key = "perm:application-mgt:login",
                         permissions = {"/device-mgt/application-mgt/login"}
@@ -117,7 +117,7 @@ public interface SubscriptionManagementAPI {
                     ),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. \n ApplicationEntity cannot be found to install."
+                            message = "Not Found. \n ApplicationDTO cannot be found to install."
                     ),
                     @ApiResponse(
                             code = 500,
@@ -162,7 +162,7 @@ public interface SubscriptionManagementAPI {
                     ),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. \n ApplicationEntity cannot be found to install."
+                            message = "Not Found. \n ApplicationDTO cannot be found to install."
                     ),
                     @ApiResponse(
                             code = 500,
@@ -198,7 +198,7 @@ public interface SubscriptionManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully uninstalled the application.",
-                            response = ApplicationEntity.class
+                            response = ApplicationDTO.class
                     ),
                     @ApiResponse(
                             code = 304,
@@ -206,7 +206,7 @@ public interface SubscriptionManagementAPI {
                     ),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. \n ApplicationEntity cannot be found to uninstall."
+                            message = "Not Found. \n ApplicationDTO cannot be found to uninstall."
                     ),
                     @ApiResponse(
                             code = 500,
@@ -242,7 +242,7 @@ public interface SubscriptionManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully uninstalled the application.",
-                            response = ApplicationEntity.class
+                            response = ApplicationDTO.class
                     ),
                     @ApiResponse(
                             code = 304,
@@ -250,7 +250,7 @@ public interface SubscriptionManagementAPI {
                     ),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. \n ApplicationEntity cannot be found to uninstall."
+                            message = "Not Found. \n ApplicationDTO cannot be found to uninstall."
                     ),
                     @ApiResponse(
                             code = 500,
@@ -287,7 +287,7 @@ public interface SubscriptionManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully installed the application.",
-                            response = ApplicationEntity.class
+                            response = ApplicationDTO.class
                     ),
                     @ApiResponse(
                             code = 304,
@@ -302,7 +302,7 @@ public interface SubscriptionManagementAPI {
     Response getApplication(
             @ApiParam(
                     name = "applicationUUID",
-                    value = "ApplicationEntity ID"
+                    value = "ApplicationDTO ID"
             )
             @QueryParam("applicationUUID") String applicationUUID,
             @ApiParam(

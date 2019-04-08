@@ -30,7 +30,7 @@
 <PermissionConfiguration>
     <APIVersion></APIVersion>
 
-    <!-- ApplicationEntity related permissions -->
+    <!-- ApplicationDTO related permissions -->
     <Permission>
         <name>Get Application</name>
         <path>/device-mgt/application/get</path>

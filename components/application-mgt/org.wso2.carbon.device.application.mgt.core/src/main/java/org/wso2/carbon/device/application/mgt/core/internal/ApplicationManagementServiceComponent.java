@@ -120,14 +120,14 @@ public class ApplicationManagementServiceComponent {
 
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
-            log.debug("Setting ApplicationEntity Management OSGI Manager");
+            log.debug("Setting ApplicationDTO Management OSGI Manager");
         }
         DataHolder.getInstance().setDeviceManagementService(deviceManagementProviderService);
     }
 
     protected void unsetDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
-            log.debug("Removing ApplicationEntity Management OSGI Manager");
+            log.debug("Removing ApplicationDTO Management OSGI Manager");
         }
         DataHolder.getInstance().setDeviceManagementService(null);
     }

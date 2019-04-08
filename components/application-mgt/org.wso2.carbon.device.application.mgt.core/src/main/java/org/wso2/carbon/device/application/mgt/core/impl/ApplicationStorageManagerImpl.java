@@ -29,9 +29,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
@@ -44,11 +43,9 @@ import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 import org.xml.sax.SAXException;
 
-import javax.activation.DataHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +77,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationReleaseEntity uploadImageArtifacts(ApplicationReleaseEntity applicationRelease, InputStream iconFileStream,
+    public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFileStream,
                                                    InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -90,6 +87,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         String scStoredLocation = null;
 
         try {
+            // todo handle WEB CLIP and save data in different folder (uuid)
             artifactDirectoryPath = storagePath + applicationRelease.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             iconStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getIconName();
@@ -128,7 +126,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             throw new ApplicationStorageManagementException("IO Exception while saving the screens hots for " +
                     "the application " + applicationRelease.getUuid(), e);
         } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationEntity Management DAO exception while trying to "
+            throw new ApplicationStorageManagementException("ApplicationDTO Management DAO exception while trying to "
                     + "update the screen-shot count for the application " + applicationRelease.getUuid() +
                     " for the tenant id " + tenantId, e);
         }
@@ -136,7 +134,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
 
     @Override
-     public ApplicationReleaseEntity updateImageArtifacts(ApplicationReleaseEntity applicationRelease, InputStream
+     public ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream
             iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
 
@@ -171,27 +169,22 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                     screenShotStreams);
             return applicationRelease;
         } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationEntity Storage exception while trying to"
+            throw new ApplicationStorageManagementException("ApplicationDTO Storage exception while trying to"
                     + " update the screen-shot count for the application Release " + applicationRelease.getUuid() +
                     " for the tenant " + tenantId, e);
         }
     }
 
     @Override
-    public ApplicationReleaseEntity uploadReleaseArtifact(ApplicationReleaseEntity applicationRelease, String appType,
-            String deviceType, InputStream binaryFile) throws ResourceManagementException, RequestValidatingException {
+    public ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO, String appType,
+            String deviceType, InputStream binaryFile) throws ResourceManagementException {
         try {
+            // move version and package getting code into separate method and check whether package exist in db
             if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
-                applicationRelease.setVersion(Constants.DEFAULT_VERSION);
-                UrlValidator urlValidator = new UrlValidator();
-                if (applicationRelease.getUrl() == null || !urlValidator.isValid(applicationRelease.getUrl())) {
-                    String msg = "Request payload doesn't contains Web Clip URL with application release object or Web Clip URL is invalid";
-                    log.error(msg);
-                    throw new RequestValidatingException(msg);
-                }
-                applicationRelease.setInstallerName(applicationRelease.getUrl());
-                applicationRelease.setAppHashValue(null);
-                return applicationRelease;
+                applicationReleaseDTO.setVersion(Constants.DEFAULT_VERSION);
+                applicationReleaseDTO.setInstallerName(applicationReleaseDTO.getUrl());
+                applicationReleaseDTO.setAppHashValue(null);
+                return applicationReleaseDTO;
             }
             String artifactDirectoryPath;
             String md5OfApp;
@@ -200,9 +193,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             md5OfApp = getMD5(new ByteArrayInputStream(content));
             if (md5OfApp == null) {
-                String msg =
-                        "Error occurred while md5sum value retrieving process: application UUID " + applicationRelease
-                                .getUuid();
+                String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                        + applicationReleaseDTO.getUuid();
                 log.error(msg);
                 throw new ApplicationStorageManagementException(msg);
             }
@@ -210,16 +202,16 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             artifactDirectoryPath = storagePath + md5OfApp;
             if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
                 ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(new ByteArrayInputStream(content));
-                applicationRelease.setVersion(apkMeta.getVersionName());
-                applicationRelease.setPackageName(apkMeta.getPackageName());
+                applicationReleaseDTO.setVersion(apkMeta.getVersionName());
+                applicationReleaseDTO.setPackageName(apkMeta.getPackageName());
             } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
-                applicationRelease
+                applicationReleaseDTO
                         .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
-                applicationRelease
+                applicationReleaseDTO
                         .setPackageName(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_IDENTIFIER_KEY).toString());
             } else {
-                String msg = "ApplicationEntity Type doesn't match with supporting application types " + applicationRelease
+                String msg = "Application Type doesn't match with supporting application types " + applicationReleaseDTO
                         .getUuid();
                 log.error(msg);
                 throw new ApplicationStorageManagementException(msg);
@@ -227,30 +219,29 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             if (log.isDebugEnabled()) {
                 log.debug("Artifact Directory Path for saving the application release related artifacts related with "
-                        + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
+                        + "application UUID " + applicationReleaseDTO.getUuid() + " is " + artifactDirectoryPath);
             }
 
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            artifactPath = artifactDirectoryPath + File.separator + applicationRelease.getInstallerName();
+            artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
-            applicationRelease.setAppHashValue(md5OfApp);
+            applicationReleaseDTO.setAppHashValue(md5OfApp);
         } catch (IOException e) {
             String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
-                    + applicationRelease.getUuid();
+                    + applicationReleaseDTO.getUuid();
             log.error(msg);
             throw new ApplicationStorageManagementException( msg, e);
         } catch (ParsingException e) {
-            String msg =
-                    "Error occurred while parsing the artifact file. ApplicationEntity release UUID is " + applicationRelease
-                            .getUuid();
+            String msg = "Error occurred while parsing the artifact file. Application release UUID is "
+                    + applicationReleaseDTO.getUuid();
             log.error(msg);
             throw new ApplicationStorageManagementException(msg, e);
         }
-        return applicationRelease;
+        return applicationReleaseDTO;
     }
 
     @Override
-    public ApplicationReleaseEntity updateReleaseArtifacts(ApplicationReleaseEntity applicationRelease, String appType,
+    public ApplicationReleaseDTO updateReleaseArtifacts(ApplicationReleaseDTO applicationRelease, String appType,
             String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException,
             RequestValidatingException {
 
@@ -258,9 +249,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             deleteApplicationReleaseArtifacts(applicationRelease.getInstallerName());
             applicationRelease = uploadReleaseArtifact(applicationRelease, appType, deviceType, binaryFile);
         } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationEntity Artifact doesn't contains in the System", e);
+            throw new ApplicationStorageManagementException("ApplicationDTO Artifact doesn't contains in the System", e);
         } catch (ResourceManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationEntity Artifact Updating failed", e);
+            throw new ApplicationStorageManagementException("ApplicationDTO Artifact Updating failed", e);
         }
         return applicationRelease;
     }

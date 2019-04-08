@@ -48,7 +48,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     @Override
     @POST
     @Path("/install-application")
-    public Response installApplication(@ApiParam(name = "installationDetails", value = "ApplicationEntity ID and list of" +
+    public Response installApplication(@ApiParam(name = "installationDetails", value = "ApplicationDTO ID and list of" +
             "devices", required = true) @Valid InstallationDetails installationDetails) {
         SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
         String applicationUUID = installationDetails.getApplicationUUID();
@@ -81,7 +81,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         ApplicationInstallResponse response;
 
         if (applicationUUID.isEmpty()) {
-            msg = "ApplicationEntity UUID is empty in the incoming request. Therefore unable to proceed with the "
+            msg = "ApplicationDTO UUID is empty in the incoming request. Therefore unable to proceed with the "
                     + "installation.";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
@@ -128,7 +128,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     }
 
     @Override
-    public Response getApplication(@ApiParam(name = "applicationUUID", value = "ApplicationEntity ID") String
+    public Response getApplication(@ApiParam(name = "applicationUUID", value = "ApplicationDTO ID") String
                                                applicationUUID, @ApiParam(name = "deviceId", value = "The device ID")
             String deviceId) {
         return null;

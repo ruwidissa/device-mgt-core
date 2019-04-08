@@ -33,7 +33,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Implementation of ApplicationEntity Management related APIs.
+ * Implementation of ApplicationDTO Management related APIs.
  */
 @Produces({"application/json"})
 @Path("/artifact")

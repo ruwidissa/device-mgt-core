@@ -22,20 +22,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
-import org.wso2.carbon.device.application.mgt.common.entity.CategoryEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
-import org.wso2.carbon.device.application.mgt.common.entity.TagEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,10 +52,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     private static final Log log = LogFactory.getLog(GenericApplicationDAOImpl.class);
 
     @Override
-    public int createApplication(ApplicationEntity application, int tenantId) throws ApplicationManagementDAOException {
+    public int createApplication(ApplicationDTO application, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to create an application");
-            log.debug("ApplicationEntity Details : ");
+            log.debug("ApplicationDTO Details : ");
             log.debug("App Name : " + application.getName() + " App Type : " + application.getType());
         }
         Connection conn;
@@ -443,7 +442,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationEntity getApplication(String appName, String appType, int tenantId) throws
+    public ApplicationDTO getApplication(String appName, String appType, int tenantId) throws
                                                                                     ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the type(" + appType + " and Name " + appName +
@@ -488,7 +487,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationEntity getApplicationById(String id, int tenantId) throws
+    public ApplicationDTO getApplicationById(String id, int tenantId) throws
             ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the id:" + id);
@@ -530,7 +529,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationEntity getApplicationByUUID(String releaseUuid, int tenantId) throws
+    public ApplicationDTO getApplicationByUUID(String releaseUuid, int tenantId) throws
                                                                            ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the release UUID: " + releaseUuid + " from the database");
@@ -577,7 +576,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationEntity getApplicationById(int applicationId, int tenantId) throws
+    public ApplicationDTO getApplicationById(int applicationId, int tenantId) throws
             ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the id (" + applicationId + ") from the database");
@@ -656,11 +655,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationEntity editApplication(ApplicationEntity application, int tenantId) throws ApplicationManagementDAOException {
+    public ApplicationDTO editApplication(ApplicationDTO application, int tenantId) throws ApplicationManagementDAOException {
         int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
-        ApplicationEntity existingApplication = this.getApplicationById(application.getId(), tenantId);
+        ApplicationDTO existingApplication = this.getApplicationById(application.getId(), tenantId);
 
         if (existingApplication == null) {
             throw new ApplicationManagementDAOException("There doesn't have an application for updating");
@@ -770,7 +769,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public List<TagEntity> getAllTags(int tenantId) throws ApplicationManagementDAOException {
+    public List<TagDTO> getAllTags(int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get all tags");
         }
@@ -778,7 +777,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            List<TagEntity> tagEntities = new ArrayList<>();
+            List<TagDTO> tagEntities = new ArrayList<>();
             String sql = "SELECT "
                     + "AP_APP_TAG.ID AS ID, "
                     + "AP_APP_TAG.TAG AS TAG "
@@ -790,10 +789,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             rs = stmt.executeQuery();
 
             while(rs.next()){
-                TagEntity tagEntity = new TagEntity();
-                tagEntity.setId(rs.getInt("ID"));
-                tagEntity.setTagName(rs.getString("TAG"));
-                tagEntities.add(tagEntity);
+                TagDTO tagDTO = new TagDTO();
+                tagDTO.setId(rs.getInt("ID"));
+                tagDTO.setTagName(rs.getString("TAG"));
+                tagEntities.add(tagDTO);
             }
             return tagEntities;
         } catch (DBConnectionException e) {
@@ -807,7 +806,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public List<CategoryEntity> getAllCategories(int tenantId) throws ApplicationManagementDAOException {
+    public List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get all tags");
         }
@@ -815,7 +814,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            List<CategoryEntity> categories = new ArrayList<>();
+            List<CategoryDTO> categories = new ArrayList<>();
             String sql = "SELECT "
                     + "AP_APP_CATEGORY.ID AS ID, "
                     + "AP_APP_CATEGORY.CATEGORY AS CATEGORY "
@@ -827,7 +826,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             rs = stmt.executeQuery();
 
             while(rs.next()){
-                CategoryEntity category = new CategoryEntity();
+                CategoryDTO category = new CategoryDTO();
                 category.setId(rs.getInt("ID"));
                 category.setCategoryName(rs.getString("CATEGORY"));
                 categories.add(category);
@@ -1003,7 +1002,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationEntity getApplicationByRelease(String appReleaseUUID, int tenantId)
+    public ApplicationDTO getApplicationByRelease(String appReleaseUUID, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the UUID (" + appReleaseUUID + ") from the database");
@@ -1034,10 +1033,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 log.debug("Successfully retrieved details of the application with the UUID " + appReleaseUUID);
             }
 
-            ApplicationEntity application = null;
+            ApplicationDTO application = null;
             while (rs.next()) {
-                ApplicationReleaseEntity appRelease = Util.loadApplicationRelease(rs);
-                application = new ApplicationEntity();
+                ApplicationReleaseDTO appRelease = Util.loadApplicationRelease(rs);
+                application = new ApplicationDTO();
 
                 application.setId(rs.getInt("APP_ID"));
                 application.setName(rs.getString("APP_NAME"));
@@ -1053,7 +1052,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
                 application.setUnrestrictedRoles(unrestrictedRoleList);
 
-                List<ApplicationReleaseEntity> applicationReleaseList = new ArrayList<>();
+                List<ApplicationReleaseDTO> applicationReleaseList = new ArrayList<>();
                 applicationReleaseList.add(appRelease);
 
                 application.setApplicationReleases(applicationReleaseList);

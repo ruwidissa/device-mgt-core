@@ -18,24 +18,24 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 
 import java.util.List;
 
 /**
- * Represents a list of {@link ApplicationEntity}.
+ * Represents a list of {@link ApplicationDTO}.
  */
 public class ApplicationList {
 
-    private List<ApplicationEntity> applications;
+    private List<ApplicationDTO> applications;
 
     private Pagination pagination;
 
-    public List<ApplicationEntity> getApplications() {
+    public List<ApplicationDTO> getApplications() {
         return applications;
     }
 
-    public void setApplications(List<ApplicationEntity> applications) {
+    public void setApplications(List<ApplicationDTO> applications) {
         this.applications = applications;
     }
 

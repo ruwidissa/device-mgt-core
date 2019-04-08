@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.core.exception;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 
 /**
- * Exception thrown during the ApplicationEntity Management DAO operations.
+ * Exception thrown during the ApplicationDTO Management DAO operations.
  */
 public class ApplicationManagementDAOException extends ApplicationManagementException {
 

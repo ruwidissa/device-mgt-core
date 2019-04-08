@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.common.entity;
+package org.wso2.carbon.device.application.mgt.common.dto;
 
 import java.sql.Timestamp;
 import io.swagger.annotations.ApiModel;
@@ -24,8 +24,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(value = "LifecycleStateEntity", description = "LifecycleStateEntity represents the Lifecycle state for an application release")
-public class LifecycleStateEntity {
+@ApiModel(value = "LifecycleStateDTO", description = "LifecycleStateDTO represents the Lifecycle state for an application release")
+public class LifecycleStateDTO {
 
     @ApiModelProperty(name = "id",
             value = "ID of the application release lifecycle",

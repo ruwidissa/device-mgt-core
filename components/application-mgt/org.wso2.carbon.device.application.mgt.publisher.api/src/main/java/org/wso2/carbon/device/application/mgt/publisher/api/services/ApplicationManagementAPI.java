@@ -34,10 +34,8 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
-import org.wso2.carbon.device.application.mgt.common.response.Application;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
 import java.util.List;
@@ -60,7 +58,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationEntity Management Service",
+                title = "ApplicationDTO Management Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationManagementService"),
@@ -69,20 +67,20 @@ import javax.ws.rs.core.Response;
                 }
         ),
         tags = {
-                @Tag(name = "application_management, device_management", description = "ApplicationEntity Management related "
+                @Tag(name = "application_management, device_management", description = "ApplicationDTO Management related "
                         + "APIs")
         }
 )
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "Get ApplicationEntity Details",
+                        name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:publisher:view",
                         permissions = {"/device-mgt/application/view"}
                 ),
                 @Scope(
-                        name = "Update an ApplicationEntity",
+                        name = "Update an ApplicationDTO",
                         description = "Update an application",
                         key = "perm:app:publisher:update",
                         permissions = {"/device-mgt/application/update"}
@@ -90,7 +88,7 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/publisher/applications")
-@Api(value = "ApplicationEntity Management", description = "This API carries all application management related operations " +
+@Api(value = "ApplicationDTO Management", description = "This API carries all application management related operations " +
         "such as get all the applications, add application, etc.")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementAPI {
@@ -106,7 +104,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get all applications",
             notes = "This will get all applications",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
@@ -143,7 +141,7 @@ public interface ApplicationManagementAPI {
             @QueryParam("type") String appType,
             @ApiParam(
                     name = "category",
-                    value = "CategoryEntity of the application")
+                    value = "CategoryDTO of the application")
             @QueryParam("category") String appCategory,
             @ApiParam(
                     name = "exact-match",
@@ -180,7 +178,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get the application of requesting application id and  state",
             notes = "This will get the application identified by the application id and state, if exists",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
@@ -192,10 +190,10 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully retrieved relevant application.",
-                            response = ApplicationEntity.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 404,
-                            message = "ApplicationEntity not found"),
+                            message = "ApplicationDTO not found"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application.",
@@ -224,7 +222,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "PUT",
             value = "Edit an application",
             notes = "This will edit the new application",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -236,11 +234,11 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully edited the application.",
-                            response = ApplicationEntity.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "ApplicationEntity updating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while editing the application.",
@@ -256,7 +254,7 @@ public interface ApplicationManagementAPI {
                     name = "application",
                     value = "The application that need to be edited.",
                     required = true)
-            @Valid ApplicationEntity application
+            @Valid ApplicationDTO application
     );
 
     @POST
@@ -268,7 +266,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "POST",
             value = "Create an application",
             notes = "This will create a new application",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -280,11 +278,11 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully created an application.",
-                            response = ApplicationEntity.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "ApplicationEntity creating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while creating the application.",
@@ -338,7 +336,7 @@ public interface ApplicationManagementAPI {
 //            httpMethod = "POST",
 //            value = "Create an application",
 //            notes = "This will create a new application",
-//            tags = "ApplicationEntity Management",
+//            tags = "ApplicationDTO Management",
 //            extensions = {
 //                    @Extension(properties = {
 //                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -354,7 +352,7 @@ public interface ApplicationManagementAPI {
 //                    @ApiResponse(
 //                            code = 400,
 //                            message = "Bad Request. \n " +
-//                                    "ApplicationEntity creating payload contains unacceptable or vulnerable data"),
+//                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
 //                    @ApiResponse(
 //                            code = 500,
 //                            message = "Internal Server Error. \n Error occurred while creating the application.",
@@ -368,7 +366,7 @@ public interface ApplicationManagementAPI {
 //                    name = "applicationRelease",
 //                    value = "The application release that need to be created.",
 //                    required = true)
-//            @Multipart("applicationRelease") ApplicationReleaseEntity applicationRelease,
+//            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
 //            @ApiParam(
 //                    name = "binaryFile",
 //                    value = "Binary file of uploading application",
@@ -410,7 +408,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "DELETE",
             value = "Delete the application with the given UUID",
             notes = "This will delete the application with the given UUID",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -431,7 +429,7 @@ public interface ApplicationManagementAPI {
     Response deleteApplication(
             @ApiParam(
                     name = "UUID",
-                    value = "Unique identifier of the ApplicationEntity",
+                    value = "Unique identifier of the ApplicationDTO",
                     required = true)
             @PathParam("appid") int applicationId
     );
@@ -446,7 +444,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "POST",
             value = "Upload artifacts",
             notes = "This will create a new application",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -522,7 +520,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "POST",
             value = "Upload artifacts",
             notes = "This will create a new application",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -537,7 +535,7 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "ApplicationEntity artifact updating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO artifact updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 404,
                             message = "NOT FOUND. \n Couldn't found application/application release to update applocation release artifact."),
@@ -568,7 +566,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "PUT",
             value = "Update an application release",
             notes = "This will update a new application release",
-            tags = "ApplicationEntity Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -580,11 +578,11 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully created an application release.",
-                            response = ApplicationReleaseEntity.class),
+                            response = ApplicationReleaseDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "ApplicationEntity release updating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO release updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while releasing the application.",
@@ -593,11 +591,11 @@ public interface ApplicationManagementAPI {
     Response updateApplicationRelease(
             @ApiParam(name = "deviceType", value = "Supported device type of the application", required = true)
             @PathParam("deviceType") String deviceType,
-            @ApiParam(name = "appId", value = "Identifier of the ApplicationEntity", required = true)
+            @ApiParam(name = "appId", value = "Identifier of the ApplicationDTO", required = true)
             @PathParam("appId") int applicationId,
-            @ApiParam(name = "UUID", value = "Unique identifier of the ApplicationEntity Release", required = true)
+            @ApiParam(name = "UUID", value = "Unique identifier of the ApplicationDTO Release", required = true)
             @PathParam("uuid") String applicationUUID,
-            @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationReleaseEntity applicationRelease,
+            @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationReleaseDTO applicationRelease,
             @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
             @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
@@ -660,7 +658,7 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully add a lifecycle state.",
-                            response = ApplicationEntity.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
@@ -677,12 +675,12 @@ public interface ApplicationManagementAPI {
     Response addLifecycleState(
             @ApiParam(
                     name = "appId",
-                    value = "Identifier of the ApplicationEntity",
+                    value = "Identifier of the ApplicationDTO",
                     required = true)
             @PathParam("appId") int applicationId,
             @ApiParam(
                     name = "uuid",
-                    value = "UUID of the ApplicationEntity Release",
+                    value = "UUID of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUuid,
             @ApiParam(

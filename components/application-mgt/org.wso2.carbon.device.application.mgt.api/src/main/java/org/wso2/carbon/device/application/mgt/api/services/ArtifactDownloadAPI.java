@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationEntity Management Common Service",
+                title = "ApplicationDTO Management Common Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationManagementArtifactDownloadService"),
@@ -52,7 +52,7 @@ import javax.ws.rs.core.Response;
         )
 )
 @Path("/artifact")
-@Api(value = "ApplicationEntity Management Artifact Downloading Service", description = "This API carries all application management artifact downloading services")
+@Api(value = "ApplicationDTO Management Artifact Downloading Service", description = "This API carries all application management artifact downloading services")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ArtifactDownloadAPI {
 

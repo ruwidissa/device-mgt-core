@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.common.wrapper;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(value = "ApplicationReleaseEntity", description = "This class holds the details when releasing an ApplicationEntity to application store")
+@ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
 public class ApplicationReleaseWrapper {
 
     @ApiModelProperty(name = "description",
@@ -54,7 +54,7 @@ public class ApplicationReleaseWrapper {
     private String url;
 
     @ApiModelProperty(name = "supportedOsVersions",
-            value = "ApplicationEntity release supported OS versions")
+            value = "ApplicationDTO release supported OS versions")
     private String supportedOsVersions;
 
     public String getReleaseType() {

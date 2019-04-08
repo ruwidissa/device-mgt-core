@@ -23,9 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
-import org.wso2.carbon.device.application.mgt.common.entity.LifecycleStateEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
@@ -62,7 +62,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Implementation of ApplicationEntity Management related APIs.
+ * Implementation of Application Management related APIs.
  */
 @Produces({"application/json"})
 @Path("/applications")
@@ -114,10 +114,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @DefaultValue("PUBLISHED") @QueryParam("state") String state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            ApplicationEntity application = applicationManager.getApplicationById(appId, state);
+            ApplicationDTO application = applicationManager.getApplicationById(appId, state);
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
-            String msg = "ApplicationEntity with application id: " + appId + " not found";
+            String msg = "ApplicationDTO with application id: " + appId + " not found";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -151,17 +151,21 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
 
         try {
-            applicationManager
-                    .validateAppCreatingRequest(applicationWrapper, binaryFile, iconFile, bannerFile, attachmentList);
+            applicationManager.validateAppCreatingRequest(applicationWrapper);
+            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0),
+                    applicationWrapper.getType());
+            applicationManager.isValidAttachmentSet(binaryFile, iconFile, bannerFile, attachmentList,
+                    applicationWrapper.getType());
+
             // Created new application entry
-            Application createdApplication = applicationManager.createApplication(applicationWrapper,
+            Application application = applicationManager.createApplication(applicationWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
-            if (createdApplication != null) {
-                return Response.status(Response.Status.CREATED).entity(createdApplication).build();
+            if (application != null) {
+                return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
-                String msg = "ApplicationEntity creation is failed";
+                String msg = "ApplicationDTO creation is failed";
                 log.error(msg);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
@@ -181,7 +185,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 //            @PathParam("deviceType") String deviceType,
 //            @PathParam("appType") String appType,
 //            @PathParam("appId") int appId,
-//            @Multipart("applicationRelease") ApplicationReleaseEntity applicationRelease,
+//            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
 //            @Multipart("binaryFile") Attachment binaryFile,
 //            @Multipart("icon") Attachment iconFile,
 //            @Multipart("banner") Attachment bannerFile,
@@ -233,11 +237,11 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 //            applicationRelease.setUuid(UUID.randomUUID().toString());
 //
 //            // Created new application release entry
-//            ApplicationReleaseEntity release = applicationManager.createRelease(appId, applicationRelease);
+//            ApplicationReleaseDTO release = applicationManager.createRelease(appId, applicationRelease);
 //            if (release != null) {
 //                return Response.status(Response.Status.CREATED).entity(release).build();
 //            } else {
-//                log.error("ApplicationEntity Creation Failed");
+//                log.error("ApplicationDTO Creation Failed");
 //                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 //            }
 //        } catch (ApplicationManagementException e) {
@@ -337,7 +341,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                                 + applicationReleaseUuid).build();
             }
             if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("If ApplicationEntity type is " + appType
+                return Response.status(Response.Status.BAD_REQUEST).entity("If ApplicationDTO type is " + appType
                         + ", therefore you don't have application release artifact to update for application release UUID: "
                         + applicationReleaseUuid).build();
             }
@@ -370,7 +374,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Path("/{appId}")
     public Response updateApplication(
             @PathParam("appId") int applicationId,
-            @Valid ApplicationEntity application) {
+            @Valid ApplicationDTO application) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             application = applicationManager.updateApplication(applicationId, application);
@@ -395,7 +399,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @PathParam("deviceType") String deviceType,
             @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUUID,
-            @Multipart("applicationRelease") ApplicationReleaseEntity applicationRelease,
+            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
@@ -434,12 +438,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                     .updateRelease(applicationId, applicationUUID, deviceType, applicationRelease, binaryFileStram,
                             iconFileStream, bannerFileStream, attachments);
             if (!status){
-                log.error("ApplicationEntity release updating is failed. Please contact the administrator. ApplicationEntity id: "
-                        + applicationId + ", ApplicationEntity release UUID: " + applicationUUID + ", Supported device type: "
+                log.error("ApplicationDTO release updating is failed. Please contact the administrator. ApplicationDTO id: "
+                        + applicationId + ", ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: "
                         + deviceType);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(applicationRelease).build();
             }
-            return Response.status(Response.Status.OK).entity("ApplicationEntity release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity("ApplicationDTO release is successfully updated.").build();
         } catch(BadRequestException e){
             String msg = "Invalid request to update application release for application release UUID " + applicationUUID;
             log.error(msg, e);
@@ -536,7 +540,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     public Response getLifecycleState(
             @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUuid) {
-        LifecycleStateEntity lifecycleState;
+        LifecycleStateDTO lifecycleState;
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
@@ -567,7 +571,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            LifecycleStateEntity state = new LifecycleStateEntity();
+            LifecycleStateDTO state = new LifecycleStateDTO();
             state.setCurrentState(action);
             applicationManager.changeLifecycleState(applicationId, applicationUuid, state);
         } catch (NotFoundException e) {

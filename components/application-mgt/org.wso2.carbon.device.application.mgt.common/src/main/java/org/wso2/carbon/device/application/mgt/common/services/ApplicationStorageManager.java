@@ -19,8 +19,7 @@
 
 package org.wso2.carbon.device.application.mgt.common.services;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
@@ -29,22 +28,22 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * This manages all the storage related requirements of ApplicationEntity.
+ * This manages all the storage related requirements of ApplicationDTO.
  */
 public interface ApplicationStorageManager {
     /**
-     * To upload image artifacts related with an ApplicationEntity.
+     * To upload image artifacts related with an ApplicationDTO.
      *
-     * @param applicationRelease ApplicationReleaseEntity Object
+     * @param applicationRelease ApplicationReleaseDTO Object
      * @param iconFile        Icon File input stream
      * @param bannerFile      Banner File input stream
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationReleaseEntity uploadImageArtifacts(ApplicationReleaseEntity applicationRelease,
+    ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease,
             InputStream iconFile, InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
 
     /**
-     * To upload image artifacts related with an ApplicationEntity.
+     * To upload image artifacts related with an ApplicationDTO.
      *
      * @param applicationRelease Release of the application
      * @param iconFile        Icon File input stream
@@ -52,35 +51,35 @@ public interface ApplicationStorageManager {
      * @param screenshots   Input Streams of screenshots
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationReleaseEntity updateImageArtifacts(ApplicationReleaseEntity applicationRelease, InputStream iconFile,
+    ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFile,
             InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
 
     /**
-     * To upload release artifacts for an ApplicationEntity.
+     * To upload release artifacts for an ApplicationDTO.
      *
-     * @param applicationRelease ApplicationEntity Release Object.
-     * @param appType ApplicationEntity Type.
+     * @param applicationRelease ApplicationDTO Release Object.
+     * @param appType ApplicationDTO Type.
      * @param deviceType Compatible device tipe of the application.
      * @param binaryFile      Binary File for the release.
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationReleaseEntity uploadReleaseArtifact(ApplicationReleaseEntity applicationRelease, String appType, String deviceType,
-            InputStream binaryFile) throws ResourceManagementException, RequestValidatingException;
+    ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationRelease, String appType, String deviceType,
+            InputStream binaryFile) throws ResourceManagementException;
 
     /**
-     * To upload release artifacts for an ApplicationEntity.
+     * To upload release artifacts for an ApplicationDTO.
      *
-     * @param applicationRelease applicationRelease ApplicationEntity release of a particular application.
+     * @param applicationRelease applicationRelease ApplicationDTO release of a particular application.
      * @param appType   Type of the application.
      * @param deviceType Compatible device tipe of the application.
      * @param binaryFile      Binary File for the release.
      * @throws ApplicationStorageManagementException Resource Management Exception.
      */
-    ApplicationReleaseEntity updateReleaseArtifacts(ApplicationReleaseEntity applicationRelease, String appType, String deviceType,
+    ApplicationReleaseDTO updateReleaseArtifacts(ApplicationReleaseDTO applicationRelease, String appType, String deviceType,
             InputStream binaryFile) throws ApplicationStorageManagementException, RequestValidatingException;
 
     /**
-     * To delete the artifacts related with particular ApplicationEntity Release.
+     * To delete the artifacts related with particular ApplicationDTO Release.
      *
      * @param directoryPath Hash value of the application artifact.
      * @throws ApplicationStorageManagementException Not Found Exception.
@@ -88,10 +87,10 @@ public interface ApplicationStorageManager {
     void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException;
 
     /**
-     * To delete all release artifacts related with particular ApplicationEntity Release.
+     * To delete all release artifacts related with particular ApplicationDTO Release.
      *
-     * @param directoryPaths Hash values of the ApplicationEntity.
-     * @throws ApplicationStorageManagementException ApplicationEntity Storage Management Exception
+     * @param directoryPaths Hash values of the ApplicationDTO.
+     * @throws ApplicationStorageManagementException ApplicationDTO Storage Management Exception
      */
     void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths) throws ApplicationStorageManagementException;
 

@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.application.release
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationReleaseArtifactPaths;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
@@ -38,21 +38,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * GenericApplicationReleaseDAOImpl holds the implementation of ApplicationReleaseEntity related DAO operations.
+ * GenericApplicationReleaseDAOImpl holds the implementation of ApplicationReleaseDTO related DAO operations.
  */
 public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements ApplicationReleaseDAO {
 
     private static final Log log = LogFactory.getLog(GenericApplicationReleaseDAOImpl.class);
 
     /**
-     * To insert the ApplicationEntity Release Details.
+     * To insert the ApplicationDTO Release Details.
      *
      * @param appId              Id of the application
-     * @param applicationRelease ApplicationEntity Release the properties of which that need to be inserted.
+     * @param applicationRelease ApplicationDTO Release the properties of which that need to be inserted.
      * @param tenantId           Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    @Override public ApplicationReleaseEntity createRelease(ApplicationReleaseEntity applicationRelease, int appId, int tenantId)
+    @Override public ApplicationReleaseDTO createRelease(ApplicationReleaseDTO applicationRelease, int appId, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
@@ -128,9 +128,9 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * @param versionName     version name of the application.
      * @param releaseType     type of the application release.
      * @param tenantId        Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    @Override public ApplicationReleaseEntity getRelease(String applicationName, String applicationType, String versionName,
+    @Override public ApplicationReleaseDTO getRelease(String applicationName, String applicationType, String versionName,
             String releaseType, int tenantId) throws ApplicationManagementDAOException {
         //todo no usage
         Connection connection;
@@ -178,9 +178,9 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * @param applicationId ID of the application.
      * @param releaseUuid   UUID of the application release.
      * @param tenantId      Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    @Override public ApplicationReleaseEntity getReleaseByIds(int applicationId, String releaseUuid, int tenantId)
+    @Override public ApplicationReleaseDTO getReleaseByIds(int applicationId, String releaseUuid, int tenantId)
             throws ApplicationManagementDAOException {
 
         Connection connection;
@@ -226,14 +226,14 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      *
      * @param applicationId Id of the application.
      * @param tenantId      Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    @Override public List<ApplicationReleaseEntity> getReleases(int applicationId, int tenantId)
+    @Override public List<ApplicationReleaseDTO> getReleases(int applicationId, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        List<ApplicationReleaseEntity> applicationReleases = new ArrayList<>();
+        List<ApplicationReleaseDTO> applicationReleases = new ArrayList<>();
         String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID, AR.RELEASE_TYPE "
                 + "AS RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE, AR.STORED_LOCATION, AR.ICON_LOCATION, "
                 + "AR.BANNER_LOCATION, AR.SC_1_LOCATION AS SCREEN_SHOT_1, AR.SC_2_LOCATION AS SCREEN_SHOT_2, "
@@ -249,7 +249,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                ApplicationReleaseEntity applicationRelease = Util.loadApplicationRelease(resultSet);
+                ApplicationReleaseDTO applicationRelease = Util.loadApplicationRelease(resultSet);
                 applicationReleases.add(applicationRelease);
             }
             return applicationReleases;
@@ -267,12 +267,12 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
 
     //todo this has to be removed
     @Override
-    public List<ApplicationReleaseEntity> getReleaseByState(int appId, int tenantId, String state) throws
+    public List<ApplicationReleaseDTO> getReleaseByState(int appId, int tenantId, String state) throws
             ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        List<ApplicationReleaseEntity> applicationReleases = new ArrayList<>();
+        List<ApplicationReleaseDTO> applicationReleases = new ArrayList<>();
         String sql = "SELECT AR.ID AS RELEASE_ID, AR.VERSION AS RELEASE_VERSION, AR.UUID AS UUID, AR.RELEASE_TYPE AS "
                 + "RELEASE_TYPE, AR.PACKAGE_NAME AS PACKAGE_NAME, AR.APP_PRICE AS APP_PRICE, AR.STORED_LOCATION AS "
                 + "STORED_LOCATION, AR.BANNER_LOCATION AS BANNER_LOCATION, ICON_LOCATION, AR.SC_1_LOCATION AS "
@@ -292,7 +292,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                ApplicationReleaseEntity appRelease = Util.loadApplicationRelease(resultSet);
+                ApplicationReleaseDTO appRelease = Util.loadApplicationRelease(resultSet);
                 applicationReleases.add(appRelease);
             }
             return applicationReleases;
@@ -313,7 +313,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      *
      * @param uuid   UUID of the application Release.
      * @param rating given stars for the application release.
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
     @Override public void updateRatingValue(String uuid, double rating, int ratedUsers)
             throws ApplicationManagementDAOException {
@@ -342,7 +342,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * To retrieve rating of an application release.
      *
      * @param uuid UUID of the application Release.
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
     @Override public Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException {
         Connection connection;
@@ -377,11 +377,11 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     /**
      * To insert the application release properties.
      *
-     * @param applicationRelease ApplicationEntity Release the properties of which that need to be inserted.
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @param applicationRelease ApplicationDTO Release the properties of which that need to be inserted.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
     @Override
-    public ApplicationReleaseEntity updateRelease(int applicationId, ApplicationReleaseEntity applicationRelease, int tenantId)
+    public ApplicationReleaseDTO updateRelease(int applicationId, ApplicationReleaseDTO applicationRelease, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
@@ -430,7 +430,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      *
      * @param id      Id of the application Release.
      * @param version version name of the application release.
-     * @throws ApplicationManagementDAOException ApplicationEntity Management DAO Exception.
+     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
     @Override public void deleteRelease(int id, String version) throws ApplicationManagementDAOException {
         Connection connection;
@@ -477,7 +477,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved basic details of the application release with the application ID "
-                        + appId + " ApplicationEntity release hash value: " + hashVal);
+                        + appId + " ApplicationDTO release hash value: " + hashVal);
             }
             return rs.next();
         } catch (SQLException e) {
@@ -551,7 +551,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
 
             if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved basic details of the application release with the application ID "
-                        + appId + " ApplicationEntity release uuid: " + uuid);
+                        + appId + " ApplicationDTO release uuid: " + uuid);
             }
             return rs.next();
         } catch (SQLException e) {
@@ -653,6 +653,33 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
             Util.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public boolean isAppExisitForPackageName (String packageName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Verifying application release existence for package name:" + packageName);
+        }
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            String sql = "SELECT AR.ID AS RELEASE_ID "
+                    + "FROM AP_APP_RELEASE AS AR "
+                    + "WHERE AR.PACKAGE_NAME = ? AND AR.TENANT_ID = ? LIMIT 1";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, packageName);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while getting application release details for package name: " + packageName, e);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         }
     }
 

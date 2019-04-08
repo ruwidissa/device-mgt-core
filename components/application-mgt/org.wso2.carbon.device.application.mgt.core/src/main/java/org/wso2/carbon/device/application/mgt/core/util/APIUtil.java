@@ -29,7 +29,7 @@ import javax.ws.rs.core.Response;
 
 
 /**
- * Holds util methods required for ApplicationEntity-Mgt API component.
+ * Holds util methods required for ApplicationDTO-Mgt API component.
  */
 public class APIUtil {
 
@@ -49,7 +49,7 @@ public class APIUtil {
                     applicationManager =
                             (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
                     if (applicationManager == null) {
-                        String msg = "ApplicationEntity Manager service has not initialized.";
+                        String msg = "ApplicationDTO Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -60,7 +60,7 @@ public class APIUtil {
     }
 
     /**
-     * To get the ApplicationEntity Storage Manager from the osgi context.
+     * To get the ApplicationDTO Storage Manager from the osgi context.
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
@@ -71,7 +71,7 @@ public class APIUtil {
                     applicationStorageManager = (ApplicationStorageManager) ctx
                             .getOSGiService(ApplicationStorageManager.class, null);
                     if (applicationStorageManager == null) {
-                        String msg = "ApplicationEntity Storage Manager service has not initialized.";
+                        String msg = "ApplicationDTO Storage Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }

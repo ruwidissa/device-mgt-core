@@ -22,10 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -55,10 +55,10 @@ public class Util {
 //     * @throws SQLException  SQL Exception
 //     * @throws JSONException JSONException.
 //     */
-//    public static List<ApplicationEntity> loadApplications(ResultSet rs) throws SQLException, JSONException {
+//    public static List<ApplicationDTO> loadApplications(ResultSet rs) throws SQLException, JSONException {
 //
-//        List<ApplicationEntity> applications = new ArrayList<>();
-//        ApplicationEntity application = null;
+//        List<ApplicationDTO> applications = new ArrayList<>();
+//        ApplicationDTO application = null;
 //        int applicationId = -1;
 //        boolean hasNext = rs.next();
 //
@@ -68,7 +68,7 @@ public class Util {
 //                    applications.add(application);
 //                }
 //                applicationId = rs.getInt("APP_ID");
-//                application = new ApplicationEntity();
+//                application = new ApplicationDTO();
 //                application.setTags(new ArrayList<>());
 //                application.setUnrestrictedRoles(new ArrayList<>());
 //                application.setId(applicationId);
@@ -115,10 +115,10 @@ public class Util {
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static List<ApplicationEntity> loadApplications(ResultSet rs) throws SQLException, JSONException {
+    public static List<ApplicationDTO> loadApplications(ResultSet rs) throws SQLException, JSONException {
 
-        List<ApplicationEntity> applications = new ArrayList<>();
-        ApplicationEntity application = null;
+        List<ApplicationDTO> applications = new ArrayList<>();
+        ApplicationDTO application = null;
         int applicationId = -1;
         boolean hasNext = rs.next();
 
@@ -127,7 +127,7 @@ public class Util {
                 if (application != null) {
                     applications.add(application);
                 }
-                application = new ApplicationEntity();
+                application = new ApplicationDTO();
                 application.setApplicationReleases(new ArrayList<>());
                 applicationId = rs.getInt("APP_ID");
                 application.setId(applicationId);
@@ -140,7 +140,7 @@ public class Util {
                 application.setAppRating(rs.getInt("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
             } else {
-                ApplicationReleaseEntity appRelease = new ApplicationReleaseEntity();
+                ApplicationReleaseDTO appRelease = new ApplicationReleaseDTO();
                 appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
                 appRelease.setUuid(rs.getString("RELEASE_UUID"));
                 appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
@@ -173,19 +173,19 @@ public class Util {
      * To create application object from the result set retrieved from the Database.
      *
      * @param rs ResultSet
-     * @return ApplicationEntity that is retrieved from the Database.
+     * @return ApplicationDTO that is retrieved from the Database.
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static ApplicationEntity loadApplication(ResultSet rs) throws SQLException, JSONException {
+    public static ApplicationDTO loadApplication(ResultSet rs) throws SQLException, JSONException {
 
-        ApplicationEntity application = null;
+        ApplicationDTO application = null;
         int applicatioId;
         int iteration = 0;
         if (rs != null) {
             while (rs.next()) {
                 if (iteration == 0) {
-                    application = new ApplicationEntity();
+                    application = new ApplicationDTO();
                     application.setTags(new ArrayList<>());
                     application.setUnrestrictedRoles(new ArrayList<>());
                     applicatioId = rs.getInt("APP_ID");
@@ -215,14 +215,14 @@ public class Util {
     }
 
     /**
-     * Populates {@link ApplicationReleaseEntity} object with the result obtained from the database.
+     * Populates {@link ApplicationReleaseDTO} object with the result obtained from the database.
      *
      * @param resultSet {@link ResultSet} from obtained from the database
-     * @return {@link ApplicationReleaseEntity} object populated with the data
-     * @throws SQLException If unable to populate {@link ApplicationReleaseEntity} object with the data
+     * @return {@link ApplicationReleaseDTO} object populated with the data
+     * @throws SQLException If unable to populate {@link ApplicationReleaseDTO} object with the data
      */
-    public static ApplicationReleaseEntity loadApplicationRelease(ResultSet resultSet) throws SQLException {
-        ApplicationReleaseEntity applicationRelease = new ApplicationReleaseEntity();
+    public static ApplicationReleaseDTO loadApplicationRelease(ResultSet resultSet) throws SQLException {
+        ApplicationReleaseDTO applicationRelease = new ApplicationReleaseDTO();
         applicationRelease.setId(resultSet.getInt("RELEASE_ID"));
         applicationRelease.setVersion(resultSet.getString("RELEASE_VERSION"));
         applicationRelease.setUuid(resultSet.getString("UUID"));
@@ -274,7 +274,7 @@ public class Util {
                         commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
             } else {
                 throw new ReviewManagementException(
-                        "ApplicationEntity Management configuration has not initialized. Please check the application-mgt.xml file.");
+                        "ApplicationDTO Management configuration has not initialized. Please check the application-mgt.xml file.");
             }
         }
         return paginationRequest;
@@ -292,7 +292,7 @@ public class Util {
                     applicationManager =
                             (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
                     if (applicationManager == null) {
-                        String msg = "ApplicationEntity Manager service has not initialized.";
+                        String msg = "ApplicationDTO Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -303,7 +303,7 @@ public class Util {
     }
 
     /**
-     * To get the ApplicationEntity Storage Manager from the osgi context.
+     * To get the ApplicationDTO Storage Manager from the osgi context.
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
@@ -314,7 +314,7 @@ public class Util {
                     applicationStorageManager = (ApplicationStorageManager) ctx
                             .getOSGiService(ApplicationStorageManager.class, null);
                     if (applicationStorageManager == null) {
-                        String msg = "ApplicationEntity Storage Manager service has not initialized.";
+                        String msg = "ApplicationDTO Storage Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }

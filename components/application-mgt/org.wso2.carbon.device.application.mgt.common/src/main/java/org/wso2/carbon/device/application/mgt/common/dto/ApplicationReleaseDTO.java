@@ -16,15 +16,15 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.common.entity;
+package org.wso2.carbon.device.application.mgt.common.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-@ApiModel(value = "ApplicationReleaseEntity", description = "This class holds the details when releasing an ApplicationEntity to application store")
+@ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
 @JsonIgnoreProperties({"appHashValue"})
-public class ApplicationReleaseEntity {
+public class ApplicationReleaseDTO {
 
     @ApiModelProperty(name = "id",
             value = "ID of the application release")
@@ -43,7 +43,7 @@ public class ApplicationReleaseEntity {
     private String uuid;
 
     @ApiModelProperty(name = "installerName",
-            value = "ApplicationEntity storing location")
+            value = "ApplicationDTO storing location")
     private String installerName;
 
     @ApiModelProperty(name = "bannerName",
@@ -104,7 +104,7 @@ public class ApplicationReleaseEntity {
     private String url;
 
     @ApiModelProperty(name = "supportedOsVersions",
-            value = "ApplicationEntity release supported OS versions")
+            value = "ApplicationDTO release supported OS versions")
     private String supportedOsVersions;
 
     @ApiModelProperty(name = "currentState",
@@ -112,10 +112,10 @@ public class ApplicationReleaseEntity {
     private String currentState;
 
     @ApiModelProperty(name = "packageName",
-            value = "ApplicationEntity bundle identifier")
+            value = "ApplicationDTO bundle identifier")
     private String packageName;
 
-    public ApplicationReleaseEntity() {
+    public ApplicationReleaseDTO() {
     }
 
     public int getRatedUsers() {

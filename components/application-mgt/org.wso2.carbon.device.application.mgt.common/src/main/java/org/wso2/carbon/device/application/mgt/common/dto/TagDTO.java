@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.application.mgt.common.entity;/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+package org.wso2.carbon.device.application.mgt.common.dto;/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,10 +15,11 @@ package org.wso2.carbon.device.application.mgt.common.entity;/* Copyright (c) 20
  * under the License.
  */
 
-public class CategoryEntity {
+public class TagDTO {
+
     int id;
 
-    String categoryName;
+    String tagName;
 
     public int getId() {
         return id;
@@ -28,11 +29,11 @@ public class CategoryEntity {
         this.id = id;
     }
 
-    public String getCategoryName() {
-        return categoryName;
+    public String getTagName() {
+        return tagName;
     }
 
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
     }
 }

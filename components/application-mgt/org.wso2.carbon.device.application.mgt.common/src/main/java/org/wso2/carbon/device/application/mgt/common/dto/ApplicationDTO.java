@@ -16,18 +16,16 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.common.entity;
+package org.wso2.carbon.device.application.mgt.common.dto;
 
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.application.mgt.common.User;
-import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import java.util.List;
 
-@ApiModel(value = "ApplicationEntity", description = "ApplicationEntity represents the an ApplicationEntity in ApplicationEntity Store")
-public class ApplicationEntity {
+@ApiModel(value = "ApplicationDTO", description = "ApplicationDTO represents an Application details.")
+public class ApplicationDTO {
 
     @ApiModelProperty(name = "id",
             value = "The ID given to the application when it is stored in the APPM database")
@@ -44,7 +42,7 @@ public class ApplicationEntity {
     private String description;
 
     @ApiModelProperty(name = "appCategory",
-            value = "CategoryEntity of the application",
+            value = "Category of the application",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
     private String appCategory;
@@ -92,7 +90,7 @@ public class ApplicationEntity {
     private int appRating;
 
     @ApiModelProperty(name = "status",
-            value = "ApplicationEntity status",
+            value = "Application status",
             required = true,
             example = "REMOVED, ACTIVE")
     private String status;
@@ -100,7 +98,7 @@ public class ApplicationEntity {
     @ApiModelProperty(name = "applicationReleases",
             value = "List of application releases",
             required = true)
-    private List<ApplicationReleaseEntity> applicationReleases;
+    private List<ApplicationReleaseDTO> applicationReleases;
 
     public int getId() {
         return id;
@@ -154,11 +152,11 @@ public class ApplicationEntity {
         this.paymentCurrency = paymentCurrency;
     }
 
-    public List<ApplicationReleaseEntity> getApplicationReleases() {
+    public List<ApplicationReleaseDTO> getApplicationReleases() {
         return applicationReleases;
     }
 
-    public void setApplicationReleases(List<ApplicationReleaseEntity> applicationReleases) {
+    public void setApplicationReleases(List<ApplicationReleaseDTO> applicationReleases) {
         this.applicationReleases = applicationReleases;
     }
 

@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.common.response;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(value = "ApplicationReleaseEntity", description = "This class holds the details when releasing an ApplicationEntity to application store")
+@ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
 public class ApplicationRelease {
 
     @ApiModelProperty(name = "description",
@@ -37,7 +37,7 @@ public class ApplicationRelease {
     private String uuid;
 
     @ApiModelProperty(name = "installerPath",
-            value = "ApplicationEntity storing location")
+            value = "ApplicationDTO storing location")
     private String installerPath;
 
     @ApiModelProperty(name = "bannerPath",
@@ -86,7 +86,7 @@ public class ApplicationRelease {
     private String url;
 
     @ApiModelProperty(name = "supportedOsVersions",
-            value = "ApplicationEntity release supported OS versions")
+            value = "ApplicationDTO release supported OS versions")
     private String supportedOsVersions;
 
     public String getReleaseType() {

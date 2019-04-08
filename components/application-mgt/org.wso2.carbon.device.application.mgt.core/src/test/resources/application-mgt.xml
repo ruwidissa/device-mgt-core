@@ -19,7 +19,7 @@
 
 <ApplicationManagementConfiguration>
 
-    <!-- ApplicationEntity Mgt DB schema -->
+    <!-- ApplicationDTO Mgt DB schema -->
     <DatasourceName>jdbc/APPM_DS</DatasourceName>
 
     <Extensions>

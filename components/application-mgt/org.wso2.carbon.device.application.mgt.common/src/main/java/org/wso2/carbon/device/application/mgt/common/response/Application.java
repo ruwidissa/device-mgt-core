@@ -36,7 +36,7 @@ public class Application {
     private String description;
 
     @ApiModelProperty(name = "appCategory",
-            value = "CategoryEntity of the application",
+            value = "CategoryDTO of the application",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
     private String appCategory;

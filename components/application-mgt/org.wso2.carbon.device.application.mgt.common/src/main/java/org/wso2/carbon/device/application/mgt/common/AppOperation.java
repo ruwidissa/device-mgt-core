@@ -18,13 +18,13 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 
 public class AppOperation {
 
     private static final long serialVersionUID = 7603215716452548282L;
 
-    private ApplicationEntity application;
+    private ApplicationDTO application;
     private int tenantId;
     private String activityId;
     private String scheduledDateTime;
@@ -73,11 +73,11 @@ public class AppOperation {
         this.type = type;
     }
 
-    public ApplicationEntity getApplication() {
+    public ApplicationDTO getApplication() {
         return application;
     }
 
-    public void setApplication(ApplicationEntity application) {
+    public void setApplication(ApplicationDTO application) {
         this.application = application;
     }
 

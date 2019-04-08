@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.application.mgt.core.impl;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,15 +28,15 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.entity.ApplicationReleaseEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationSubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
-import org.wso2.carbon.device.application.mgt.common.entity.CategoryEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
-import org.wso2.carbon.device.application.mgt.common.entity.LifecycleStateEntity;
-import org.wso2.carbon.device.application.mgt.common.entity.TagEntity;
+import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
@@ -115,8 +116,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     /***
      * The responsbility of this method is the creating an application.
-     * @param applicationWrapper ApplicationEntity that need to be created.
-     * @return {@link ApplicationEntity}
+     * @param applicationWrapper ApplicationDTO that need to be created.
+     * @return {@link ApplicationDTO}
      * @throws RequestValidatingException if application creating request is invalid, returns {@link RequestValidatingException}
      * @throws ApplicationManagementException Catch all other throwing exceptions and returns {@link ApplicationManagementException}
      */
@@ -126,37 +127,42 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity applicationEntity;
+        ApplicationDTO applicationDTO;
         Application application;
         if (log.isDebugEnabled()) {
             log.debug("Application create request is received for the tenant : " + tenantId + " From" + " the user : "
                     + userName);
         }
         try {
-            applicationEntity = addApplicationReleaseArtifacts(appWrapperToAppEntity(applicationWrapper), applicationArtifact);
+            applicationDTO = addApplicationReleaseArtifacts(appWrapperToAppDTO(applicationWrapper),
+                    applicationArtifact);
         } catch (UnexpectedServerErrorException e) {
-            throw new ApplicationManagementException(e.getMessage(), e);
+            String msg = "Error occurred when getting Device Type data.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         }  catch (ResourceManagementException e) {
-            String msg = "Error Occured when uploading artifacts of the application.: " + applicationWrapper.getName();
+            String msg = "Error Occured when uploading artifacts of the application: " + applicationWrapper.getName();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         }
 
         try {
-            List<ApplicationReleaseEntity> applicationReleaseEntities = new ArrayList<>();
-            ApplicationReleaseEntity applicationReleaseEntity;
+            List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
+            ApplicationReleaseDTO applicationReleaseDTO;
             Filter filter = new Filter();
 
             filter.setFullMatch(true);
-            filter.setAppName(applicationEntity.getName().trim());
-            filter.setDeviceTypeId(applicationEntity.getDeviceTypeId());
+            filter.setAppName(applicationDTO.getName().trim());
+            filter.setDeviceTypeId(applicationDTO.getDeviceTypeId());
             filter.setOffset(0);
             filter.setLimit(1);
 
             ConnectionManagerUtil.beginDBTransaction();
 
-            //todo check is there an application release with same md5sum, if there is an applicatio release delete
-            // application storage and thrown an error
+            // todo resolve following comment
+            /*check is there an application release with same package name, if there is an application release
+            throw an error and request to delete the existing application or add this as new application release
+            for existing application*/
 
             ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
             if (!applicationList.getApplications().isEmpty()) {
@@ -168,14 +174,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             // Insert to application table
-            int appId = this.applicationDAO.createApplication(applicationEntity, tenantId);
+            int appId = this.applicationDAO.createApplication(applicationDTO, tenantId);
             if (appId == -1) {
-                log.error("ApplicationEntity creation is Failed");
+                log.error("ApplicationDTO creation is Failed");
                 ConnectionManagerUtil.rollbackDBTransaction();
                 return null;
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("New ApplicationEntity entry added to AP_APP table. App Id:" + appId);
+                    log.debug("New ApplicationDTO entry added to AP_APP table. App Id:" + appId);
                 }
                 //adding application unrestricted roles
                 List<String> unrestrictedRoles = applicationWrapper.getUnrestrictedRoles();
@@ -192,11 +198,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
                 }
 
-                List<CategoryEntity> registeredCatehgories = this.applicationDAO.getAllCategories(tenantId);
+                List<CategoryDTO> registeredCategories = this.applicationDAO.getAllCategories(tenantId);
                 String categoryName = applicationWrapper.getAppCategory();
-                Optional<CategoryEntity> category = registeredCatehgories.stream().filter(obj -> obj.getCategoryName().equals(categoryName)).findAny();
+                Optional<CategoryDTO> category = registeredCategories.stream()
+                        .filter(obj -> obj.getCategoryName().equals(categoryName)).findAny();
 
-                if (registeredCatehgories.isEmpty()) {
+                if (registeredCategories.isEmpty()) {
                     ConnectionManagerUtil.rollbackDBTransaction();
                     String msg = "Registered application category set is empty category: " + categoryName;
                     log.error(msg);
@@ -223,14 +230,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 //adding application tags
                 List<String> tags = applicationWrapper.getTags();
                 if (!tags.isEmpty()) {
-                    List<TagEntity> allRegisteredTagEntities = applicationDAO.getAllTags(tenantId);
-                    List<String> allRegisteredTagNames = new ArrayList<>();
+                    List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
+                    List<String> registeredTagNames = new ArrayList<>();
                     List<Integer> tagIds = new ArrayList<>();
 
-                    for (TagEntity tagEntity : allRegisteredTagEntities) {
-                        allRegisteredTagNames.add(tagEntity.getTagName());
+                    for (TagDTO tagDTO : registeredTags) {
+                        registeredTagNames.add(tagDTO.getTagName());
                     }
-                    List<String> newTags = getDifference(tags, allRegisteredTagNames);
+                    List<String> newTags = getDifference(tags, registeredTagNames);
                     if (!newTags.isEmpty()) {
                         this.applicationDAO.addTags(newTags, tenantId);
                         if (log.isDebugEnabled()) {
@@ -239,10 +246,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         tagIds = this.applicationDAO.getTagIdsForTagNames(tags, tenantId);
                     } else {
 
-                        for (TagEntity tagEntity : allRegisteredTagEntities) {
+                        for (TagDTO tagDTO : registeredTags) {
                             for (String tagName : tags) {
-                                if (tagName.equals(tagEntity.getTagName())) {
-                                    tagIds.add(tagEntity.getId());
+                                if (tagName.equals(tagDTO.getTagName())) {
+                                    tagIds.add(tagDTO.getId());
                                     break;
                                 }
                             }
@@ -254,54 +261,54 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
-                applicationReleaseEntity = applicationEntity.getApplicationReleases().get(0);
-                applicationReleaseEntity.setCurrentState(AppLifecycleState.CREATED.toString());
-                applicationReleaseEntity = this.applicationReleaseDAO.createRelease(applicationReleaseEntity, appId, tenantId);
+                applicationReleaseDTO = applicationDTO.getApplicationReleases().get(0);
+                applicationReleaseDTO.setCurrentState(AppLifecycleState.CREATED.toString());
+                applicationReleaseDTO = this.applicationReleaseDAO.createRelease(applicationReleaseDTO, appId, tenantId);
 
                 if (log.isDebugEnabled()) {
                     log.debug("Changing lifecycle state. App Id:" + appId);
                 }
                 //todo get initial state from lifecycle manager and set current state to Release object
-                LifecycleStateEntity lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
+                LifecycleStateDTO lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
                         AppLifecycleState.CREATED.toString());
-                this.lifecycleStateDAO.addLifecycleState(lifecycleState, appId, applicationReleaseEntity.getUuid(), tenantId);
-                applicationReleaseEntity.setCurrentState(AppLifecycleState.CREATED.toString());
-                applicationReleaseEntities.add(applicationReleaseEntity);
-                applicationEntity.setApplicationReleases(applicationReleaseEntities);
-                application = appDtoToAppResponse(applicationEntity);
+                this.lifecycleStateDAO.addLifecycleState(lifecycleState, appId, applicationReleaseDTO.getUuid(), tenantId);
+                applicationReleaseDTO.setCurrentState(AppLifecycleState.CREATED.toString());
+                applicationReleaseEntities.add(applicationReleaseDTO);
+                applicationDTO.setApplicationReleases(applicationReleaseEntities);
+                application = appDtoToAppResponse(applicationDTO);
                 ConnectionManagerUtil.commitDBTransaction();
             }
             return application;
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while adding lifecycle state. application name: " + applicationWrapper.getName()
+            String msg = "Error occurred while adding lifecycle state. application name: " + applicationWrapper.getName()
                     + " application type: is " + applicationWrapper.getType();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg =
-                    "Error occured while adding application or application release. application name: " + applicationWrapper
+                    "Error occurred while adding application or application release. application name: " + applicationWrapper
                             .getName() + " application type: " + applicationWrapper.getType();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occured while getting database connection.";
+            String msg = "Error occurred while getting database connection.";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (VisibilityManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while adding unrestricted roles. application name: " + applicationWrapper.getName()
+            String msg = "Error occurred while adding unrestricted roles. application name: " + applicationWrapper.getName()
                     + " application type: " + applicationWrapper.getType();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            String msg = "Error occured while disabling AutoCommit.";
+            String msg = "Error occurred while disabling AutoCommit.";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured when validating the unrestricted roles given for the application";
+            String msg = "Error occurred when validating the unrestricted roles given for the application";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -309,58 +316,51 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private ApplicationEntity addApplicationReleaseArtifacts(ApplicationEntity applicationEntity,
+    private ApplicationDTO addApplicationReleaseArtifacts(ApplicationDTO applicationDTO,
             ApplicationArtifact applicationArtifact) throws ResourceManagementException {
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
-        List<ApplicationReleaseEntity> applicationReleaseEntities = new ArrayList<>();
-        ApplicationReleaseEntity applicationReleaseEntity;
-        try {
-            applicationReleaseEntity = applicationEntity.getApplicationReleases().get(0);
-            // The application executable artifacts such as apks are uploaded.
-            if (!ApplicationType.ENTERPRISE.toString().equals(applicationEntity.getType())) {
-                applicationReleaseEntity = applicationStorageManager
-                        .uploadReleaseArtifact(applicationReleaseEntity, applicationEntity.getType(),
-                                applicationEntity.getDeviceTypeName(), null);
-            } else {
-                applicationReleaseEntity.setInstallerName(applicationArtifact.getInstallerName());
-                applicationReleaseEntity = applicationStorageManager
-                        .uploadReleaseArtifact(applicationReleaseEntity, applicationEntity.getType(),
-                                applicationEntity.getDeviceTypeName(), applicationArtifact.getInstallerStream());
-            }
-
-            applicationReleaseEntity.setIconName(applicationArtifact.getIconName());
-            applicationReleaseEntity.setBannerName(applicationArtifact.getBannername());
-
-            Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
-            List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
-
-            int counter = 1;
-            for (String scName : screenshotNames) {
-                if (counter == 1) {
-                    applicationReleaseEntity.setScreenshotName1(scName);
-                } else if (counter == 2) {
-                    applicationReleaseEntity.setScreenshotName2(scName);
-
-                } else if (counter == 3) {
-                    applicationReleaseEntity.setScreenshotName3(scName);
-                }
-                counter++;
-            }
-
-            // Upload images
-            applicationReleaseEntity = applicationStorageManager
-                    .uploadImageArtifacts(applicationReleaseEntity, applicationArtifact.getIconStream(),
-                            applicationArtifact.getBannerStream(), new ArrayList<>(screenshots.values()));
-            applicationReleaseEntity.setUuid(UUID.randomUUID().toString());
-            applicationReleaseEntities.add(applicationReleaseEntity);
-            applicationEntity.setApplicationReleases(applicationReleaseEntities);
-            return applicationEntity;
-        } catch (RequestValidatingException e) {
-            //            todo remove this exception cath, do this validation in the request validate method
-            String msg = "Error Occured when uploading artifacts of the application.: " + applicationEntity.getName();
-            log.error(msg);
-            throw new ResourceManagementException(msg, e);
+        List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
+        ApplicationReleaseDTO applicationReleaseDTO;
+        applicationReleaseDTO = applicationDTO.getApplicationReleases().get(0);
+        // The application executable artifacts such as apks are uploaded.
+        if (!ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
+            applicationReleaseDTO = applicationStorageManager
+                    .uploadReleaseArtifact(applicationReleaseDTO, applicationDTO.getType(),
+                            applicationDTO.getDeviceTypeName(), null);
+        } else {
+            applicationReleaseDTO.setInstallerName(applicationArtifact.getInstallerName());
+            applicationReleaseDTO = applicationStorageManager
+                    .uploadReleaseArtifact(applicationReleaseDTO, applicationDTO.getType(),
+                            applicationDTO.getDeviceTypeName(), applicationArtifact.getInstallerStream());
         }
+
+        applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
+        applicationReleaseDTO.setBannerName(applicationArtifact.getBannername());
+
+        Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
+        List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
+
+        int counter = 1;
+        for (String scName : screenshotNames) {
+            if (counter == 1) {
+                applicationReleaseDTO.setScreenshotName1(scName);
+            } else if (counter == 2) {
+                applicationReleaseDTO.setScreenshotName2(scName);
+
+            } else if (counter == 3) {
+                applicationReleaseDTO.setScreenshotName3(scName);
+            }
+            counter++;
+        }
+
+        // Upload images
+        applicationReleaseDTO = applicationStorageManager
+                .uploadImageArtifacts(applicationReleaseDTO, applicationArtifact.getIconStream(),
+                        applicationArtifact.getBannerStream(), new ArrayList<>(screenshots.values()));
+        applicationReleaseDTO.setUuid(UUID.randomUUID().toString());
+        applicationReleaseEntities.add(applicationReleaseDTO);
+        applicationDTO.setApplicationReleases(applicationReleaseEntities);
+        return applicationDTO;
     }
 
     @Override
@@ -369,8 +369,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList;
-        List<ApplicationEntity> apps;
-        List<ApplicationReleaseEntity> releases;
+        List<ApplicationDTO> apps;
+        List<ApplicationReleaseDTO> releases;
         DeviceType deviceType;
 
         filter = validateFilter(filter);
@@ -381,7 +381,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             if (!StringUtils.isEmpty(deviceTypeName)){
                 try {
-                    deviceType = getDevceTypeData(deviceTypeName);
+                    deviceType = getDeviceTypeData(deviceTypeName);
                     filter.setDeviceTypeId(deviceType.getId());
                 } catch (UnexpectedServerErrorException e){
                     throw new ApplicationManagementException(e.getMessage(), e);
@@ -392,7 +392,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 //            todo modify this logic, join app n release tables
             applicationList = applicationDAO.getApplications(filter, tenantId);
             apps = applicationList.getApplications();
-            for ( ApplicationEntity app : apps){
+            for ( ApplicationDTO app : apps){
                 if (AppLifecycleState.REMOVED.toString().equals(app.getStatus())){
                     apps.remove(app);
                 }
@@ -403,7 +403,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                     applicationList = getRoleRestrictedApplicationList(applicationList, userName);
                 }
-                for (ApplicationEntity application : applicationList.getApplications()) {
+                for (ApplicationDTO application : applicationList.getApplications()) {
                     releases = getReleases(application, filter.getCurrentAppReleaseState());
                     application.setApplicationReleases(releases);
                 }
@@ -421,17 +421,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    @Override public ApplicationReleaseEntity createRelease(int applicationId, ApplicationReleaseEntity applicationRelease)
+    @Override public ApplicationReleaseDTO createRelease(int applicationId, ApplicationReleaseDTO applicationRelease)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
 //        validateAppReleasePayload(applicationRelease);
         if (log.isDebugEnabled()) {
-            log.debug("ApplicationEntity release request is received for the application id: " + applicationId);
+            log.debug("ApplicationDTO release request is received for the application id: " + applicationId);
         }
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationEntity existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            ApplicationDTO existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
             if (existingApplication == null) {
                 throw new NotFoundException("Couldn't find application for the application Id: " + applicationId);
             }
@@ -445,12 +445,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             if (!existingApplication.getUnrestrictedRoles().isEmpty() && !isRoleExists(
                     existingApplication.getUnrestrictedRoles(), userName)) {
-                String msg = "ApplicationEntity is visible to limited roles and those roles are not assigned to " + userName;
+                String msg = "ApplicationDTO is visible to limited roles and those roles are not assigned to " + userName;
                 throw new ApplicationManagementException(msg);
             }
             if (this.applicationReleaseDAO
                     .verifyReleaseExistenceByHash(applicationId, applicationRelease.getAppHashValue(), tenantId)) {
-                throw new BadRequestException("ApplicationEntity release exists for the application Id: " + applicationId
+                throw new BadRequestException("ApplicationDTO release exists for the application Id: " + applicationId
                         + " and uploaded binary file");
             }
             String packageName = this.applicationReleaseDAO.getPackageName(applicationId, tenantId);
@@ -460,7 +460,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             applicationRelease = this.applicationReleaseDAO
                     .createRelease(applicationRelease, existingApplication.getId(), tenantId);
-            LifecycleStateEntity lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
+            LifecycleStateDTO lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
                     AppLifecycleState.CREATED.toString());
             this.lifecycleStateDAO
                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(), tenantId);
@@ -472,7 +472,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             + applicationId, e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementException(
-                    "Error occurred while adding application release into IoTS app management ApplicationEntity id of the "
+                    "Error occurred while adding application release into IoTS app management ApplicationDTO id of the "
                             + "application release: " + applicationId, e);
 
         } catch (LifeCycleManagementDAOException e) {
@@ -487,19 +487,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Error occurred whecn checking whether user is admin user or not. ApplicationEntity release: "
+                    "Error occurred whecn checking whether user is admin user or not. ApplicationDTO release: "
                             + applicationId, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
 
-    @Override public ApplicationEntity getApplicationById(int appId, String state) throws ApplicationManagementException {
+    @Override public ApplicationDTO getApplicationById(int appId, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity application;
+        ApplicationDTO application;
         boolean isAppAllowed = false;
-        List<ApplicationReleaseEntity> applicationReleases;
+        List<ApplicationReleaseDTO> applicationReleases;
         try {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplicationById(appId, tenantId);
@@ -535,12 +535,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationEntity getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
+    public ApplicationDTO getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity application;
+        ApplicationDTO application;
         boolean isAppAllowed = false;
-        List<ApplicationReleaseEntity> applicationReleases;
+        List<ApplicationReleaseDTO> applicationReleases;
         try {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
@@ -618,12 +618,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return roleList;
     }
 
-    public ApplicationEntity getApplication(String appType, String appName) throws ApplicationManagementException {
+    public ApplicationDTO getApplication(String appType, String appName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity application;
+        ApplicationDTO application;
         boolean isAppAllowed = false;
-        List<ApplicationReleaseEntity> applicationReleases;
+        List<ApplicationReleaseDTO> applicationReleases;
         try {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplication(appName, appType, tenantId);
@@ -656,10 +656,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    @Override public ApplicationEntity getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException {
+    @Override public ApplicationDTO getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity application;
+        ApplicationDTO application;
         try {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplicationByRelease(appReleaseUUID, tenantId);
@@ -678,17 +678,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     //    todo rethink about this method
-    private List<ApplicationReleaseEntity> getReleases(ApplicationEntity application, String releaseState)
+    private List<ApplicationReleaseDTO> getReleases(ApplicationDTO application, String releaseState)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        List<ApplicationReleaseEntity> applicationReleases;
+        List<ApplicationReleaseDTO> applicationReleases;
         if (log.isDebugEnabled()) {
             log.debug("Request is received to retrieve all the releases related with the application " + application
                     .toString());
         }
         applicationReleases = this.applicationReleaseDAO.getReleases(application.getId(), tenantId);
-        for (ApplicationReleaseEntity applicationRelease : applicationReleases) {
-            LifecycleStateEntity lifecycleState = null;
+        for (ApplicationReleaseDTO applicationRelease : applicationReleases) {
+            LifecycleStateDTO lifecycleState = null;
             try {
                 lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
             } catch (LifeCycleManagementDAOException e) {
@@ -705,12 +705,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
 //        return filterAppReleaseByCurrentState(applicationReleases, releaseState);
     }
 
-//    private List<ApplicationReleaseEntity> filterAppReleaseByCurrentState(List<ApplicationReleaseEntity> applicationReleases,
+//    private List<ApplicationReleaseDTO> filterAppReleaseByCurrentState(List<ApplicationReleaseDTO> applicationReleases,
 //            String state) {
-//        List<ApplicationReleaseEntity> filteredReleases = new ArrayList<>();
+//        List<ApplicationReleaseDTO> filteredReleases = new ArrayList<>();
 //
 //        if (state != null && !state.isEmpty()) {
-//            for (ApplicationReleaseEntity applicationRelease : applicationReleases) {
+//            for (ApplicationReleaseDTO applicationRelease : applicationReleases) {
 //                if (state.equals(applicationRelease.getLifecycleState().getCurrentState())) {
 //                    filteredReleases.add(applicationRelease);
 //                }
@@ -736,31 +736,31 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         List<String> storedLocations = new ArrayList<>();
-        ApplicationEntity application;
+        ApplicationDTO application;
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
             application = this.applicationDAO.getApplicationById(applicationId, tenantId);
 
             if (application == null) {
-                throw new NotFoundException("Couldn't found an application for ApplicationEntity ID: " + applicationId);
+                throw new NotFoundException("Couldn't found an application for ApplicationDTO ID: " + applicationId);
             }
 
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
                     .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
                 throw new ForbiddenException(
                         "You don't have permission to delete this application. In order to delete an application you "
-                                + "need to have required permission. ApplicationEntity ID: " + applicationId);
+                                + "need to have required permission. ApplicationDTO ID: " + applicationId);
             }
-            List<ApplicationReleaseEntity> applicationReleases = getReleases(application, null);
+            List<ApplicationReleaseDTO> applicationReleases = getReleases(application, null);
             if (log.isDebugEnabled()) {
                 log.debug("Request is received to delete applications which are related with the application id "
                         + applicationId);
             }
-            for (ApplicationReleaseEntity applicationRelease : applicationReleases) {
-                LifecycleStateEntity appLifecycleState = this.lifecycleStateDAO
+            for (ApplicationReleaseDTO applicationRelease : applicationReleases) {
+                LifecycleStateDTO appLifecycleState = this.lifecycleStateDAO
                         .getLatestLifeCycleState(applicationId, applicationRelease.getUuid());
-                LifecycleStateEntity newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
+                LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
                         newAppLifecycleState.getCurrentState())) {
@@ -772,7 +772,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
                             AppLifecycleState.REMOVED.toString());
                     for (String nextState : lifecycleFlow) {
-                        LifecycleStateEntity lifecycleState = getLifecycleStateInstance(nextState, currentState);
+                        LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
                         if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
@@ -860,7 +860,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity application;
+        ApplicationDTO application;
         try {
             ConnectionManagerUtil.beginDBTransaction();
             application = this.applicationDAO.getApplicationById(applicationId, tenantId);
@@ -870,17 +870,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
                     .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
                 throw new ForbiddenException(
-                        "You don't have permission for deleting application release. ApplicationEntity id: " + applicationId
+                        "You don't have permission for deleting application release. ApplicationDTO id: " + applicationId
                                 + " and release UUID: " + releaseUuid);
             }
 
-            ApplicationReleaseEntity applicationRelease = this.applicationReleaseDAO
+            ApplicationReleaseDTO applicationRelease = this.applicationReleaseDAO
                     .getReleaseByIds(applicationId, releaseUuid, tenantId);
             if (applicationRelease == null) {
                 throw new NotFoundException("Couldn't find an application release for application ID: " + applicationId
                         + " and release UUID: " + releaseUuid);
             }
-            LifecycleStateEntity appLifecycleState = this.lifecycleStateDAO
+            LifecycleStateDTO appLifecycleState = this.lifecycleStateDAO
                     .getLatestLifeCycleState(applicationId, releaseUuid);
             if (appLifecycleState == null) {
                 throw new NotFoundException(
@@ -890,7 +890,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String currentState = appLifecycleState.getCurrentState();
             if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState.REJECTED.toString()
                     .equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals(currentState)) {
-                LifecycleStateEntity newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
+                LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
                         appLifecycleState.getCurrentState());
                 if (lifecycleStateManger.isValidStateChange(newAppLifecycleState.getPreviousState(),
                         newAppLifecycleState.getCurrentState())) {
@@ -902,7 +902,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
                             AppLifecycleState.REMOVED.toString());
                     for (String nextState : lifecycleFlow) {
-                        LifecycleStateEntity lifecycleState = getLifecycleStateInstance(nextState, currentState);
+                        LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
                         if (lifecycleStateManger.isValidStateChange(currentState, nextState)) {
                             this.lifecycleStateDAO
                                     .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
@@ -934,8 +934,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             + " and application release UUID of " + releaseUuid, e);
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
-                    "Error occured when checking permission for executing application release update. ApplicationEntity ID: "
-                            + applicationId + " and ApplicationEntity UUID: " + releaseUuid);
+                    "Error occured when checking permission for executing application release update. ApplicationDTO ID: "
+                            + applicationId + " and ApplicationDTO UUID: " + releaseUuid);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -980,11 +980,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             InputStream bannerFileStream, List<InputStream> attachments) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
-        ApplicationReleaseEntity applicationRelease;
+        ApplicationReleaseDTO applicationRelease;
         try {
             if (appId <= 0) {
                 throw new ValidationException(
-                        "ApplicationEntity id could,t be a negative integer. Hence please add valid application id.");
+                        "ApplicationDTO id could,t be a negative integer. Hence please add valid application id.");
             }
             ConnectionManagerUtil.beginDBTransaction();
             applicationRelease = this.applicationReleaseDAO.getReleaseByIds(appId, uuid, tenantId);
@@ -993,7 +993,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         "Doesn't exist a application release for application ID:  " + appId + "and application UUID: "
                                 + uuid);
             }
-            LifecycleStateEntity lifecycleState = this.lifecycleStateDAO
+            LifecycleStateDTO lifecycleState = this.lifecycleStateDAO
                     .getLatestLifeCycleState(appId, applicationRelease.getUuid());
             if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState())
                     || AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
@@ -1006,8 +1006,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (applicationRelease == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new ApplicationManagementException(
-                        "ApplicationEntity release updating count is 0. ApplicationEntity id: " + appId
-                                + " ApplicationEntity release UUID: " + uuid);
+                        "ApplicationDTO release updating count is 0. ApplicationDTO id: " + appId
+                                + " ApplicationDTO release UUID: " + uuid);
 
             }
             ConnectionManagerUtil.commitDBTransaction();
@@ -1041,7 +1041,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
-        ApplicationReleaseEntity applicationRelease;
+        ApplicationReleaseDTO applicationRelease;
         try {
             boolean isValidDeviceType = false;
             List<DeviceType> deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
@@ -1054,16 +1054,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!isValidDeviceType) {
                 throw new ValidationException(
                         "Invalid request to update application release artifact, invalid application type: "
-                                + deviceType + " for ApplicationEntity id: " + appId + " application release uuid: " + uuid);
+                                + deviceType + " for ApplicationDTO id: " + appId + " application release uuid: " + uuid);
             }
             if (appId <= 0) {
                 throw new ValidationException(
-                        "ApplicationEntity id could,t be a negative integer. Hence please add valid application id. application type: "
-                                + deviceType + " ApplicationEntity id: " + appId + " UUID: " + uuid);
+                        "ApplicationDTO id could,t be a negative integer. Hence please add valid application id. application type: "
+                                + deviceType + " ApplicationDTO id: " + appId + " UUID: " + uuid);
             }
 
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationEntity application = this.applicationDAO.getApplicationById(appId, tenantId);
+            ApplicationDTO application = this.applicationDAO.getApplicationById(appId, tenantId);
             if (application == null) {
                 throw new NotFoundException("Doesn't exist a application for the application ID:  " + appId);
             }
@@ -1080,8 +1080,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (applicationRelease == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new ApplicationManagementException(
-                        "ApplicationEntity release updating count is 0. ApplicationEntity id: " + appId
-                                + " ApplicationEntity release UUID: " + uuid);
+                        "ApplicationDTO release updating count is 0. ApplicationDTO id: " + appId
+                                + " ApplicationDTO release UUID: " + uuid);
 
             }
             ConnectionManagerUtil.commitDBTransaction();
@@ -1115,13 +1115,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
      *
      * @param applicationList list of applications.
      * @param userName        user name
-     * @return ApplicationEntity related with the UUID
+     * @return ApplicationDTO related with the UUID
      */
     private ApplicationList getRoleRestrictedApplicationList(ApplicationList applicationList, String userName)
             throws ApplicationManagementException {
         ApplicationList roleRestrictedApplicationList = new ApplicationList();
-        ArrayList<ApplicationEntity> unRestrictedApplications = new ArrayList<>();
-        for (ApplicationEntity application : applicationList.getApplications()) {
+        ArrayList<ApplicationDTO> unRestrictedApplications = new ArrayList<>();
+        for (ApplicationDTO application : applicationList.getApplications()) {
             if (application.getUnrestrictedRoles().isEmpty()) {
                 unRestrictedApplications.add(application);
             } else {
@@ -1141,21 +1141,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /**
      * To validate a app release creating request and app updating request to make sure all the pre-conditions satisfied.
      *
-     * @param applicationRelease ApplicationReleaseEntity that need to be created.
-     * @throws ApplicationManagementException ApplicationEntity Management Exception.
+     * @param applicationRelease ApplicationReleaseDTO that need to be created.
+     * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    private void validateAppReleasePayload(ApplicationReleaseEntity applicationRelease)
+    private void validateAppReleasePayload(ApplicationReleaseDTO applicationRelease)
             throws ApplicationManagementException {
         if (applicationRelease.getVersion() == null) {
-            throw new ApplicationManagementException("ApplicationReleaseEntity version name is a mandatory parameter for "
+            throw new ApplicationManagementException("ApplicationReleaseDTO version name is a mandatory parameter for "
                     + "creating release. It cannot be found.");
         }
     }
 
     @Override
-    public LifecycleStateEntity getLifecycleState(int applicationId, String releaseUuid)
+    public LifecycleStateDTO getLifecycleState(int applicationId, String releaseUuid)
             throws ApplicationManagementException {
-        LifecycleStateEntity lifecycleState;
+        LifecycleStateDTO lifecycleState;
         try {
             ConnectionManagerUtil.openDBConnection();
             lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
@@ -1174,7 +1174,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void changeLifecycleState(int applicationId, String releaseUuid, LifecycleStateEntity state)
+    public void changeLifecycleState(int applicationId, String releaseUuid, LifecycleStateDTO state)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
@@ -1186,7 +1186,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException("Couldn't find application release for the application Id: " + applicationId
                         + " application release uuid: " + releaseUuid);
             }
-            LifecycleStateEntity currentState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
+            LifecycleStateDTO currentState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
             if (currentState == null) {
                 throw new ApplicationManagementException(
                         "Couldn't find latest lifecycle state for the appId: " + applicationId
@@ -1208,14 +1208,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.error("Invalid lifecycle state transition from '" + state.getPreviousState() + "'" + " to '"
                             + state.getCurrentState() + "'");
                     throw new ApplicationManagementException(
-                            "Lifecycle State Validation failed. ApplicationEntity Id: " + applicationId
-                                    + " ApplicationEntity release UUID: " + releaseUuid);
+                            "Lifecycle State Validation failed. ApplicationDTO Id: " + applicationId
+                                    + " ApplicationDTO release UUID: " + releaseUuid);
                 }
             }
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Failed to add lifecycle state. ApplicationEntity Id: " + applicationId + " ApplicationEntity release UUID: "
+                    "Failed to add lifecycle state. ApplicationDTO Id: " + applicationId + " ApplicationDTO release UUID: "
                             + releaseUuid, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
@@ -1227,8 +1227,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            List<CategoryEntity> existingCategories = applicationDAO.getAllCategories(tenantId);
-            List<String> existingCategoryNames = existingCategories.stream().map(CategoryEntity::getCategoryName)
+            List<CategoryDTO> existingCategories = applicationDAO.getAllCategories(tenantId);
+            List<String> existingCategoryNames = existingCategories.stream().map(CategoryDTO::getCategoryName)
                     .collect(Collectors.toList());
             if(!existingCategoryNames.containsAll(categories)){
                 List<String> newCategories = getDifference(categories, existingCategoryNames);
@@ -1246,12 +1246,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationEntity updateApplication(int applicationId, ApplicationEntity application)
+    public ApplicationDTO updateApplication(int applicationId, ApplicationDTO application)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationEntity existingApplication;
+        ApplicationDTO existingApplication;
         boolean isExistingAppRestricted = false;
         List<String> addingRoleList;
         List<String> removingRoleList;
@@ -1263,7 +1263,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
             if (existingApplication == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
-                throw new NotFoundException("Tried to update ApplicationEntity which is not in the publisher, "
+                throw new NotFoundException("Tried to update ApplicationDTO which is not in the publisher, "
                         + "Please verify application details");
             }
             if (!existingApplication.getUnrestrictedRoles().isEmpty()) {
@@ -1334,15 +1334,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (VisibilityManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Error occurred while updating the visibility restriction of the application. ApplicationEntity id  is "
+                    "Error occurred while updating the visibility restriction of the application. ApplicationDTO id  is "
                             + applicationId);
         } catch (TransactionManagementException e) {
             throw new ApplicationManagementException(
-                    "Error occurred while starting database transaction for application updating. ApplicationEntity id  is "
+                    "Error occurred while starting database transaction for application updating. ApplicationDTO id  is "
                             + applicationId);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementException(
-                    "Error occurred while getting database connection for application updating. ApplicationEntity id  is "
+                    "Error occurred while getting database connection for application updating. ApplicationDTO id  is "
                             + applicationId);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
@@ -1379,11 +1379,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * By invoking the method, it returns Lifecycle State Instance.
      * @param currentState Current state of the lifecycle
      * @param previousState Previouse state of the Lifecycle
-     * @return {@link LifecycleStateEntity}
+     * @return {@link LifecycleStateDTO}
      */
-    private LifecycleStateEntity getLifecycleStateInstance(String currentState, String previousState) {
+    private LifecycleStateDTO getLifecycleStateInstance(String currentState, String previousState) {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        LifecycleStateEntity lifecycleState = new LifecycleStateEntity();
+        LifecycleStateDTO lifecycleState = new LifecycleStateDTO();
         lifecycleState.setCurrentState(currentState);
         lifecycleState.setPreviousState(previousState);
         lifecycleState.setUpdatedBy(userName);
@@ -1391,14 +1391,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     //todo check whether package names are same
-    @Override public boolean updateRelease(int applicationId, String releaseUuid, String deviceType,
-            ApplicationReleaseEntity updateRelease, InputStream binaryFileStram, InputStream iconFileStream,
+    @Override
+    public boolean updateRelease(int applicationId, String releaseUuid, String deviceType,
+            ApplicationReleaseDTO updateRelease, InputStream binaryFileStram, InputStream iconFileStream,
             InputStream bannerFileStream, List<InputStream> attachments) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationReleaseEntity release;
-        ApplicationEntity app = null;
+        ApplicationReleaseDTO release;
+        ApplicationDTO app = null;
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         DeviceType deviceTypeObj;
         boolean isAdminUser;
@@ -1415,19 +1416,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (app == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new NotFoundException(
-                        "Couldn't found an application for updating. ApplicationEntity id: " + applicationId);
+                        "Couldn't found an application for updating. ApplicationDTO id: " + applicationId);
             }
 
             if (deviceTypeObj == null || deviceTypeObj.getId() != app.getDeviceTypeId()) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new BadRequestException(
                         "Request to update application release for Invalid device type. Device type: " + deviceType
-                                + " application ID " + applicationId + " ApplicationEntity Release UUID " + releaseUuid);
+                                + " application ID " + applicationId + " ApplicationDTO Release UUID " + releaseUuid);
             }
             if (release == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new NotFoundException(
-                        "Couldn't found an application realise for updating. ApplicationEntity id: " + applicationId
+                        "Couldn't found an application realise for updating. ApplicationDTO id: " + applicationId
                                 + " and application release UUID: " + releaseUuid);
             }
 
@@ -1439,9 +1440,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     || (price > 0.0 && ApplicationSubscriptionType.FREE.toString().equals(app.getSubType()))) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new BadRequestException(
-                        "Invalid app release payload for updating application release. ApplicationEntity price is " + price
-                                + " for " + app.getSubType() + " application. ApplicationEntity ID: " + applicationId
-                                + ", ApplicationEntity Release UUID " + releaseUuid + " and supported device type is "
+                        "Invalid app release payload for updating application release. ApplicationDTO price is " + price
+                                + " for " + app.getSubType() + " application. ApplicationDTO ID: " + applicationId
+                                + ", ApplicationDTO Release UUID " + releaseUuid + " and supported device type is "
                                 + deviceType);
             }
             release.setPrice(price);
@@ -1464,7 +1465,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             //todo try to remove this DB call and get it when getting application release
-            LifecycleStateEntity lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
+            LifecycleStateDTO lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
             if (!AppLifecycleState.CREATED.toString().equals(lifecycleState.getCurrentState())
                     && !AppLifecycleState.IN_REVIEW.toString().equals(lifecycleState.getCurrentState())
                     && !AppLifecycleState.REJECTED.toString().equals(lifecycleState.getCurrentState())) {
@@ -1493,69 +1494,59 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Error occured when updating ApplicationEntity release. ApplicationEntity ID " + applicationId
-                            + " ApplicationEntity Release UUID: " + releaseUuid, e);
+                    "Error occured when updating ApplicationDTO release. ApplicationDTO ID " + applicationId
+                            + " ApplicationDTO Release UUID: " + releaseUuid, e);
         } catch (ApplicationStorageManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Error occured when updating application release artifact. ApplicationEntity ID " + applicationId
-                            + " ApplicationEntity release UUID: " + releaseUuid, e);
+                    "Error occured when updating application release artifact. ApplicationDTO ID " + applicationId
+                            + " ApplicationDTO release UUID: " + releaseUuid, e);
         } catch (ResourceManagementException e) {
             //            updating images
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
-                    "Error occured when updating image artifact of the application release. ApplicationEntity ID: "
-                            + applicationId + " ApplicationEntity release UUID: " + releaseUuid, e);
+                    "Error occured when updating image artifact of the application release. ApplicationDTO ID: "
+                            + applicationId + " ApplicationDTO release UUID: " + releaseUuid, e);
         } catch (RequestValidatingException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
                     "Error occured when validating application release artifact for device type " + deviceType
                             + " And application type " + app.getType() + ". Applicationn ID: " + applicationId
-                            + " ApplicationEntity release UUID: " + releaseUuid);
+                            + " ApplicationDTO release UUID: " + releaseUuid);
         }
     }
 
-    /***
-     * To validate the application creating request
-     *
-     * @param applicationWrapper {@link ApplicationEntity}
-     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
-     * @param iconFile Icon file for the application.
-     * @param bannerFile Banner file for the application.
-     * @param attachmentList Screenshot list.
-     * @throws RequestValidatingException if the payload contains invalid inputs.
-     */
-    public void validateAppCreatingRequest(ApplicationWrapper applicationWrapper, Attachment binaryFile,
-            Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
-            throws RequestValidatingException {
+
+    @Override
+    public void validateAppCreatingRequest(ApplicationWrapper applicationWrapper) throws RequestValidatingException {
 
         boolean isValidApplicationType;
         String applicationType = applicationWrapper.getType();
 
         if (StringUtils.isEmpty(applicationWrapper.getName())) {
-            String msg = "ApplicationEntity name cannot be empty";
+            String msg = "Application name cannot be empty.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
         if (StringUtils.isEmpty(applicationWrapper.getAppCategory())) {
-            String msg = "ApplicationEntity category can't be empty";
+            String msg = "Application category can't be empty.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
         if (StringUtils.isEmpty(applicationType)) {
-            String msg = "ApplicationEntity type can't be empty";
+            String msg = "Application type can't be empty.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
         if (StringUtils.isEmpty(applicationWrapper.getDeviceType())) {
-            String msg = "Device type can't be empty for the application";
+            String msg = "Device type can't be empty for the application.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
 
         isValidApplicationType = isValidAppType(applicationWrapper.getType());
         if (!isValidApplicationType) {
-            String msg = "App Type contains in the application creating payload doesn't match with supported app types";
+            String msg = "App Type contains in the application creating payload doesn't match with supported app types.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
@@ -1565,45 +1556,44 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         if (applicationReleaseWrappers == null || applicationReleaseWrappers.size() != 1) {
             String msg =
-                    "Invalid application creating request. ApplicationEntity creating request must have single application "
-                            + "release.  ApplicationEntity name:" + applicationWrapper.getName() + " and type: " + applicationWrapper
+                    "Invalid application creating request. ApplicationDTO creating request must have single application "
+                            + "release.  ApplicationDTO name:" + applicationWrapper.getName() + " and type: " + applicationWrapper
                             .getType();
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-        validateReleaseCreatingRequest(applicationReleaseWrappers.get(0), applicationType, binaryFile, iconFile, bannerFile,
-                attachmentList);
+
     }
 
-    /***
-     *
-     * @param applicationReleaseWrapper {@link ApplicationReleaseEntity}
-     * @param applicationType Type of the application
-     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
-     * @param iconFile Icon file for the application.
-     * @param bannerFile Banner file for the application.
-     * @param attachmentList Screenshot list.
-     * @throws RequestValidatingException throws if payload does not satisfy requrements.
-     */
-    public void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper, String applicationType,
-            Attachment binaryFile, Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
-            throws RequestValidatingException {
 
-        if (ApplicationType.WEB_CLIP.toString().equals(applicationType) && applicationReleaseWrapper.getUrl() == null){
-            String msg = "URL should't be null for the application release creating request for application type: "
-                    + applicationType;
-            log.error(msg);
-            throw new RequestValidatingException(msg);
+    @Override
+    public void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper,
+            String applicationType) throws RequestValidatingException {
+
+        if (ApplicationType.WEB_CLIP.toString().equals(applicationType)) {
+            UrlValidator urlValidator = new UrlValidator();
+            if (StringUtils
+                    .isEmpty(applicationReleaseWrapper.getUrl())){
+                String msg = "URL should't be null for the application release creating request for application type WEB_CLIP";
+                log.error(msg);
+                throw new RequestValidatingException(msg);
+            }
+            if (!urlValidator.isValid(applicationReleaseWrapper.getUrl())){
+                String msg = "Request payload contains an invalid Web Clip URL.";
+                log.error(msg);
+                throw new RequestValidatingException(msg);
+            }
         }
         if (StringUtils.isEmpty(applicationReleaseWrapper.getSupportedOsVersions())){
-            String msg = "Supported OS Vershios shouldn't be null or empty.";
+            String msg = "Supported OS Version shouldn't be null or empty.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-        isValidAttachmentSet(binaryFile, iconFile, bannerFile, attachmentList, applicationType);
     }
 
-    private void isValidAttachmentSet(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
+
+    @Override
+    public void isValidAttachmentSet(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
             List<Attachment> attachmentList, String applicationType) throws RequestValidatingException {
         if (iconFile == null) {
             String msg = "Icon file is not found with the application release creating request.";
@@ -1626,7 +1616,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new RequestValidatingException(msg);
         }
         if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(applicationType)) {
-            String msg = "Binary file is not found with the application release creating request. ApplicationEntity type: "
+            String msg = "Binary file is not found with the application release creating request. ApplicationDTO type: "
                     + applicationType;
             log.error(msg);
             throw new RequestValidatingException(msg);
@@ -1634,89 +1624,89 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
 
-    private ApplicationEntity appWrapperToAppEntity(ApplicationWrapper applicationWrapper)
+    private ApplicationDTO appWrapperToAppDTO(ApplicationWrapper applicationWrapper)
             throws BadRequestException, UnexpectedServerErrorException {
 
-        DeviceType deviceType = getDevceTypeData(applicationWrapper.getDeviceType());
-        ApplicationEntity applicationEntity = new ApplicationEntity();
-        applicationEntity.setName(applicationWrapper.getName());
-        applicationEntity.setDescription(applicationWrapper.getDescription());
-        applicationEntity.setAppCategory(applicationWrapper.getAppCategory());
-        applicationEntity.setType(applicationWrapper.getType());
-        applicationEntity.setSubType(applicationWrapper.getSubType());
-        applicationEntity.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
-        applicationEntity.setTags(applicationWrapper.getTags());
-        applicationEntity.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
-        applicationEntity.setDeviceTypeId(deviceType.getId());
-        applicationEntity.setDeviceTypeName(deviceType.getName());
-        List<ApplicationReleaseEntity> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
-                .stream().map(this::releaseWrapperToReleaseEntity).collect(Collectors.toList());
-        applicationEntity.setApplicationReleases(applicationReleaseEntities);
-        return applicationEntity;
+        DeviceType deviceType = getDeviceTypeData(applicationWrapper.getDeviceType());
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setName(applicationWrapper.getName());
+        applicationDTO.setDescription(applicationWrapper.getDescription());
+        applicationDTO.setAppCategory(applicationWrapper.getAppCategory());
+        applicationDTO.setType(applicationWrapper.getType());
+        applicationDTO.setSubType(applicationWrapper.getSubType());
+        applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
+        applicationDTO.setTags(applicationWrapper.getTags());
+        applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
+        applicationDTO.setDeviceTypeId(deviceType.getId());
+        applicationDTO.setDeviceTypeName(deviceType.getName());
+        List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
+                .stream().map(this::releaseWrapperToReleaseDTO).collect(Collectors.toList());
+        applicationDTO.setApplicationReleases(applicationReleaseEntities);
+        return applicationDTO;
     }
 
-    private ApplicationReleaseEntity releaseWrapperToReleaseEntity(ApplicationReleaseWrapper applicationReleaseWrapper){
-        ApplicationReleaseEntity applicationReleaseEntity = new ApplicationReleaseEntity();
-        applicationReleaseEntity.setDescription(applicationReleaseWrapper.getDescription());
-        applicationReleaseEntity.setReleaseType(applicationReleaseWrapper.getReleaseType());
-        applicationReleaseEntity.setPrice(applicationReleaseWrapper.getPrice());
-        applicationReleaseEntity.setIsSharedWithAllTenants(applicationReleaseWrapper.getIsSharedWithAllTenants());
-        applicationReleaseEntity.setMetaData(applicationReleaseWrapper.getMetaData());
-        applicationReleaseEntity.setUrl(applicationReleaseWrapper.getUrl());
-        applicationReleaseEntity.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
-        return applicationReleaseEntity;
+    private ApplicationReleaseDTO releaseWrapperToReleaseDTO(ApplicationReleaseWrapper applicationReleaseWrapper){
+        ApplicationReleaseDTO applicationReleaseDTO = new ApplicationReleaseDTO();
+        applicationReleaseDTO.setDescription(applicationReleaseWrapper.getDescription());
+        applicationReleaseDTO.setReleaseType(applicationReleaseWrapper.getReleaseType());
+        applicationReleaseDTO.setPrice(applicationReleaseWrapper.getPrice());
+        applicationReleaseDTO.setIsSharedWithAllTenants(applicationReleaseWrapper.getIsSharedWithAllTenants());
+        applicationReleaseDTO.setMetaData(applicationReleaseWrapper.getMetaData());
+        applicationReleaseDTO.setUrl(applicationReleaseWrapper.getUrl());
+        applicationReleaseDTO.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
+        return applicationReleaseDTO;
     }
 
-    private Application appDtoToAppResponse(ApplicationEntity applicationEntity) {
+    private Application appDtoToAppResponse(ApplicationDTO applicationDTO) {
 
         Application application = new Application();
-        application.setId(applicationEntity.getId());
-        application.setName(applicationEntity.getName());
-        application.setDescription(applicationEntity.getDescription());
-        application.setAppCategory(applicationEntity.getAppCategory());
-        application.setType(applicationEntity.getType());
-        application.setSubType(applicationEntity.getSubType());
-        application.setPaymentCurrency(applicationEntity.getPaymentCurrency());
-        application.setTags(applicationEntity.getTags());
-        application.setUnrestrictedRoles(applicationEntity.getUnrestrictedRoles());
-        application.setDeviceType(applicationEntity.getDeviceTypeName());
-        List<ApplicationRelease> applicationReleases = applicationEntity.getApplicationReleases()
+        application.setId(applicationDTO.getId());
+        application.setName(applicationDTO.getName());
+        application.setDescription(applicationDTO.getDescription());
+        application.setAppCategory(applicationDTO.getAppCategory());
+        application.setType(applicationDTO.getType());
+        application.setSubType(applicationDTO.getSubType());
+        application.setPaymentCurrency(applicationDTO.getPaymentCurrency());
+        application.setTags(applicationDTO.getTags());
+        application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
+        application.setDeviceType(applicationDTO.getDeviceTypeName());
+        List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleases()
                 .stream().map(this::releaseDtoToRelease).collect(Collectors.toList());
         application.setApplicationReleases(applicationReleases);
         return application;
     }
 
-    private ApplicationRelease releaseDtoToRelease(ApplicationReleaseEntity applicationReleaseEntity){
+    private ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO){
         String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration().getArtifactDownloadEndpoint();
-        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseEntity.getUuid();
+        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid();
         ApplicationRelease applicationRelease = new ApplicationRelease();
-        applicationRelease.setDescription(applicationReleaseEntity.getDescription());
-        applicationRelease.setReleaseType(applicationReleaseEntity.getReleaseType());
-        applicationRelease.setPrice(applicationReleaseEntity.getPrice());
-        applicationRelease.setIsSharedWithAllTenants(applicationReleaseEntity.getIsSharedWithAllTenants());
-        applicationRelease.setMetaData(applicationReleaseEntity.getMetaData());
-        applicationRelease.setUrl(applicationReleaseEntity.getUrl());
-        applicationRelease.setSupportedOsVersions(applicationReleaseEntity.getSupportedOsVersions());
-        applicationRelease.setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getInstallerName());
-        applicationRelease.setIconPath(basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getIconName());
-        applicationRelease.setBannerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getBannerName());
+        applicationRelease.setDescription(applicationReleaseDTO.getDescription());
+        applicationRelease.setReleaseType(applicationReleaseDTO.getReleaseType());
+        applicationRelease.setPrice(applicationReleaseDTO.getPrice());
+        applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
+        applicationRelease.setMetaData(applicationReleaseDTO.getMetaData());
+        applicationRelease.setUrl(applicationReleaseDTO.getUrl());
+        applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
+        applicationRelease.setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName());
+        applicationRelease.setIconPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName());
+        applicationRelease.setBannerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getBannerName());
 
-        if (!StringUtils.isEmpty(applicationReleaseEntity.getScreenshotName1())) {
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
             applicationRelease.setScreenshotPath1(
-                    basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getScreenshotName1());
+                    basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getScreenshotName1());
         }
-        if (!StringUtils.isEmpty(applicationReleaseEntity.getScreenshotName2())) {
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName2())) {
             applicationRelease.setScreenshotPath2(
-                    basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getScreenshotName2());
+                    basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getScreenshotName2());
         }
-        if (!StringUtils.isEmpty(applicationReleaseEntity.getScreenshotName3())) {
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName3())) {
             applicationRelease.setScreenshotPath3(
-                    basePath + Constants.FORWARD_SLASH + applicationReleaseEntity.getScreenshotName3());
+                    basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getScreenshotName3());
         }
         return applicationRelease;
     }
 
-    private <T> DeviceType getDevceTypeData( T deviceTypeAttr)
+    private <T> DeviceType getDeviceTypeData( T deviceTypeAttr)
             throws BadRequestException, UnexpectedServerErrorException {
         List<DeviceType> deviceTypes;
         try {

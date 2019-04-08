@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-@ApiModel(value = "ApplicationWrapper", description = "ApplicationWrapper represents the an ApplicationEntity in ApplicationEntity Store")
+@ApiModel(value = "ApplicationWrapper", description = "ApplicationWrapper represents the an ApplicationDTO in ApplicationDTO Store")
 public class ApplicationWrapper {
 
 
@@ -38,7 +38,7 @@ public class ApplicationWrapper {
     private String description;
 
     @ApiModelProperty(name = "appCategory",
-            value = "CategoryEntity of the application",
+            value = "CategoryDTO of the application",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
     private String appCategory;
