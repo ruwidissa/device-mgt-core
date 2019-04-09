@@ -42,6 +42,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
@@ -162,12 +163,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             filter.setLimit(1);
 
             ConnectionManagerUtil.beginDBTransaction();
-
-            // todo resolve following comment
-            /*check is there an application release with same package name, if there is an application release
-            throw an error and request to delete the existing application or add this as new application release
-            for existing application*/
-
             ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
             if (!applicationList.getApplications().isEmpty()) {
                 String msg =
@@ -265,18 +260,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
+                String initialLifecycleState = lifecycleStateManager.getInitialState();
                 applicationReleaseDTO = applicationDTO.getApplicationReleases().get(0);
-                applicationReleaseDTO.setCurrentState(AppLifecycleState.CREATED.toString());
+                applicationReleaseDTO.setCurrentState(initialLifecycleState);
                 applicationReleaseDTO = this.applicationReleaseDAO.createRelease(applicationReleaseDTO, appId, tenantId);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Changing lifecycle state. App Id:" + appId);
-                }
-                //todo get initial state from lifecycle manager and set current state to Release object
-                LifecycleStateDTO lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
-                        AppLifecycleState.CREATED.toString());
-                this.lifecycleStateDAO.addLifecycleState(lifecycleState, appId, applicationReleaseDTO.getUuid(), tenantId);
-                applicationReleaseDTO.setCurrentState(AppLifecycleState.CREATED.toString());
+                LifecycleStateDTO lifecycleStateDTO = getLifecycleStateInstance(initialLifecycleState,
+                        initialLifecycleState);
+                this.lifecycleStateDAO
+                        .addLifecycleState(lifecycleStateDTO, appId, applicationReleaseDTO.getUuid(), tenantId);
                 applicationReleaseEntities.add(applicationReleaseDTO);
                 applicationDTO.setApplicationReleases(applicationReleaseEntities);
                 application = appDtoToAppResponse(applicationDTO);
@@ -291,12 +282,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg =
-                    "Error occurred while adding application or application release. application name: " + applicationWrapper
-                            .getName() + " application type: " + applicationWrapper.getType();
+            String msg = "Error occurred while adding application or application release. application name: "
+                    + applicationWrapper.getName() + " application type: " + applicationWrapper.getType();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
-        } catch (DBConnectionException e) {
+        } catch(LifecycleManagementException e){
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when getting initial lifecycle state. application name: " + applicationWrapper
+                    .getName() + " application type: is " + applicationWrapper.getType();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }catch (DBConnectionException e) {
             String msg = "Error occurred while getting database connection.";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
@@ -345,8 +341,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     String packagename = applicationInstaller.getPackageName();
 
                     ConnectionManagerUtil.getDBConnection();
-                    if (applicationReleaseDAO.isAppExisitForPackageName(packagename, tenantId)) {
-                        String msg = "Application release is already exist for the package name: " + packagename;
+                    if (applicationReleaseDAO.isActiveReleaseExisitForPackageName(packagename, tenantId)) {
+                        String msg = "Application release is already exist for the package name: " + packagename +
+                                ". Either you can delete all application releases for package " + packagename + " or "
+                                + "you can add this app release as an new application release, under the existing "
+                                + "application.";
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
@@ -655,7 +654,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private String[] getRolesOfUser(String userName) throws UserStoreException {
         UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
-        String[] roleList = {};
+        String[] roleList;
         if (userRealm != null) {
             userRealm.getUserStoreManager().getRoleNames();
             roleList = userRealm.getUserStoreManager().getRoleListOfUser(userName);

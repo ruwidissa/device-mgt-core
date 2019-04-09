@@ -49,36 +49,36 @@ public class LifecycleManagementTest {
                 proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
 
-    @Test
-    public void CheckUpdatableState() {
-        Boolean isUpdatable = lifecycleStateManager.isUpdatable(UPDATABLE_STATE);
-        System.out.println(isUpdatable);
-        Assert.assertTrue("Updatable state: " + UPDATABLE_STATE, isUpdatable);
-    }
-
-    @Test
-    public void CheckNonUpdatableState() {
-        Boolean isUpdatable = lifecycleStateManager.isUpdatable(NON_UPDATABLE_STATE);
-        Assert.assertFalse("Non Updatable state: " + NON_UPDATABLE_STATE, isUpdatable);
-    }
-
-    @Test
-    public void CheckInstallableState() {
-        Boolean isInstallable = lifecycleStateManager.isInstallable(INSTALLABLE_STATE);
-        Assert.assertTrue("Installable state: " + INSTALLABLE_STATE, isInstallable);
-    }
-
-    @Test
-    public void CheckUnInstallableState() {
-        Boolean isInstallable = lifecycleStateManager.isInstallable(UNINSTALlABLE_STATE);
-        Assert.assertFalse("UnInstallable state: " + UNINSTALlABLE_STATE, isInstallable);
-    }
-
-    @Test
-    public void check() {
-        Set<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
-        Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
-                proceedingStates.contains(BOGUS_STATE.toUpperCase()));
-    }
+//    @Test
+//    public void CheckUpdatableState() {
+//        boolean isUpdatable = lifecycleStateManager.isUpdatable(UPDATABLE_STATE);
+//        System.out.println(isUpdatable);
+//        Assert.assertTrue("Updatable state: " + UPDATABLE_STATE, isUpdatable);
+//    }
+//
+//    @Test
+//    public void CheckNonUpdatableState() {
+//        boolean isUpdatable = lifecycleStateManager.isUpdatable(NON_UPDATABLE_STATE);
+//        Assert.assertFalse("Non Updatable state: " + NON_UPDATABLE_STATE, isUpdatable);
+//    }
+//
+//    @Test
+//    public void CheckInstallableState() {
+//        boolean isInstallable = lifecycleStateManager.isInstallable(INSTALLABLE_STATE);
+//        Assert.assertTrue("Installable state: " + INSTALLABLE_STATE, isInstallable);
+//    }
+//
+//    @Test
+//    public void CheckUnInstallableState() {
+//        boolean isInstallable = lifecycleStateManager.isInstallable(UNINSTALlABLE_STATE);
+//        Assert.assertFalse("UnInstallable state: " + UNINSTALlABLE_STATE, isInstallable);
+//    }
+//
+//    @Test
+//    public void check() {
+//        Set<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
+//        Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
+//                proceedingStates.contains(BOGUS_STATE.toUpperCase()));
+//    }
 
 }

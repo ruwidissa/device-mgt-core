@@ -21,6 +21,7 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.application.release
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationReleaseArtifactPaths;
 import org.wso2.carbon.device.application.mgt.common.Rating;
@@ -657,7 +658,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
-    public boolean isAppExisitForPackageName (String packageName, int tenantId) throws ApplicationManagementDAOException {
+    public boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence for package name:" + packageName);
         }
@@ -666,11 +667,12 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             conn = this.getDBConnection();
             String sql = "SELECT AR.ID AS RELEASE_ID "
                     + "FROM AP_APP_RELEASE AS AR "
-                    + "WHERE AR.PACKAGE_NAME = ? AND AR.TENANT_ID = ? LIMIT 1";
+                    + "WHERE AR.PACKAGE_NAME = ? AND AR.CURRENT_STATE != ? AND AR.TENANT_ID = ? LIMIT 1";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, packageName);
-                stmt.setInt(2, tenantId);
+                stmt.setString(2, AppLifecycleState.REMOVED.toString());
+                stmt.setInt(3, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     return rs.next();
                 }

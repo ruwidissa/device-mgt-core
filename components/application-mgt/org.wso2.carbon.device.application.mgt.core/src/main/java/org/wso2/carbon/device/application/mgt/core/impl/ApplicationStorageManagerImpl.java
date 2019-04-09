@@ -219,11 +219,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 log.error(msg);
                 throw new ApplicationStorageManagementException(msg);
             }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Artifact Directory Path for saving the application release is " + artifactDirectoryPath
-                        + ". ApplicationUUID: " + applicationReleaseDTO.getUuid());
-            }
             artifactDirectoryPath = storagePath + md5OfApp;
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
