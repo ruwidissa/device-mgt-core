@@ -14,9 +14,10 @@ import {
     Input,
     Icon,
     Select,
-    Checkbox,
+    Switch,
     Form,
-    Upload
+    Upload,
+    Divider
 } from "antd";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
@@ -44,7 +45,7 @@ const routes = [
 
 const props = {
     name: 'file',
-    multiple: true,
+    multiple: false,
     action: '//jsonplaceholder.typicode.com/posts/',
     onChange(info) {
         const status = info.file.status;
@@ -79,12 +80,14 @@ const InputGroup = Input.Group;
 
 const formItemLayout = {
     labelCol: {
-        span: 8,
+        span: 4,
     },
     wrapperCol: {
-        span: 16,
+        span: 20,
     },
 };
+
+
 
 class EditableTagGroup extends React.Component {
     state = {
@@ -170,6 +173,12 @@ class AddNewApp extends React.Component {
         };
     }
 
+    tags = [];
+
+    addTag(key, value){
+        this.tags.push(<Option key={key}>{value}</Option>);
+    }
+
     next() {
         const current = this.state.current + 1;
         this.setState({current});
@@ -184,6 +193,8 @@ class AddNewApp extends React.Component {
     render() {
         const {current} = this.state;
         const Content = steps[current].content;
+        this.addTag('1','Lorem');
+        this.addTag('2','Ipsum');
         return (
             <div>
                 <PageHeader
@@ -205,7 +216,8 @@ class AddNewApp extends React.Component {
                                 <Row>
                                     <Col span={12}>
                                         <div>
-                                            <Form layout="horizontal" className={styles.stepForm} hideRequiredMark>
+                                            <Form labelAlign="left" layout="horizontal" className={styles.stepForm}
+                                                  hideRequiredMark>
 
                                                 <Form.Item {...formItemLayout} label="Platform">
                                                     <Select placeholder="ex: android">
@@ -218,11 +230,11 @@ class AddNewApp extends React.Component {
                                                         <Option value="Enterprise" selected>Enterprise</Option>
                                                     </Select>
                                                 </Form.Item>
-                                                <Form.Item {...formItemLayout} label="Name">
-                                                    <Input placeholder="App Name"/>
+                                                <Form.Item {...formItemLayout} label="App Name">
+                                                    <Input placeholder="ex: Lorem App"/>
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Description">
-                                                    <TextArea placeholder="Enter the description" rows={4}/>
+                                                    <TextArea placeholder="Enter the description..." rows={4}/>
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Category">
                                                     <Select placeholder="Select a category">
@@ -230,14 +242,21 @@ class AddNewApp extends React.Component {
                                                         <Option value="entertainment">Entertainment</Option>
                                                     </Select>
                                                 </Form.Item>
-                                                <Form.Item {...formItemLayout} label="Tags">
-                                                    <EditableTagGroup/>
-                                                </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Price">
                                                     <Input prefix="$" placeholder="00.00"/>
                                                 </Form.Item>
-                                                <Form.Item {...formItemLayout} label="Share with all tenents?">
-                                                    <Checkbox> </Checkbox>
+                                                <Form.Item {...formItemLayout} label="Is Sahred?">
+                                                    <Switch checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="close" />} defaultChecked />
+                                                </Form.Item>
+                                                <Divider/>
+                                                <Form.Item {...formItemLayout} label="Tags">
+                                                    <Select
+                                                        mode="tags"
+                                                        style={{ width: '100%' }}
+                                                        placeholder="Tags Mode"
+                                                    >
+                                                        {this.tags}
+                                                    </Select>,
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Meta Daa">
                                                     <InputGroup>
@@ -257,18 +276,21 @@ class AddNewApp extends React.Component {
                                             </Form>
                                         </div>
                                     </Col>
-                                    <Col span={12} style={{paddingTop:40}}>
+                                    <Col span={12} style={{paddingTop: 40, paddingLeft: 20}}>
                                         <p>Application</p>
-                                        <div style={{height:170}}>
+                                        <div style={{height: 170}}>
                                             <Dragger {...props}>
                                                 <p className="ant-upload-drag-icon">
-                                                    <Icon type="inbox" />
+                                                    <Icon type="inbox"/>
                                                 </p>
-                                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                                                <p className="ant-upload-hint">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files</p>
+                                                <p className="ant-upload-text">Click or drag file to this area to
+                                                    upload</p>
+                                                <p className="ant-upload-hint">Support for a single or bulk upload.
+                                                    Strictly prohibit from uploading company data or other band
+                                                    files</p>
                                             </Dragger>
                                         </div>
-                                        <Row style={{marginTop:40}}>
+                                        <Row style={{marginTop: 40}}>
                                             <Col span={12}>
                                                 <p>Icon</p>
                                                 <IconImage/>
@@ -280,7 +302,7 @@ class AddNewApp extends React.Component {
                                         </Row>
 
 
-                                        <Row style={{marginTop:40}}>
+                                        <Row style={{marginTop: 40}}>
                                             <Col span={24}>
                                                 <p>Screenshots</p>
                                                 <UploadScreenshots/>
@@ -288,6 +310,7 @@ class AddNewApp extends React.Component {
                                         </Row>
 
                                     </Col>
+
                                 </Row>
                             </Card>
                         </Col>
