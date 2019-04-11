@@ -218,7 +218,6 @@ class AddNewApp extends React.Component {
                                         <div>
                                             <Form labelAlign="left" layout="horizontal" className={styles.stepForm}
                                                   hideRequiredMark>
-
                                                 <Form.Item {...formItemLayout} label="Platform">
                                                     <Select placeholder="ex: android">
                                                         <Option value="Android">Android</Option>
@@ -234,7 +233,7 @@ class AddNewApp extends React.Component {
                                                     <Input placeholder="ex: Lorem App"/>
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Description">
-                                                    <TextArea placeholder="Enter the description..." rows={4}/>
+                                                    <TextArea placeholder="Enter the description..." rows={7}/>
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Category">
                                                     <Select placeholder="Select a category">
@@ -250,24 +249,34 @@ class AddNewApp extends React.Component {
                                                 </Form.Item>
                                                 <Divider/>
                                                 <Form.Item {...formItemLayout} label="Tags">
-                                                    <Select
-                                                        mode="tags"
-                                                        style={{ width: '100%' }}
-                                                        placeholder="Tags Mode"
-                                                    >
-                                                        {this.tags}
-                                                    </Select>,
+
+                                                    <InputGroup>
+                                                        <Row gutter={8}>
+                                                            <Col span={22}>
+                                                                <Select
+                                                                    mode="multiple"
+                                                                    style={{ width: '100%' }}
+                                                                    placeholder="Tags Mode"
+                                                                >
+                                                                    {this.tags}
+                                                                </Select>
+                                                            </Col>
+                                                            <Col span={2}>
+                                                                <Button type="dashed" shape="circle" icon="plus"/>
+                                                            </Col>
+                                                        </Row>
+                                                    </InputGroup>
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Meta Daa">
                                                     <InputGroup>
                                                         <Row gutter={8}>
-                                                            <Col span={5}>
+                                                            <Col span={10}>
                                                                 <Input placeholder="Key"/>
                                                             </Col>
-                                                            <Col span={10}>
+                                                            <Col span={12}>
                                                                 <Input placeholder="value"/>
                                                             </Col>
-                                                            <Col span={4}>
+                                                            <Col span={2}>
                                                                 <Button type="dashed" shape="circle" icon="plus"/>
                                                             </Col>
                                                         </Row>
