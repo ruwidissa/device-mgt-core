@@ -18,12 +18,12 @@ import {
     Form,
     Upload
 } from "antd";
-import Step1 from "./Step1"
-import Step2 from "./Step2"
-import Step3 from "./Step3"
-import styles from "./Style.less"
-import IconImage from "./IconImg"
-import UploadScreenshots from "./UploadScreenshots"
+import Step1 from "./Step1";
+import Step2 from "./Step2";
+import Step3 from "./Step3";
+import styles from "./Style.less";
+import IconImage from "./IconImg";
+import UploadScreenshots from "./UploadScreenshots";
 
 const Paragraph = Typography;
 const Dragger = Upload.Dragger;
