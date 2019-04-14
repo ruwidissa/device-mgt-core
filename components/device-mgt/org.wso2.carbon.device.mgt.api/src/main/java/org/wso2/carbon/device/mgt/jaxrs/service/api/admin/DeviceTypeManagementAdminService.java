@@ -15,6 +15,23 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (https://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ *
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.api.admin;
 
@@ -31,7 +48,7 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -40,12 +57,11 @@ import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -73,10 +89,22 @@ import javax.ws.rs.core.Response;
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "Getting Details of a Device",
-                        description = "Getting Details of a Device",
+                        name = "Manage a Device Type",
+                        description = "Add, Edit or View a Device Type",
                         key = "perm:admin:device-type",
                         permissions = {"/device-mgt/admin/device-type"}
+                ),
+                @Scope(
+                        name = "Getting Details of a Device Type",
+                        description = "Getting Details of a Device Type",
+                        key = "perm:admin:device-type:view",
+                        permissions = {"/device-mgt/admin/device-type/view"}
+                ),
+                @Scope(
+                        name = "Add Device Type Config",
+                        description = "Add Platform Config of a Device Type",
+                        key = "perm:admin:device-type:configs",
+                        permissions = {"/device-mgt/admin/device-type/config"}
                 )
         }
 )
@@ -88,10 +116,10 @@ public interface DeviceTypeManagementAdminService {
             httpMethod = "GET",
             value = "Getting the Supported Device Type with Meta Definition",
             notes = "Get the list of device types supported by WSO2 IoT.",
-            tags = "Device Type Management",
+            tags = "Device Type Management Administrative Service",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type:view")
                     })
             }
     )
@@ -132,6 +160,59 @@ public interface DeviceTypeManagementAdminService {
             }
     )
     Response getDeviceTypes();
+
+    @GET
+    @Path("/{type}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of a Device Type",
+            notes = "Get the details of a device by searching via the device type and the tenant domain.",
+            response = DeviceType.class,
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type.",
+                    response = DeviceType.class,
+                    responseContainer = "List",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response getDeviceTypeByName(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows or fire-alarm.",
+                    required = true)
+            @PathParam("type")
+            @Size(min = 2, max = 45)
+                    String type);
 
     @POST
     @ApiOperation(
@@ -179,6 +260,7 @@ public interface DeviceTypeManagementAdminService {
             required = true)DeviceType deviceType);
 
     @PUT
+    @Path("/{type}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
@@ -219,9 +301,73 @@ public interface DeviceTypeManagementAdminService {
                     message = "Internal Server Error. \n Server error occurred while fetching the device list.",
                     response = ErrorResponse.class)
     })
-    Response updateDeviceType(@ApiParam(
-            name = "type",
+    Response updateDeviceType(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows or fire-alarm.",
+                    required = true)
+            @PathParam("type")
+            @Size(min = 2, max = 45)
+                    String name,
+            @ApiParam(
+            name = "deviceType",
             value = "The device type such as ios, android, windows or fire-alarm.",
             required = true) DeviceType deviceType);
+
+    @POST
+    @Path("/{type}/configs")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add Configuration Details",
+            notes = "Add Configuration Details of a Device Type.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type:configs")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully added the device type config.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response addDeviceTypePlatformConfig(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows or fire-alarm.",
+                    required = true)
+            @PathParam("type")
+            @Size(min = 2, max = 45)
+                    String type,
+            @ApiParam(
+                    name = "config",
+                    value = "Platform configuration of specified device type.",
+                    required = true)
+                    PlatformConfiguration config);
+
 
 }

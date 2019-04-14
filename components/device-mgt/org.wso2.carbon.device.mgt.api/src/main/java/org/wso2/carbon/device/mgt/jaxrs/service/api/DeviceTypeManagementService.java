@@ -15,6 +15,22 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
@@ -31,15 +47,23 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.ResponseHeader;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.mgt.common.Feature;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @SwaggerDefinition(
         info = @Info(
@@ -62,13 +86,19 @@ import javax.ws.rs.core.Response;
                         name = "Getting the Supported Device Platforms",
                         description = "Getting the Supported Device Platforms",
                         key = "perm:device-types:types",
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/device-type/view"}
                 ),
                 @Scope(
                         name = "Get Feature Details of a Device Type",
                         description = "Get Feature Details of a Device Type",
                         key = "perm:device-types:features",
-                        permissions = {"/device-mgt/devices/owning-device/view"}
+                        permissions = {"/device-mgt/device-type/features/view"}
+                ),
+                @Scope(
+                        name = "Get Config Details of a Device Type",
+                        description = "Get Config Details of a Device Type",
+                        key = "perm:device-types:configs",
+                        permissions = {"/device-mgt/device-type/config/view"}
                 )
         }
 )
@@ -84,7 +114,7 @@ public interface DeviceTypeManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Getting the Supported Device Platforms",
-            notes = "Get the list of device platforms supported by WSO2 EMM.",
+            notes = "Get the list of device platforms supported by Entgra IoTS.",
             tags = "Device Type Management",
             extensions = {
                     @Extension(properties = {
@@ -133,10 +163,63 @@ public interface DeviceTypeManagementService {
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time.\n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200"
+            )
             @HeaderParam("If-Modified-Since")
                     String ifModifiedSince);
+
+    @GET
+    @Path("/{type}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of a Device Type",
+            notes = "Get the details of a device by searching via the device type and the tenant domain.",
+            response = DeviceType.class,
+            tags = "Device Type Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type.",
+                    response = DeviceType.class,
+                    responseContainer = "List",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response getDeviceTypeByName(
+            @ApiParam(
+                    name = "type",
+                    value = "The device type name, such as ios, android, windows or fire-alarm.",
+                    required = true)
+            @PathParam("type")
+            @Size(min = 2, max = 45)
+                    String type);
 
     @GET
     @Path("/{type}/features")
@@ -144,7 +227,7 @@ public interface DeviceTypeManagementService {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Get Feature Details of a Device Type",
-            notes = "The features in WSO2 EMM enables you to carry out many operations on a given device platform. " +
+            notes = "The features in Entgra IoTS enables you to carry out many operations on a given device platform. " +
                     "Using this REST API you can get the features that can be carried out on a preferred device type," +
                     " such as iOS, Android or Windows.",
             tags = "Device Type Management",
@@ -202,108 +285,78 @@ public interface DeviceTypeManagementService {
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time.\n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200"
+            )
             @HeaderParam("If-Modified-Since")
                     String ifModifiedSince);
 
     @GET
-    @Path("/all/{type}")
+    @Path("/{type}/configs")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Details of a Device Type",
-            notes = "Get the details of a device by searching via the device type and the tenant domain.",
-            response = DeviceType.class,
-            tags = "Device Type Management Administrative Service",
+            value = "Get Configuration Details of a Device Type",
+            notes = "The features in Entgra IoTS enables you to carry out many operations on a given device platform. " +
+                    "Using this REST API you can get platform configurations that can be carried out on a preferred " +
+                    "device type, such as iOS, Android or Windows.",
+            tags = "Device Type Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:configs")
                     })
             }
     )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type.",
-                         response = DeviceType.class,
-                         responseContainer = "List",
-                         responseHeaders = {
-                                 @ResponseHeader(
-                                         name = "Content-Type",
-                                         description = "The content type of the body")
-                         }),
-            @ApiResponse(
-                    code = 304,
-                    message = "Not Modified. Empty body because the client already has the latest version of the " +
-                            "requested resource.\n"),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 404,
-                    message = "Not Found.\n The specified device does not exist",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 406,
-                    message = "Not Acceptable.\n The requested media type is not supported"),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
-                    response = ErrorResponse.class)
-    })
-    Response getDeviceTypeByName(
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched configurations.",
+                            response = PlatformConfiguration.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description =
+                                                    "Date and time the resource was last modified.\n" +
+                                                            "Used by caches, or in conditional requests."),
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 304,
+                            message =
+                                    "Not Modified. \n Empty body because the client already has the latest version " +
+                                            "of the requested resource.\n"),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable.\n The requested media type is not supported"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Server error occurred while fetching the " +
+                                    "list of supported device types.",
+                            response = ErrorResponse.class)
+            }
+    )
+    Response getConfigs(
             @ApiParam(
                     name = "type",
                     value = "The device type name, such as ios, android, windows or fire-alarm.",
                     required = true)
             @PathParam("type")
-            @Size(min = 2, max = 45)
-            String type);
-
-    @GET
-    @Path("/all")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Retrieve device types information",
-            notes = "Retrieve device types information.",
-            response = DeviceType.class,
-            tags = "Device Type Management Administrative Service",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device-types:types")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type.",
-                         response = DeviceType.class,
-                         responseContainer = "List",
-                         responseHeaders = {
-                                 @ResponseHeader(
-                                         name = "Content-Type",
-                                         description = "The content type of the body")
-                         }),
-            @ApiResponse(
-                    code = 304,
-                    message = "Not Modified. Empty body because the client already has the latest version of the " +
-                            "requested resource.\n"),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 404,
-                    message = "Not Found.\n The specified device does not exist",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 406,
-                    message = "Not Acceptable.\n The requested media type is not supported"),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
-                    response = ErrorResponse.class)
-    })
-    Response getDeviceTypes();
+            @Size(max = 45)
+                    String type,
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time.\n" +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200"
+            )
+            @HeaderParam("If-Modified-Since")
+                    String ifModifiedSince);
 
 }
