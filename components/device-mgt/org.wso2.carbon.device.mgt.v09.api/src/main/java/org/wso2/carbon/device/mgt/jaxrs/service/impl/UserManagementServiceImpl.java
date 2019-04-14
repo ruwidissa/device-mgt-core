@@ -23,12 +23,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.wst.common.uriresolver.internal.util.URIEncoder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
+import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoWrapper;
@@ -67,8 +71,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -633,6 +640,94 @@ public class UserManagementServiceImpl implements UserManagementService {
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
         return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
+    }
+
+    @GET
+    @Override
+    @Path("/activities")
+    public Response getActivities(
+            @QueryParam("since") String since,
+            @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
+        long ifModifiedSinceTimestamp;
+        long sinceTimestamp;
+        long timestamp = 0;
+        boolean isIfModifiedSinceSet = false;
+        String initiatedBy;
+        if (log.isDebugEnabled()) {
+            log.debug("getActivities since: " + since + " , offset: " + offset + " ,limit: " + limit + " ,"
+                    + "ifModifiedSince: " + ifModifiedSince);
+        }
+        RequestValidationUtil.validatePaginationParameters(offset, limit);
+        if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+            Date ifSinceDate;
+            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+            try {
+                ifSinceDate = format.parse(ifModifiedSince);
+            } catch (ParseException e) {
+                return Response.status(400).entity(new ErrorResponse.ErrorResponseBuilder()
+                        .setMessage("Invalid date string is provided in 'If-Modified-Since' header").build()).build();
+            }
+            ifModifiedSinceTimestamp = ifSinceDate.getTime();
+            isIfModifiedSinceSet = true;
+            timestamp = ifModifiedSinceTimestamp / 1000;
+        } else if (since != null && !since.isEmpty()) {
+            Date sinceDate;
+            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+            try {
+                sinceDate = format.parse(since);
+            } catch (ParseException e) {
+                return Response.status(400).entity(new ErrorResponse.ErrorResponseBuilder()
+                        .setMessage("Invalid date string is provided in 'since' filter").build()).build();
+            }
+            sinceTimestamp = sinceDate.getTime();
+            timestamp = sinceTimestamp / 1000;
+        }
+
+        if (timestamp == 0) {
+            //If timestamp is not sent by the user, a default value is set, that is equal to current time-12 hours.
+            long time = System.currentTimeMillis() / 1000;
+            timestamp = time - 42300;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("getActivities final timestamp " + timestamp);
+        }
+
+        List<Activity> activities;
+        int count;
+        ActivityList activityList = new ActivityList();
+        DeviceManagementProviderService dmService;
+
+        initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Calling database to get activities.");
+            }
+            dmService = DeviceMgtAPIUtils.getDeviceManagementService();
+            activities = dmService.getActivitiesUpdatedAfterByUser(timestamp, initiatedBy, limit, offset);
+            if (log.isDebugEnabled()) {
+                log.debug("Calling database to get activity count with timestamp and user.");
+            }
+            count = dmService.getActivityCountUpdatedAfterByUser(timestamp, initiatedBy);
+            if (log.isDebugEnabled()) {
+                log.debug("Activity count: " + count);
+            }
+
+            activityList.setList(activities);
+            activityList.setCount(count);
+            if ((activities == null || activities.isEmpty()) && isIfModifiedSinceSet) {
+                return Response.notModified().build();
+            }
+            return Response.ok().entity(activityList).build();
+        } catch (OperationManagementException e) {
+            String msg =
+                    "Error Response occurred while fetching the activities updated after given time stamp for the user "
+                            + initiatedBy + ".";
+            log.error(msg, e);
+            return Response.serverError().entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build())
+                    .build();
+        }
     }
 
     private Map<String, String> buildDefaultUserClaims(String firstName, String lastName, String emailAddress) {
