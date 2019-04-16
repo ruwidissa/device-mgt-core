@@ -348,7 +348,7 @@ public interface DeviceTypeManagementService {
                     value = "The device type name, such as ios, android, windows or fire-alarm.",
                     required = true)
             @PathParam("type")
-            @Size(max = 45)
+            @Size(min = 2, max = 45)
                     String type,
             @ApiParam(
                     name = "If-Modified-Since",

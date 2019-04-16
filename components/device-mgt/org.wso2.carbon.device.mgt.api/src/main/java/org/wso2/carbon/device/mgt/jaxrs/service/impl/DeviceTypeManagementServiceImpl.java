@@ -83,7 +83,7 @@ public class DeviceTypeManagementServiceImpl implements DeviceTypeManagementServ
     @Override
     @GET
     @Path("/{type}")
-    public Response getDeviceTypeByName(@PathParam("type") @Size(max = 45) String type) {
+    public Response getDeviceTypeByName(@PathParam("type") @Size(min = 2, max = 45) String type) {
         if (type != null && type.length() > 0) {
             try {
                 DeviceType deviceType = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceType(type);
@@ -129,11 +129,16 @@ public class DeviceTypeManagementServiceImpl implements DeviceTypeManagementServ
     @GET
     @Override
     @Path("/{type}/configs")
-    public Response getConfigs(@PathParam("type") @Size(max = 45) String type,
+    public Response getConfigs(@PathParam("type") @Size(min = 2, max = 45) String type,
                                @HeaderParam("If-Modified-Since") String ifModifiedSince) {
         PlatformConfiguration platformConfiguration;
         try {
             platformConfiguration = DeviceMgtAPIUtils.getDeviceManagementService().getConfiguration(type);
+            if (platformConfiguration == null) {
+                platformConfiguration = new PlatformConfiguration();
+                platformConfiguration.setType(type);
+                platformConfiguration.setConfiguration(new ArrayList<>());
+            }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving the '" + type + "' platform configuration";
             log.error(msg, e);
