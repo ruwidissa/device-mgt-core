@@ -26,6 +26,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
@@ -499,7 +500,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         try {
             RequestValidationUtil.validateDeviceIdentifier(type, id);
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            FeatureManager fm = dms.getFeatureManager(type);
+            FeatureManager fm;
+            try {
+                fm = dms.getFeatureManager(type);
+            } catch (DeviceTypeNotFoundException e) {
+                return Response.status(Response.Status.NOT_FOUND).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage("No feature manager is " +
+                                "registered with the given type '" + type + "'").build()).build();
+            }
             if (fm == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage("No feature manager is " +

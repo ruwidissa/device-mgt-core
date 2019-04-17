@@ -31,9 +31,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
@@ -437,7 +437,7 @@ public class DeviceManagementServiceImplTest {
     }
 
     @Test(description = "Testing getting device features when feature manager is not registered for the device type")
-    public void testGetFeaturesOfDeviceWhenFeatureManagerIsNotRegistered() throws DeviceManagementException {
+    public void testGetFeaturesOfDeviceWhenFeatureManagerIsNotRegistered() throws DeviceTypeNotFoundException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString())).thenReturn(null);
@@ -448,14 +448,14 @@ public class DeviceManagementServiceImplTest {
     }
 
     @Test(description = "Testing getting device features when unable to get the feature manager")
-    public void testGetFeaturesException() throws DeviceManagementException {
+    public void testGetFeaturesException() throws DeviceTypeNotFoundException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString()))
-                .thenThrow(new DeviceManagementException());
+                .thenThrow(new DeviceTypeNotFoundException());
         Response response = this.deviceManagementService
                 .getFeaturesOfDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), null);
-        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }
 

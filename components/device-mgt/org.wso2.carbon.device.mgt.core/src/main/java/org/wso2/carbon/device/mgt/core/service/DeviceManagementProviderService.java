@@ -486,7 +486,7 @@ public interface DeviceManagementProviderService {
 
     void sendRegistrationEmail(EmailMetaInfo metaInfo) throws DeviceManagementException, ConfigurationManagementException;
 
-    FeatureManager getFeatureManager(String deviceType) throws DeviceManagementException;
+    FeatureManager getFeatureManager(String deviceType) throws DeviceTypeNotFoundException;
 
     /**
      * Proxy method to get the tenant configuration of a given platform.

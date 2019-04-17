@@ -38,6 +38,7 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -107,14 +108,19 @@ public class DeviceTypeManagementServiceImpl implements DeviceTypeManagementServ
     @Path("/{type}/features")
     public Response getFeatures(@PathParam("type") @Size(max = 45) String type,
                                 @HeaderParam("If-Modified-Since") String ifModifiedSince) {
-        List<Feature> features;
+        List<Feature> features = new ArrayList<>();
         DeviceManagementProviderService dms;
         try {
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            FeatureManager fm = dms.getFeatureManager(type);
-            if (fm == null) {
-                features = new ArrayList<>();
-            } else {
+            FeatureManager fm;
+            try {
+                fm = dms.getFeatureManager(type);
+            } catch (DeviceTypeNotFoundException e) {
+                return Response.status(Response.Status.NOT_FOUND).entity(
+                        new ErrorResponse.ErrorResponseBuilder()
+                                .setMessage("No device type found with name '" + type + "'").build()).build();
+            }
+            if (fm != null) {
                 features = fm.getFeatures();
             }
         } catch (DeviceManagementException e) {

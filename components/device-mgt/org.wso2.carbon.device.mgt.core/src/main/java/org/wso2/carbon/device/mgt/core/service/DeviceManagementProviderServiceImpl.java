@@ -39,6 +39,7 @@ import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
@@ -171,14 +172,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public FeatureManager getFeatureManager(String deviceType) throws DeviceManagementException {
+    public FeatureManager getFeatureManager(String deviceType) throws DeviceTypeNotFoundException {
         DeviceManager deviceManager = this.getDeviceManager(deviceType);
         if (deviceManager == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Device Manager associated with the device type '" + deviceType + "' is null. " +
                         "Therefore, not attempting method 'getFeatureManager'");
             }
-            return null;
+            throw new DeviceTypeNotFoundException("Device type '" + deviceType + "' not found.");
         }
         return deviceManager.getFeatureManager();
     }
