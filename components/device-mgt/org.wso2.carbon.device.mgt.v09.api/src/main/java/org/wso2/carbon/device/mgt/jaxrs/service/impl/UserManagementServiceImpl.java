@@ -644,7 +644,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @GET
     @Override
-    @Path("/activities")
+    @Path("/device/activities")
     public Response getActivities(
             @QueryParam("since") String since,
             @QueryParam("offset") int offset,
@@ -662,7 +662,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         RequestValidationUtil.validatePaginationParameters(offset, limit);
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             Date ifSinceDate;
-            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+            SimpleDateFormat format = new SimpleDateFormat(Constants.DEFAULT_SIMPLE_DATE_FORMAT);
             try {
                 ifSinceDate = format.parse(ifModifiedSince);
             } catch (ParseException e) {
@@ -674,7 +674,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             timestamp = ifModifiedSinceTimestamp / 1000;
         } else if (since != null && !since.isEmpty()) {
             Date sinceDate;
-            SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+            SimpleDateFormat format = new SimpleDateFormat(Constants.DEFAULT_SIMPLE_DATE_FORMAT);
             try {
                 sinceDate = format.parse(since);
             } catch (ParseException e) {

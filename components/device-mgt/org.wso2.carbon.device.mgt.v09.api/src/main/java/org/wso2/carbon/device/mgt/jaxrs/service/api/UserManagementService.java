@@ -807,7 +807,7 @@ public interface UserManagementService {
             @Valid EnrollmentInvitation enrollmentInvitation);
 
     @GET
-    @Path("/activities")
+    @Path("/device/activities")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",

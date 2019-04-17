@@ -933,7 +933,7 @@ public interface UserManagementService {
     Response validateUser(Credential credential);
 
     @GET
-    @Path("/activities")
+    @Path("/device/activities")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
