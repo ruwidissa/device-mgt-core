@@ -44,6 +44,10 @@ public class Configuration {
 
     private UIConfiguration uiConfiguration;
 
+    private List<String> appCategories;
+
+    private String artifactDownloadEndpoint;
+
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
         return datasourceName;
@@ -74,8 +78,7 @@ public class Configuration {
         return lifecycleStates;
     }
 
-    public void setLifecycleStates(
-            List<LifecycleState> lifecycleStates) {
+    public void setLifecycleStates(List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
 
@@ -86,6 +89,25 @@ public class Configuration {
     @XmlElement(name = "UIConfigs")
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
+    }
+
+    @XmlElement(name = "ArtifactDownloadEndpoint", required = true)
+    public String getArtifactDownloadEndpoint() {
+        return artifactDownloadEndpoint;
+    }
+
+    public void setArtifactDownloadEndpoint(String artifactDownloadEndpoint) {
+        this.artifactDownloadEndpoint = artifactDownloadEndpoint;
+    }
+
+    @XmlElementWrapper(name = "AppCategories")
+    @XmlElement(name = "Category")
+    public List<String> getAppCategories() {
+        return appCategories;
+    }
+
+    public void setAppCategories(List<String> appCategories) {
+        this.appCategories = appCategories;
     }
 }
 

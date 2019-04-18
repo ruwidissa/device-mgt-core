@@ -71,7 +71,6 @@
                             org.wso2.carbon.user.api.*,
                             org.wso2.carbon.ndatasource.core,
                             org.wso2.carbon,
-                            javax.annotation,
                             org.xml.sax,
                             org.xml.sax.helpers,
                             org.apache.commons.io,
@@ -196,6 +195,17 @@
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>3.2.7</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

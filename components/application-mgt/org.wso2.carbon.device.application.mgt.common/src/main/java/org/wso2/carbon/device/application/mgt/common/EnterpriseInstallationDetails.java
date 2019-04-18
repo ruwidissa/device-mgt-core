@@ -37,7 +37,7 @@ public class EnterpriseInstallationDetails {
 
     @ApiModelProperty(
             name = "applicationUUID",
-            value = "Application ID",
+            value = "ApplicationDTO ID",
             required = true,
             example = "4354c752-109f-11e8-b642-0ed5f89f718b"
     )

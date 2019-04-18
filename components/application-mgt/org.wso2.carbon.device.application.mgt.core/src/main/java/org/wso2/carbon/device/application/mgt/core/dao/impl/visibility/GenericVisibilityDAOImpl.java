@@ -89,7 +89,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
             rs = stmt.executeQuery();
 
             while (rs.next()){
-                unrestrictedRoles.add(rs.getString("ROLE").toLowerCase());
+                unrestrictedRoles.add(rs.getString("ROLE"));
             }
             return unrestrictedRoles;
 

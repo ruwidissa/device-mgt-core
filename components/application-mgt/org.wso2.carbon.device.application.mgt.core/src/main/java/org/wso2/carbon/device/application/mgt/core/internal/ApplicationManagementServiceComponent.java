@@ -24,14 +24,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.ConfigManager;
+import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import org.wso2.carbon.device.application.mgt.core.impl.ConfigManagerImpl;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.impl.AppmDataHandlerImpl;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -75,16 +75,17 @@ public class ApplicationManagementServiceComponent {
         try {
             String dataSourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
             ApplicationManagementDAOFactory.init(dataSourceName);
-//            ApplicationManagementDAOFactory.initDatabases();
 
             List<LifecycleState> lifecycleStates = ConfigurationManager.getInstance().
                     getConfiguration().getLifecycleStates();
-            LifecycleStateManger lifecycleStateManger = ApplicationManagementUtil.getLifecycleStateMangerInstance();
-            lifecycleStateManger.init(lifecycleStates);
-            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManger);
-            bundleContext.registerService(LifecycleStateManger.class.getName(), lifecycleStateManger, null);
+            LifecycleStateManager lifecycleStateManager = ApplicationManagementUtil.getLifecycleStateMangerInstance();
+            lifecycleStateManager.init(lifecycleStates);
+            DataHolder.getInstance().setLifecycleStateManger(lifecycleStateManager);
+            bundleContext.registerService(LifecycleStateManager.class.getName(), lifecycleStateManager, null);
 
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
+            applicationManager
+                    .addAplicationCategories(ConfigurationManager.getInstance().getConfiguration().getAppCategories());
             DataHolder.getInstance().setApplicationManager(applicationManager);
             bundleContext.registerService(ApplicationManager.class.getName(), applicationManager, null);
 
@@ -103,9 +104,9 @@ public class ApplicationManagementServiceComponent {
 
             UIConfiguration uiConfiguration = ConfigurationManager.getInstance().
                     getConfiguration().getUiConfiguration();
-            ConfigManager configManager = new ConfigManagerImpl(uiConfiguration);
+            AppmDataHandler configManager = new AppmDataHandlerImpl(uiConfiguration);
             DataHolder.getInstance().setConfigManager(configManager);
-            bundleContext.registerService(ConfigManager.class.getName(), configManager, null);
+            bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
 
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (Throwable e) {
@@ -119,14 +120,14 @@ public class ApplicationManagementServiceComponent {
 
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
-            log.debug("Setting Application Management OSGI Manager");
+            log.debug("Setting ApplicationDTO Management OSGI Manager");
         }
         DataHolder.getInstance().setDeviceManagementService(deviceManagementProviderService);
     }
 
     protected void unsetDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
-            log.debug("Removing Application Management OSGI Manager");
+            log.debug("Removing ApplicationDTO Management OSGI Manager");
         }
         DataHolder.getInstance().setDeviceManagementService(null);
     }

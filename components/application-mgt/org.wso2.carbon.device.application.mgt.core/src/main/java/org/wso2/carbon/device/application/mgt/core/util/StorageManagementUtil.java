@@ -20,11 +20,14 @@ package org.wso2.carbon.device.application.mgt.core.util;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ImageArtifact;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +38,9 @@ import java.nio.file.Files;
  * This is a util class that handles Storage Management related tasks.
  */
 public class StorageManagementUtil {
+
+    private static Log log = LogFactory.getLog(StorageManagementUtil.class);
+
     /**
      * This method is responsible for creating artifact parent directories in the given path.
      *
@@ -99,4 +105,19 @@ public class StorageManagementUtil {
         return imageArtifact;
     }
 
+    /***
+     * Get the fine input stream
+     * @param filePath File path
+     * @return {@link InputStream}
+     * @throws IOException throws if error occured when reading file or if couldn't find a file in the filePath
+     */
+    public static InputStream getInputStream (String filePath) throws IOException {
+        try (InputStream inputStream = new FileInputStream(filePath)){
+            return inputStream;
+        } catch (FileNotFoundException e) {
+            String msg = "Couldn't file the file in file path: " + filePath;
+            log.error(msg);
+            throw new IOException(msg);
+        }
+    }
 }

@@ -28,12 +28,31 @@
     </parent>
     <artifactId>org.wso2.carbon.device.application.mgt.store.ui</artifactId>
     <version>3.2.2-SNAPSHOT</version>
-
+    <packaging>war</packaging>
+    <name>WSO2 Carbon - Application Management Store UI Component</name>
+    <url>http://wso2.org</url>
+    <description>This Component contains Application Management store UI</description>
     <dependencies>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <packagingExcludes>WEB-INF/lib/*cxf*.jar</packagingExcludes>
+                    <warName>store</warName>
+                    <webResources>
+                        <resource>
+                            <directory>${npm.output.directory}/dist</directory>
+                        </resource>
+                        <resource>
+                            <directory>${npm.output.directory}/public</directory>
+                            <targetPath>public</targetPath>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -46,10 +65,11 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/store</workingDirectory>
+                            <workingDirectory>react-app</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>install</argument>
+                                <argument>--silent</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -60,7 +80,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/store</workingDirectory>
+                            <workingDirectory>react-app</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
@@ -73,7 +93,6 @@
                     <workingDirectory>${npm.working.dir}</workingDirectory>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
     <profiles>
@@ -94,6 +113,8 @@
         <maven.test.skip>false</maven.test.skip>
         <npm.executable>npm</npm.executable>
         <npm.build.command>build_prod</npm.build.command>
-        <npm.working.dir>./src/main/</npm.working.dir>
+        <npm.working.dir>./react-app</npm.working.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <npm.output.directory>react-app</npm.output.directory>
     </properties>
 </project>

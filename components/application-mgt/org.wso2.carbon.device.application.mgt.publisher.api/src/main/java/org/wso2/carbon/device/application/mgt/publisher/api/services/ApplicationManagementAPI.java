@@ -34,6 +34,9 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
 import java.util.List;
 import javax.validation.Valid;
@@ -55,7 +58,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "Application Management Service",
+                title = "ApplicationDTO Management Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationManagementService"),
@@ -64,20 +67,20 @@ import javax.ws.rs.core.Response;
                 }
         ),
         tags = {
-                @Tag(name = "application_management, device_management", description = "Application Management related "
+                @Tag(name = "application_management, device_management", description = "ApplicationDTO Management related "
                         + "APIs")
         }
 )
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "Get Application Details",
+                        name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:publisher:view",
                         permissions = {"/device-mgt/application/view"}
                 ),
                 @Scope(
-                        name = "Update an Application",
+                        name = "Update an ApplicationDTO",
                         description = "Update an application",
                         key = "perm:app:publisher:update",
                         permissions = {"/device-mgt/application/update"}
@@ -85,7 +88,7 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/publisher/applications")
-@Api(value = "Application Management", description = "This API carries all application management related operations " +
+@Api(value = "ApplicationDTO Management", description = "This API carries all application management related operations " +
         "such as get all the applications, add application, etc.")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementAPI {
@@ -101,7 +104,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get all applications",
             notes = "This will get all applications",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
@@ -125,6 +128,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
+                    name = "deviceType",
+                    value = "Supporting device Type of the application")
+            @QueryParam("device-type") String deviceType,
+            @ApiParam(
                     name = "name",
                     value = "Name of the application")
             @QueryParam("name") String appName,
@@ -134,7 +141,7 @@ public interface ApplicationManagementAPI {
             @QueryParam("type") String appType,
             @ApiParam(
                     name = "category",
-                    value = "Category of the application")
+                    value = "CategoryDTO of the application")
             @QueryParam("category") String appCategory,
             @ApiParam(
                     name = "exact-match",
@@ -171,7 +178,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get the application of requesting application id and  state",
             notes = "This will get the application identified by the application id and state, if exists",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
@@ -183,10 +190,10 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully retrieved relevant application.",
-                            response = Application.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 404,
-                            message = "Application not found"),
+                            message = "ApplicationDTO not found"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application.",
@@ -206,6 +213,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
+    @Path("/{appId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -214,7 +222,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "PUT",
             value = "Edit an application",
             notes = "This will edit the new application",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -226,11 +234,11 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully edited the application.",
-                            response = Application.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "Application updating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while editing the application.",
@@ -238,10 +246,15 @@ public interface ApplicationManagementAPI {
             })
     Response updateApplication(
             @ApiParam(
+                    name = "appId",
+                    value = "application Id",
+                    required = true)
+            @PathParam("appId") int appId,
+            @ApiParam(
                     name = "application",
                     value = "The application that need to be edited.",
                     required = true)
-            @Valid Application application
+            @Valid ApplicationDTO application
     );
 
     @POST
@@ -253,7 +266,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "POST",
             value = "Create an application",
             notes = "This will create a new application",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -265,11 +278,11 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully created an application.",
-                            response = Application.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "Application creating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while creating the application.",
@@ -280,7 +293,7 @@ public interface ApplicationManagementAPI {
                     name = "application",
                     value = "The application that need to be created.",
                     required = true)
-            @Multipart("application") Application application,
+            @Multipart("application") ApplicationWrapper application,
             @ApiParam(
                     name = "binaryFile",
                     value = "Binary file of uploading application",
@@ -313,78 +326,78 @@ public interface ApplicationManagementAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
-    @Path("/{deviceType}/{appType}/{appId}")
-    @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
-            value = "Create an application",
-            notes = "This will create a new application",
-            tags = "Application Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 201,
-                            message = "OK. \n Successfully created an application.",
-                            response = Application.class),
-                    @ApiResponse(
-                            code = 400,
-                            message = "Bad Request. \n " +
-                                    "Application creating payload contains unacceptable or vulnerable data"),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Error occurred while creating the application.",
-                            response = ErrorResponse.class)
-            })
-    Response createRelease(
-            @PathParam("deviceType") String deviceType,
-            @PathParam("appId") String appType,
-            @PathParam("appId") int appId,
-            @ApiParam(
-                    name = "applicationRelease",
-                    value = "The application release that need to be created.",
-                    required = true)
-            @Multipart("applicationRelease") ApplicationRelease applicationRelease,
-            @ApiParam(
-                    name = "binaryFile",
-                    value = "Binary file of uploading application",
-                    required = true)
-            @Multipart(value = "binaryFile") Attachment binaryFile,
-            @ApiParam(
-                    name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
-            @Multipart(value = "icon") Attachment iconFile,
-            @ApiParam(
-                    name = "banner",
-                    value = "Banner of the uploading application",
-                    required = true)
-            @Multipart(value = "banner") Attachment bannerFile,
-            @ApiParam(
-                    name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
-            @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(
-                    name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(
-                    name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
-            @Multipart(value = "screenshot3") Attachment screenshot3
-    );
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes("multipart/mixed")
+//    @Path("/{deviceType}/{appType}/{appId}")
+//    @ApiOperation(
+//            consumes = MediaType.APPLICATION_JSON,
+//            produces = MediaType.APPLICATION_JSON,
+//            httpMethod = "POST",
+//            value = "Create an application",
+//            notes = "This will create a new application",
+//            tags = "ApplicationDTO Management",
+//            extensions = {
+//                    @Extension(properties = {
+//                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+//                    })
+//            }
+//    )
+//    @ApiResponses(
+//            value = {
+//                    @ApiResponse(
+//                            code = 201,
+//                            message = "OK. \n Successfully created an application.",
+//                            response = Application.class),
+//                    @ApiResponse(
+//                            code = 400,
+//                            message = "Bad Request. \n " +
+//                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
+//                    @ApiResponse(
+//                            code = 500,
+//                            message = "Internal Server Error. \n Error occurred while creating the application.",
+//                            response = ErrorResponse.class)
+//            })
+//    Response createRelease(
+//            @PathParam("deviceType") String deviceType,
+//            @PathParam("appId") String appType,
+//            @PathParam("appId") int appId,
+//            @ApiParam(
+//                    name = "applicationRelease",
+//                    value = "The application release that need to be created.",
+//                    required = true)
+//            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
+//            @ApiParam(
+//                    name = "binaryFile",
+//                    value = "Binary file of uploading application",
+//                    required = true)
+//            @Multipart(value = "binaryFile") Attachment binaryFile,
+//            @ApiParam(
+//                    name = "icon",
+//                    value = "Icon of the uploading application",
+//                    required = true)
+//            @Multipart(value = "icon") Attachment iconFile,
+//            @ApiParam(
+//                    name = "banner",
+//                    value = "Banner of the uploading application",
+//                    required = true)
+//            @Multipart(value = "banner") Attachment bannerFile,
+//            @ApiParam(
+//                    name = "screenshot1",
+//                    value = "Screen Shots of the uploading application",
+//                    required = true)
+//            @Multipart(value = "screenshot1") Attachment screenshot1,
+//            @ApiParam(
+//                    name = "screenshot2",
+//                    value = "Screen Shots of the uploading application",
+//                    required = false)
+//            @Multipart(value = "screenshot2") Attachment screenshot2,
+//            @ApiParam(
+//                    name = "screenshot3",
+//                    value = "Screen Shots of the uploading application",
+//                    required = false)
+//            @Multipart(value = "screenshot3") Attachment screenshot3
+//    );
 
     @DELETE
     @Consumes("application/json")
@@ -395,7 +408,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "DELETE",
             value = "Delete the application with the given UUID",
             notes = "This will delete the application with the given UUID",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -416,7 +429,7 @@ public interface ApplicationManagementAPI {
     Response deleteApplication(
             @ApiParam(
                     name = "UUID",
-                    value = "Unique identifier of the Application",
+                    value = "Unique identifier of the ApplicationDTO",
                     required = true)
             @PathParam("appid") int applicationId
     );
@@ -431,7 +444,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "POST",
             value = "Upload artifacts",
             notes = "This will create a new application",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -443,6 +456,10 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully updated artifacts."),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Requesting to update image artifacts with invalid application "
+                                    + "or application release data."),
                     @ApiResponse(
                             code = 403,
                             message = "FORBIDDEN. \n Can't Update the application release in PUBLISHED or DEPRECATED "
@@ -503,7 +520,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "POST",
             value = "Upload artifacts",
             notes = "This will create a new application",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -518,7 +535,10 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "Application artifact updating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO artifact updating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found application/application release to update applocation release artifact."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
@@ -537,7 +557,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
-    @Path("/{appId}/{uuid}")
+    @Path("/{deviceType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -546,7 +566,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "PUT",
             value = "Update an application release",
             notes = "This will update a new application release",
-            tags = "Application Management",
+            tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -558,24 +578,33 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully created an application release.",
-                            response = ApplicationRelease.class),
+                            response = ApplicationReleaseDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
-                                    "Application release updating payload contains unacceptable or vulnerable data"),
+                                    "ApplicationDTO release updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while releasing the application.",
                             response = ErrorResponse.class)
             })
     Response updateApplicationRelease(
-            @ApiParam(name = "appId", value = "Identifier of the Application", required = true) @PathParam("appId") int applicationId,
-            @ApiParam(name = "UUID", value = "Unique identifier of the Application Release", required = true) @PathParam("uuid") String applicationUUID,
-            @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationRelease applicationRelease,
+            @ApiParam(name = "deviceType", value = "Supported device type of the application", required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(name = "appId", value = "Identifier of the ApplicationDTO", required = true)
+            @PathParam("appId") int applicationId,
+            @ApiParam(name = "UUID", value = "Unique identifier of the ApplicationDTO Release", required = true)
+            @PathParam("uuid") String applicationUUID,
+            @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationReleaseDTO applicationRelease,
             @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
             @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @Multipart(value = "screenshot", required = false) List<Attachment> attachmentList);
+            @ApiParam(name = "screenshot1", value = "Screen Shots of the uploading application", required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(name = "screenshot2", value = "Screen Shots of the uploading application")
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(name = "screenshot3", value = "Screen Shots of the uploading application")
+            @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @GET
     @Path("/lifecycle/{appId}/{uuid}")
@@ -629,7 +658,7 @@ public interface ApplicationManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully add a lifecycle state.",
-                            response = Application.class),
+                            response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n " +
@@ -646,12 +675,12 @@ public interface ApplicationManagementAPI {
     Response addLifecycleState(
             @ApiParam(
                     name = "appId",
-                    value = "Identifier of the Application",
+                    value = "Identifier of the ApplicationDTO",
                     required = true)
             @PathParam("appId") int applicationId,
             @ApiParam(
                     name = "uuid",
-                    value = "UUID of the Application Release",
+                    value = "UUID of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUuid,
             @ApiParam(

@@ -63,6 +63,11 @@ public class Filter {
      */
     private String currentAppReleaseState;
 
+    /***
+     * Supported device type for the application. i.e Android, iOS, Windows etc
+     */
+    private int deviceTypeId;
+
     public int getLimit() {
         return limit;
     }
@@ -119,11 +124,13 @@ public class Filter {
         this.appCategory = appCategory;
     }
 
-    public String getCurrentAppReleaseState() {
-        return currentAppReleaseState;
-    }
+    public String getCurrentAppReleaseState() { return currentAppReleaseState; }
 
     public void setCurrentAppReleaseState(String currentAppReleaseState) {
         this.currentAppReleaseState = currentAppReleaseState;
     }
+
+    public int getDeviceTypeId() { return deviceTypeId; }
+
+    public void setDeviceTypeId(int deviceTypeId) { this.deviceTypeId = deviceTypeId; }
 }

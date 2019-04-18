@@ -18,7 +18,8 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.Application;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -37,8 +38,8 @@ public interface SubscriptionDAO {
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
      * @param deviceList List of {@link Device} which the application is installed on
-     * @param appId id of the {@link Application} which installs
-     * @param releaseId id of the {@link org.wso2.carbon.device.application.mgt.common.ApplicationRelease}
+     * @param appId id of the {@link ApplicationDTO} which installs
+     * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
     void subscribeDeviceToApplication(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
@@ -51,8 +52,8 @@ public interface SubscriptionDAO {
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
      * @param userList list of user names of the users whose devices are subscribed to the application
-     * @param appId id of the {@link Application} which installs
-     * @param releaseId id of the {@link org.wso2.carbon.device.application.mgt.common.ApplicationRelease}
+     * @param appId id of the {@link ApplicationDTO} which installs
+     * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
     void subscribeUserToApplication(int tenantId, String subscribedBy, List<String> userList, int appId, int releaseId)
@@ -65,8 +66,8 @@ public interface SubscriptionDAO {
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
      * @param roleList list of roles which belongs devices are subscribed to the application
-     * @param appId id of the {@link Application} which installs
-     * @param releaseId id of the {@link org.wso2.carbon.device.application.mgt.common.ApplicationRelease}
+     * @param appId id of the {@link ApplicationDTO} which installs
+     * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
     void subscribeRoleToApplication(int tenantId, String subscribedBy, List<String> roleList, int appId, int releaseId)
@@ -79,8 +80,8 @@ public interface SubscriptionDAO {
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
      * @param groupList list of {@link DeviceGroup} which belongs the devices that are subscribed to the application
-     * @param appId id of the {@link Application} which installs
-     * @param releaseId id of the {@link org.wso2.carbon.device.application.mgt.common.ApplicationRelease}
+     * @param appId id of the {@link ApplicationDTO} which installs
+     * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
     void subscribeGroupToApplication(int tenantId, String subscribedBy, List<DeviceGroup> groupList, int appId,

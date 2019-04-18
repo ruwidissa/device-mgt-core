@@ -16,10 +16,9 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-
 <ApplicationManagementConfiguration>
 
-    <!-- Application Mgt DB schema -->
+    <!-- ApplicationDTO Mgt DB schema -->
     <DatasourceName>jdbc/APPM_DS</DatasourceName>
 
     <Extensions>
@@ -30,54 +29,143 @@
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ReviewManagerImpl</ClassName>
         </Extension>
         <Extension name="LifecycleStateManager">
-            <ClassName>org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger</ClassName>
+            <ClassName>org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
         </Extension>
         <Extension name="SubscriptionManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
         </Extension>
+        <Extension name="ApplicationStorageManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
+            <Parameters>
+                <Parameter name="StoragePath">repository/resources/apps/</Parameter>
+                <Parameter name="MaxScreenShotCount">6</Parameter>
+            </Parameters>
+        </Extension>
     </Extensions>
 
+    <!-- This is for publisher lifecycle -->
+    <!-- The current lifecycle as follows
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        [Created] -> [In-Review] -> [Approved] -> [Published] -> [Unpublished] -> [Removed]
+                        ^                               |                               ^
+                        |                               |                               |
+                        |                               |-> [Deprecated] - - - - - - - -|
+                        |                                                               |
+                        |-> [Rejected]  - - - - - - - - - - - - - - - - - - - - - - - - |
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    If there is a requirement to introduce a new state to the lifecycle, please refer above
+    diagram and add relevant state to the below configuration appropriately.
+    -->
+
+    <!-- a lifecyclestate can have following properties
+        <LifecycleState name="In-Review">
+            <IsAppInstallable>false</IsAppInstallable>
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>false</IsInitialState>
+            <IsEndState>false</IsEndState>
+            <Permission>
+                /device-mgt/applications/life-cycle/in-review
+            </Permission>
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+            </ProceedingStates>
+        </LifecycleState>
+    -->
     <LifecycleStates>
         <LifecycleState name="Created">
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>true</IsInitialState>
+            <Permission>/device-mgt/applications/life-cycle/create</Permission>
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="In-Review">
+            <Permission>/device-mgt/applications/life-cycle/in-review</Permission>
             <ProceedingStates>
                 <State>Rejected</State>
                 <State>Approved</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Approved">
+            <Permission>/device-mgt/applications/life-cycle/approve</Permission>
             <ProceedingStates>
                 <State>Published</State>
+                <State>Created</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Rejected">
+            <Permission>/device-mgt/applications/life-cycle/reject</Permission>
             <ProceedingStates>
-                <State>In-Review</State>
+                <State>Created</State>
                 <State>Removed</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Published">
+            <IsAppInstallable>true</IsAppInstallable>
+            <Permission>/device-mgt/applications/life-cycle/publish</Permission>
             <ProceedingStates>
                 <State>Unpublished</State>
                 <State>Deprecated</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Unpublished">
+            <Permission>/device-mgt/applications/life-cycle/unpublish</Permission>
             <ProceedingStates>
+                <State>Published</State>
+                <State>In-Review</State>
                 <State>Removed</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Deprecated">
+            <Permission>/device-mgt/applications/life-cycle/deprecate</Permission>
             <ProceedingStates>
                 <State>Removed</State>
+                <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Removed">
+            <IsEndState>true</IsEndState>
+            <Permission>/device-mgt/applications/life-cycle/remove</Permission>
         </LifecycleState>
     </LifecycleStates>
 
+    <UIConfigs>
+        <EnableOAuth>true</EnableOAuth>
+        <EnableSSO>false</EnableSSO>
+        <EnableSSO>false</EnableSSO>
+        <AppRegistration>
+            <Tags>
+                <Tag>application_management</Tag>
+                <Tag>device_management</Tag>
+                <Tag>subscription_management</Tag>
+                <Tag>review_management</Tag>
+            </Tags>
+            <AllowToAllDomains>true</AllowToAllDomains>
+        </AppRegistration>
+        <Scopes>
+            <Scope>perm:app:review:view</Scope>
+            <Scope>perm:app:review:update</Scope>
+            <Scope>perm:app:publisher:view</Scope>
+            <Scope>perm:app:publisher:update</Scope>
+        </Scopes>
+        <SSOConfiguration>
+            <Issuer>app-mgt</Issuer>
+        </SSOConfiguration>
+        <LoginResponse>
+            <SuccessCallback>/application-mgt</SuccessCallback>
+            <FailureCallback>
+                <BadRequest>/pages/error/client-errors/400</BadRequest>
+                <Unauthorized>/pages/error/client-errors/401</Unauthorized>
+                <Forbidden>/pages/error/client-errors/403</Forbidden>
+                <NotFound>/pages/error/client-errors/404</NotFound>
+                <MethodNotAllowed>/pages/error/client-errors/405</MethodNotAllowed>
+                <NotAcceptable>/pages/error/client-errors/406</NotAcceptable>
+                <UnsupportedMediaType>/pages/error/client-errors/415</UnsupportedMediaType>
+                <InternalServerError>/pages/error/server-errors/500</InternalServerError>
+                <DefaultPage>/pages/error/default</DefaultPage>
+            </FailureCallback>
+        </LoginResponse>
+    </UIConfigs>
 </ApplicationManagementConfiguration>

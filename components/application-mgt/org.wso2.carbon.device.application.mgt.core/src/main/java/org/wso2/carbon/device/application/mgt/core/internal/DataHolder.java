@@ -20,10 +20,10 @@ package org.wso2.carbon.device.application.mgt.core.internal;
 
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.ConfigManager;
+import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManger;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -44,9 +44,9 @@ public class DataHolder {
 
     private ApplicationStorageManager applicationStorageManager;
 
-    private LifecycleStateManger lifecycleStateManger;
+    private LifecycleStateManager lifecycleStateManager;
 
-    private ConfigManager configManager;
+    private AppmDataHandler configManager;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -106,19 +106,19 @@ public class DataHolder {
         return applicationStorageManager;
     }
 
-    public LifecycleStateManger getLifecycleStateManager() {
-        return lifecycleStateManger;
+    public LifecycleStateManager getLifecycleStateManager() {
+        return lifecycleStateManager;
     }
 
-    public void setLifecycleStateManger(LifecycleStateManger lifecycleStateManger) {
-        this.lifecycleStateManger = lifecycleStateManger;
+    public void setLifecycleStateManger(LifecycleStateManager lifecycleStateManager) {
+        this.lifecycleStateManager = lifecycleStateManager;
     }
 
-    public ConfigManager getConfigManager() {
+    public AppmDataHandler getConfigManager() {
         return configManager;
     }
 
-    public void setConfigManager(ConfigManager configManager) {
+    public void setConfigManager(AppmDataHandler configManager) {
         this.configManager = configManager;
     }
 }
