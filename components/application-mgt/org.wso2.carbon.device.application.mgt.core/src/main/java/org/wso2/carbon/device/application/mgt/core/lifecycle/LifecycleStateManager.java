@@ -172,7 +172,7 @@ public class LifecycleStateManager {
         return initialState;
     }
 
-    public String getEntState() throws LifecycleManagementException {
+    public String getEndState() throws LifecycleManagementException {
         String endState = null;
         for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
             if (stringStateEntry.getValue().isEndState()) {
@@ -187,6 +187,15 @@ public class LifecycleStateManager {
             throw  new LifecycleManagementException(msg);
         }
         return endState;
+    }
+
+    public boolean isStateExist(String currentState) {
+        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
+            if (stringStateEntry.getKey().equalsIgnoreCase(currentState)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setLifecycleStates(Map<String, State> lifecycleStates) {

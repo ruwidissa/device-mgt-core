@@ -30,6 +30,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
+import org.wso2.carbon.device.application.mgt.common.Pagination;
+import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
@@ -158,15 +160,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             filter.setFullMatch(true);
             filter.setAppName(applicationDTO.getName().trim());
-            filter.setDeviceTypeId(applicationDTO.getDeviceTypeId());
             filter.setOffset(0);
             filter.setLimit(1);
 
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationList applicationList = applicationDAO.getApplications(filter, tenantId);
-            if (!applicationList.getApplications().isEmpty()) {
+            List<ApplicationDTO> applicationList = applicationDAO
+                    .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
+            if (!applicationList.isEmpty()) {
                 String msg =
-                        "Already an application registered with same name - " + applicationList.getApplications().get(0)
+                        "Already an application registered with same name - " + applicationList.get(0)
                                 .getName();
                 log.error(msg);
                 throw new RequestValidatingException(msg);
@@ -411,52 +413,110 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationList getApplications(Filter filter, String deviceTypeName)
-            throws ApplicationManagementException {
+    public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationList applicationList;
-        List<ApplicationDTO> apps;
-        List<ApplicationReleaseDTO> releases;
-        DeviceType deviceType;
-
-        filter = validateFilter(filter);
-        if (filter == null) {
-            throw new ApplicationManagementException("Filter validation failed, Please verify the request payload");
-        }
+        ApplicationList applicationList = new ApplicationList();
+        List<ApplicationDTO> appDTOs;
+        List<Application> applications = new ArrayList<>();
+        List<ApplicationDTO> filteredApplications = new ArrayList<>();
+        DeviceType deviceType = null;
 
         try {
-            if (!StringUtils.isEmpty(deviceTypeName)){
-                try {
-                    deviceType = getDeviceTypeData(deviceTypeName);
-                    filter.setDeviceTypeId(deviceType.getId());
-                } catch (UnexpectedServerErrorException e){
-                    throw new ApplicationManagementException(e.getMessage(), e);
-                }
+            validateFilter(filter);
+
+            //set default values
+            if (StringUtils.isEmpty(filter.getSortBy())) {
+                filter.setSortBy("ASC");
+            }
+            if (filter.getLimit() == 0) {
+                filter.setLimit(20);
+            }
+            String deviceTypename = filter.getDeviceType();
+            if (!StringUtils.isEmpty(deviceTypename)) {
+                deviceType = getDeviceTypeData(deviceTypename);
             }
 
             ConnectionManagerUtil.openDBConnection();
-//            todo modify this logic, join app n release tables
-            applicationList = applicationDAO.getApplications(filter, tenantId);
-            apps = applicationList.getApplications();
-            for ( ApplicationDTO app : apps){
-                if (AppLifecycleState.REMOVED.toString().equals(app.getStatus())){
-                    apps.remove(app);
+            if (deviceType == null) {
+                appDTOs = applicationDAO.getApplications(filter, 0, tenantId);
+            } else {
+                appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
+            }
+
+            for (ApplicationDTO app : appDTOs) {
+                boolean isSearchingApp = true;
+                List<String> tags = filter.getTags();
+                List<String> categories = filter.getAppCategories();
+                List<String> unrestrictedRoles = filter.getUnrestrictedRoles();
+
+                if (lifecycleStateManager.getEndState().equals(app.getStatus())) {
+                    isSearchingApp = false;
+                }
+                if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
+
+                    if (!isRoleExists(unrestrictedRoles, userName)) {
+                        String msg = "At least one filtering role is not assigned for the user: " + userName
+                                + ". Hence user " + userName
+                                + " Can't filter applications by giving these unrestriced role list";
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                    List<String> appUnrestrictedRoles = visibilityDAO.getUnrestrictedRoles(app.getId(), tenantId);
+                    boolean isUnrestrictedRoleExistForApp = false;
+                    for (String role : unrestrictedRoles) {
+                        if (appUnrestrictedRoles.contains(role)) {
+                            isUnrestrictedRoleExistForApp = true;
+                            break;
+                        }
+                    }
+                    if (!isUnrestrictedRoleExistForApp) {
+                        isSearchingApp = false;
+                    }
+                }
+                if (tags != null && !tags.isEmpty()) {
+                    List<String> appTagList = applicationDAO.getAppTags(app.getId(), tenantId);
+                    boolean isTagExistForApp = false;
+                    for (String tag : tags) {
+                        if (appTagList.contains(tag)) {
+                            isTagExistForApp = true;
+                            break;
+                        }
+                    }
+                    if (!isTagExistForApp) {
+                        isSearchingApp = false;
+                    }
+                }
+                if (categories != null && !categories.isEmpty()) {
+                    List<String> appTagList = applicationDAO.getAppCategories(app.getId(), tenantId);
+                    boolean isCategoryExistForApp = false;
+                    for (String category : categories) {
+                        if (appTagList.contains(category)) {
+                            isCategoryExistForApp = true;
+                            break;
+                        }
+                    }
+                    if (!isCategoryExistForApp) {
+                        isSearchingApp = false;
+                    }
+                }
+                if (isSearchingApp) {
+                    filteredApplications.add(app);
                 }
             }
-            applicationList.setApplications(apps);
-            if (applicationList.getApplications() != null && !applicationList
-                    .getApplications().isEmpty()) {
-                if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                    applicationList = getRoleRestrictedApplicationList(applicationList, userName);
-                }
-                for (ApplicationDTO application : applicationList.getApplications()) {
-                    releases = getReleases(application, filter.getCurrentAppReleaseState());
-                    application.setApplicationReleases(releases);
-                }
+
+            for(ApplicationDTO appDTO : filteredApplications){
+                applications.add(appDtoToAppResponse(appDTO));
             }
+            applicationList.setApplications(applications);
+            Pagination pagination = new Pagination();
+            applicationList.setPagination(pagination);
+            applicationList.getPagination().setSize(filter.getOffset());
+            applicationList.getPagination().setCount(applicationList.getApplications().size());
             return applicationList;
-        } catch (UserStoreException e) {
+        }  catch (UnexpectedServerErrorException e){
+            throw new ApplicationManagementException(e.getMessage(), e);
+        }catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
                             + " has the publisher permission", e);
@@ -1165,26 +1225,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param userName        user name
      * @return ApplicationDTO related with the UUID
      */
-    private ApplicationList getRoleRestrictedApplicationList(ApplicationList applicationList, String userName)
-            throws ApplicationManagementException {
-        ApplicationList roleRestrictedApplicationList = new ApplicationList();
-        ArrayList<ApplicationDTO> unRestrictedApplications = new ArrayList<>();
-        for (ApplicationDTO application : applicationList.getApplications()) {
-            if (application.getUnrestrictedRoles().isEmpty()) {
-                unRestrictedApplications.add(application);
-            } else {
-                try {
-                    if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
-                        unRestrictedApplications.add(application);
-                    }
-                } catch (UserStoreException e) {
-                    throw new ApplicationManagementException("Role restriction verifying is failed");
-                }
-            }
-        }
-        roleRestrictedApplicationList.setApplications(unRestrictedApplications);
-        return roleRestrictedApplicationList;
-    }
+//    private ApplicationList getRoleRestrictedApplicationList(ApplicationList applicationList, String userName)
+//            throws ApplicationManagementException {
+//        ApplicationList roleRestrictedApplicationList = new ApplicationList();
+//        ArrayList<ApplicationDTO> unRestrictedApplications = new ArrayList<>();
+//        for (ApplicationDTO application : applicationList.getApplications()) {
+//            if (application.getUnrestrictedRoles().isEmpty()) {
+//                unRestrictedApplications.add(application);
+//            } else {
+//                try {
+//                    if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+//                        unRestrictedApplications.add(application);
+//                    }
+//                } catch (UserStoreException e) {
+//                    throw new ApplicationManagementException("Role restriction verifying is failed");
+//                }
+//            }
+//        }
+//        roleRestrictedApplicationList.setApplications(unRestrictedApplications);
+//        return roleRestrictedApplicationList;
+//    }
 
     /**
      * To validate a app release creating request and app updating request to make sure all the pre-conditions
@@ -1397,20 +1457,55 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private Filter validateFilter(Filter filter) {
-        if (filter != null && filter.getAppType() != null) {
-            boolean isValidRequest = false;
+    private void validateFilter(Filter filter) throws BadRequestException {
+        if (filter == null) {
+            String msg = "Filter validation is failed, Filter shouldn't be null, hence please verify the request payload";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        String appType = filter.getAppType();
+
+        if (!StringUtils.isEmpty(appType)) {
+            boolean isValidAppType = false;
             for (ApplicationType applicationType : ApplicationType.values()) {
-                if (applicationType.toString().equals(filter.getAppType())) {
-                    isValidRequest = true;
+                if (applicationType.toString().equals(appType)) {
+                    isValidAppType = true;
                     break;
                 }
             }
-            if (!isValidRequest) {
-                return null;
+            if (!isValidAppType) {
+                String msg =
+                        "Filter validation is failed, Invalid application type is found in filter. Application Type: "
+                                + appType + " Please verify the request payload";
+                log.error(msg);
+                throw new BadRequestException(msg);
             }
         }
-        return filter;
+
+        RatingConfiguration ratingConfiguration = ConfigurationManager.getInstance().getConfiguration()
+                .getRatingConfiguration();
+
+        int defaultMinRating = ratingConfiguration.getMinRatingValue();
+        int defaultMaxRating = ratingConfiguration.getMaxRatingValue();
+        int filteringMinRating = filter.getMinimumRating();
+
+        if (filteringMinRating != 0 && (filteringMinRating < defaultMinRating || filteringMinRating > defaultMaxRating))
+        {
+            String msg = "Filter validation is failed, Minimum rating value: " + filteringMinRating
+                    + " is not in the range of default minimum rating value " + defaultMaxRating
+                    + " and default maximum rating " + defaultMaxRating;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
+        String appReleaseState = filter.getAppReleaseState();
+        if (!StringUtils.isEmpty(appReleaseState) && !lifecycleStateManager.isStateExist(appReleaseState)) {
+            String msg = "Filter validation is failed, Requesting to filter by invalid app release state: "
+                    + appReleaseState;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
     }
 
     private <T> List<T> getDifference(List<T> list1, Collection<T> list2) {

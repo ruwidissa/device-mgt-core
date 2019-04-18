@@ -54,6 +54,11 @@ public interface ApplicationDAO {
 
     void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
+    List<String> getAppTags(int appId, int tenantId) throws ApplicationManagementDAOException;
+
+    List<String> getAppCategories (int appId, int tenantId) throws ApplicationManagementDAOException;
+
+
 
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
 
@@ -76,11 +81,12 @@ public interface ApplicationDAO {
      * To get the applications that satisfy the given criteria.
      *
      * @param filter   Filter criteria.
+     * @param deviceTypeId ID of the device type
      * @param tenantId Id of the tenant.
      * @return ApplicationDTO list
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    ApplicationList getApplications(Filter filter, int tenantId) throws ApplicationManagementDAOException;
+    List<ApplicationDTO> getApplications(Filter filter, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get the UUID of latest app release that satisfy the given criteria.

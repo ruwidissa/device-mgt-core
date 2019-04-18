@@ -67,17 +67,17 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             filter.setLimit(limit);
             filter.setSortBy(sortBy);
             filter.setFullMatch(isFullMatch);
-            filter.setCurrentAppReleaseState(AppLifecycleState.PUBLISHED.toString());
+            filter.setAppReleaseState(AppLifecycleState.PUBLISHED.toString());
             if (appName != null && !appName.isEmpty()) {
                 filter.setAppName(appName);
             }
             if (appType != null && !appType.isEmpty()) {
                 filter.setAppType(appType);
             }
-            if (appCategory != null && !appCategory.isEmpty()) {
-                filter.setAppCategory(appCategory);
-            }
-            ApplicationList applications = applicationManager.getApplications(filter, null);
+//            if (appCategory != null && !appCategory.isEmpty()) {
+//                filter.setAppCategories(appCategory);
+//            }
+            ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Couldn't find any application for requested query.").build();

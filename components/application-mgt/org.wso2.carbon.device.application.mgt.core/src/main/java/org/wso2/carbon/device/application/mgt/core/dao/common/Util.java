@@ -74,7 +74,7 @@ public class Util {
 //                application.setId(applicationId);
 //                application.setName(rs.getString("APP_NAME"));
 //                application.setType(rs.getString("APP_TYPE"));
-//                application.setAppCategory(rs.getString("APP_CATEGORY"));
+//                application.setAppCategories(rs.getString("APP_CATEGORY"));
 //                application.setSubType(rs.getString("SUB_TYPE"));
 //                application.setPaymentCurrency(rs.getString("CURRENCY"));
 //                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
@@ -139,25 +139,10 @@ public class Util {
                 application.setStatus(rs.getString("APP_STATUS"));
                 application.setAppRating(rs.getInt("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
+                application.getApplicationReleases().add(loadAppRelease(rs));
             } else {
-                ApplicationReleaseDTO appRelease = new ApplicationReleaseDTO();
-                appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
-                appRelease.setUuid(rs.getString("RELEASE_UUID"));
-                appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
-                appRelease.setVersion(rs.getString("RELEASE_VERSION"));
-                appRelease.setInstallerName(rs.getString("AP_RELEASE_STORED_LOC"));
-                appRelease.setBannerName(rs.getString("RELEASE_BANNER_LOC"));
-                appRelease.setScreenshotName1("RELEASE_SC1");
-                appRelease.setScreenshotName2("RELEASE_SC2");
-                appRelease.setScreenshotName3("RELEASE_SC3");
-                appRelease.setPrice(rs.getDouble(" RELEASE_PRICE"));
-                appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
-                appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
-                appRelease.setRating(rs.getDouble("RELEASE_RATING"));
-                appRelease.setCurrentState(rs.getString("RELEASE_CURRENT_STATE"));
-                appRelease.setRatedUsers(rs.getInt("RATED_USER_COUNT"));
                 if (application != null && application.getApplicationReleases() != null) {
-                    application.getApplicationReleases().add(appRelease);
+                    application.getApplicationReleases().add(loadAppRelease(rs));
                 }
             }
             hasNext = rs.next();
@@ -166,6 +151,33 @@ public class Util {
             }
         }
         return applications;
+    }
+
+    /**
+     * Populates {@link ApplicationReleaseDTO} object with the result obtained from the database.
+     *
+     * @param rs {@link ResultSet} from obtained from the database
+     * @return {@link ApplicationReleaseDTO} object populated with the data
+     * @throws SQLException If unable to populate {@link ApplicationReleaseDTO} object with the data
+     */
+    public static ApplicationReleaseDTO loadAppRelease(ResultSet rs) throws SQLException {
+        ApplicationReleaseDTO appRelease = new ApplicationReleaseDTO();
+        appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
+        appRelease.setUuid(rs.getString("RELEASE_UUID"));
+        appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
+        appRelease.setVersion(rs.getString("RELEASE_VERSION"));
+        appRelease.setInstallerName(rs.getString("AP_RELEASE_STORED_LOC"));
+        appRelease.setBannerName(rs.getString("AP_RELEASE_BANNER_LOC"));
+        appRelease.setScreenshotName1("AP_RELEASE_SC1");
+        appRelease.setScreenshotName2("AP_RELEASE_SC2");
+        appRelease.setScreenshotName3("AP_RELEASE_SC3");
+        appRelease.setPrice(rs.getDouble("RELEASE_PRICE"));
+        appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
+        appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
+        appRelease.setRating(rs.getDouble("RELEASE_RATING"));
+        appRelease.setCurrentState(rs.getString("RELEASE_CURRENT_STATE"));
+        appRelease.setRatedUsers(rs.getInt("RATED_USER_COUNT"));
+        return appRelease;
     }
 
 
