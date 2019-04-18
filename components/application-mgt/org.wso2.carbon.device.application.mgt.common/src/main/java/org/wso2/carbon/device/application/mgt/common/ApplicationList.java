@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.application.mgt.common;
 
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
 
 import java.util.List;
 
@@ -27,15 +28,15 @@ import java.util.List;
  */
 public class ApplicationList {
 
-    private List<ApplicationDTO> applications;
+    private List<Application> applications;
 
     private Pagination pagination;
 
-    public List<ApplicationDTO> getApplications() {
+    public List<Application> getApplications() {
         return applications;
     }
 
-    public void setApplications(List<ApplicationDTO> applications) {
+    public void setApplications(List<Application> applications) {
         this.applications = applications;
     }
 

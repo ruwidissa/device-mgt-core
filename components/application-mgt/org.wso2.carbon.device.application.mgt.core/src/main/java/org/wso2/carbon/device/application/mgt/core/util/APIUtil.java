@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.application.mgt.core.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -164,26 +165,29 @@ public class APIUtil {
         return appmDataHandler;
     }
 
-    public static Filter constructFilter( String appName, String appType, String appCategory,
-            boolean isFullMatch, String releaseState, int offset, int limit, String sortBy) {
-        Filter filter = new Filter();
-        filter.setOffset(offset);
-        filter.setLimit(limit);
-        filter.setSortBy(sortBy);
-        filter.setFullMatch(isFullMatch);
-        if (appName != null && !appName.isEmpty()) {
-            filter.setAppName(appName);
-        }
-        if (appType != null && !appType.isEmpty()) {
-            filter.setAppType(appType);
-        }
-        if (appCategory != null && !appCategory.isEmpty()) {
-            filter.setAppCategory(appCategory);
-        }
-        if (releaseState != null && !releaseState.isEmpty()) {
-            filter.setCurrentAppReleaseState(releaseState);
-        }
-        return filter;
-    }
+//    public static Filter constructFilter( String appName, String appType, String appCategory, String tags,
+//            boolean isFullMatch, String releaseState, int offset, int limit, String sortBy) {
+//        Filter filter = new Filter();
+//        filter.setOffset(offset);
+//        filter.setLimit(limit);
+//        filter.setSortBy(sortBy);
+//        filter.setFullMatch(isFullMatch);
+//        if (!StringUtils.isEmpty(appName)) {
+//            filter.setAppName(appName);
+//        }
+//        if (!StringUtils.isEmpty(appType)) {
+//            filter.setAppType(appType);
+//        }
+//        if (!StringUtils.isEmpty(appCategory)) {
+//            filter.setAppCategories(appCategory);
+//        }
+//        if (!StringUtils.isEmpty(tags)) {
+//            filter.setAppCategories(appCategory);
+//        }
+//        if (!StringUtils.isEmpty(releaseState)) {
+//            filter.setAppReleaseState(releaseState);
+//        }
+//        return filter;
+//    }
 
 }

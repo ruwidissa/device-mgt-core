@@ -79,7 +79,9 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<String> unrestrictedRoles = new ArrayList<>();
-        String sql = "SELECT ID, ROLE FROM AP_UNRESTRICTED_ROLE WHERE AP_APP_ID = ? AND TENANT_ID = ?;";
+        String sql = "SELECT ROLE "
+                + "FROM AP_UNRESTRICTED_ROLE "
+                + "WHERE AP_APP_ID = ? AND TENANT_ID = ?";
         try{
             conn = this.getDBConnection();
             conn.setAutoCommit(false);

@@ -95,7 +95,7 @@ public interface ApplicationManagementAPI {
 
     String SCOPE = "scope";
 
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -125,48 +125,12 @@ public interface ApplicationManagementAPI {
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
                             response = ErrorResponse.class)
-            })
-    Response getApplications(
-            @ApiParam(
-                    name = "deviceType",
-                    value = "Supporting device Type of the application")
-            @QueryParam("device-type") String deviceType,
-            @ApiParam(
-                    name = "name",
-                    value = "Name of the application")
-            @QueryParam("name") String appName,
-            @ApiParam(
-                    name = "type",
-                    value = "Type of the application")
-            @QueryParam("type") String appType,
-            @ApiParam(
-                    name = "category",
-                    value = "CategoryDTO of the application")
-            @QueryParam("category") String appCategory,
-            @ApiParam(
-                    name = "exact-match",
-                    value = "Is it requesting exactly matching application or partially matching application.")
-            @QueryParam("exact-match") boolean isFullMatch,
-            @ApiParam(
-                    name = "release-state",
-                    value = "Current state of the application release")
-            @QueryParam("release-state") String releaseState,
-            @ApiParam(
-                    name = "offset",
-                    value = "offset",
-                    defaultValue = "0")
-            @QueryParam("offset") int offset,
-            @ApiParam(
-                    name = "limit",
-                    value = "limit",
-                    defaultValue = "20")
-            @QueryParam("limit") int limit,
-            @ApiParam(
-                    name = "sort",
-                    value = "Sorting type",
-                    defaultValue = "AES")
-            @QueryParam("sort") String sortBy
-    );
+            }) Response getApplications(
+                    @ApiParam(
+                            name = "Filter",
+                            value = "Get application filter",
+                            required = true)
+                    @Valid Filter filter);
 
     @GET
     @Path("/{appId}")

@@ -83,7 +83,7 @@ public interface ApplicationManager {
      * @return Applications that matches the given filter criteria.
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    ApplicationList getApplications(Filter filter, String deviceTypeName) throws ApplicationManagementException;
+    ApplicationList getApplications(Filter filter) throws ApplicationManagementException;
 
     /**
      * To get the ApplicationDTO for given Id.

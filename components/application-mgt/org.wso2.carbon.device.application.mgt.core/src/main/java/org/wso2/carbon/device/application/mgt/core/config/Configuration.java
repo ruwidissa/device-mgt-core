@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.config;
 
+import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 
@@ -47,6 +48,8 @@ public class Configuration {
     private List<String> appCategories;
 
     private String artifactDownloadEndpoint;
+
+    private RatingConfiguration ratingConfiguration;
 
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
@@ -82,14 +85,20 @@ public class Configuration {
         this.lifecycleStates = lifecycleStates;
     }
 
+    @XmlElement(name = "UIConfigs")
     public UIConfiguration getUiConfiguration() {
         return uiConfiguration;
     }
 
-    @XmlElement(name = "UIConfigs")
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
     }
+
+    @XmlElement(name = "RatingConfig")
+    public RatingConfiguration getRatingConfiguration() { return ratingConfiguration; }
+
+    public void setRatingConfiguration(
+            RatingConfiguration ratingConfiguration) { this.ratingConfiguration = ratingConfiguration; }
 
     @XmlElement(name = "ArtifactDownloadEndpoint", required = true)
     public String getArtifactDownloadEndpoint() {

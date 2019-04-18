@@ -174,4 +174,9 @@
         <Category>EMM</Category>
         <Category>IoT</Category>
     </AppCategories>
+
+    <RatingConfig>
+        <MinRatingValue>1</MinRatingValue>
+        <MaxRatingValue>10</MaxRatingValue>
+    </RatingConfig>
 </ApplicationManagementConfiguration>

@@ -70,33 +70,22 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
 
-    @GET
+    @POST
     @Override
     @Consumes("application/json")
     public Response getApplications(
-            @QueryParam("device-type") String deviceType,
-            @QueryParam("name") String appName,
-            @QueryParam("type") String appType,
-            @QueryParam("category") String appCategory,
-            @QueryParam("exact-match") boolean isFullMatch,
-            @QueryParam("release-state") String releaseState,
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("20") @QueryParam("limit") int limit,
-            @DefaultValue("ASC") @QueryParam("sort") String sortBy) {
+            @Valid Filter filter ){
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
         try {
-            Filter filter = APIUtil
-                    .constructFilter(appName, appType, appCategory, isFullMatch, releaseState, offset,
-                            limit, sortBy);
-            ApplicationList applications = applicationManager.getApplications(filter, deviceType);
+            ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("Couldn't find any application for the requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch(BadRequestException e){
-            String msg = "Couldn't found a device type for " + deviceType;
+            String msg = "Incompatible request payload is found. Please try with valid reuest payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }catch (ApplicationManagementException e) {
