@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
@@ -1245,4 +1246,53 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
         return geoClusters;
     }
+
+    @Override
+    public List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            int index = 1;
+            int counter = 0;
+            List<Device> devices = new ArrayList<>();
+
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT "
+                            + "d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, "
+                            + "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, "
+                            + "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID "
+                            + "FROM "
+                            + "DM_ENROLMENT e, "
+                            + "(SELECT d.ID, d.DESCRIPTION, d.NAME, t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION "
+                            + "FROM DM_DEVICE d, DM_DEVICE_TYPE t "
+                            + "WHERE "
+                            + "t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION IN (",
+                    ") AND d.TENANT_ID = ?) d1 "
+                            + "WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? "
+                            + "ORDER BY e.DATE_OF_LAST_UPDATE DESC, e.STATUS ASC");
+            while (counter < deviceIdentifiers.size()) {
+                joiner.add("?");
+                counter++;
+            }
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (String identifier : deviceIdentifiers) {
+                    ps.setObject(index++, identifier);
+                }
+                ps.setInt(index++, tenantId);
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                }
+            }
+            return devices;
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection when adding tags",
+                    e);
+        }
+    }
+
 }

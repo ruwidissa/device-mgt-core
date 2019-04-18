@@ -20,18 +20,23 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.common.StringUtils;
+import org.wso2.carbon.apimgt.integration.generated.client.publisher.StringUtil;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.UserNotFoundException;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceManagementAdminService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
+import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -87,4 +92,32 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
         }
     }
 
+    @PUT
+    @Override
+    @Path("/device-owner")
+    public Response updateEnrollOwner(
+            @QueryParam("owner") String owner,
+            List<String> deviceIdentifiers){
+        try {
+            if (DeviceMgtAPIUtils.getDeviceManagementService().updateEnrollment(owner, deviceIdentifiers)){
+                String msg = "Device owner is updated successfully.";
+                return Response.status(Response.Status.OK).entity(msg).build();
+            }
+            String msg = "Device owner updating is failed.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch(InvalidDeviceException e){
+            String msg = "Invalid device identifiers are found with the request.";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }catch (DeviceManagementException e) {
+            String msg = "Error occurred when updating device owners.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (UserNotFoundException e) {
+            String msg = "Couldn't found the owner in user store to update the owner of devices.";
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
 }

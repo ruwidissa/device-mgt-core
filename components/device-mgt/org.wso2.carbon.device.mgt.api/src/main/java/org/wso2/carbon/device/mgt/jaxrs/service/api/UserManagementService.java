@@ -48,6 +48,7 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Credential;
@@ -155,6 +156,12 @@ import java.util.List;
                         description = "Sending Enrollment Invitations to Users",
                         key = "perm:users:send-invitation",
                         permissions = {"/device-mgt/users/manage"}
+                ),
+                @Scope(
+                        name = "Get activities",
+                        description = "Get activities",
+                        key = "perm:get-activity",
+                        permissions = {"/device-mgt/devices/owning-device/view"}
                 )
         }
 )
@@ -924,4 +931,80 @@ public interface UserManagementService {
     @POST
     @Path("/validate")
     Response validateUser(Credential credential);
+
+    @GET
+    @Path("/device/activities")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Activity Details",
+            notes = "Get the details of the operations/activities executed by the server on the devices registered" +
+                    " with WSO2 EMM, during a defined time period.",
+            tags = "Activity Info Provider",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:get-activity")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched the activity details.",
+                    response = ActivityList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client already has the latest version of the" +
+                            " requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized. \n Unauthorized request."),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n No activities found.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the activity data.",
+                    response = ErrorResponse.class)
+    })
+    Response getActivities(
+            @ApiParam(
+                    name = "since",
+                    value = "Checks if the requested variant was created since the specified date-time.\n" +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200")
+            @QueryParam("since") String since,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many activity details you require from the starting pagination index/offset.",
+                    defaultValue = "5")
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "If-Modified-Since",
+                    value = "Checks if the requested variant was modified, since the specified date-time\n." +
+                            "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z\n." +
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200")
+            @HeaderParam("If-Modified-Since") String ifModifiedSince);
 }
