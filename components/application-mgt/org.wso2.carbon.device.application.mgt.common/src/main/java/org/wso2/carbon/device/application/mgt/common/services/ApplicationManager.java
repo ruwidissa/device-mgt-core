@@ -28,6 +28,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
+import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
@@ -165,11 +166,11 @@ public interface ApplicationManager {
      * To create an application release for an ApplicationDTO.
      *
      * @param applicationId     ID of the ApplicationDTO
-     * @param applicationRelease ApplicatonRelease that need to be be created.
+     * @param applicationReleaseWrapper ApplicatonRelease that need to be be created.
      * @return the unique id of the application release, if the application release succeeded else -1
      */
-    ApplicationReleaseDTO createRelease(int applicationId, ApplicationReleaseDTO applicationRelease)
-            throws ApplicationManagementException;
+    ApplicationRelease createRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
      *
@@ -201,8 +202,8 @@ public interface ApplicationManager {
      * @param applicationType Type of the application
      * @throws RequestValidatingException throws if payload does not satisfy requrements.
      */
-    void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper,
-            String applicationType) throws RequestValidatingException;
+    void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper, String applicationType)
+            throws RequestValidatingException;
 
     /***
      *

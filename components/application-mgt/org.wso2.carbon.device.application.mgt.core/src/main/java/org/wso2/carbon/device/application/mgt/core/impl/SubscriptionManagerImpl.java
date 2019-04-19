@@ -103,7 +103,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
 
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -144,7 +144,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
 
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -188,7 +188,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
 
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -239,7 +239,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
         try {
             ConnectionManagerUtil.openDBConnection();
             List<Device> deviceList = new ArrayList<>();
@@ -266,8 +266,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         //todo: generate operation payload correctly for all types of devices.
         operation.setPayLoad(
-                "{'type':'enterprise', 'url':'" + application.getApplicationReleases().get(0).getInstallerName()
-                        + "', 'app':'" + application.getApplicationReleases().get(0).getUuid() + "'}");
+                "{'type':'enterprise', 'url':'" + application.getApplicationReleaseDTOs().get(0).getInstallerName()
+                        + "', 'app':'" + application.getApplicationReleaseDTOs().get(0).getUuid() + "'}");
         return operation;
     }
 

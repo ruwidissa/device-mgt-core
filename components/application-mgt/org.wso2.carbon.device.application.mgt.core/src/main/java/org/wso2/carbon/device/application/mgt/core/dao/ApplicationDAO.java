@@ -24,6 +24,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+
 import java.util.List;
 
 /**
@@ -115,8 +116,7 @@ public interface ApplicationDAO {
      * @return the application
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    ApplicationDTO getApplicationById(String id, int tenantId) throws
-            ApplicationManagementDAOException;
+    ApplicationDTO getApplicationById(String id, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get the application with the given id

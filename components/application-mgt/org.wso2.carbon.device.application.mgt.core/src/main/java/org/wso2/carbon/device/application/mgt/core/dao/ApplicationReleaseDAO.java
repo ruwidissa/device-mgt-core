@@ -142,12 +142,11 @@ public interface ApplicationReleaseDAO {
     /**
      * To verify whether application release exist or not for the given app release version.
      *
-     * @param appId ID of the application.
      * @param hashVal Hash value of the application release.
      * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    boolean verifyReleaseExistenceByHash(int appId, String hashVal, int tenantId)
+    boolean verifyReleaseExistenceByHash(String hashVal, int tenantId)
             throws ApplicationManagementDAOException;
 
     /**
@@ -177,6 +176,6 @@ public interface ApplicationReleaseDAO {
      * @return True if application release package name already exist in the IoT server, Otherwise returns False.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId) throws ApplicationManagementDAOException;
+    boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState) throws ApplicationManagementDAOException;
 
     }

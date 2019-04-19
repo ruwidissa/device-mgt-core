@@ -208,22 +208,13 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String deviceType, InputStream binaryFile) throws ResourceManagementException {
         try {
             String artifactDirectoryPath;
-            String md5OfApp;
             String artifactPath;
             byte [] content = IOUtils.toByteArray(binaryFile);
 
-            md5OfApp = getMD5(new ByteArrayInputStream(content));
-            if (md5OfApp == null) {
-                String msg = "Error occurred while md5sum value retrieving process: application UUID "
-                        + applicationReleaseDTO.getUuid();
-                log.error(msg);
-                throw new ApplicationStorageManagementException(msg);
-            }
-            artifactDirectoryPath = storagePath + md5OfApp;
+            artifactDirectoryPath = storagePath + applicationReleaseDTO.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
-            applicationReleaseDTO.setAppHashValue(md5OfApp);
         } catch (IOException e) {
             String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
                     + applicationReleaseDTO.getUuid();
@@ -281,17 +272,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String msg = "Error occured when accessing the file in file path: " + filePath;
             throw new ApplicationStorageManagementException(msg, e);
         }
-    }
-
-    private String getMD5(InputStream binaryFile) throws ApplicationStorageManagementException {
-        String md5;
-        try {
-            md5 = DigestUtils.md5Hex(binaryFile);
-        } catch (IOException e) {
-            throw new ApplicationStorageManagementException
-                    ("IO Exception while trying to get the md5sum value of application");
-        }
-        return md5;
     }
 
     private synchronized Map<String, String> getIPAInfo(File ipaFile) throws ApplicationStorageManagementException {

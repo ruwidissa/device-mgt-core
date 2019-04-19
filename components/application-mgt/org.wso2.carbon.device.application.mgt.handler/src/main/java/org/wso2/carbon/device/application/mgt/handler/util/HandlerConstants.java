@@ -20,7 +20,7 @@ package org.wso2.carbon.device.application.mgt.handler.util;
 public class HandlerConstants {
     public static final String PUBLISHER_APPLICATION_NAME = "application-mgt-publisher";
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
-    public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/app-mgt/ui-config";
+    public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/config/ui-config";
     public static final String TOKEN_ENDPOINT = "/oauth2/token";
     public static final String AUTHORIZATION = "Authorization";
     public static final String BASIC = "Basic ";

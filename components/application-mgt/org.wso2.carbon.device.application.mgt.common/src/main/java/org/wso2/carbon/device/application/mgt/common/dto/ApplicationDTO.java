@@ -95,10 +95,10 @@ public class ApplicationDTO {
             example = "REMOVED, ACTIVE")
     private String status;
 
-    @ApiModelProperty(name = "applicationReleases",
+    @ApiModelProperty(name = "applicationReleaseDTOs",
             value = "List of application releases",
             required = true)
-    private List<ApplicationReleaseDTO> applicationReleases;
+    private List<ApplicationReleaseDTO> applicationReleaseDTOs;
 
     public int getId() {
         return id;
@@ -152,12 +152,12 @@ public class ApplicationDTO {
         this.paymentCurrency = paymentCurrency;
     }
 
-    public List<ApplicationReleaseDTO> getApplicationReleases() {
-        return applicationReleases;
+    public List<ApplicationReleaseDTO> getApplicationReleaseDTOs() {
+        return applicationReleaseDTOs;
     }
 
-    public void setApplicationReleases(List<ApplicationReleaseDTO> applicationReleases) {
-        this.applicationReleases = applicationReleases;
+    public void setApplicationReleaseDTOs(List<ApplicationReleaseDTO> applicationReleaseDTOs) {
+        this.applicationReleaseDTOs = applicationReleaseDTOs;
     }
 
     public List<String> getUnrestrictedRoles() {

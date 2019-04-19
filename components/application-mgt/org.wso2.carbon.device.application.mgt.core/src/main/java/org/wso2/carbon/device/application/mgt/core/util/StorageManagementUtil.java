@@ -19,10 +19,12 @@
 package org.wso2.carbon.device.application.mgt.core.util;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ImageArtifact;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 
 import java.io.File;
@@ -119,5 +121,16 @@ public class StorageManagementUtil {
             log.error(msg);
             throw new IOException(msg);
         }
+    }
+
+    public static String getMD5(InputStream binaryFile) throws ApplicationStorageManagementException {
+        String md5;
+        try {
+            md5 = DigestUtils.md5Hex(binaryFile);
+        } catch (IOException e) {
+            throw new ApplicationStorageManagementException
+                    ("IO Exception while trying to get the md5sum value of application");
+        }
+        return md5;
     }
 }

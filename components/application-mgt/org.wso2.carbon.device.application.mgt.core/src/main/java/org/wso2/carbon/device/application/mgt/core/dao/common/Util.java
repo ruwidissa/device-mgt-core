@@ -32,6 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorage
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
+import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 
 import java.sql.PreparedStatement;
@@ -46,66 +47,6 @@ import java.util.List;
 public class Util {
 
     private static final Log log = LogFactory.getLog(Util.class);
-
-//    /**
-//     * To create application object from the result set retrieved from the Database.
-//     *
-//     * @param rs ResultSet
-//     * @return List of Applications that is retrieved from the Database.
-//     * @throws SQLException  SQL Exception
-//     * @throws JSONException JSONException.
-//     */
-//    public static List<ApplicationDTO> loadApplications(ResultSet rs) throws SQLException, JSONException {
-//
-//        List<ApplicationDTO> applications = new ArrayList<>();
-//        ApplicationDTO application = null;
-//        int applicationId = -1;
-//        boolean hasNext = rs.next();
-//
-//        while (hasNext) {
-//            if (applicationId != rs.getInt("APP_ID")) {
-//                if (application != null) {
-//                    applications.add(application);
-//                }
-//                applicationId = rs.getInt("APP_ID");
-//                application = new ApplicationDTO();
-//                application.setTags(new ArrayList<>());
-//                application.setUnrestrictedRoles(new ArrayList<>());
-//                application.setId(applicationId);
-//                application.setName(rs.getString("APP_NAME"));
-//                application.setType(rs.getString("APP_TYPE"));
-//                application.setAppCategories(rs.getString("APP_CATEGORY"));
-//                application.setSubType(rs.getString("SUB_TYPE"));
-//                application.setPaymentCurrency(rs.getString("CURRENCY"));
-//                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
-//                application.setStatus(rs.getString("STATUS"));
-//                String tag = rs.getString("APP_TAG");
-//                String unrestrictedRole = rs.getString("ROLE");
-//                if (tag != null) {
-//                    application.getTags().add(tag);
-//                }
-//                if (unrestrictedRole != null) {
-//                    application.getUnrestrictedRoles().add(unrestrictedRole);
-//                }
-//            } else {
-//                String tag = rs.getString("APP_TAG");
-//                String unrestrictedRole = rs.getString("ROLE");
-//                if (application != null) {
-//                    if (tag != null && !application.getTags().contains(tag)) {
-//                        application.getTags().add(tag);
-//                    }
-//                    if (unrestrictedRole != null && !application.getUnrestrictedRoles().contains(unrestrictedRole)) {
-//                        application.getUnrestrictedRoles().add(unrestrictedRole);
-//                    }
-//                }
-//            }
-//            hasNext = rs.next();
-//            if (!hasNext) {
-//                applications.add(application);
-//            }
-//        }
-//        return applications;
-//    }
 
     /**
      * To create application object from the result set retrieved from the Database.
@@ -128,7 +69,7 @@ public class Util {
                     applications.add(application);
                 }
                 application = new ApplicationDTO();
-                application.setApplicationReleases(new ArrayList<>());
+                application.setApplicationReleaseDTOs(new ArrayList<>());
                 applicationId = rs.getInt("APP_ID");
                 application.setId(applicationId);
                 application.setName(rs.getString("APP_NAME"));
@@ -139,10 +80,10 @@ public class Util {
                 application.setStatus(rs.getString("APP_STATUS"));
                 application.setAppRating(rs.getInt("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
-                application.getApplicationReleases().add(loadAppRelease(rs));
+                application.getApplicationReleaseDTOs().add(loadAppRelease(rs));
             } else {
-                if (application != null && application.getApplicationReleases() != null) {
-                    application.getApplicationReleases().add(loadAppRelease(rs));
+                if (application != null && application.getApplicationReleaseDTOs() != null) {
+                    application.getApplicationReleaseDTOs().add(loadAppRelease(rs));
                 }
             }
             hasNext = rs.next();
@@ -189,41 +130,18 @@ public class Util {
      * @throws SQLException  SQL Exception
      * @throws JSONException JSONException.
      */
-    public static ApplicationDTO loadApplication(ResultSet rs) throws SQLException, JSONException {
-
-        ApplicationDTO application = null;
-        int applicatioId;
-        int iteration = 0;
-        if (rs != null) {
-            while (rs.next()) {
-                if (iteration == 0) {
-                    application = new ApplicationDTO();
-                    application.setTags(new ArrayList<>());
-                    application.setUnrestrictedRoles(new ArrayList<>());
-                    applicatioId = rs.getInt("APP_ID");
-                    application.setId(applicatioId);
-                    application.setName(rs.getString("APP_NAME"));
-                    application.setType(rs.getString("APP_TYPE"));
-                    application.setAppCategory(rs.getString("APP_CATEGORY"));
-                    application.setSubType(rs.getString("SUB_TYPE"));
-                    application.setPaymentCurrency(rs.getString("CURRENCY"));
-//                    application.setIsRestricted(rs.getBoolean("RESTRICTED"));
-                    application.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
-                }
-
-                String tag = rs.getString("APP_TAG");
-                String unrestrictedRole = rs.getString("ROLE");
-                if (tag != null && !application.getTags().contains(tag)) {
-                    application.getTags().add(tag);
-                }
-                if (unrestrictedRole != null && !application.getUnrestrictedRoles().contains(unrestrictedRole)) {
-                    application.getUnrestrictedRoles().add(unrestrictedRole);
-                }
-                iteration++;
-            }
+    public static ApplicationDTO loadApplication(ResultSet rs)
+            throws SQLException, JSONException, UnexpectedServerErrorException {
+        List<ApplicationDTO> applicationDTOs = loadApplications(rs);
+        if (applicationDTOs.isEmpty()) {
+            return null;
         }
-        return application;
-
+        if (applicationDTOs.size() > 1) {
+            String msg = "Internal server error. Found more than one application for requested application ID";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return applicationDTOs.get(0);
     }
 
     /**

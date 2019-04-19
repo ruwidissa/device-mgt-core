@@ -29,6 +29,8 @@ import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
+import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
@@ -109,7 +111,12 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             String msg = "ApplicationDTO with application id: " + appId + " not found";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (ApplicationManagementException e) {
+        } catch(ForbiddenException e){
+            String msg = "You don't have permission to access the application. application id: " + appId;
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        }
+        catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting application with the id " + appId;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
@@ -167,91 +174,56 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
-//    @POST
-//    @Consumes("multipart/mixed")
-//    @Path("/{deviceType}/{appType}/{appId}")
-//    public Response createRelease(
-//            @PathParam("deviceType") String deviceType,
-//            @PathParam("appType") String appType,
-//            @PathParam("appId") int appId,
-//            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
-//            @Multipart("binaryFile") Attachment binaryFile,
-//            @Multipart("icon") Attachment iconFile,
-//            @Multipart("banner") Attachment bannerFile,
-//            @Multipart("screenshot1") Attachment screenshot1,
-//            @Multipart("screenshot2") Attachment screenshot2,
-//            @Multipart("screenshot3") Attachment screenshot3) {
-//        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-//        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-//        InputStream iconFileStream;
-//        InputStream bannerFileStream;
-//        List<InputStream> attachments = new ArrayList<>();
-//        List<Attachment> attachmentList = new ArrayList<>();
-//        attachmentList.add(screenshot1);
-//        if (screenshot2 != null) {
-//            attachmentList.add(screenshot2);
-//        }
-//        if (screenshot3 != null) {
-//            attachmentList.add(screenshot3);
-//        }
-//
-//        try {
-//            applicationManager
-//                    .validateReleaseCreatingRequest(applicationRelease, appType, binaryFile, iconFile, bannerFile,
-//                            attachmentList);
-//
-//            // The application executable artifacts such as apks are uploaded.
-//            if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
-//                applicationRelease = applicationStorageManager
-//                        .uploadReleaseArtifact(applicationRelease, appType, deviceType, null);
-//            } else {
-//                applicationRelease = applicationStorageManager
-//                        .uploadReleaseArtifact(applicationRelease, appType, deviceType,
-//                                binaryFile.getDataHandler().getInputStream());
-//                if (applicationRelease.getInstallerName() == null || applicationRelease.getAppHashValue() == null) {
-//                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-//                }
-//            }
-//
-//            iconFileStream = iconFile.getDataHandler().getInputStream();
-//            bannerFileStream = bannerFile.getDataHandler().getInputStream();
-//
-//            for (Attachment screenshot : attachmentList) {
-//                attachments.add(screenshot.getDataHandler().getInputStream());
-//            }
-//
-//            // Upload images
-//            applicationRelease = applicationStorageManager
-//                    .uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-//            applicationRelease.setUuid(UUID.randomUUID().toString());
-//
-//            // Created new application release entry
-//            ApplicationReleaseDTO release = applicationManager.createRelease(appId, applicationRelease);
-//            if (release != null) {
-//                return Response.status(Response.Status.CREATED).entity(release).build();
-//            } else {
-//                log.error("ApplicationDTO Creation Failed");
-//                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-//            }
-//        } catch (ApplicationManagementException e) {
-//            String msg = "Error occurred while creating the application";
-//            log.error(msg, e);
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-//        } catch (ResourceManagementException e) {
-//            String msg = "Error occurred while uploading the releases artifacts of the application ID: " + appId;
-//            log.error(msg, e);
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-//        } catch (IOException e) {
-//            String msg = "Error while uploading binary file and resources for the application release of the "
-//                    + "application ID: " + appId;
-//            log.error(msg, e);
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-//        } catch (RequestValidatingException e) {
-//            String msg = "Error occurred while handling the application creating request";
-//            log.error(msg, e);
-//            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-//        }
-//    }
+    @POST
+    @Consumes("multipart/mixed")
+    @Path("/{deviceType}/{appType}/{appId}")
+    public Response createRelease(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("appType") String appType,
+            @PathParam("appId") int appId,
+            @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
+            @Multipart("binaryFile") Attachment binaryFile,
+            @Multipart("icon") Attachment iconFile,
+            @Multipart("banner") Attachment bannerFile,
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<Attachment> attachmentList = new ArrayList<>();
+
+        if (screenshot1 != null) {
+            attachmentList.add(screenshot1);
+        }
+        if (screenshot2 != null) {
+            attachmentList.add(screenshot2);
+        }
+        if (screenshot3 != null) {
+            attachmentList.add(screenshot3);
+        }
+
+        try {
+            applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper, appType);
+            applicationManager.isValidAttachmentSet(binaryFile, iconFile, bannerFile, attachmentList, appType);
+
+            // Created new application release
+            ApplicationRelease release = applicationManager.createRelease(appId, applicationReleaseWrapper,
+                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
+            if (release != null) {
+                return Response.status(Response.Status.CREATED).entity(release).build();
+            } else {
+                log.error("ApplicationDTO Creation Failed");
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating the application";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while handling the application creating request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
 
     @Override
     @PUT

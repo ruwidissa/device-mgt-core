@@ -73,6 +73,7 @@ import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
+import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -141,8 +142,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + userName);
         }
         try {
-            applicationDTO = addApplicationReleaseArtifacts(appWrapperToAppDTO(applicationWrapper),
-                    applicationArtifact);
+            applicationDTO = appWrapperToAppDTO(applicationWrapper);
+            ApplicationReleaseDTO initialApplicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+            applicationDTO.getApplicationReleaseDTOs().clear();
+            applicationDTO.getApplicationReleaseDTOs()
+                    .add(addApplicationReleaseArtifacts(applicationDTO.getType(), applicationDTO.getDeviceTypeName(),
+                            initialApplicationReleaseDTO, applicationArtifact));
         } catch (UnexpectedServerErrorException e) {
             String msg = "Error occurred when getting Device Type data.";
             log.error(msg);
@@ -263,7 +268,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
                 String initialLifecycleState = lifecycleStateManager.getInitialState();
-                applicationReleaseDTO = applicationDTO.getApplicationReleases().get(0);
+                applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
                 applicationReleaseDTO.setCurrentState(initialLifecycleState);
                 applicationReleaseDTO = this.applicationReleaseDAO.createRelease(applicationReleaseDTO, appId, tenantId);
                 LifecycleStateDTO lifecycleStateDTO = getLifecycleStateInstance(initialLifecycleState,
@@ -271,7 +276,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 this.lifecycleStateDAO
                         .addLifecycleState(lifecycleStateDTO, appId, applicationReleaseDTO.getUuid(), tenantId);
                 applicationReleaseEntities.add(applicationReleaseDTO);
-                applicationDTO.setApplicationReleases(applicationReleaseEntities);
+                applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
                 application = appDtoToAppResponse(applicationDTO);
                 ConnectionManagerUtil.commitDBTransaction();
             }
@@ -318,20 +323,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private ApplicationDTO addApplicationReleaseArtifacts(ApplicationDTO applicationDTO,
-            ApplicationArtifact applicationArtifact) throws ResourceManagementException,
-            ApplicationManagementException {
+    private ApplicationReleaseDTO addApplicationReleaseArtifacts(String applicationType, String deviceType,
+            ApplicationReleaseDTO applicationReleaseDTO, ApplicationArtifact applicationArtifact)
+            throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
-        List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
-        ApplicationReleaseDTO applicationReleaseDTO;
-        applicationReleaseDTO = applicationDTO.getApplicationReleases().get(0);
 
         String uuid = UUID.randomUUID().toString();
         applicationReleaseDTO.setUuid(uuid);
 
         // The application executable artifacts such as apks are uploaded.
-        if (ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
+        if (ApplicationType.ENTERPRISE.toString().equals(applicationType)) {
             try {
                 byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
 
@@ -339,11 +341,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
                 try (ByteArrayInputStream binary = new ByteArrayInputStream(content)) {
                     ApplicationInstaller applicationInstaller = applicationStorageManager
-                            .getAppInstallerData(binary, applicationDTO.getDeviceTypeName());
+                            .getAppInstallerData(binary, deviceType);
                     String packagename = applicationInstaller.getPackageName();
 
                     ConnectionManagerUtil.getDBConnection();
-                    if (applicationReleaseDAO.isActiveReleaseExisitForPackageName(packagename, tenantId)) {
+                    if (applicationReleaseDAO.isActiveReleaseExisitForPackageName(packagename, tenantId,
+                            lifecycleStateManager.getEndState())) {
                         String msg = "Application release is already exist for the package name: " + packagename +
                                 ". Either you can delete all application releases for package " + packagename + " or "
                                 + "you can add this app release as an new application release, under the existing "
@@ -353,10 +356,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
                     applicationReleaseDTO.setVersion(applicationInstaller.getVersion());
                     applicationReleaseDTO.setPackageName(packagename);
+
+                    String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
+                    if (md5OfApp == null) {
+                        String msg = "Error occurred while md5sum value retrieving process: application UUID "
+                                + applicationReleaseDTO.getUuid();
+                        log.error(msg);
+                        throw new ApplicationStorageManagementException(msg);
+                    }
+                    if (this.applicationReleaseDAO
+                            .verifyReleaseExistenceByHash(md5OfApp, tenantId)) {
+                        throw new BadRequestException(
+                                "Application release exists for the uploaded binary file. Application Type: "
+                                        + applicationType + " Device Tyep: " + deviceType);
+                    }
+
+                    applicationReleaseDTO.setAppHashValue(md5OfApp);
+
                     try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
                         applicationReleaseDTO = applicationStorageManager
-                                .uploadReleaseArtifact(applicationReleaseDTO, applicationDTO.getType(),
-                                        applicationDTO.getDeviceTypeName(), binaryDuplicate);
+                                .uploadReleaseArtifact(applicationReleaseDTO,applicationType,
+                                        deviceType, binaryDuplicate);
                     }
                 }
             } catch (IOException e) {
@@ -377,7 +397,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             } finally {
                 ConnectionManagerUtil.closeDBConnection();
             }
-        } else if (ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
+        } else if (ApplicationType.WEB_CLIP.toString().equals(applicationType)) {
             applicationReleaseDTO.setVersion(Constants.DEFAULT_VERSION);
             applicationReleaseDTO.setInstallerName(applicationReleaseDTO.getUrl());
             // Since WEB CLIP doesn't have an installer, set uuid as has value for WEB CLIP
@@ -407,9 +427,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationReleaseDTO = applicationStorageManager
                 .uploadImageArtifacts(applicationReleaseDTO, applicationArtifact.getIconStream(),
                         applicationArtifact.getBannerStream(), new ArrayList<>(screenshots.values()));
-        applicationReleaseEntities.add(applicationReleaseDTO);
-        applicationDTO.setApplicationReleases(applicationReleaseEntities);
-        return applicationDTO;
+        return applicationReleaseDTO;
     }
 
     @Override
@@ -528,50 +546,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    @Override public ApplicationReleaseDTO createRelease(int applicationId, ApplicationReleaseDTO applicationRelease)
+    @Override
+    public ApplicationRelease createRelease(int applicationId,
+            ApplicationReleaseWrapper applicationReleaseWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-//        validateAppReleasePayload(applicationRelease);
+        ApplicationRelease applicationRelease;
         if (log.isDebugEnabled()) {
             log.debug("ApplicationDTO release request is received for the application id: " + applicationId);
         }
+
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
-            if (existingApplication == null) {
-                throw new NotFoundException("Couldn't find application for the application Id: " + applicationId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            if (applicationDTO == null) {
+                String msg = "Couldn't find application for the application Id: " + applicationId;
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
+            ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
+                    applicationDTO.getDeviceTypeName(), releaseWrapperToReleaseDTO(applicationReleaseWrapper),
+                    applicationArtifact);
 
-            // todo check whether admin or app creator.
-            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                String msg = "You don't have permission to create application release for the application id: "
-                        + applicationId
-                        + ". In order to create ann new application realse, you should be either ADMIN user or the application created user.";
-                throw new ForbiddenException(msg);
-            }
-            if (!existingApplication.getUnrestrictedRoles().isEmpty() && !isRoleExists(
-                    existingApplication.getUnrestrictedRoles(), userName)) {
-                String msg = "ApplicationDTO is visible to limited roles and those roles are not assigned to " + userName;
-                throw new ApplicationManagementException(msg);
-            }
-            if (this.applicationReleaseDAO
-                    .verifyReleaseExistenceByHash(applicationId, applicationRelease.getAppHashValue(), tenantId)) {
-                throw new BadRequestException("ApplicationDTO release exists for the application Id: " + applicationId
-                        + " and uploaded binary file");
-            }
-            String packageName = this.applicationReleaseDAO.getPackageName(applicationId, tenantId);
-            if (packageName != null && !packageName.equals(applicationRelease.getPackageName())) {
-                throw new BadRequestException(
-                        "Package name in the payload is different from the existing package name of other application" +
-                                " releases.");
-            }
-            applicationRelease = this.applicationReleaseDAO
-                    .createRelease(applicationRelease, existingApplication.getId(), tenantId);
-            LifecycleStateDTO lifecycleState = getLifecycleStateInstance(AppLifecycleState.CREATED.toString(),
-                    AppLifecycleState.CREATED.toString());
+            String initialstate = lifecycleStateManager.getInitialState();
+            applicationReleaseDTO.setCurrentState(initialstate);
+            LifecycleStateDTO lifecycleState = getLifecycleStateInstance(initialstate, initialstate);
             this.lifecycleStateDAO
-                    .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(), tenantId);
+                    .addLifecycleState(lifecycleState, applicationId, applicationReleaseDTO.getUuid(), tenantId);
+            applicationReleaseDTO = this.applicationReleaseDAO
+                    .createRelease(applicationReleaseDTO, applicationDTO.getId(), tenantId);
+            applicationRelease = releaseDtoToRelease(applicationReleaseDTO);
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
         } catch (TransactionManagementException e) {
@@ -592,36 +596,43 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
                     "Error occurred while adding new application release for application " + applicationId, e);
-        } catch (UserStoreException e) {
+        } catch (ResourceManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred whecn checking whether user is admin user or not. ApplicationDTO release: "
-                            + applicationId, e);
+            String msg =
+                    "Error occurred while uploading application release artifacts. Application ID: " + applicationId;
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
 
-    @Override public ApplicationDTO getApplicationById(int appId, String state) throws ApplicationManagementException {
+    @Override
+    public ApplicationDTO getApplicationById(int appId, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationDTO application;
         boolean isAppAllowed = false;
-        List<ApplicationReleaseDTO> applicationReleases;
         try {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplicationById(appId, tenantId);
             if (application == null) {
                 throw new NotFoundException("Couldn't find an application for application Id: " + appId);
             }
+
+            List<String> tags = this.applicationDAO.getAppTags(appId, tenantId);
+            List<String> categories = this.applicationDAO.getAppCategories(appId, tenantId);
+            application.setTags(tags);
+            //todo when support to add multiple categories this has to be changed
+            if (!categories.isEmpty()){
+                application.setAppCategory(categories.get(0));
+            }
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationReleases = getReleases(application, state);
-                application.setApplicationReleases(applicationReleases);
                 return application;
             }
 
-            if (!application.getUnrestrictedRoles().isEmpty()) {
-                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+            List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(appId, tenantId);
+            if (!unrestrictedRoles.isEmpty()) {
+                if (isRoleExists(unrestrictedRoles, userName)) {
                     isAppAllowed = true;
                 }
             } else {
@@ -629,10 +640,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             if (!isAppAllowed) {
-                return null;
+                String msg = "You are trying to access visibility restricted application. You don't have required "
+                        + "roles to view this application,";
+                log.error(msg);
+                throw new ForbiddenException(msg);
             }
-            applicationReleases = getReleases(application, state);
-            application.setApplicationReleases(applicationReleases);
             return application;
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
@@ -657,7 +669,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                 applicationReleases = getReleases(application, state);
-                application.setApplicationReleases(applicationReleases);
+                application.setApplicationReleaseDTOs(applicationReleases);
                 return application;
             }
 
@@ -673,7 +685,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 return null;
             }
             applicationReleases = getReleases(application, state);
-            application.setApplicationReleases(applicationReleases);
+            application.setApplicationReleaseDTOs(applicationReleases);
             return application;
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
@@ -737,7 +749,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             application = this.applicationDAO.getApplication(appName, appType, tenantId);
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                 applicationReleases = getReleases(application, null);
-                application.setApplicationReleases(applicationReleases);
+                application.setApplicationReleaseDTOs(applicationReleases);
                 return application;
             }
 
@@ -754,7 +766,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             applicationReleases = getReleases(application, null);
-            application.setApplicationReleases(applicationReleases);
+            application.setApplicationReleaseDTOs(applicationReleases);
             return application;
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
@@ -1713,6 +1725,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper,
             String applicationType) throws RequestValidatingException {
 
+        if (applicationReleaseWrapper == null){
+            String msg = "Application Release shouldn't be null.";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
+
         if (ApplicationType.WEB_CLIP.toString().equals(applicationType)) {
             UrlValidator urlValidator = new UrlValidator();
             if (StringUtils
@@ -1784,7 +1802,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationDTO.setDeviceTypeName(deviceType.getName());
         List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
                 .stream().map(this::releaseWrapperToReleaseDTO).collect(Collectors.toList());
-        applicationDTO.setApplicationReleases(applicationReleaseEntities);
+        applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
         return applicationDTO;
     }
 
@@ -1813,7 +1831,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setDeviceType(applicationDTO.getDeviceTypeName());
-        List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleases()
+        List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
                 .stream().map(this::releaseDtoToRelease).collect(Collectors.toList());
         application.setApplicationReleases(applicationReleases);
         return application;
