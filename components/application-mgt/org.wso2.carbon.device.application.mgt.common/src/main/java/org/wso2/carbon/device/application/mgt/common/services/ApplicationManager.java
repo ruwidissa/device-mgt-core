@@ -53,12 +53,12 @@ public interface ApplicationManager {
     /**
      * Updates an already existing application.
      *
-     * @param application Application that need to be updated.
+     * @param applicationWrapper Application that need to be updated.
      * @param applicationId ID of the application
      * @return Updated Application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    ApplicationDTO updateApplication(int applicationId, ApplicationDTO application) throws ApplicationManagementException;
+    void updateApplication(int applicationId, ApplicationWrapper applicationWrapper) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
@@ -94,7 +94,7 @@ public interface ApplicationManager {
      * @return the ApplicationDTO identified by the ID
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    ApplicationDTO getApplicationById(int id, String state) throws ApplicationManagementException;
+    Application getApplicationById(int id, String state) throws ApplicationManagementException;
 
     /**
      * To get the ApplicationDTO for given application relase UUID.
@@ -139,28 +139,24 @@ public interface ApplicationManager {
     /**
      * To update release images such as icons, banner and screenshots.
      *
-     * @param appId    ID of the ApplicationDTO
      * @param uuid    uuid of the ApplicationDTO
-     * @param iconFileStream    icon file of the release
-     * @param bannerFileStream    bannerFileStream of the release.
-     * @param attachments    screenshot attachments of the release
+     * @param applicationArtifact Application artifact that contains names and input streams of the application artifacts.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void updateApplicationImageArtifact(int appId, String uuid, InputStream iconFileStream, InputStream
-            bannerFileStream, List<InputStream> attachments) throws ApplicationManagementException;
+    void updateApplicationImageArtifact(String uuid, ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
 
     /**
      * To update release images.
      *
-     * @param appId    ID of the ApplicationDTO
-     * @param deviceType   Applicable device type of the application
+     * @param deviceType Application artifact compatible device type name.
+     * @param appType Type of the application.
      * @param uuid    uuid of the ApplicationDTO
-     * @param binaryFile    binaryFile of the release.
+     * @param  applicationArtifact Application artifact that contains names and input streams of the application artifacts.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void updateApplicationArtifact(int appId, String deviceType, String uuid, InputStream binaryFile)
-            throws ApplicationManagementException;
+    void updateApplicationArtifact(String deviceType, String appType, String uuid,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /**
      * To create an application release for an ApplicationDTO.
@@ -207,15 +203,15 @@ public interface ApplicationManager {
 
     /***
      *
-     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
      * @param iconFile Icon file for the application.
      * @param bannerFile Banner file for the application.
      * @param attachmentList Screenshot list.
-     * @param applicationType Type of the application.
      * @throws RequestValidatingException If request doesn't contains required attachments.
      */
-    void isValidAttachmentSet(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
-            List<Attachment> attachmentList, String applicationType) throws RequestValidatingException;
+    void validateImageArtifacts(Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
+            throws RequestValidatingException;
+
+    void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException;
 
 
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;

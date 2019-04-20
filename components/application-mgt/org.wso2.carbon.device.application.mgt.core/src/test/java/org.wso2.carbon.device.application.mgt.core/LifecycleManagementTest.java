@@ -51,27 +51,27 @@ public class LifecycleManagementTest {
 
 //    @Test
 //    public void CheckUpdatableState() {
-//        boolean isUpdatable = lifecycleStateManager.isUpdatable(UPDATABLE_STATE);
-//        System.out.println(isUpdatable);
-//        Assert.assertTrue("Updatable state: " + UPDATABLE_STATE, isUpdatable);
+//        boolean isUpdatableState = lifecycleStateManager.isUpdatableState(UPDATABLE_STATE);
+//        System.out.println(isUpdatableState);
+//        Assert.assertTrue("Updatable state: " + UPDATABLE_STATE, isUpdatableState);
 //    }
 //
 //    @Test
 //    public void CheckNonUpdatableState() {
-//        boolean isUpdatable = lifecycleStateManager.isUpdatable(NON_UPDATABLE_STATE);
-//        Assert.assertFalse("Non Updatable state: " + NON_UPDATABLE_STATE, isUpdatable);
+//        boolean isUpdatableState = lifecycleStateManager.isUpdatableState(NON_UPDATABLE_STATE);
+//        Assert.assertFalse("Non Updatable state: " + NON_UPDATABLE_STATE, isUpdatableState);
 //    }
 //
 //    @Test
 //    public void CheckInstallableState() {
-//        boolean isInstallable = lifecycleStateManager.isInstallable(INSTALLABLE_STATE);
-//        Assert.assertTrue("Installable state: " + INSTALLABLE_STATE, isInstallable);
+//        boolean isInstallableState = lifecycleStateManager.isInstallableState(INSTALLABLE_STATE);
+//        Assert.assertTrue("Installable state: " + INSTALLABLE_STATE, isInstallableState);
 //    }
 //
 //    @Test
 //    public void CheckUnInstallableState() {
-//        boolean isInstallable = lifecycleStateManager.isInstallable(UNINSTALlABLE_STATE);
-//        Assert.assertFalse("UnInstallable state: " + UNINSTALlABLE_STATE, isInstallable);
+//        boolean isInstallableState = lifecycleStateManager.isInstallableState(UNINSTALlABLE_STATE);
+//        Assert.assertFalse("UnInstallable state: " + UNINSTALlABLE_STATE, isInstallableState);
 //    }
 //
 //    @Test

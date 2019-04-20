@@ -63,14 +63,26 @@ public class StorageManagementUtil {
      *
      * @param artifactDirectory Artifact Directory that need to be deleted.
      */
-    public static void deleteDir(File artifactDirectory) throws IOException {
+    public static void delete(File artifactDirectory) throws IOException {
         File[] contents = artifactDirectory.listFiles();
         if (contents != null) {
             for (File file : contents) {
-                deleteDir(file);
+                delete(file);
             }
         }
         Files.delete(artifactDirectory.toPath());
+    }
+
+    public static void copy(String source, String destination) throws IOException {
+        File sourceFile = new File(source);
+        File destinationFile = new File(destination);
+        if (sourceFile.exists() && destinationFile.exists()) {
+            Files.copy(sourceFile.toPath(), destinationFile.toPath());
+        } else {
+            String msg = "Source file " + source + " or destination file " + destination + " doesn't exist";
+            log.error(msg);
+            throw new IOException(msg);
+        }
     }
 
     /**

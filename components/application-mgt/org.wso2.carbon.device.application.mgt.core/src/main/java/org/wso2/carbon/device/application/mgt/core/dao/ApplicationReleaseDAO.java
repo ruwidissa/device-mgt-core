@@ -82,12 +82,11 @@ public interface ApplicationReleaseDAO {
      * To update an ApplicationDTO release.
      *
      * @param applicationRelease ApplicationReleaseDTO that need to be updated.
-     * @param applicationId      Id of the application.
      * @param tenantId           Id of the tenant
      * @return the updated ApplicationDTO Release
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception
      */
-    ApplicationReleaseDTO updateRelease(int applicationId, ApplicationReleaseDTO applicationRelease, int tenantId) throws
+    ApplicationReleaseDTO updateRelease(ApplicationReleaseDTO applicationRelease, int tenantId) throws
                                                                                                              ApplicationManagementDAOException;
 
     /**
@@ -128,6 +127,8 @@ public interface ApplicationReleaseDAO {
      */
     ApplicationReleaseDTO getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
             ApplicationManagementDAOException;
+
+    ApplicationReleaseDTO getReleaseByUUID(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To verify whether application release exist or not.

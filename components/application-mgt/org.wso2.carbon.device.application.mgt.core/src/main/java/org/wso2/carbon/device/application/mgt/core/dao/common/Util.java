@@ -108,10 +108,12 @@ public class Util {
         appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));
         appRelease.setVersion(rs.getString("RELEASE_VERSION"));
         appRelease.setInstallerName(rs.getString("AP_RELEASE_STORED_LOC"));
+        appRelease.setIconName(rs.getString("AP_RELEASE_ICON_LOC"));
         appRelease.setBannerName(rs.getString("AP_RELEASE_BANNER_LOC"));
-        appRelease.setScreenshotName1("AP_RELEASE_SC1");
-        appRelease.setScreenshotName2("AP_RELEASE_SC2");
-        appRelease.setScreenshotName3("AP_RELEASE_SC3");
+        appRelease.setScreenshotName1(rs.getString("AP_RELEASE_SC1"));
+        appRelease.setScreenshotName2(rs.getString("AP_RELEASE_SC2"));
+        appRelease.setScreenshotName3(rs.getString("AP_RELEASE_SC3"));
+        appRelease.setAppHashValue(rs.getString("RELEASE_HASH_VALUE"));
         appRelease.setPrice(rs.getDouble("RELEASE_PRICE"));
         appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
         appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));

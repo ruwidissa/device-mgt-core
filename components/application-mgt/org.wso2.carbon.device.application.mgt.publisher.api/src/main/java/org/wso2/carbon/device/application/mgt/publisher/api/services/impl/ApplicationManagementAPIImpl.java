@@ -105,7 +105,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @DefaultValue("PUBLISHED") @QueryParam("state") String state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            ApplicationDTO application = applicationManager.getApplicationById(appId, state);
+            Application application = applicationManager.getApplicationById(appId, state);
+            if (application == null){
+                String msg = "Couldn't found an application release which is in " + state + " state for application id "
+                        + appId;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
             String msg = "ApplicationDTO with application id: " + appId + " not found";
@@ -150,8 +156,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             applicationManager.validateAppCreatingRequest(applicationWrapper);
             applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0),
                     applicationWrapper.getType());
-            applicationManager.isValidAttachmentSet(binaryFile, iconFile, bannerFile, attachmentList,
-                    applicationWrapper.getType());
+            applicationManager.validateBinaryArtifact(binaryFile, applicationWrapper.getType());
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new application entry
             Application application = applicationManager.createApplication(applicationWrapper,
@@ -176,9 +182,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
     @POST
     @Consumes("multipart/mixed")
-    @Path("/{deviceType}/{appType}/{appId}")
+    @Path("/{appType}/{appId}")
     public Response createRelease(
-            @PathParam("deviceType") String deviceType,
             @PathParam("appType") String appType,
             @PathParam("appId") int appId,
             @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
@@ -203,7 +208,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
         try {
             applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper, appType);
-            applicationManager.isValidAttachmentSet(binaryFile, iconFile, bannerFile, attachmentList, appType);
+            applicationManager.validateBinaryArtifact(binaryFile, appType);
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new application release
             ApplicationRelease release = applicationManager.createRelease(appId, applicationReleaseWrapper,
@@ -229,9 +235,8 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @PUT
     @Consumes("multipart/mixed")
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/image-artifacts/{appId}/{uuid}")
+    @Path("/image-artifacts/{uuid}")
     public Response updateApplicationImageArtifacts(
-            @PathParam("appId") int appId,
             @PathParam("uuid") String applicationReleaseUuid,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
@@ -239,47 +244,36 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         try {
-            InputStream iconFileStream = null;
-            InputStream bannerFileStream = null;
-            List<InputStream> attachments = new ArrayList<>();
+            List<Attachment> attachments = new ArrayList<>();
 
-            if (iconFile != null) {
-                iconFileStream = iconFile.getDataHandler().getInputStream();
+            if (screenshot1 != null) {
+                attachments.add(screenshot1);
             }
-            if (bannerFile != null) {
-                bannerFileStream = bannerFile.getDataHandler().getInputStream();
-            }
-            attachments.add(screenshot1.getDataHandler().getInputStream());
             if (screenshot2 != null) {
-                attachments.add(screenshot2.getDataHandler().getInputStream());
+                attachments.add(screenshot2);
             }
             if (screenshot3 != null) {
-                attachments.add(screenshot3.getDataHandler().getInputStream());
+                attachments.add(screenshot3);
             }
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            applicationManager
-                    .updateApplicationImageArtifact(appId, applicationReleaseUuid, iconFileStream, bannerFileStream,
-                            attachments);
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachments);
+            applicationManager.updateApplicationImageArtifact(applicationReleaseUuid,
+                    constructApplicationArtifact(null, iconFile, bannerFile, attachments));
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationReleaseUuid).build();
+        } catch (RequestValidatingException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ValidationException e) {
-            log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (ForbiddenException e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while updating the application image artifacts for app id: " + appId
-                    + " application release uuid: " + applicationReleaseUuid;
+            String msg = "Error occurred while updating the application image artifacts for application release uuid: "
+                    + applicationReleaseUuid;
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (IOException e) {
-            String msg =
-                    "Exception while trying to read icon, banner files for the application " + applicationReleaseUuid;
-            log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
@@ -287,41 +281,35 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Override
     @PUT
     @Consumes("multipart/mixed")
-    @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
+    @Path("/app-artifact/{deviceType}/{appType}/{uuid}")
     public Response updateApplicationArtifact(
             @PathParam("deviceType") String deviceType,
             @PathParam("appType") String appType,
-            @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationReleaseUuid,
             @Multipart("binaryFile") Attachment binaryFile) {
 
         try {
-            if (binaryFile == null) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("binary file is NULL, hence invalid request to update application release artifact for application release UUID: "
-                                + applicationReleaseUuid).build();
-            }
+            ApplicationManager applicationManager = APIUtil.getApplicationManager();
+
             if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("If ApplicationDTO type is " + appType
+                String msg = "If ApplicationDTO type is " + appType
                         + ", therefore you don't have application release artifact to update for application release UUID: "
-                        + applicationReleaseUuid).build();
+                        + applicationReleaseUuid;
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
-            APIUtil.getApplicationManager().updateApplicationArtifact(applicationId, deviceType, applicationReleaseUuid,
-                    binaryFile.getDataHandler().getInputStream());
+            applicationManager.validateBinaryArtifact(binaryFile, appType);
+            applicationManager.updateApplicationArtifact(deviceType, appType, applicationReleaseUuid,
+                    constructApplicationArtifact(binaryFile, null, null, null));
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application release. UUID is "
                             + applicationReleaseUuid).build();
-        } catch (IOException e) {
-            String msg = "Error occurred while trying to read icon, banner files for the application release"
-                    + applicationReleaseUuid;
-            log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (RequestValidatingException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ValidationException e) {
-            log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (ApplicationManagementException e) {
             log.error("Error occurred while updating the image artifacts of the application with the uuid "
                     + applicationReleaseUuid, e);
@@ -335,10 +323,13 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Path("/{appId}")
     public Response updateApplication(
             @PathParam("appId") int applicationId,
-            @Valid ApplicationDTO application) {
+            @Valid ApplicationWrapper applicationWrapper) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            application = applicationManager.updateApplication(applicationId, application);
+            //todo wrong
+            applicationManager.updateApplication(applicationId, applicationWrapper);
+            return Response.status(Response.Status.OK)
+                    .entity("Application was updated successfully. ApplicationID " + applicationId).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
@@ -350,7 +341,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
-        return Response.status(Response.Status.OK).entity(application).build();
     }
 
     @Override
@@ -582,65 +572,71 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
                 applicationArtifact.setInstallerStream(installerStream);
             }
 
-            dataHandler = iconFile.getDataHandler();
-            String iconFileName = dataHandler.getName();
-            InputStream iconStream = dataHandler.getInputStream();
+            if (iconFile != null) {
+                dataHandler = iconFile.getDataHandler();
+                String iconFileName = dataHandler.getName();
+                InputStream iconStream = dataHandler.getInputStream();
 
-            if (iconStream == null) {
-                String msg = "Stream of the application release icon is null. Hence can't proceed. Please "
-                        + "verify the uploaded icon file.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-            if (iconFileName == null) {
-                String msg =
-                        "Icon file name retrieving is failed.. Hence can't proceed. Please verify the " + "icon file.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-            applicationArtifact.setIconName(iconFileName);
-            applicationArtifact.setIconStream(iconStream);
-
-            dataHandler = bannerFile.getDataHandler();
-            String bannerFileName = dataHandler.getName();
-            InputStream bannerStream = dataHandler.getInputStream();
-            if (bannerStream == null) {
-                String msg = "Stream of the application release banner is null. Hence can't proceed. Please "
-                        + "verify the uploaded banner file.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-            if (bannerFileName == null) {
-                String msg = "Banner file name retrieving is failed.. Hence can't proceed. Please verify the "
-                        + "banner file.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-            applicationArtifact.setBannerName(bannerFileName);
-            applicationArtifact.setBannerStream(bannerStream);
-
-            Map<String, InputStream> scrrenshotData = new HashMap<>();
-            for (Attachment sc : attachmentList) {
-                dataHandler = sc.getDataHandler();
-                String screenshotrFileName = dataHandler.getName();
-                InputStream screenshotStream = dataHandler.getInputStream();
-                if (screenshotStream == null) {
-                    String msg =
-                            "Stream of one of the application release screenshot is null. Hence can't proceed. Please "
-                                    + "verify the uploaded screenshots.";
+                if (iconStream == null) {
+                    String msg = "Stream of the application release icon is null. Hence can't proceed. Please "
+                            + "verify the uploaded icon file.";
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
-                if (screenshotrFileName == null) {
-                    String msg =
-                            "Screenshot file name retrieving is failed for one screenshot. Hence can't proceed. Please verify the "
-                                    + "screenshots.";
+                if (iconFileName == null) {
+                    String msg = "Icon file name retrieving is failed.. Hence can't proceed. Please verify the "
+                            + "icon file.";
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
-                scrrenshotData.put(screenshotrFileName, screenshotStream);
+                applicationArtifact.setIconName(iconFileName);
+                applicationArtifact.setIconStream(iconStream);
             }
-            applicationArtifact.setScreenshots(scrrenshotData);
+
+            if (bannerFile != null) {
+                dataHandler = bannerFile.getDataHandler();
+                String bannerFileName = dataHandler.getName();
+                InputStream bannerStream = dataHandler.getInputStream();
+                if (bannerStream == null) {
+                    String msg = "Stream of the application release banner is null. Hence can't proceed. Please "
+                            + "verify the uploaded banner file.";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+                if (bannerFileName == null) {
+                    String msg = "Banner file name retrieving is failed.. Hence can't proceed. Please verify the "
+                            + "banner file.";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+                applicationArtifact.setBannerName(bannerFileName);
+                applicationArtifact.setBannerStream(bannerStream);
+            }
+
+            if (attachmentList != null) {
+                Map<String, InputStream> scrrenshotData = new HashMap<>();
+                for (Attachment sc : attachmentList) {
+                    dataHandler = sc.getDataHandler();
+                    String screenshotrFileName = dataHandler.getName();
+                    InputStream screenshotStream = dataHandler.getInputStream();
+                    if (screenshotStream == null) {
+                        String msg =
+                                "Stream of one of the application release screenshot is null. Hence can't proceed. Please "
+                                        + "verify the uploaded screenshots.";
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                    if (screenshotrFileName == null) {
+                        String msg =
+                                "Screenshot file name retrieving is failed for one screenshot. Hence can't proceed. "
+                                        + "Please verify the screenshots.";
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                    scrrenshotData.put(screenshotrFileName, screenshotStream);
+                }
+                applicationArtifact.setScreenshots(scrrenshotData);
+            }
             return applicationArtifact;
         } catch (IOException e) {
             String msg = "Error occurred when reading attachment data.";

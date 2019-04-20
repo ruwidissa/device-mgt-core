@@ -223,7 +223,7 @@ public interface ApplicationManagementAPI {
                     name = "application",
                     value = "The application that need to be edited.",
                     required = true)
-            @Valid ApplicationDTO application
+            @Valid ApplicationWrapper applicationWrapper
     );
 
     @POST
@@ -298,7 +298,7 @@ public interface ApplicationManagementAPI {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes("multipart/mixed")
-    @Path("/{deviceType}/{appType}/{appId}")
+    @Path("/{appType}/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -328,8 +328,15 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response createRelease(
-            @PathParam("deviceType") String deviceType,
-            @PathParam("appId") String appType,
+            @ApiParam(
+                    name = "appType",
+                    value = "Application Type.",
+                    required = true)
+            @PathParam("appType") String appType,
+            @ApiParam(
+                    name = "appId",
+                    value = "Id of the application.",
+                    required = true)
             @PathParam("appId") int appId,
             @ApiParam(
                     name = "applicationRelease",
@@ -404,7 +411,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
-    @Path("/image-artifacts/{appId}/{uuid}")
+    @Path("/image-artifacts/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes("multipart/mixed")
     @ApiOperation(
@@ -442,11 +449,6 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationImageArtifacts(
-            @ApiParam(
-                    name = "appId",
-                    value = "ID of the application",
-                    required = true)
-            @PathParam("appId") int applicatioId,
             @ApiParam(
                     name = "uuid",
                     value = "UUID of the application",
@@ -514,13 +516,20 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationArtifact(
-            @ApiParam(name = "deviceType", value = "Type of the device i.e Android, IOS etc", required = true)
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Type of the device i.e Android, IOS etc",
+                    required = true)
             @PathParam("deviceType") String deviceType,
-            @ApiParam(name = "appType", value = "Type of the application i.e Mobile, WEB, WEB-CLIP etc", required = true)
+            @ApiParam(
+                    name = "appType",
+                    value = "Type of the application i.e ENTERPRISE, PUBLIC, WEB, WEB-CLIP etc",
+                    required = true)
             @PathParam("appType") String appType,
-            @ApiParam(name = "appId", value = "Id of the application", required = true)
-            @PathParam("appId") int applicationId,
-            @ApiParam(name = "uuid", value = "UUID of the application", required = true)
+            @ApiParam(
+                    name = "uuid",
+                    value = "UUID of the application",
+                    required = true)
             @PathParam("uuid") String applicationUUID,
             @Multipart("binaryFile") Attachment binaryFile
     );

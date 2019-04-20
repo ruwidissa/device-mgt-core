@@ -24,18 +24,14 @@ import com.dd.plist.NSString;
 import com.dd.plist.PropertyListFormatException;
 import com.dd.plist.PropertyListParser;
 import net.dongliu.apk.parser.bean.ApkMeta;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
-import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
@@ -46,6 +42,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +51,7 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.deleteDir;
+import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.delete;
 import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.saveFile;
 
 /**
@@ -88,7 +85,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         String scStoredLocation = null;
 
         try {
-            // todo handle WEB CLIP and save data in different folder (uuid)
             artifactDirectoryPath = storagePath + applicationRelease.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             iconStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getIconName();
@@ -135,43 +131,42 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
 
     @Override
-     public ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream
-            iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
+     public void deleteImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO)
             throws ResourceManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
         try {
-            if (iconFileStream != null) {
-                deleteApplicationReleaseArtifacts(applicationRelease.getIconName());
+            String iconName = applicationReleaseDTO.getIconName();
+            String bannerName = applicationReleaseDTO.getBannerName();
+            String sc1 = applicationReleaseDTO.getScreenshotName1();
+            String sc2 = applicationReleaseDTO.getScreenshotName2();
+            String sc3 = applicationReleaseDTO.getScreenshotName3();
+            String hashValue = applicationReleaseDTO.getAppHashValue();
+            if (iconName != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + iconName);
             }
-            if (bannerFileStream != null) {
-                deleteApplicationReleaseArtifacts(applicationRelease.getBannerName());
+            if (bannerName != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + bannerName);
             }
-            if (!screenShotStreams.isEmpty()) {
-                if (screenShotStreams.size() > screenShotMaxCount) {
-                    throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
-                }
-                int count = 1;
-                while (count < screenShotStreams.size()) {
-                    if (count == 1) {
-                        deleteApplicationReleaseArtifacts(applicationRelease.getScreenshotName1());
-                    }
-                    if (count == 2) {
-                        deleteApplicationReleaseArtifacts(applicationRelease.getScreenshotName2());
-                    }
-                    if (count == 3) {
-                        deleteApplicationReleaseArtifacts(applicationRelease.getScreenshotName3());
-                    }
-                    count++;
-                }
+
+            if (sc1 != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + sc1);
             }
-            applicationRelease = uploadImageArtifacts(applicationRelease, iconFileStream, bannerFileStream,
-                    screenShotStreams);
-            return applicationRelease;
+            if (sc2 != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + sc2);
+            }
+            if (sc3 != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + sc3);
+            }
         } catch (ApplicationStorageManagementException e) {
             throw new ApplicationStorageManagementException("ApplicationDTO Storage exception while trying to"
-                    + " update the screen-shot count for the application Release " + applicationRelease.getUuid() +
+                    + " update the screen-shot count for the application Release " + applicationReleaseDTO.getUuid() +
                     " for the tenant " + tenantId, e);
         }
     }
@@ -225,27 +220,53 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationReleaseDTO updateReleaseArtifacts(ApplicationReleaseDTO applicationRelease,
-            String appType, String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException {
+    public void copyImageArtifactsAndDeleteInstaller(String deletingAppHashValue,
+            ApplicationReleaseDTO applicationReleaseDTO) throws ApplicationStorageManagementException {
 
         try {
-            deleteApplicationReleaseArtifacts(applicationRelease.getInstallerName());
-            applicationRelease = uploadReleaseArtifact(applicationRelease, appType, deviceType, binaryFile);
-        } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationDTO Artifact doesn't contains in the System", e);
-        } catch (ResourceManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationDTO Artifact Updating failed", e);
+            String basePath = storagePath + Constants.FORWARD_SLASH;
+            String appHashValue = applicationReleaseDTO.getAppHashValue();
+            String bannerName = applicationReleaseDTO.getBannerName();
+            String iconName = applicationReleaseDTO.getIconName();
+            String screenshot1 = applicationReleaseDTO.getScreenshotName1();
+            String screenshot2 = applicationReleaseDTO.getScreenshotName2();
+            String screenshot3 = applicationReleaseDTO.getScreenshotName3();
+
+            if (bannerName != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + bannerName, basePath + appHashValue + bannerName);
+            }
+            if (iconName != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + iconName, basePath + appHashValue + iconName);
+            }
+            if (screenshot1 != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + screenshot1, basePath + appHashValue + screenshot1);
+            }
+            if (screenshot2 != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + screenshot2, basePath + appHashValue + screenshot2);
+            }
+            if (screenshot3 != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + screenshot3, basePath + appHashValue + screenshot3);
+            }
+            deleteApplicationReleaseArtifacts( basePath + deletingAppHashValue);
+        } catch (IOException e) {
+            String msg = "Application installer updating is failed because of I/O issue";
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg, e);
         }
-        return applicationRelease;
     }
 
     @Override
-    public void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException {
-        File artifact = new File(directoryPath);
+    public void deleteApplicationReleaseArtifacts(String artifactPath) throws ApplicationStorageManagementException {
+        File artifact = new File(artifactPath);
 
         if (artifact.exists()) {
             try {
-                StorageManagementUtil.deleteDir(artifact);
+                StorageManagementUtil.delete(artifact);
             } catch (IOException e) {
                 throw new ApplicationStorageManagementException(
                         "Error occured while deleting application release artifacts", e);
@@ -283,7 +304,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             ipaDirectory = new File(ipaAbsPath).getParent();
 
             if (new File(ipaDirectory + File.separator + Constants.PAYLOAD).exists()) {
-                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+                delete(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
             }
 
             // unzip ipa zip file
@@ -313,7 +334,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             if (ipaDirectory != null) {
                 // remove unzip folder
-                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+                delete(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
             }
 
         } catch (ParseException e) {

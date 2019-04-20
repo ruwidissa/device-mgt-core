@@ -133,7 +133,7 @@ public class LifecycleStateManager {
         return null;
     }
 
-    public boolean isUpdatable(String state) throws LifecycleManagementException {
+    public boolean isUpdatableState(String state) throws LifecycleManagementException {
         State currentState = getMatchingState(state);
         if (currentState != null) {
             return currentState.isAppUpdatable();
@@ -144,7 +144,7 @@ public class LifecycleStateManager {
         }
     }
 
-    public boolean isInstallable(String state) throws LifecycleManagementException {
+    public boolean isInstallableState(String state) throws LifecycleManagementException {
         State currentState = getMatchingState(state);
         if (currentState != null) {
             return currentState.isAppInstallable();

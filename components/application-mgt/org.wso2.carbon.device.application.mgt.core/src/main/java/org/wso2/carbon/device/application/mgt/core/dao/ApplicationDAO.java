@@ -149,15 +149,16 @@ public interface ApplicationDAO {
     boolean verifyApplicationExistenceById(int appId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
-     * To get the application id of the application specified by the UUID
+     * Verify whether application exist for given application name and device type. Because a name and device type is
+     * unique for an application.
      *
      * @param appName     name of the application.
-     * @param appType     type of the application.
+     * @param deviceTypeId  ID of the device type.
      * @param tenantId ID of the tenant.
      * @return ID of the ApplicationDTO.
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
+     * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    int getApplicationId(String appName, String appType, int tenantId) throws ApplicationManagementDAOException;
+    boolean isValidAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To edit the given application.

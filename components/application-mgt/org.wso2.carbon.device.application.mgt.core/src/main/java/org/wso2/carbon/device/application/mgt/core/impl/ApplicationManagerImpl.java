@@ -67,7 +67,6 @@ import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
-import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
@@ -145,9 +144,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationDTO = appWrapperToAppDTO(applicationWrapper);
             ApplicationReleaseDTO initialApplicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
             applicationDTO.getApplicationReleaseDTOs().clear();
-            applicationDTO.getApplicationReleaseDTOs()
-                    .add(addApplicationReleaseArtifacts(applicationDTO.getType(), applicationDTO.getDeviceTypeName(),
-                            initialApplicationReleaseDTO, applicationArtifact));
+
+            ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(), applicationDTO.getDeviceTypeName(),
+                    initialApplicationReleaseDTO, applicationArtifact);
+            applicationDTO.getApplicationReleaseDTOs().add(addImageArtifacts(applicationReleaseDTO, applicationArtifact));
         } catch (UnexpectedServerErrorException e) {
             String msg = "Error occurred when getting Device Type data.";
             log.error(msg);
@@ -161,8 +161,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
             ApplicationReleaseDTO applicationReleaseDTO;
-            Filter filter = new Filter();
 
+            Filter filter = new Filter();
             filter.setFullMatch(true);
             filter.setAppName(applicationDTO.getName().trim());
             filter.setOffset(0);
@@ -193,9 +193,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 List<String> unrestrictedRoles = applicationWrapper.getUnrestrictedRoles();
                 if (!unrestrictedRoles.isEmpty()) {
                     if (!isValidRestrictedRole(unrestrictedRoles)) {
+                        ConnectionManagerUtil.rollbackDBTransaction();
                         String msg = "Unrestricted role list contain role/roles which are not in the user store.";
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
+                    }
+
+                    if (!hasUserRole(unrestrictedRoles, userName)){
+                        ConnectionManagerUtil.rollbackDBTransaction();
+                        String msg =
+                                "You are trying to restrict the visibility of the application for a role set, but in order to perform the action at least one role should be assigned to user: "
+                                        + userName;
+                        log.error(msg);
+                        throw new BadRequestException(msg);
                     }
                     this.visibilityDAO.addUnrestrictedRoles(unrestrictedRoles, appId, tenantId);
                     if (log.isDebugEnabled()) {
@@ -251,7 +261,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         }
                         tagIds = this.applicationDAO.getTagIdsForTagNames(tags, tenantId);
                     } else {
-
                         for (TagDTO tagDTO : registeredTags) {
                             for (String tagName : tags) {
                                 if (tagName.equals(tagDTO.getTagName())) {
@@ -403,6 +412,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
             // Since WEB CLIP doesn't have an installer, set uuid as has value for WEB CLIP
             applicationReleaseDTO.setAppHashValue(uuid);
         }
+        return applicationReleaseDTO;
+    }
+
+    private ApplicationReleaseDTO addImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
+            ApplicationArtifact applicationArtifact) throws ResourceManagementException {
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
 
         applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
         applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
@@ -441,8 +456,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         DeviceType deviceType = null;
 
         try {
-            validateFilter(filter);
-
             //set default values
             if (StringUtils.isEmpty(filter.getSortBy())) {
                 filter.setSortBy("ASC");
@@ -456,6 +469,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             ConnectionManagerUtil.openDBConnection();
+
+            validateFilter(filter);
             if (deviceType == null) {
                 appDTOs = applicationDAO.getApplications(filter, 0, tenantId);
             } else {
@@ -464,62 +479,46 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             for (ApplicationDTO app : appDTOs) {
                 boolean isSearchingApp = true;
-                List<String> tags = filter.getTags();
-                List<String> categories = filter.getAppCategories();
-                List<String> unrestrictedRoles = filter.getUnrestrictedRoles();
+                List<String> filteringTags = filter.getTags();
+                List<String> filteringCategories = filter.getAppCategories();
+                List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
 
-                if (lifecycleStateManager.getEndState().equals(app.getStatus())) {
-                    isSearchingApp = false;
-                }
-                if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
-
-                    if (!isRoleExists(unrestrictedRoles, userName)) {
-                        String msg = "At least one filtering role is not assigned for the user: " + userName
-                                + ". Hence user " + userName
-                                + " Can't filter applications by giving these unrestriced role list";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
+                if (!lifecycleStateManager.getEndState().equals(app.getStatus())) {
                     List<String> appUnrestrictedRoles = visibilityDAO.getUnrestrictedRoles(app.getId(), tenantId);
-                    boolean isUnrestrictedRoleExistForApp = false;
-                    for (String role : unrestrictedRoles) {
-                        if (appUnrestrictedRoles.contains(role)) {
-                            isUnrestrictedRoleExistForApp = true;
-                            break;
+                    if ((appUnrestrictedRoles.isEmpty() || hasUserRole(appUnrestrictedRoles, userName)) && (
+                            filteringUnrestrictedRoles == null || filteringUnrestrictedRoles.isEmpty()
+                                    || hasAppUnrestrictedRole(appUnrestrictedRoles, filteringUnrestrictedRoles,
+                                    userName))) {
+                        if (filteringCategories != null && !filteringCategories.isEmpty()) {
+                            List<String> appTagList = applicationDAO.getAppCategories(app.getId(), tenantId);
+                            boolean isAppCategory = false;
+                            for (String category : filteringCategories) {
+                                if (appTagList.contains(category)) {
+                                    isAppCategory = true;
+                                    break;
+                                }
+                            }
+                            if (!isAppCategory) {
+                                isSearchingApp = false;
+                            }
+                        }
+                        if (filteringTags != null && !filteringTags.isEmpty()) {
+                            List<String> appTagList = applicationDAO.getAppTags(app.getId(), tenantId);
+                            boolean isAppTag = false;
+                            for (String tag : filteringTags) {
+                                if (appTagList.contains(tag)) {
+                                    isAppTag = true;
+                                    break;
+                                }
+                            }
+                            if (!isAppTag) {
+                                isSearchingApp = false;
+                            }
+                        }
+                        if (isSearchingApp) {
+                            filteredApplications.add(app);
                         }
                     }
-                    if (!isUnrestrictedRoleExistForApp) {
-                        isSearchingApp = false;
-                    }
-                }
-                if (tags != null && !tags.isEmpty()) {
-                    List<String> appTagList = applicationDAO.getAppTags(app.getId(), tenantId);
-                    boolean isTagExistForApp = false;
-                    for (String tag : tags) {
-                        if (appTagList.contains(tag)) {
-                            isTagExistForApp = true;
-                            break;
-                        }
-                    }
-                    if (!isTagExistForApp) {
-                        isSearchingApp = false;
-                    }
-                }
-                if (categories != null && !categories.isEmpty()) {
-                    List<String> appTagList = applicationDAO.getAppCategories(app.getId(), tenantId);
-                    boolean isCategoryExistForApp = false;
-                    for (String category : categories) {
-                        if (appTagList.contains(category)) {
-                            isCategoryExistForApp = true;
-                            break;
-                        }
-                    }
-                    if (!isCategoryExistForApp) {
-                        isSearchingApp = false;
-                    }
-                }
-                if (isSearchingApp) {
-                    filteredApplications.add(app);
                 }
             }
 
@@ -546,6 +545,25 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    private boolean hasAppUnrestrictedRole(List<String> appUnrestrictedRoles, List<String> filteringUnrestrictedRoles,
+            String userName) throws BadRequestException, UserStoreException {
+        if (!haveAllUserRoles(filteringUnrestrictedRoles, userName)) {
+            String msg =
+                    "At least one filtering role is not assigned for the user: " + userName + ". Hence user " + userName
+                            + " Can't filter applications by giving these unrestriced role list";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (!appUnrestrictedRoles.isEmpty()) {
+            for (String role : filteringUnrestrictedRoles) {
+                if (appUnrestrictedRoles.contains(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public ApplicationRelease createRelease(int applicationId,
             ApplicationReleaseWrapper applicationReleaseWrapper, ApplicationArtifact applicationArtifact)
@@ -567,6 +585,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
                     applicationDTO.getDeviceTypeName(), releaseWrapperToReleaseDTO(applicationReleaseWrapper),
                     applicationArtifact);
+            applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact);
 
             String initialstate = lifecycleStateManager.getInitialState();
             applicationReleaseDTO.setCurrentState(initialstate);
@@ -607,45 +626,54 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationDTO getApplicationById(int appId, String state) throws ApplicationManagementException {
+    public Application getApplicationById(int appId, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO application;
-        boolean isAppAllowed = false;
+        ApplicationDTO applicationDTO;
+        List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs;
+        boolean isVisibleApp = false;
         try {
             ConnectionManagerUtil.openDBConnection();
-            application = this.applicationDAO.getApplicationById(appId, tenantId);
-            if (application == null) {
+            applicationDTO = this.applicationDAO.getApplicationById(appId, tenantId);
+            if (applicationDTO == null) {
                 throw new NotFoundException("Couldn't find an application for application Id: " + appId);
+            }
+
+            filteredApplicationReleaseDTOs = applicationDTO.getApplicationReleaseDTOs().stream()
+                    .filter(applicationReleaseDTO -> applicationReleaseDTO.getCurrentState().equals(state))
+                    .collect(Collectors.toList());
+            applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
+            if (applicationDTO.getApplicationReleaseDTOs().isEmpty()){
+                return null;
             }
 
             List<String> tags = this.applicationDAO.getAppTags(appId, tenantId);
             List<String> categories = this.applicationDAO.getAppCategories(appId, tenantId);
-            application.setTags(tags);
+            applicationDTO.setTags(tags);
             //todo when support to add multiple categories this has to be changed
             if (!categories.isEmpty()){
-                application.setAppCategory(categories.get(0));
+                applicationDTO.setAppCategory(categories.get(0));
             }
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                return application;
+                return appDtoToAppResponse(applicationDTO);
             }
 
             List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(appId, tenantId);
             if (!unrestrictedRoles.isEmpty()) {
-                if (isRoleExists(unrestrictedRoles, userName)) {
-                    isAppAllowed = true;
+                if (hasUserRole(unrestrictedRoles, userName)) {
+                    isVisibleApp = true;
                 }
             } else {
-                isAppAllowed = true;
+                isVisibleApp = true;
             }
 
-            if (!isAppAllowed) {
+            if (!isVisibleApp) {
                 String msg = "You are trying to access visibility restricted application. You don't have required "
                         + "roles to view this application,";
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
-            return application;
+            return appDtoToAppResponse(applicationDTO);
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while getting application with the application id " + appId);
@@ -674,7 +702,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             if (!application.getUnrestrictedRoles().isEmpty()) {
-                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                if (hasUserRole(application.getUnrestrictedRoles(), userName)) {
                     isAppAllowed = true;
                 }
             } else {
@@ -695,7 +723,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private boolean isRoleExists(Collection<String> unrestrictedRoleList, String userName) throws UserStoreException {
+    private boolean hasUserRole(Collection<String> unrestrictedRoleList, String userName) throws UserStoreException {
         String[] roleList;
         roleList = getRolesOfUser(userName);
         for (String unrestrictedRole : unrestrictedRoleList) {
@@ -706,6 +734,20 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
         }
         return false;
+    }
+
+    private boolean haveAllUserRoles(Collection<String> unrestrictedRoleList, String userName)
+            throws UserStoreException {
+        String[] roleList;
+        roleList = getRolesOfUser(userName);
+        for (String unrestrictedRole : unrestrictedRoleList) {
+            for (String role : roleList) {
+                if (!unrestrictedRole.equals(role)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private boolean isValidRestrictedRole(Collection<String> unrestrictedRoleList) throws UserStoreException {
@@ -754,7 +796,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             if (!application.getUnrestrictedRoles().isEmpty()) {
-                if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                if (hasUserRole(application.getUnrestrictedRoles(), userName)) {
                     isAppAllowed = true;
                 }
             } else {
@@ -784,7 +826,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.openDBConnection();
             application = this.applicationDAO.getApplicationByRelease(appReleaseUUID, tenantId);
 
-            if (application.getUnrestrictedRoles().isEmpty() || isRoleExists(application.getUnrestrictedRoles(),
+            if (application.getUnrestrictedRoles().isEmpty() || hasUserRole(application.getUnrestrictedRoles(),
                     userName)) {
                 return application;
             }
@@ -867,7 +909,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
-                    .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                    .getUnrestrictedRoles().isEmpty() && hasUserRole(application.getUnrestrictedRoles(), userName)) {
                 throw new ForbiddenException(
                         "You don't have permission to delete this application. In order to delete an application you "
                                 + "need to have required permission. ApplicationDTO ID: " + applicationId);
@@ -988,7 +1030,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException("Couldn't find an application for application ID: " + applicationId);
             }
             if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
-                    .getUnrestrictedRoles().isEmpty() && isRoleExists(application.getUnrestrictedRoles(), userName)) {
+                    .getUnrestrictedRoles().isEmpty() && hasUserRole(application.getUnrestrictedRoles(), userName)) {
                 throw new ForbiddenException(
                         "You don't have permission for deleting application release. ApplicationDTO id: " + applicationId
                                 + " and release UUID: " + releaseUuid);
@@ -1094,77 +1136,76 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return false;
     }
 
-    //todo check whether user is whether admin user or application owner, otherwise throw an exception
     @Override
-    public void updateApplicationImageArtifact(int appId, String uuid, InputStream iconFileStream,
-            InputStream bannerFileStream, List<InputStream> attachments) throws ApplicationManagementException {
+    //todo with this implementation user has to provide all image artifacts in order to update one image artifact as
+    // well. Therefore enhance this later.
+    public void updateApplicationImageArtifact(String uuid, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
-        ApplicationReleaseDTO applicationRelease;
+        ApplicationReleaseDTO applicationReleaseDTO;
         try {
-            if (appId <= 0) {
-                throw new ValidationException(
-                        "ApplicationDTO id could,t be a negative integer. Hence please add valid application id.");
-            }
-            ConnectionManagerUtil.beginDBTransaction();
-            applicationRelease = this.applicationReleaseDAO.getReleaseByIds(appId, uuid, tenantId);
-            if (applicationRelease == null) {
-                throw new NotFoundException(
-                        "Doesn't exist a application release for application ID:  " + appId + "and application UUID: "
-                                + uuid);
-            }
-            LifecycleStateDTO lifecycleState = this.lifecycleStateDAO
-                    .getLatestLifeCycleState(appId, applicationRelease.getUuid());
-            if (AppLifecycleState.PUBLISHED.toString().equals(lifecycleState.getCurrentState())
-                    || AppLifecycleState.DEPRECATED.toString().equals(lifecycleState.getCurrentState())) {
-                throw new ForbiddenException("Can't Update the application release in PUBLISHED or DEPRECATED state. "
-                        + "Hence please demote the application and update the application release");
-            }
-            applicationRelease = applicationStorageManager
-                    .updateImageArtifacts(applicationRelease, iconFileStream, bannerFileStream, attachments);
-            applicationRelease = this.applicationReleaseDAO.updateRelease(appId, applicationRelease, tenantId);
-            if (applicationRelease == null) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                throw new ApplicationManagementException(
-                        "ApplicationDTO release updating count is 0. ApplicationDTO id: " + appId
-                                + " ApplicationDTO release UUID: " + uuid);
 
+            ConnectionManagerUtil.beginDBTransaction();
+            applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Application release image artifact uploading is failed. Doesn't exist a application "
+                        + "release for application ID: application UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+
+            String currentState = applicationReleaseDTO.getCurrentState();
+            if (!lifecycleStateManager.isUpdatableState(currentState)){
+                throw new ForbiddenException(
+                        "Can't Update the application release. Application release is in " + currentState
+                                + " and it is not an release updatable state. Hence please move the application release"
+                                + " into updatable state and retry the operation.");
+            }
+            applicationStorageManager.deleteImageArtifacts(applicationReleaseDTO);
+
+            applicationReleaseDTO = this.applicationReleaseDAO
+                    .updateRelease(addImageArtifacts(applicationReleaseDTO, applicationArtifact), tenantId);
+            if (applicationReleaseDTO == null) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "ApplicationDTO release updating count is 0.  ApplicationDTO release UUID is " + uuid;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occured when getting DB connection to update image artifacts of the application, appid: "
-                            + appId + " and uuid " + uuid + ".", e);
+            String msg =
+                    "Error occured when getting DB connection to update image artifacts of the application release of haveing  uuid "
+                            + uuid + ".";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured while getting application release data for updating image artifacts of the application, appid: "
-                            + appId + " and uuid " + uuid + ".", e);
-        } catch (LifeCycleManagementDAOException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured while getting latest lifecycle state for updating image artifacts of the application, appid: "
-                            + appId + " and uuid " + uuid + ".", e);
+            String msg =
+                    "Error occured while getting application release data for updating image artifacts of the application release uuid "
+                            + uuid + ".";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ResourceManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured while updating image artifacts of the application, appid: " + appId + " and uuid "
-                            + uuid + " to the system.", e);
+            String msg = "Error occured while updating image artifacts of the application release uuid " + uuid + ".";
+            log.error(msg);
+            throw new ApplicationManagementException(msg , e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
 
-    //todo check whether package names are same
     @Override
-    public void updateApplicationArtifact(int appId, String deviceType, String uuid, InputStream binaryFile)
-            throws ApplicationManagementException {
+    public void updateApplicationArtifact(String deviceType, String appType, String uuid,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
-        ApplicationReleaseDTO applicationRelease;
+        boolean isValidDeviceType = false;
+        List<DeviceType> deviceTypes;
         try {
-            boolean isValidDeviceType = false;
-            List<DeviceType> deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
+            deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
+
             for (DeviceType dt : deviceTypes) {
                 if (dt.getName().equals(deviceType)) {
                     isValidDeviceType = true;
@@ -1172,59 +1213,64 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
             if (!isValidDeviceType) {
-                throw new ValidationException(
-                        "Invalid request to update application release artifact, invalid application type: "
-                                + deviceType + " for ApplicationDTO id: " + appId + " application release uuid: " + uuid);
+                String msg = "Invalid request to update application release artifact, invalid application type: "
+                        + deviceType + " for application release uuid: " + uuid;
+                log.error(msg);
+                throw new BadRequestException(msg);
             }
-            if (appId <= 0) {
-                throw new ValidationException(
-                        "ApplicationDTO id could,t be a negative integer. Hence please add valid application id. application type: "
-                                + deviceType + " ApplicationDTO id: " + appId + " UUID: " + uuid);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occured while getting supported device types in IoTS";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't found an application release for UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
 
-            ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO application = this.applicationDAO.getApplicationById(appId, tenantId);
-            if (application == null) {
-                throw new NotFoundException("Doesn't exist a application for the application ID:  " + appId);
-            }
-            applicationRelease = this.applicationReleaseDAO.getReleaseByIds(appId, uuid, tenantId);
-            if (applicationRelease == null) {
-                throw new NotFoundException(
-                        "Doesn't exist a application release for application ID:  " + appId + "and application UUID: "
-                                + uuid);
-            }
-            applicationRelease = applicationStorageManager
-                    .updateReleaseArtifacts(applicationRelease, application.getType(), application.getDeviceTypeName(),
-                            binaryFile);
-            applicationRelease = this.applicationReleaseDAO.updateRelease(appId, applicationRelease, tenantId);
-            if (applicationRelease == null) {
+            String deletingAppHashValue = applicationReleaseDTO.getAppHashValue();
+            applicationReleaseDTO = addApplicationReleaseArtifacts(appType, deviceType, applicationReleaseDTO,
+                    applicationArtifact);
+            applicationStorageManager.copyImageArtifactsAndDeleteInstaller(deletingAppHashValue, applicationReleaseDTO);
+            applicationReleaseDTO = this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId);
+            if (applicationReleaseDTO == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new ApplicationManagementException(
-                        "ApplicationDTO release updating count is 0. ApplicationDTO id: " + appId
-                                + " ApplicationDTO release UUID: " + uuid);
+                        "ApplicationDTO release updating count is 0.  ApplicationDTO release UUID: " + uuid);
 
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException("Error occured while getting/updating APPM DB.", e);
+            String msg = "Error occured while getting/updating APPM DB for updating application Installer.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occured while starting the transaction to update application release artifact of the application, appid: "
-                            + appId + " and uuid " + uuid + ".", e);
-        } catch (RequestValidatingException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException("Error occured while updating application artifact.", e);
-        } catch (DeviceManagementException e) {
-            throw new ApplicationManagementException("Error occured while getting supported device types in IoTS", e);
+            String msg =
+                    "Error occured while starting the transaction to update application release artifact of the application uuid "
+                            + uuid + ".";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occured when getting DB connection to update application release artifact of the application, appid: "
-                            + appId + " and uuid " + uuid + ".", e);
+            String msg =
+                    "Error occured when getting DB connection to update application release artifact of the application release uuid "
+                            + uuid + ".";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationStorageManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException("In order to update the artifact, couldn't find it in the system",
                     e);
+        } catch (ResourceManagementException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occured when updating application installer.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1246,7 +1292,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 //                unRestrictedApplications.add(application);
 //            } else {
 //                try {
-//                    if (isRoleExists(application.getUnrestrictedRoles(), userName)) {
+//                    if (hasUserRole(application.getUnrestrictedRoles(), userName)) {
 //                        unRestrictedApplications.add(application);
 //                    }
 //                } catch (UserStoreException e) {
@@ -1366,82 +1412,137 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationDTO updateApplication(int applicationId, ApplicationDTO application)
+    public void updateApplication(int applicationId, ApplicationWrapper applicationWrapper)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO existingApplication;
-        boolean isExistingAppRestricted = false;
-        List<String> addingRoleList;
-        List<String> removingRoleList;
-        List<String> addingTags;
-        List<String> removingTags;
+        ApplicationDTO applicationDTO;
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            existingApplication = this.applicationDAO.getApplicationById(applicationId, tenantId);
-            if (existingApplication == null) {
+            applicationDTO = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            if (applicationDTO == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
-                throw new NotFoundException("Tried to update ApplicationDTO which is not in the publisher, "
-                        + "Please verify application details");
-            }
-            if (!existingApplication.getUnrestrictedRoles().isEmpty()) {
-                isExistingAppRestricted = true;
-            }
-
-            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !(
-                    isExistingAppRestricted && isRoleExists(existingApplication.getUnrestrictedRoles(), userName))) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                throw new ForbiddenException("You are not authorized user to update application");
+                String msg = "Tried to update Application which is not in the publisher. Please verify "
+                        + "application details";
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
 
-            if (!existingApplication.getType().equals(application.getType())) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                throw new ApplicationManagementException("You are trying to change the application type and it is not "
+            if (!StringUtils.isEmpty(applicationWrapper.getType()) && !applicationDTO.getType()
+                    .equals(applicationWrapper.getType())) {
+                String msg = "You are trying to change the application type and it is not "
                         + "possible after you create an application. Therefore please remove this application and "
-                        + "publish new application with type: " + application.getType());
+                        + "publish new application with type: " + applicationWrapper.getType();
+                log.error(msg);
+                throw new BadRequestException(msg);
             }
-            if (!existingApplication.getSubType().equals(application.getSubType())) {
-                if (ApplicationSubscriptionType.PAID.toString().equals(existingApplication.getSubType()) && (
-                        !"".equals(application.getPaymentCurrency()) || application.getPaymentCurrency() != null)) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    throw new ApplicationManagementException("If you are going to change Non-Free app as Free app, "
-                            + "currency attribute in the application updating payload should be null or \"\"");
-                } else if (ApplicationSubscriptionType.FREE.toString().equals(existingApplication.getSubType()) && (
-                        application.getPaymentCurrency() == null || "".equals(application.getPaymentCurrency()))) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    throw new ApplicationManagementException("If you are going to change Free app as Non-Free app, "
-                            + "currency attribute in the application payload should not be null or \"\"");
-                }
+            if (!StringUtils.isEmpty(applicationWrapper.getDeviceType()) && !applicationDTO.getDeviceTypeName()
+                    .equals(applicationWrapper.getDeviceType())) {
+                String msg = "You are trying to change the compatible device type of the application type and it is not "
+                        + "possible after you create an application for device type. " +
+                        applicationWrapper.getDeviceType()  + "Therefore please remove this application and publish "
+                        + "new application with device type: " + applicationWrapper.getDeviceType();
+                log.error(msg);
+                throw new BadRequestException(msg);
             }
-            if (isExistingAppRestricted && application.getUnrestrictedRoles().isEmpty()) {
-                visibilityDAO.deleteUnrestrictedRoles(existingApplication.getUnrestrictedRoles(), application.getId(),
-                        tenantId);
-            } else if (!isExistingAppRestricted && !application.getUnrestrictedRoles().isEmpty()) {
-                visibilityDAO.addUnrestrictedRoles(application.getUnrestrictedRoles(), application.getId(), tenantId);
-            } else if (isExistingAppRestricted && !application.getUnrestrictedRoles().isEmpty()) {
-                addingRoleList = getDifference(application.getUnrestrictedRoles(),
-                        existingApplication.getUnrestrictedRoles());
-                removingRoleList = getDifference(existingApplication.getUnrestrictedRoles(),
-                        application.getUnrestrictedRoles());
-                if (!addingRoleList.isEmpty()) {
-                    visibilityDAO.addUnrestrictedRoles(addingRoleList, application.getId(), tenantId);
+            if (!StringUtils.isEmpty(applicationWrapper.getSubType()) && !applicationDTO.getSubType()
+                    .equals(applicationWrapper.getSubType())) {
+                if (!ApplicationSubscriptionType.PAID.toString().equals(applicationWrapper.getSubType())
+                        && !ApplicationSubscriptionType.FREE.toString().equals(applicationWrapper.getSubType())) {
+                    String msg = "Invalid application subscription type is found with application updating request "
+                            + applicationWrapper.getSubType();
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+
+                } else if (ApplicationSubscriptionType.FREE.toString().equals(applicationWrapper.getSubType()) && !StringUtils
+                        .isEmpty(applicationWrapper.getPaymentCurrency())) {
+                    String msg = "If you are going to change Non-Free app as Free app, "
+                            + "currency attribute in the application updating payload should be null or \"\"";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                } else if (ApplicationSubscriptionType.PAID.toString().equals(applicationWrapper.getSubType())
+                        && StringUtils.isEmpty(applicationWrapper.getPaymentCurrency()) ){
+                    String msg = "If you are going to change Free app as Non-Free app, "
+                            + "currency attribute in the application payload should not be null or \"\"";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
                 }
-                if (!removingRoleList.isEmpty()) {
-                    visibilityDAO.deleteUnrestrictedRoles(removingRoleList, application.getId(), tenantId);
+
+                applicationDTO.setSubType(applicationWrapper.getSubType());
+                applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
+            }
+            if (!StringUtils.isEmpty(applicationWrapper.getName())){
+                Filter filter = new Filter();
+                filter.setFullMatch(true);
+                filter.setAppName(applicationWrapper.getName().trim());
+                filter.setOffset(0);
+                filter.setLimit(1);
+
+                List<ApplicationDTO> applicationList = applicationDAO
+                        .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
+                if (!applicationList.isEmpty()) {
+                    String msg = "Already an application registered with same name " + applicationWrapper.getName()
+                            + ". Hence you can't update the application name from " + applicationDTO.getName() + " to "
+                            + applicationWrapper.getName();
+                    log.error(msg);
+                    throw new BadRequestException(msg);
                 }
+                applicationDTO.setName(applicationWrapper.getName());
+            }
+            if (!StringUtils.isEmpty(applicationWrapper.getDescription())){
+                applicationDTO.setDescription(applicationWrapper.getDescription());
             }
 
-            addingTags = getDifference(existingApplication.getTags(), application.getTags());
-            removingTags = getDifference(application.getTags(), existingApplication.getTags());
-            if (!addingTags.isEmpty()) {
+            List<String> appUnrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationId, tenantId);
+            List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
+
+            boolean isExistingAppRestricted = !appUnrestrictedRoles.isEmpty();
+            boolean isUpdatingAppRestricted = !applicationWrapper.getUnrestrictedRoles().isEmpty();
+
+            if (isExistingAppRestricted && !isUpdatingAppRestricted) {
+                visibilityDAO.deleteUnrestrictedRoles(appUnrestrictedRoles, applicationId, tenantId);
+            } else if (isUpdatingAppRestricted) {
+                if (!hasUserRole(applicationWrapper.getUnrestrictedRoles(), userName)) {
+                    String msg =
+                            "You are trying to restrict the visibility of visible application.But you are trying to "
+                                    + "restrict the visibility to roles that there isn't at least one role is assigned "
+                                    + "to user: " + userName + ". Therefore, it is not allowed and you should have "
+                                    + "added at least one role that assigned to " + userName + " user into "
+                                    + "restricting role set.";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+
+                if (!isExistingAppRestricted) {
+                    visibilityDAO
+                            .addUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles(), applicationId, tenantId);
+                } else {
+                    List<String> addingRoleList = getDifference(applicationWrapper.getUnrestrictedRoles(),
+                            applicationDTO.getUnrestrictedRoles());
+                    List<String> removingRoleList = getDifference(applicationDTO.getUnrestrictedRoles(),
+                            applicationWrapper.getUnrestrictedRoles());
+                    if (!addingRoleList.isEmpty()) {
+                        visibilityDAO.addUnrestrictedRoles(addingRoleList, applicationId, tenantId);
+                    }
+                    if (!removingRoleList.isEmpty()) {
+                        visibilityDAO.deleteUnrestrictedRoles(removingRoleList, applicationId, tenantId);
+                    }
+                }
+            }
+            applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
+
+            List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
+            List<String> addingTagList = getDifference(appTags, applicationWrapper.getTags());
+            List<String> removingTagList = getDifference(applicationWrapper.getTags(), appTags);
+            if (!addingTagList.isEmpty()) {
 //                applicationDAO.addTags(addingTags, application.getId(), tenantId);
             }
-            if (!removingTags.isEmpty()) {
-                applicationDAO.deleteTags(removingTags, application.getId(), tenantId);
+            if (!removingTagList.isEmpty()) {
+                applicationDAO.deleteTags(removingTagList, applicationId, tenantId);
             }
-            return applicationDAO.editApplication(application, tenantId);
+            applicationDAO.editApplication(applicationDTO, tenantId);
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
@@ -1613,7 +1714,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String applicationReleaseCreatedUser = lifecycleStateDAO
                     .getAppReleaseCreatedUsername(applicationId, releaseUuid, tenantId);
 
-            if (!isAdminUser && !(!unrestrictedRoles.isEmpty() && isRoleExists(unrestrictedRoles, userName))
+            if (!isAdminUser && !(!unrestrictedRoles.isEmpty() && hasUserRole(unrestrictedRoles, userName))
                     && !userName.equals(applicationReleaseCreatedUser)) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new ForbiddenException("You are not authorized user to update application");
@@ -1630,11 +1731,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + " State");
             }
 
-            release = applicationStorageManager
-                    .updateImageArtifacts(release, iconFileStream, bannerFileStream, attachments);
-            release = applicationStorageManager
-                    .updateReleaseArtifacts(release, app.getType(), deviceType, binaryFileStram);
-            return applicationReleaseDAO.updateRelease(applicationId, release, tenantId) != null;
+//            release = applicationStorageManager
+//                    .deleteImageArtifacts(release, iconFileStream, bannerFileStream, attachments);
+//            release = applicationStorageManager
+//                    .copyImageArtifactsAndDeleteInstaller(release, app.getType(), deviceType, binaryFileStram);
+            return applicationReleaseDAO.updateRelease(release, tenantId) != null;
         } catch (DeviceManagementException e) {
             throw new ApplicationManagementException("Error occured when validating the device type " + deviceType, e);
         } catch (UserStoreException e) {
@@ -1651,31 +1752,32 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(
                     "Error occured when updating ApplicationDTO release. ApplicationDTO ID " + applicationId
                             + " ApplicationDTO Release UUID: " + releaseUuid, e);
-        } catch (ApplicationStorageManagementException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured when updating application release artifact. ApplicationDTO ID " + applicationId
-                            + " ApplicationDTO release UUID: " + releaseUuid, e);
-        } catch (ResourceManagementException e) {
-            //            updating images
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured when updating image artifact of the application release. ApplicationDTO ID: "
-                            + applicationId + " ApplicationDTO release UUID: " + releaseUuid, e);
-        } catch (RequestValidatingException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured when validating application release artifact for device type " + deviceType
-                            + " And application type " + app.getType() + ". Applicationn ID: " + applicationId
-                            + " ApplicationDTO release UUID: " + releaseUuid);
         }
+//        catch (ApplicationStorageManagementException e) {
+//            ConnectionManagerUtil.rollbackDBTransaction();
+//            throw new ApplicationManagementException(
+//                    "Error occured when updating application release artifact. ApplicationDTO ID " + applicationId
+//                            + " ApplicationDTO release UUID: " + releaseUuid, e);
+//        }
+//        catch (ResourceManagementException e) {
+//            //            updating images
+//            ConnectionManagerUtil.rollbackDBTransaction();
+//            throw new ApplicationManagementException(
+//                    "Error occured when updating image artifact of the application release. ApplicationDTO ID: "
+//                            + applicationId + " ApplicationDTO release UUID: " + releaseUuid, e);
+//        } catch (RequestValidatingException e) {
+//            ConnectionManagerUtil.rollbackDBTransaction();
+//            throw new ApplicationManagementException(
+//                    "Error occured when validating application release artifact for device type " + deviceType
+//                            + " And application type " + app.getType() + ". Applicationn ID: " + applicationId
+//                            + " ApplicationDTO release UUID: " + releaseUuid);
+//        }
     }
 
 
     @Override
     public void validateAppCreatingRequest(ApplicationWrapper applicationWrapper) throws RequestValidatingException {
 
-        boolean isValidApplicationType;
         String applicationType = applicationWrapper.getType();
 
         if (StringUtils.isEmpty(applicationWrapper.getName())) {
@@ -1695,13 +1797,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         if (StringUtils.isEmpty(applicationWrapper.getDeviceType())) {
             String msg = "Device type can't be empty for the application.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-
-        isValidApplicationType = isValidAppType(applicationWrapper.getType());
-        if (!isValidApplicationType) {
-            String msg = "App Type contains in the application creating payload doesn't match with supported app types.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
@@ -1754,8 +1849,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
 
     @Override
-    public void isValidAttachmentSet(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
-            List<Attachment> attachmentList, String applicationType) throws RequestValidatingException {
+    public void validateImageArtifacts(Attachment iconFile, Attachment bannerFile,
+            List<Attachment> attachmentList) throws RequestValidatingException {
         if (iconFile == null) {
             String msg = "Icon file is not found with the application release creating request.";
             log.error(msg);
@@ -1771,8 +1866,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-        if (StringUtils.isEmpty(applicationType)){
-            String msg = "Application type is empty and it cannot be empty";
+    }
+
+    @Override
+    public void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException {
+
+        if (StringUtils.isEmpty(applicationType)) {
+            String msg = "Application type can't be empty.";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
+        if (!isValidAppType(applicationType)) {
+            String msg = "App Type contains in the application creating payload doesn't match with supported app types.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }

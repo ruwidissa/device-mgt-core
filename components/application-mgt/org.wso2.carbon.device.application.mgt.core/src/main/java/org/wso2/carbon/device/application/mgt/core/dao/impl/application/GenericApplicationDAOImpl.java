@@ -149,10 +149,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
                 + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
                 + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
                 + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
                 + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
                 + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
                 + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                 + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
                 + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
                 + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
@@ -1063,23 +1065,25 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public int getApplicationId(String appName, String appType, int tenantId) throws ApplicationManagementDAOException {
+    public boolean isValidAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String sql;
-        int id = -1;
         try {
             conn = this.getDBConnection();
-            sql = "SELECT ID FROM AP_APP WHERE NAME = ? AND TYPE = ? AND TENANT_ID = ?";
+            sql = "SELECT AP_APP.ID AS ID "
+                    + "FROM AP_APP "
+                    + "WHERE "
+                    + "AP_APP.NAME = ? AND "
+                    + "AP_APP.DEVICE_TYPE_ID = ? AND "
+                    + "AP_APP.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, appName);
-            stmt.setString(2, appType);
+            stmt.setInt(2, deviceTypeId);
             stmt.setInt(3, tenantId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt(1);
-            }
+            return rs.next();
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } catch (SQLException e) {
@@ -1087,6 +1091,5 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } finally {
             Util.cleanupResources(stmt, rs);
         }
-        return id;
     }
 }
