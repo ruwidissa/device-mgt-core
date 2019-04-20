@@ -94,11 +94,7 @@ public class AuthenticationHandler extends AbstractHandler {
                 if (log.isDebugEnabled()) {
                     log.debug("Verify Cert:\n" + mdmSignature);
                 }
-                String deviceType = this.getDeviceType(messageContext.getTo().getAddress().trim());
-                if (deviceType == null) {
-                    return false;
-                }
-                URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + deviceType);
+                URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + "ios");
                 Map<String, String> certVerifyHeaders = this.setHeaders(this.restInvoker);
 
                 Certificate certificate = new Certificate();
