@@ -36,6 +36,8 @@ import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
 import java.util.List;
@@ -156,8 +158,11 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully retrieved relevant application.",
                             response = ApplicationDTO.class),
                     @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to access the application"),
+                    @ApiResponse(
                             code = 404,
-                            message = "ApplicationDTO not found"),
+                            message = "Application not found"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application.",
@@ -218,7 +223,7 @@ public interface ApplicationManagementAPI {
                     name = "application",
                     value = "The application that need to be edited.",
                     required = true)
-            @Valid ApplicationDTO application
+            @Valid ApplicationWrapper applicationWrapper
     );
 
     @POST
@@ -290,78 +295,85 @@ public interface ApplicationManagementAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
-//    @POST
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Consumes("multipart/mixed")
-//    @Path("/{deviceType}/{appType}/{appId}")
-//    @ApiOperation(
-//            consumes = MediaType.APPLICATION_JSON,
-//            produces = MediaType.APPLICATION_JSON,
-//            httpMethod = "POST",
-//            value = "Create an application",
-//            notes = "This will create a new application",
-//            tags = "ApplicationDTO Management",
-//            extensions = {
-//                    @Extension(properties = {
-//                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
-//                    })
-//            }
-//    )
-//    @ApiResponses(
-//            value = {
-//                    @ApiResponse(
-//                            code = 201,
-//                            message = "OK. \n Successfully created an application.",
-//                            response = Application.class),
-//                    @ApiResponse(
-//                            code = 400,
-//                            message = "Bad Request. \n " +
-//                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
-//                    @ApiResponse(
-//                            code = 500,
-//                            message = "Internal Server Error. \n Error occurred while creating the application.",
-//                            response = ErrorResponse.class)
-//            })
-//    Response createRelease(
-//            @PathParam("deviceType") String deviceType,
-//            @PathParam("appId") String appType,
-//            @PathParam("appId") int appId,
-//            @ApiParam(
-//                    name = "applicationRelease",
-//                    value = "The application release that need to be created.",
-//                    required = true)
-//            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
-//            @ApiParam(
-//                    name = "binaryFile",
-//                    value = "Binary file of uploading application",
-//                    required = true)
-//            @Multipart(value = "binaryFile") Attachment binaryFile,
-//            @ApiParam(
-//                    name = "icon",
-//                    value = "Icon of the uploading application",
-//                    required = true)
-//            @Multipart(value = "icon") Attachment iconFile,
-//            @ApiParam(
-//                    name = "banner",
-//                    value = "Banner of the uploading application",
-//                    required = true)
-//            @Multipart(value = "banner") Attachment bannerFile,
-//            @ApiParam(
-//                    name = "screenshot1",
-//                    value = "Screen Shots of the uploading application",
-//                    required = true)
-//            @Multipart(value = "screenshot1") Attachment screenshot1,
-//            @ApiParam(
-//                    name = "screenshot2",
-//                    value = "Screen Shots of the uploading application",
-//                    required = false)
-//            @Multipart(value = "screenshot2") Attachment screenshot2,
-//            @ApiParam(
-//                    name = "screenshot3",
-//                    value = "Screen Shots of the uploading application",
-//                    required = false)
-//            @Multipart(value = "screenshot3") Attachment screenshot3
-//    );
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes("multipart/mixed")
+    @Path("/{appType}/{appId}")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Create an application",
+            notes = "This will create a new application",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully created an application.",
+                            response = ApplicationRelease.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while creating the application.",
+                            response = ErrorResponse.class)
+            })
+    Response createRelease(
+            @ApiParam(
+                    name = "appType",
+                    value = "Application Type.",
+                    required = true)
+            @PathParam("appType") String appType,
+            @ApiParam(
+                    name = "appId",
+                    value = "Id of the application.",
+                    required = true)
+            @PathParam("appId") int appId,
+            @ApiParam(
+                    name = "applicationRelease",
+                    value = "The application release that need to be created.",
+                    required = true)
+            @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
+            @ApiParam(
+                    name = "binaryFile",
+                    value = "Binary file of uploading application",
+                    required = true)
+            @Multipart(value = "binaryFile") Attachment binaryFile,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon of the uploading application",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "Banner of the uploading application",
+                    required = true)
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "Screen Shots of the uploading application",
+                    required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot3") Attachment screenshot3
+    );
 
     @DELETE
     @Consumes("application/json")
@@ -399,7 +411,7 @@ public interface ApplicationManagementAPI {
     );
 
     @PUT
-    @Path("/image-artifacts/{appId}/{uuid}")
+    @Path("/image-artifacts/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes("multipart/mixed")
     @ApiOperation(
@@ -437,11 +449,6 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationImageArtifacts(
-            @ApiParam(
-                    name = "appId",
-                    value = "ID of the application",
-                    required = true)
-            @PathParam("appId") int applicatioId,
             @ApiParam(
                     name = "uuid",
                     value = "UUID of the application",
@@ -509,13 +516,20 @@ public interface ApplicationManagementAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationArtifact(
-            @ApiParam(name = "deviceType", value = "Type of the device i.e Android, IOS etc", required = true)
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Type of the device i.e Android, IOS etc",
+                    required = true)
             @PathParam("deviceType") String deviceType,
-            @ApiParam(name = "appType", value = "Type of the application i.e Mobile, WEB, WEB-CLIP etc", required = true)
+            @ApiParam(
+                    name = "appType",
+                    value = "Type of the application i.e ENTERPRISE, PUBLIC, WEB, WEB-CLIP etc",
+                    required = true)
             @PathParam("appType") String appType,
-            @ApiParam(name = "appId", value = "Id of the application", required = true)
-            @PathParam("appId") int applicationId,
-            @ApiParam(name = "uuid", value = "UUID of the application", required = true)
+            @ApiParam(
+                    name = "uuid",
+                    value = "UUID of the application",
+                    required = true)
             @PathParam("uuid") String applicationUUID,
             @Multipart("binaryFile") Attachment binaryFile
     );

@@ -24,17 +24,16 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
-import org.wso2.carbon.device.application.mgt.common.Pagination;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -150,10 +149,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
                 + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
                 + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
                 + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
                 + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
                 + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
                 + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                 + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
                 + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
                 + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
@@ -163,8 +164,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
-                + "AP_APP.TENANT_ID = ? AND "
-                + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID";
+                + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                + "WHERE AP_APP.TENANT_ID = ?";
 
         if (filter == null) {
             throw new ApplicationManagementDAOException("Filter need to be instantiated");
@@ -381,14 +382,15 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } catch (UnexpectedServerErrorException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
             Util.cleanupResources(stmt, rs);
         }
     }
 
     @Override
-    public ApplicationDTO getApplicationById(String id, int tenantId) throws
-            ApplicationManagementDAOException {
+    public ApplicationDTO getApplicationById(String id, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the id:" + id);
         }
@@ -423,14 +425,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } catch (UnexpectedServerErrorException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
             Util.cleanupResources(stmt, rs);
         }
     }
 
     @Override
-    public ApplicationDTO getApplicationByUUID(String releaseUuid, int tenantId) throws
-                                                                           ApplicationManagementDAOException {
+    public ApplicationDTO getApplicationByUUID(String releaseUuid, int tenantId)
+            throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the release UUID: " + releaseUuid + " from the database");
         }
@@ -470,14 +474,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } catch (UnexpectedServerErrorException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
             Util.cleanupResources(stmt, rs);
         }
     }
 
     @Override
-    public ApplicationDTO getApplicationById(int applicationId, int tenantId) throws
-            ApplicationManagementDAOException {
+    public ApplicationDTO getApplicationById(int applicationId, int tenantId)
+            throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Getting application with the id (" + applicationId + ") from the database");
         }
@@ -486,28 +492,48 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ResultSet rs = null;
         try {
             conn = this.getDBConnection();
-            String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP.DEVICE_TYPE_ID AS DEVICE_TYPE_ID, "
-                            + "AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE AS ROLE FROM "
-                            + "((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
-                            + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) WHERE "
-                            + "AP_APP.ID = ? AND AP_APP.TENANT_ID =  ? AND AP_APP.STATUS != ?";
+            String sql = "SELECT "
+                    + "AP_APP.ID AS APP_ID, "
+                    + "AP_APP.NAME AS APP_NAME, "
+                    + "AP_APP.DESCRIPTION AS APP_DESCRIPTION, "
+                    + "AP_APP.TYPE AS APP_TYPE, "
+                    + "AP_APP.STATUS AS APP_STATUS, "
+                    + "AP_APP.SUB_TYPE AS APP_SUB_TYPE, "
+                    + "AP_APP.CURRENCY AS APP_CURRENCY, "
+                    + "AP_APP.RATING AS APP_RATING, "
+                    + "AP_APP.DEVICE_TYPE_ID AS APP_DEVICE_TYPE_ID, "
+                    + "AP_APP_RELEASE.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                    + "AP_APP_RELEASE.VERSION AS RELEASE_VERSION, "
+                    + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
+                    + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
+                    + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                    + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                    + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                    + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                    + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                    + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
+                    + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                    + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                    + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
+                    + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                    + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                    + "FROM AP_APP "
+                    + "INNER JOIN AP_APP_RELEASE ON "
+                    + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
+                    + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                    + "WHERE "
+                    + "AP_APP.ID =? AND "
+                    + "AP_APP.TENANT_ID = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, applicationId);
             stmt.setInt(2, tenantId);
-            stmt.setString(3, AppLifecycleState.REMOVED.toString());
             rs = stmt.executeQuery();
-
             if (log.isDebugEnabled()) {
                 log.debug("Successfully retrieved basic details of the application with the id "
                         + applicationId);
             }
-
             return Util.loadApplication(rs);
-
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app id " + applicationId +
@@ -515,6 +541,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
         } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+        } catch (UnexpectedServerErrorException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
             Util.cleanupResources(stmt, rs);
@@ -555,10 +583,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationDTO editApplication(ApplicationDTO application, int tenantId) throws ApplicationManagementDAOException {
+    public ApplicationDTO editApplication(ApplicationDTO application, int tenantId)
+            throws ApplicationManagementDAOException {
         int paramIndex = 1;
         Connection conn;
         PreparedStatement stmt = null;
+        //todo this is wrong
         ApplicationDTO existingApplication = this.getApplicationById(application.getId(), tenantId);
 
         if (existingApplication == null) {
@@ -883,7 +913,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "FROM "
                 + "AP_APP_TAG tag INNER JOIN AP_APP_TAG_MAPPING tag_map ON tag.ID = tag_map.AP_APP_TAG_ID "
                 + "INNER JOIN AP_APP app ON tag_map.AP_APP_ID = app.ID "
-                + "WHERE app.ID = ? and app.TENANT_ID = ?";
+                + "WHERE app.ID = ? AND app.TENANT_ID = ?";
         try {
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -915,7 +945,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "FROM "
                 + "AP_APP_CATEGORY cat INNER JOIN AP_APP_CATEGORY_MAPPING cat_map ON cat.ID = cat_map.AP_APP_CATEGORY_ID "
                 + "INNER JOIN AP_APP app ON cat_map.AP_APP_ID = app.ID "
-                + "WHERE app.ID = ? and app.TENANT_ID = ?";
+                + "WHERE app.ID = ? AND app.TENANT_ID = ?";
         try {
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -1019,7 +1049,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 List<ApplicationReleaseDTO> applicationReleaseList = new ArrayList<>();
                 applicationReleaseList.add(appRelease);
 
-                application.setApplicationReleases(applicationReleaseList);
+                application.setApplicationReleaseDTOs(applicationReleaseList);
             }
             return application;
         } catch (SQLException e) {
@@ -1035,23 +1065,25 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public int getApplicationId(String appName, String appType, int tenantId) throws ApplicationManagementDAOException {
+    public boolean isValidAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         String sql;
-        int id = -1;
         try {
             conn = this.getDBConnection();
-            sql = "SELECT ID FROM AP_APP WHERE NAME = ? AND TYPE = ? AND TENANT_ID = ?";
+            sql = "SELECT AP_APP.ID AS ID "
+                    + "FROM AP_APP "
+                    + "WHERE "
+                    + "AP_APP.NAME = ? AND "
+                    + "AP_APP.DEVICE_TYPE_ID = ? AND "
+                    + "AP_APP.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, appName);
-            stmt.setString(2, appType);
+            stmt.setInt(2, deviceTypeId);
             stmt.setInt(3, tenantId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt(1);
-            }
+            return rs.next();
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } catch (SQLException e) {
@@ -1059,6 +1091,5 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } finally {
             Util.cleanupResources(stmt, rs);
         }
-        return id;
     }
 }

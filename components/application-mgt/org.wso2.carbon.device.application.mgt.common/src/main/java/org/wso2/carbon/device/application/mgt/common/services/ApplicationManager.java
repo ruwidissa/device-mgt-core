@@ -28,6 +28,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
+import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
@@ -52,12 +53,12 @@ public interface ApplicationManager {
     /**
      * Updates an already existing application.
      *
-     * @param application Application that need to be updated.
+     * @param applicationWrapper Application that need to be updated.
      * @param applicationId ID of the application
      * @return Updated Application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    ApplicationDTO updateApplication(int applicationId, ApplicationDTO application) throws ApplicationManagementException;
+    void updateApplication(int applicationId, ApplicationWrapper applicationWrapper) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
@@ -93,7 +94,7 @@ public interface ApplicationManager {
      * @return the ApplicationDTO identified by the ID
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    ApplicationDTO getApplicationById(int id, String state) throws ApplicationManagementException;
+    Application getApplicationById(int id, String state) throws ApplicationManagementException;
 
     /**
      * To get the ApplicationDTO for given application relase UUID.
@@ -138,38 +139,34 @@ public interface ApplicationManager {
     /**
      * To update release images such as icons, banner and screenshots.
      *
-     * @param appId    ID of the ApplicationDTO
      * @param uuid    uuid of the ApplicationDTO
-     * @param iconFileStream    icon file of the release
-     * @param bannerFileStream    bannerFileStream of the release.
-     * @param attachments    screenshot attachments of the release
+     * @param applicationArtifact Application artifact that contains names and input streams of the application artifacts.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void updateApplicationImageArtifact(int appId, String uuid, InputStream iconFileStream, InputStream
-            bannerFileStream, List<InputStream> attachments) throws ApplicationManagementException;
+    void updateApplicationImageArtifact(String uuid, ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
 
     /**
      * To update release images.
      *
-     * @param appId    ID of the ApplicationDTO
-     * @param deviceType   Applicable device type of the application
+     * @param deviceType Application artifact compatible device type name.
+     * @param appType Type of the application.
      * @param uuid    uuid of the ApplicationDTO
-     * @param binaryFile    binaryFile of the release.
+     * @param  applicationArtifact Application artifact that contains names and input streams of the application artifacts.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void updateApplicationArtifact(int appId, String deviceType, String uuid, InputStream binaryFile)
-            throws ApplicationManagementException;
+    void updateApplicationArtifact(String deviceType, String appType, String uuid,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /**
      * To create an application release for an ApplicationDTO.
      *
      * @param applicationId     ID of the ApplicationDTO
-     * @param applicationRelease ApplicatonRelease that need to be be created.
+     * @param applicationReleaseWrapper ApplicatonRelease that need to be be created.
      * @return the unique id of the application release, if the application release succeeded else -1
      */
-    ApplicationReleaseDTO createRelease(int applicationId, ApplicationReleaseDTO applicationRelease)
-            throws ApplicationManagementException;
+    ApplicationRelease createRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
      *
@@ -201,20 +198,20 @@ public interface ApplicationManager {
      * @param applicationType Type of the application
      * @throws RequestValidatingException throws if payload does not satisfy requrements.
      */
-    void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper,
-            String applicationType) throws RequestValidatingException;
+    void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper, String applicationType)
+            throws RequestValidatingException;
 
     /***
      *
-     * @param binaryFile Uploading binary fila. i.e .apk or .ipa
      * @param iconFile Icon file for the application.
      * @param bannerFile Banner file for the application.
      * @param attachmentList Screenshot list.
-     * @param applicationType Type of the application.
      * @throws RequestValidatingException If request doesn't contains required attachments.
      */
-    void isValidAttachmentSet(Attachment binaryFile, Attachment iconFile, Attachment bannerFile,
-            List<Attachment> attachmentList, String applicationType) throws RequestValidatingException;
+    void validateImageArtifacts(Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
+            throws RequestValidatingException;
+
+    void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException;
 
 
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;

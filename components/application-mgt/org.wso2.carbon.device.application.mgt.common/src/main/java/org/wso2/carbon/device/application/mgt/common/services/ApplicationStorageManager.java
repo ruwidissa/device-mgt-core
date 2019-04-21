@@ -47,13 +47,9 @@ public interface ApplicationStorageManager {
      * To upload image artifacts related with an ApplicationDTO.
      *
      * @param applicationRelease Release of the application
-     * @param iconFile        Icon File input stream
-     * @param bannerFile      Banner File input stream
-     * @param screenshots   Input Streams of screenshots
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFile,
-            InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
+    void deleteImageArtifacts(ApplicationReleaseDTO applicationRelease) throws ResourceManagementException;
 
     ApplicationInstaller getAppInstallerData(InputStream binaryFile, String deviceType)
             throws ApplicationStorageManagementException;
@@ -74,14 +70,12 @@ public interface ApplicationStorageManager {
     /**
      * To upload release artifacts for an ApplicationDTO.
      *
-     * @param applicationRelease applicationRelease ApplicationDTO release of a particular application.
-     * @param appType   Type of the application.
-     * @param deviceType Compatible device tipe of the application.
-     * @param binaryFile      Binary File for the release.
+     * @param applicationReleaseDTO applicationRelease ApplicationDTO release of a particular application.
+     * @param deletingAppHashValue Hash value of the deleting application release.
      * @throws ApplicationStorageManagementException Resource Management Exception.
      */
-    ApplicationReleaseDTO updateReleaseArtifacts(ApplicationReleaseDTO applicationRelease, String appType, String deviceType,
-            InputStream binaryFile) throws ApplicationStorageManagementException, RequestValidatingException;
+    void copyImageArtifactsAndDeleteInstaller(String deletingAppHashValue,
+            ApplicationReleaseDTO applicationReleaseDTO) throws ApplicationStorageManagementException;
 
     /**
      * To delete the artifacts related with particular ApplicationDTO Release.
