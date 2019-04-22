@@ -1,6 +1,8 @@
 import React from "react";
 import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox,} from 'antd';
 import styles from './Login.less';
+import axios from 'axios';
+
 const {Title} = Typography;
 
 class Login extends React.Component {
@@ -38,26 +40,36 @@ class NormalLoginForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
+                let data = "username="+values.username+"&password="+values.password+"&platform=publisher";
+                axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/login', data
+                    ).then(res => {
+                        console.log(res);
+                        console.log(res.data);
+                    })
             }
+
         });
-    }
+    };
 
     render() {
-        const { getFieldDecorator } = this.props.form;
+        const {getFieldDecorator} = this.props.form;
         return (
             <Form onSubmit={this.handleSubmit} className="login-form">
                 <Form.Item>
-                    {getFieldDecorator('userName', {
-                        rules: [{ required: true, message: 'Please input your username!' }],
+                    {getFieldDecorator('username', {
+                        rules: [{required: true, message: 'Please input your username!'}],
                     })(
-                        <Input style={{height: 32}} prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
+                        <Input style={{height: 32}} prefix={<Icon type="user" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                               placeholder="Username"/>
                     )}
                 </Form.Item>
                 <Form.Item>
                     {getFieldDecorator('password', {
-                        rules: [{ required: true, message: 'Please input your Password!' }],
+                        rules: [{required: true, message: 'Please input your Password!'}],
                     })(
-                        <Input style={{height: 32}} className={styles.input} prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+                        <Input style={{height: 32}} className={styles.input}
+                               prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>} type="password"
+                               placeholder="Password"/>
                     )}
                 </Form.Item>
                 <Form.Item>
@@ -65,19 +77,18 @@ class NormalLoginForm extends React.Component {
                         valuePropName: 'checked',
                         initialValue: true,
                     })(
-                        <Checkbox>Remember me</Checkbox>
+                        <Checkbox>Remember me....</Checkbox>
                     )}
                     <a className="login-form-forgot" href="">Forgot password</a>
                     <Button block type="primary" htmlType="submit" className="login-form-button">
                         Log in
                     </Button>
-                    Or <a href="">register now!</a>
                 </Form.Item>
             </Form>
         );
     }
 }
 
-const WrappedNormalLoginForm = Form.create({ name: 'normal_login' })(NormalLoginForm);
+const WrappedNormalLoginForm = Form.create({name: 'normal_login'})(NormalLoginForm);
 
 export default Login;
