@@ -26,10 +26,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
+import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.handler.beans.AuthData;
 import org.wso2.carbon.device.application.mgt.handler.exceptions.LoginException;
 import org.wso2.carbon.device.application.mgt.handler.util.HandlerConstants;
@@ -47,8 +49,6 @@ import java.io.IOException;
 import java.util.Base64;
 
 import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.execute;
-import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.loadUiConfig;
-import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.retrieveResponseString;
 
 @MultipartConfig
 @WebServlet("/login")
@@ -61,6 +61,7 @@ public class LoginHandler extends HttpServlet {
     private static String platform;
     private static String serverUrl;
     private static String uiConfigUrl;
+    private static JsonObject uiConfig;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -79,7 +80,19 @@ public class LoginHandler extends HttpServlet {
             //setting session to expiry in 5 mins
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
-            JsonObject uiConfigAsJsonObject = loadUiConfig(uiConfigUrl);
+            HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
+            JsonParser jsonParser = new JsonParser();
+            String uiConfigJsonString = execute(uiConfigEndpoint,HttpStatus.SC_OK);
+            if (uiConfigJsonString.contains(HandlerConstants.EXECUTOR_XCEPTIO_PRFIX)){
+                log.error("Error occurred while getting UI configurations by invoking " + uiConfigUrl);
+                handleErrorResponse(resp, uiConfigJsonString);
+            }
+
+            JsonElement uiConfigJsonElement = jsonParser.parse(uiConfigJsonString);
+            JsonObject uiConfigAsJsonObject = null ;
+            if (uiConfigJsonElement.isJsonObject()) {
+                uiConfigAsJsonObject = uiConfigJsonElement.getAsJsonObject();
+            }
             if (uiConfigAsJsonObject == null) {
                 resp.sendRedirect(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
                 return;
@@ -98,11 +111,8 @@ public class LoginHandler extends HttpServlet {
                         .encodeToString((adminUsername + HandlerConstants.COLON + adminPwd).getBytes()));
                 apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
                 apiRegEndpoint.setEntity(constructAppRegPayload(tags));
-                HttpResponse response = execute(apiRegEndpoint);
-                if (!evaluateResponse(response,resp, HttpStatus.SC_CREATED)){
-                    return;
-                }
-                String clientAppResult = retrieveResponseString(response);
+
+                String clientAppResult = execute(apiRegEndpoint, HttpStatus.SC_CREATED);
 
                 if (!clientAppResult.isEmpty() && persistTokenInSession(req, resp, clientAppResult, scopes)) {
                     resp.sendRedirect(
@@ -256,51 +266,30 @@ public class LoginHandler extends HttpServlet {
                     "grant_type=password&username=" + username + "&password=" + password + "&scope=" + scopeString,
                     ContentType.APPLICATION_FORM_URLENCODED);
             tokenEndpoint.setEntity(tokenEPPayload);
-        HttpResponse response = execute(tokenEndpoint);
 
-        if (evaluateResponse(response, resp,  HttpStatus.SC_OK)){
-            return retrieveResponseString(response);
-        }
+            String tokenResult = execute(tokenEndpoint, HttpStatus.SC_OK);
 
-        return null;
-
+            if (tokenResult.contains(HandlerConstants.EXECUTOR_XCEPTIO_PRFIX)) {
+                log.error("Error occurred while getting token data by invoking " + serverUrl
+                        + HandlerConstants.TOKEN_ENDPOINT);
+                handleErrorResponse(resp, tokenResult);
+            }
+            return tokenResult;
     }
 
     /***
      *
-     * @param response {@link HttpResponse}
      * @param resp {@link HttpServletResponse}
-     * @param expectedStatusCode expected status code of the response
-     * @return If response returns expected status code, then returns True otherwise returns False after redirect to
      * corresponding error page.
      * @throws LoginException If an {@link IOException} occurs when redirecting to corresponding error page.
      */
-    private boolean evaluateResponse(HttpResponse response, HttpServletResponse resp, int expectedStatusCode)
-            throws  LoginException {
-        JsonObject uiJsonObject = loadUiConfig(uiConfigUrl);
+    private void handleErrorResponse(HttpServletResponse resp, String respMessage) throws LoginException {
         try {
-            if (response == null) {
-                if (uiJsonObject != null) {
-                    resp.sendRedirect(serverUrl + uiJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
-                            .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
-                            .get(HandlerUtil.getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE)).getAsString());
-                    return false;
-                }
-                resp.sendRedirect(serverUrl + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-                return false;
-            } else if (response.getStatusLine().getStatusCode() != expectedStatusCode) {
-                if (uiJsonObject != null) {
-                    resp.sendRedirect(serverUrl + uiJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
-                            .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
-                            .get(HandlerUtil.getStatusKey(response.getStatusLine().getStatusCode())).getAsString());
-                    return false;
-                }
-                resp.sendRedirect(serverUrl + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-                return false;
-            }
-        } catch (IOException e){
+            resp.sendRedirect(serverUrl + uiConfig.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
+                    .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
+                    .get(respMessage.split(HandlerConstants.EXECUTOR_XCEPTIO_PRFIX)[0]).getAsString());
+        } catch (IOException e) {
             throw new LoginException("Error occured while redirecting to corresponding error page. ", e);
         }
-        return true;
     }
 }

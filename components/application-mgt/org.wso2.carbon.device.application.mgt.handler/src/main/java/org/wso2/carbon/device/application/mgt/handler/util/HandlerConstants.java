@@ -32,6 +32,7 @@ public class HandlerConstants {
     public static final String LOGIN_RESPONSE_KEY = "loginResponse";
     public static final String FAILURE_CALLBACK_KEY = "FailureCallback";
     public static final String API_COMMON_CONTEXT = "/api";
+    public static final String EXECUTOR_XCEPTIO_PRFIX = "ExecutorException-";
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 300;
