@@ -46,7 +46,7 @@ public class HandlerUtil {
      * @return response as string
      * @throws IOException IO exception returns if error occurs when executing the httpMethod
      */
-    public static <T> HttpResponse execute(T httpMethod) throws IOException {
+    public static <T> String execute(T httpMethod, int expectedStatusCode) throws IOException {
         HttpResponse response = null;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             if (httpMethod instanceof HttpPost) {
@@ -57,10 +57,24 @@ public class HandlerUtil {
                 response = client.execute(method);
             }
 
-            if (response != null) {
-                return response;
+            if (response == null) {
+                return HandlerConstants.EXECUTOR_XCEPTIO_PRFIX + getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE);
+            } else {
+                int statusCode = response.getStatusLine().getStatusCode();
+                if ( statusCode != expectedStatusCode) {
+                    return HandlerConstants.EXECUTOR_XCEPTIO_PRFIX + getStatusKey(statusCode);
+                } else {
+                    try (BufferedReader rd = new BufferedReader(
+                            new InputStreamReader(response.getEntity().getContent()))) {
+                        StringBuilder result = new StringBuilder();
+                        String line;
+                        while ((line = rd.readLine()) != null) {
+                            result.append(line);
+                        }
+                        return result.toString();
+                    }
+                }
             }
-            return null;
         }
     }
 
@@ -138,15 +152,14 @@ public class HandlerUtil {
             }
             HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
             JsonParser jsonParser = new JsonParser();
-            HttpResponse response = execute(uiConfigEndpoint);
-            if (response != null && response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                String uiConfig = retrieveResponseString(response);
-                JsonElement uiConfigJsonElement = jsonParser.parse(uiConfig);
-                if (uiConfigJsonElement.isJsonObject()) {
-                    uiConfigAsJsonObject = uiConfigJsonElement.getAsJsonObject();
-                    return uiConfigAsJsonObject;
-                }
+            String uiConfig = execute(uiConfigEndpoint,HttpStatus.SC_OK);
+
+            JsonElement uiConfigJsonElement = jsonParser.parse(uiConfig);
+            if (uiConfigJsonElement.isJsonObject()) {
+                uiConfigAsJsonObject = uiConfigJsonElement.getAsJsonObject();
+                return uiConfigAsJsonObject;
             }
+
         } catch (IOException e) {
             throw new LoginException("Error occured while getting UI configs. ", e);
         }
