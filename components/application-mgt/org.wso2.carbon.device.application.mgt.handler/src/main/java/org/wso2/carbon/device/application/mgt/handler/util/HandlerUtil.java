@@ -95,6 +95,7 @@ public class HandlerUtil {
                         }
                     }
                     proxyResponse.setCode(statusCode);
+                    proxyResponse.setData(jsonString);
                     proxyResponse
                             .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
                     return proxyResponse;
