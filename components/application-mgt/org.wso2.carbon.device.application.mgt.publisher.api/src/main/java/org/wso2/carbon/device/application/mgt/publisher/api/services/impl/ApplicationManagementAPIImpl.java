@@ -82,7 +82,7 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         try {
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND)
+                return Response.status(Response.Status.OK)
                         .entity("Couldn't find any application for the requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
