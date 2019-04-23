@@ -64,17 +64,11 @@ class NormalLoginForm extends React.Component {
                 let data = "username=" + values.username + "&password=" + values.password + "&platform=publisher";
                 axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/login', data
                 ).then(res => {
-                    console.log(res);
                     if (res.status === 200) {
-                        console.log(res);
-                        console.log(res.data);
-                        console.log(res.status);
                         window.location = res.data.url;
                     }
-
                 }).catch(function (error) {
                     if (error.response.status === 400) {
-                        console.log("hoo");
                         thisForm.setState({
                             inValid: true,
                             loading: false

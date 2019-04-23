@@ -17,15 +17,15 @@ const routes = [
         component: Login
     },
     {
-        path: '/publisher/dashboard',
+        path: '/publisher/application-mgt',
         component: Dashboard,
         routes: [
             {
-                path: '/publisher/dashboard/apps',
+                path: '/publisher/application-mgt/apps',
                 component: Apps
             },
             {
-                path: '/publisher/dashboard/new-app',
+                path: '/publisher/application-mgt/new-app',
                 component: AddNewApp
             }
         ]
