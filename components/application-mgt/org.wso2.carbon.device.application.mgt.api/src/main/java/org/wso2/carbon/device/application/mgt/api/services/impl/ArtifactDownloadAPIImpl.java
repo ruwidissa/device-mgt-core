@@ -44,9 +44,9 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
     @GET
     @Override
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/download-artifact/{md5sum}/{fileName}")
+    @Path("/download-artifact/{uuid}/{fileName}")
     public Response getArtifact(
-            @PathParam("md5sum") String md5sum,
+            @PathParam("uuid") String uuid,
             @PathParam("fileName") String fileName) {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
         try {

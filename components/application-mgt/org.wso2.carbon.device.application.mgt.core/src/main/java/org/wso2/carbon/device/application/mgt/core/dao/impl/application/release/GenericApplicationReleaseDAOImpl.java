@@ -656,7 +656,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
-    public ApplicationReleaseArtifactPaths getReleaseArtifactPaths(String uuid, int tenantId) throws ApplicationManagementDAOException{
+    public String getReleaseHashValue(String uuid, int tenantId) throws ApplicationManagementDAOException{
         if (log.isDebugEnabled()) {
             log.debug("Getting application release artifact stored location paths for: " + uuid);
         }
@@ -664,15 +664,12 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         PreparedStatement stmt = null;
         ResultSet rs = null;
         ApplicationReleaseArtifactPaths applicationReleaseArtifactPaths = null;
+        String releaseHashValue = null;
         try {
             conn = this.getDBConnection();
-            String sql = "SELECT AR.INSTALLER_LOCATION AS INSTALLER,"
-                            + "AR.ICON_LOCATION AS ICON,"
-                            + "AR.BANNER_LOCATION AS BANNER,"
-                            + "AR.SC_1_LOCATION AS SC1,"
-                            + "AR.SC_2_LOCATION AS SC2,"
-                            + "AR.SC_3_LOCATION AS SC3 "
-                            + "FROM AP_APP_RELEASE AS AR "
+            String sql = "SELECT "
+                    + "AR.APP_HASH_VALUE AS HASH_VALUE "
+                    + "FROM AP_APP_RELEASE "
                     + "WHERE AR.UUID = ? AND AR.TENANT_ID = ?;";
 
             stmt = conn.prepareStatement(sql);
@@ -686,21 +683,15 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                                 + uuid);
             }
 
-            if (rs.getFetchSize() == 0 || rs.getFetchSize() >1){
-                return null;
+            if (rs.getFetchSize() >1){
+                String msg = "Found more than one application release for UUID: " + uuid;
+                log.error(msg);
+                throw new ApplicationManagementDAOException(msg);
             }
             while(rs.next()){
-                applicationReleaseArtifactPaths = new ApplicationReleaseArtifactPaths();
-                List<String> scs = new ArrayList<>();
-                applicationReleaseArtifactPaths.setInstallerPath(rs.getString("INSTALLER"));
-                applicationReleaseArtifactPaths.setIconPath(rs.getString("ICON"));
-                applicationReleaseArtifactPaths.setBannerPath(rs.getString("BANNER"));
-                scs.add(rs.getString("SC1"));
-                scs.add(rs.getString("SC2"));
-                scs.add(rs.getString("SC3"));
-                applicationReleaseArtifactPaths.setScreenshotPaths(scs);
+                releaseHashValue = rs.getString("HASH_VALUE");
             }
-            return applicationReleaseArtifactPaths;
+            return releaseHashValue;
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred when executing query to get application release artifact paths for App release uuid: "

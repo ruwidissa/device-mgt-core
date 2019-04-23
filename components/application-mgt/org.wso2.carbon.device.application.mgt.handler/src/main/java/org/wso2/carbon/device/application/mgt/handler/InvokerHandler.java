@@ -47,7 +47,8 @@ import java.io.IOException;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.execute;
 
-@MultipartConfig @WebServlet("/invoke")
+@MultipartConfig
+@WebServlet("/invoke")
 public class InvokerHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(LoginHandler.class);
     private static final long serialVersionUID = -6508020875358160165L;
@@ -57,7 +58,8 @@ public class InvokerHandler extends HttpServlet {
     private static String serverUrl;
     private static String platform;
 
-    @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (!validateRequest(req, resp)) {
                 return;
@@ -68,8 +70,8 @@ public class InvokerHandler extends HttpServlet {
                 return;
             }
             executor.setHeader(HandlerConstants.AUTHORIZATION_HEADER_KEY, "Bearer " + authData.getAccessToken());
-
             ProxyResponse proxyResponse = execute(executor);
+
             if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
                 if (!refreshToken(req, resp)) {
                     return;
@@ -87,9 +89,7 @@ public class InvokerHandler extends HttpServlet {
                 HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
                 return;
             }
-
             HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
-
         } catch (IOException e) {
             log.error("Error occured when processing invoke call.", e);
         }

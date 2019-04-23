@@ -86,8 +86,8 @@ public interface ApplicationReleaseDAO {
      * @return the updated ApplicationDTO Release
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception
      */
-    ApplicationReleaseDTO updateRelease(ApplicationReleaseDTO applicationRelease, int tenantId) throws
-                                                                                                             ApplicationManagementDAOException;
+    ApplicationReleaseDTO updateRelease(ApplicationReleaseDTO applicationRelease, int tenantId)
+            throws ApplicationManagementDAOException;
 
     /**
      * To update an ApplicationDTO release.
@@ -168,7 +168,7 @@ public interface ApplicationReleaseDAO {
      */
     boolean verifyReleaseExistenceByUuid(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
-    ApplicationReleaseArtifactPaths getReleaseArtifactPaths(String uuid, int tenantId) throws ApplicationManagementDAOException;
+    String getReleaseHashValue(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     /***
      *

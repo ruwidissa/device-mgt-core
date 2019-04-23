@@ -50,7 +50,8 @@ import java.util.Base64;
 
 import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.execute;
 
-@MultipartConfig @WebServlet("/login")
+@MultipartConfig
+@WebServlet("/login")
 public class LoginHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(LoginHandler.class);
     private static final long serialVersionUID = 9050048549140517002L;
@@ -61,7 +62,8 @@ public class LoginHandler extends HttpServlet {
     private static String serverUrl;
     private static String uiConfigUrl;
 
-    @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             validateLoginRequest(req, resp);
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance()
@@ -286,7 +288,6 @@ public class LoginHandler extends HttpServlet {
                 "grant_type=password&username=" + username + "&password=" + password + "&scope=" + scopeString,
                 ContentType.APPLICATION_FORM_URLENCODED);
         tokenEndpoint.setEntity(tokenEPPayload);
-
         return execute(tokenEndpoint);
     }
 }
