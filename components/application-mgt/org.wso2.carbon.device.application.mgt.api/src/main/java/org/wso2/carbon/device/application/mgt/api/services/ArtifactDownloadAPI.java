@@ -57,7 +57,7 @@ import javax.ws.rs.core.Response;
 public interface ArtifactDownloadAPI {
 
     @GET
-    @Path("/download-artifact/{md5sum}/{fileName}")
+    @Path("/download-artifact/{uuid}/{fileName}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(
             produces = MediaType.APPLICATION_OCTET_STREAM,
@@ -82,10 +82,10 @@ public interface ArtifactDownloadAPI {
             })
     Response getArtifact(
             @ApiParam(
-            name = "md5sum",
-            value = "md5sum of the application release installer",
+            name = "uuid",
+            value = "UUID of the application release.",
             required = true)
-            @PathParam("md5sum") String md5sum,
+            @PathParam("uuid") String uuid,
             @ApiParam(
                     name = "fileName",
                     value = "Name of the artifact",

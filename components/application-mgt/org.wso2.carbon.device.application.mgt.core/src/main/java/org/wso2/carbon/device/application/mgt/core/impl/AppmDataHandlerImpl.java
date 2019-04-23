@@ -29,6 +29,8 @@ import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import org.wso2.carbon.device.application.mgt.core.util.Constants;
 
 import java.io.InputStream;
 
@@ -51,53 +53,26 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         ApplicationReleaseDAO applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
-        String artifactPath = null;
+        String artifactPath;
 
-        if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(artifactName)) {
-            //            todo throw
-        }
-        ApplicationReleaseArtifactPaths applicationReleaseArtifactPaths = null;
+        String appReleaseHashValue = null;
         try {
-            applicationReleaseArtifactPaths = applicationReleaseDAO
-                    .getReleaseArtifactPaths(uuid, tenantId);
+            appReleaseHashValue = applicationReleaseDAO.getReleaseHashValue(uuid, tenantId);
+            artifactPath = appReleaseHashValue + Constants.FORWARD_SLASH + artifactName;
+            return applicationStorageManager.getFileSttream(artifactPath);
+
+
         } catch (ApplicationManagementDAOException e) {
 //            todo throw
 //            throw new ApplicationManagementException();
 //            e.printStackTrace();
+        }catch (ApplicationStorageManagementException e) {
+            //                todo throw
+            //                throw new ApplicationManagementException();
+            //                e.printStackTrace();
         }
 
-        String installerFileName = applicationReleaseArtifactPaths.getInstallerPath();
-        String iconFileName = applicationReleaseArtifactPaths.getIconPath();
-        String bannerFileName = applicationReleaseArtifactPaths.getBannerPath();
 
-        if (StringUtils.isEmpty(installerFileName) && artifactName.equals(installerFileName)) {
-            artifactPath = applicationReleaseArtifactPaths.getInstallerPath();
-        }
-
-        if (StringUtils.isEmpty(iconFileName) && artifactName.equals(iconFileName)) {
-            artifactPath = applicationReleaseArtifactPaths.getIconPath();
-        }
-
-        if (StringUtils.isEmpty(bannerFileName) && artifactName.equals(bannerFileName)) {
-            artifactPath = applicationReleaseArtifactPaths.getBannerPath();
-        }
-
-        for (String screenshotPath : applicationReleaseArtifactPaths.getScreenshotPaths()) {
-            if (screenshotPath != null && screenshotPath.contains(artifactName)) {
-                artifactPath = screenshotPath;
-            }
-        }
-
-        if (artifactPath != null) {
-            try {
-                return applicationStorageManager.getFileSttream(artifactPath);
-            } catch (ApplicationStorageManagementException e) {
-//                todo throw
-//                throw new ApplicationManagementException();
-//                e.printStackTrace();
-            }
-
-        }
         return null;
     }
 }

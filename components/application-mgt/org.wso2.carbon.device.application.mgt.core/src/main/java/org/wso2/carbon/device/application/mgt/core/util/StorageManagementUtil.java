@@ -126,6 +126,8 @@ public class StorageManagementUtil {
      * @throws IOException throws if error occured when reading file or if couldn't find a file in the filePath
      */
     public static InputStream getInputStream (String filePath) throws IOException {
+        File sourceFile = new File(filePath);
+
         try (InputStream inputStream = new FileInputStream(filePath)){
             return inputStream;
         } catch (FileNotFoundException e) {
