@@ -161,6 +161,9 @@ public class HandlerUtil {
             proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil
                     .getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE));
         }
+        if (platform == null){
+            platform = "default";
+        }
 
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType("application/json");

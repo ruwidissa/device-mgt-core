@@ -45,7 +45,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.execute;
 
 @MultipartConfig @WebServlet("/invoke")
@@ -83,7 +82,6 @@ public class InvokerHandler extends HttpServlet {
                     return;
                 }
             }
-
             if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 log.error("Error occurred while invoking the API endpoint.");
                 HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
@@ -136,23 +134,38 @@ public class InvokerHandler extends HttpServlet {
      * @throws IOException If and error occurs while witting error response to client side
      */
     private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
+        apiEndpoint = req.getParameter("api-endpoint");
+        method = req.getParameter("method");
         HttpSession session = req.getSession(false);
         if (session == null) {
-            resp.sendError(HTTP_UNAUTHORIZED, "Unauthorized, You are not logged in. Please log in to the portal");
+            log.error("Unauthorized, You are not logged in. Please log in to the portal");
+            ProxyResponse proxyResponse = new ProxyResponse();
+            proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
+            proxyResponse.setExecutorResponse(
+                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
+            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
             return false;
         }
         authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
         platform = (String) session.getAttribute(HandlerConstants.PLATFORM);
         if (authData == null) {
-            resp.sendError(HTTP_UNAUTHORIZED, "Unauthorized, Access token couldn't found in the current session");
+            log.error("Unauthorized, Access token couldn't found in the current session");
+            ProxyResponse proxyResponse = new ProxyResponse();
+            proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
+            proxyResponse.setExecutorResponse(
+                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
+            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
             return false;
         }
 
-        apiEndpoint = req.getParameter("api-endpoint");
-        method = req.getParameter("method");
-        serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
         if (apiEndpoint == null || method == null) {
-            resp.sendError(HTTP_BAD_REQUEST, "Bad Request, Either api-endpoint or method is empty");
+            log.error("Bad Request, Either api-endpoint or method is empty");
+            ProxyResponse proxyResponse = new ProxyResponse();
+            proxyResponse.setCode(HttpStatus.SC_BAD_REQUEST);
+            proxyResponse.setExecutorResponse(
+                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_BAD_REQUEST));
+            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
             return false;
         }
         return true;
