@@ -2,6 +2,7 @@ import React from "react";
 import "antd/dist/antd.css";
 import {Table, Divider, Tag, Card, PageHeader, Typography, Avatar,Input, Button, Icon, Row, Col} from "antd";
 import Highlighter from 'react-highlight-words';
+import axios from "axios";
 
 const Paragraph = Typography;
 const Search = Input.Search;
@@ -65,6 +66,34 @@ class Apps extends React.Component {
     constructor(props) {
         super(props);
         this.routes = props.routes;
+        this.state = {
+            data: []
+        };
+
+        this.loadData = this.loadData.bind(this);
+    }
+
+    loadData(){
+        const thisComponent = this;
+        const request = "method=post&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications";
+        axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/invoke', request
+        ).then(res => {
+            if(res.status === 200){
+                thisComponent.setState({
+                    data : []
+                })
+            }
+
+        }).catch(function (error) {
+            if(error.status === 401){
+                window.location = 'https://localhost:9443/publisher/login'
+            }
+        });
+    }
+
+    componentDidMount() {
+        this.loadData();
+
     }
 
     getColumnSearchProps = (dataIndex) => ({
@@ -113,17 +142,17 @@ class Apps extends React.Component {
                 textToHighlight={text.toString()}
             />
         ),
-    })
+    });
 
     handleSearch = (selectedKeys, confirm) => {
         confirm();
         this.setState({ searchText: selectedKeys[0] });
-    }
+    };
 
     handleReset = (clearFilters) => {
         clearFilters();
         this.setState({ searchText: '' });
-    }
+    };
 
 
     render() {
@@ -157,10 +186,10 @@ class Apps extends React.Component {
                         color = 'green';
                         break;
                     case 'removed':
-                        color = 'red'
+                        color = 'red';
                         break;
                     case 'default':
-                        color = 'blue'
+                        color = 'blue';
                 }
                 return <Tag color={color} key={tag}>{tag.toUpperCase()}</Tag>;
             },
@@ -202,7 +231,7 @@ class Apps extends React.Component {
                                 <Button style={{margin:5}}>Advanced Search</Button>
                             </Col>
                         </Row>
-                        <Table columns={columns} dataSource={data}/>
+                        <Table columns={columns} dataSource={this.state.data}/>
                     </Card>
                 </div>
 
