@@ -7,7 +7,8 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
-
+import store from "./js/store/index";
+import {Provider} from "react-redux";
 
 
 const routes = [
@@ -29,11 +30,14 @@ const routes = [
             }
         ]
     }
-]
+];
 
 
-
-ReactDOM.render( <App routes={routes}/>, document.getElementById('root'));
+ReactDOM.render(
+    <Provider store={store}>
+        <App routes={routes}/>
+    </Provider>,
+    document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
