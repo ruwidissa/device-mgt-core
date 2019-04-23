@@ -43,11 +43,7 @@ class NormalLoginForm extends React.Component {
             inValid: false,
             loading : false
         };
-
     }
-
-
-
 
     handleSubmit = (e) => {
         const thisForm = this;
