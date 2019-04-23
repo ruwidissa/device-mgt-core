@@ -127,8 +127,11 @@ public class StorageManagementUtil {
      */
     public static InputStream getInputStream (String filePath) throws IOException {
         File sourceFile = new File(filePath);
+        if (!sourceFile.exists()){
+            return null;
+        }
 
-        try (InputStream inputStream = new FileInputStream(filePath)){
+        try (InputStream inputStream = new FileInputStream(sourceFile)){
             return inputStream;
         } catch (FileNotFoundException e) {
             String msg = "Couldn't file the file in file path: " + filePath;

@@ -17,9 +17,9 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.ApplicationReleaseArtifactPaths;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -29,7 +29,8 @@ import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
-import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
+import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 
 import java.io.InputStream;
@@ -37,42 +38,54 @@ import java.io.InputStream;
 public class AppmDataHandlerImpl implements AppmDataHandler {
 
     private UIConfiguration uiConfiguration;
+    private static final Log log = LogFactory.getLog(AppmDataHandlerImpl.class);
+
 
     public AppmDataHandlerImpl(UIConfiguration config) {
         this.uiConfiguration = config;
     }
 
     @Override
-    public UIConfiguration getUIConfiguration() throws ApplicationManagementException {
+    public UIConfiguration getUIConfiguration() {
         return this.uiConfiguration;
     }
 
     @Override
-//    throws ApplicationManagementException
-    public InputStream getArtifactStream(String uuid, String artifactName) {
+    public InputStream getArtifactStream(String uuid, String artifactName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         ApplicationReleaseDAO applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
         String artifactPath;
-
-        String appReleaseHashValue = null;
+        String appReleaseHashValue;
         try {
+            ConnectionManagerUtil.openDBConnection();
             appReleaseHashValue = applicationReleaseDAO.getReleaseHashValue(uuid, tenantId);
+            if (appReleaseHashValue == null) {
+                String msg = "Could't find application release for UUID: " + uuid + ". Hence try with valid UUID.";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
             artifactPath = appReleaseHashValue + Constants.FORWARD_SLASH + artifactName;
-            return applicationStorageManager.getFileSttream(artifactPath);
-
-
+            InputStream inputStream = applicationStorageManager.getFileSttream(artifactPath);
+            if (inputStream == null) {
+                String msg = "Couldn't file the file in the file system. File path: " + artifactPath;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+            return inputStream;
         } catch (ApplicationManagementDAOException e) {
-//            todo throw
-//            throw new ApplicationManagementException();
-//            e.printStackTrace();
-        }catch (ApplicationStorageManagementException e) {
-            //                todo throw
-            //                throw new ApplicationManagementException();
-            //                e.printStackTrace();
+            String msg =
+                    "Error occurred when retrieving application release hash value for given application release UUID: "
+                            + uuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred when getting input stream of the " + artifactName + " file.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
 
-
-        return null;
     }
 }

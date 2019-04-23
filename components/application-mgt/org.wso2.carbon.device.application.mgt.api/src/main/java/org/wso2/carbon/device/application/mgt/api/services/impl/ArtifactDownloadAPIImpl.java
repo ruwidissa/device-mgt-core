@@ -20,9 +20,10 @@ package org.wso2.carbon.device.application.mgt.api.services.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.api.services.ArtifactDownloadAPI;
-import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 
 import javax.ws.rs.GET;
@@ -31,6 +32,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 
 /**
  * Implementation of ApplicationDTO Management related APIs.
@@ -44,20 +46,26 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
     @GET
     @Override
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/download-artifact/{uuid}/{fileName}")
-    public Response getArtifact(
-            @PathParam("uuid") String uuid,
+    @Path("/{uuid}/{fileName}")
+    public Response getArtifact(@PathParam("uuid") String uuid,
             @PathParam("fileName") String fileName) {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
         try {
-            UIConfiguration uiConfiguration = dataHandler.getUIConfiguration();
-            return Response.status(Response.Status.OK).entity(uiConfiguration).build();
-
-        }catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting the application list for publisher ";
+            InputStream fileInputStream = dataHandler.getArtifactStream(uuid, fileName);
+            return Response.status(Response.Status.OK).entity(fileInputStream).build();
+        } catch (NotFoundException e) {
+            String msg = "Couldn't find an application release for UUID: " + uuid + " and file name:  " + fileName;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Invalid data is used with the request to get input stream of the application release. UUID: "
+                    + uuid + " and file name: " + fileName;
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting the application release artifact file. ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
-
 }

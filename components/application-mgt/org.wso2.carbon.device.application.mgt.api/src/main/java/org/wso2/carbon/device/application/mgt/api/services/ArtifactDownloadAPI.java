@@ -52,12 +52,12 @@ import javax.ws.rs.core.Response;
         )
 )
 @Path("/artifact")
-@Api(value = "ApplicationDTO Management Artifact Downloading Service", description = "This API carries all application management artifact downloading services")
+@Api(value = "ApplicationDTO Management Artifact Downloading Service")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ArtifactDownloadAPI {
 
     @GET
-    @Path("/download-artifact/{uuid}/{fileName}")
+    @Path("/{uuid}/{fileName}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(
             produces = MediaType.APPLICATION_OCTET_STREAM,

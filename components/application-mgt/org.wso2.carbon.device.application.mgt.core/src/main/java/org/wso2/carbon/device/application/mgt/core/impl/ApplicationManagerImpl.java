@@ -1947,6 +1947,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid();
         ApplicationRelease applicationRelease = new ApplicationRelease();
         applicationRelease.setDescription(applicationReleaseDTO.getDescription());
+        applicationRelease.setUuid(applicationReleaseDTO.getUuid());
         applicationRelease.setReleaseType(applicationReleaseDTO.getReleaseType());
         applicationRelease.setPrice(applicationReleaseDTO.getPrice());
         applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
