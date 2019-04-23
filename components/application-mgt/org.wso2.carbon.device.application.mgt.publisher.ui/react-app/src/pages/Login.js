@@ -1,9 +1,10 @@
 import React from "react";
-import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox,} from 'antd';
+import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
 import styles from './Login.less';
 import axios from 'axios';
 
 const {Title} = Typography;
+const {Text} = Typography;
 
 class Login extends React.Component {
     render() {
@@ -35,17 +36,51 @@ class Login extends React.Component {
 }
 
 class NormalLoginForm extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            inValid: false,
+            loading : false
+        };
+
+    }
+
+
+
+
     handleSubmit = (e) => {
+        const thisForm = this;
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
+            thisForm.setState({
+                inValid: false
+            });
             if (!err) {
+                thisForm.setState({
+                    loading: true
+                });
                 console.log('Received values of form: ', values);
-                let data = "username="+values.username+"&password="+values.password+"&platform=publisher";
+                let data = "username=" + values.username + "&password=" + values.password + "&platform=publisher";
                 axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/login', data
-                    ).then(res => {
+                ).then(res => {
+                    console.log(res);
+                    if (res.status === 200) {
                         console.log(res);
                         console.log(res.data);
-                    })
+                        console.log(res.status);
+                        window.location = res.data.url;
+                    }
+
+                }).catch(function (error) {
+                    if (error.response.status === 400) {
+                        console.log("hoo");
+                        thisForm.setState({
+                            inValid: true,
+                            loading: false
+                        });
+                    }
+                });
             }
 
         });
@@ -53,6 +88,14 @@ class NormalLoginForm extends React.Component {
 
     render() {
         const {getFieldDecorator} = this.props.form;
+        let errorMsg = "";
+        if (this.state.inValid) {
+            errorMsg = <Text type="danger">Invalid Login Details</Text>;
+        }
+        let loading = "";
+        if (this.state.loading) {
+            loading = <Text type="secondary">Loading..</Text>;
+        }
         return (
             <Form onSubmit={this.handleSubmit} className="login-form">
                 <Form.Item>
@@ -72,13 +115,16 @@ class NormalLoginForm extends React.Component {
                                placeholder="Password"/>
                     )}
                 </Form.Item>
+                {loading}
+                {errorMsg}
                 <Form.Item>
                     {getFieldDecorator('remember', {
                         valuePropName: 'checked',
                         initialValue: true,
                     })(
-                        <Checkbox>Remember me....</Checkbox>
+                        <Checkbox>Remember me</Checkbox>
                     )}
+                    <br/>
                     <a className="login-form-forgot" href="">Forgot password</a>
                     <Button block type="primary" htmlType="submit" className="login-form-button">
                         Log in
