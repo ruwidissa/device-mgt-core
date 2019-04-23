@@ -28,11 +28,16 @@ public class HandlerConstants {
     public static final String TAGS_KEY = "tags";
     public static final String APP_NAME_KEY = "applicationName";
     public static final String SESSION_AUTH_DATA_KEY = "application-mgt";
+    public static final String AUTHORIZATION_HEADER_KEY = "Authorization";
+    public static final String UI_CONFIG_KEY = "ui-config";
+    public static final String PLATFORM = "platform";
+    public static final String SERVER_HOST = "server-host";
     public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
     public static final String LOGIN_RESPONSE_KEY = "loginResponse";
-    public static final String FAILURE_CALLBACK_KEY = "FailureCallback";
+    public static final String FAILURE_CALLBACK_KEY = "failureCallback";
     public static final String API_COMMON_CONTEXT = "/api";
-    public static final String EXECUTOR_XCEPTIO_PRFIX = "ExecutorException-";
+    public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
+    public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 300;
