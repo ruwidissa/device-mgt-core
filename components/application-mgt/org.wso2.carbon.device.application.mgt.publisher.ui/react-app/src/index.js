@@ -13,19 +13,19 @@ import {Provider} from "react-redux";
 
 const routes = [
     {
-        path: '/publisher/Login',
+        path: '/publisher/login',
         component: Login
     },
     {
-        path: '/publisher/dashboard',
+        path: '/publisher',
         component: Dashboard,
         routes: [
             {
-                path: '/publisher/dashboard/apps',
+                path: '/publisher/apps',
                 component: Apps
             },
             {
-                path: '/publisher/dashboard/new-app',
+                path: '/publisher/new-app',
                 component: AddNewApp
             }
         ]

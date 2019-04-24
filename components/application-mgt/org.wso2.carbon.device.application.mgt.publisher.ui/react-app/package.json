@@ -18,7 +18,8 @@
     "react-highlight-words": "^0.16.0",
     "react-router-config": "^5.0.0",
     "react-router-dom": "latest",
-    "react-scripts": "2.1.8"
+    "react-scripts": "2.1.8",
+    "react-router": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
