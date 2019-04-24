@@ -207,7 +207,11 @@ public class HandlerUtil {
         resp.setCharacterEncoding("UTF-8");
         proxyResponse.setExecutorResponse(null);
         try (PrintWriter writer = resp.getWriter()) {
-            writer.write(gson.toJson(proxyResponse));
+            if (proxyResponse.getCode() == HttpStatus.SC_OK){
+                writer.write(gson.toJson(proxyResponse.getData()));
+            } else{
+                writer.write(proxyResponse.getData());
+            }
         }
     }
 

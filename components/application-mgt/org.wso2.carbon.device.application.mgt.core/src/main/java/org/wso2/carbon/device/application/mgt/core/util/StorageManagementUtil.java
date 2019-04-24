@@ -130,9 +130,8 @@ public class StorageManagementUtil {
         if (!sourceFile.exists()){
             return null;
         }
-
-        try (InputStream inputStream = new FileInputStream(sourceFile)){
-            return inputStream;
+        try {
+            return new FileInputStream(sourceFile);
         } catch (FileNotFoundException e) {
             String msg = "Couldn't file the file in file path: " + filePath;
             log.error(msg);

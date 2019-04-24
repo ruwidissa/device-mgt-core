@@ -52,7 +52,12 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
         try {
             InputStream fileInputStream = dataHandler.getArtifactStream(uuid, fileName);
-            return Response.status(Response.Status.OK).entity(fileInputStream).build();
+            Response.ResponseBuilder response = Response
+                    .ok(fileInputStream, MediaType.APPLICATION_OCTET_STREAM);
+            response.status(Response.Status.OK);
+//            response.type("application/html");
+            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            return response.build();
         } catch (NotFoundException e) {
             String msg = "Couldn't find an application release for UUID: " + uuid + " and file name:  " + fileName;
             log.error(msg, e);
