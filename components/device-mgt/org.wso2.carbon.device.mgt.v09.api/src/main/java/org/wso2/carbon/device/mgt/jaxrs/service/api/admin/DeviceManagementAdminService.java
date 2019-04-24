@@ -71,6 +71,12 @@ import java.util.List;
                         description = "Getting Details of a Device",
                         key = "perm:admin:devices:view",
                         permissions = {"/device-mgt/devices/owning-device/view"}
+                ),
+                @Scope(
+                        name = "Update the Device Owner",
+                        description = "Update the ownership of the device",
+                        key = "perm:admin:devices:update-enrollment",
+                        permissions = {"/device-mgt/admin/devices/update-enrollment"}
                 )
         }
 )

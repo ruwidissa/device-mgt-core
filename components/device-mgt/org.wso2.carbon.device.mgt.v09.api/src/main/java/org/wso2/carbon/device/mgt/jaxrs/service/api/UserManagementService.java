@@ -140,6 +140,12 @@ import java.util.List;
                         description = "Sending Enrollment Invitations to Users",
                         key = "perm:users:send-invitation",
                         permissions = {"/device-mgt/users/manage"}
+                ),
+                @Scope(
+                        name = "Get activities",
+                        description = "Get activities",
+                        key = "perm:get-activity",
+                        permissions = {"/device-mgt/devices/owning-device/view"}
                 )
         }
 )
