@@ -155,6 +155,28 @@ public class LifecycleStateManager {
         }
     }
 
+    public boolean isInitialState(String state) throws LifecycleManagementException {
+        State currentState = getMatchingState(state);
+        if (currentState != null) {
+            return currentState.isInitialState();
+        } else {
+            String msg = "Couldn't find a lifecycle state that matches with " + state + " state.";
+            log.error(msg);
+            throw new LifecycleManagementException(msg);
+        }
+    }
+
+    public boolean isEndState(String state) throws LifecycleManagementException {
+        State currentState = getMatchingState(state);
+        if (currentState != null) {
+            return currentState.isEndState();
+        } else {
+            String msg = "Couldn't find a lifecycle state that matches with " + state + " state.";
+            log.error(msg);
+            throw new LifecycleManagementException(msg);
+        }
+    }
+
     public String getInitialState() throws LifecycleManagementException {
         String initialState = null;
         for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
@@ -197,6 +219,23 @@ public class LifecycleStateManager {
         }
         return false;
     }
+
+    public boolean isUpdatable(String state) {
+        State currentState = getMatchingState(state);
+        if (currentState.isAppUpdatable()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isInstallable(String state) {
+        State currentState = getMatchingState(state);
+        if (currentState.isAppInstallable()) {
+            return true;
+        }
+        return false;
+    }
+
 
     public void setLifecycleStates(Map<String, State> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
