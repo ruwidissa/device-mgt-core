@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.AppOperation;
-import org.wso2.carbon.device.application.mgt.common.Application;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
@@ -70,7 +70,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             log.debug("Install application: " + applicationUUID + " to " + deviceList.size() + "devices.");
         }
         ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
-        Application application = applicationManager.getApplicationByRelease(applicationUUID);
+        ApplicationDTO application = applicationManager.getApplicationByRelease(applicationUUID);
 
         return installApplication(application, deviceList);
     }
@@ -82,7 +82,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             log.debug("Install application: " + applicationUUID + " to " + userList.size() + " users.");
         }
         ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
-        Application application = applicationManager.getApplicationByRelease(applicationUUID);
+        ApplicationDTO application = applicationManager.getApplicationByRelease(applicationUUID);
         List<DeviceIdentifier> deviceList = new ArrayList<>();
         for (String user : userList) {
             try {
@@ -103,7 +103,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
 
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -123,7 +123,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             log.debug("Install application: " + applicationUUID + " to " + roleList.size() + " roles.");
         }
         ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
-        Application application = applicationManager.getApplicationByRelease(applicationUUID);
+        ApplicationDTO application = applicationManager.getApplicationByRelease(applicationUUID);
         List<DeviceIdentifier> deviceList = new ArrayList<>();
         for (String role : roleList) {
             try {
@@ -144,7 +144,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
 
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -164,7 +164,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             log.debug("Install application: " + applicationUUID + " to " + deviceGroupList.size() + " groups.");
         }
         ApplicationManager applicationManager = DataHolder.getInstance().getApplicationManager();
-        Application application = applicationManager.getApplicationByRelease(applicationUUID);
+        ApplicationDTO application = applicationManager.getApplicationByRelease(applicationUUID);
         GroupManagementProviderService groupManagementProviderService = HelperUtil.getGroupManagementProviderService();
         List<DeviceGroup> groupList = new ArrayList<>();
         List<DeviceIdentifier> deviceList = new ArrayList<>();
@@ -188,7 +188,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
 
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -207,7 +207,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return null;
     }
 
-    private ApplicationInstallResponse installApplication(Application application,
+    private ApplicationInstallResponse installApplication(ApplicationDTO application,
             List<DeviceIdentifier> deviceIdentifierList) throws ApplicationManagementException {
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
@@ -239,7 +239,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        int applicationReleaseId = application.getApplicationReleases().get(0).getId();
+        int applicationReleaseId = application.getApplicationReleaseDTOs().get(0).getId();
         try {
             ConnectionManagerUtil.openDBConnection();
             List<Device> deviceList = new ArrayList<>();
@@ -259,15 +259,15 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return response;
     }
 
-    private Operation generateOperationPayloadByDeviceType(String deviceType, Application application) {
+    private Operation generateOperationPayloadByDeviceType(String deviceType, ApplicationDTO application) {
         ProfileOperation operation = new ProfileOperation();
         operation.setCode(INSTALL_APPLICATION);
         operation.setType(Operation.Type.PROFILE);
 
         //todo: generate operation payload correctly for all types of devices.
         operation.setPayLoad(
-                "{'type':'enterprise', 'url':'" + application.getApplicationReleases().get(0).getAppStoredLoc()
-                        + "', 'app':'" + application.getApplicationReleases().get(0).getUuid() + "'}");
+                "{'type':'enterprise', 'url':'" + application.getApplicationReleaseDTOs().get(0).getInstallerName()
+                        + "', 'app':'" + application.getApplicationReleaseDTOs().get(0).getUuid() + "'}");
         return operation;
     }
 

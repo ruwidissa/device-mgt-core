@@ -24,28 +24,25 @@ import com.dd.plist.NSString;
 import com.dd.plist.PropertyListFormatException;
 import com.dd.plist.PropertyListParser;
 import net.dongliu.apk.parser.bean.ApkMeta;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.ApplicationType;
-import org.wso2.carbon.device.application.mgt.common.DeviceType;
+import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
 import org.wso2.carbon.device.application.mgt.core.util.ArtifactsParser;
-import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +51,7 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.deleteDir;
+import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.delete;
 import static org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil.saveFile;
 
 /**
@@ -78,44 +75,44 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationRelease uploadImageArtifacts(ApplicationRelease applicationRelease, InputStream iconFileStream,
+    public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFileStream,
                                                    InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String artifactDirectoryPath;
         String iconStoredLocation;
         String bannerStoredLocation;
-        String scStoredLocation;
+        String scStoredLocation = null;
 
         try {
             artifactDirectoryPath = storagePath + applicationRelease.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            iconStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[0];
-            bannerStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[1];
+            iconStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getIconName();
+            bannerStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getBannerName();
 
             if (iconFileStream != null) {
                 saveFile(iconFileStream, iconStoredLocation);
-                applicationRelease.setIconLoc(iconStoredLocation);
             }
             if (bannerFileStream != null) {
                 saveFile(bannerFileStream, bannerStoredLocation);
-                applicationRelease.setBannerLoc(bannerStoredLocation);
             }
             if (!screenShotStreams.isEmpty()) {
                 if (screenShotStreams.size() > screenShotMaxCount) {
-                    throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
+                    String msg = "Maximum limit for the screen-shot exceeds. You can't upload more than three "
+                            + "screenshot for an application release";
+                    log.error(msg);
+                    throw new ApplicationStorageManagementException(msg);
                 }
                 int count = 1;
                 for (InputStream screenshotStream : screenShotStreams) {
-                    scStoredLocation = artifactDirectoryPath + File.separator + Constants.IMAGE_ARTIFACTS[2] + count;
                     if (count == 1) {
-                        applicationRelease.setScreenshotLoc1(scStoredLocation);
+                        scStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getScreenshotName1();
                     }
                     if (count == 2) {
-                        applicationRelease.setScreenshotLoc2(scStoredLocation);
+                        scStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getScreenshotName2();
                     }
                     if (count == 3) {
-                        applicationRelease.setScreenshotLoc3(scStoredLocation);
+                        scStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getScreenshotName3();
                     }
                     saveFile(screenshotStream, scStoredLocation);
                     count++;
@@ -126,179 +123,150 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             throw new ApplicationStorageManagementException("IO Exception while saving the screens hots for " +
                     "the application " + applicationRelease.getUuid(), e);
         } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("Application Management DAO exception while trying to "
+            throw new ApplicationStorageManagementException("ApplicationDTO Management DAO exception while trying to "
                     + "update the screen-shot count for the application " + applicationRelease.getUuid() +
                     " for the tenant id " + tenantId, e);
         }
     }
 
+
     @Override
-     public ApplicationRelease updateImageArtifacts(ApplicationRelease applicationRelease, InputStream
-            iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
+     public void deleteImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO)
             throws ResourceManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
         try {
-            if (iconFileStream != null) {
-                deleteApplicationReleaseArtifacts(applicationRelease.getIconLoc());
+            String iconName = applicationReleaseDTO.getIconName();
+            String bannerName = applicationReleaseDTO.getBannerName();
+            String sc1 = applicationReleaseDTO.getScreenshotName1();
+            String sc2 = applicationReleaseDTO.getScreenshotName2();
+            String sc3 = applicationReleaseDTO.getScreenshotName3();
+            String hashValue = applicationReleaseDTO.getAppHashValue();
+            if (iconName != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + iconName);
             }
-            if (bannerFileStream != null) {
-                deleteApplicationReleaseArtifacts(applicationRelease.getBannerLoc());
+            if (bannerName != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + bannerName);
             }
-            if (!screenShotStreams.isEmpty()) {
-                if (screenShotStreams.size() > screenShotMaxCount) {
-                    throw new ApplicationStorageManagementException("Maximum limit for the screen-shot exceeds");
-                }
-                int count = 1;
-                while (count < screenShotStreams.size()) {
-                    if (count == 1) {
-                        deleteApplicationReleaseArtifacts(applicationRelease.getScreenshotLoc1());
-                    }
-                    if (count == 2) {
-                        deleteApplicationReleaseArtifacts(applicationRelease.getScreenshotLoc2());
-                    }
-                    if (count == 3) {
-                        deleteApplicationReleaseArtifacts(applicationRelease.getScreenshotLoc3());
-                    }
-                    count++;
-                }
+
+            if (sc1 != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + sc1);
             }
-            return applicationRelease;
+            if (sc2 != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + sc2);
+            }
+            if (sc3 != null) {
+                deleteApplicationReleaseArtifacts(
+                        storagePath + Constants.FORWARD_SLASH + hashValue + Constants.FORWARD_SLASH + sc3);
+            }
         } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("Application Storage exception while trying to"
-                    + " update the screen-shot count for the application Release " + applicationRelease.getUuid() +
+            throw new ApplicationStorageManagementException("ApplicationDTO Storage exception while trying to"
+                    + " update the screen-shot count for the application Release " + applicationReleaseDTO.getUuid() +
                     " for the tenant " + tenantId, e);
         }
     }
 
-    @Override
-    public ApplicationRelease uploadReleaseArtifact(ApplicationRelease applicationRelease, String appType,
-            String deviceType, InputStream binaryFile) throws ResourceManagementException, RequestValidatingException {
-
+    public ApplicationInstaller getAppInstallerData(InputStream binaryFile, String deviceType)
+            throws ApplicationStorageManagementException {
+        ApplicationInstaller applicationInstaller = new ApplicationInstaller();
         try {
-            if (ApplicationType.WEB_CLIP.toString().equals(appType)) {
-                applicationRelease.setVersion(Constants.DEFAULT_VERSION);
-                UrlValidator urlValidator = new UrlValidator();
-                if (applicationRelease.getUrl() == null || !urlValidator.isValid(applicationRelease.getUrl())) {
-                    throw new RequestValidatingException("Request payload doesn't contains Web Clip URL " +
-                                                                            "with application release object or Web " +
-                                                                            "Clip URL is invalid");
-                }
-                applicationRelease.setAppStoredLoc(applicationRelease.getUrl());
-                applicationRelease.setAppHashValue(null);
-                return applicationRelease;
-            }
-
-            String artifactDirectoryPath;
-            String md5OfApp;
-            InputStream[] cloneInputStream = cloneInputStream(binaryFile);
-            md5OfApp = getMD5(binaryFile);
-
-            if (md5OfApp == null) {
-                throw new ApplicationStorageManagementException(
-                        "Error occurred while md5sum value retrieving process: " +
-                                "application UUID " + applicationRelease.getUuid());
-            }
-
-            if (DeviceType.ANDROID.toString().equalsIgnoreCase(deviceType)) {
-                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(cloneInputStream[2]);
-                applicationRelease.setVersion(apkMeta.getVersionName());
-                applicationRelease.setPackageName(apkMeta.getPackageName());
-            } else if (DeviceType.IOS.toString().equalsIgnoreCase(deviceType)) {
+            if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+                ApkMeta apkMeta = ArtifactsParser.readAndroidManifestFile(binaryFile);
+                applicationInstaller.setVersion(apkMeta.getVersionName());
+                applicationInstaller.setPackageName(apkMeta.getPackageName());
+            } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 NSDictionary plistInfo = ArtifactsParser.readiOSManifestFile(binaryFile);
-                applicationRelease
+                applicationInstaller
                         .setVersion(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_VERSION_KEY).toString());
-                applicationRelease
+                applicationInstaller
                         .setPackageName(plistInfo.objectForKey(ArtifactsParser.IPA_BUNDLE_IDENTIFIER_KEY).toString());
             } else {
-                throw new ApplicationStorageManagementException("Application Type doesn't match with supporting " +
-                        "application types " + applicationRelease.getUuid());
+                String msg = "Application Type doesn't match with supporting application types " + deviceType;
+                log.error(msg);
+                throw new ApplicationStorageManagementException(msg);
             }
+        } catch (ParsingException e){
+            String msg = "Application Type doesn't match with supporting application types " + deviceType;
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg);
+        }
+        return applicationInstaller;
+    }
 
-            artifactDirectoryPath = storagePath + md5OfApp;
+    @Override
+    public ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO, String appType,
+            String deviceType, InputStream binaryFile) throws ResourceManagementException {
+        try {
+            String artifactDirectoryPath;
+            String artifactPath;
+            byte [] content = IOUtils.toByteArray(binaryFile);
+
+            artifactDirectoryPath = storagePath + applicationReleaseDTO.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            if (log.isDebugEnabled()) {
-                log.debug("Artifact Directory Path for saving the application release related artifacts related with "
-                                  + "application UUID " + applicationRelease.getUuid() + " is " + artifactDirectoryPath);
-            }
-
-            String artifactPath = artifactDirectoryPath + File.separator + Constants.RELEASE_ARTIFACT +".apk";
-            saveFile(cloneInputStream[1], artifactPath);
-            applicationRelease.setAppStoredLoc(artifactPath);
-            applicationRelease.setAppHashValue(md5OfApp);
-
+            artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
+            saveFile(new ByteArrayInputStream(content), artifactPath);
         } catch (IOException e) {
-            throw new ApplicationStorageManagementException(
-                    "IO Exception while saving the release artifacts in the server for the application UUID "
-                            + applicationRelease.getUuid(), e);
-        } catch (ParsingException e) {
-            throw new ApplicationStorageManagementException(
-                    "Error occurred while parsing the artifact file. Application release UUID is " + applicationRelease
-                            .getUuid(), e);
+            String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
+                    + applicationReleaseDTO.getUuid();
+            log.error(msg);
+            throw new ApplicationStorageManagementException( msg, e);
         }
-
-        return applicationRelease;
+        return applicationReleaseDTO;
     }
 
-    public InputStream[] cloneInputStream(InputStream inputStream) throws ApplicationStorageManagementException {
-
-        ByteArrayOutputStream byteArrayOutputStream = null;
+    @Override
+    public void copyImageArtifactsAndDeleteInstaller(String deletingAppHashValue,
+            ApplicationReleaseDTO applicationReleaseDTO) throws ApplicationStorageManagementException {
 
         try {
-            byteArrayOutputStream = new ByteArrayOutputStream();
+            String basePath = storagePath + Constants.FORWARD_SLASH;
+            String appHashValue = applicationReleaseDTO.getAppHashValue();
+            String bannerName = applicationReleaseDTO.getBannerName();
+            String iconName = applicationReleaseDTO.getIconName();
+            String screenshot1 = applicationReleaseDTO.getScreenshotName1();
+            String screenshot2 = applicationReleaseDTO.getScreenshotName2();
+            String screenshot3 = applicationReleaseDTO.getScreenshotName3();
 
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int len;
-            while ((len = inputStream.read(buffer)) > -1 ) {
-                byteArrayOutputStream.write(buffer, 0, len);
+            if (bannerName != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + bannerName, basePath + appHashValue + bannerName);
             }
-            byteArrayOutputStream.flush();
-
-            InputStream stream1 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            InputStream stream2 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            InputStream stream3 = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-
-            return new InputStream[]{stream1, stream2, stream3};
+            if (iconName != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + iconName, basePath + appHashValue + iconName);
+            }
+            if (screenshot1 != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + screenshot1, basePath + appHashValue + screenshot1);
+            }
+            if (screenshot2 != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + screenshot2, basePath + appHashValue + screenshot2);
+            }
+            if (screenshot3 != null) {
+                StorageManagementUtil
+                        .copy(basePath + deletingAppHashValue + screenshot3, basePath + appHashValue + screenshot3);
+            }
+            deleteApplicationReleaseArtifacts( basePath + deletingAppHashValue);
         } catch (IOException e) {
-            throw new ApplicationStorageManagementException("Error occurred while cloning input stream ", e);
-        } finally {
-            if (byteArrayOutputStream != null) {
-                try {
-                    byteArrayOutputStream.close();
-                } catch (IOException e) {
-
-                }
-            }
+            String msg = "Application installer updating is failed because of I/O issue";
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg, e);
         }
     }
 
     @Override
-    public ApplicationRelease updateReleaseArtifacts(ApplicationRelease applicationRelease, String appType,
-            String deviceType, InputStream binaryFile) throws ApplicationStorageManagementException,
-            RequestValidatingException {
-
-        try {
-            deleteApplicationReleaseArtifacts(applicationRelease.getAppStoredLoc());
-            applicationRelease = uploadReleaseArtifact(applicationRelease, appType, deviceType, binaryFile);
-        } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("Application Artifact doesn't contains in the System", e);
-        } catch (ResourceManagementException e) {
-            throw new ApplicationStorageManagementException("Application Artifact Updating failed", e);
-        }
-
-        return applicationRelease;
-
-    }
-
-
-    @Override
-    public void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException {
-        File artifact = new File(directoryPath);
+    public void deleteApplicationReleaseArtifacts(String artifactPath) throws ApplicationStorageManagementException {
+        File artifact = new File(artifactPath);
 
         if (artifact.exists()) {
             try {
-                StorageManagementUtil.deleteDir(artifact);
+                StorageManagementUtil.delete(artifact);
             } catch (IOException e) {
                 throw new ApplicationStorageManagementException(
                         "Error occured while deleting application release artifacts", e);
@@ -309,22 +277,22 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         }
     }
 
-    @Override public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths)
+    @Override
+    public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths)
             throws ApplicationStorageManagementException {
         for (String directoryBasePath : directoryPaths) {
-            deleteApplicationReleaseArtifacts(directoryBasePath);
+            deleteApplicationReleaseArtifacts(storagePath + directoryBasePath);
         }
     }
 
-    private String getMD5(InputStream binaryFile) throws ApplicationStorageManagementException {
-        String md5;
+    public InputStream getFileSttream (String path) throws ApplicationStorageManagementException {
+        String filePath = storagePath + path;
         try {
-            md5 = DigestUtils.md5Hex(IOUtils.toByteArray(binaryFile));
+            return StorageManagementUtil.getInputStream(filePath);
         } catch (IOException e) {
-            throw new ApplicationStorageManagementException
-                    ("IO Exception while trying to get the md5sum value of application");
+            String msg = "Error occured when accessing the file in file path: " + filePath;
+            throw new ApplicationStorageManagementException(msg, e);
         }
-        return md5;
     }
 
     private synchronized Map<String, String> getIPAInfo(File ipaFile) throws ApplicationStorageManagementException {
@@ -336,7 +304,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             ipaDirectory = new File(ipaAbsPath).getParent();
 
             if (new File(ipaDirectory + File.separator + Constants.PAYLOAD).exists()) {
-                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+                delete(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
             }
 
             // unzip ipa zip file
@@ -366,7 +334,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
             if (ipaDirectory != null) {
                 // remove unzip folder
-                deleteDir(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
+                delete(new File(ipaDirectory + File.separator + Constants.PAYLOAD));
             }
 
         } catch (ParseException e) {

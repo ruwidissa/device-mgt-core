@@ -22,14 +22,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
+import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 import org.wso2.carbon.device.application.mgt.handler.beans.AuthData;
 import org.wso2.carbon.device.application.mgt.handler.exceptions.LoginException;
 import org.wso2.carbon.device.application.mgt.handler.util.HandlerConstants;
@@ -47,8 +49,6 @@ import java.io.IOException;
 import java.util.Base64;
 
 import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.execute;
-import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.loadUiConfig;
-import static org.wso2.carbon.device.application.mgt.handler.util.HandlerUtil.retrieveResponseString;
 
 @MultipartConfig
 @WebServlet("/login")
@@ -79,15 +79,40 @@ public class LoginHandler extends HttpServlet {
             //setting session to expiry in 5 mins
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
-            JsonObject uiConfigAsJsonObject = loadUiConfig(uiConfigUrl);
-            if (uiConfigAsJsonObject == null) {
-                resp.sendRedirect(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
+            HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
+            JsonParser jsonParser = new JsonParser();
+            ProxyResponse uiConfigResponse = execute(uiConfigEndpoint);
+            String executorResponse = uiConfigResponse.getExecutorResponse();
+            if (!StringUtils.isEmpty(executorResponse) && executorResponse
+                    .contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                log.error("Error occurred while getting UI configurations by invoking " + uiConfigUrl);
+                HandlerUtil.handleError(req, resp, serverUrl, platform, uiConfigResponse);
                 return;
             }
 
-            boolean isSsoEnable = uiConfigAsJsonObject.get("isSsoEnable").getAsBoolean();
-            JsonArray tags = uiConfigAsJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
-            JsonArray scopes = uiConfigAsJsonObject.get("scopes").getAsJsonArray();
+            String uiConfig = uiConfigResponse.getData();
+            if (uiConfig == null){
+                log.error("UI config retrieval is failed, and didn't find UI configuration for App manager.");
+                HandlerUtil.handleError(req, resp, serverUrl, platform, null);
+                return;
+            }
+            JsonElement uiConfigJsonElement = jsonParser.parse(uiConfigResponse.getData());
+            JsonObject uiConfigJsonObject = null;
+            if (uiConfigJsonElement.isJsonObject()) {
+                uiConfigJsonObject = uiConfigJsonElement.getAsJsonObject();
+                httpSession.setAttribute(HandlerConstants.UI_CONFIG_KEY, uiConfigJsonObject);
+                httpSession.setAttribute(HandlerConstants.PLATFORM, serverUrl);
+            }
+            if (uiConfigJsonObject == null) {
+                log.error(
+                        "Either UI config json element is not an json object or converting rom json element to json object is failed.");
+                HandlerUtil.handleError(req, resp, serverUrl, platform, null);
+                return;
+            }
+
+            boolean isSsoEnable = uiConfigJsonObject.get("isSsoEnable").getAsBoolean();
+            JsonArray tags = uiConfigJsonObject.get("appRegistration").getAsJsonObject().get("tags").getAsJsonArray();
+            JsonArray scopes = uiConfigJsonObject.get("scopes").getAsJsonArray();
 
             if (isSsoEnable) {
                 log.debug("SSO is enabled");
@@ -98,22 +123,20 @@ public class LoginHandler extends HttpServlet {
                         .encodeToString((adminUsername + HandlerConstants.COLON + adminPwd).getBytes()));
                 apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
                 apiRegEndpoint.setEntity(constructAppRegPayload(tags));
-                HttpResponse response = execute(apiRegEndpoint);
-                if (!evaluateResponse(response,resp, HttpStatus.SC_CREATED)){
-                    return;
-                }
-                String clientAppResult = retrieveResponseString(response);
 
-                if (!clientAppResult.isEmpty() && persistTokenInSession(req, resp, clientAppResult, scopes)) {
-                    resp.sendRedirect(
-                            serverUrl + "/" + platform + uiConfigAsJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY)
-                                    .getAsJsonObject().get("successCallback").getAsString());
+                ProxyResponse clientAppResponse = execute(apiRegEndpoint);
+                String clientAppResult = clientAppResponse.getData();
+
+                if (!StringUtils.isEmpty(clientAppResult) && getTokenAndPersistInSession(req, resp,
+                        clientAppResponse.getData(), scopes)) {
+                    ProxyResponse proxyResponse = new ProxyResponse();
+                    proxyResponse.setCode(HttpStatus.SC_OK);
+                    proxyResponse.setUrl(serverUrl + "/" + platform + uiConfigJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY)
+                            .getAsJsonObject().get("successCallback").getAsString());
+                    HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
                     return;
                 }
-                resp.sendRedirect(
-                        serverUrl + "/" + platform + uiConfigAsJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY)
-                                .getAsJsonObject().get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
-                                .get(HandlerUtil.getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE)).getAsString());
+                HandlerUtil.handleError(req, resp, serverUrl, platform, null);
             }
         } catch (IOException e) {
             log.error("Error occured while sending the response into the socket. ", e);
@@ -131,11 +154,9 @@ public class LoginHandler extends HttpServlet {
      * @param scopes - scopes defied in the application-mgt.xml
      * @throws LoginException - login exception throws when getting token result
      */
-    private boolean persistTokenInSession(HttpServletRequest req, HttpServletResponse resp, String clientAppResult,
-            JsonArray scopes) throws LoginException {
+    private boolean getTokenAndPersistInSession(HttpServletRequest req, HttpServletResponse resp,
+            String clientAppResult, JsonArray scopes) throws LoginException {
         JsonParser jsonParser = new JsonParser();
-        String tokenResult;
-
         try {
             JsonElement jClientAppResult = jsonParser.parse(clientAppResult);
             if (jClientAppResult.isJsonObject()) {
@@ -145,26 +166,37 @@ public class LoginHandler extends HttpServlet {
                 String encodedClientApp = Base64.getEncoder()
                         .encodeToString((clientId + ":" + clientSecret).getBytes());
 
-                tokenResult = getTokenResult(encodedClientApp, scopes, resp);
+                ProxyResponse tokenResultResponse = getTokenResult(encodedClientApp, scopes);
 
-                if (tokenResult != null) {
-                    JsonElement jTokenResult = jsonParser.parse(tokenResult);
-                    if (jTokenResult.isJsonObject()) {
-                        JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
-                        HttpSession session = req.getSession(false);
-                        if (session == null) {
-                            return false;
-                        }
-                        AuthData authData = new AuthData();
-                        authData.setClientId(clientId);
-                        authData.setClientSecret(clientSecret);
-                        authData.setEncodedClientApp(encodedClientApp);
-                        authData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
-                        authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
-                        authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
-                        session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
-                        return true;
+                if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                    log.error("Error occurred while invoking the API to get token data.");
+                    HandlerUtil.handleError(req, resp, serverUrl, platform, tokenResultResponse);
+                    return false;
+                }
+                String tokenResult = tokenResultResponse.getData();
+                if (tokenResult == null){
+                    log.error("Invalid token response is received.");
+                    HandlerUtil.handleError(req, resp, serverUrl, platform, tokenResultResponse);
+                    return false;
+                }
+
+                JsonElement jTokenResult = jsonParser.parse(tokenResult);
+                if (jTokenResult.isJsonObject()) {
+                    JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
+                    HttpSession session = req.getSession(false);
+                    if (session == null) {
+                        return false;
                     }
+                    AuthData authData = new AuthData();
+                    authData.setClientId(clientId);
+                    authData.setClientSecret(clientSecret);
+                    authData.setEncodedClientApp(encodedClientApp);
+                    authData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
+                    authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
+                    authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+                    session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
+                    return true;
+
                 }
             }
             return false;
@@ -236,71 +268,26 @@ public class LoginHandler extends HttpServlet {
      *
      * @param encodedClientApp - Base64 encoded clientId:clientSecret.
      * @param scopes - Scopes which are retrieved by reading application-mgt configuration
-     * @param resp - {@link HttpServletResponse}
      * @return Invoke token endpoint and return the response as string.
      * @throws IOException IO exception throws if an error occured when invoking token endpoint
      */
-    private String getTokenResult(String encodedClientApp, JsonArray scopes, HttpServletResponse resp)
-            throws IOException, LoginException {
+    private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
 
-            HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.TOKEN_ENDPOINT);
-            tokenEndpoint.setHeader("Authorization", "Basic " + encodedClientApp);
-            tokenEndpoint.setHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.toString());
-            String scopeString = getScopeString(scopes);
+        HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.TOKEN_ENDPOINT);
+        tokenEndpoint.setHeader("Authorization", "Basic " + encodedClientApp);
+        tokenEndpoint.setHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.toString());
+        String scopeString = getScopeString(scopes);
 
-            if (scopeString != null) {
-                scopeString = scopeString.trim();
-            }
-
-            StringEntity tokenEPPayload = new StringEntity(
-                    "grant_type=password&username=" + username + "&password=" + password + "&scope=" + scopeString,
-                    ContentType.APPLICATION_FORM_URLENCODED);
-            tokenEndpoint.setEntity(tokenEPPayload);
-        HttpResponse response = execute(tokenEndpoint);
-
-        if (evaluateResponse(response, resp,  HttpStatus.SC_OK)){
-            return retrieveResponseString(response);
+        if (scopeString != null) {
+            scopeString = scopeString.trim();
+        } else {
+            scopeString = "default";
         }
 
-        return null;
-
-    }
-
-    /***
-     *
-     * @param response {@link HttpResponse}
-     * @param resp {@link HttpServletResponse}
-     * @param expectedStatusCode expected status code of the response
-     * @return If response returns expected status code, then returns True otherwise returns False after redirect to
-     * corresponding error page.
-     * @throws LoginException If an {@link IOException} occurs when redirecting to corresponding error page.
-     */
-    private boolean evaluateResponse(HttpResponse response, HttpServletResponse resp, int expectedStatusCode)
-            throws  LoginException {
-        JsonObject uiJsonObject = loadUiConfig(uiConfigUrl);
-        try {
-            if (response == null) {
-                if (uiJsonObject != null) {
-                    resp.sendRedirect(serverUrl + uiJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
-                            .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
-                            .get(HandlerUtil.getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE)).getAsString());
-                    return false;
-                }
-                resp.sendRedirect(serverUrl + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-                return false;
-            } else if (response.getStatusLine().getStatusCode() != expectedStatusCode) {
-                if (uiJsonObject != null) {
-                    resp.sendRedirect(serverUrl + uiJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
-                            .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
-                            .get(HandlerUtil.getStatusKey(response.getStatusLine().getStatusCode())).getAsString());
-                    return false;
-                }
-                resp.sendRedirect(serverUrl + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-                return false;
-            }
-        } catch (IOException e){
-            throw new LoginException("Error occured while redirecting to corresponding error page. ", e);
-        }
-        return true;
+        StringEntity tokenEPPayload = new StringEntity(
+                "grant_type=password&username=" + username + "&password=" + password + "&scope=" + scopeString,
+                ContentType.APPLICATION_FORM_URLENCODED);
+        tokenEndpoint.setEntity(tokenEPPayload);
+        return execute(tokenEndpoint);
     }
 }

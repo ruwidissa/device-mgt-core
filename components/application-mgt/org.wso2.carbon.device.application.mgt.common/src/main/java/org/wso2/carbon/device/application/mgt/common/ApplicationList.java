@@ -18,10 +18,13 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
+
 import java.util.List;
 
 /**
- * Represents a list of {@link Application}.
+ * Represents a list of {@link ApplicationDTO}.
  */
 public class ApplicationList {
 

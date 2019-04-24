@@ -17,9 +17,9 @@
 
 package org.wso2.carbon.device.application.mgt.handler.util;
 
-import com.google.gson.JsonElement;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -28,16 +28,21 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.wso2.carbon.device.application.mgt.handler.exceptions.LoginException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 public class HandlerUtil {
 
     private static final Log log = LogFactory.getLog(HandlerUtil.class);
-    private static JsonObject uiConfigAsJsonObject;
 
     /***
      *
@@ -46,9 +51,9 @@ public class HandlerUtil {
      * @return response as string
      * @throws IOException IO exception returns if error occurs when executing the httpMethod
      */
-    public static <T> HttpResponse execute(T httpMethod) throws IOException {
-        HttpResponse response = null;
+    public static <T> ProxyResponse execute(T httpMethod) throws IOException {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpResponse response = null;
             if (httpMethod instanceof HttpPost) {
                 HttpPost method = (HttpPost) httpMethod;
                 response = client.execute(method);
@@ -57,29 +62,48 @@ public class HandlerUtil {
                 response = client.execute(method);
             }
 
-            if (response != null) {
-                return response;
-            }
-            return null;
-        }
-    }
+            ProxyResponse proxyResponse = new ProxyResponse();
+            if (response == null) {
+                proxyResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);
+                proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
+                        HandlerConstants.INTERNAL_ERROR_CODE));
+                return proxyResponse;
+            } else {
+                int statusCode = response.getStatusLine().getStatusCode();
+                try (BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()))) {
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = rd.readLine()) != null) {
+                        result.append(line);
+                    }
 
-    /***
-     *
-     * @param response {@link HttpResponse}
-     * @return {@link String} get the response payload by using Entity of the response
-     * @throws IOException if error occurs while reading the content of the response or reading {@link BufferedReader}
-     * object
-     */
-    public static String retrieveResponseString (HttpResponse response) throws  IOException{
-        try (BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()))) {
-            StringBuilder result = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                result.append(line);
+                    String jsonString = result.toString();
+                    if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
+                        proxyResponse.setCode(statusCode);
+                        proxyResponse.setData(jsonString);
+                        proxyResponse.setExecutorResponse("SUCCESS");
+                        return proxyResponse;
+                    } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                        if (jsonString.contains("Access token expired") || jsonString
+                                .contains("Invalid input. Access token validation failed")) {
+                            proxyResponse.setCode(statusCode);
+                            proxyResponse.setExecutorResponse("ACCESS_TOKEN_IS_EXPIRED");
+                            return proxyResponse;
+                        } else {
+                            proxyResponse.setCode(statusCode);
+                            proxyResponse.setData(jsonString);
+                            proxyResponse.setExecutorResponse(
+                                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                            return proxyResponse;
+                        }
+                    }
+                    proxyResponse.setCode(statusCode);
+                    proxyResponse.setData(jsonString);
+                    proxyResponse
+                            .setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(statusCode));
+                    return proxyResponse;
+                }
             }
-            return result.toString();
         }
     }
 
@@ -92,28 +116,28 @@ public class HandlerUtil {
         String statusCodeKey;
 
         switch (statusCode) {
-        case 500:
+        case HttpStatus.SC_INTERNAL_SERVER_ERROR:
             statusCodeKey = "internalServerError";
             break;
-        case 400:
+        case HttpStatus.SC_BAD_REQUEST:
             statusCodeKey = "badRequest";
             break;
-        case 401:
+        case HttpStatus.SC_UNAUTHORIZED:
             statusCodeKey = "unauthorized";
             break;
-        case 403:
+        case HttpStatus.SC_FORBIDDEN:
             statusCodeKey = "forbidden";
             break;
-        case 404:
+        case HttpStatus.SC_NOT_FOUND:
             statusCodeKey = "notFound";
             break;
-        case 405:
+        case HttpStatus.SC_METHOD_NOT_ALLOWED:
             statusCodeKey = "methodNotAllowed";
             break;
-        case 406:
+        case HttpStatus.SC_NOT_ACCEPTABLE:
             statusCodeKey = "notAcceptable";
             break;
-        case 415:
+        case HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE:
             statusCodeKey = "unsupportedMediaType";
             break;
         default:
@@ -123,34 +147,87 @@ public class HandlerUtil {
         return statusCodeKey;
     }
 
+
     /***
      *
-     * @param uiConfigUrl - JSON string of the UI configuration
-     * @return - True returns if UI config load is succeeded and False returns if it fails. Further, if call ie
-     * succeeded assign values for uiConfigAsJsonObject static variable.
-     * @throws LoginException IO exception could occur if an error occured when invoking end point for getting UI
-     * configs
+     * @param resp {@link HttpServletResponse}
+     * Return Error Response.
      */
-    public static JsonObject loadUiConfig(String uiConfigUrl) throws LoginException {
-        try {
-            if (uiConfigAsJsonObject != null) {
-                return uiConfigAsJsonObject;
-            }
-            HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
-            JsonParser jsonParser = new JsonParser();
-            HttpResponse response = execute(uiConfigEndpoint);
-            if (response != null && response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                String uiConfig = retrieveResponseString(response);
-                JsonElement uiConfigJsonElement = jsonParser.parse(uiConfig);
-                if (uiConfigJsonElement.isJsonObject()) {
-                    uiConfigAsJsonObject = uiConfigJsonElement.getAsJsonObject();
-                    return uiConfigAsJsonObject;
-                }
-            }
-        } catch (IOException e) {
-            throw new LoginException("Error occured while getting UI configs. ", e);
+    public static void handleError(HttpServletRequest req, HttpServletResponse resp, String serverUrl,
+            String platform, ProxyResponse proxyResponse) throws IOException {
+
+        HttpSession httpSession = req.getSession(true);
+        Gson gson = new Gson();
+        if (proxyResponse == null){
+            proxyResponse = new ProxyResponse();
+            proxyResponse.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil
+                    .getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE));
         }
-        return null;
+        if (platform == null){
+            platform = "default";
+        }
+
+        resp.setStatus(proxyResponse.getCode());
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        if (httpSession != null) {
+            JsonObject uiConfig = (JsonObject) httpSession.getAttribute(HandlerConstants.UI_CONFIG_KEY);
+            if (uiConfig == null){
+                proxyResponse.setUrl(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
+            } else{
+                proxyResponse.setUrl(serverUrl + uiConfig.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
+                        .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
+                        .get(proxyResponse.getExecutorResponse().split(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)[1])
+                        .getAsString());
+            }
+        } else {
+            proxyResponse.setUrl(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
+        }
+
+        proxyResponse.setExecutorResponse(null);
+        try (PrintWriter writer = resp.getWriter()) {
+            writer.write(gson.toJson(proxyResponse));
+        }
+    }
+
+    /***
+     *
+     * @param resp {@link HttpServletResponse}
+     * Return Success Response.
+     */
+    public static void handleSuccess(HttpServletRequest req, HttpServletResponse resp, String serverUrl,
+            String platform, ProxyResponse proxyResponse) throws IOException {
+        if (proxyResponse == null){
+            handleError(req,resp,serverUrl,platform,proxyResponse);
+            return;
+        }
+
+        resp.setStatus(proxyResponse.getCode());
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+
+        JSONObject response = new JSONObject();
+        String redirectUrl = proxyResponse.getUrl();
+        String responseData = proxyResponse.getData();
+
+        if (!StringUtils.isEmpty(redirectUrl)){
+            response.put("url", redirectUrl);
+        }
+        if (!StringUtils.isEmpty(responseData)){
+            try {
+                JSONObject responseDataJsonObj = new JSONObject(responseData);
+                response.put("data", responseDataJsonObj);
+            } catch (JSONException e) {
+                log.debug("Response data is not valid json string");
+                response.put("data", responseData);
+            }
+        }
+
+        try (PrintWriter writer = resp.getWriter()) {
+            writer.write(response.toString());
+        }
     }
 
 }

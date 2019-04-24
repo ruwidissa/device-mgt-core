@@ -39,7 +39,7 @@ public class StorageManagementUtilTest {
     public void before() throws IOException {
         File file = new File(TEMP_FOLDER);
         if (file.exists()) {
-            StorageManagementUtil.deleteDir(file);
+            StorageManagementUtil.delete(file);
         }
     }
 
@@ -67,7 +67,7 @@ public class StorageManagementUtilTest {
     @AfterMethod
     public void deleteFileTest() throws IOException, ResourceManagementException {
         File file = new File(TEMP_FOLDER);
-        StorageManagementUtil.deleteDir(file);
+        StorageManagementUtil.delete(file);
         if (file.exists()) {
             Assert.fail("File deleting failed.");
         }

@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.config;
 
+import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
 
@@ -43,6 +44,12 @@ public class Configuration {
     private List<LifecycleState> lifecycleStates;
 
     private UIConfiguration uiConfiguration;
+
+    private List<String> appCategories;
+
+    private String artifactDownloadEndpoint;
+
+    private RatingConfiguration ratingConfiguration;
 
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
@@ -74,18 +81,42 @@ public class Configuration {
         return lifecycleStates;
     }
 
-    public void setLifecycleStates(
-            List<LifecycleState> lifecycleStates) {
+    public void setLifecycleStates(List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
 
+    @XmlElement(name = "UIConfigs")
     public UIConfiguration getUiConfiguration() {
         return uiConfiguration;
     }
 
-    @XmlElement(name = "UIConfigs")
     public void setUiConfiguration(UIConfiguration uiConfiguration) {
         this.uiConfiguration = uiConfiguration;
+    }
+
+    @XmlElement(name = "RatingConfig")
+    public RatingConfiguration getRatingConfiguration() { return ratingConfiguration; }
+
+    public void setRatingConfiguration(
+            RatingConfiguration ratingConfiguration) { this.ratingConfiguration = ratingConfiguration; }
+
+    @XmlElement(name = "ArtifactDownloadEndpoint", required = true)
+    public String getArtifactDownloadEndpoint() {
+        return artifactDownloadEndpoint;
+    }
+
+    public void setArtifactDownloadEndpoint(String artifactDownloadEndpoint) {
+        this.artifactDownloadEndpoint = artifactDownloadEndpoint;
+    }
+
+    @XmlElementWrapper(name = "AppCategories")
+    @XmlElement(name = "Category")
+    public List<String> getAppCategories() {
+        return appCategories;
+    }
+
+    public void setAppCategories(List<String> appCategories) {
+        this.appCategories = appCategories;
     }
 }
 

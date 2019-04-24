@@ -50,11 +50,15 @@
             <artifactId>dd-plist</artifactId>
             <version>${googlecode.plist.version}</version>
         </dependency>
-
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>${commons-validator.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+            <version>${cxf.version}</version>
         </dependency>
 
         <!--<dependency>-->
@@ -141,6 +145,9 @@
                                 <bundleDef>
                                     commons-validator:commons-validator:${commons-validator.version}
                                 </bundleDef>
+                                <!--<bundleDef>-->
+                                    <!--org.apache.cxf:cxf-rt-frontend-jaxrs:${cxf.version}-->
+                                <!--</bundleDef>-->
                                 <!--<bundleDef>javax.servlet.jsp:javax.servlet.jsp-api</bundleDef>-->
                                 <!--<bundleDef>org.wso2.orbit.org.scannotation:scannotation:${scannotation.version}</bundleDef>-->
                             </bundles>

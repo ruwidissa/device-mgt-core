@@ -7,33 +7,37 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
-
+import store from "./js/store/index";
+import {Provider} from "react-redux";
 
 
 const routes = [
     {
-        path: '/publisher/Login',
+        path: '/publisher/login',
         component: Login
     },
     {
-        path: '/publisher/dashboard',
+        path: '/publisher',
         component: Dashboard,
         routes: [
             {
-                path: '/publisher/dashboard/apps',
+                path: '/publisher/apps',
                 component: Apps
             },
             {
-                path: '/publisher/dashboard/new-app',
+                path: '/publisher/new-app',
                 component: AddNewApp
             }
         ]
     }
-]
+];
 
 
-
-ReactDOM.render( <App routes={routes}/>, document.getElementById('root'));
+ReactDOM.render(
+    <Provider store={store}>
+        <App routes={routes}/>
+    </Provider>,
+    document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

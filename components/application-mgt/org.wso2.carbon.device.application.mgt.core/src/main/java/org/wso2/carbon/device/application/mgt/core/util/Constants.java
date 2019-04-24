@@ -37,6 +37,8 @@ public class Constants {
     public static final String CF_BUNDLE_VERSION = "CFBundleVersion";
     public static final String APP_EXTENSION = ".app";
 
+    public static final String FORWARD_SLASH = "/";
+
     /**
      * Database types supported by Application Management.
      */
@@ -50,12 +52,6 @@ public class Constants {
         public static final String DB_TYPE_H2 = "H2";
         public static final String DB_TYPE_POSTGRESQL = "PostgreSQL";
     }
-
-    /**
-     * Lifecycle states of the application life-cycle.
-     */
-    public static final String[] LIFE_CYCLES = {"CREATED", "IN REVIEW", "APPROVED", "REJECTED", "PUBLISHED",
-            "UNPUBLISHED", "RETIRED"};
 
 
     /**

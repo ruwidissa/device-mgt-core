@@ -12,7 +12,6 @@ public class State {
     private Set<String> proceedingStates;
     private String stateName;
     private String permission;
-    private List<String> allowedActions;
     private boolean isAppUpdatable;
     private boolean isAppInstallable;
     private boolean isInitialState;
@@ -41,12 +40,12 @@ public class State {
 
     public String getPermission(){ return permission;}
 
-    public boolean getIsAppUpdatable(){ return isAppUpdatable;}
+    public boolean isAppUpdatable(){ return isAppUpdatable;}
 
-    public boolean getIsAppInstallable(){ return isAppInstallable;}
+    public boolean isAppInstallable(){ return isAppInstallable;}
 
-    public boolean getIsInitialState(){ return isInitialState;}
+    public boolean isInitialState(){ return isInitialState;}
 
-    public boolean getIsEndState(){ return isEndState;}
+    public boolean isEndState(){ return isEndState;}
 
 }

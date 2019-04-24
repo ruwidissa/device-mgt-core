@@ -51,7 +51,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     @Override
     public boolean addReview(Review review, String uuid, int tenantId) throws ReviewManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to add review for application release. Application UUID: " + uuid);
+            log.debug("Request received in DAO Layer to add review for application release. ApplicationDTO UUID: " + uuid);
         }
         PreparedStatement statement = null;
         ResultSet rs = null;
@@ -93,7 +93,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         if (log.isDebugEnabled()) {
             log.debug(
                     "Request received in DAO Layer to check whether user have already commented or not for the "
-                            + "application release. Application UUID:  " + uuid +  " comment owner: " + username +
+                            + "application release. ApplicationDTO UUID:  " + uuid +  " comment owner: " + username +
                             " tenant-id " + tenantId);
         }
         Connection conn;

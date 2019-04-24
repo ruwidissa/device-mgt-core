@@ -154,7 +154,7 @@
             <Issuer>app-mgt</Issuer>
         </SSOConfiguration>
         <LoginResponse>
-            <SuccessCallback>/application-mgt</SuccessCallback>
+            <SuccessCallback>/apps</SuccessCallback>
             <FailureCallback>
                 <BadRequest>/pages/error/client-errors/400</BadRequest>
                 <Unauthorized>/pages/error/client-errors/401</Unauthorized>
@@ -168,4 +168,15 @@
             </FailureCallback>
         </LoginResponse>
     </UIConfigs>
+
+    <ArtifactDownloadEndpoint>https://localhost:9443/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
+    <AppCategories>
+        <Category>EMM</Category>
+        <Category>IoT</Category>
+    </AppCategories>
+
+    <RatingConfig>
+        <MinRatingValue>1</MinRatingValue>
+        <MaxRatingValue>10</MaxRatingValue>
+    </RatingConfig>
 </ApplicationManagementConfiguration>

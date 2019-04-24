@@ -19,7 +19,7 @@
 package org.wso2.carbon.device.application.mgt.common;
 
 /**
- * Represents an user of {@link Application}.
+ * Represents an user.
  */
 public class User {
 

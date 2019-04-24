@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.device.application.mgt.core.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 
@@ -28,7 +30,7 @@ import javax.ws.rs.core.Response;
 
 
 /**
- * Holds util methods required for Application-Mgt API component.
+ * Holds util methods required for ApplicationDTO-Mgt API component.
  */
 public class APIUtil {
 
@@ -38,7 +40,7 @@ public class APIUtil {
     private static ApplicationStorageManager applicationStorageManager;
     private static SubscriptionManager subscriptionManager;
     private static ReviewManager reviewManager;
-    private static ConfigManager configManager;
+    private static AppmDataHandler appmDataHandler;
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {
@@ -48,7 +50,7 @@ public class APIUtil {
                     applicationManager =
                             (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
                     if (applicationManager == null) {
-                        String msg = "Application Manager service has not initialized.";
+                        String msg = "ApplicationDTO Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -59,7 +61,7 @@ public class APIUtil {
     }
 
     /**
-     * To get the Application Storage Manager from the osgi context.
+     * To get the ApplicationDTO Storage Manager from the osgi context.
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
@@ -70,7 +72,7 @@ public class APIUtil {
                     applicationStorageManager = (ApplicationStorageManager) ctx
                             .getOSGiService(ApplicationStorageManager.class, null);
                     if (applicationStorageManager == null) {
-                        String msg = "Application Storage Manager service has not initialized.";
+                        String msg = "ApplicationDTO Storage Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }
@@ -141,17 +143,17 @@ public class APIUtil {
     }
 
     /**
-     * To get the Config Manager from the osgi context.
-     * @return ConfigManager instance in the current osgi context.
+     * To get the DataHandler from the osgi context.
+     * @return AppmDataHandler instance in the current osgi context.
      */
-    public static ConfigManager getConfigManager() {
-        if (configManager == null) {
+    public static AppmDataHandler getDataHandler() {
+        if (appmDataHandler == null) {
             synchronized (APIUtil.class) {
-                if (configManager == null) {
+                if (appmDataHandler == null) {
                     PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    configManager =
-                            (ConfigManager) ctx.getOSGiService(ConfigManager.class, null);
-                    if (configManager == null) {
+                    appmDataHandler =
+                            (AppmDataHandler) ctx.getOSGiService(AppmDataHandler.class, null);
+                    if (appmDataHandler == null) {
                         String msg = "Config Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
@@ -160,7 +162,32 @@ public class APIUtil {
             }
         }
 
-        return configManager;
+        return appmDataHandler;
     }
+
+//    public static Filter constructFilter( String appName, String appType, String appCategory, String tags,
+//            boolean isFullMatch, String releaseState, int offset, int limit, String sortBy) {
+//        Filter filter = new Filter();
+//        filter.setOffset(offset);
+//        filter.setLimit(limit);
+//        filter.setSortBy(sortBy);
+//        filter.setFullMatch(isFullMatch);
+//        if (!StringUtils.isEmpty(appName)) {
+//            filter.setAppName(appName);
+//        }
+//        if (!StringUtils.isEmpty(appType)) {
+//            filter.setAppType(appType);
+//        }
+//        if (!StringUtils.isEmpty(appCategory)) {
+//            filter.setAppCategories(appCategory);
+//        }
+//        if (!StringUtils.isEmpty(tags)) {
+//            filter.setAppCategories(appCategory);
+//        }
+//        if (!StringUtils.isEmpty(releaseState)) {
+//            filter.setAppReleaseState(releaseState);
+//        }
+//        return filter;
+//    }
 
 }

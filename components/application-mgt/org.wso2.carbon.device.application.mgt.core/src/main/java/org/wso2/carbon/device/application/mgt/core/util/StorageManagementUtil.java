@@ -19,12 +19,17 @@
 package org.wso2.carbon.device.application.mgt.core.util;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ImageArtifact;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +40,9 @@ import java.nio.file.Files;
  * This is a util class that handles Storage Management related tasks.
  */
 public class StorageManagementUtil {
+
+    private static Log log = LogFactory.getLog(StorageManagementUtil.class);
+
     /**
      * This method is responsible for creating artifact parent directories in the given path.
      *
@@ -55,14 +63,26 @@ public class StorageManagementUtil {
      *
      * @param artifactDirectory Artifact Directory that need to be deleted.
      */
-    public static void deleteDir(File artifactDirectory) throws IOException {
+    public static void delete(File artifactDirectory) throws IOException {
         File[] contents = artifactDirectory.listFiles();
         if (contents != null) {
             for (File file : contents) {
-                deleteDir(file);
+                delete(file);
             }
         }
         Files.delete(artifactDirectory.toPath());
+    }
+
+    public static void copy(String source, String destination) throws IOException {
+        File sourceFile = new File(source);
+        File destinationFile = new File(destination);
+        if (sourceFile.exists() && destinationFile.exists()) {
+            Files.copy(sourceFile.toPath(), destinationFile.toPath());
+        } else {
+            String msg = "Source file " + source + " or destination file " + destination + " doesn't exist";
+            log.error(msg);
+            throw new IOException(msg);
+        }
     }
 
     /**
@@ -99,4 +119,34 @@ public class StorageManagementUtil {
         return imageArtifact;
     }
 
+    /***
+     * Get the fine input stream
+     * @param filePath File path
+     * @return {@link InputStream}
+     * @throws IOException throws if error occured when reading file or if couldn't find a file in the filePath
+     */
+    public static InputStream getInputStream (String filePath) throws IOException {
+        File sourceFile = new File(filePath);
+        if (!sourceFile.exists()){
+            return null;
+        }
+        try {
+            return new FileInputStream(sourceFile);
+        } catch (FileNotFoundException e) {
+            String msg = "Couldn't file the file in file path: " + filePath;
+            log.error(msg);
+            throw new IOException(msg);
+        }
+    }
+
+    public static String getMD5(InputStream binaryFile) throws ApplicationStorageManagementException {
+        String md5;
+        try {
+            md5 = DigestUtils.md5Hex(binaryFile);
+        } catch (IOException e) {
+            throw new ApplicationStorageManagementException
+                    ("IO Exception while trying to get the md5sum value of application");
+        }
+        return md5;
+    }
 }

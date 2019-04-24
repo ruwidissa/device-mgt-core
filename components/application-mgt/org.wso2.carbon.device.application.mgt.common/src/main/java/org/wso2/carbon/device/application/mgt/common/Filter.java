@@ -18,25 +18,68 @@
  */
 package org.wso2.carbon.device.application.mgt.common;
 
+import java.util.List;
+
 /**
  * Filter represents a criteria that can be used for searching applications.
  */
 public class Filter {
 
-    /**
-     * Name of the application
+    /***
+     * Supported device type for the application.
+     * e.g :- Android, iOS, Windows
+     */
+    private String deviceType;
+
+    /***
+     * Name of the application.
      */
     private String appName;
 
-    /**
-     * Type of the application
+    /***
+     * Type of the application.
+     * e.g :- ENTERPRISE, PUBLIC
      */
     private String appType;
 
-    /**
-     * Category of the application
+    /***
+     * Subscription type of the application.
+     * e.g :- FREE, PAID etc
      */
-    private String appCategory;
+    private String subscriptionType;
+
+    /***
+     * Minimum rating of the application.
+     * e.g :- 4,5
+     */
+    private int minimumRating;
+
+    /***
+     * Application release version.
+     */
+    private String version;
+
+    /***
+     * Release type of the application release.
+     *  e.g :- Alpha, Beta
+     */
+    private String appReleaseType;
+
+    /**
+     * Category list of the application
+     */
+    private List<String> appCategories;
+
+    /**
+     * Tag list of the application
+     */
+    private List<String> tags;
+
+    /***
+     * Unrestricted role list. Visibility of the application can restricted through user roles and users can view the
+     * application who has at least one role in unrestricted role list
+     */
+    private List<String> unrestrictedRoles;
 
     /**
      * Checking the application name matches fully with given name
@@ -59,9 +102,10 @@ public class Filter {
     private String sortBy;
 
     /**
-     * Set as True if required to have only published application release, otherwise set to False
+     * Current application release state.
+     * e.g :- CREATED. IN_REVIEW, PUBLISHED etc
      */
-    private String currentAppReleaseState;
+    private String appReleaseState;
 
     public int getLimit() {
         return limit;
@@ -111,19 +155,43 @@ public class Filter {
         this.appType = appType;
     }
 
-    public String getAppCategory() {
-        return appCategory;
+    public List<String> getAppCategories() {
+        return appCategories;
     }
 
-    public void setAppCategory(String appCategory) {
-        this.appCategory = appCategory;
+    public void setAppCategories(List<String> appCategories) {
+        this.appCategories = appCategories;
     }
 
-    public String getCurrentAppReleaseState() {
-        return currentAppReleaseState;
-    }
+    public List<String> getTags() { return tags; }
 
-    public void setCurrentAppReleaseState(String currentAppReleaseState) {
-        this.currentAppReleaseState = currentAppReleaseState;
-    }
+    public void setTags(List<String> tags) { this.tags = tags; }
+
+    public List<String> getUnrestrictedRoles() { return unrestrictedRoles; }
+
+    public void setUnrestrictedRoles(List<String> unrestrictedRoles) { this.unrestrictedRoles = unrestrictedRoles; }
+
+    public String getAppReleaseState() { return appReleaseState; }
+
+    public void setAppReleaseState(String appReleaseState) { this.appReleaseState = appReleaseState; }
+
+    public String getDeviceType() { return deviceType; }
+
+    public void setDeviceType(String deviceType) { this.deviceType = deviceType; }
+
+    public String getSubscriptionType() { return subscriptionType; }
+
+    public void setSubscriptionType(String subscriptionType) { this.subscriptionType = subscriptionType; }
+
+    public int getMinimumRating() { return minimumRating; }
+
+    public void setMinimumRating(int minimumRating) { this.minimumRating = minimumRating; }
+
+    public String getVersion() { return version; }
+
+    public void setVersion(String version) { this.version = version; }
+
+    public String getAppReleaseType() { return appReleaseType; }
+
+    public void setAppReleaseType(String appReleaseType) { this.appReleaseType = appReleaseType; }
 }
