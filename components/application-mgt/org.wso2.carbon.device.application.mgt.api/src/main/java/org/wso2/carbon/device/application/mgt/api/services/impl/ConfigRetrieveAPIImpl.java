@@ -23,7 +23,6 @@ import org.wso2.carbon.device.application.mgt.api.services.ConfigRetrieveAPI;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -46,15 +45,8 @@ public class ConfigRetrieveAPIImpl implements ConfigRetrieveAPI {
     @Path("/ui-config")
     public Response getUiConfig() {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
-        try {
-            UIConfiguration uiConfiguration = dataHandler.getUIConfiguration();
-            return Response.status(Response.Status.OK).entity(uiConfiguration).build();
-
-        }catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting the application list for publisher ";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
+        UIConfiguration uiConfiguration = dataHandler.getUIConfiguration();
+        return Response.status(Response.Status.OK).entity(uiConfiguration).build();
     }
 
 }

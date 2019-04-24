@@ -663,13 +663,12 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        ApplicationReleaseArtifactPaths applicationReleaseArtifactPaths = null;
         String releaseHashValue = null;
         try {
             conn = this.getDBConnection();
             String sql = "SELECT "
                     + "AR.APP_HASH_VALUE AS HASH_VALUE "
-                    + "FROM AP_APP_RELEASE "
+                    + "FROM AP_APP_RELEASE AR "
                     + "WHERE AR.UUID = ? AND AR.TENANT_ID = ?;";
 
             stmt = conn.prepareStatement(sql);

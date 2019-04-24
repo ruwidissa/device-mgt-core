@@ -27,9 +27,8 @@ public interface AppmDataHandler {
      * Get UI configuration which is defined in the app-manager.xml
      *
      * @return {@link UIConfiguration} UI configuration
-     * @throws ApplicationManagementException Exceptions of the ApplicationDTO management.
      */
-    UIConfiguration getUIConfiguration() throws ApplicationManagementException;
+    UIConfiguration getUIConfiguration();
 
-    InputStream getArtifactStream(String md5sum, String artifactName) throws ApplicationManagementException;
+    InputStream getArtifactStream(String uuid, String artifactName) throws ApplicationManagementException;
 }
