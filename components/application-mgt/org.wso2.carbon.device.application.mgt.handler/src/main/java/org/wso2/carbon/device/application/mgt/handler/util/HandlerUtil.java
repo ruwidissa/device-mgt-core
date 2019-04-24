@@ -19,6 +19,7 @@ package org.wso2.carbon.device.application.mgt.handler.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -27,6 +28,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -201,17 +204,29 @@ public class HandlerUtil {
             return;
         }
 
-        Gson gson = new Gson();
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
-        proxyResponse.setExecutorResponse(null);
-        try (PrintWriter writer = resp.getWriter()) {
-            if (proxyResponse.getCode() == HttpStatus.SC_OK){
-                writer.write(gson.toJson(proxyResponse.getData()));
-            } else{
-                writer.write(proxyResponse.getData());
+
+        JSONObject response = new JSONObject();
+        String redirectUrl = proxyResponse.getUrl();
+        String responseData = proxyResponse.getData();
+
+        if (!StringUtils.isEmpty(redirectUrl)){
+            response.put("url", redirectUrl);
+        }
+        if (!StringUtils.isEmpty(responseData)){
+            try {
+                JSONObject responseDataJsonObj = new JSONObject(responseData);
+                response.put("data", responseDataJsonObj);
+            } catch (JSONException e) {
+                log.debug("Response data is not valid json string");
+                response.put("data", responseData);
             }
+        }
+
+        try (PrintWriter writer = resp.getWriter()) {
+            writer.write(response.toString());
         }
     }
 
