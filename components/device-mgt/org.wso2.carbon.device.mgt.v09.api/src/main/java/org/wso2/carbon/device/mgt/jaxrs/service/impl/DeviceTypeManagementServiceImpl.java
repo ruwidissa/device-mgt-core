@@ -22,6 +22,7 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
@@ -76,11 +77,18 @@ public class DeviceTypeManagementServiceImpl implements DeviceTypeManagementServ
         DeviceManagementProviderService dms;
         try {
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            FeatureManager fm = dms.getFeatureManager(type);
+            FeatureManager fm;
+            try {
+                fm = dms.getFeatureManager(type);
+            } catch (DeviceTypeNotFoundException e) {
+                return Response.status(Response.Status.NOT_FOUND).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage("No feature manager is " +
+                                "registered with the given type '" + type + "'").build()).build();
+            }
             if (fm == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage("No feature manager is " +
-                                                                                    "registered with the given type '" + type + "'").build()).build();
+                                "registered with the given type '" + type + "'").build()).build();
             }
             features = fm.getFeatures();
         } catch (DeviceManagementException e) {
