@@ -49,6 +49,7 @@ import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -2809,7 +2810,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             success = deviceDAO.setEnrolmentStatusInBulk(deviceType, status, tenantId, deviceList);
             DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred in while updating status of devices :" +deviceType + " status : " + deviceList.toString();
+            String msg = "Error occurred in while updating status of devices :" + deviceType + " status : " + deviceList
+                    .toString();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } catch (SQLException e) {
@@ -2820,6 +2822,66 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
         return success;
+    }
+
+    public boolean updateEnrollment(String owner, List<String> deviceIdentifiers)
+            throws DeviceManagementException, UserNotFoundException, InvalidDeviceException {
+
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            List<Device> existingDevices;
+            owner = validateOwner(owner, tenantId);
+            try {
+                DeviceManagementDAOFactory.beginTransaction();
+                existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+                if (existingDevices.size() != deviceIdentifiers.size()) {
+                    for (Device device : existingDevices) {
+                        deviceIdentifiers.remove(device.getDeviceIdentifier());
+                    }
+                    String msg =
+                            "Couldn't find device ids for requested all device identifiers. Therefore payload should "
+                                    + "contains device identifiers which are not in the system. Invalid device "
+                                    + "identifiers are " + deviceIdentifiers.toString();
+                    log.error(msg);
+                    throw new InvalidDeviceException(msg);
+                }
+                if (enrollmentDAO.updateOwnerOfEnrollment(existingDevices, owner, tenantId)) {
+                    DeviceManagementDAOFactory.commitTransaction();
+                    return true;
+                }
+                DeviceManagementDAOFactory.rollbackTransaction();
+                return false;
+            } catch (TransactionManagementException e) {
+                String msg = "Error occurred while initiating transaction";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (DeviceManagementDAOException e) {
+                String msg = "Error occurred either verifying existence of device ids or updating owner of the device.";
+                log.error(msg);
+                throw new DeviceManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+    }
+
+    private String validateOwner(String owner, int tenantId) throws UserNotFoundException, DeviceManagementException {
+        try {
+            if (StringUtils.isEmpty(owner)) {
+                owner = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            } else {
+                boolean isUserExisit = DeviceManagementDataHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getUserStoreManager().isExistingUser(owner);
+                if (!isUserExisit) {
+                    String msg = "Owner does not exist in the user storage. Owner: " + owner;
+                    log.error(msg);
+                    throw new UserNotFoundException(msg);
+                }
+            }
+            return owner;
+        } catch (UserStoreException e) {
+            String msg = "Error occurred when checking whether owner is exist or not. Owner: " + owner;
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        }
     }
 
     private void extractDeviceLocationToUpdate(Device device) {

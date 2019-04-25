@@ -33,6 +33,7 @@ import io.swagger.annotations.ResponseHeader;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
@@ -40,6 +41,7 @@ import javax.validation.constraints.Size;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @SwaggerDefinition(
         info = @Info(
@@ -168,4 +170,54 @@ public interface DeviceManagementAdminService {
                     required = false,
                     defaultValue = "5")
             @QueryParam("limit") int limit);
+
+    @PUT
+    @Path("/device-owner")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update the device owner",
+            notes = "Update enrollment owner for given device Identifiers.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:devices:update-enrollment")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully update the owner of devices.",
+                    response = DeviceList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    }) Response updateEnrollOwner(
+            @ApiParam(
+                    name = "Device Owner",
+                    value = "The username that is going to use for the new device owner of given devices.",
+                    required = true)
+            @QueryParam("owner") String owner,
+            @ApiParam(
+                    name = "Device Identifiers",
+                    value = "List of device identifiers.",
+                    required = true)
+            List<String> deviceIdentifiers);
 }
