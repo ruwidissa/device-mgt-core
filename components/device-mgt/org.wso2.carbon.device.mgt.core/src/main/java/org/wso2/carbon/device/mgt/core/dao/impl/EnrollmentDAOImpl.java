@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -28,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -358,6 +360,44 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                                                    "information of user '" + user + "' upon device '" + deviceId + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
+    public boolean updateOwnerOfEnrollment(List<Device> devices, String owner, int tenantId)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            boolean updateStatus = true;
+            String sql = "UPDATE DM_ENROLMENT SET OWNER = ? WHERE ID = ? AND TENANT_ID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                if (conn.getMetaData().supportsBatchUpdates()) {
+                    for (Device device : devices) {
+                        ps.setString(1, owner);
+                        ps.setInt(2, device.getId());
+                        ps.setInt(3, tenantId);
+                        ps.addBatch();
+                    }
+                    for (int i : ps.executeBatch()) {
+                        if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
+                            updateStatus = false;
+                        }
+                    }
+                } else {
+                    for (Device device : devices) {
+                        ps.setString(1, owner);
+                        ps.setInt(2, device.getId());
+                        ps.setInt(3, tenantId);
+                        if (ps.executeUpdate() == 0) {
+                            updateStatus = false;
+                        }
+                    }
+                }
+            }
+            return updateStatus;
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection when adding tags",
+                    e);
         }
     }
 

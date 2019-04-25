@@ -67,11 +67,27 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     getDeviceManagementProvider().getDevice(deviceId, false);
 
             DeviceManagementDAOFactory.beginTransaction();
+            DeviceInfo newDeviceInfo;
+            DeviceInfo previousDeviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            Map<String, String> previousDeviceProperties = deviceDetailsDAO.getDeviceProperties(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            if (previousDeviceInfo != null && previousDeviceProperties != null) {
+                previousDeviceInfo.setDeviceDetailsMap(previousDeviceProperties);
+                newDeviceInfo = processDeviceInfo(previousDeviceInfo, deviceInfo);
+            } else if (previousDeviceInfo == null && previousDeviceProperties != null) {
+                previousDeviceInfo = new DeviceInfo();
+                previousDeviceInfo.setDeviceDetailsMap(previousDeviceProperties);
+                newDeviceInfo = processDeviceInfo(previousDeviceInfo, deviceInfo);
+            } else {
+                newDeviceInfo = deviceInfo;
+            }
+
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             deviceDetailsDAO.deleteDeviceInformation(device.getId(), device.getEnrolmentInfo().getId());
             deviceDetailsDAO.deleteDeviceProperties(device.getId(), device.getEnrolmentInfo().getId());
-            deviceDetailsDAO.addDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(), deviceInfo);
-            deviceDetailsDAO.addDeviceProperties(deviceInfo.getDeviceDetailsMap(), device.getId(),
+            deviceDetailsDAO.addDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(), newDeviceInfo);
+            deviceDetailsDAO.addDeviceProperties(newDeviceInfo.getDeviceDetailsMap(), device.getId(),
                     device.getEnrolmentInfo().getId());
             DeviceManagementDAOFactory.commitTransaction();
 
@@ -289,6 +305,68 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } finally{
             DeviceManagementDAOFactory.closeConnection();
         }
+    }
+
+    private DeviceInfo processDeviceInfo(DeviceInfo previousDeviceInfo, DeviceInfo newDeviceInfo) {
+        if (newDeviceInfo.getDeviceModel().isEmpty()) {
+            newDeviceInfo.setDeviceModel(previousDeviceInfo.getDeviceModel());
+        }
+        if (newDeviceInfo.getVendor().isEmpty()) {
+            newDeviceInfo.setVendor(previousDeviceInfo.getVendor());
+        }
+        if (newDeviceInfo.getOsBuildDate().isEmpty()) {
+            newDeviceInfo.setOsBuildDate(previousDeviceInfo.getOsBuildDate());
+        }
+        if (newDeviceInfo.getOsVersion().isEmpty()) {
+            newDeviceInfo.setOsVersion(previousDeviceInfo.getOsVersion());
+        }
+        if (newDeviceInfo.getBatteryLevel() == -1D) {
+            newDeviceInfo.setBatteryLevel(previousDeviceInfo.getBatteryLevel());
+        }
+        if (newDeviceInfo.getInternalTotalMemory() == -1D) {
+            newDeviceInfo.setInternalTotalMemory(previousDeviceInfo.getInternalTotalMemory());
+        }
+        if (newDeviceInfo.getInternalAvailableMemory() == -1D) {
+            newDeviceInfo.setInternalAvailableMemory(previousDeviceInfo.getInternalAvailableMemory());
+        }
+        if (newDeviceInfo.getExternalTotalMemory() == -1D) {
+            newDeviceInfo.setExternalTotalMemory(previousDeviceInfo.getExternalTotalMemory());
+        }
+        if (newDeviceInfo.getExternalAvailableMemory() == -1D) {
+            newDeviceInfo.setExternalAvailableMemory(previousDeviceInfo.getExternalAvailableMemory());
+        }
+        if (newDeviceInfo.getOperator().isEmpty()) {
+            newDeviceInfo.setOperator(previousDeviceInfo.getOperator());
+        }
+        if (newDeviceInfo.getConnectionType().isEmpty()) {
+            newDeviceInfo.setConnectionType(previousDeviceInfo.getConnectionType());
+        }
+        if (newDeviceInfo.getMobileSignalStrength() == 0.0) {
+            newDeviceInfo.setMobileSignalStrength(previousDeviceInfo.getMobileSignalStrength());
+        }
+        if (newDeviceInfo.getSsid().isEmpty()) {
+            newDeviceInfo.setSsid(previousDeviceInfo.getSsid());
+        }
+        if (newDeviceInfo.getCpuUsage() == 0.0) {
+            newDeviceInfo.setCpuUsage(previousDeviceInfo.getCpuUsage());
+        }
+        if (newDeviceInfo.getTotalRAMMemory() == -1D) {
+            newDeviceInfo.setTotalRAMMemory(previousDeviceInfo.getTotalRAMMemory());
+        }
+        if (newDeviceInfo.getAvailableRAMMemory() == -1D) {
+            newDeviceInfo.setAvailableRAMMemory(previousDeviceInfo.getAvailableRAMMemory());
+        }
+        if (!newDeviceInfo.isPluggedIn()) {
+            newDeviceInfo.setPluggedIn(previousDeviceInfo.isPluggedIn());
+        }
+        Map<String, String> newDeviceDetailsMap = newDeviceInfo.getDeviceDetailsMap();
+        Map<String, String> previousDeviceDetailsMap = previousDeviceInfo.getDeviceDetailsMap();
+        for (String eachKey : previousDeviceDetailsMap.keySet()) {
+            if (!newDeviceDetailsMap.containsKey(eachKey)) {
+                newDeviceDetailsMap.put(eachKey, previousDeviceDetailsMap.get(eachKey));
+            }
+        }
+        return newDeviceInfo;
     }
 
 }

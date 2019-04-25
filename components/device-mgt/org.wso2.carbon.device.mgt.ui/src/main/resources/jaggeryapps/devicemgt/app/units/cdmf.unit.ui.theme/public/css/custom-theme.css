@@ -188,7 +188,7 @@ h1, .h1 {
 }
 
 .dropdown-menu-content a {
-	color: #11375B;
+	color: #008cc4;
     padding: 8px 10px;
 	cursor:pointer;
 	display:block;
@@ -196,7 +196,7 @@ h1, .h1 {
 
 .dropdown-menu-content a:hover {
     color:#fff;
-    background: #11375B;
+    background: #008cc4;
 }
 
 
@@ -417,8 +417,8 @@ a.ctrl-filter-category:hover {
 
 .btn-primary {
 	color: #fff;
-	background-color: #11375b;
-	border-color: #11375b;
+	background-color: #008cc4;
+	border-color: #008cc4;
 }
 
 .btn-primary:hover, .btn-primary:focus, .btn-primary.focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {

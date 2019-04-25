@@ -223,6 +223,7 @@ policyModule = function () {
                             appObjectToView = {};
                             appObjectToView["appName"] = appObjectFromRestEndpoint["name"];
                             appObjectToView["appId"] = appObjectFromRestEndpoint["id"];
+                            appObjectToView["webUrl"] = appObjectFromRestEndpoint["appmeta"]["weburl"];
                             if ("webapp" === appObjectFromRestEndpoint["platform"]) {
                                 appObjectToView["packageName"] = appObjectFromRestEndpoint["appmeta"]["weburl"];
                                 appObjectToView["type"] = "Web Clip"
