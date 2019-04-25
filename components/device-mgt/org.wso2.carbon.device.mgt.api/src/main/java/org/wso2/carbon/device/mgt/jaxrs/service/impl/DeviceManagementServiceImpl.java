@@ -25,6 +25,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
@@ -506,18 +507,22 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @PathParam("type") @Size(max = 45) String type,
             @PathParam("id") @Size(max = 45) String id,
             @HeaderParam("If-Modified-Since") String ifModifiedSince) {
-        List<Feature> features;
+        List<Feature> features = new ArrayList<>();
         DeviceManagementProviderService dms;
         try {
             RequestValidationUtil.validateDeviceIdentifier(type, id);
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
-            FeatureManager fm = dms.getFeatureManager(type);
-            if (fm == null) {
+            FeatureManager fm;
+            try {
+                fm = dms.getFeatureManager(type);
+            } catch (DeviceTypeNotFoundException e) {
                 return Response.status(Response.Status.NOT_FOUND).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("No feature manager is " +
-                                "registered with the given type '" + type + "'").build()).build();
+                        new ErrorResponse.ErrorResponseBuilder()
+                                .setMessage("No device type found with name '" + type + "'").build()).build();
             }
-            features = fm.getFeatures();
+            if (fm != null) {
+                features = fm.getFeatures();
+            }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while retrieving the list of features of '" + type + "' device, which " +
                     "carries the id '" + id + "'";

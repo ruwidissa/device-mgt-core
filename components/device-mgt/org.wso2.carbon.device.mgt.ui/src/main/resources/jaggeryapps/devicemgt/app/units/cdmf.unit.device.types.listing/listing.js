@@ -28,14 +28,14 @@ function onRequest(context) {
     var utility = require("/app/modules/utility.js").utility;
     var typesListResponse = deviceModule.getDeviceTypes();
     if (typesListResponse["status"] == "success") {
-        var deviceTypes = typesListResponse.content.deviceTypes;
+        var deviceTypes = typesListResponse.content;
         if (deviceTypes) {
             if (deviceTypes.length > 0){
                 viewModel.hasDeviceTypes = true;
             }
             var deviceTypesList = [], virtualDeviceTypesList = [];
             for (var i = 0; i < deviceTypes.length; i++) {
-                var deviceType = deviceTypes[i];
+                var deviceType = deviceTypes[i].name;
                 var deviceTypeLabel = deviceType;
                 var configs = utility.getDeviceTypeConfig(deviceTypeLabel);
                 var deviceCategory = "device";

@@ -27,8 +27,8 @@ function onRequest(context) {
             return options.fn(this);
         }
     });
+    var utility = require("/app/modules/utility.js").utility;
     var userModule = require("/app/modules/business-controllers/user.js")["userModule"];
-    var deviceModule = require("/app/modules/business-controllers/device.js")["deviceModule"];
     var mdmProps = require("/app/modules/conf-reader/main.js")["conf"];
     var constants = require("/app/modules/constants.js");
     var uiPermissions = userModule.getUIPermissions();
@@ -43,15 +43,10 @@ function onRequest(context) {
         "device-mgt": []
     };
 
-    var typesListResponse = deviceModule.getDeviceTypesConfig();
-    var temp = [];
-    temp = typesListResponse["content"];
     var iosPluginFlag = false;
-    temp.forEach(function(element) {
-        if (element["name"] == "ios") {
-            iosPluginFlag = true;
-        }
-    });
+    if (utility.getTenantedDeviceUnitName("ios", "type-view")) {
+        iosPluginFlag = true;
+    }
     context["iosPluginFlag"] = iosPluginFlag;
 
     // following context.link value comes here based on the value passed at the point
