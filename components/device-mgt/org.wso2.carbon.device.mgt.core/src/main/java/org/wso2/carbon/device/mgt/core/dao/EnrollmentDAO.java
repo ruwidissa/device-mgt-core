@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.mgt.core.dao;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 
@@ -49,5 +50,17 @@ public interface EnrollmentDAO {
 
     List<EnrolmentInfo> getEnrollmentsOfUser(int deviceId, String user, int tenantId) throws
                                                                                              DeviceManagementDAOException;
+
+    /***
+     *This method is used to update the owner of the enrollment for given set of devices to given user.
+     *
+     * @param devices List of devices.
+     * @param owner Username of the new device owner.
+     * @param tenantId tenant id.
+     * @return either (1) true, if device owner updating is succeed or false.
+     * @throws DeviceManagementDAOException if an error occurs when updating device owner.
+     */
+    boolean updateOwnerOfEnrollment(List<Device> devices, String owner, int tenantId)
+            throws DeviceManagementDAOException;
 
 }

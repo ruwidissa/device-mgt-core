@@ -504,6 +504,12 @@ function formatRepoSelection(user) {
 
 
 $(document).ready(function () {
+
+    // Handlebar helper to convert JSON to String
+    Handlebars.registerHelper("json", function (jsonObject) {
+        return JSON.stringify(jsonObject);
+    });
+
     $("#users-input").select2({
         multiple: true,
         tags: false,
