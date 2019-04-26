@@ -583,66 +583,36 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationDTO editApplication(ApplicationDTO application, int tenantId)
+    public boolean updateApplication(ApplicationDTO applicationDTO, int tenantId)
             throws ApplicationManagementDAOException {
-        int paramIndex = 1;
         Connection conn;
-        PreparedStatement stmt = null;
-        //todo this is wrong
-        ApplicationDTO existingApplication = this.getApplicationById(application.getId(), tenantId);
-
-        if (existingApplication == null) {
-            throw new ApplicationManagementDAOException("There doesn't have an application for updating");
-        }
         try {
             conn = this.getDBConnection();
-            String sql = "UPDATE AP_APP SET ";
+            String sql = "UPDATE AP_APP AP " +
+                    "SET " +
+                    "AP.NAME = ?,  " +
+                    "AP.DESCRIPTION = ?, " +
+                    "AP.SUB_TYPE = ?, " +
+                    "AP.CURRENCY = ? " +
+                    "WHERE AP.ID = ? AND AP.TENANT_ID = ?";
 
-            if (application.getName() != null && !application.getName().equals(existingApplication.getName())) {
-                sql += "NAME = ?, ";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, applicationDTO.getName());
+                stmt.setString(2, applicationDTO.getDescription());
+                stmt.setString(3, applicationDTO.getSubType());
+                stmt.setString(4, applicationDTO.getPaymentCurrency());
+                stmt.setInt(5, applicationDTO.getId());
+                stmt.setInt(6, tenantId);
+                return stmt.executeUpdate() > 0;
             }
-            if (application.getType() != null && !application.getType().equals(existingApplication.getType())) {
-                sql += "TYPE = ?, ";
-            }
-            if (application.getAppCategory() != null && !application.getAppCategory().equals(
-                    existingApplication.getAppCategory())) {
-                sql += "APP_CATEGORY = ?, ";
-            }
-//            if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-//                sql += "RESTRICTED = ? ";
-//            }
-            if (!application.getSubType().equals(existingApplication.getSubType())) {
-                sql += "SUB_TYPE = ? ";
-            }
-
-            sql += "WHERE ID = ?";
-
-            stmt = conn.prepareStatement(sql);
-            if (application.getName() != null && !application.getName().equals(existingApplication.getName())) {
-                stmt.setString(paramIndex++, application.getName());
-            }
-            if (application.getType() != null && !application.getType().equals(existingApplication.getType())) {
-                stmt.setString(paramIndex++, application.getType());
-            }
-            if (application.getAppCategory() != null && !application.getAppCategory().equals(
-                    existingApplication.getAppCategory())) {
-                stmt.setString(paramIndex++, application.getAppCategory());
-            }
-//            if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-//                stmt.setBoolean(paramIndex++, application.getIsRestricted());
-//            }
-            if (!application.getSubType().equals(existingApplication.getSubType())) {
-                stmt.setString(paramIndex++, application.getSubType());
-            }
-            stmt.setInt(paramIndex, application.getId());
-            stmt.executeUpdate();
-            return application;
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+            String msg = "Error occurred while obtaining the DB connection to update the application.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding the application", e);
-        } finally {
-            Util.cleanupResources(stmt, null);
+            String msg = "Error occurred when obtaining database connection for updating the application.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 

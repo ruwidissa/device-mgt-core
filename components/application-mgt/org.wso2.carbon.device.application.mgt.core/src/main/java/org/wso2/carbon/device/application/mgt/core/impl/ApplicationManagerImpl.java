@@ -1589,8 +1589,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     applicationDAO.deleteTags(removingTagList, applicationId, tenantId);
                 }
             }
-            //todo
-            applicationDAO.editApplication(applicationDTO, tenantId);
+            if (!applicationDAO.updateApplication(applicationDTO, tenantId)){
+                String msg = "Any application is not updated for the application ID: " + applicationId;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(

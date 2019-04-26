@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
@@ -34,7 +33,6 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseW
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
-import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -316,10 +314,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
-    /*
-    //todo ----------------------
-    */
-
     @PUT
     @Consumes("application/json")
     @Path("/{appId}")
@@ -328,22 +322,28 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             @Valid ApplicationWrapper applicationWrapper) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            //todo wrong
             applicationManager.updateApplication(applicationId, applicationWrapper);
             return Response.status(Response.Status.OK)
-                    .entity("Application was updated successfully. ApplicationID " + applicationId).build();
+                    .entity("Application was updated successfully for ApplicationID: " + applicationId).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ForbiddenException e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while modifying the application";
+        }  catch (BadRequestException e) {
+            String msg = "Error occurred while modifying the application. Found bad request payload for updating the "
+                    + "application";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
+        catch (ApplicationManagementException e) {
+            String msg = "Internal Error occurred while modifying the application.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
     }
+
+    /*
+    //todo ----------------------
+    */
 
     @Override
     @PUT
