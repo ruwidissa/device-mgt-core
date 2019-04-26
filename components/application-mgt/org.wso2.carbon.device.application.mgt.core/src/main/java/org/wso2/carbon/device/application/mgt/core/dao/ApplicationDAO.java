@@ -57,9 +57,9 @@ public interface ApplicationDAO {
 
     List<String> getAppTags(int appId, int tenantId) throws ApplicationManagementDAOException;
 
+    void deleteTagMapping (List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
     List<String> getAppCategories (int appId, int tenantId) throws ApplicationManagementDAOException;
-
-
 
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
 

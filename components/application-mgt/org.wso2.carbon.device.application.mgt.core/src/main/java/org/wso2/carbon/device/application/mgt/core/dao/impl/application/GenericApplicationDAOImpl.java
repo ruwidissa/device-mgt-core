@@ -935,6 +935,37 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public void deleteTagMapping (List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete Tag mappings.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM "
+                + "AP_APP_TAG_MAPPING tm "
+                + "WHERE "
+                + "tm.AP_APP_TAG_ID = ? AND "
+                + "tm.AP_APP_ID = ? AND "
+                + "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                for (Integer tagId : tagIds){
+                    stmt.setInt(1, tagId);
+                    stmt.setInt(2, applicationId);
+                    stmt.setInt(3, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting tag mapppig", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred when deleting tag mapping", e);
+        }
+    }
+
+    @Override
     public List<String> getAppCategories(int appId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get categories for given application.");

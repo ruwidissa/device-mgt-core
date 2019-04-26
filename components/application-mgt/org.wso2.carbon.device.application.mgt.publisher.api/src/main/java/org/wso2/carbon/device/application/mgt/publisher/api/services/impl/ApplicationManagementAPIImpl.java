@@ -102,15 +102,14 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Path("/{appId}")
     public Response getApplication(
             @PathParam("appId") int appId,
-            @DefaultValue("PUBLISHED") @QueryParam("state") String state) {
+            @QueryParam("state") String state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             Application application = applicationManager.getApplicationById(appId, state);
             if (application == null){
-                String msg = "Couldn't found an application release which is in " + state + " state for application id "
-                        + appId;
+                String msg = "Could not found an application release which is in " + state + " state.";
                 log.error(msg);
-                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+                return Response.status(Response.Status.OK).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
@@ -317,6 +316,9 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
+    /*
+    //todo ----------------------
+    */
 
     @PUT
     @Consumes("application/json")

@@ -145,8 +145,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationReleaseDTO initialApplicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
             applicationDTO.getApplicationReleaseDTOs().clear();
 
-            ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(), applicationDTO.getDeviceTypeName(),
-                    initialApplicationReleaseDTO, applicationArtifact);
+            ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
+                    applicationWrapper.getDeviceType(), initialApplicationReleaseDTO, applicationArtifact);
             applicationDTO.getApplicationReleaseDTOs().add(addImageArtifacts(applicationReleaseDTO, applicationArtifact));
         } catch (UnexpectedServerErrorException e) {
             String msg = "Error occurred when getting Device Type data.";
@@ -550,7 +550,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (!haveAllUserRoles(filteringUnrestrictedRoles, userName)) {
             String msg =
                     "At least one filtering role is not assigned for the user: " + userName + ". Hence user " + userName
-                            + " Can't filter applications by giving these unrestriced role list";
+                            + " Can't filter applications by giving these unrestricted role list";
             log.error(msg);
             throw new BadRequestException(msg);
         }
@@ -582,8 +582,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+            DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
             ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
-                    applicationDTO.getDeviceTypeName(), releaseWrapperToReleaseDTO(applicationReleaseWrapper),
+                    deviceType.getName(), releaseWrapperToReleaseDTO(applicationReleaseWrapper),
                     applicationArtifact);
             applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact);
 
@@ -630,18 +631,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationDTO applicationDTO;
-        List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs;
         boolean isVisibleApp = false;
         try {
             ConnectionManagerUtil.openDBConnection();
             applicationDTO = this.applicationDAO.getApplicationById(appId, tenantId);
             if (applicationDTO == null) {
-                throw new NotFoundException("Couldn't find an application for application Id: " + appId);
+                String msg = "Couldn't find an application for application Id: " + appId;
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
 
-            filteredApplicationReleaseDTOs = applicationDTO.getApplicationReleaseDTOs().stream()
-                    .filter(applicationReleaseDTO -> applicationReleaseDTO.getCurrentState().equals(state))
-                    .collect(Collectors.toList());
+            List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs = new ArrayList<>();
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
+                if (!applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState()) && (
+                        state == null || applicationReleaseDTO.getCurrentState().equals(state))) {
+                    filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
+                }
+            }
             applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
             if (applicationDTO.getApplicationReleaseDTOs().isEmpty()){
                 return null;
@@ -674,9 +680,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new ForbiddenException(msg);
             }
             return appDtoToAppResponse(applicationDTO);
-        } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while getting application with the application id " + appId);
+        } catch (LifecycleManagementException e){
+            String msg = "Error occurred when getting the last state of the application lifecycle flow";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }catch (UserStoreException e) {
+            String msg = "User-store exception while getting application with the application id " + appId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1438,14 +1449,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            if (!StringUtils.isEmpty(applicationWrapper.getDeviceType()) && !applicationDTO.getDeviceTypeName()
-                    .equals(applicationWrapper.getDeviceType())) {
-                String msg = "You are trying to change the compatible device type of the application type and it is not "
-                        + "possible after you create an application for device type. " +
-                        applicationWrapper.getDeviceType()  + "Therefore please remove this application and publish "
-                        + "new application with device type: " + applicationWrapper.getDeviceType();
-                log.error(msg);
-                throw new BadRequestException(msg);
+
+            String deviceTypeName = applicationWrapper.getDeviceType();
+            if (!StringUtils.isEmpty(deviceTypeName)) {
+                DeviceType deviceType = getDeviceTypeData(deviceTypeName);
+                if (!deviceType.getName().equals(deviceTypeName)){
+                    String msg = "You are trying to change the compatible device type of the application type and it is "
+                            + "not possible after you create an application for device type. " + deviceTypeName  +
+                            "Therefore please remove this application and publish new application with device type: " +
+                            deviceTypeName;
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+            }
+            if (!StringUtils.isEmpty(applicationWrapper.getName())){
+                Filter filter = new Filter();
+                filter.setFullMatch(true);
+                filter.setAppName(applicationWrapper.getName().trim());
+                filter.setOffset(0);
+                filter.setLimit(1);
+
+                List<ApplicationDTO> applicationList = applicationDAO
+                        .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
+                if (!applicationList.isEmpty()) {
+                    String msg = "Already an application registered with same name " + applicationWrapper.getName()
+                            + ". Hence you can't update the application name from " + applicationDTO.getName() + " to "
+                            + applicationWrapper.getName();
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+                applicationDTO.setName(applicationWrapper.getName());
             }
             if (!StringUtils.isEmpty(applicationWrapper.getSubType()) && !applicationDTO.getSubType()
                     .equals(applicationWrapper.getSubType())) {
@@ -1473,30 +1506,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationDTO.setSubType(applicationWrapper.getSubType());
                 applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
             }
-            if (!StringUtils.isEmpty(applicationWrapper.getName())){
-                Filter filter = new Filter();
-                filter.setFullMatch(true);
-                filter.setAppName(applicationWrapper.getName().trim());
-                filter.setOffset(0);
-                filter.setLimit(1);
 
-                List<ApplicationDTO> applicationList = applicationDAO
-                        .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
-                if (!applicationList.isEmpty()) {
-                    String msg = "Already an application registered with same name " + applicationWrapper.getName()
-                            + ". Hence you can't update the application name from " + applicationDTO.getName() + " to "
-                            + applicationWrapper.getName();
-                    log.error(msg);
-                    throw new BadRequestException(msg);
-                }
-                applicationDTO.setName(applicationWrapper.getName());
-            }
             if (!StringUtils.isEmpty(applicationWrapper.getDescription())){
                 applicationDTO.setDescription(applicationWrapper.getDescription());
             }
 
             List<String> appUnrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationId, tenantId);
-            List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
 
             boolean isExistingAppRestricted = !appUnrestrictedRoles.isEmpty();
             boolean isUpdatingAppRestricted = !applicationWrapper.getUnrestrictedRoles().isEmpty();
@@ -1533,15 +1548,48 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
 
-            List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
-            List<String> addingTagList = getDifference(appTags, applicationWrapper.getTags());
-            List<String> removingTagList = getDifference(applicationWrapper.getTags(), appTags);
-            if (!addingTagList.isEmpty()) {
-//                applicationDAO.addTags(addingTags, application.getId(), tenantId);
+            String updatingAppCategory = applicationWrapper.getAppCategory();
+            if ( updatingAppCategory != null){
+                List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
+                if (!appCategories.contains(updatingAppCategory)){
+                    List<CategoryDTO> allCategories = this.applicationDAO.getAllCategories(tenantId);
+                    List<Integer> categoryIds = allCategories.stream()
+                            .filter(category -> category.getCategoryName().equals(updatingAppCategory))
+                            .map(CategoryDTO::getId).collect(Collectors.toList());
+                    if (!categoryIds.isEmpty()){
+                        String msg =
+                                "You are trying to update application category into invalid application category, "
+                                        + "it is not registered in the system. Therefore please register the category "
+                                        + updatingAppCategory + " and perform the action";
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                    this.applicationDAO.addCategoryMapping(categoryIds, applicationId, tenantId);
+                }
             }
-            if (!removingTagList.isEmpty()) {
-                applicationDAO.deleteTags(removingTagList, applicationId, tenantId);
+
+            List<String> updatingAppTags = applicationWrapper.getTags();
+            if ( updatingAppTags!= null){
+                List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
+                List<String> addingTagList = getDifference(appTags, updatingAppTags);
+                List<String> removingTagList = getDifference(updatingAppTags, appTags);
+                if (!addingTagList.isEmpty()) {
+                    List<TagDTO> allTags = this.applicationDAO.getAllTags(tenantId);
+                    List<String> newTags = addingTagList.stream().filter(updatingTagName -> allTags.stream()
+                            .noneMatch(tag -> tag.getTagName().equals(updatingTagName))).collect(Collectors.toList());
+                    if (!newTags.isEmpty()){
+                        this.applicationDAO.addTags(newTags, tenantId);
+                    }
+                    List<Integer> addingTagIds = this.applicationDAO.getTagIdsForTagNames(addingTagList, tenantId);
+                    this.applicationDAO.addTagMapping(addingTagIds, applicationId, tenantId);
+                }
+                if (!removingTagList.isEmpty()) {
+                    List<Integer> removingTagIds = this.applicationDAO.getTagIdsForTagNames(removingTagList, tenantId);
+                    this.applicationDAO.deleteTagMapping(removingTagIds, applicationId, tenantId);
+                    applicationDAO.deleteTags(removingTagList, applicationId, tenantId);
+                }
             }
+            //todo
             applicationDAO.editApplication(applicationDTO, tenantId);
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
@@ -1904,7 +1952,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationDTO.setTags(applicationWrapper.getTags());
         applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
         applicationDTO.setDeviceTypeId(deviceType.getId());
-        applicationDTO.setDeviceTypeName(deviceType.getName());
         List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
                 .stream().map(this::releaseWrapperToReleaseDTO).collect(Collectors.toList());
         applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
@@ -1923,9 +1970,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return applicationReleaseDTO;
     }
 
-    private Application appDtoToAppResponse(ApplicationDTO applicationDTO) {
+    private Application appDtoToAppResponse(ApplicationDTO applicationDTO)
+            throws BadRequestException, UnexpectedServerErrorException {
 
         Application application = new Application();
+        DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
         application.setId(applicationDTO.getId());
         application.setName(applicationDTO.getName());
         application.setDescription(applicationDTO.getDescription());
@@ -1935,7 +1984,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setPaymentCurrency(applicationDTO.getPaymentCurrency());
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
-        application.setDeviceType(applicationDTO.getDeviceTypeName());
+        application.setDeviceType(deviceType.getName());
         List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
                 .stream().map(this::releaseDtoToRelease).collect(Collectors.toList());
         application.setApplicationReleases(applicationReleases);
@@ -1943,7 +1992,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     private ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO){
-        String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration().getArtifactDownloadEndpoint();
+        String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
+                .getArtifactDownloadEndpoint();
         String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid();
         ApplicationRelease applicationRelease = new ApplicationRelease();
         applicationRelease.setDescription(applicationReleaseDTO.getDescription());
@@ -1953,8 +2003,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
         applicationRelease.setMetaData(applicationReleaseDTO.getMetaData());
         applicationRelease.setUrl(applicationReleaseDTO.getUrl());
+        applicationRelease.setCurrentStatus(applicationReleaseDTO.getCurrentState());
+        applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
-        applicationRelease.setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName());
+        applicationRelease
+                .setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName());
         applicationRelease.setIconPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName());
         applicationRelease.setBannerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getBannerName());
 

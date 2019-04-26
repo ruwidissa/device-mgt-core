@@ -176,8 +176,7 @@ public interface ApplicationManagementAPI {
             @PathParam("appId") int appId,
             @ApiParam(
                     name = "state",
-                    value = "state",
-                    defaultValue = "PUBLISHED")
+                    value = "state")
             @QueryParam("state") String state
     );
 

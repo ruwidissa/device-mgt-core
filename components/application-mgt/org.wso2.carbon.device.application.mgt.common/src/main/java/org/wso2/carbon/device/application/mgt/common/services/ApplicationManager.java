@@ -58,7 +58,8 @@ public interface ApplicationManager {
      * @return Updated Application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    void updateApplication(int applicationId, ApplicationWrapper applicationWrapper) throws ApplicationManagementException;
+    void updateApplication(int applicationId, ApplicationWrapper applicationWrapper)
+            throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
