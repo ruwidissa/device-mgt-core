@@ -1493,7 +1493,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             List<String> appUnrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationId, tenantId);
 
             boolean isExistingAppRestricted = !appUnrestrictedRoles.isEmpty();
-            boolean isUpdatingAppRestricted = !applicationUpdateWrapper.getUnrestrictedRoles().isEmpty();
+            boolean isUpdatingAppRestricted = false;
+            if (applicationUpdateWrapper.getUnrestrictedRoles() != null && !applicationUpdateWrapper
+                    .getUnrestrictedRoles().isEmpty()) {
+                isUpdatingAppRestricted = true;
+            }
 
             if (isExistingAppRestricted && !isUpdatingAppRestricted) {
                 visibilityDAO.deleteUnrestrictedRoles(appUnrestrictedRoles, applicationId, tenantId);
