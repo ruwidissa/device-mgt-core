@@ -68,6 +68,8 @@ import javax.ws.rs.core.Response;
 @Path("/applications")
 public class ApplicationManagementPublisherAPIImpl implements ApplicationManagementPublisherAPI {
 
+    private static Log log = LogFactory.getLog(ApplicationManagementPublisherAPIImpl.class);
+
     @POST
     @Override
     @Consumes("application/json")
