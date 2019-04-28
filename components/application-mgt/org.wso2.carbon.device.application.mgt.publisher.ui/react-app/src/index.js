@@ -9,24 +9,29 @@ import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
 import store from "./js/store/index";
 import {Provider} from "react-redux";
+import {Switch} from "react-router";
 
 
 const routes = [
     {
         path: '/publisher/login',
+        exact: true,
         component: Login
     },
     {
-        path: '/publisher',
+        path: '/publisher/dashboard',
+        exact: false,
         component: Dashboard,
         routes: [
             {
-                path: '/publisher/apps',
-                component: Apps
+                path: '/publisher/dashboard/apps',
+                component: Apps,
+                exact: false
             },
             {
-                path: '/publisher/new-app',
-                component: AddNewApp
+                path: '/publisher/dashboard/new-app',
+                component: AddNewApp,
+                exact: false
             }
         ]
     }
@@ -35,7 +40,7 @@ const routes = [
 
 ReactDOM.render(
     <Provider store={store}>
-        <App routes={routes}/>
+            <App routes={routes}/>
     </Provider>,
     document.getElementById('root'));
 
