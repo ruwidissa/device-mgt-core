@@ -1579,6 +1579,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
+            ConnectionManagerUtil.commitDBTransaction();
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             throw new ApplicationManagementException(
