@@ -19,19 +19,19 @@ const routes = [
         component: Login
     },
     {
-        path: '/publisher/dashboard',
+        path: '/publisher/apps',
         exact: false,
         component: Dashboard,
         routes: [
             {
-                path: '/publisher/dashboard/apps',
+                path: '/publisher/apps',
                 component: Apps,
-                exact: false
+                exact: true
             },
             {
-                path: '/publisher/dashboard/new-app',
+                path: '/publisher/apps/new-app',
                 component: AddNewApp,
-                exact: false
+                exact: true
             }
         ]
     }
