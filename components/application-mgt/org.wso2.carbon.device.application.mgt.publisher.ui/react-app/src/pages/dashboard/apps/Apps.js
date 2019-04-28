@@ -85,8 +85,9 @@ class Apps extends React.Component {
             }
 
         }).catch(function (error) {
-            if(error.status === 401){
-                window.location = 'https://localhost:9443/publisher/login'
+            if(error.response.status === 401){
+                console.log("bis");
+                window.location.href = 'https://localhost:9443/publisher/login';
             }
         });
     }
