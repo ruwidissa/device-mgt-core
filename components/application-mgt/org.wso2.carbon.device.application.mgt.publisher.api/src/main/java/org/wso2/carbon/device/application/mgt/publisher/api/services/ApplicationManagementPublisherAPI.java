@@ -194,7 +194,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -238,7 +238,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -308,7 +308,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -387,7 +387,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -423,7 +423,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -494,7 +494,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -547,7 +547,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -595,7 +595,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "Lifecycle Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
@@ -627,7 +627,7 @@ public interface ApplicationManagementPublisherAPI {
             tags = "Lifecycle Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
                     })
             }
     )
