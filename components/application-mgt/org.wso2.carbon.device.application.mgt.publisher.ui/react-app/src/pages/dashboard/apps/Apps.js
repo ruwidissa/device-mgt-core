@@ -23,40 +23,8 @@ const routes = [
 ];
 
 
-
-
-const data = [{
-    key: '1',
-    icon: 'https://gw.alipayobjects.com/zos/rmsportal/zOsKZmFRdUtvpqCImOVY.png',
-    name: 'John Brown',
-    platform: 'android',
-    type: 'Enterprise',
-    status: 'published',
-    version: '13.0.0.1',
-    updated_at: '27-03-2019 08:27'
-},{
-    key: '2',
-    icon: 'http://aztechbeat.com/wp-content/uploads/2014/04/confide-app-icon.png',
-    name: 'Lorem Ipsum',
-    platform: 'ios',
-    type: 'Enterprise',
-    status: 'published',
-    version: '2.3.1.2',
-    updated_at: '27-03-2019 09:45'
-},{
-    key: '3',
-    icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRx2Xx1-hnH16EGZHUlT06nOcfGODPoboA2TXKaBVtODto4lJtK',
-    name: 'Lorem Ipsum',
-    platform: 'ios',
-    type: 'Enterprise',
-    status: 'removed',
-    version: '4.1.1.0',
-    updated_at: '27-03-2019 09:46'
-}];
-
 class Apps extends React.Component {
     routes;
-
 
     state = {
         searchText: '',
@@ -79,14 +47,27 @@ class Apps extends React.Component {
         axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/invoke', request
         ).then(res => {
             if(res.status === 200){
+                console.log(res.status);
+                let apps = [];
+                res.data['data']['applications'].forEach(function (app) {
+                    apps.push({
+                        key: app.id,
+                        icon: app["applicationReleases"][0]["iconPath"],
+                        name: app.name,
+                        platform: 'undefined',
+                        type: app.type,
+                        status: 'undefined',
+                        version: 'undefined',
+                        updated_at: 'undefined'
+                    });
+                });
                 thisComponent.setState({
-                    data : []
+                    data : apps
                 })
             }
 
         }).catch(function (error) {
             if(error.response.status === 401){
-                console.log("bis");
                 window.location.href = 'https://localhost:9443/publisher/login';
             }
         });
