@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
@@ -31,12 +30,12 @@ import org.wso2.carbon.device.application.mgt.common.exception.RequestValidating
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
-import org.wso2.carbon.device.application.mgt.core.exception.ValidationException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
+import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementPublisherAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -52,7 +51,6 @@ import javax.activation.DataHandler;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -68,9 +66,7 @@ import javax.ws.rs.core.Response;
  */
 @Produces({"application/json"})
 @Path("/applications")
-public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
-
-    private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
+public class ApplicationManagementPublisherAPIImpl implements ApplicationManagementPublisherAPI {
 
     @POST
     @Override
@@ -102,15 +98,14 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Path("/{appId}")
     public Response getApplication(
             @PathParam("appId") int appId,
-            @DefaultValue("PUBLISHED") @QueryParam("state") String state) {
+            @QueryParam("state") String state) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             Application application = applicationManager.getApplicationById(appId, state);
             if (application == null){
-                String msg = "Couldn't found an application release which is in " + state + " state for application id "
-                        + appId;
+                String msg = "Could not found an application release which is in " + state + " state.";
                 log.error(msg);
-                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+                return Response.status(Response.Status.OK).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
@@ -317,31 +312,36 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
         }
     }
 
-
     @PUT
     @Consumes("application/json")
     @Path("/{appId}")
     public Response updateApplication(
             @PathParam("appId") int applicationId,
-            @Valid ApplicationWrapper applicationWrapper) {
+            @Valid ApplicationUpdateWrapper applicationUpdateWrapper) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            //todo wrong
-            applicationManager.updateApplication(applicationId, applicationWrapper);
+            applicationManager.updateApplication(applicationId, applicationUpdateWrapper);
             return Response.status(Response.Status.OK)
-                    .entity("Application was updated successfully. ApplicationID " + applicationId).build();
+                    .entity("Application was updated successfully for ApplicationID: " + applicationId).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ForbiddenException e) {
-            log.error(e.getMessage());
-            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while modifying the application";
+        }  catch (BadRequestException e) {
+            String msg = "Error occurred while modifying the application. Found bad request payload for updating the "
+                    + "application";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
+        catch (ApplicationManagementException e) {
+            String msg = "Internal Error occurred while modifying the application.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
     }
+
+    /*
+    //todo ----------------------
+    */
 
     @Override
     @PUT

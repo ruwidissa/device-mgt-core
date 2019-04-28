@@ -72,13 +72,13 @@ import java.util.List;
                         name = "Get Review Details",
                         description = "Get review details",
                         key = "perm:app:review:view",
-                        permissions = {"/device-mgt/review/view"}
+                        permissions = {"/app-mgt/store/review/view"}
                 ),
                 @Scope(
                         name = "Update a Review",
                         description = "Update a comment",
                         key = "perm:app:review:update",
-                        permissions = {"/device-mgt/review/update"}
+                        permissions = {"/app-mgt/store/review/update"}
                 ),
         }
 )

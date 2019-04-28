@@ -507,10 +507,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
                     + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
                     + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                    + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
                     + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
                     + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
                     + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
                     + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                    + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                     + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
                     + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
                     + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
@@ -583,66 +585,36 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationDTO editApplication(ApplicationDTO application, int tenantId)
+    public boolean updateApplication(ApplicationDTO applicationDTO, int tenantId)
             throws ApplicationManagementDAOException {
-        int paramIndex = 1;
         Connection conn;
-        PreparedStatement stmt = null;
-        //todo this is wrong
-        ApplicationDTO existingApplication = this.getApplicationById(application.getId(), tenantId);
-
-        if (existingApplication == null) {
-            throw new ApplicationManagementDAOException("There doesn't have an application for updating");
-        }
         try {
             conn = this.getDBConnection();
-            String sql = "UPDATE AP_APP SET ";
+            String sql = "UPDATE AP_APP AP " +
+                    "SET " +
+                    "AP.NAME = ?,  " +
+                    "AP.DESCRIPTION = ?, " +
+                    "AP.SUB_TYPE = ?, " +
+                    "AP.CURRENCY = ? " +
+                    "WHERE AP.ID = ? AND AP.TENANT_ID = ?";
 
-            if (application.getName() != null && !application.getName().equals(existingApplication.getName())) {
-                sql += "NAME = ?, ";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, applicationDTO.getName());
+                stmt.setString(2, applicationDTO.getDescription());
+                stmt.setString(3, applicationDTO.getSubType());
+                stmt.setString(4, applicationDTO.getPaymentCurrency());
+                stmt.setInt(5, applicationDTO.getId());
+                stmt.setInt(6, tenantId);
+                return stmt.executeUpdate() > 0;
             }
-            if (application.getType() != null && !application.getType().equals(existingApplication.getType())) {
-                sql += "TYPE = ?, ";
-            }
-            if (application.getAppCategory() != null && !application.getAppCategory().equals(
-                    existingApplication.getAppCategory())) {
-                sql += "APP_CATEGORY = ?, ";
-            }
-//            if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-//                sql += "RESTRICTED = ? ";
-//            }
-            if (!application.getSubType().equals(existingApplication.getSubType())) {
-                sql += "SUB_TYPE = ? ";
-            }
-
-            sql += "WHERE ID = ?";
-
-            stmt = conn.prepareStatement(sql);
-            if (application.getName() != null && !application.getName().equals(existingApplication.getName())) {
-                stmt.setString(paramIndex++, application.getName());
-            }
-            if (application.getType() != null && !application.getType().equals(existingApplication.getType())) {
-                stmt.setString(paramIndex++, application.getType());
-            }
-            if (application.getAppCategory() != null && !application.getAppCategory().equals(
-                    existingApplication.getAppCategory())) {
-                stmt.setString(paramIndex++, application.getAppCategory());
-            }
-//            if (application.getIsRestricted() != existingApplication.getIsRestricted()) {
-//                stmt.setBoolean(paramIndex++, application.getIsRestricted());
-//            }
-            if (!application.getSubType().equals(existingApplication.getSubType())) {
-                stmt.setString(paramIndex++, application.getSubType());
-            }
-            stmt.setInt(paramIndex, application.getId());
-            stmt.executeUpdate();
-            return application;
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+            String msg = "Error occurred while obtaining the DB connection to update the application.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding the application", e);
-        } finally {
-            Util.cleanupResources(stmt, null);
+            String msg = "Error occurred when obtaining database connection for updating the application.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
@@ -931,6 +903,37 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     "Error occurred while obtaining the DB connection when adding tags", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        }
+    }
+
+    @Override
+    public void deleteTagMapping (List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete Tag mappings.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM "
+                + "AP_APP_TAG_MAPPING tm "
+                + "WHERE "
+                + "tm.AP_APP_TAG_ID = ? AND "
+                + "tm.AP_APP_ID = ? AND "
+                + "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                for (Integer tagId : tagIds){
+                    stmt.setInt(1, tagId);
+                    stmt.setInt(2, applicationId);
+                    stmt.setInt(3, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting tag mapppig", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred when deleting tag mapping", e);
         }
     }
 

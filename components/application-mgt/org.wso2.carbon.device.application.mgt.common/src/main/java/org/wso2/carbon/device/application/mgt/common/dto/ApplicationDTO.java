@@ -79,12 +79,6 @@ public class ApplicationDTO {
             example = "1, 2, 3")
     private int deviceTypeId;
 
-    @ApiModelProperty(name = "deviceTypeName",
-            value = "Related device type of the application",
-            required = true,
-            example = "IoS, Android, Arduino, RaspberryPi etc")
-    private String deviceTypeName;
-
     @ApiModelProperty(name = "appRating",
             value = "Rating of the aplication")
     private int appRating;
@@ -167,12 +161,6 @@ public class ApplicationDTO {
     public void setUnrestrictedRoles(List<String> unrestrictedRoles) {
         this.unrestrictedRoles = unrestrictedRoles;
     }
-
-    public String getDeviceTypeName() {
-        return deviceTypeName;
-    }
-
-    public void setDeviceTypeName(String deviceTypeName) { this.deviceTypeName = deviceTypeName; }
 
     public int getDeviceTypeId() {
         return deviceTypeId;

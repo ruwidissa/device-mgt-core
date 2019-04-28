@@ -31,13 +31,14 @@ import org.wso2.carbon.webapp.authenticator.framework.authenticator.WebappAuthen
 import org.wso2.carbon.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
-    private static HashMap<String, String> nonSecuredEndpoints = new HashMap<>();
+    private static TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
 
     @Override
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
@@ -126,6 +127,7 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
         if (!nonSecuredEndpoints.containsKey(contextPath)) {
             String param = request.getContext().findParameter("nonSecuredEndPoints");
             String skippedEndPoint;
+            boolean isUriUnsecured = false;
             if (param != null && !param.isEmpty()) {
                 //Add the nonSecured end-points to cache
                 StringTokenizer tokenizer = new StringTokenizer(param, ",");
@@ -137,10 +139,23 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
                         skippedEndPoint = skippedEndPoint + "/";
                     }
                     nonSecuredEndpoints.put(skippedEndPoint, "true");
+                    if (uri.equals(skippedEndPoint) || Pattern.matches(skippedEndPoint, uri)){
+                        isUriUnsecured = true;
+                    }
+                }
+                return isUriUnsecured;
+            }
+        } else {
+            if (nonSecuredEndpoints.containsKey(uri)) {
+                return true;
+            }
+            for (String endpoint : nonSecuredEndpoints.keySet()) {
+                if (Pattern.matches(endpoint, uri)) {
+                    return true;
                 }
             }
         }
-        return nonSecuredEndpoints.containsKey(uri);
+        return false;
     }
 
     private void processRequest(Request request, Response response, CompositeValve compositeValve,

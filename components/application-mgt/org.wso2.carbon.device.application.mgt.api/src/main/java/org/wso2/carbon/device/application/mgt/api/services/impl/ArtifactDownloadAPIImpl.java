@@ -55,7 +55,6 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
             Response.ResponseBuilder response = Response
                     .ok(fileInputStream, MediaType.APPLICATION_OCTET_STREAM);
             response.status(Response.Status.OK);
-//            response.type("application/html");
             response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
             return response.build();
         } catch (NotFoundException e) {

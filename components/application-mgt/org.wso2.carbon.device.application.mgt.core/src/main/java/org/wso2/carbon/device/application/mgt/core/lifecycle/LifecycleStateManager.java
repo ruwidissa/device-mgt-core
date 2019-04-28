@@ -211,27 +211,28 @@ public class LifecycleStateManager {
         return endState;
     }
 
+    public String getInstallableState() throws LifecycleManagementException {
+        String installableState = null;
+        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
+            if (stringStateEntry.getValue().isAppInstallable()) {
+                installableState = stringStateEntry.getKey();
+                break;
+            }
+        }
+        if (installableState == null){
+            String msg = "Haven't defined the installable state in the application-manager.xml. Please add installable "
+                    + "state to the <LifecycleStates> section in the app-manager.xml";
+            log.error(msg);
+            throw  new LifecycleManagementException(msg);
+        }
+        return installableState;
+    }
+
     public boolean isStateExist(String currentState) {
         for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
             if (stringStateEntry.getKey().equalsIgnoreCase(currentState)) {
                 return true;
             }
-        }
-        return false;
-    }
-
-    public boolean isUpdatable(String state) {
-        State currentState = getMatchingState(state);
-        if (currentState.isAppUpdatable()) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isInstallable(String state) {
-        State currentState = getMatchingState(state);
-        if (currentState.isAppInstallable()) {
-            return true;
         }
         return false;
     }
