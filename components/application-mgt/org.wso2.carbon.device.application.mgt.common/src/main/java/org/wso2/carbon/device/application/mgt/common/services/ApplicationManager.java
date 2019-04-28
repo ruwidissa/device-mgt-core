@@ -30,6 +30,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.RequestValidating
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
 import java.io.InputStream;
@@ -53,12 +54,12 @@ public interface ApplicationManager {
     /**
      * Updates an already existing application.
      *
-     * @param applicationWrapper Application that need to be updated.
+     * @param applicationUpdateWrapper Application data that need to be updated.
      * @param applicationId ID of the application
      * @return Updated Application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    void updateApplication(int applicationId, ApplicationWrapper applicationWrapper)
+    void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper)
             throws ApplicationManagementException;
 
     /**

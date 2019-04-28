@@ -30,11 +30,12 @@ import org.wso2.carbon.device.application.mgt.common.exception.RequestValidating
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementAPI;
+import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementPublisherAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -50,7 +51,6 @@ import javax.activation.DataHandler;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -66,9 +66,7 @@ import javax.ws.rs.core.Response;
  */
 @Produces({"application/json"})
 @Path("/applications")
-public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
-
-    private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
+public class ApplicationManagementPublisherAPIImpl implements ApplicationManagementPublisherAPI {
 
     @POST
     @Override
@@ -319,10 +317,10 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
     @Path("/{appId}")
     public Response updateApplication(
             @PathParam("appId") int applicationId,
-            @Valid ApplicationWrapper applicationWrapper) {
+            @Valid ApplicationUpdateWrapper applicationUpdateWrapper) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.updateApplication(applicationId, applicationWrapper);
+            applicationManager.updateApplication(applicationId, applicationUpdateWrapper);
             return Response.status(Response.Status.OK)
                     .entity("Application was updated successfully for ApplicationID: " + applicationId).build();
         } catch (NotFoundException e) {

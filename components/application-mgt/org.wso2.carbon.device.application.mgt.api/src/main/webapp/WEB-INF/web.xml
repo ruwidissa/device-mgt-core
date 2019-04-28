@@ -43,7 +43,7 @@
     </session-config>
     <context-param>
         <param-name>doAuthentication</param-name>
-        <param-value>false</param-value>
+        <param-value>true</param-value>
     </context-param>
 
     <!-- Below configuration is used to redirect http requests to https -->
@@ -116,5 +116,13 @@
         <filter-name>ApiOriginFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+    <context-param>
+        <param-name>nonSecuredEndPoints</param-name>
+        <param-value>
+            /api/application-mgt/v1.0/artifact/.*,
+            /api/application-mgt/v1.0/config/.*
+        </param-value>
+    </context-param>
 
 </web-app>

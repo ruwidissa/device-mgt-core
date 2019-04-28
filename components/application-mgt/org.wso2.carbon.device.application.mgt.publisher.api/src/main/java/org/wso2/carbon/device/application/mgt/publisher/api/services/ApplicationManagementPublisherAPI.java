@@ -32,12 +32,14 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.application.mgt.common.*;
+import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
 import java.util.List;
@@ -60,17 +62,16 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationDTO Management Service",
+                title = "ApplicationDTO Management Publisher Service",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = "name", value = "ApplicationManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/applications"),
+                                @ExtensionProperty(name = "name", value = "ApplicationManagementPublisherService"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt-publisher/v1.0/applications"),
                         })
                 }
         ),
         tags = {
-                @Tag(name = "application_management, device_management", description = "ApplicationDTO Management related "
-                        + "APIs")
+                @Tag(name = "application_management, device_management", description = "App publisher related APIs")
         }
 )
 @Scopes(
@@ -79,21 +80,21 @@ import javax.ws.rs.core.Response;
                         name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:publisher:view",
-                        permissions = {"/device-mgt/application/view"}
+                        permissions = {"/app-mgt/publisher/application/update"}
                 ),
                 @Scope(
                         name = "Update an ApplicationDTO",
                         description = "Update an application",
                         key = "perm:app:publisher:update",
-                        permissions = {"/device-mgt/application/update"}
+                        permissions = {"/app-mgt/publisher/application/update"}
                 )
         }
 )
-@Path("/publisher/applications")
+@Path("/applications")
 @Api(value = "ApplicationDTO Management", description = "This API carries all application management related operations " +
         "such as get all the applications, add application, etc.")
 @Produces(MediaType.APPLICATION_JSON)
-public interface ApplicationManagementAPI {
+public interface ApplicationManagementPublisherAPI {
 
     String SCOPE = "scope";
 
@@ -193,7 +194,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -220,9 +221,9 @@ public interface ApplicationManagementAPI {
             @PathParam("appId") int appId,
             @ApiParam(
                     name = "application",
-                    value = "The application that need to be edited.",
+                    value = "Application data that need to be edited.",
                     required = true)
-            @Valid ApplicationWrapper applicationWrapper
+            @Valid ApplicationUpdateWrapper applicationUpdateWrapper
     );
 
     @POST
@@ -237,7 +238,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -307,7 +308,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -386,7 +387,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -398,7 +399,7 @@ public interface ApplicationManagementAPI {
                             response = List.class),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while deleteing the application.",
+                            message = "Internal Server Error. \n Error occurred while deleting the application.",
                             response = ErrorResponse.class)
             })
     Response deleteApplication(
@@ -422,7 +423,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -493,7 +494,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -546,7 +547,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -594,7 +595,7 @@ public interface ApplicationManagementAPI {
             tags = "Lifecycle Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )
@@ -626,7 +627,7 @@ public interface ApplicationManagementAPI {
             tags = "Lifecycle Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:update")
                     })
             }
     )

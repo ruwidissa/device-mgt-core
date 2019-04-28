@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationDTO Management Common Service",
+                title = "Application Management Artifact Download Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationManagementArtifactDownloadService"),

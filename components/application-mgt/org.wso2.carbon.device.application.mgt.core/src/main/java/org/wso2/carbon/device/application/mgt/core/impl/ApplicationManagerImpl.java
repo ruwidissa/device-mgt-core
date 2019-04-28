@@ -53,6 +53,7 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
@@ -1423,7 +1424,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void updateApplication(int applicationId, ApplicationWrapper applicationWrapper)
+    public void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1441,85 +1442,63 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
 
-            if (!StringUtils.isEmpty(applicationWrapper.getType()) && !applicationDTO.getType()
-                    .equals(applicationWrapper.getType())) {
-                String msg = "You are trying to change the application type and it is not "
-                        + "possible after you create an application. Therefore please remove this application and "
-                        + "publish new application with type: " + applicationWrapper.getType();
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-
-            String deviceTypeName = applicationWrapper.getDeviceType();
-            if (!StringUtils.isEmpty(deviceTypeName)) {
-                DeviceType deviceType = getDeviceTypeData(deviceTypeName);
-                if (!deviceType.getName().equals(deviceTypeName)){
-                    String msg = "You are trying to change the compatible device type of the application type and it is "
-                            + "not possible after you create an application for device type. " + deviceTypeName  +
-                            "Therefore please remove this application and publish new application with device type: " +
-                            deviceTypeName;
-                    log.error(msg);
-                    throw new BadRequestException(msg);
-                }
-            }
-            if (!StringUtils.isEmpty(applicationWrapper.getName())){
+            if (!StringUtils.isEmpty(applicationUpdateWrapper.getName())){
                 Filter filter = new Filter();
                 filter.setFullMatch(true);
-                filter.setAppName(applicationWrapper.getName().trim());
+                filter.setAppName(applicationUpdateWrapper.getName().trim());
                 filter.setOffset(0);
                 filter.setLimit(1);
 
                 List<ApplicationDTO> applicationList = applicationDAO
                         .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
                 if (!applicationList.isEmpty()) {
-                    String msg = "Already an application registered with same name " + applicationWrapper.getName()
+                    String msg = "Already an application registered with same name " + applicationUpdateWrapper.getName()
                             + ". Hence you can't update the application name from " + applicationDTO.getName() + " to "
-                            + applicationWrapper.getName();
+                            + applicationUpdateWrapper.getName();
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
-                applicationDTO.setName(applicationWrapper.getName());
+                applicationDTO.setName(applicationUpdateWrapper.getName());
             }
-            if (!StringUtils.isEmpty(applicationWrapper.getSubType()) && !applicationDTO.getSubType()
-                    .equals(applicationWrapper.getSubType())) {
-                if (!ApplicationSubscriptionType.PAID.toString().equals(applicationWrapper.getSubType())
-                        && !ApplicationSubscriptionType.FREE.toString().equals(applicationWrapper.getSubType())) {
+            if (!StringUtils.isEmpty(applicationUpdateWrapper.getSubType()) && !applicationDTO.getSubType()
+                    .equals(applicationUpdateWrapper.getSubType())) {
+                if (!ApplicationSubscriptionType.PAID.toString().equals(applicationUpdateWrapper.getSubType())
+                        && !ApplicationSubscriptionType.FREE.toString().equals(applicationUpdateWrapper.getSubType())) {
                     String msg = "Invalid application subscription type is found with application updating request "
-                            + applicationWrapper.getSubType();
+                            + applicationUpdateWrapper.getSubType();
                     log.error(msg);
                     throw new BadRequestException(msg);
 
-                } else if (ApplicationSubscriptionType.FREE.toString().equals(applicationWrapper.getSubType()) && !StringUtils
-                        .isEmpty(applicationWrapper.getPaymentCurrency())) {
+                } else if (ApplicationSubscriptionType.FREE.toString().equals(applicationUpdateWrapper.getSubType())
+                        && !StringUtils.isEmpty(applicationUpdateWrapper.getPaymentCurrency())) {
                     String msg = "If you are going to change Non-Free app as Free app, "
                             + "currency attribute in the application updating payload should be null or \"\"";
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
-                } else if (ApplicationSubscriptionType.PAID.toString().equals(applicationWrapper.getSubType())
-                        && StringUtils.isEmpty(applicationWrapper.getPaymentCurrency()) ){
+                } else if (ApplicationSubscriptionType.PAID.toString().equals(applicationUpdateWrapper.getSubType())
+                        && StringUtils.isEmpty(applicationUpdateWrapper.getPaymentCurrency()) ){
                     String msg = "If you are going to change Free app as Non-Free app, "
                             + "currency attribute in the application payload should not be null or \"\"";
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
-
-                applicationDTO.setSubType(applicationWrapper.getSubType());
-                applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
+                applicationDTO.setSubType(applicationUpdateWrapper.getSubType());
+                applicationDTO.setPaymentCurrency(applicationUpdateWrapper.getPaymentCurrency());
             }
 
-            if (!StringUtils.isEmpty(applicationWrapper.getDescription())){
-                applicationDTO.setDescription(applicationWrapper.getDescription());
+            if (!StringUtils.isEmpty(applicationUpdateWrapper.getDescription())){
+                applicationDTO.setDescription(applicationUpdateWrapper.getDescription());
             }
 
             List<String> appUnrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationId, tenantId);
 
             boolean isExistingAppRestricted = !appUnrestrictedRoles.isEmpty();
-            boolean isUpdatingAppRestricted = !applicationWrapper.getUnrestrictedRoles().isEmpty();
+            boolean isUpdatingAppRestricted = !applicationUpdateWrapper.getUnrestrictedRoles().isEmpty();
 
             if (isExistingAppRestricted && !isUpdatingAppRestricted) {
                 visibilityDAO.deleteUnrestrictedRoles(appUnrestrictedRoles, applicationId, tenantId);
             } else if (isUpdatingAppRestricted) {
-                if (!hasUserRole(applicationWrapper.getUnrestrictedRoles(), userName)) {
+                if (!hasUserRole(applicationUpdateWrapper.getUnrestrictedRoles(), userName)) {
                     String msg =
                             "You are trying to restrict the visibility of visible application.But you are trying to "
                                     + "restrict the visibility to roles that there isn't at least one role is assigned "
@@ -1532,12 +1511,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
                 if (!isExistingAppRestricted) {
                     visibilityDAO
-                            .addUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles(), applicationId, tenantId);
+                            .addUnrestrictedRoles(applicationUpdateWrapper.getUnrestrictedRoles(), applicationId, tenantId);
                 } else {
-                    List<String> addingRoleList = getDifference(applicationWrapper.getUnrestrictedRoles(),
+                    List<String> addingRoleList = getDifference(applicationUpdateWrapper.getUnrestrictedRoles(),
                             applicationDTO.getUnrestrictedRoles());
                     List<String> removingRoleList = getDifference(applicationDTO.getUnrestrictedRoles(),
-                            applicationWrapper.getUnrestrictedRoles());
+                            applicationUpdateWrapper.getUnrestrictedRoles());
                     if (!addingRoleList.isEmpty()) {
                         visibilityDAO.addUnrestrictedRoles(addingRoleList, applicationId, tenantId);
                     }
@@ -1546,9 +1525,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
                 }
             }
-            applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
+            applicationDTO.setUnrestrictedRoles(applicationUpdateWrapper.getUnrestrictedRoles());
 
-            String updatingAppCategory = applicationWrapper.getAppCategory();
+            String updatingAppCategory = applicationUpdateWrapper.getAppCategory();
             if ( updatingAppCategory != null){
                 List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
                 if (!appCategories.contains(updatingAppCategory)){
@@ -1556,7 +1535,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     List<Integer> categoryIds = allCategories.stream()
                             .filter(category -> category.getCategoryName().equals(updatingAppCategory))
                             .map(CategoryDTO::getId).collect(Collectors.toList());
-                    if (!categoryIds.isEmpty()){
+                    if (categoryIds.isEmpty()){
+                        ConnectionManagerUtil.rollbackDBTransaction();
                         String msg =
                                 "You are trying to update application category into invalid application category, "
                                         + "it is not registered in the system. Therefore please register the category "
@@ -1568,7 +1548,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
 
-            List<String> updatingAppTags = applicationWrapper.getTags();
+            List<String> updatingAppTags = applicationUpdateWrapper.getTags();
             if ( updatingAppTags!= null){
                 List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
                 List<String> addingTagList = getDifference(appTags, updatingAppTags);
@@ -1590,6 +1570,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
             if (!applicationDAO.updateApplication(applicationDTO, tenantId)){
+                ConnectionManagerUtil.rollbackDBTransaction();
                 String msg = "Any application is not updated for the application ID: " + applicationId;
                 log.error(msg);
                 throw new ApplicationManagementException(msg);

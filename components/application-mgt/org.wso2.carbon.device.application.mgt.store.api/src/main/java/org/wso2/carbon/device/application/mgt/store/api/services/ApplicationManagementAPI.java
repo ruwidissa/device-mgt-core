@@ -68,7 +68,7 @@ import javax.ws.rs.core.Response;
                         name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:store:view",
-                        permissions = {"/device-mgt/application/get"}
+                        permissions = {"/app-mgt/store/application/view"}
                 )
         }
 )
@@ -92,7 +92,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:store:view")
                     })
             }
     )
@@ -155,7 +155,7 @@ public interface ApplicationManagementAPI {
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:application:get")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:store:view")
                     })
             }
     )
