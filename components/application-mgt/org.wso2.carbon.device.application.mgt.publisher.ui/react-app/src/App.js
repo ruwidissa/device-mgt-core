@@ -20,7 +20,7 @@ class App extends React.Component {
             <Router>
                 <div>
                     <Switch>
-                        <Redirect exact from="/publisher" to="/publisher/dashboard/apps"/>
+                        <Redirect exact from="/publisher" to="/publisher/apps"/>
                         {this.routes.map((route) => (
                             <RouteWithSubRoutes key={route.path} {...route} />
                         ))}
