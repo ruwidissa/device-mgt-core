@@ -25,7 +25,7 @@ class ConnectedAppList extends React.Component {
                     <Col key={app.id} xs={24} sm={12} md={6} lg={6}>
                         <AppCard key={app.id}
                                  name={app.name}
-                                 platform={app.platform}
+                                 platform={app.deviceType}
                                  type={app.type}
                                  subType={app.subType}
                                  description={app.description}/>
