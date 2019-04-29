@@ -53,26 +53,26 @@ public class LifecycleManagementTest {
 
     @Test
     public void CheckUpdatableState() throws LifecycleManagementException {
-        boolean isUpdatable = lifecycleStateManager.isUpdatable(UPDATABLE_STATE);
+        boolean isUpdatable = lifecycleStateManager.isUpdatableState(UPDATABLE_STATE);
         System.out.println(isUpdatable);
         Assert.assertTrue("Updatable state: " + UPDATABLE_STATE, isUpdatable);
     }
 
     @Test
     public void CheckNonUpdatableState() throws LifecycleManagementException {
-        boolean isUpdatable = lifecycleStateManager.isUpdatable(NON_UPDATABLE_STATE);
+        boolean isUpdatable = lifecycleStateManager.isUpdatableState(NON_UPDATABLE_STATE);
         Assert.assertFalse("Non Updatable state: " + NON_UPDATABLE_STATE, isUpdatable);
     }
 
     @Test
     public void CheckInstallableState() throws LifecycleManagementException {
-        boolean isInstallable = lifecycleStateManager.isInstallable(INSTALLABLE_STATE);
+        boolean isInstallable = lifecycleStateManager.isInstallableState(INSTALLABLE_STATE);
         Assert.assertTrue("Installable state: " + INSTALLABLE_STATE, isInstallable);
     }
 
     @Test
     public void CheckUnInstallableState() throws LifecycleManagementException {
-        boolean isInstallable = lifecycleStateManager.isInstallable(UNINSTALlABLE_STATE);
+        boolean isInstallable = lifecycleStateManager.isInstallableState(UNINSTALlABLE_STATE);
         Assert.assertFalse("UnInstallable state: " + UNINSTALlABLE_STATE, isInstallable);
     }
 

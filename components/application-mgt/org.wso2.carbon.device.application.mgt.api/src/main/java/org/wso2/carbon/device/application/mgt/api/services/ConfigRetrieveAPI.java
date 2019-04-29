@@ -40,17 +40,17 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationDTO Management Common Service",
+                title = "Application Management Config Retrieve Service",
                 extensions = {
                         @Extension(properties = {
-                                @ExtensionProperty(name = "name", value = "ApplicationManagementCommonService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/configt"),
+                                @ExtensionProperty(name = "name", value = "ApplicationManagementConfigRetrieveService"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/config"),
                         })
                 }
         )
 )
 @Path("/config")
-@Api(value = "ApplicationDTO Management Common Service", description = "This API carries all application management common services")
+@Api(value = "ApplicationDTO Management Common Service")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ConfigRetrieveAPI {
 

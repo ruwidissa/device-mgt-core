@@ -66,6 +66,12 @@ public class ApplicationRelease {
             example = "alpha, beta etc")
     private String releaseType;
 
+    @ApiModelProperty(name = "currentStatus",
+            value = "CurrentStatus of the Application Release.",
+            required = true,
+            example = "CREATED, IN-REVIEW, PUBLISHED etc")
+    private String currentStatus;
+
     @ApiModelProperty(name = "price",
             value = "Price of the application release",
             required = true)
@@ -172,4 +178,8 @@ public class ApplicationRelease {
     public String getSupportedOsVersions() { return supportedOsVersions; }
 
     public void setSupportedOsVersions(String supportedOsVersions) { this.supportedOsVersions = supportedOsVersions; }
+
+    public String getCurrentStatus() { return currentStatus; }
+
+    public void setCurrentStatus(String currentStatus) { this.currentStatus = currentStatus; }
 }
