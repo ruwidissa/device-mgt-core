@@ -3,6 +3,7 @@ import "antd/dist/antd.css";
 import {PageHeader, Typography,Input, Button, Row, Col} from "antd";
 
 import AppCard from "../../../components/AppCard";
+import AppList from "../../../components/AppList";
 
 const Search = Input.Search;
 
@@ -47,18 +48,7 @@ class Apps extends React.Component {
                             <Button style={{margin:5}}>Advanced Search</Button>
                         </Col>
                     </Row>
-
-                    <Row gutter={16}>
-                        <Col xs={24} sm={12} md={6} lg={6}>
-                            <AppCard title="Forest" platform="android" type="ENTERPRISE" subType="FREE" description="This function is a valid React component because it accepts a single “props” (which stands for properties) object"/>
-                        </Col>
-                        <Col xs={24} sm={12} md={6} lg={6}>
-                            <AppCard title="hi" platform="ios" type="ENTERPRISE" subType="FREE" description="This function is a valid React component because it accepts a single “props” (which stands for properties) object"/>
-                        </Col>
-                        <Col xs={24} sm={12} md={6} lg={6}>
-                            <AppCard title="Unknown App" type="ENTERPRISE" subType="FREE" description="This function is a valid React component because it accepts a single “props” (which stands for properties) object"/>
-                        </Col>
-                    </Row>
+                    <AppList/>
                 </div>
 
             </div>
