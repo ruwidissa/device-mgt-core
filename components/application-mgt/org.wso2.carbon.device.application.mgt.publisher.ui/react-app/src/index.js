@@ -9,7 +9,6 @@ import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
 import store from "./js/store/index";
 import {Provider} from "react-redux";
-import {Switch} from "react-router";
 
 
 const routes = [

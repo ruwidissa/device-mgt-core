@@ -16,10 +16,11 @@
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-highlight-words": "^0.16.0",
+    "react-router": "latest",
     "react-router-config": "^5.0.0",
     "react-router-dom": "latest",
     "react-scripts": "2.1.8",
-    "react-router": "latest"
+    "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

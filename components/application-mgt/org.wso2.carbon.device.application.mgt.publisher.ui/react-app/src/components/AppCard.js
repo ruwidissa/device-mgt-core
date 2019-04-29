@@ -32,7 +32,7 @@ class AppCard extends React.Component {
                 <Card style={{marginTop: 16 }}  actions={[<Icon type="edit" />, <Icon type="close" />, <Icon type="ellipsis" />]}>
                     <Meta
                         avatar={<Avatar src={icon} />}
-                        title={this.props.title}
+                        title={this.props.name}
                         description={description}
                     />
                 </Card>
