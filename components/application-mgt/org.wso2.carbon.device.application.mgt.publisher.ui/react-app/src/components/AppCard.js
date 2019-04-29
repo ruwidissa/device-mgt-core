@@ -20,9 +20,13 @@ class AppCard extends React.Component {
         if(defaultPlatformIcons.hasOwnProperty(this.props.platform)){
             icon = defaultPlatformIcons[this.props.platform];
         }
+        let descriptionText = this.props.description;
+        if(descriptionText.length>50){
+            descriptionText = descriptionText.substring(0,50)+"...";
+        }
         const description = (
             <div>
-                <p>{this.props.description}</p>
+                <p>{descriptionText}</p>
                 <Text code>{this.props.type}</Text>
                 <Text> {this.props.subType}</Text>
             </div>

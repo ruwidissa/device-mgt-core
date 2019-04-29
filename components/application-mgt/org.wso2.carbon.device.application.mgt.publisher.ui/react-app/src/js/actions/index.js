@@ -1,12 +1,13 @@
 import axios from "axios";
 import {GET_APPS} from "../constants/action-types";
+import config from "../../../public/conf/config.json";
 
 export function getApps() {
 
     return (dispatch) => {
         const request = "method=post&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications";
 
-        return axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/invoke', request
+        return axios.post('https://'+config.serverConfig.hostname+':'+config.serverConfig.httpsPort+config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 let apps = [];

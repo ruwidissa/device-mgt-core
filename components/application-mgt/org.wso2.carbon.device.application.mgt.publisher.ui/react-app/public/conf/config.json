@@ -3,10 +3,11 @@
     "type": "default",
     "value": "lightBaseTheme"
   },
-  "config": {
+  "serverConfig": {
     "hostname": "localhost",
     "httpsPort": "9443",
-    "apiPort": "8243"
+    "invokerUri": "/api/application-mgt-handler/v1.0/invoke",
+    "loginUri": "/api/application-mgt-handler/v1.0/login"
   },
   "serverUrl" : "https://localhost:9443",
   "defaultPlatformIcons": {
