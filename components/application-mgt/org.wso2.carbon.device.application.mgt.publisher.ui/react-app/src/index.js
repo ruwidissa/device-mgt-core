@@ -4,7 +4,7 @@ import * as serviceWorker from './serviceWorker';
 import App from "./App";
 import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
-import Apps from "./pages/dashboard/apps/Apps";
+import OldApps from "./pages/dashboard/apps/OldApps";
 import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
 import store from "./js/store/index";
@@ -25,7 +25,7 @@ const routes = [
         routes: [
             {
                 path: '/publisher/apps',
-                component: Apps,
+                component: OldApps,
                 exact: true
             },
             {

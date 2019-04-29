@@ -18,12 +18,12 @@ const routes = [
     },
     {
         path: 'second',
-        breadcrumbName: 'Apps',
+        breadcrumbName: 'OldApps',
     },
 ];
 
 
-class Apps extends React.Component {
+class OldApps extends React.Component {
     routes;
 
     state = {
@@ -223,4 +223,4 @@ class Apps extends React.Component {
     }
 }
 
-export default Apps;
+export default OldApps;
