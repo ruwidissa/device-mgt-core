@@ -2,6 +2,7 @@ import React from "react";
 import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
 import styles from './Login.less';
 import axios from 'axios';
+import config from "../../public/conf/config.json";
 
 const {Title} = Typography;
 const {Text} = Typography;
@@ -58,7 +59,7 @@ class NormalLoginForm extends React.Component {
                 });
                 console.log('Received values of form: ', values);
                 let data = "username=" + values.username + "&password=" + values.password + "&platform=publisher";
-                axios.post('https://localhost:9443/api/application-mgt-handler/v1.0/login', data
+                axios.post('https://'+config.serverConfig.hostname+':'+config.serverConfig.httpsPort+config.serverConfig.loginUri, data
                 ).then(res => {
                     if (res.status === 200) {
                         window.location = res.data.url;

@@ -31,14 +31,14 @@ class Dashboard extends React.Component {
                         defaultSelectedKeys={['2']}
                         style={{lineHeight: '64px'}}
                     >
-                        <Menu.Item key="1"><Link to="apps"><Icon type="appstore"/>Apps</Link></Menu.Item>
-                        <Menu.Item key="2"><Link to="apps"><Icon type="line-chart"/>Apps</Link></Menu.Item>
-                        <Menu.Item key="3"><Link to="new-app"><Icon type="upload"/>Add New App</Link></Menu.Item>
+                        <Menu.Item key="1"><Link to="/publisher/apps"><Icon type="appstore"/>Apps</Link></Menu.Item>
+                        <Menu.Item key="2"><Link to="/publisher/apps"><Icon type="line-chart"/>Apps</Link></Menu.Item>
+                        <Menu.Item key="3"><Link to="/publisher/apps/new-app"><Icon type="upload"/>Add New App</Link></Menu.Item>
                     </Menu>
                 </Header>
                 <Content style={{padding: '0 0'}}>
                     <Switch>
-                        <Redirect exact from="/publisher" to="/publisher/apps"/>
+                        <Redirect exact from="/publisher/dashboard" to="/publisher/dashboard/apps"/>
                         {this.state.routes.map((route) => (
                             <RouteWithSubRoutes key={route.path} {...route} />
                         ))}
