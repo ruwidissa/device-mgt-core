@@ -1,30 +1,25 @@
 import React from "react";
 import AppCard from "./AppCard";
 import {Col, Row} from "antd";
+import {connect} from "react-redux";
 
-class AppList extends React.Component {
+// connecting state.articles with the component
+const mapStateToProps= state => {
+    return {apps : state.apps}
+};
+
+
+class ConnectedAppList extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            apps: [
-                {
-                    id: 1,
-                    title: 'Hi',
-                    platform: 'android',
-                    description: 'lorem',
-                    subType: 'FREE',
-                    type: 'ENTERPRISE'
-                }
-            ]
-        }
     }
 
     render() {
         return (
             <Row gutter={16}>
-                {this.state.apps.map(app => (
-                    <Col xs={24} sm={12} md={6} lg={6}>
-                        <AppCard title={app.title}
+                {this.props.apps.map(app => (
+                    <Col key={app.id} xs={24} sm={12} md={6} lg={6}>
+                        <AppCard key={app.id} title={app.title}
                                  platform={app.platform}
                                  type={app.type}
                                  subType={app.subType}
@@ -35,5 +30,7 @@ class AppList extends React.Component {
         );
     }
 }
+
+const AppList = connect(mapStateToProps)(ConnectedAppList);
 
 export default AppList;
