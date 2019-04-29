@@ -78,7 +78,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFileStream,
                                                    InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String artifactDirectoryPath;
         String iconStoredLocation;
         String bannerStoredLocation;
@@ -122,10 +121,6 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         } catch (IOException e) {
             throw new ApplicationStorageManagementException("IO Exception while saving the screens hots for " +
                     "the application " + applicationRelease.getUuid(), e);
-        } catch (ApplicationStorageManagementException e) {
-            throw new ApplicationStorageManagementException("ApplicationDTO Management DAO exception while trying to "
-                    + "update the screen-shot count for the application " + applicationRelease.getUuid() +
-                    " for the tenant id " + tenantId, e);
         }
     }
 

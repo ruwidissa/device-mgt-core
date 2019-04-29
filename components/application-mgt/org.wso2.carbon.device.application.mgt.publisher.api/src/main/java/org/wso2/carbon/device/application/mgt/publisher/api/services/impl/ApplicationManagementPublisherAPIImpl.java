@@ -288,6 +288,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
 
+            applicationManager.validateBinaryArtifact(binaryFile, appType);
             if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
                 String msg = "If ApplicationDTO type is " + appType
                         + ", therefore you don't have application release artifact to update for application release UUID: "
@@ -295,7 +296,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
-            applicationManager.validateBinaryArtifact(binaryFile, appType);
+
             applicationManager.updateApplicationArtifact(deviceType, appType, applicationReleaseUuid,
                     constructApplicationArtifact(binaryFile, null, null, null));
             return Response.status(Response.Status.OK)
@@ -341,18 +342,14 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-    /*
-    //todo ----------------------
-    */
-
     @Override
     @PUT
-    @Path("/{deviceType}/{appId}/{uuid}")
+    @Path("/app-release/{deviceType}/{appType}/{uuid}")
     public Response updateApplicationRelease(
             @PathParam("deviceType") String deviceType,
-            @PathParam("appId") int applicationId,
+            @PathParam("appType") String appType,
             @PathParam("uuid") String applicationUUID,
-            @Multipart("applicationRelease") ApplicationReleaseDTO applicationRelease,
+            @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
@@ -360,50 +357,35 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        InputStream iconFileStream;
-        InputStream bannerFileStream;
-        InputStream binaryFileStram;
-        List<InputStream> attachments = new ArrayList<>();
-        List<Attachment> attachmentList = new ArrayList<>();
+        List<Attachment> screenshots = new ArrayList<>();
         if (screenshot1 != null){
-            attachmentList.add(screenshot1);
+            screenshots.add(screenshot1);
         }
         if (screenshot2 != null) {
-            attachmentList.add(screenshot2);
+            screenshots.add(screenshot2);
         }
         if (screenshot3 != null) {
-            attachmentList.add(screenshot3);
+            screenshots.add(screenshot3);
         }
-        if (iconFile == null || bannerFile == null || binaryFile == null || attachmentList.isEmpty()){
-            String msg = "Invalid data is received for application release updating. application id: " + applicationId
-                    + " and application release UUID: " + applicationUUID;
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }
-
         try {
-            binaryFileStram = binaryFile.getDataHandler().getInputStream();
-            iconFileStream = iconFile.getDataHandler().getInputStream();
-            bannerFileStream = bannerFile.getDataHandler().getInputStream();
-            for (Attachment screenshot : attachmentList) {
-                attachments.add(screenshot.getDataHandler().getInputStream());
+            applicationManager.validateBinaryArtifact(binaryFile, appType);
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, screenshots);
+            if (!applicationManager.updateRelease(deviceType, appType, applicationUUID, applicationReleaseWrapper,
+                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots))) {
+                log.error("Application release updating is failed. Please contact the administrator. "
+                        + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(applicationReleaseWrapper).build();
             }
-            boolean status = applicationManager
-                    .updateRelease(applicationId, applicationUUID, deviceType, applicationRelease, binaryFileStram,
-                            iconFileStream, bannerFileStream, attachments);
-            if (!status){
-                log.error("ApplicationDTO release updating is failed. Please contact the administrator. ApplicationDTO id: "
-                        + applicationId + ", ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: "
-                        + deviceType);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(applicationRelease).build();
-            }
-            return Response.status(Response.Status.OK).entity("ApplicationDTO release is successfully updated.").build();
-        } catch(BadRequestException e){
-            String msg = "Invalid request to update application release for application release UUID " + applicationUUID;
+
+            return Response.status(Response.Status.OK).entity("Application release is successfully updated.").build();
+        } catch (BadRequestException e) {
+            String msg =
+                    "Invalid request to update application release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
-            String msg = "Couldn't found application or application release for application id: " + applicationId
-                    + " and application release UUID " + applicationUUID;
+            String msg =
+                    "Couldn't found application or application release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -411,18 +393,20 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                     + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
-        }
-        catch (ApplicationManagementException e) {
+        } catch (ApplicationManagementException e) {
             String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (IOException e) {
-            String msg = "Error while updating the release artifacts of the application with UUID " + applicationUUID;
-            log.error(msg, e);
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while updating the application release in the file system";
+            log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
+    /*
+//todo ----------------------
+*/
     @DELETE
     @Path("/{appid}")
     public Response deleteApplication(
