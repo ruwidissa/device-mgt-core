@@ -241,7 +241,8 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                         + "AR.APP_META_INFO AS RELEASE_META_INFO, "
                         + "AR.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                         + "AR.RATING AS RELEASE_RATING, "
-                        + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, AR.RATED_USERS AS RATED_USER_COUNT "
+                        + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                        + "AR.RATED_USERS AS RATED_USER_COUNT "
                 + "FROM AP_APP_RELEASE AS AR "
                 + "WHERE AR.UUID = ? AND AR.TENAT_ID = ?";
 

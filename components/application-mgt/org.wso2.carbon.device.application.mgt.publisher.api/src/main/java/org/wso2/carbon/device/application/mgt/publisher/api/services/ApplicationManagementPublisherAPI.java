@@ -535,7 +535,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/{deviceType}/{appId}/{uuid}")
+    @Path("/app-release/{deviceType}/{appType}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -567,21 +567,56 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationRelease(
-            @ApiParam(name = "deviceType", value = "Supported device type of the application", required = true)
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Supported device type of the application",
+                    required = true)
             @PathParam("deviceType") String deviceType,
-            @ApiParam(name = "appId", value = "Identifier of the ApplicationDTO", required = true)
-            @PathParam("appId") int applicationId,
-            @ApiParam(name = "UUID", value = "Unique identifier of the ApplicationDTO Release", required = true)
+            @ApiParam(
+                    name = "appType",
+                    value = "Type of the application",
+                    required = true)
+            @PathParam("appType") String appType,
+            @ApiParam(
+                    name = "UUID",
+                    value = "Unique identifier of the ApplicationDTO Release",
+                    required = true)
             @PathParam("uuid") String applicationUUID,
-            @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationReleaseDTO applicationRelease,
-            @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
-            @Multipart(value = "icon", required = false) Attachment iconFile,
-            @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @ApiParam(name = "screenshot1", value = "Screen Shots of the uploading application", required = true)
+            @ApiParam(
+                    name = "applicationReleaseWrapper",
+                    value = "Application release wrapper which is going to update.",
+                    required = true)
+            @Multipart(
+                    value = "applicationReleaseWrapper",
+                    type = "application/json")
+                    ApplicationReleaseWrapper applicationReleaseWrapper,
+            @ApiParam(
+                    name = "binaryFile",
+                    value = "Application installer file.",
+                    required = true)
+            @Multipart(value = "binaryFile") Attachment binaryFile,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon file of the application release.",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "banner file of the application release.",
+                    required = true)
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "First screenshot of the uploading application",
+                    required = true)
             @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(name = "screenshot2", value = "Screen Shots of the uploading application")
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Second screenshot 2 of the uploading application")
             @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(name = "screenshot3", value = "Screen Shots of the uploading application")
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Third screenshot of the uploading application")
             @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @GET
