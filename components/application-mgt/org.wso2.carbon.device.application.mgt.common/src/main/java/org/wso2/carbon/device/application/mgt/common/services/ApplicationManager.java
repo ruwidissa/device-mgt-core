@@ -172,14 +172,11 @@ public interface ApplicationManager {
 
     /***
      *
-     * @param applicationId ID of the application
-     * @param releaseUuid UUID of the application release
-     * @param deviceType Supported device type of the application
+     * @param deviceType Device type which is supported for the Application.
+     * @param applicationType Application Type
+     * @param releaseUuid UUID of the application release.
      * @param applicationReleaseWrapper {@link ApplicationReleaseDTO}
-     * @param binaryFileStram {@link InputStream} of the binary file
-     * @param iconFileStream {@link InputStream} of the icon
-     * @param bannerFileStream {@link InputStream} of the banner
-     * @param attachments {@link List} of {@link InputStream} of attachments
+     * @param applicationArtifact {@link ApplicationArtifact}
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
     boolean updateRelease(String deviceType, String applicationType, String releaseUuid,
