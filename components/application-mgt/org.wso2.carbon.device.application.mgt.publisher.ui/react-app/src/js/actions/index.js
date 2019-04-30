@@ -1,5 +1,5 @@
 import axios from "axios";
-import {GET_APPS} from "../constants/action-types";
+import ActionTypes from "../constants/ActionTypes";
 import config from "../../../public/conf/config.json";
 
 export function getApps() {
@@ -16,7 +16,7 @@ export function getApps() {
                     apps = res.data.data.applications;
                 }
                 console.log(res.data);
-                dispatch({type: GET_APPS, payload: apps});
+                dispatch({type: ActionTypes.GET_APPS, payload: apps});
             }
 
         }).catch(function (error) {

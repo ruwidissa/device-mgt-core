@@ -1,11 +1,11 @@
-import {GET_APPS} from "../constants/action-types";
+import ActionTypes from "../constants/ActionTypes";
 
 const initialState = {
     apps: []
 };
 
 function rootReducer(state = initialState, action) {
-    if (action.type === GET_APPS) {
+    if (action.type === ActionTypes.GET_APPS) {
         console.log(11);
         return Object.assign({}, state, {
             apps: action.payload
