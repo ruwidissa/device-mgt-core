@@ -28,11 +28,12 @@ export const getApps = () => dispatch => {
 
 };
 
-export const openReleasesModal = () => dispatch => {
+export const openReleasesModal = (app) => dispatch => {
+    console.log(app);
     dispatch({
         type: ActionTypes.OPEN_RELEASES_MODAL,
         payload: {
-            title :"hi"
+            app:app
         }
     });
 };

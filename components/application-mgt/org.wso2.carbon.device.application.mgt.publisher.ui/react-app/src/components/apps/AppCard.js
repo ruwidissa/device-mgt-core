@@ -3,14 +3,25 @@ import {
 } from 'antd';
 import React from "react";
 import config from "../../../public/conf/config.json";
+import {openReleasesModal} from "../../js/actions";
+import {connect} from "react-redux";
 
 const { Meta } = Card;
 const { Text } = Typography;
 
-class AppCard extends React.Component {
+const mapDispatchToProps = dispatch => ({
+    openReleasesModal: (app) => dispatch(openReleasesModal(app))
+});
+
+class ConnectedAppCard extends React.Component {
 
     constructor(props){
         super(props);
+        this.handleReleasesClick = this.handleReleasesClick.bind(this);
+    }
+
+    handleReleasesClick(){
+        this.props.openReleasesModal(this.props.app);
     }
 
 
@@ -33,7 +44,7 @@ class AppCard extends React.Component {
         );
 
         return (
-                <Card style={{marginTop: 16 }}  actions={[<Icon type="edit" />, <Icon type="close" />, <Icon type="ellipsis" />]}>
+                <Card style={{marginTop: 16 }}  actions={[<Icon type="edit" />, <Icon type="close" />, <Icon type="ellipsis" onClick={this.handleReleasesClick} />]}>
                     <Meta
                         avatar={<Avatar src={icon} />}
                         title={this.props.name}
@@ -43,5 +54,7 @@ class AppCard extends React.Component {
         );
     }
 }
+
+const AppCard = connect(null,mapDispatchToProps)(ConnectedAppCard);
 
 export default AppCard;

@@ -4,7 +4,7 @@ const initialState = {
     apps: [],
     releaseView: {
         visible: false,
-        title: "hi"
+        app: null
     }
 };
 
@@ -17,7 +17,7 @@ function rootReducer(state = initialState, action) {
         return Object.assign({}, state, {
             releaseView: {
                 visible: true,
-                title: action.title
+                app: action.payload.app
             }
         });
     }

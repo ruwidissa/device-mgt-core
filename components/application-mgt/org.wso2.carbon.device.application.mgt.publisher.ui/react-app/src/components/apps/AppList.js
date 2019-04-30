@@ -24,6 +24,7 @@ class ConnectedAppList extends React.Component {
                 {this.props.apps.map(app => (
                     <Col key={app.id} xs={24} sm={12} md={6} lg={6}>
                         <AppCard key={app.id}
+                                 app = {app}
                                  name={app.name}
                                  platform={app.deviceType}
                                  type={app.type}
