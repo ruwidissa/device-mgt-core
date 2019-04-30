@@ -4,7 +4,7 @@ import {Col, Row} from "antd";
 import {connect} from "react-redux";
 import {getApps} from "../../js/actions";
 
-// connecting state.articles with the component
+// connecting state.apps with the component
 const mapStateToProps= state => {
     return {apps : state.apps}
 };

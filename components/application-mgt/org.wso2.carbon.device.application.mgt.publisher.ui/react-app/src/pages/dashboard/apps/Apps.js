@@ -2,6 +2,7 @@ import React from "react";
 import "antd/dist/antd.css";
 import {PageHeader, Typography,Input, Button, Row, Col} from "antd";
 import AppList from "../../../components/apps/AppList";
+import ReleaseModal from "../../../components/apps/ReleaseModal";
 
 const Search = Input.Search;
 
@@ -46,6 +47,7 @@ class Apps extends React.Component {
                             <Button style={{margin:5}}>Advanced Search</Button>
                         </Col>
                     </Row>
+                    <ReleaseModal/>
                     <AppList/>
                 </div>
 
