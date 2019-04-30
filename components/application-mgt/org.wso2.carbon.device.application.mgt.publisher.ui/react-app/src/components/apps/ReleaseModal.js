@@ -1,6 +1,6 @@
 import React from "react";
-import {Modal, Typography} from 'antd';
-import { connect } from 'react-redux';
+import {Modal, Typography,List, Avatar} from 'antd';
+import {connect} from 'react-redux';
 
 // connecting state.releaseView with the component
 const mapStateToProps = state => {
@@ -17,10 +17,11 @@ class ConnectedReleaseModal extends React.Component {
             app: null
         };
     }
+
     componentWillReceiveProps(nextProps) {
         if (nextProps !== this.props) {
             this.setState({
-               visible: nextProps.releaseView.visible,
+                visible: nextProps.releaseView.visible,
                 app: nextProps.releaseView.app
             })
         }
@@ -45,29 +46,39 @@ class ConnectedReleaseModal extends React.Component {
     };
 
     render() {
-        if(this.props.releaseView.app != null){
-            const app = this.props.app;
-
+        if (this.props.releaseView.app != null) {
+            const app = this.props.releaseView.app;
             return (
                 <div>
                     <Modal
-                        title={app.title}
+                        title={app.name}
                         visible={this.state.visible}
                         onOk={this.handleOk}
                         onCancel={this.handleCancel}
                     >
                         <p>Some contents...</p>
-                        <p>Some contents...</p>
-                        <p>Some contents...</p>
+                        <List
+                        itemLayout="horizontal"
+                        dataSource={app.applicationReleases}
+                        renderItem={item => (
+                            <List.Item>
+                                <List.Item.Meta
+                                    avatar={<Avatar src={item.iconPath} />}
+                                    title={<a href="https://ant.design">Title</a>}
+                                    description={item.description}
+                                />
+                            </List.Item>
+                        )}
+                    />
                     </Modal>
                 </div>
             );
-        }else {
+        } else {
             return null;
         }
     }
 }
 
-const ReleaseModal = connect(mapStateToProps,null)(ConnectedReleaseModal);
+const ReleaseModal = connect(mapStateToProps, null)(ConnectedReleaseModal);
 
 export default ReleaseModal;
