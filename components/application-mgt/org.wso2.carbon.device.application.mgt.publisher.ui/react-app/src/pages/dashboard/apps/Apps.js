@@ -1,7 +1,7 @@
 import React from "react";
 import "antd/dist/antd.css";
 import {PageHeader, Typography,Input, Button, Row, Col} from "antd";
-import AppList from "../../../components/AppList";
+import AppList from "../../../components/apps/AppList";
 
 const Search = Input.Search;
 

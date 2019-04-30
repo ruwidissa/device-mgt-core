@@ -2,7 +2,7 @@ import {
     Skeleton, Switch, Card, Icon, Avatar, Typography
 } from 'antd';
 import React from "react";
-import config from "../../public/conf/config.json";
+import config from "../../../public/conf/config.json";
 
 const { Meta } = Card;
 const { Text } = Typography;

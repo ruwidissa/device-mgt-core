@@ -2,7 +2,7 @@ import React from "react";
 import AppCard from "./AppCard";
 import {Col, Row} from "antd";
 import {connect} from "react-redux";
-import {getApps} from "../js/actions";
+import {getApps} from "../../js/actions";
 
 // connecting state.articles with the component
 const mapStateToProps= state => {
