@@ -476,8 +476,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
 
                 }
-
-
             } catch (IOException e) {
                 String msg =
                         "Error occurred when getting byte array of binary file. Installer name: " + applicationArtifact
@@ -1045,80 +1043,52 @@ public class ApplicationManagerImpl implements ApplicationManager {
 //        return applicationReleases;
 //    }
 
-    @Override public List<String> deleteApplication(int applicationId) throws ApplicationManagementException {
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+    @Override
+    public void deleteApplication(int applicationId) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         List<String> storedLocations = new ArrayList<>();
-        ApplicationDTO application;
-
+        ApplicationDTO applicationDTO;
+        if (log.isDebugEnabled()) {
+            log.debug("Request is received to delete applications which are related with the application id "
+                    + applicationId);
+        }
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            application = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            applicationDTO = this.applicationDAO.getApplicationById(applicationId, tenantId);
 
-            if (application == null) {
-                throw new NotFoundException("Couldn't found an application for ApplicationDTO ID: " + applicationId);
+            if (applicationDTO == null) {
+                throw new NotFoundException("Couldn't found an application for Application ID: " + applicationId);
             }
-
-            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
-                    .getUnrestrictedRoles().isEmpty() && hasUserRole(application.getUnrestrictedRoles(), userName)) {
-                throw new ForbiddenException(
-                        "You don't have permission to delete this application. In order to delete an application you "
-                                + "need to have required permission. ApplicationDTO ID: " + applicationId);
-            }
-            List<ApplicationReleaseDTO> applicationReleases = getReleases(application, null);
-            if (log.isDebugEnabled()) {
-                log.debug("Request is received to delete applications which are related with the application id "
-                        + applicationId);
-            }
-            for (ApplicationReleaseDTO applicationRelease : applicationReleases) {
-                LifecycleStateDTO appLifecycleState = this.lifecycleStateDAO
-                        .getLatestLifeCycleState(applicationId, applicationRelease.getUuid());
-                LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
-                        appLifecycleState.getCurrentState());
-                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
-                        newAppLifecycleState.getCurrentState(), userName, tenantId)) {
-                    this.lifecycleStateDAO
-                            .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
-                                    tenantId);
-                } else {
-                    String currentState = appLifecycleState.getCurrentState();
-                    List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
-                            AppLifecycleState.REMOVED.toString());
-                    for (String nextState : lifecycleFlow) {
-                        LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
-                        if (lifecycleStateManager.isValidStateChange(currentState, nextState, userName, tenantId)) {
-                            this.lifecycleStateDAO
-                                    .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
-                                            tenantId);
-                        } else {
-                            ConnectionManagerUtil.rollbackDBTransaction();
-                            throw new ApplicationManagementException(
-                                    "Can't delete application release which has the UUID:" + applicationRelease
-                                            .getUuid()
-                                            + " and its belongs to the  application which has application ID:"
-                                            + applicationId + " You have to move the lifecycle state from "
-                                            + currentState + " to acceptable state");
-                        }
-                        currentState = nextState;
-                    }
+            List<ApplicationReleaseDTO> applicationReleaseDTOs = applicationDTO.getApplicationReleaseDTOs();
+            List<ApplicationReleaseDTO> activeApplicationReleaseDTOs = new ArrayList<>();
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
+                if (!applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState())){
+                    activeApplicationReleaseDTOs.add(applicationReleaseDTO);
                 }
-                storedLocations.add(applicationRelease.getAppHashValue());
+                storedLocations.add(applicationReleaseDTO.getAppHashValue());
+            }
+            if (!activeApplicationReleaseDTOs.isEmpty()) {
+                String msg = "There are application releases which are not in the state " + lifecycleStateManager
+                        .getEndState() + ". Hence you are not allowed to delete the application";
+                log.error(msg);
+                throw new ForbiddenException(msg);
             }
             this.applicationDAO.deleteApplication(applicationId);
             ConnectionManagerUtil.commitDBTransaction();
-        } catch (UserStoreException e) {
-            String msg = "Error occured while check whether current user has the permission to delete an application";
+            applicationStorageManager.deleteAllApplicationReleaseArtifacts(storedLocations);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting application data for application id: " + applicationId;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
-        } catch (LifeCycleManagementDAOException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occured while changing the application lifecycle state into REMOVED state.";
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred when deleting application artifacts in the file system. Application id: "
+                    + applicationId;
             log.error(msg);
-            throw new ApplicationManagementException(msg, e);
+            throw new ApplicationManagementException(msg);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-        return storedLocations;
     }
 
     private List<String> searchLifecycleStateFlow(String start, String finish) throws ApplicationManagementException {

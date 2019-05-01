@@ -68,7 +68,7 @@ public interface ApplicationManager {
      * @param applicationId ID for tha application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    List<String> deleteApplication(int applicationId) throws ApplicationManagementException;
+    void deleteApplication(int applicationId) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.

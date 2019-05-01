@@ -80,7 +80,7 @@ import javax.ws.rs.core.Response;
                         name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:publisher:view",
-                        permissions = {"/app-mgt/publisher/application/update"}
+                        permissions = {"/app-mgt/publisher/application/view"}
                 ),
                 @Scope(
                         name = "Update an ApplicationDTO",
@@ -91,8 +91,7 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/applications")
-@Api(value = "ApplicationDTO Management", description = "This API carries all application management related operations " +
-        "such as get all the applications, add application, etc.")
+@Api(value = "ApplicationDTO Management")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementPublisherAPI {
 
@@ -377,7 +376,7 @@ public interface ApplicationManagementPublisherAPI {
 
     @DELETE
     @Consumes("application/json")
-    @Path("/{appid}")
+    @Path("/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -400,14 +399,20 @@ public interface ApplicationManagementPublisherAPI {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while deleting the application.",
-                            response = ErrorResponse.class)
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to delete the application"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Application not found"),
             })
     Response deleteApplication(
             @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO",
                     required = true)
-            @PathParam("appid") int applicationId
+            @PathParam("appId") int applicationId
     );
 
     @PUT
