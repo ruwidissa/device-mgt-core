@@ -87,6 +87,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -135,103 +136,131 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO applicationDTO;
-        Application application;
         if (log.isDebugEnabled()) {
             log.debug("Application create request is received for the tenant : " + tenantId + " From" + " the user : "
                     + userName);
         }
+
+        ApplicationDTO applicationDTO;
+        List<String> unrestrictedRoles;
+        Optional<CategoryDTO> category;
+        List<String> tags;
+
+        //validating and verifying application data
         try {
+            ConnectionManagerUtil.openDBConnection();
             applicationDTO = appWrapperToAppDTO(applicationWrapper);
-            ApplicationReleaseDTO initialApplicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
-            applicationDTO.getApplicationReleaseDTOs().clear();
+            unrestrictedRoles = applicationWrapper.getUnrestrictedRoles();
+            tags = applicationWrapper.getTags();
 
-            ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
-                    applicationWrapper.getDeviceType(), initialApplicationReleaseDTO, applicationArtifact, false);
-            applicationDTO.getApplicationReleaseDTOs().add(addImageArtifacts(applicationReleaseDTO, applicationArtifact));
-        } catch (UnexpectedServerErrorException e) {
-            String msg = "Error occurred when getting Device Type data.";
-            log.error(msg);
-            throw new ApplicationManagementException(msg, e);
-        }  catch (ResourceManagementException e) {
-            String msg = "Error Occured when uploading artifacts of the application: " + applicationWrapper.getName();
-            log.error(msg);
-            throw new ApplicationManagementException(msg, e);
-        }
-
-        try {
-            List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
-            ApplicationReleaseDTO applicationReleaseDTO;
+            if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
+                if (!isValidRestrictedRole(unrestrictedRoles)) {
+                    String msg = "Unrestricted role list contain role/roles which are not in the user store.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+                if (!hasUserRole(unrestrictedRoles, userName)) {
+                    String msg = "You are trying to restrict the visibility of the application for a role set, but "
+                            + "in order to perform the action at least one role should be assigned to user: "
+                            + userName;
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+            }
 
             Filter filter = new Filter();
             filter.setFullMatch(true);
             filter.setAppName(applicationDTO.getName().trim());
             filter.setOffset(0);
             filter.setLimit(1);
-
-            ConnectionManagerUtil.beginDBTransaction();
             List<ApplicationDTO> applicationList = applicationDAO
                     .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
             if (!applicationList.isEmpty()) {
-                String msg =
-                        "Already an application registered with same name - " + applicationList.get(0)
-                                .getName();
+                String msg = "Already an application registered with same name - " + applicationList.get(0).getName()
+                        + " for the device type " + applicationWrapper.getDeviceType();
                 log.error(msg);
                 throw new RequestValidatingException(msg);
             }
 
+            List<CategoryDTO> registeredCategories = this.applicationDAO.getAllCategories(tenantId);
+            String categoryName = applicationWrapper.getAppCategory();
+
+            if (registeredCategories.isEmpty()) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Registered application category set is empty. Since it is mandatory to add application "
+                        + "category when adding new application, registered application category list shouldn't be null.";
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+            category = registeredCategories.stream().filter(obj -> obj.getCategoryName().equals(categoryName))
+                    .findAny();
+            if (!category.isPresent()) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Request contains invalid category: " + categoryName;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (UnexpectedServerErrorException e) {
+            String msg = "Error occurred when getting Device Type data.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting data which is related to application. application name: "
+                    + applicationWrapper.getName() + " and application type: " + applicationWrapper.getType();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (UserStoreException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when validating the unrestricted roles given for the application";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+
+        //uploading application artifacts
+        try {
+            ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+            applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
+                    applicationWrapper.getDeviceType(), applicationReleaseDTO, applicationArtifact, false);
+            applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact);
+            applicationDTO.getApplicationReleaseDTOs().clear();
+            applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
+        } catch (ResourceManagementException e) {
+            String msg = "Error Occured when uploading artifacts of the application: " + applicationWrapper.getName();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+
+        //insert application data into databse
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+        try {
+            List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
+
+            ConnectionManagerUtil.beginDBTransaction();
             // Insert to application table
             int appId = this.applicationDAO.createApplication(applicationDTO, tenantId);
             if (appId == -1) {
-                log.error("ApplicationDTO creation is Failed");
+                log.error("Application data storing is Failed.");
                 ConnectionManagerUtil.rollbackDBTransaction();
+                deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
                 return null;
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("New ApplicationDTO entry added to AP_APP table. App Id:" + appId);
                 }
                 //adding application unrestricted roles
-                List<String> unrestrictedRoles = applicationWrapper.getUnrestrictedRoles();
-                if (!unrestrictedRoles.isEmpty()) {
-                    if (!isValidRestrictedRole(unrestrictedRoles)) {
-                        ConnectionManagerUtil.rollbackDBTransaction();
-                        String msg = "Unrestricted role list contain role/roles which are not in the user store.";
-                        log.error(msg);
-                        throw new ApplicationManagementException(msg);
-                    }
-
-                    if (!hasUserRole(unrestrictedRoles, userName)){
-                        ConnectionManagerUtil.rollbackDBTransaction();
-                        String msg =
-                                "You are trying to restrict the visibility of the application for a role set, but in order to perform the action at least one role should be assigned to user: "
-                                        + userName;
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
+                if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
                     this.visibilityDAO.addUnrestrictedRoles(unrestrictedRoles, appId, tenantId);
                     if (log.isDebugEnabled()) {
                         log.debug("New restricted roles to app ID mapping added to AP_UNRESTRICTED_ROLE table."
                                 + " App Id:" + appId);
                     }
-                }
-
-                List<CategoryDTO> registeredCategories = this.applicationDAO.getAllCategories(tenantId);
-                String categoryName = applicationWrapper.getAppCategory();
-                Optional<CategoryDTO> category = registeredCategories.stream()
-                        .filter(obj -> obj.getCategoryName().equals(categoryName)).findAny();
-
-                if (registeredCategories.isEmpty()) {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    String msg = "Registered application category set is empty category: " + categoryName;
-                    log.error(msg);
-                    throw new ApplicationManagementException(msg);
-                }
-                if (!category.isPresent()){
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    String msg = "Request contains invalid category: " + categoryName;
-                    log.error(msg);
-                    throw new ApplicationManagementException(msg);
-
                 }
 
                 /*
@@ -241,11 +270,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 */
                 List<Integer> categoryIds = new ArrayList<>();
                 categoryIds.add(category.get().getId());
-                this.applicationDAO.addCategoryMapping(categoryIds,appId,tenantId);
+                this.applicationDAO.addCategoryMapping(categoryIds, appId, tenantId);
 
                 //adding application tags
-                List<String> tags = applicationWrapper.getTags();
-                if (!tags.isEmpty()) {
+                if (tags != null && !tags.isEmpty()) {
                     List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
                     List<String> registeredTagNames = new ArrayList<>();
                     List<Integer> tagIds = new ArrayList<>();
@@ -277,58 +305,81 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.debug("Creating a new release. App Id:" + appId);
                 }
                 String initialLifecycleState = lifecycleStateManager.getInitialState();
-                applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
                 applicationReleaseDTO.setCurrentState(initialLifecycleState);
-                applicationReleaseDTO = this.applicationReleaseDAO.createRelease(applicationReleaseDTO, appId, tenantId);
+                applicationReleaseDTO = this.applicationReleaseDAO
+                        .createRelease(applicationReleaseDTO, appId, tenantId);
                 LifecycleStateDTO lifecycleStateDTO = getLifecycleStateInstance(initialLifecycleState,
                         initialLifecycleState);
                 this.lifecycleStateDAO
                         .addLifecycleState(lifecycleStateDTO, appId, applicationReleaseDTO.getUuid(), tenantId);
                 applicationReleaseEntities.add(applicationReleaseDTO);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
-                application = appDtoToAppResponse(applicationDTO);
+                Application application = appDtoToAppResponse(applicationDTO);
                 ConnectionManagerUtil.commitDBTransaction();
+                return application;
             }
-            return application;
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while adding lifecycle state. application name: " + applicationWrapper.getName()
-                    + " application type: is " + applicationWrapper.getType();
+            String msg =
+                    "Error occurred while adding lifecycle state. application name: " + applicationWrapper.getName()
+                            + " application type: is " + applicationWrapper.getType();
             log.error(msg);
+            try {
+                applicationStorageManager.deleteAllApplicationReleaseArtifacts(
+                        Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
+            } catch (ApplicationStorageManagementException ex) {
+                String errorLog =
+                        "Error occurred when deleting application artifacts. Application artifacts are tried to "
+                                + "delete because of lifecycle state adding issue in the application creating operation.";
+                log.error(errorLog);
+                throw new ApplicationManagementException(errorLog, e);
+            }
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while adding application or application release. application name: "
                     + applicationWrapper.getName() + " application type: " + applicationWrapper.getType();
             log.error(msg);
+            deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
             throw new ApplicationManagementException(msg, e);
-        } catch(LifecycleManagementException e){
+        } catch (LifecycleManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred when getting initial lifecycle state. application name: " + applicationWrapper
                     .getName() + " application type: is " + applicationWrapper.getType();
             log.error(msg);
+            deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
             throw new ApplicationManagementException(msg, e);
-        }catch (DBConnectionException e) {
+        } catch (DBConnectionException e) {
             String msg = "Error occurred while getting database connection.";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (VisibilityManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while adding unrestricted roles. application name: " + applicationWrapper.getName()
-                    + " application type: " + applicationWrapper.getType();
+            String msg =
+                    "Error occurred while adding unrestricted roles. application name: " + applicationWrapper.getName()
+                            + " application type: " + applicationWrapper.getType();
             log.error(msg);
+            deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while disabling AutoCommit.";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
-        } catch (UserStoreException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred when validating the unrestricted roles given for the application";
-            log.error(msg);
-            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    private void deleteApplicationArtifacts(List<String> directoryPaths) throws ApplicationManagementException {
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+
+        try {
+            applicationStorageManager.deleteAllApplicationReleaseArtifacts(directoryPaths);
+        } catch (ApplicationStorageManagementException e) {
+            String errorLog = "Error occurred when deleting application artifacts. directory paths: ." + directoryPaths
+                    .toString();
+            log.error(errorLog);
+            throw new ApplicationManagementException(errorLog, e);
         }
     }
 
@@ -576,9 +627,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             //set default values
-            if (StringUtils.isEmpty(filter.getSortBy())) {
-                filter.setSortBy("ASC");
-            }
             if (filter.getLimit() == 0) {
                 filter.setLimit(20);
             }
@@ -586,16 +634,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (!StringUtils.isEmpty(deviceTypename)) {
                 deviceType = getDeviceTypeData(deviceTypename);
             }
-
-            ConnectionManagerUtil.openDBConnection();
-
-            validateFilter(filter);
             if (deviceType == null) {
-                appDTOs = applicationDAO.getApplications(filter, 0, tenantId);
-            } else {
-                appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
+                deviceType = new DeviceType();
+                deviceType.setId(-1);
             }
 
+            ConnectionManagerUtil.openDBConnection();
+            validateFilter(filter);
+            appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
+            //todo as a performance improvement get these data from DB. Consider where in clause.
             for (ApplicationDTO app : appDTOs) {
                 boolean isSearchingApp = true;
                 List<String> filteringTags = filter.getTags();
@@ -905,6 +952,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     private String[] getRoleNames() throws UserStoreException {
+        //todo check role by role
         UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
         if (userRealm != null) {
             return userRealm.getUserStoreManager().getRoleNames();

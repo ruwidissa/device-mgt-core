@@ -84,7 +84,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch(BadRequestException e){
-            String msg = "Incompatible request payload is found. Please try with valid reuest payload.";
+            String msg = "Incompatible request payload is found. Please try with valid request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }catch (ApplicationManagementException e) {
@@ -161,7 +161,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
-                String msg = "ApplicationDTO creation is failed";
+                String msg = "Application creation is failed";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
@@ -285,9 +285,6 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("binaryFile") Attachment binaryFile) {
 
         try {
-            ApplicationManager applicationManager = APIUtil.getApplicationManager();
-
-            applicationManager.validateBinaryArtifact(binaryFile, appType);
             if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
                 String msg = "If ApplicationDTO type is " + appType
                         + ", therefore you don't have application release artifact to update for application release UUID: "
@@ -295,7 +292,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
-
+            ApplicationManager applicationManager = APIUtil.getApplicationManager();
+            applicationManager.validateBinaryArtifact(binaryFile, appType);
             applicationManager.updateApplicationArtifact(deviceType, appType, applicationReleaseUuid,
                     constructApplicationArtifact(binaryFile, null, null, null));
             return Response.status(Response.Status.OK)
@@ -371,9 +369,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateImageArtifacts(iconFile, bannerFile, screenshots);
             if (!applicationManager.updateRelease(deviceType, appType, applicationUUID, applicationReleaseWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots))) {
-                log.error("Application release updating is failed. Please contact the administrator. "
-                        + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(applicationReleaseWrapper).build();
+                String msg ="Application release updating is failed. Please contact the administrator. "
+                        + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType;
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity("Application release is successfully updated.").build();
         } catch (BadRequestException e) {
@@ -402,9 +401,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-    /*
-//todo ----------------------
-*/
+
     @DELETE
     @Path("/{appId}")
     public Response deleteApplication(@PathParam("appId") int applicationId) {
@@ -429,6 +426,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
+
+    /*
+//todo ----------------------
+*/
     @GET
     @Path("/lifecycle/{appId}/{uuid}")
     public Response getLifecycleState(

@@ -407,6 +407,7 @@ public interface ApplicationManagementPublisherAPI {
                             code = 404,
                             message = "Application not found"),
             })
+    //todo add new scope and permission
     Response deleteApplication(
             @ApiParam(
                     name = "UUID",
