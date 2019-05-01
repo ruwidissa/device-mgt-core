@@ -643,49 +643,45 @@ public class ApplicationManagerImpl implements ApplicationManager {
             validateFilter(filter);
             appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
             //todo as a performance improvement get these data from DB. Consider where in clause.
-            for (ApplicationDTO app : appDTOs) {
+            for (ApplicationDTO applicationDTO : appDTOs) {
                 boolean isSearchingApp = true;
                 List<String> filteringTags = filter.getTags();
                 List<String> filteringCategories = filter.getAppCategories();
                 List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
 
-                if (!lifecycleStateManager.getEndState().equals(app.getStatus())) {
-                    List<String> appUnrestrictedRoles = visibilityDAO.getUnrestrictedRoles(app.getId(), tenantId);
+                if (!lifecycleStateManager.getEndState().equals(applicationDTO.getStatus())) {
+                    List<String> appUnrestrictedRoles = visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId);
                     if ((appUnrestrictedRoles.isEmpty() || hasUserRole(appUnrestrictedRoles, userName)) && (
                             filteringUnrestrictedRoles == null || filteringUnrestrictedRoles.isEmpty()
                                     || hasAppUnrestrictedRole(appUnrestrictedRoles, filteringUnrestrictedRoles,
                                     userName))) {
                         if (filteringCategories != null && !filteringCategories.isEmpty()) {
-                            List<String> appTagList = applicationDAO.getAppCategories(app.getId(), tenantId);
-                            boolean isAppCategory = false;
-                            for (String category : filteringCategories) {
-                                if (appTagList.contains(category)) {
-                                    isAppCategory = true;
-                                    break;
-                                }
-                            }
+                            List<String> appTagList = applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
+                            boolean isAppCategory = filteringCategories.stream().anyMatch(appTagList::contains);
                             if (!isAppCategory) {
                                 isSearchingApp = false;
                             }
                         }
                         if (filteringTags != null && !filteringTags.isEmpty()) {
-                            List<String> appTagList = applicationDAO.getAppTags(app.getId(), tenantId);
-                            boolean isAppTag = false;
-                            for (String tag : filteringTags) {
-                                if (appTagList.contains(tag)) {
-                                    isAppTag = true;
-                                    break;
-                                }
-                            }
+                            List<String> appTagList = applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
+                            boolean isAppTag = filteringTags.stream().anyMatch(appTagList::contains);
                             if (!isAppTag) {
                                 isSearchingApp = false;
                             }
                         }
                         if (isSearchingApp) {
-                            filteredApplications.add(app);
+                            filteredApplications.add(applicationDTO);
                         }
                     }
                 }
+
+                List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs = new ArrayList<>();
+                for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
+                    if (!applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState())) {
+                        filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
+                    }
+                }
+                applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
             }
 
             for(ApplicationDTO appDTO : filteredApplications){
