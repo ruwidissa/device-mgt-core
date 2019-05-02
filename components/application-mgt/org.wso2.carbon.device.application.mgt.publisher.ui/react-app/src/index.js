@@ -14,19 +14,23 @@ import {Provider} from "react-redux";
 const routes = [
     {
         path: '/publisher/login',
+        exact: true,
         component: Login
     },
     {
-        path: '/publisher',
+        path: '/publisher/apps',
+        exact: false,
         component: Dashboard,
         routes: [
             {
                 path: '/publisher/apps',
-                component: Apps
+                component: Apps,
+                exact: true
             },
             {
-                path: '/publisher/new-app',
-                component: AddNewApp
+                path: '/publisher/apps/new-app',
+                component: AddNewApp,
+                exact: true
             }
         ]
     }
@@ -35,7 +39,7 @@ const routes = [
 
 ReactDOM.render(
     <Provider store={store}>
-        <App routes={routes}/>
+            <App routes={routes}/>
     </Provider>,
     document.getElementById('root'));
 
