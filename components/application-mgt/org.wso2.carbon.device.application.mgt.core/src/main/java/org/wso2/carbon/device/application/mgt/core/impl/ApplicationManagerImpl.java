@@ -875,6 +875,53 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
+    public ApplicationRelease getApplicationReleaseByUUID(String uuid) throws ApplicationManagementException{
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        boolean isVisibleAppRelease = false;
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationReleaseDTO applicationReleaseDTO = applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for the UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            if (applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState())) {
+                return null;
+            }
+
+            List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRolesByUUID(uuid, tenantId);
+            if (!unrestrictedRoles.isEmpty()) {
+                if (hasUserRole(unrestrictedRoles, userName)) {
+                    isVisibleAppRelease = true;
+                }
+            } else {
+                isVisibleAppRelease = true;
+            }
+
+            if (!isVisibleAppRelease) {
+                String msg = "You are trying to access release of visibility restricted application. You don't have "
+                        + "required roles to view this application,";
+                log.error(msg);
+                throw new ForbiddenException(msg);
+            }
+            return releaseDtoToRelease(applicationReleaseDTO);
+        } catch (LifecycleManagementException e) {
+            String msg = "Error occurred when getting the end state of the application lifecycle flow";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (UserStoreException e) {
+            String msg = "User-store exception while getting application with the application release UUID: " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+
+    @Override
     public ApplicationDTO getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();

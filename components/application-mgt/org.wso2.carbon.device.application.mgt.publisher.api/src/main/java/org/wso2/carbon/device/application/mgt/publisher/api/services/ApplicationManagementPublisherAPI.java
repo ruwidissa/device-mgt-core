@@ -180,6 +180,48 @@ public interface ApplicationManagementPublisherAPI {
             @QueryParam("state") String state
     );
 
+    @GET
+    @Path("/release/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get the application release of requesting application UUID and state",
+            notes = "This will get the application release identified by the application release uuid and state.",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved relevant application release.",
+                            response = ApplicationDTO.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to access the application release"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Application release not found"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting relevant application release.",
+                            response = ErrorResponse.class)
+            })
+    Response getApplicationRelease(
+            @ApiParam(
+                    name = "uuid",
+                    value = "application release uuid",
+                    required = true)
+            @PathParam("uuid") String uuid
+    );
+
     @PUT
     @Path("/{appId}")
     @Produces(MediaType.APPLICATION_JSON)

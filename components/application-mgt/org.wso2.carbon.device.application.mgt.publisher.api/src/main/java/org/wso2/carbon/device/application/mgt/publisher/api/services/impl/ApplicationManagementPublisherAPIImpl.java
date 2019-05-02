@@ -125,6 +125,37 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
+    @GET
+    @Consumes("application/json")
+    @Path("/release/{uuid}")
+    public Response getApplicationRelease(
+            @PathParam("uuid") String uuid) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            ApplicationRelease applicationRelease = applicationManager.getApplicationReleaseByUUID(uuid);
+            if (applicationRelease == null){
+                String msg = "Application release is in the end state of the application lifecycle flow.";
+                log.error(msg);
+                return Response.status(Response.Status.OK).entity(msg).build();
+            }
+            return Response.status(Response.Status.OK).entity(applicationRelease).build();
+        } catch (NotFoundException e) {
+            String msg = "Application Release with UUID: " + uuid + " is not found";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch(ForbiddenException e){
+            String msg = "You don't have permission to access the application release. application release UUID: : "
+                    + uuid;
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        }
+        catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
     @POST
     @Consumes("multipart/mixed")
     public Response createApplication(

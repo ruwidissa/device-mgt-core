@@ -104,6 +104,42 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         }
     }
 
+
+    @Override
+    public List<String> getUnrestrictedRolesByUUID(String uuid, int tenantId) throws VisibilityManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get unrestricted roles for UUID: " + uuid);
+        }
+        Connection conn;
+        List<String> unrestrictedRoles = new ArrayList<>();
+        String sql = "SELECT ROLE FROM AP_UNRESTRICTED_ROLE "
+                + "WHERE "
+                + "AP_APP_ID = (SELECT AR.AP_APP_ID FROM AP_APP_RELEASE AR WHERE AR.UUID = ? AND AR.TENANT_ID = ? ) "
+                + "AND TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, uuid);
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, tenantId);
+                try (ResultSet rs = stmt.executeQuery();) {
+                    while (rs.next()) {
+                        unrestrictedRoles.add(rs.getString("ROLE"));
+                    }
+                    return unrestrictedRoles;
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new VisibilityManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting unrestricted roles for UUID: "
+                            + uuid, e);
+        } catch (SQLException e) {
+            throw new VisibilityManagementDAOException(
+                    "Error occurred while getting unrestricted roles for UUID: " + uuid, e);
+        }
+    }
+
     @Override
     public void deleteUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws VisibilityManagementDAOException {
         if (log.isDebugEnabled()) {

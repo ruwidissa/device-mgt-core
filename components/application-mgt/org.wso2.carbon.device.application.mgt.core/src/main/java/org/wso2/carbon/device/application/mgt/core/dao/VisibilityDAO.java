@@ -40,6 +40,8 @@ public interface VisibilityDAO {
 
     List<String> getUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException;
 
+    List<String> getUnrestrictedRolesByUUID(String uuid, int tenantId) throws VisibilityManagementDAOException;
+
     void deleteUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws
             VisibilityManagementDAOException;
 

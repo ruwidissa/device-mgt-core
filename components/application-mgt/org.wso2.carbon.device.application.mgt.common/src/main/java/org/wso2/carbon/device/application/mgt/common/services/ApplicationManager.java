@@ -33,7 +33,6 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseW
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -89,7 +88,7 @@ public interface ApplicationManager {
     ApplicationList getApplications(Filter filter) throws ApplicationManagementException;
 
     /**
-     * To get the ApplicationDTO for given Id.
+     * To get the Application for given Id.
      *
      * @param id id of the ApplicationDTO
      * @param state state of the ApplicationDTO
@@ -97,6 +96,15 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
     Application getApplicationById(int id, String state) throws ApplicationManagementException;
+
+    /**
+     * To get the Application Release for given uuid.
+     *
+     * @param uuid uuid of the ApplicationDTO
+     * @return the Application Release identified by the UUID
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    ApplicationRelease getApplicationReleaseByUUID(String uuid) throws ApplicationManagementException;
 
     /**
      * To get the ApplicationDTO for given application relase UUID.
