@@ -1,6 +1,7 @@
 import React from "react";
 import {Modal, Typography,List, Avatar} from 'antd';
 import {connect} from 'react-redux';
+import {Link} from "react-router-dom";
 
 // connecting state.releaseView with the component
 const mapStateToProps = state => {
@@ -60,12 +61,12 @@ class ConnectedReleaseModal extends React.Component {
                         <List
                         itemLayout="horizontal"
                         dataSource={app.applicationReleases}
-                        renderItem={item => (
+                        renderItem={release => (
                             <List.Item>
                                 <List.Item.Meta
-                                    avatar={<Avatar src={item.iconPath} />}
-                                    title={<a href="https://ant.design">Title</a>}
-                                    description={item.description}
+                                    avatar={<Avatar src={release.iconPath} />}
+                                    title={<Link to={"/publisher/apps/releases/"+release.uuid}>{release.version}</Link>}
+                                    description={release.description}
                                 />
                             </List.Item>
                         )}
