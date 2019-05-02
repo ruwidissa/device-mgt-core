@@ -44,7 +44,7 @@ class ConnectedAppCard extends React.Component {
         );
 
         return (
-                <Card style={{marginTop: 16 }}  actions={[<Icon type="edit" />, <Icon type="close" />, <Icon type="ellipsis" onClick={this.handleReleasesClick} />]}>
+                <Card style={{marginTop: 16 }}  actions={[<Icon type="edit" />, <Icon type="delete" />, <Icon type="appstore" theme="twoTone" onClick={this.handleReleasesClick} />]}>
                     <Meta
                         avatar={<Avatar src={icon} />}
                         title={this.props.name}
