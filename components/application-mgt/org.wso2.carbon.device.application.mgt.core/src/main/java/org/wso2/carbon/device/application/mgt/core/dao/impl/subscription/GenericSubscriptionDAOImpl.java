@@ -19,16 +19,21 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.subscription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -44,7 +49,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             conn = this.getDBConnection();
             long time = System.currentTimeMillis() / 1000;
             String sql = "INSERT INTO AP_DEVICE_SUBSCRIPTION(TENANT_ID, SUBSCRIBED_BY, SUBSCRIBED_TIMESTAMP, "
-                    + "DM_DEVICE_ID, AP_APP_RELEASE_ID, AP_APP_ID, INSTALL_STATUS) VALUES (?, ?, ?, ?, ?, ?)";
+                    + "DM_DEVICE_ID, AP_APP_RELEASE_ID, AP_APP_ID, INSTALL_STATUS) VALUES (?, ?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql);
             for (Device device : deviceList) {
                 stmt.setInt(1, tenantId);
@@ -166,6 +171,52 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     e);
         } finally {
             Util.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
+            ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting device subscriptions for the application release id " + appReleaseId
+                    + " from the database");
+        }
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            String sql = "SELECT "
+                    + "DS.ID AS ID, "
+                    + "DS.SUBSCRIBED_BY AS SUBSCRIBED_BY, "
+                    + "DS.SUBSCRIBED_TIMESTAMP AS SUBSCRIBED_AT, "
+                    + "DS.UNSUBSCRIBED AS IS_UNSUBSCRIBED, "
+                    + "DS.UNSUBSCRIBED_BY AS UNSUBSCRIBED_BY, "
+                    + "DS.UNSUBSCRIBED_TIMESTAMP AS UNSUBSCRIBED_AT, "
+                    + "DS.SUBSCRIBED_FROM AS SUBSCRIBED_FROM, "
+                    + "DS.DM_DEVICE_ID AS DEVICE_ID "
+                    + "FROM AP_DEVICE_SUBSCRIPTION DS "
+                    + "WHERE DS.AP_APP_RELEASE_ID = ? AND DS.TENANT_ID=?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, appReleaseId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully retrieved device subscriptions for application release id "
+                                + appReleaseId);
+                    }
+                    return Util.loadDeviceSubscriptions(rs);
+                }
+            }
+        } catch (SQLException e) {
+            String msg =
+                    "Error occurred while getting device subscription data for application ID: " + appReleaseId + ".";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg =
+                    "Error occurred while obtaining the DB connection for getting device subscription for applicationID: "
+                            + appReleaseId + ".";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 }

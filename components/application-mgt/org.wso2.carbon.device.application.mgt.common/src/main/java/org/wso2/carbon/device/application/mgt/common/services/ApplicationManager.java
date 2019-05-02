@@ -76,7 +76,7 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of tha application release
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
+    void deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.

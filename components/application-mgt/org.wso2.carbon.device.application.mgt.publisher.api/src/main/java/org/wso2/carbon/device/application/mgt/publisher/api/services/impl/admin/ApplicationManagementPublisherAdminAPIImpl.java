@@ -74,16 +74,14 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
     private static Log log = LogFactory.getLog(ApplicationManagementPublisherAdminAPIImpl.class);
 
         @DELETE
-        @Path("/{appid}/{uuid}")
+        @Path("/release/{appId}/{uuid}")
         public Response deleteApplicationRelease(
-                @PathParam("appid") int applicationId,
+                @PathParam("appId") int applicationId,
                 @PathParam("uuid") String releaseUuid) {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
             try {
-                String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
-                applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
-                String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
+                applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
+                String responseMsg = "Successfully deleted the application release for uuid: " + releaseUuid + "";
                 return Response.status(Response.Status.OK).entity(responseMsg).build();
             }  catch (NotFoundException e) {
                 String msg = "Couldn't found application release which is having application id: " + applicationId
@@ -98,10 +96,6 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
                 return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
             }catch (ApplicationManagementException e) {
                 String msg = "Error occurred while deleting the application: " + applicationId;
-                log.error(msg, e);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            } catch (ApplicationStorageManagementException e) {
-                String msg = "Error occurred while deleting the application storage: " + applicationId;
                 log.error(msg, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }

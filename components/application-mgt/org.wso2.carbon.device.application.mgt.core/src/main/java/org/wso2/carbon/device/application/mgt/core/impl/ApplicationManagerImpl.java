@@ -39,6 +39,7 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationSubscriptionType
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
+import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -59,6 +60,7 @@ import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
@@ -109,6 +111,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ApplicationDAO applicationDAO;
     private ApplicationReleaseDAO applicationReleaseDAO;
     private LifecycleStateDAO lifecycleStateDAO;
+    private SubscriptionDAO subscriptionDAO;
     private LifecycleStateManager lifecycleStateManager;
 
     public ApplicationManagerImpl() {
@@ -121,6 +124,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
         this.lifecycleStateDAO = ApplicationManagementDAOFactory.getLifecycleStateDAO();
         this.applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
+        this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
     }
 
     /***
@@ -1230,86 +1234,91 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public String deleteApplicationRelease(int applicationId, String releaseUuid)
+    public void deleteApplicationRelease(int applicationId, String releaseUuid)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO application;
+        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            application = this.applicationDAO.getApplicationById(applicationId, tenantId);
-            if (application == null) {
-                throw new NotFoundException("Couldn't find an application for application ID: " + applicationId);
-            }
-            if (!isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION) && !application
-                    .getUnrestrictedRoles().isEmpty() && hasUserRole(application.getUnrestrictedRoles(), userName)) {
-                throw new ForbiddenException(
-                        "You don't have permission for deleting application release. ApplicationDTO id: " + applicationId
-                                + " and release UUID: " + releaseUuid);
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO
+                    .getReleaseByUUID(releaseUuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find an application release for application release UUID: " + releaseUuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
 
-            ApplicationReleaseDTO applicationRelease = this.applicationReleaseDAO
-                    .getReleaseByIds(applicationId, releaseUuid, tenantId);
-            if (applicationRelease == null) {
-                throw new NotFoundException("Couldn't find an application release for application ID: " + applicationId
-                        + " and release UUID: " + releaseUuid);
+            if (!applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getInitialState())) {
+                String msg = "Application state is not in the initial state: " + lifecycleStateManager.getInitialState()
+                        + ". Therefore you are not permitted to delete the application release.";
+                log.error(msg);
+                throw new ForbiddenException(msg);
             }
-            LifecycleStateDTO appLifecycleState = this.lifecycleStateDAO
-                    .getLatestLifeCycleState(applicationId, releaseUuid);
-            if (appLifecycleState == null) {
-                throw new NotFoundException(
-                        "Couldn't find an lifecycle sate for application ID: " + applicationId + " and UUID: "
-                                + releaseUuid);
-            }
-            String currentState = appLifecycleState.getCurrentState();
-            if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState.REJECTED.toString()
-                    .equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals(currentState)) {
-                LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
-                        appLifecycleState.getCurrentState());
-                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
-                        newAppLifecycleState.getCurrentState(), userName, tenantId)) {
-                    this.lifecycleStateDAO
-                            .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
-                                    tenantId);
-                    ConnectionManagerUtil.commitDBTransaction();
-                } else {
-                    List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
-                            AppLifecycleState.REMOVED.toString());
-                    for (String nextState : lifecycleFlow) {
-                        LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
-                        if (lifecycleStateManager.isValidStateChange(currentState, nextState, userName, tenantId)) {
-                            this.lifecycleStateDAO
-                                    .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
-                                            tenantId);
-                        } else {
-                            ConnectionManagerUtil.rollbackDBTransaction();
-                            throw new ApplicationManagementException(
-                                    "Can't delete the application release, You have to move the "
-                                            + "lifecycle state from " + currentState + " to " + nextState);
-                        }
-                        currentState = nextState;
-                    }
+            List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
+                    .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
+            for (DeviceSubscriptionDTO deviceSubscriptionDTO : deviceSubscriptionDTOS) {
+                if (!deviceSubscriptionDTO.isUnsubscribed()) {
+                    String msg = "This application is subscribed to device/s. Therefore you are not permitted to delete "
+                            + "the application release.";
+                    log.error(msg);
+                    throw new ForbiddenException(msg);
                 }
-            } else {
-                throw new ApplicationManagementException(
-                        "Can't delete the application release, You have to move the " + "lifecycle state from "
-                                + currentState + " to acceptable " + "state");
             }
-            return applicationRelease.getAppHashValue();
+            //todo delete application release data ON delete cascade
+            applicationStorageManager.deleteApplicationReleaseArtifacts(applicationReleaseDTO.getAppHashValue());
+
+            //            LifecycleStateDTO appLifecycleState = this.lifecycleStateDAO
+//                    .getLatestLifeCycleState(applicationId, releaseUuid);
+//            if (appLifecycleState == null) {
+//                throw new NotFoundException(
+//                        "Couldn't find an lifecycle sate for application ID: " + applicationId + " and UUID: "
+//                                + releaseUuid);
+//            }
+//            String currentState = appLifecycleState.getCurrentState();
+//            if (AppLifecycleState.DEPRECATED.toString().equals(currentState) || AppLifecycleState.REJECTED.toString()
+//                    .equals(currentState) || AppLifecycleState.UNPUBLISHED.toString().equals(currentState)) {
+//                LifecycleStateDTO newAppLifecycleState = getLifecycleStateInstance(AppLifecycleState.REMOVED.toString(),
+//                        appLifecycleState.getCurrentState());
+//                if (lifecycleStateManager.isValidStateChange(newAppLifecycleState.getPreviousState(),
+//                        newAppLifecycleState.getCurrentState(), userName, tenantId)) {
+//                    this.lifecycleStateDAO
+//                            .addLifecycleState(newAppLifecycleState, applicationId, applicationRelease.getUuid(),
+//                                    tenantId);
+//                    ConnectionManagerUtil.commitDBTransaction();
+//                } else {
+//                    List<String> lifecycleFlow = searchLifecycleStateFlow(currentState,
+//                            AppLifecycleState.REMOVED.toString());
+//                    for (String nextState : lifecycleFlow) {
+//                        LifecycleStateDTO lifecycleState = getLifecycleStateInstance(nextState, currentState);
+//                        if (lifecycleStateManager.isValidStateChange(currentState, nextState, userName, tenantId)) {
+//                            this.lifecycleStateDAO
+//                                    .addLifecycleState(lifecycleState, applicationId, applicationRelease.getUuid(),
+//                                            tenantId);
+//                        } else {
+//                            ConnectionManagerUtil.rollbackDBTransaction();
+//                            throw new ApplicationManagementException(
+//                                    "Can't delete the application release, You have to move the "
+//                                            + "lifecycle state from " + currentState + " to " + nextState);
+//                        }
+//                        currentState = nextState;
+//                    }
+//                }
+//            } else {
+//                throw new ApplicationManagementException(
+//                        "Can't delete the application release, You have to move the " + "lifecycle state from "
+//                                + currentState + " to acceptable " + "state");
+//            }
+//            return applicationReleaseDTO.getAppHashValue();
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementDAOException(
-                    "Error ocured when getting application data or application release data for application id of "
-                            + applicationId + " application release UUID of the " + releaseUuid);
-        } catch (LifeCycleManagementDAOException e) {
+            String msg = "Error ocured when getting application data or application release data for application id of "
+                    + applicationId + " application release UUID of the " + releaseUuid;
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (ApplicationStorageManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occured when deleting application release for application ID of " + applicationId
-                            + " and application release UUID of " + releaseUuid, e);
-        } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "Error occured when checking permission for executing application release update. ApplicationDTO ID: "
-                            + applicationId + " and ApplicationDTO UUID: " + releaseUuid);
+            String msg = "Error occured when deleteing the application release artifact from the file system. Application release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
