@@ -244,7 +244,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                         + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
                         + "AR.RATED_USERS AS RATED_USER_COUNT "
                 + "FROM AP_APP_RELEASE AS AR "
-                + "WHERE AR.UUID = ? AND AR.TENAT_ID = ?";
+                + "WHERE AR.UUID = ? AND AR.TENANT_ID = ?";
 
         try {
             connection = this.getDBConnection();
