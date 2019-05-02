@@ -197,7 +197,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (!StringUtils.isEmpty(filter.getAppReleaseState())) {
             sql += " AND AP_APP_RELEASE.CURRENT_STATE = ?";
         }
-        if (deviceTypeId > 0) {
+        if (deviceTypeId != -1) {
             sql += " AND AP_APP.DEVICE_TYPE_ID = ?";
         }
 
