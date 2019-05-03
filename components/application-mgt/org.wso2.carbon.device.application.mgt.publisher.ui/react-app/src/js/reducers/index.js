@@ -5,7 +5,8 @@ const initialState = {
     releaseView: {
         visible: false,
         app: null
-    }
+    },
+    release: null
 };
 
 function rootReducer(state = initialState, action) {
@@ -20,6 +21,11 @@ function rootReducer(state = initialState, action) {
                 app: action.payload.app
             }
         });
+    }else if(action.type === ActionTypes.GET_RELEASE){
+        return Object.assign({}, state, {
+            release: action.payload
+        });
+
     }
     return state;
 }

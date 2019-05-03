@@ -1,9 +1,11 @@
 import React from "react";
-import "antd/dist/antd.css";
-import {PageHeader, Typography, Input, Button, Row, Col} from "antd";
-
+import {PageHeader, Typography, Input, Button, Row, Col, Avatar, Card} from "antd";
+import {connect} from "react-redux";
+import ReleaseView from "../../../../components/apps/release/ReleaseView";
+import {getRelease} from "../../../../js/actions";
 
 const Search = Input.Search;
+const {Title} = Typography;
 
 const routes = [
     {
@@ -20,8 +22,15 @@ const routes = [
     },
 ];
 
+const mapStateToProps = state => {
+    return {release: state.release}
+};
 
-class Release extends React.Component {
+const mapDispatchToProps = dispatch => ({
+    getRelease: (uuid) => dispatch(getRelease(uuid))
+});
+
+class ConnectedRelease extends React.Component {
     routes;
 
     constructor(props) {
@@ -31,11 +40,20 @@ class Release extends React.Component {
     }
 
     componentDidMount() {
-
+        const {uuid} = this.props.match.params;
+        this.props.getRelease(uuid);
     }
 
     render() {
-        const {uuid} = this.props.match.params;
+
+        const release = this.props.release;
+        if (release == null) {
+            return (
+                <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
+                    <Title level={3}>No Releases Found</Title>
+                </div>
+            );
+        }
         return (
             <div>
                 <PageHeader
@@ -43,13 +61,10 @@ class Release extends React.Component {
                 />
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
                     <Row style={{padding: 10}}>
-                        <Col span={6} offset={18}>
-                            <Search
-                                placeholder="search"
-                                onSearch={value => console.log(value)}
-                                style={{width: 200}}
-                            />
-                            <Button style={{margin: 5}}>Advanced Search</Button>
+                        <Col span={18}>
+                            <Card>
+                                <ReleaseView release={release}/>
+                            </Card>
                         </Col>
                     </Row>
                 </div>
@@ -59,5 +74,7 @@ class Release extends React.Component {
         );
     }
 }
+
+const Release = connect(mapStateToProps,mapDispatchToProps)(ConnectedRelease);
 
 export default Release;
