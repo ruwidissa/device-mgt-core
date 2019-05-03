@@ -19,6 +19,8 @@ package org.wso2.carbon.device.application.mgt.core.lifecycle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleGraph;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleStateVertex;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
@@ -60,6 +62,37 @@ public class LifecycleStateManager {
                 throw new LifecycleManagementException(msg, e);
             }
         }
+    }
+
+    public LifecycleGraph getLifecyccleStateGraph() throws LifecycleManagementException {
+        LifecycleGraph lifecycleGraph = new LifecycleGraph();
+        Map<String, State> lifecycleStatesDup = lifecycleStates;
+
+        for (State state : lifecycleStatesDup.values()) {
+            Set<String> proceedingStateNames = state.getProceedingStates();
+            String stateName = state.getState();
+            LifecycleStateVertex lifecycleStateVertex = new LifecycleStateVertex(stateName);
+            if (isInitialState(stateName)) {
+                lifecycleStateVertex.setInitialState(true);
+            }
+            if (isUpdatableState(stateName)) {
+                lifecycleStateVertex.setAppUpdatable(true);
+            }
+            if (isEndState(stateName)) {
+                lifecycleStateVertex.setEndState(true);
+            }
+            if (isInstallableState(stateName)) {
+                lifecycleStateVertex.setAppInstallable(true);
+            }
+            lifecycleGraph.addVertex(lifecycleStateVertex);
+            if (proceedingStateNames != null) {
+                proceedingStateNames.forEach(proceedingStateName -> {
+                    lifecycleGraph.addVertex(proceedingStateName);
+                    lifecycleGraph.addEdge(stateName, proceedingStateName);
+                });
+            }
+        }
+        return lifecycleGraph;
     }
 
 
