@@ -207,5 +207,7 @@ public interface ApplicationDAO {
      * @throws ApplicationManagementDAOException if unable to fetch the ApplicationDTO from the data store.
      */
     ApplicationDTO getApplicationByRelease(String appReleaseUUID, int tenantId) throws ApplicationManagementDAOException;
+
+    String getApplicationSubTypeByUUID(String uuid, int tenantId) throws ApplicationManagementDAOException;
 }
 

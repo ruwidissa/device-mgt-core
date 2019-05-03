@@ -7,7 +7,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManageme
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
 import java.util.Set;

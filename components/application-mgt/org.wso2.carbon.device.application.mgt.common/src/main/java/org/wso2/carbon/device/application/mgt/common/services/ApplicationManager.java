@@ -33,7 +33,6 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseW
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -68,7 +67,7 @@ public interface ApplicationManager {
      * @param applicationId ID for tha application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    List<String> deleteApplication(int applicationId) throws ApplicationManagementException;
+    void deleteApplication(int applicationId) throws ApplicationManagementException;
 
     /**
      * Delete an application identified by the unique ID.
@@ -77,7 +76,7 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of tha application release
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    String deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
+    void deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.
@@ -89,7 +88,7 @@ public interface ApplicationManager {
     ApplicationList getApplications(Filter filter) throws ApplicationManagementException;
 
     /**
-     * To get the ApplicationDTO for given Id.
+     * To get the Application for given Id.
      *
      * @param id id of the ApplicationDTO
      * @param state state of the ApplicationDTO
@@ -97,6 +96,15 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
     Application getApplicationById(int id, String state) throws ApplicationManagementException;
+
+    /**
+     * To get the Application Release for given uuid.
+     *
+     * @param uuid uuid of the ApplicationDTO
+     * @return the Application Release identified by the UUID
+     * @throws ApplicationManagementException Application Management Exception.
+     */
+    ApplicationRelease getApplicationReleaseByUUID(String uuid) throws ApplicationManagementException;
 
     /**
      * To get the ApplicationDTO for given application relase UUID.
@@ -172,19 +180,16 @@ public interface ApplicationManager {
 
     /***
      *
-     * @param applicationId ID of the application
-     * @param releaseUuid UUID of the application release
-     * @param deviceType Supported device type of the application
-     * @param applicationRelease {@link ApplicationReleaseDTO}
-     * @param binaryFileStram {@link InputStream} of the binary file
-     * @param iconFileStream {@link InputStream} of the icon
-     * @param bannerFileStream {@link InputStream} of the banner
-     * @param attachments {@link List} of {@link InputStream} of attachments
+     * @param deviceType Device type which is supported for the Application.
+     * @param applicationType Application Type
+     * @param releaseUuid UUID of the application release.
+     * @param applicationReleaseWrapper {@link ApplicationReleaseDTO}
+     * @param applicationArtifact {@link ApplicationArtifact}
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
-    boolean updateRelease(int applicationId, String releaseUuid, String deviceType, ApplicationReleaseDTO applicationRelease,
-            InputStream binaryFileStram, InputStream iconFileStream, InputStream bannerFileStream,
-            List<InputStream> attachments) throws ApplicationManagementException;
+    boolean updateRelease(String deviceType, String applicationType, String releaseUuid,
+            ApplicationReleaseWrapper applicationReleaseWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException;
 
     /***
      * To validate the application creating request

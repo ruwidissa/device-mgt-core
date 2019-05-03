@@ -20,8 +20,10 @@ package org.wso2.carbon.device.application.mgt.core.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.State;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
@@ -30,24 +32,36 @@ import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagem
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
+import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
+import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 
 import java.io.InputStream;
+import java.util.Map;
 
 public class AppmDataHandlerImpl implements AppmDataHandler {
 
-    private UIConfiguration uiConfiguration;
     private static final Log log = LogFactory.getLog(AppmDataHandlerImpl.class);
+    private UIConfiguration uiConfiguration;
+    private LifecycleStateManager lifecycleStateManager;
+
 
 
     public AppmDataHandlerImpl(UIConfiguration config) {
         this.uiConfiguration = config;
+        lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
+
     }
 
     @Override
     public UIConfiguration getUIConfiguration() {
         return this.uiConfiguration;
+    }
+
+    @Override
+    public Map<String, State> getLifecycleConfiguration() throws LifecycleManagementException {
+        return lifecycleStateManager.getLifecycleConfig();
     }
 
     @Override

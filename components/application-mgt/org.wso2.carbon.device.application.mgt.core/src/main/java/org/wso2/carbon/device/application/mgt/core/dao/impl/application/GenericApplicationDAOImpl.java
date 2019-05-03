@@ -197,7 +197,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (!StringUtils.isEmpty(filter.getAppReleaseState())) {
             sql += " AND AP_APP_RELEASE.CURRENT_STATE = ?";
         }
-        if (deviceTypeId > 0) {
+        if (deviceTypeId != -1) {
             sql += " AND AP_APP.DEVICE_TYPE_ID = ?";
         }
 
@@ -1095,4 +1095,41 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             Util.cleanupResources(stmt, rs);
         }
     }
+
+    @Override
+    public String getApplicationSubTypeByUUID(String uuid, int tenantId) throws ApplicationManagementDAOException {
+        Connection conn;
+        String sql;
+        try {
+            conn = this.getDBConnection();
+            sql = "SELECT AP_APP.SUB_TYPE AS SUB_TYPE "
+                    + "FROM AP_APP "
+                    + "WHERE "
+                    + "AP_APP.ID = (SELECT AP_APP_RELEASE.AP_APP_ID "
+                    + "             FROM AP_APP_RELEASE "
+                    + "             WHERE AP_APP_RELEASE.UUID = ?) "
+                    + "AND AP_APP.TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setString(1, uuid);
+                stmt.setInt(2, tenantId);
+                try(ResultSet rs = stmt.executeQuery()){
+                    if (rs.next()){
+                        return rs.getString("SUB_TYPE");
+                    }
+                    return null;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get subscription type of the application "
+                    + "for given application release uuid. UUID:." + uuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting application subscribe type for given application release UUID: "
+                    + uuid + " from database.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
 }

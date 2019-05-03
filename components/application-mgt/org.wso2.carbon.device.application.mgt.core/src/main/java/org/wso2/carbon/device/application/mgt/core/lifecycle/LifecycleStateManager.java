@@ -19,9 +19,10 @@ package org.wso2.carbon.device.application.mgt.core.lifecycle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.State;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.device.mgt.core.search.mgt.Constants;
@@ -60,6 +61,15 @@ public class LifecycleStateManager {
                 throw new LifecycleManagementException(msg, e);
             }
         }
+    }
+
+    public Map<String, State> getLifecycleConfig() throws LifecycleManagementException {
+        if (lifecycleStates == null){
+            String msg = "Lifecycle configuration in not initialized.";
+            log.error(msg);
+            throw new LifecycleManagementException(msg);
+        }
+        return lifecycleStates;
     }
 
 

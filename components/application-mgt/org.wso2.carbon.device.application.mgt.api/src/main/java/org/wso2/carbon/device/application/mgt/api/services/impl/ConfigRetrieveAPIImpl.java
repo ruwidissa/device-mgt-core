@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.api.services.ConfigRetrieveAPI;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
+import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 
@@ -46,7 +47,26 @@ public class ConfigRetrieveAPIImpl implements ConfigRetrieveAPI {
     public Response getUiConfig() {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
         UIConfiguration uiConfiguration = dataHandler.getUIConfiguration();
+        if (uiConfiguration == null){
+            String msg = "UI configuration is not initiated.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
         return Response.status(Response.Status.OK).entity(uiConfiguration).build();
     }
 
+    @GET
+    @Override
+    @Consumes("application/json")
+    @Path("/lifecycle-config")
+    public Response getLifecycleConfig() {
+        AppmDataHandler dataHandler = APIUtil.getDataHandler();
+        try {
+            return Response.status(Response.Status.OK).entity(dataHandler.getLifecycleConfiguration()).build();
+        } catch (LifecycleManagementException e) {
+            String msg = "Error Occurred while accessing lifecycle manager.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
 }

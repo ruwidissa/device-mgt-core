@@ -80,7 +80,7 @@ import javax.ws.rs.core.Response;
                         name = "Get ApplicationDTO Details",
                         description = "Get application details",
                         key = "perm:app:publisher:view",
-                        permissions = {"/app-mgt/publisher/application/update"}
+                        permissions = {"/app-mgt/publisher/application/view"}
                 ),
                 @Scope(
                         name = "Update an ApplicationDTO",
@@ -91,8 +91,7 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/applications")
-@Api(value = "ApplicationDTO Management", description = "This API carries all application management related operations " +
-        "such as get all the applications, add application, etc.")
+@Api(value = "ApplicationDTO Management")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementPublisherAPI {
 
@@ -179,6 +178,48 @@ public interface ApplicationManagementPublisherAPI {
                     name = "state",
                     value = "state")
             @QueryParam("state") String state
+    );
+
+    @GET
+    @Path("/release/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get the application release of requesting application UUID and state",
+            notes = "This will get the application release identified by the application release uuid and state.",
+            tags = "ApplicationDTO Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved relevant application release.",
+                            response = ApplicationDTO.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to access the application release"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Application release not found"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting relevant application release.",
+                            response = ErrorResponse.class)
+            })
+    Response getApplicationRelease(
+            @ApiParam(
+                    name = "uuid",
+                    value = "application release uuid",
+                    required = true)
+            @PathParam("uuid") String uuid
     );
 
     @PUT
@@ -377,7 +418,7 @@ public interface ApplicationManagementPublisherAPI {
 
     @DELETE
     @Consumes("application/json")
-    @Path("/{appid}")
+    @Path("/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -400,14 +441,21 @@ public interface ApplicationManagementPublisherAPI {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while deleting the application.",
-                            response = ErrorResponse.class)
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to delete the application"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Application not found"),
             })
+    //todo add new scope and permission
     Response deleteApplication(
             @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO",
                     required = true)
-            @PathParam("appid") int applicationId
+            @PathParam("appId") int applicationId
     );
 
     @PUT
@@ -535,7 +583,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/{deviceType}/{appId}/{uuid}")
+    @Path("/app-release/{deviceType}/{appType}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -567,21 +615,56 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response updateApplicationRelease(
-            @ApiParam(name = "deviceType", value = "Supported device type of the application", required = true)
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Supported device type of the application",
+                    required = true)
             @PathParam("deviceType") String deviceType,
-            @ApiParam(name = "appId", value = "Identifier of the ApplicationDTO", required = true)
-            @PathParam("appId") int applicationId,
-            @ApiParam(name = "UUID", value = "Unique identifier of the ApplicationDTO Release", required = true)
+            @ApiParam(
+                    name = "appType",
+                    value = "Type of the application",
+                    required = true)
+            @PathParam("appType") String appType,
+            @ApiParam(
+                    name = "UUID",
+                    value = "Unique identifier of the ApplicationDTO Release",
+                    required = true)
             @PathParam("uuid") String applicationUUID,
-            @Multipart(value = "applicationRelease", required = false, type = "application/json") ApplicationReleaseDTO applicationRelease,
-            @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
-            @Multipart(value = "icon", required = false) Attachment iconFile,
-            @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @ApiParam(name = "screenshot1", value = "Screen Shots of the uploading application", required = true)
+            @ApiParam(
+                    name = "applicationReleaseWrapper",
+                    value = "Application release wrapper which is going to update.",
+                    required = true)
+            @Multipart(
+                    value = "applicationReleaseWrapper",
+                    type = "application/json")
+                    ApplicationReleaseWrapper applicationReleaseWrapper,
+            @ApiParam(
+                    name = "binaryFile",
+                    value = "Application installer file.",
+                    required = true)
+            @Multipart(value = "binaryFile") Attachment binaryFile,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon file of the application release.",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "banner file of the application release.",
+                    required = true)
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "First screenshot of the uploading application",
+                    required = true)
             @Multipart(value = "screenshot1") Attachment screenshot1,
-            @ApiParam(name = "screenshot2", value = "Screen Shots of the uploading application")
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Second screenshot 2 of the uploading application")
             @Multipart(value = "screenshot2") Attachment screenshot2,
-            @ApiParam(name = "screenshot3", value = "Screen Shots of the uploading application")
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Third screenshot of the uploading application")
             @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @GET
