@@ -20,7 +20,6 @@ package org.wso2.carbon.device.application.mgt.api.services.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.api.services.ConfigRetrieveAPI;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleStateVertex;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
@@ -31,9 +30,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Implementation of ApplicationDTO Management related APIs.
@@ -51,6 +47,11 @@ public class ConfigRetrieveAPIImpl implements ConfigRetrieveAPI {
     public Response getUiConfig() {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
         UIConfiguration uiConfiguration = dataHandler.getUIConfiguration();
+        if (uiConfiguration == null){
+            String msg = "UI configuration is not initiated.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
         return Response.status(Response.Status.OK).entity(uiConfiguration).build();
     }
 
@@ -60,14 +61,8 @@ public class ConfigRetrieveAPIImpl implements ConfigRetrieveAPI {
     @Path("/lifecycle-config")
     public Response getLifecycleConfig() {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
-        Map<String, List<LifecycleStateVertex>> verticesObject = new HashMap<>();
-        Map<LifecycleStateVertex, List<LifecycleStateVertex>> vertices = null;
         try {
-            vertices = dataHandler.getLifecycleConfiguration().getAdjVertices();
-            for (LifecycleStateVertex vt : vertices.keySet()) {
-                verticesObject.put(vt.getLabel(), vertices.get(vt));
-            }
-            return Response.status(Response.Status.OK).entity(verticesObject).build();
+            return Response.status(Response.Status.OK).entity(dataHandler.getLifecycleConfiguration()).build();
         } catch (LifecycleManagementException e) {
             String msg = "Error Occurred while accessing lifecycle manager.";
             log.error(msg);

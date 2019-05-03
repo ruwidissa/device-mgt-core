@@ -32,7 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.impl.AppmDataHandlerImpl;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;

@@ -1,8 +1,8 @@
 package org.wso2.carbon.device.application.mgt.core;
 
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.State;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.State;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 
 import java.util.HashMap;
 import java.util.List;

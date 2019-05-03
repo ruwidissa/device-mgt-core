@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.application.mgt.core.lifecycle;
+package org.wso2.carbon.device.application.mgt.common;
 
 import java.util.HashSet;
 import java.util.List;

@@ -19,11 +19,10 @@ package org.wso2.carbon.device.application.mgt.core.lifecycle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleGraph;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleStateVertex;
+import org.wso2.carbon.device.application.mgt.common.State;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionUtils;
 import org.wso2.carbon.device.mgt.core.search.mgt.Constants;
@@ -64,35 +63,13 @@ public class LifecycleStateManager {
         }
     }
 
-    public LifecycleGraph getLifecyccleStateGraph() throws LifecycleManagementException {
-        LifecycleGraph lifecycleGraph = new LifecycleGraph();
-        Map<String, State> lifecycleStatesDup = lifecycleStates;
-
-        for (State state : lifecycleStatesDup.values()) {
-            Set<String> proceedingStateNames = state.getProceedingStates();
-            String stateName = state.getState();
-            LifecycleStateVertex lifecycleStateVertex = new LifecycleStateVertex(stateName);
-            if (isInitialState(stateName)) {
-                lifecycleStateVertex.setInitialState(true);
-            }
-            if (isUpdatableState(stateName)) {
-                lifecycleStateVertex.setAppUpdatable(true);
-            }
-            if (isEndState(stateName)) {
-                lifecycleStateVertex.setEndState(true);
-            }
-            if (isInstallableState(stateName)) {
-                lifecycleStateVertex.setAppInstallable(true);
-            }
-            lifecycleGraph.addVertex(lifecycleStateVertex);
-            if (proceedingStateNames != null) {
-                proceedingStateNames.forEach(proceedingStateName -> {
-                    lifecycleGraph.addVertex(proceedingStateName);
-                    lifecycleGraph.addEdge(stateName, proceedingStateName);
-                });
-            }
+    public Map<String, State> getLifecycleConfig() throws LifecycleManagementException {
+        if (lifecycleStates == null){
+            String msg = "Lifecycle configuration in not initialized.";
+            log.error(msg);
+            throw new LifecycleManagementException(msg);
         }
-        return lifecycleGraph;
+        return lifecycleStates;
     }
 
 

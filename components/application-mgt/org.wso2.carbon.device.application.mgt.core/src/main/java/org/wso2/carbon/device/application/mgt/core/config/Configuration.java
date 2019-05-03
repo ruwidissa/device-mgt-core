@@ -20,7 +20,7 @@ package org.wso2.carbon.device.application.mgt.core.config;
 
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;

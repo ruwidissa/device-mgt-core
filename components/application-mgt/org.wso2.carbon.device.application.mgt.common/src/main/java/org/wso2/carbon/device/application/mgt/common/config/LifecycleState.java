@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.application.mgt.core.lifecycle.config;
+package org.wso2.carbon.device.application.mgt.common.config;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

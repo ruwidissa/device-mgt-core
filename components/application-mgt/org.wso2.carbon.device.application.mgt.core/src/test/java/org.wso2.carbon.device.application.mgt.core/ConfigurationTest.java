@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
 
