@@ -5,6 +5,7 @@ import App from "./App";
 import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
+import Release from "./pages/dashboard/apps/release/Release";
 import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
 import store from "./js/store/index";
@@ -31,6 +32,11 @@ const routes = [
                 path: '/publisher/apps/new-app',
                 component: AddNewApp,
                 exact: true
+            },
+            {
+                path: '/publisher/apps/releases/:uuid',
+                exact: true,
+                component: Release
             }
         ]
     }
@@ -39,7 +45,7 @@ const routes = [
 
 ReactDOM.render(
     <Provider store={store}>
-            <App routes={routes}/>
+        <App routes={routes}/>
     </Provider>,
     document.getElementById('root'));
 
