@@ -40,5 +40,5 @@ public class HandlerConstants {
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
 
     public static final int INTERNAL_ERROR_CODE = 500;
-    public static final long TIMEOUT = 300;
+    public static final long TIMEOUT = 1200;
 }
