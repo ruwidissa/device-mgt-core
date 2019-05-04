@@ -2230,6 +2230,9 @@
         <!-- app management related versions -->
         <googlecode.plist.version>1.21</googlecode.plist.version>
         <net.dongliu.version>2.6.5</net.dongliu.version>
+        <frontend.mave.version>1.7.6</frontend.mave.version>
+        <node.version>v10.15.3</node.version>
+        <npm.version>6.9.0</npm.version>
         
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>
