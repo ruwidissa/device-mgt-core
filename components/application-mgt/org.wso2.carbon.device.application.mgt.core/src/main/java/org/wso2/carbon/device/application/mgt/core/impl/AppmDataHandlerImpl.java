@@ -20,7 +20,7 @@ package org.wso2.carbon.device.application.mgt.core.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.State;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
@@ -60,7 +60,7 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
     }
 
     @Override
-    public Map<String, State> getLifecycleConfiguration() throws LifecycleManagementException {
+    public Map<String, LifecycleState> getLifecycleConfiguration() throws LifecycleManagementException {
         return lifecycleStateManager.getLifecycleConfig();
     }
 

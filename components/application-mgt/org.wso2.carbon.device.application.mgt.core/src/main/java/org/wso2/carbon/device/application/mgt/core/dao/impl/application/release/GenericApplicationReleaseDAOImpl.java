@@ -490,30 +490,25 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         return applicationReleaseDTO;
     }
 
-    /**
-     * To delete an application release.
-     *
-     * @param id      Id of the application Release.
-     * @param version version name of the application release.
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    @Override public void deleteRelease(int id, String version) throws ApplicationManagementDAOException {
+    @Override
+    public void deleteRelease(int id) throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
-        String sql = "DELETE FROM AP_APP_RELEASE WHERE ID = ? AND VERSION = ?";
+        String sql = "DELETE "
+                + "FROM AP_APP_RELEASE "
+                + "WHERE ID = ?";
         try {
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
-            statement.setString(2, version);
             statement.executeUpdate();
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
-                    "Database connection exception while trying to delete the release with version " + version, e);
+                    "Database connection exception while trying to delete the release fore release ID: " + id, e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
-                    "SQL exception while deleting the release with version " + version + ",while executing the query "
-                            + "sql", e);
+                    "SQL exception while deleting the release for release ID: " + id  + ",while executing the query sql"
+                    , e);
         } finally {
             Util.cleanupResources(statement, null);
         }

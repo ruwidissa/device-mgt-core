@@ -176,7 +176,7 @@ public interface ApplicationDAO {
      * @param appId     ID of the application.
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    void deleteApplication(int appId) throws ApplicationManagementDAOException;
+    void retireApplication(int appId) throws ApplicationManagementDAOException;
 
     /**
      * To get the application count that satisfies gives search query.

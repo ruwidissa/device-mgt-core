@@ -87,7 +87,7 @@ VALUES ('REJECTED', 'REJECTED', 'State in which Application is rejected after re
 INSERT INTO APPM_LIFECYCLE_STATE (NAME, IDENTIFIER, DESCRIPTION)
 VALUES ('PUBLISHED', 'PUBLISHED', 'State in which Application is in published state.');
 INSERT INTO APPM_LIFECYCLE_STATE (NAME, IDENTIFIER, DESCRIPTION)
-VALUES ('UNPUBLISHED', 'UNPUBLISHED', 'State in which Application is in un published state.');
+VALUES ('BLOCKED', 'BLOCKED', 'State in which Application is in un published state.');
 INSERT INTO APPM_LIFECYCLE_STATE (NAME, IDENTIFIER, DESCRIPTION)
 VALUES ('RETIRED', 'RETIRED', 'Retiring an application to indicate end of life state,');
 

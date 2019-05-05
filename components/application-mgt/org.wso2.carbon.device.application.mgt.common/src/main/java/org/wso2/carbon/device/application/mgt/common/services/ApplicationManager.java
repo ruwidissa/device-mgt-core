@@ -70,13 +70,20 @@ public interface ApplicationManager {
     void deleteApplication(int applicationId) throws ApplicationManagementException;
 
     /**
+     * Retire an application identified by the unique ID.
+     *
+     * @param applicationId ID for tha application
+     * @throws ApplicationManagementException ApplicationDTO Management Exception
+     */
+    void retireApplication(int applicationId) throws ApplicationManagementException;
+
+    /**
      * Delete an application identified by the unique ID.
      *
-     * @param applicationId ID of tha application
      * @param releaseUuid UUID of tha application release
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    void deleteApplicationRelease(int applicationId, String releaseUuid) throws ApplicationManagementException;
+    void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get the applications based on the search filter.

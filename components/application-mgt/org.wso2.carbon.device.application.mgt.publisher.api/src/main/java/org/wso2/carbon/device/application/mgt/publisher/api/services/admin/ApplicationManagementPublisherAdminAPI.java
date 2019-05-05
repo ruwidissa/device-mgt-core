@@ -77,7 +77,7 @@ public interface ApplicationManagementPublisherAdminAPI {
     String SCOPE = "scope";
 
     @DELETE
-    @Path("/release/{appId}/{uuid}")
+    @Path("/release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -108,11 +108,6 @@ public interface ApplicationManagementPublisherAdminAPI {
                             message = "Internal Server Error. \n Error occurred while deleting application release.",
                             response = ErrorResponse.class)
             }) Response deleteApplicationRelease(
-            @ApiParam(
-                    name = "appId",
-                    value = "application Id",
-                    required = true)
-            @PathParam("appId") int applicationId,
             @ApiParam(
                     name = "uuid",
                     value = "application release UUID",

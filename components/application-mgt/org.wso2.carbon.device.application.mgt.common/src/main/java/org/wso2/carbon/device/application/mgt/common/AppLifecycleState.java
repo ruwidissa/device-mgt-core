@@ -23,6 +23,6 @@ package org.wso2.carbon.device.application.mgt.common;
  * States of the Application.
  */
 public enum AppLifecycleState {
-    CREATED, IN_REVIEW, PUBLISHED, APPROVED, UNPUBLISHED, REJECTED, DEPRECATED, REMOVED
+    CREATED, IN_REVIEW, PUBLISHED, APPROVED, BLOCKED, REJECTED, DEPRECATED, RETIRED
 }
 

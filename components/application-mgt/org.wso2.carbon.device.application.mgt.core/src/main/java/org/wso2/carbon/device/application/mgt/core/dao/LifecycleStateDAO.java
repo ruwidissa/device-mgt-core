@@ -69,12 +69,12 @@ public interface LifecycleStateDAO {
             throws LifeCycleManagementDAOException;
 
     /**
-     * To delete a specific lifecycle state for application release.
-     * @param identifier Id of the LifecycleStateDTO.
+     * To delete lifecycle state data of specific application release.
+     * @param releaseId Id of the LifecycleStateDTO.
      *
      * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
      */
-    void deleteLifecycleState(int identifier) throws LifeCycleManagementDAOException;
+    void deleteLifecycleStateByReleaseId(int releaseId) throws LifeCycleManagementDAOException;
 
     /***
      *

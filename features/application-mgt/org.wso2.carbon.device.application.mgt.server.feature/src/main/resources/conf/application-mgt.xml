@@ -76,58 +76,59 @@
         <LifecycleState name="Created">
             <IsAppUpdatable>true</IsAppUpdatable>
             <IsInitialState>true</IsInitialState>
-            <Permission>/device-mgt/applications/life-cycle/create</Permission>
+            <IsDeletableState>true</IsDeletableState>
+            <Permission>/app-mgt/life-cycle/application/create</Permission>
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="In-Review">
-            <Permission>/device-mgt/applications/life-cycle/in-review</Permission>
+            <Permission>/app-mgt/life-cycle/application/review</Permission>
             <ProceedingStates>
                 <State>Rejected</State>
                 <State>Approved</State>
+                <State>Created</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Approved">
-            <Permission>/device-mgt/applications/life-cycle/approve</Permission>
+            <Permission>/app-mgt/life-cycle/application/approve</Permission>
             <ProceedingStates>
+                <State>In-Review</State>
                 <State>Published</State>
-                <State>Created</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Rejected">
-            <Permission>/device-mgt/applications/life-cycle/reject</Permission>
+            <IsDeletableState>true</IsDeletableState>
+            <Permission>/app-mgt/life-cycle/application/reject</Permission>
             <ProceedingStates>
-                <State>Created</State>
-                <State>Removed</State>
+                <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Published">
             <IsAppInstallable>true</IsAppInstallable>
-            <Permission>/device-mgt/applications/life-cycle/publish</Permission>
+            <Permission>/app-mgt/life-cycle/application/publish</Permission>
             <ProceedingStates>
-                <State>Unpublished</State>
+                <State>Blocked</State>
                 <State>Deprecated</State>
             </ProceedingStates>
         </LifecycleState>
-        <LifecycleState name="Unpublished">
-            <Permission>/device-mgt/applications/life-cycle/unpublish</Permission>
+        <LifecycleState name="Blocked">
+            <Permission>/app-mgt/life-cycle/application/block</Permission>
             <ProceedingStates>
                 <State>Published</State>
-                <State>In-Review</State>
-                <State>Removed</State>
+                <State>Deprecated</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Deprecated">
-            <Permission>/device-mgt/applications/life-cycle/deprecate</Permission>
+            <Permission>/app-mgt/life-cycle/application/deprecate</Permission>
             <ProceedingStates>
-                <State>Removed</State>
-                <State>In-Review</State>
+                <State>Published</State>
+                <State>Retired</State>
             </ProceedingStates>
         </LifecycleState>
-        <LifecycleState name="Removed">
+        <LifecycleState name="Retired">
             <IsEndState>true</IsEndState>
-            <Permission>/device-mgt/applications/life-cycle/remove</Permission>
+            <Permission>/app-mgt/life-cycle/application/retire</Permission>
         </LifecycleState>
     </LifecycleStates>
 

@@ -45,7 +45,6 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import java.util.List;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -416,15 +415,15 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
-    @DELETE
+    @PUT
     @Consumes("application/json")
-    @Path("/{appId}")
+    @Path("/retire/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "DELETE",
-            value = "Delete the application with the given UUID",
-            notes = "This will delete the application with the given UUID",
+            httpMethod = "PUT",
+            value = "Retire the application with the given UUID",
+            notes = "This will retire the application with the given UUID",
             tags = "ApplicationDTO Management",
             extensions = {
                     @Extension(properties = {
@@ -449,8 +448,7 @@ public interface ApplicationManagementPublisherAPI {
                             code = 404,
                             message = "Application not found"),
             })
-    //todo add new scope and permission
-    Response deleteApplication(
+    Response retireApplication(
             @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO",
@@ -592,7 +590,7 @@ public interface ApplicationManagementPublisherAPI {
             httpMethod = "PUT",
             value = "Update an application release",
             notes = "This will update a new application release",
-            tags = "ApplicationDTO Management",
+            tags = "Application Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
@@ -750,4 +748,39 @@ public interface ApplicationManagementPublisherAPI {
                     required = true)
             @QueryParam("action") String action
     );
+
+    @GET
+    @Path("/lifecycle-config")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get application management UI configuration",
+            notes = "This will get all UI configuration of application management",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully got Lifecycle Config.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. There doesn't have an defined <LifecycleStates> in app management "
+                                    + "configuration file." +
+                                    "query."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting the lifecycle config.",
+                            response = ErrorResponse.class)
+            })
+    Response getLifecycleConfig();
+
 }
