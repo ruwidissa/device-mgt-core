@@ -115,6 +115,9 @@ public interface ApplicationReleaseDAO {
      */
     void deleteRelease(int id) throws ApplicationManagementDAOException;
 
+    void deleteReleases(List<Integer> applicationReleaseIds) throws ApplicationManagementDAOException;
+
+
     /**
      * To get release details of a specific application.
      *

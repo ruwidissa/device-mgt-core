@@ -515,6 +515,31 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
+    public void deleteReleases(List<Integer> applicationReleaseIds) throws ApplicationManagementDAOException{
+        Connection connection;
+        String sql = "DELETE "
+                + "FROM AP_APP_RELEASE "
+                + "WHERE ID = ?";
+        try {
+            connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)){
+                for (Integer releaseId : applicationReleaseIds){
+                    statement.setInt(1, releaseId);
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Database connection exception occurred while trying to delete given application release", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "SQL exception occurred while execute delete query for deleting given application releases.", e);
+        }
+    }
+
+
+    @Override
     public boolean verifyReleaseExistenceByHash(String hashVal, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence by application hash value: " + hashVal);

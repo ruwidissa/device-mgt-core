@@ -76,6 +76,9 @@ public interface LifecycleStateDAO {
      */
     void deleteLifecycleStateByReleaseId(int releaseId) throws LifeCycleManagementDAOException;
 
+    void deleteLifecycleStates(List<Integer> appReleaseIds) throws LifeCycleManagementDAOException;
+
+
     /***
      *
      * @param appId ID of the application
