@@ -54,7 +54,7 @@ import java.util.List;
 /**
  * This is a test case for {@link GroupManagementServiceImpl}.
  */
-@PowerMockIgnore({"javax.ws.rs.*", "javax.xml.parsers"})
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*", "javax.xml.parsers"})
 @SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.PrivilegedCarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, CarbonContext.class})
