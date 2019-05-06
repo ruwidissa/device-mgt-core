@@ -1,20 +1,18 @@
-/*
- *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
- *   Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License.
- *   You may obtain a copy of the License at
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing,
- *   software distributed under the License is distributed on an
- *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
- *   specific language governing permissions and limitations
- *   under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
@@ -167,18 +165,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Attachment> attachmentList = new ArrayList<>();
-
-        if (screenshot1 != null) {
-            attachmentList.add(screenshot1);
-        }
-        if (screenshot2 != null) {
-            attachmentList.add(screenshot2);
-        }
-        if (screenshot3 != null) {
-            attachmentList.add(screenshot3);
-        }
-
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateAppCreatingRequest(applicationWrapper);
             applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0),
@@ -221,18 +208,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Attachment> attachmentList = new ArrayList<>();
-
-        if (screenshot1 != null) {
-            attachmentList.add(screenshot1);
-        }
-        if (screenshot2 != null) {
-            attachmentList.add(screenshot2);
-        }
-        if (screenshot3 != null) {
-            attachmentList.add(screenshot3);
-        }
-
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper, appType);
             applicationManager.validateBinaryArtifact(binaryFile, appType);
@@ -271,17 +247,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         try {
-            List<Attachment> attachments = new ArrayList<>();
-
-            if (screenshot1 != null) {
-                attachments.add(screenshot1);
-            }
-            if (screenshot2 != null) {
-                attachments.add(screenshot2);
-            }
-            if (screenshot3 != null) {
-                attachments.add(screenshot3);
-            }
+            List<Attachment> attachments = constructAttachmentList(screenshot1, screenshot2, screenshot3);
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachments);
             applicationManager.updateApplicationImageArtifact(applicationReleaseUuid,
@@ -385,16 +351,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Attachment> screenshots = new ArrayList<>();
-        if (screenshot1 != null){
-            screenshots.add(screenshot1);
-        }
-        if (screenshot2 != null) {
-            screenshots.add(screenshot2);
-        }
-        if (screenshot3 != null) {
-            screenshots.add(screenshot3);
-        }
+        List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateBinaryArtifact(binaryFile, appType);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, screenshots);
@@ -520,6 +477,29 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
     /***
+     * Construct the screenshot list by evaluating the availability of each screenshot.
+     *
+     * @param screenshot1 First Screenshot
+     * @param screenshot2 Second Screenshot
+     * @param screenshot3 Third Screenshot
+     * @return List of {@link Attachment}
+     */
+    private List<Attachment> constructAttachmentList(Attachment screenshot1, Attachment screenshot2,
+            Attachment screenshot3) {
+        List<Attachment> attachments = new ArrayList<>();
+        if (screenshot1 != null) {
+            attachments.add(screenshot1);
+        }
+        if (screenshot2 != null) {
+            attachments.add(screenshot2);
+        }
+        if (screenshot3 != null) {
+            attachments.add(screenshot3);
+        }
+        return attachments;
+    }
+
+    /***
      *
      * @param binaryFile binary file of the application release
      * @param iconFile icon file of the application release
@@ -624,7 +604,5 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             throw new ApplicationManagementException(msg);
         }
-
     }
-
 }
