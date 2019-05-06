@@ -144,7 +144,6 @@ public interface ApplicationManager {
     /**
      * To get all the releases of a particular ApplicationDTO.
      *
-     * @param applicationId ID of the ApplicationDTO.
      * @param releaseUuid UUID of the ApplicationDTO Release.
      * @param stateName Lifecycle state to change the app
      * @throws ApplicationManagementException ApplicationDTO Management Exception.

@@ -1625,6 +1625,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationReleaseDTO.setCurrentState(stateName);
                 this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId);
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+                ConnectionManagerUtil.commitDBTransaction();
             } else {
                 String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
                         + " to '" + stateName + "'";

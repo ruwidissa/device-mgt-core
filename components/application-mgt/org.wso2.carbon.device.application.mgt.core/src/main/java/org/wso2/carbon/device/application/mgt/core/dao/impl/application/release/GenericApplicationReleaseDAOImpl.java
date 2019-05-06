@@ -226,7 +226,8 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     public ApplicationReleaseDTO getReleaseByUUID( String uuid, int tenantId) throws ApplicationManagementDAOException {
         Connection connection;
         String sql =
-                "SELECT AR.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                "SELECT AR.ID AS RELEASE_ID, "
+                        + "AR.DESCRIPTION AS RELEASE_DESCRIPTION, "
                         + "AR.VERSION AS RELEASE_VERSION, "
                         + "AR.UUID AS RELEASE_UUID, "
                         + "AR.RELEASE_TYPE AS RELEASE_TYPE, "
