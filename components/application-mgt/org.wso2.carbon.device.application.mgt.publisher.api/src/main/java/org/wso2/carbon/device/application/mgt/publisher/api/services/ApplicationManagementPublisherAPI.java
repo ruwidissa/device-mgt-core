@@ -666,7 +666,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @GET
-    @Path("/lifecycle/{appId}/{uuid}")
+    @Path("/life-cycle/state-changes/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -688,15 +688,21 @@ public interface ApplicationManagementPublisherAPI {
                             response = List.class,
                             responseContainer = "List"),
                     @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found an application release for application release UUID."),
+                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the lifecycle list.",
                             response = ErrorResponse.class)
             })
-    Response getLifecycleState(@PathParam("appId") int applicationId,
-                               @PathParam("uuid") String applicationUuid);
+    Response getLifecycleStates(
+            @ApiParam(
+                    name = "uuid",
+                    value = "UUID of the application release.")
+            @PathParam("uuid") String applicationUuid);
 
     @POST
-    @Path("/lifecycle/{appId}/{uuid}")
+    @Path("/life-cycle/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -732,11 +738,6 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response addLifecycleState(
-            @ApiParam(
-                    name = "appId",
-                    value = "Identifier of the ApplicationDTO",
-                    required = true)
-            @PathParam("appId") int applicationId,
             @ApiParam(
                     name = "uuid",
                     value = "UUID of the ApplicationDTO Release",

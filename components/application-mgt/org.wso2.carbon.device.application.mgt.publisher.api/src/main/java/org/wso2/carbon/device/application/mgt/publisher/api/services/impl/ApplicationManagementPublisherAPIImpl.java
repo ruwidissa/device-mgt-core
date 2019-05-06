@@ -18,12 +18,13 @@
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
+import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
@@ -457,49 +458,43 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-
-    /*
-//todo ----------------------
-*/
     @GET
-    @Path("/lifecycle/{appId}/{uuid}")
-    public Response getLifecycleState(
-            @PathParam("appId") int applicationId,
-            @PathParam("uuid") String applicationUuid) {
-        LifecycleStateDTO lifecycleState;
+    @Path("/life-cycle/state-changes/{uuid}")
+    public Response getLifecycleStates(
+            @PathParam("uuid") String releaseUuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
-            if (lifecycleState == null) {
-                String msg = "Couldn't found application lifecycle details for appid: " + applicationId
-                        + " and app release UUID: " + applicationUuid;
-                log.error(msg);
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
+            List<LifecycleState> lifecycleStates = applicationManager.getLifecycleStateChangeFlow(releaseUuid);
+            return Response.status(Response.Status.OK).entity(lifecycleStates).build();
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUID: " + releaseUuid;
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting lifecycle state.";
+            String msg =
+                    "Error occurred while getting lifecycle states for application release UUID: " + releaseUuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.OK).entity(lifecycleState).build();
     }
 
+/*
+//todo ----------------------
+*/
     @POST
-    @Path("/lifecycle/{appId}/{uuid}")
+    @Path("/life-cycle/{uuid}")
     public Response addLifecycleState(
-            @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUuid,
             @QueryParam("action") String action) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            if (action == null || action.isEmpty()) {
-                String msg = "The Action is null or empty. Please check the request";
+            if (StringUtils.isEmpty(action)) {
+                String msg = "The Action is null or empty. Please verify the request.";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            LifecycleStateDTO state = new LifecycleStateDTO();
-            state.setCurrentState(action);
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state);
+
+            applicationManager.changeLifecycleState( applicationUuid, action);
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application id: " + applicationId
                     + " and application release uuid: " + applicationUuid;

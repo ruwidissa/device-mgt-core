@@ -178,6 +178,10 @@ public interface ApplicationReleaseDAO {
      * @return True if application release package name already exist in the IoT server, Otherwise returns False.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState) throws ApplicationManagementDAOException;
+    boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState)
+            throws ApplicationManagementDAOException;
+
+    boolean hasExisitInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
+            throws ApplicationManagementDAOException;
 
     }
