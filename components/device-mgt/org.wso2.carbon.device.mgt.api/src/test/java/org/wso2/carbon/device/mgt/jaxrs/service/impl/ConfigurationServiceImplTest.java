@@ -44,7 +44,7 @@ import java.util.List;
 /**
  * This is a test class for {@link ConfigurationServiceImpl}.
  */
-@PowerMockIgnore("javax.ws.rs.*")
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
 @SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, PolicyManagerUtil.class})
