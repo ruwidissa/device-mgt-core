@@ -100,4 +100,29 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
             }
         }
 
+    @DELETE
+    @Path("/{appId}")
+    public Response deleteApplication(
+            @PathParam("appId") int applicatioId) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.deleteApplication(applicatioId);
+            String responseMsg = "Successfully deleted the application which has ID: " + applicatioId + "";
+            return Response.status(Response.Status.OK).entity(responseMsg).build();
+        } catch (NotFoundException e) {
+            String msg =
+                    "Couldn't found application release which is having the ID:" + applicatioId;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "You don't have require permission to delete the application which has ID: " + applicatioId;
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while deleting the application which has application ID:: " + applicatioId;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
 }

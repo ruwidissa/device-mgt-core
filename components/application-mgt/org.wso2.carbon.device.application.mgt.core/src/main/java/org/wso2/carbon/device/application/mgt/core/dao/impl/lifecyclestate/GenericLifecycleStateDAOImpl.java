@@ -212,6 +212,31 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         }
     }
 
+    @Override
+    public void deleteLifecycleStates(List<Integer> appReleaseIds) throws LifeCycleManagementDAOException{
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            String sql = "DELETE FROM " +
+                    "AP_APP_LIFECYCLE_STATE " +
+                    "WHERE AP_APP_RELEASE_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer releaseId : appReleaseIds) {
+                    stmt.setInt(1, releaseId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (DBConnectionException e) {
+            throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection for deleting "
+                    + "application life-cycle states for given application Ids.", e);
+        } catch (SQLException e) {
+            throw new LifeCycleManagementDAOException("Error occurred while deleting life-cycle states for given "
+                    + "application releases.", e);
+        }
+    }
+
+
     private LifecycleStateDTO constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
         LifecycleStateDTO lifecycleState = null;
         try {

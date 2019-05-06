@@ -59,14 +59,18 @@ public interface ApplicationDAO {
 
     void deleteTagMapping (List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
+    void deleteTagMapping (int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
     List<String> getAppCategories (int appId, int tenantId) throws ApplicationManagementDAOException;
 
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
 
     void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException;
 
-    void addCategoryMapping (List<Integer>  categoryIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+    void addCategoryMapping(List<Integer> categoryIds, int applicationId, int tenantId)
+            throws ApplicationManagementDAOException;
 
+    void deleteCategoryMapping (int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To check application existence.
@@ -209,5 +213,8 @@ public interface ApplicationDAO {
     ApplicationDTO getApplicationByRelease(String appReleaseUUID, int tenantId) throws ApplicationManagementDAOException;
 
     String getApplicationSubTypeByUUID(String uuid, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteApplication(int appId, int tenantId) throws ApplicationManagementDAOException;
+
 }
 
