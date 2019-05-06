@@ -80,5 +80,4 @@ public interface ConfigRetrieveAPI {
                             response = ErrorResponse.class)
             })
     Response getUiConfig();
-
 }

@@ -74,34 +74,27 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
     private static Log log = LogFactory.getLog(ApplicationManagementPublisherAdminAPIImpl.class);
 
         @DELETE
-        @Path("/{appid}/{uuid}")
+        @Path("/release/{uuid}")
         public Response deleteApplicationRelease(
-                @PathParam("appid") int applicationId,
                 @PathParam("uuid") String releaseUuid) {
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
             try {
-                String storedLocation = applicationManager.deleteApplicationRelease(applicationId, releaseUuid);
-                applicationStorageManager.deleteApplicationReleaseArtifacts(storedLocation);
-                String responseMsg = "Successfully deleted the application release of: " + applicationId + "";
+                applicationManager.deleteApplicationRelease(releaseUuid);
+                String responseMsg = "Successfully deleted the application release for uuid: " + releaseUuid + "";
                 return Response.status(Response.Status.OK).entity(responseMsg).build();
-            }  catch (NotFoundException e) {
-                String msg = "Couldn't found application release which is having application id: " + applicationId
-                        + " and application release UUID:" + releaseUuid;
+            } catch (NotFoundException e) {
+                String msg =
+                        "Couldn't found application release which is having application release UUID:" + releaseUuid;
                 log.error(msg, e);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
             } catch (ForbiddenException e) {
-                String msg =
-                        "You don't have require permission to delete the application release which has UUID " + releaseUuid
-                                + " and application ID " + applicationId;
+                String msg = "You don't have require permission to delete the application release which has UUID "
+                        + releaseUuid;
                 log.error(msg, e);
                 return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
-            }catch (ApplicationManagementException e) {
-                String msg = "Error occurred while deleting the application: " + applicationId;
-                log.error(msg, e);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            } catch (ApplicationStorageManagementException e) {
-                String msg = "Error occurred while deleting the application storage: " + applicationId;
+            } catch (ApplicationManagementException e) {
+                String msg = "Error occurred while deleting the application release for application release UUID:: "
+                        + releaseUuid;
                 log.error(msg, e);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }

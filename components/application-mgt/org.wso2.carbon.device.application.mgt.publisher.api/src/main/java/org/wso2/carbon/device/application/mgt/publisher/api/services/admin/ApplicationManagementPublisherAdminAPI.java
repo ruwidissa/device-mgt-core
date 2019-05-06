@@ -28,33 +28,18 @@ import io.swagger.annotations.ExtensionProperty;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.Filter;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
-import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 /**
  * APIs to handle application management related tasks.
@@ -92,19 +77,19 @@ public interface ApplicationManagementPublisherAdminAPI {
     String SCOPE = "scope";
 
     @DELETE
-    @Path("/{appid}/{uuid}")
+    @Path("/release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "get all applications",
-            notes = "This will get all applications",
-            tags = "ApplicationDTO Management",
+            httpMethod = "DELETE",
+            value = "Delete application release.",
+            notes = "This will delete application release for given UUID",
+            tags = "Application Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
+                            @ExtensionProperty(name = SCOPE, value = "perm:admin:app:publisher:update")
                     })
             }
     )
@@ -112,22 +97,17 @@ public interface ApplicationManagementPublisherAdminAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully delete application releaset.",
+                            message = "OK. \n Successfully delete application release.",
                             response = ApplicationList.class),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. There doesn't have an application release with UUID" +
+                            message = "Not Found. There doesn't have an application release for UUID" +
                                     "query."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while deleting application release.",
                             response = ErrorResponse.class)
             }) Response deleteApplicationRelease(
-            @ApiParam(
-                    name = "appId",
-                    value = "application Id",
-                    required = true)
-            @PathParam("appid") int applicationId,
             @ApiParam(
                     name = "uuid",
                     value = "application release UUID",

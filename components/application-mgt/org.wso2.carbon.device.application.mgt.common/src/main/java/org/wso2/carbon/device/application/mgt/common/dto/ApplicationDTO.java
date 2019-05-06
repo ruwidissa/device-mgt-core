@@ -86,7 +86,7 @@ public class ApplicationDTO {
     @ApiModelProperty(name = "status",
             value = "Application status",
             required = true,
-            example = "REMOVED, ACTIVE")
+            example = "RETIRED, ACTIVE")
     private String status;
 
     @ApiModelProperty(name = "applicationReleaseDTOs",

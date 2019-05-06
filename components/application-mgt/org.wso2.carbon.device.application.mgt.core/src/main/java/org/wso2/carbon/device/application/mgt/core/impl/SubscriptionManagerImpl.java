@@ -28,6 +28,7 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
+import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
@@ -109,6 +110,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.openDBConnection();
             subscriptionDAO.subscribeUserToApplication(tenantId, subscriber, userList, application.getId(),
                     applicationReleaseId);
+        } catch (ApplicationManagementDAOException e) {
+            //todo
+            throw new ApplicationManagementException("");
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -150,6 +154,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.openDBConnection();
             subscriptionDAO.subscribeRoleToApplication(tenantId, subscriber, roleList, application.getId(),
                     applicationReleaseId);
+        } catch (ApplicationManagementDAOException e) {
+            //todo
+            throw new ApplicationManagementException("");
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -194,6 +201,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.openDBConnection();
             subscriptionDAO.subscribeGroupToApplication(tenantId, subscriber, groupList, application.getId(),
                     applicationReleaseId);
+        } catch (ApplicationManagementDAOException e) {
+            //todo
+            throw new ApplicationManagementException("");
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -252,6 +262,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
             subscriptionDAO.subscribeDeviceToApplication(tenantId, subscriber, deviceList, application.getId(),
                     applicationReleaseId, String.valueOf(AppOperation.InstallState.UNINSTALLED));
+        } catch (ApplicationManagementDAOException e) {
+            //todo
+            throw new ApplicationManagementException("");
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

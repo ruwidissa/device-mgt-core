@@ -456,7 +456,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, releaseUuid);
             stmt.setInt(2, tenantId);
-            stmt.setString(3, AppLifecycleState.REMOVED.toString());
+            stmt.setString(3, AppLifecycleState.RETIRED.toString());
             rs = stmt.executeQuery();
 
             if (log.isDebugEnabled()) {
@@ -619,14 +619,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void deleteApplication(int appId) throws ApplicationManagementDAOException {
+    public void retireApplication(int appId) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         try {
             conn = this.getDBConnection();
             String sql = "UPDATE AP_APP SET STATUS = ? WHERE ID = ? ";
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, AppLifecycleState.REMOVED.toString());
+            stmt.setString(1, AppLifecycleState.RETIRED.toString());
             stmt.setInt(2, appId);
             stmt.executeUpdate();
 

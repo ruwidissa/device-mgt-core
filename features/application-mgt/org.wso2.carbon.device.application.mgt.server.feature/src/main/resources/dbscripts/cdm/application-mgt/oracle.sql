@@ -157,7 +157,7 @@ VALUES ('PUBLISHED', 'PUBLISHED', 'State in which Application is in published st
 /
 
 INSERT INTO APPM_LIFECYCLE_STATE (NAME, IDENTIFIER, DESCRIPTION)
-VALUES ('UNPUBLISHED', 'UNPUBLISHED', 'State in which Application is in un published state.')
+VALUES ('BLOCKED', 'BLOCKED', 'State in which Application is in un published state.')
 /
 
 INSERT INTO APPM_LIFECYCLE_STATE (NAME, IDENTIFIER, DESCRIPTION)

@@ -24,10 +24,11 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
-import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
@@ -37,7 +38,6 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementPublisherAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 
 import java.io.IOException;
@@ -49,7 +49,6 @@ import java.util.Map;
 import javax.activation.DataHandler;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -433,12 +432,13 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
 
-    @DELETE
-    @Path("/{appId}")
-    public Response deleteApplication(@PathParam("appId") int applicationId) {
+    @PUT
+    @Path("/retire/{appId}")
+    public Response retireApplication(
+            @PathParam("appId") int applicationId) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.deleteApplication(applicationId);
+            applicationManager.retireApplication(applicationId);
             return Response.status(Response.Status.OK)
                     .entity("Successfully deleted the application for application ID: " + applicationId).build();
         } catch (NotFoundException e) {
@@ -511,6 +511,21 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.CREATED).entity("Lifecycle state added successfully.").build();
+    }
+
+    @GET
+    @Override
+    @Consumes("application/json")
+    @Path("/lifecycle-config")
+    public Response getLifecycleConfig() {
+        AppmDataHandler dataHandler = APIUtil.getDataHandler();
+        try {
+            return Response.status(Response.Status.OK).entity(dataHandler.getLifecycleConfiguration()).build();
+        } catch (LifecycleManagementException e) {
+            String msg = "Error Occurred while accessing lifecycle manager.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
     }
 
     /***

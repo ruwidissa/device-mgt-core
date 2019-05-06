@@ -26,6 +26,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -92,6 +93,31 @@ public class Util {
             }
         }
         return applications;
+    }
+
+    /**
+     * To create list of device subscription objects from the result set retrieved from the Database.
+     *
+     * @param rs ResultSet
+     * @return List of device subscriptions that is retrieved from the Database.
+     * @throws SQLException  SQL Exception
+     * @throws JSONException JSONException.
+     */
+    public static List<DeviceSubscriptionDTO> loadDeviceSubscriptions(ResultSet rs) throws SQLException {
+        List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = new ArrayList<>();
+        while (rs.next()) {
+            DeviceSubscriptionDTO deviceSubscriptionDTO = new DeviceSubscriptionDTO();
+            deviceSubscriptionDTO.setId(rs.getInt("ID"));
+            deviceSubscriptionDTO.setSubscribedBy(rs.getString("SUBSCRIBED_BY"));
+            deviceSubscriptionDTO.setSubscribedTimestamp(rs.getTimestamp("SUBSCRIBED_AT"));
+            deviceSubscriptionDTO.setUnsubscribed(rs.getBoolean("IS_UNSUBSCRIBED"));
+            deviceSubscriptionDTO.setUnsubscribedBy(rs.getString("UNSUBSCRIBED_BY"));
+            deviceSubscriptionDTO.setUnsubscribedTimestapm(rs.getTimestamp("UNSUBSCRIBED_AT"));
+            deviceSubscriptionDTO.setSubscribedFrom(rs.getString("SUBSCRIBED_FROM"));
+            deviceSubscriptionDTO.setDeviceId(rs.getInt("DEVICE_ID"));
+            deviceSubscriptionDTOS.add(deviceSubscriptionDTO);
+        }
+        return deviceSubscriptionDTOS;
     }
 
     /**

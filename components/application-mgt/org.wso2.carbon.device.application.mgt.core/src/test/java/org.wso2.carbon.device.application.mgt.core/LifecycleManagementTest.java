@@ -7,10 +7,9 @@ import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManageme
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.core.lifecycle.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
-import java.util.Set;
 
 public class LifecycleManagementTest {
 
@@ -19,17 +18,16 @@ public class LifecycleManagementTest {
 
     private final String CURRENT_STATE = "Approved";
     private final String NEXT_STATE = "Published";
-    private final String BOGUS_STATE = "Removed";
+    private final String BOGUS_STATE = "Retired";
     private final String UPDATABLE_STATE = "Created";
-    private final String NON_UPDATABLE_STATE = "Removed";
+    private final String NON_UPDATABLE_STATE = "Retired";
     private final String INSTALLABLE_STATE = "Published";
-    private final String UNINSTALlABLE_STATE = "Removed";
     private final String INITIAL_STATE = "Created";
-    private final String END_STATE = "Removed";
+    private final String END_STATE = "Retired";
 
 
     @BeforeClass
-    public void init() throws LifecycleManagementException {
+    public void init() {
         ConfigurationManager configurationManager = ConfigurationManager.getInstance();
         Configuration configuration = configurationManager.getConfiguration();
         lifecycleStates = configuration.getLifecycleStates();
@@ -39,14 +37,14 @@ public class LifecycleManagementTest {
 
     @Test
     public void checkValidNextLifecycleState() {
-        Set<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
+        List<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertTrue("Invalid proceeding state of: " + CURRENT_STATE,
                 proceedingStates.contains(NEXT_STATE.toUpperCase()));
     }
 
     @Test
     public void checkInvalidNextLifecycleState() {
-        Set<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
+        List<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
                 proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
@@ -68,12 +66,6 @@ public class LifecycleManagementTest {
     public void CheckInstallableState() throws LifecycleManagementException {
         boolean isInstallable = lifecycleStateManager.isInstallableState(INSTALLABLE_STATE);
         Assert.assertTrue("Installable state: " + INSTALLABLE_STATE, isInstallable);
-    }
-
-    @Test
-    public void CheckUnInstallableState() throws LifecycleManagementException {
-        boolean isInstallable = lifecycleStateManager.isInstallableState(UNINSTALlABLE_STATE);
-        Assert.assertFalse("UnInstallable state: " + UNINSTALlABLE_STATE, isInstallable);
     }
 
     @Test
@@ -126,7 +118,7 @@ public class LifecycleManagementTest {
 
     @Test
     public void check() {
-        Set<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
+        List<String> proceedingStates = lifecycleStateManager.getNextLifecycleStates(CURRENT_STATE);
         Assert.assertFalse("Invalid proceeding state of: " + CURRENT_STATE,
                 proceedingStates.contains(BOGUS_STATE.toUpperCase()));
     }
