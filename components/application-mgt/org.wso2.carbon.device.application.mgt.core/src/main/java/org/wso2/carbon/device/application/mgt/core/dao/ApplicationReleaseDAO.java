@@ -181,7 +181,7 @@ public interface ApplicationReleaseDAO {
     boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState)
             throws ApplicationManagementDAOException;
 
-    boolean hasExisitInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
+    boolean hasExistInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
             throws ApplicationManagementDAOException;
 
     }

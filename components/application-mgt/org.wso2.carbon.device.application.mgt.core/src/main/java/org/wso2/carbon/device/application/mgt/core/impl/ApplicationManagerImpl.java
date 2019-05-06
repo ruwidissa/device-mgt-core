@@ -1598,65 +1598,50 @@ public class ApplicationManagerImpl implements ApplicationManager {
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(releaseUuid, tenantId);
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO
+                    .getReleaseByUUID(releaseUuid, tenantId);
 
-            if (applicationReleaseDTO == null ){
+            if (applicationReleaseDTO == null) {
                 String msg = "Couldn't found an application release for the UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
 
-            if (lifecycleStateManager.isValidStateChange(applicationReleaseDTO.getCurrentState(), stateName, userName, tenantId)){
+            if (lifecycleStateManager
+                    .isValidStateChange(applicationReleaseDTO.getCurrentState(), stateName, userName, tenantId)) {
+                if (lifecycleStateManager.isInstallableState(stateName) && applicationReleaseDAO
+                        .hasExistInstallableAppRelease(applicationReleaseDTO.getUuid(),
+                                lifecycleStateManager.getInstallableState(), tenantId)) {
+                    String msg = "Installable application release is already registered for the application. "
+                            + "Therefore it is not permitted to change the lifecycle state from "
+                            + applicationReleaseDTO.getCurrentState() + " to " + stateName;
+                    log.error(msg);
+                    throw new ForbiddenException(msg);
+                }
                 LifecycleState lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(stateName);
                 lifecycleState.setPreviousState(applicationReleaseDTO.getCurrentState());
                 lifecycleState.setUpdatedBy(userName);
+                applicationReleaseDTO.setCurrentState(stateName);
+                this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId);
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
-
-            }
-
-
-
-            if (!this.applicationDAO.verifyApplicationExistenceById(applicationId, tenantId)) {
-                throw new NotFoundException("Couldn't find application for the application Id: " + applicationId);
-            }
-            if (!this.applicationReleaseDAO.verifyReleaseExistence(applicationId, releaseUuid, tenantId)) {
-                throw new NotFoundException("Couldn't find application release for the application Id: " + applicationId
-                        + " application release uuid: " + releaseUuid);
-            }
-            LifecycleState currentState = this.lifecycleStateDAO.getLatestLifeCycleState(applicationId, releaseUuid);
-            if (currentState == null) {
-                throw new ApplicationManagementException(
-                        "Couldn't find latest lifecycle state for the appId: " + applicationId
-                                + " and application release UUID: " + releaseUuid);
-            }
-            stateName.setPreviousState(currentState.getCurrentState());
-
-
-            if (stateName.getCurrentState() != null && stateName.getPreviousState() != null) {
-                if (lifecycleStateManager.isValidStateChange(stateName.getPreviousState(), stateName.getCurrentState(),
-                        userName, tenantId)) {
-                    //todo if current state of the adding lifecycle state is PUBLISHED, need to check whether is there
-                    //todo any other application release in PUBLISHED state for the application( i.e for the appid)
-                    this.lifecycleStateDAO.addLifecycleState(stateName, applicationId, releaseUuid, tenantId);
-                    ConnectionManagerUtil.commitDBTransaction();
-                } else {
-                    ConnectionManagerUtil.rollbackDBTransaction();
-                    log.error("Invalid lifecycle state transition from '" + stateName.getPreviousState() + "'" + " to '"
-                            + stateName.getCurrentState() + "'");
-                    throw new ApplicationManagementException(
-                            "Lifecycle State Validation failed. ApplicationDTO Id: " + applicationId
-                                    + " ApplicationDTO release UUID: " + releaseUuid);
-                }
+            } else {
+                String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
+                        + " to '" + stateName + "'";
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
             }
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Failed to add lifecycle state. ApplicationDTO Id: " + applicationId + " ApplicationDTO release UUID: "
-                            + releaseUuid, e);
+            String msg = "Failed to add lifecycle state for Application release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            //todo
-            throw new ApplicationManagementException("");
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when accessing application release data of application release which has the "
+                    + "application release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

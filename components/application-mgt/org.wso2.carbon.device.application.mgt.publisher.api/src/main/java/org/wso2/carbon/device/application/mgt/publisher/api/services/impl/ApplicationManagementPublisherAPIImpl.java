@@ -478,9 +478,6 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-/*
-//todo ----------------------
-*/
     @POST
     @Path("/life-cycle/{uuid}")
     public Response addLifecycleState(
@@ -496,8 +493,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
             applicationManager.changeLifecycleState( applicationUuid, action);
         } catch (NotFoundException e) {
-            String msg = "Could,t find application release for application id: " + applicationId
-                    + " and application release uuid: " + applicationUuid;
+            String msg = "Could,t find application release for application release uuid: " + applicationUuid;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {

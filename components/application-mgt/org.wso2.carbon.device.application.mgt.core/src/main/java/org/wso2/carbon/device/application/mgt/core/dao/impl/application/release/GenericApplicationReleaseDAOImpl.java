@@ -753,7 +753,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
-    public boolean hasExisitInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
+    public boolean hasExistInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
             throws ApplicationManagementDAOException{
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence in the installable state: :" + installableStateName);
