@@ -21,7 +21,8 @@
     "react-router-config": "^5.0.0",
     "react-router-dom": "latest",
     "react-scripts": "2.1.8",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "storm-react-diagrams": "^5.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

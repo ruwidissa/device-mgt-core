@@ -38,7 +38,7 @@ class Dashboard extends React.Component {
                 </Header>
                 <Content style={{padding: '0 0'}}>
                     <Switch>
-                        <Redirect exact from="/publisher/dashboard" to="/publisher/dashboard/apps"/>
+                        <Redirect exact from="/publisher" to="/publisher/apps"/>
                         {this.state.routes.map((route) => (
                             <RouteWithSubRoutes key={route.path} {...route} />
                         ))}
