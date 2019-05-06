@@ -68,7 +68,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class includes unit tests for testing the functionality of {@link DeviceManagementServiceImpl}
  */
-@PowerMockIgnore("javax.ws.rs.*")
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
 @SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
         "org.wso2.carbon.context.CarbonContext"})
 @PrepareForTest({DeviceMgtAPIUtils.class, MultitenantUtils.class, CarbonContext.class})
