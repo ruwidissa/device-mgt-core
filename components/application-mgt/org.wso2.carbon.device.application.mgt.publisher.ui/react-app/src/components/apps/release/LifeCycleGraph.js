@@ -4,6 +4,8 @@ import "storm-react-diagrams/dist/style.min.css";
 import "./LifeCycle.css";
 import {distributeElements} from "../../../js/utils/dagre-utils.ts";
 
+const inPortName = "IN";
+const outPortName = "OUT";
 
 class LifeCycleGraph extends React.Component {
     render() {
@@ -16,36 +18,36 @@ class LifeCycleGraph extends React.Component {
         engine.installDefaultFactories();
 
         const model = new SRD.DiagramModel();
+        const nextStates = lifecycle[this.props.currentStatus].proceedingStates;
 
 
         Object.keys(lifecycle).forEach((stateName) => {
-            const node = createNode(stateName);
+            let color = "rgb(83, 92, 104)";
+            if (stateName === this.props.currentStatus) {
+                color = "rgb(192,255,0)";
+            }else if(nextStates.includes(stateName)){
+                color = "rgb(0,192,255)";
+            }
+            const node = createNode(stateName, color);
+            // node.addPort()
             nodes.push(node);
             lifecycle[stateName].node = node;
         });
 
         Object.keys(lifecycle).forEach((stateName) => {
-            console.log(stateName);
             const state = lifecycle[stateName];
-
             //todo: remove checking property
-            if(state.hasOwnProperty("proceedingStates")) {
-                // console.log(state,state.proceedingStates);
+            if (state.hasOwnProperty("proceedingStates")) {
 
                 state.proceedingStates.forEach((proceedingState) => {
-                    // console.log(proceedingState);
-                    // console.log(lifecycle[proceedingState]);
-                    // links.push(connectNodes(state.node, lifecycle[proceedingState].node));
+                    links.push(connectNodes(state.node, lifecycle[proceedingState].node));
                 });
             }
         });
-        links.push(connectNodes(nodes[0], nodes[1]));
 
         nodes.forEach((node) => {
             model.addNode(node);
         });
-
-        console.log(links);
         links.forEach((link) => {
             model.addLink(link);
         });
@@ -55,8 +57,8 @@ class LifeCycleGraph extends React.Component {
         engine.setDiagramModel(distributedModel);
 
         return (
-            <div>
-                <SRD.DiagramWidget diagramEngine={engine}/>
+            <div style={{height: 900}}>
+                <SRD.DiagramWidget diagramEngine={engine} maxNumberPointsPerLink={10} smartRouting={true}/>
             </div>
         );
     }
@@ -72,18 +74,21 @@ function getDistributedModel(engine, model) {
     return deSerializedModel;
 }
 
-function createNode(name) {
-    return new SRD.DefaultNodeModel(name, "rgb(0,192,255)");
+function createNode(name, color) {
+    const node = new SRD.DefaultNodeModel(name, color);
+    node.addPort(new SRD.DefaultPortModel(true, inPortName, " "));
+    node.addPort(new SRD.DefaultPortModel(false, outPortName, " "));
+    return node;
 }
 
 let count = 0;
 
 function connectNodes(nodeFrom, nodeTo) {
     //just to get id-like structure
-    count++;
-    const portOut = nodeFrom.addPort(new SRD.DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, " "));
-    const portTo = nodeTo.addPort(new SRD.DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, " "));
-    return portOut.link(portTo);
+    // count++;
+    // const portOut = nodeFrom.addPort(new SRD.DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, " "));
+    // const portTo = nodeTo.addPort(new SRD.DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, " "));
+    return nodeFrom.getPort(outPortName).link(nodeTo.getPort(inPortName));
 }
 
 export default LifeCycleGraph;

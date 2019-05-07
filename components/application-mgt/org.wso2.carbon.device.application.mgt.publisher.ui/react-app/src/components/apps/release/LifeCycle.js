@@ -8,7 +8,9 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mapStateToProps = state => {
-    return {lifecycle: state.lifecycle};
+    return {
+        lifecycle: state.lifecycle
+    };
 };
 
 class ConnectedLifeCycle extends React.Component {
@@ -17,10 +19,11 @@ class ConnectedLifeCycle extends React.Component {
     }
 
     render() {
+        console.log();
         const lifecycle = this.props.lifecycle;
         if(lifecycle != null){
             return (
-                <LifeCycleGraph lifecycle={this.props.lifecycle}/>
+                <LifeCycleGraph currentStatus={this.props.currentStatus} lifecycle={this.props.lifecycle}/>
             );
 
         }else {

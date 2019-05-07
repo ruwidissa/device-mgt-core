@@ -55,6 +55,8 @@ class ConnectedRelease extends React.Component {
                 </div>
             );
         }
+
+        //todo remove uppercase
         return (
             <div>
                 <PageHeader
@@ -69,7 +71,7 @@ class ConnectedRelease extends React.Component {
                         </Col>
                         <Col span={8}>
                             <Card>
-                               <LifeCycle/>
+                               <LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>
                             </Card>
                         </Col>
                     </Row>
