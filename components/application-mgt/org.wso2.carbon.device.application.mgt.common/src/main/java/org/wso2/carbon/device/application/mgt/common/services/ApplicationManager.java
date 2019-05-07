@@ -24,7 +24,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
-import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
+import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
@@ -133,24 +133,22 @@ public interface ApplicationManager {
     ApplicationDTO getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException;
 
     /**
-     * To get all the releases of a particular ApplicationDTO.
+     * To get lifecycle state change flow of a particular Application Release.
      *
-     * @param applicationId ID of the ApplicationDTO .
-     * @param releaseUuid UUID of the ApplicationDTO Release.
-     * @return the LifecycleStateDTO of the ApplicationDTO releases related with the particular ApplicationDTO.
-     * @throws ApplicationManagementException ApplicationDTO Management Exception.
+     * @param releaseUuid UUID of the Application Release.
+     * @return the List of LifecycleStates which represent the lifecycle change flow of the application releases.
+     * @throws ApplicationManagementException Application Management Exception.
      */
-    LifecycleStateDTO getLifecycleState(int applicationId, String releaseUuid) throws ApplicationManagementException;
+    List<LifecycleState> getLifecycleStateChangeFlow(String releaseUuid) throws ApplicationManagementException;
 
     /**
      * To get all the releases of a particular ApplicationDTO.
      *
-     * @param applicationId ID of the ApplicationDTO.
      * @param releaseUuid UUID of the ApplicationDTO Release.
-     * @param state Lifecycle state to change the app
+     * @param stateName Lifecycle state to change the app
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void changeLifecycleState(int applicationId, String releaseUuid, LifecycleStateDTO state)
+    void changeLifecycleState(String releaseUuid, String stateName)
             throws ApplicationManagementException;
 
     /**

@@ -1,29 +1,28 @@
-/*
- *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
- *   Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License.
- *   You may obtain a copy of the License at
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing,
- *   software distributed under the License is distributed on an
- *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
- *   specific language governing permissions and limitations
- *   under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.device.application.mgt.common.*;
-import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
+import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
@@ -166,18 +165,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Attachment> attachmentList = new ArrayList<>();
-
-        if (screenshot1 != null) {
-            attachmentList.add(screenshot1);
-        }
-        if (screenshot2 != null) {
-            attachmentList.add(screenshot2);
-        }
-        if (screenshot3 != null) {
-            attachmentList.add(screenshot3);
-        }
-
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateAppCreatingRequest(applicationWrapper);
             applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0),
@@ -220,18 +208,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Attachment> attachmentList = new ArrayList<>();
-
-        if (screenshot1 != null) {
-            attachmentList.add(screenshot1);
-        }
-        if (screenshot2 != null) {
-            attachmentList.add(screenshot2);
-        }
-        if (screenshot3 != null) {
-            attachmentList.add(screenshot3);
-        }
-
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper, appType);
             applicationManager.validateBinaryArtifact(binaryFile, appType);
@@ -270,17 +247,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         try {
-            List<Attachment> attachments = new ArrayList<>();
-
-            if (screenshot1 != null) {
-                attachments.add(screenshot1);
-            }
-            if (screenshot2 != null) {
-                attachments.add(screenshot2);
-            }
-            if (screenshot3 != null) {
-                attachments.add(screenshot3);
-            }
+            List<Attachment> attachments = constructAttachmentList(screenshot1, screenshot2, screenshot3);
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachments);
             applicationManager.updateApplicationImageArtifact(applicationReleaseUuid,
@@ -384,16 +351,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        List<Attachment> screenshots = new ArrayList<>();
-        if (screenshot1 != null){
-            screenshots.add(screenshot1);
-        }
-        if (screenshot2 != null) {
-            screenshots.add(screenshot2);
-        }
-        if (screenshot3 != null) {
-            screenshots.add(screenshot3);
-        }
+        List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateBinaryArtifact(binaryFile, appType);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, screenshots);
@@ -457,52 +415,42 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-
-    /*
-//todo ----------------------
-*/
     @GET
-    @Path("/lifecycle/{appId}/{uuid}")
-    public Response getLifecycleState(
-            @PathParam("appId") int applicationId,
-            @PathParam("uuid") String applicationUuid) {
-        LifecycleStateDTO lifecycleState;
+    @Path("/life-cycle/state-changes/{uuid}")
+    public Response getLifecycleStates(
+            @PathParam("uuid") String releaseUuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            lifecycleState = applicationManager.getLifecycleState(applicationId, applicationUuid);
-            if (lifecycleState == null) {
-                String msg = "Couldn't found application lifecycle details for appid: " + applicationId
-                        + " and app release UUID: " + applicationUuid;
-                log.error(msg);
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
+            List<LifecycleState> lifecycleStates = applicationManager.getLifecycleStateChangeFlow(releaseUuid);
+            return Response.status(Response.Status.OK).entity(lifecycleStates).build();
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUID: " + releaseUuid;
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting lifecycle state.";
+            String msg =
+                    "Error occurred while getting lifecycle states for application release UUID: " + releaseUuid;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.OK).entity(lifecycleState).build();
     }
 
     @POST
-    @Path("/lifecycle/{appId}/{uuid}")
+    @Path("/life-cycle/{uuid}")
     public Response addLifecycleState(
-            @PathParam("appId") int applicationId,
             @PathParam("uuid") String applicationUuid,
             @QueryParam("action") String action) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            if (action == null || action.isEmpty()) {
-                String msg = "The Action is null or empty. Please check the request";
+            if (StringUtils.isEmpty(action)) {
+                String msg = "The Action is null or empty. Please verify the request.";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
-            LifecycleStateDTO state = new LifecycleStateDTO();
-            state.setCurrentState(action);
-            applicationManager.changeLifecycleState(applicationId, applicationUuid, state);
+
+            applicationManager.changeLifecycleState( applicationUuid, action);
         } catch (NotFoundException e) {
-            String msg = "Could,t find application release for application id: " + applicationId
-                    + " and application release uuid: " + applicationUuid;
+            String msg = "Could,t find application release for application release uuid: " + applicationUuid;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).build();
         } catch (ApplicationManagementException e) {
@@ -526,6 +474,29 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
+    }
+
+    /***
+     * Construct the screenshot list by evaluating the availability of each screenshot.
+     *
+     * @param screenshot1 First Screenshot
+     * @param screenshot2 Second Screenshot
+     * @param screenshot3 Third Screenshot
+     * @return List of {@link Attachment}
+     */
+    private List<Attachment> constructAttachmentList(Attachment screenshot1, Attachment screenshot2,
+            Attachment screenshot3) {
+        List<Attachment> attachments = new ArrayList<>();
+        if (screenshot1 != null) {
+            attachments.add(screenshot1);
+        }
+        if (screenshot2 != null) {
+            attachments.add(screenshot2);
+        }
+        if (screenshot3 != null) {
+            attachments.add(screenshot3);
+        }
+        return attachments;
     }
 
     /***
@@ -633,7 +604,5 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             throw new ApplicationManagementException(msg);
         }
-
     }
-
 }

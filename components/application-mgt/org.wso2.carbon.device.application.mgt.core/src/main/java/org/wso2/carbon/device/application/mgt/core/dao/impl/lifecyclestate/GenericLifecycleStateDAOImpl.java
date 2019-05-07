@@ -19,7 +19,7 @@
 package org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate;
 
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.dto.LifecycleStateDTO;
+import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
@@ -41,7 +41,7 @@ import java.util.List;
 public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements LifecycleStateDAO {
 
     @Override
-    public LifecycleStateDTO getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException {
+    public LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException {
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -65,7 +65,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         }
     }
 
-    public LifecycleStateDTO getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException{
+    public LifecycleState getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException{
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -122,40 +122,45 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     }
 
     @Override
-    public List<LifecycleStateDTO> getLifecycleStates(int appReleaseId) throws LifeCycleManagementDAOException {
-        List<LifecycleStateDTO> lifecycleStates = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public List<LifecycleState> getLifecycleStates(int appReleaseId, int tenantId) throws LifeCycleManagementDAOException {
+        List<LifecycleState> lifecycleStates = new ArrayList<>();
+        Connection conn ;
         try {
             conn = this.getDBConnection();
-            String sql = "SELECT ID, CURRENT_STATE, PREVIOUS_STATE, TENANT_ID, UPDATED_AT, UPDATED_BY FROM "
-                    + "AP_APP_LIFECYCLE_STATE WHERE AP_APP_RELEASE_ID = ? ORDER BY UPDATED_AT ASC;";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1,appReleaseId);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                LifecycleStateDTO lifecycleState = new LifecycleStateDTO();
-                lifecycleState.setId(rs.getInt("ID"));
-                lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
-                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
-                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
-                lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
-                lifecycleStates.add(lifecycleState);
+            String sql = "SELECT "
+                    + "CURRENT_STATE, "
+                    + "PREVIOUS_STATE, "
+                    + "UPDATED_AT, "
+                    + "UPDATED_BY "
+                    + "FROM AP_APP_LIFECYCLE_STATE "
+                    + "WHERE AP_APP_RELEASE_ID = ?  AND "
+                    + "TENANT_ID = ? "
+                    + "ORDER BY UPDATED_AT ASC;";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setInt(1,appReleaseId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()){
+                    while (rs.next()) {
+                        LifecycleState lifecycleState = new LifecycleState();
+                        lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
+                        lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
+                        lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
+                        lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
+                        lifecycleStates.add(lifecycleState);
+                    }
+                }
             }
         } catch (DBConnectionException e) {
             throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection when getting "
                     + "lifecycle states for an application", e);
         } catch (SQLException e) {
             throw new LifeCycleManagementDAOException("Error occurred while retrieving lifecycle states.", e);
-        } finally {
-            Util.cleanupResources(stmt, rs);
         }
         return lifecycleStates;
     }
 
     @Override
-    public void addLifecycleState(LifecycleStateDTO state, int appId, String uuid, int tenantId) throws LifeCycleManagementDAOException {
+    public void addLifecycleState(LifecycleState state, int appReleaseId, int tenantId) throws LifeCycleManagementDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
@@ -168,7 +173,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                     + "UPDATED_AT, "
                     + "AP_APP_RELEASE_ID, "
                     + "AP_APP_ID) "
-                    + "VALUES (?,?, ?, ?, ?, (SELECT ID FROM AP_APP_RELEASE WHERE UUID=?),?);";
+                    + "VALUES (?, ?, ?, ?, ?, ?, (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE ID = ?));";
 
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
@@ -179,10 +184,9 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt.setInt(3, tenantId);
             stmt.setString(4, state.getUpdatedBy());
             stmt.setTimestamp(5, timestamp);
-            stmt.setString(6, uuid);
-            stmt.setInt(7, appId);
+            stmt.setInt(6, appReleaseId);
+            stmt.setInt(7, appReleaseId);
             stmt.executeUpdate();
-
         } catch (DBConnectionException e) {
             throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } catch (SQLException e) {
@@ -237,12 +241,11 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     }
 
 
-    private LifecycleStateDTO constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
-        LifecycleStateDTO lifecycleState = null;
+    private LifecycleState constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
+        LifecycleState lifecycleState = null;
         try {
             if (rs !=null && rs.next()) {
-                lifecycleState = new LifecycleStateDTO();
-                lifecycleState.setId(rs.getInt("ID"));
+                lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
                 lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));

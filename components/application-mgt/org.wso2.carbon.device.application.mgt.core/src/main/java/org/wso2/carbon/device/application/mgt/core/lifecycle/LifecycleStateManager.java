@@ -47,7 +47,7 @@ public class LifecycleStateManager {
             if (lifecycleState.getProceedingStates() != null) {
                 lifecycleState.getProceedingStates().replaceAll(String::toUpperCase);
             }
-            lifecycleStates.put(lifecycleState.getName(), lifecycleState);
+            lifecycleStates.put(lifecycleState.getName().toUpperCase(), lifecycleState);
             try {
                 PermissionUtils.putPermission(lifecycleState.getPermission());
             } catch (PermissionManagementException e) {
@@ -123,15 +123,10 @@ public class LifecycleStateManager {
     }
 
     private String getPermissionForStateChange(String nextState) {
-        Iterator it = lifecycleStates.entrySet().iterator();
-        LifecycleState nextLifecycleState;
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if (pair.getKey().toString().equalsIgnoreCase(nextState)) {
-                nextLifecycleState = lifecycleStates.get(nextState);
-                return nextLifecycleState.getPermission();
+        for (Map.Entry<String, LifecycleState> lifecycyleState : lifecycleStates.entrySet()) {
+            if (lifecycyleState.getKey().equalsIgnoreCase(nextState)) {
+                return lifecycyleState.getValue().getPermission();
             }
-            it.remove();
         }
         return null;
     }
