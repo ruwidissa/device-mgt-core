@@ -84,10 +84,6 @@ function createNode(name, color) {
 let count = 0;
 
 function connectNodes(nodeFrom, nodeTo) {
-    //just to get id-like structure
-    // count++;
-    // const portOut = nodeFrom.addPort(new SRD.DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, " "));
-    // const portTo = nodeTo.addPort(new SRD.DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, " "));
     return nodeFrom.getPort(outPortName).link(nodeTo.getPort(inPortName));
 }
 
