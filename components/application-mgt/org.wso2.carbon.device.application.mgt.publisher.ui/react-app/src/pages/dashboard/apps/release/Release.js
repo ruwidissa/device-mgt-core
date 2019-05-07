@@ -69,7 +69,7 @@ class ConnectedRelease extends React.Component {
                         </Col>
                         <Col span={8}>
                             <Card>
-                                <LifeCycle/>
+                               <LifeCycle/>
                             </Card>
                         </Col>
                     </Row>
