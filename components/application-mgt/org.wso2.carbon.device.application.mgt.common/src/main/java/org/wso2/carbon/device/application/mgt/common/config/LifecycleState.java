@@ -19,6 +19,7 @@ public class LifecycleState {
     private boolean isAppUpdatable;
     private boolean isInitialState;
     private boolean isEndState;
+    private boolean isDeletableState;
 
     @XmlAttribute(name = "name")
     public String getName() {
@@ -84,4 +85,8 @@ public class LifecycleState {
         this.isEndState = isEndState;
     }
 
+    @XmlElement(name = "IsDeletableState")
+    public boolean isDeletableState() { return isDeletableState; }
+
+    public void setDeletableState(boolean deletableState) { isDeletableState = deletableState; }
 }

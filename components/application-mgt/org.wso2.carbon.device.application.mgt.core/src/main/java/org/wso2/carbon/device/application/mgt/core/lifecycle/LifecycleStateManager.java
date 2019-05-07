@@ -19,7 +19,6 @@ package org.wso2.carbon.device.application.mgt.core.lifecycle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.State;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
@@ -33,38 +32,36 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class represents the activities related to lifecycle management
  */
 public class LifecycleStateManager {
 
-    private Map<String, State> lifecycleStates;
+    private Map<String, LifecycleState> lifecycleStates;
     private static Log log = LogFactory.getLog(LifecycleStateManager.class);
 
     public void init(List<LifecycleState> states) throws LifecycleManagementException {
         lifecycleStates = new HashMap<>();
-        for (LifecycleState s : states) {
-            if (s.getProceedingStates() != null) {
-                s.getProceedingStates().replaceAll(String::toUpperCase);
+        for (LifecycleState lifecycleState : states) {
+            if (lifecycleState.getProceedingStates() != null) {
+                lifecycleState.getProceedingStates().replaceAll(String::toUpperCase);
             }
-            lifecycleStates.put(s.getName().toUpperCase(), new State(s.getName().toUpperCase(),
-                    s.getProceedingStates(), s.getPermission(), s.isAppUpdatable(), s.isAppInstallable(),
-                    s.isInitialState(), s.isEndState()));
+            lifecycleStates.put(lifecycleState.getName().toUpperCase(), lifecycleState);
             try {
-                PermissionUtils.putPermission(s.getPermission());
+                PermissionUtils.putPermission(lifecycleState.getPermission());
             } catch (PermissionManagementException e) {
-                String msg = "Error when adding permission " + s.getPermission() + "  related to the state: "
-                        + s.getName();
+                String msg =
+                        "Error when adding permission " + lifecycleState.getPermission() + "  related to the state: "
+                                + lifecycleState.getName();
                 log.error(msg, e);
                 throw new LifecycleManagementException(msg, e);
             }
         }
     }
 
-    public Map<String, State> getLifecycleConfig() throws LifecycleManagementException {
-        if (lifecycleStates == null){
+    public Map<String, LifecycleState> getLifecycleConfig() throws LifecycleManagementException {
+        if (lifecycleStates == null) {
             String msg = "Lifecycle configuration in not initialized.";
             log.error(msg);
             throw new LifecycleManagementException(msg);
@@ -72,29 +69,27 @@ public class LifecycleStateManager {
         return lifecycleStates;
     }
 
-
-    public Set<String> getNextLifecycleStates(String currentLifecycleState) {
+    public List<String> getNextLifecycleStates(String currentLifecycleState) {
         return lifecycleStates.get(currentLifecycleState.toUpperCase()).getProceedingStates();
     }
 
-    public boolean isValidStateChange(String currentState, String nextState, String username, int tenantId) throws
-            LifecycleManagementException {
-
+    public boolean isValidStateChange(String currentState, String nextState, String username, int tenantId)
+            throws LifecycleManagementException {
         UserRealm userRealm;
         String permission = getPermissionForStateChange(nextState);
         if (permission != null) {
             try {
                 userRealm = DataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
-                if (userRealm != null && userRealm.getAuthorizationManager() != null &&
-                        userRealm.getAuthorizationManager().isUserAuthorized(username,
-                                PermissionUtils.getAbsolutePermissionPath(permission),
+                if (userRealm != null && userRealm.getAuthorizationManager() != null && userRealm
+                        .getAuthorizationManager()
+                        .isUserAuthorized(username, PermissionUtils.getAbsolutePermissionPath(permission),
                                 Constants.UI_EXECUTE)) {
                     if (currentState.equalsIgnoreCase(nextState)) {
                         return true;
                     }
-                    State state = getMatchingState(currentState);
-                    if (state != null) {
-                        return getMatchingNextState(state.getProceedingStates(), nextState);
+                    LifecycleState matchingState = getMatchingState(currentState);
+                    if (matchingState != null) {
+                        return getMatchingNextState(matchingState.getProceedingStates(), nextState);
                     }
                     return false;
                 }
@@ -105,24 +100,22 @@ public class LifecycleStateManager {
                                 + nextState + " with username : " + username + " and tenant Id : " + tenantId, e);
             }
         } else {
-            throw new LifecycleManagementException(
-                    "Required permissions cannot be found for the state : " + nextState);
+            throw new LifecycleManagementException("Required permissions cannot be found for the state : " + nextState);
         }
     }
 
-    private State getMatchingState(String currentState) {
-        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
-            if (stringStateEntry.getKey().equalsIgnoreCase(currentState)) {
-                return lifecycleStates.get(stringStateEntry.getKey());
+    private LifecycleState getMatchingState(String currentState) {
+        for (Map.Entry<String, LifecycleState> lifecycyleState : lifecycleStates.entrySet()) {
+            if (lifecycyleState.getKey().equalsIgnoreCase(currentState)) {
+                return lifecycyleState.getValue();
             }
         }
         return null;
     }
 
-
-    private boolean getMatchingNextState(Set<String> proceedingStates, String nextState) {
-        for (String state : proceedingStates) {
-            if (state.equalsIgnoreCase(nextState)) {
+    private boolean getMatchingNextState(List<String> proceedingStates, String nextState) {
+        for (String stateName : proceedingStates) {
+            if (stateName.equalsIgnoreCase(nextState)) {
                 return true;
             }
         }
@@ -130,21 +123,27 @@ public class LifecycleStateManager {
     }
 
     private String getPermissionForStateChange(String nextState) {
-        Iterator it = lifecycleStates.entrySet().iterator();
-        State nextLifecycleState;
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            if (pair.getKey().toString().equalsIgnoreCase(nextState)) {
-                nextLifecycleState = lifecycleStates.get(nextState);
-                return nextLifecycleState.getPermission();
+        for (Map.Entry<String, LifecycleState> lifecycyleState : lifecycleStates.entrySet()) {
+            if (lifecycyleState.getKey().equalsIgnoreCase(nextState)) {
+                return lifecycyleState.getValue().getPermission();
             }
-            it.remove();
         }
         return null;
     }
 
+    public boolean isDeletableState(String state) throws LifecycleManagementException {
+        LifecycleState currentState = getMatchingState(state);
+        if (currentState != null) {
+            return currentState.isDeletableState();
+        } else {
+            String msg = "Couldn't find a lifecycle state that matches with " + state + " state.";
+            log.error(msg);
+            throw new LifecycleManagementException(msg);
+        }
+    }
+
     public boolean isUpdatableState(String state) throws LifecycleManagementException {
-        State currentState = getMatchingState(state);
+        LifecycleState currentState = getMatchingState(state);
         if (currentState != null) {
             return currentState.isAppUpdatable();
         } else {
@@ -155,7 +154,7 @@ public class LifecycleStateManager {
     }
 
     public boolean isInstallableState(String state) throws LifecycleManagementException {
-        State currentState = getMatchingState(state);
+        LifecycleState currentState = getMatchingState(state);
         if (currentState != null) {
             return currentState.isAppInstallable();
         } else {
@@ -166,7 +165,7 @@ public class LifecycleStateManager {
     }
 
     public boolean isInitialState(String state) throws LifecycleManagementException {
-        State currentState = getMatchingState(state);
+        LifecycleState currentState = getMatchingState(state);
         if (currentState != null) {
             return currentState.isInitialState();
         } else {
@@ -177,7 +176,7 @@ public class LifecycleStateManager {
     }
 
     public boolean isEndState(String state) throws LifecycleManagementException {
-        State currentState = getMatchingState(state);
+        LifecycleState currentState = getMatchingState(state);
         if (currentState != null) {
             return currentState.isEndState();
         } else {
@@ -188,58 +187,55 @@ public class LifecycleStateManager {
     }
 
     public String getInitialState() throws LifecycleManagementException {
-        String initialState = null;
-        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
-            if (stringStateEntry.getValue().isInitialState()) {
-                initialState = stringStateEntry.getKey();
-                break;
+        String initialState;
+        for (Map.Entry<String, LifecycleState> lifecycleState : lifecycleStates.entrySet()) {
+            if (lifecycleState.getValue().isInitialState()) {
+                initialState = lifecycleState.getKey();
+                return initialState;
             }
         }
-        if (initialState == null){
-            String msg = "Haven't defined the initial state in the application-manager.xml. Please add initial state "
-                    + "to the <LifecycleStates> section in the app-manager.xml";
-            log.error(msg);
-            throw  new LifecycleManagementException(msg);
-        }
-        return initialState;
+        String msg = "Haven't defined the initial state in the application-manager.xml. Please add initial state "
+                + "to the <LifecycleStates> section in the app-manager.xml";
+        log.error(msg);
+        throw new LifecycleManagementException(msg);
     }
 
     public String getEndState() throws LifecycleManagementException {
         String endState = null;
-        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
+        for (Map.Entry<String, LifecycleState> stringStateEntry : lifecycleStates.entrySet()) {
             if (stringStateEntry.getValue().isEndState()) {
                 endState = stringStateEntry.getKey();
                 break;
             }
         }
-        if (endState == null){
+        if (endState == null) {
             String msg = "Haven't defined the end state in the application-manager.xml. Please add end state "
                     + "to the <LifecycleStates> section in the app-manager.xml";
             log.error(msg);
-            throw  new LifecycleManagementException(msg);
+            throw new LifecycleManagementException(msg);
         }
         return endState;
     }
 
     public String getInstallableState() throws LifecycleManagementException {
         String installableState = null;
-        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
+        for (Map.Entry<String, LifecycleState> stringStateEntry : lifecycleStates.entrySet()) {
             if (stringStateEntry.getValue().isAppInstallable()) {
                 installableState = stringStateEntry.getKey();
                 break;
             }
         }
-        if (installableState == null){
+        if (installableState == null) {
             String msg = "Haven't defined the installable state in the application-manager.xml. Please add installable "
                     + "state to the <LifecycleStates> section in the app-manager.xml";
             log.error(msg);
-            throw  new LifecycleManagementException(msg);
+            throw new LifecycleManagementException(msg);
         }
         return installableState;
     }
 
     public boolean isStateExist(String currentState) {
-        for (Map.Entry<String, State> stringStateEntry : lifecycleStates.entrySet()) {
+        for (Map.Entry<String, LifecycleState> stringStateEntry : lifecycleStates.entrySet()) {
             if (stringStateEntry.getKey().equalsIgnoreCase(currentState)) {
                 return true;
             }
@@ -247,8 +243,7 @@ public class LifecycleStateManager {
         return false;
     }
 
-
-    public void setLifecycleStates(Map<String, State> lifecycleStates) {
+    public void setLifecycleStates(Map<String, LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
     }
 }

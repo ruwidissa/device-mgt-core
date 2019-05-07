@@ -80,33 +80,4 @@ public interface ConfigRetrieveAPI {
                             response = ErrorResponse.class)
             })
     Response getUiConfig();
-
-    @GET
-    @Path("/lifecycle-config")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "get application management UI configuration",
-            notes = "This will get all UI configuration of application management"
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully got Lifecycle Config.",
-                            response = ApplicationList.class),
-                    @ApiResponse(
-                            code = 404,
-                            message = "Not Found. There doesn't have an defined <LifecycleStates> in app management "
-                                    + "configuration file." +
-                                    "query."),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Error occurred while getting the lifecycle config.",
-                            response = ErrorResponse.class)
-            })
-    Response getLifecycleConfig();
-
 }

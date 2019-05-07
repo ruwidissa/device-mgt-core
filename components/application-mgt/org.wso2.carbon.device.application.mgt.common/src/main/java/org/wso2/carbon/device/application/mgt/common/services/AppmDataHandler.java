@@ -17,7 +17,7 @@
 
 package org.wso2.carbon.device.application.mgt.common.services;
 
-import org.wso2.carbon.device.application.mgt.common.State;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
@@ -33,7 +33,7 @@ public interface AppmDataHandler {
      */
     UIConfiguration getUIConfiguration();
 
-    Map<String, State> getLifecycleConfiguration() throws LifecycleManagementException;
+    Map<String, LifecycleState> getLifecycleConfiguration() throws LifecycleManagementException;
 
     InputStream getArtifactStream(String uuid, String artifactName) throws ApplicationManagementException;
 }

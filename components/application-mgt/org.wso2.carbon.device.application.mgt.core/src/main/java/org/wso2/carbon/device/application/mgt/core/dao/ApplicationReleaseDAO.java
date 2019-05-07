@@ -19,7 +19,6 @@
 package org.wso2.carbon.device.application.mgt.core.dao;
 
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
-import org.wso2.carbon.device.application.mgt.common.ApplicationReleaseArtifactPaths;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
@@ -112,10 +111,12 @@ public interface ApplicationReleaseDAO {
      * To delete a particular release.
      *
      * @param id      ID of the ApplicationDTO which the release need to be deleted.
-     * @param version Version of the ApplicationDTO Release
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    void deleteRelease(int id, String version) throws ApplicationManagementDAOException;
+    void deleteRelease(int id) throws ApplicationManagementDAOException;
+
+    void deleteReleases(List<Integer> applicationReleaseIds) throws ApplicationManagementDAOException;
+
 
     /**
      * To get release details of a specific application.
@@ -177,6 +178,10 @@ public interface ApplicationReleaseDAO {
      * @return True if application release package name already exist in the IoT server, Otherwise returns False.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState) throws ApplicationManagementDAOException;
+    boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState)
+            throws ApplicationManagementDAOException;
+
+    boolean hasExistInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
+            throws ApplicationManagementDAOException;
 
     }

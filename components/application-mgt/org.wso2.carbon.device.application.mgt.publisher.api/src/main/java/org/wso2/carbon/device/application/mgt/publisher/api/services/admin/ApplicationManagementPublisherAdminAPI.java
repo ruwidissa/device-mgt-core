@@ -77,7 +77,7 @@ public interface ApplicationManagementPublisherAdminAPI {
     String SCOPE = "scope";
 
     @DELETE
-    @Path("/release/{appId}/{uuid}")
+    @Path("/release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -109,13 +109,46 @@ public interface ApplicationManagementPublisherAdminAPI {
                             response = ErrorResponse.class)
             }) Response deleteApplicationRelease(
             @ApiParam(
-                    name = "appId",
-                    value = "application Id",
-                    required = true)
-            @PathParam("appId") int applicationId,
-            @ApiParam(
                     name = "uuid",
                     value = "application release UUID",
                     required = true)
             @PathParam("uuid") String releaseUuid);
+
+    @DELETE
+    @Path("/{appId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Delete application release.",
+            notes = "This will delete application release for given UUID",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:admin:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully delete application release.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. There doesn't have an application release for UUID" +
+                                    "query."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting application release.",
+                            response = ErrorResponse.class)
+            }) Response deleteApplication(
+            @ApiParam(
+                    name = "appId",
+                    value = "application ID",
+                    required = true)
+            @PathParam("appId") int applicatioId);
 }

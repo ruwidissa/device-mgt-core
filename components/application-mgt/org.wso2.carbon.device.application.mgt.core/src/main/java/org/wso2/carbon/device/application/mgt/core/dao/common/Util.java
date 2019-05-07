@@ -129,6 +129,7 @@ public class Util {
      */
     public static ApplicationReleaseDTO loadAppRelease(ResultSet rs) throws SQLException {
         ApplicationReleaseDTO appRelease = new ApplicationReleaseDTO();
+        appRelease.setId(rs.getInt("RELEASE_ID"));
         appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));
         appRelease.setUuid(rs.getString("RELEASE_UUID"));
         appRelease.setReleaseType(rs.getString("RELEASE_TYPE"));

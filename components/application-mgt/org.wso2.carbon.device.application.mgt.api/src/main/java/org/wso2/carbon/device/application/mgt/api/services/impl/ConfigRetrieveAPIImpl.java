@@ -54,19 +54,4 @@ public class ConfigRetrieveAPIImpl implements ConfigRetrieveAPI {
         }
         return Response.status(Response.Status.OK).entity(uiConfiguration).build();
     }
-
-    @GET
-    @Override
-    @Consumes("application/json")
-    @Path("/lifecycle-config")
-    public Response getLifecycleConfig() {
-        AppmDataHandler dataHandler = APIUtil.getDataHandler();
-        try {
-            return Response.status(Response.Status.OK).entity(dataHandler.getLifecycleConfiguration()).build();
-        } catch (LifecycleManagementException e) {
-            String msg = "Error Occurred while accessing lifecycle manager.";
-            log.error(msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
 }
