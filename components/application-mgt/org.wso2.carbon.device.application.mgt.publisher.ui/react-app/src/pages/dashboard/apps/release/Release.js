@@ -3,6 +3,7 @@ import {PageHeader, Typography, Input, Button, Row, Col, Avatar, Card} from "ant
 import {connect} from "react-redux";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import {getRelease} from "../../../../js/actions";
+import LifeCycle from "../../../../components/apps/release/LifeCycle";
 
 const Search = Input.Search;
 const {Title} = Typography;
@@ -54,6 +55,8 @@ class ConnectedRelease extends React.Component {
                 </div>
             );
         }
+
+        //todo remove uppercase
         return (
             <div>
                 <PageHeader
@@ -61,9 +64,14 @@ class ConnectedRelease extends React.Component {
                 />
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
                     <Row style={{padding: 10}}>
-                        <Col span={18}>
+                        <Col span={16}>
                             <Card>
                                 <ReleaseView release={release}/>
+                            </Card>
+                        </Col>
+                        <Col span={8}>
+                            <Card>
+                               <LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>
                             </Card>
                         </Col>
                     </Row>

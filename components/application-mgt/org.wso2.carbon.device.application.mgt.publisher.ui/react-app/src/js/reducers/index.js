@@ -6,7 +6,8 @@ const initialState = {
         visible: false,
         app: null
     },
-    release: null
+    release: null,
+    lifecycle: null
 };
 
 function rootReducer(state = initialState, action) {
@@ -21,11 +22,14 @@ function rootReducer(state = initialState, action) {
                 app: action.payload.app
             }
         });
-    }else if(action.type === ActionTypes.GET_RELEASE){
+    } else if (action.type === ActionTypes.GET_RELEASE) {
         return Object.assign({}, state, {
             release: action.payload
         });
-
+    } else if (action.type === ActionTypes.GET_LIFECYCLE) {
+        return Object.assign({}, state, {
+            lifecycle: action.payload
+        });
     }
     return state;
 }

@@ -14,7 +14,6 @@ export const getApps = () => dispatch => {
             if (res.data.data.hasOwnProperty("applications")) {
                 apps = res.data.data.applications;
             }
-            console.log(res.data);
             dispatch({type: ActionTypes.GET_APPS, payload: apps});
         }
 
@@ -35,8 +34,6 @@ export const getRelease = (uuid) => dispatch => {
     ).then(res => {
         if (res.status === 200) {
             let release = res.data.data;
-
-            console.log(res.data);
             dispatch({type: ActionTypes.GET_RELEASE, payload: release});
         }
 
@@ -50,7 +47,6 @@ export const getRelease = (uuid) => dispatch => {
 };
 
 export const openReleasesModal = (app) => dispatch => {
-    console.log(app);
     dispatch({
         type: ActionTypes.OPEN_RELEASES_MODAL,
         payload: {
@@ -59,3 +55,19 @@ export const openReleasesModal = (app) => dispatch => {
     });
 };
 
+export const getLifecycle = ()=> dispatch =>{
+    const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/lifecycle-config";
+
+    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    ).then(res => {
+        if (res.status === 200) {
+            let lifecycle = res.data.data;
+            dispatch({type: ActionTypes.GET_LIFECYCLE, payload: lifecycle});
+        }
+
+    }).catch(function (error) {
+        if (error.response.status === 401) {
+            window.location.href = 'https://localhost:9443/publisher/login';
+        }
+    });
+};
