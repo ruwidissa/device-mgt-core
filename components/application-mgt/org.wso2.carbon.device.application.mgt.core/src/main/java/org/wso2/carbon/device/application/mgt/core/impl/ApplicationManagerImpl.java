@@ -1873,6 +1873,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    @Override
     public List<Category> getRegisteredCategories() throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
@@ -1891,6 +1892,29 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return responseCategoryList;
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting registered tags from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void deleteTagMapping(int appId, String tagName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ApplicationDTO applicationDTO = getApplication(appId);
+            ConnectionManagerUtil.beginDBTransaction();
+            int tagId = applicationDAO.getTagIdForTagName(tagName, tenantId);
+            if (tagId == -1){
+                String msg = "Couldn't found a tag for tag name " + tagName + ".";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            applicationDAO.deleteTagMapping(tagId, applicationDTO.getId(), tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting tag Ids or deleting tag mapping from the system.";
             log.error(msg);
             throw new ApplicationManagementException(msg);
         } finally {

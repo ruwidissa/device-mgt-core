@@ -234,4 +234,6 @@ public interface ApplicationManager {
 
     List<Category> getRegisteredCategories() throws ApplicationManagementException;
 
+    void deleteTagMapping(int appId, String tagName) throws ApplicationManagementException;
+
 }

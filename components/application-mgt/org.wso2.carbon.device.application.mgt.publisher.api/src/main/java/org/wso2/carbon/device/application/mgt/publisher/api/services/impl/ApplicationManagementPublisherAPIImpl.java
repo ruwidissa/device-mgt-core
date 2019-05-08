@@ -50,6 +50,7 @@ import java.util.Map;
 import javax.activation.DataHandler;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -489,6 +490,29 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.OK).entity(tags).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while getting registered tags.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Override
+    @Consumes("application/json")
+    @Path("/{appId}/tags/{tagName}")
+    public Response deleteTagMapping(
+            @PathParam("appId") int appId,
+            @PathParam("tagName") String tagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.deleteTagMapping(appId, tagName);
+            String msg = "Tag " + tagName + " is deleted successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while deleting registered tag.";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

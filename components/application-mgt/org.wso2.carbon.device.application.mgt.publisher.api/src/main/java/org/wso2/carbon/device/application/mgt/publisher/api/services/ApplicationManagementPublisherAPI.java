@@ -45,6 +45,7 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import java.util.List;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -807,6 +808,46 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response getTags();
+
+    @DELETE
+    @Path("/{appId}/tags/{tagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get registered application tags",
+            notes = "This will get registered application tags",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully delete  Application tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting application tags.",
+                            response = ErrorResponse.class)
+            })
+    Response deleteTagMapping(
+            @ApiParam(
+                    name = "appId",
+                    value = "ID of the Application",
+                    required = true)
+            @PathParam("appId") int applicationId,
+            @ApiParam(
+                    name = "tagName",
+                    value = "Tag Name",
+                    required = true)
+            @PathParam("tagName") String tagName
+    );
 
     @GET
     @Path("/categories")

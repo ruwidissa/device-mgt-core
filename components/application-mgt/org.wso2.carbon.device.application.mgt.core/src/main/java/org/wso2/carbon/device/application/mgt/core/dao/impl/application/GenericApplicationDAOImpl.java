@@ -901,6 +901,35 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public Integer getTagIdForTagName(String tagName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get tag id for given tag name.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            String sql = "SELECT AP_APP_TAG.ID AS ID"
+                    + " FROM AP_APP_TAG "
+                    + "WHERE AP_APP_TAG.TAG = ? AND "
+                    + "AP_APP_TAG.TENANT_ID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, tagName);
+                ps.setInt(2, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("ID");
+                    }
+                }
+            }
+            return -1;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting tag Id for given tag name", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("SQL Error occurred while getting tag Id for tag name.", e);
+        }
+    }
+
+    @Override
     public List<Integer> getDistinctTagIdsInTagMapping() throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get distinct tag ids for given tag names");
@@ -1017,6 +1046,34 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     "Error occurred while obtaining the DB connection when deleting tag mapping", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred when deleting tag mapping", e);
+        }
+    }
+
+    @Override
+    public void deleteTagMapping (Integer tagId, int applicationId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete Tag mapping.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM "
+                + "AP_APP_TAG_MAPPING tm "
+                + "WHERE "
+                + "tm.AP_APP_TAG_ID = ? AND "
+                + "tm.AP_APP_ID = ? AND "
+                + "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, applicationId);
+                stmt.setInt(3, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting a tag mapping", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("SQL Error occurred when deleting a tag mapping", e);
         }
     }
 
