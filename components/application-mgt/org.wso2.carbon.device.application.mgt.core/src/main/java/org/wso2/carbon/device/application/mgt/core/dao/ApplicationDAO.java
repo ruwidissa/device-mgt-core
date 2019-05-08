@@ -53,6 +53,8 @@ public interface ApplicationDAO {
 
     List<Integer> getTagIdsForTagNames (List<String> tagNames, int tenantId) throws ApplicationManagementDAOException;
 
+    List<Integer> getDistinctTagIdsInTagMapping() throws ApplicationManagementDAOException;
+
     void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     List<String> getAppTags(int appId, int tenantId) throws ApplicationManagementDAOException;
@@ -64,6 +66,8 @@ public interface ApplicationDAO {
     List<String> getAppCategories (int appId, int tenantId) throws ApplicationManagementDAOException;
 
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
+
+    List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException;
 
     void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException;
 

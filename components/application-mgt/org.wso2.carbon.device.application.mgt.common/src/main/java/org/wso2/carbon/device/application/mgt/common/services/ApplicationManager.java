@@ -29,6 +29,8 @@ import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManage
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.response.Category;
+import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
@@ -228,4 +230,8 @@ public interface ApplicationManager {
 
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;
 
-    }
+    List<Tag> getRegisteredTags() throws ApplicationManagementException;
+
+    List<Category> getRegisteredCategories() throws ApplicationManagementException;
+
+}
