@@ -50,6 +50,8 @@ import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagemen
 import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.response.Category;
+import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
@@ -1840,6 +1842,57 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(
                     "Error occurred while getting database connection for application updating. ApplicationDTO id  is "
                             + applicationId);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public List<Tag> getRegisteredTags() throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            List<TagDTO> tags = applicationDAO.getAllTags(tenantId);
+            List<Integer> mappedTagIds = applicationDAO.getDistinctTagIdsInTagMapping();
+            List<Tag> responseTagList = new ArrayList<>();
+            tags.forEach(tag -> {
+                Tag responseTag = new Tag();
+                if (!mappedTagIds.contains(tag.getId())) {
+                    responseTag.setTagDeletable(true);
+                }
+                responseTag.setTagName(tag.getTagName());
+                responseTagList.add(responseTag);
+            });
+            return responseTagList;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting registered tags from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    public List<Category> getRegisteredCategories() throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            List<CategoryDTO> categories = applicationDAO.getAllCategories(tenantId);
+            List<Integer> mappedCategoryIds = applicationDAO.getDistinctCategoryIdsInCategoryMapping();
+            List<Category> responseCategoryList = new ArrayList<>();
+            categories.forEach(category -> {
+                Category responseCategory = new Category();
+                if (!mappedCategoryIds.contains(category.getId())) {
+                    responseCategory.setCategoryDeletable(true);
+                }
+                responseCategory.setCategoryName(category.getCategoryName());
+                responseCategoryList.add(responseCategory);
+            });
+            return responseCategoryList;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting registered tags from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

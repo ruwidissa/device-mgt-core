@@ -747,6 +747,34 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get distinct category ids for given tag names");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            List<Integer> distinctCategoryIds = new ArrayList<>();
+            String sql = "SELECT DISTINCT AP_APP_CATEGORY.ID AS ID FROM AP_APP_CATEGORY";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        distinctCategoryIds.add(rs.getInt("ID"));
+                    }
+                }
+            }
+            return distinctCategoryIds;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting distinct category ids in tag mapping",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while getting distinct category ids in tag mapping", e);
+        }
+    }
+
+
+    @Override
     public void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to add tags");
@@ -869,6 +897,31 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     "Error occurred while obtaining the DB connection when adding tags", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        }
+    }
+
+    @Override
+    public List<Integer> getDistinctTagIdsInTagMapping() throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get distinct tag ids for given tag names");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            List<Integer> distinctTagIds = new ArrayList<>();
+            String sql = "SELECT DISTINCT AP_APP_TAG.ID AS ID FROM AP_APP_TAG";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        distinctTagIds.add(rs.getInt("ID"));
+                    }
+                }
+            }
+            return distinctTagIds;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting distinct tag ids in tag mapping", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while getting distinct tag ids in tag mapping", e);
         }
     }
 

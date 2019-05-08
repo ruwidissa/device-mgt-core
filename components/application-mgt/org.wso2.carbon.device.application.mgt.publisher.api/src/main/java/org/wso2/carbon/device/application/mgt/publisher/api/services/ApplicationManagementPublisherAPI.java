@@ -773,15 +773,68 @@ public interface ApplicationManagementPublisherAPI {
                             message = "OK. \n Successfully got Lifecycle Config.",
                             response = ApplicationList.class),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. There doesn't have an defined <LifecycleStates> in app management "
-                                    + "configuration file." +
-                                    "query."),
-                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the lifecycle config.",
                             response = ErrorResponse.class)
             })
     Response getLifecycleConfig();
+
+    @GET
+    @Path("/tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get registered application tags",
+            notes = "This will get registered application tags",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully got Application tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting application tags.",
+                            response = ErrorResponse.class)
+            })
+    Response getTags();
+
+    @GET
+    @Path("/categories")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get registered application categories",
+            notes = "This will get registered application categories.",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully got application categories.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting application categories.",
+                            response = ErrorResponse.class)
+            })
+    Response getCategories();
 
 }
