@@ -69,14 +69,15 @@ class ConnectedRelease extends React.Component {
                                 <ReleaseView release={release}/>
                             </Card>
                         </Col>
-                        <Col span={8}>
+                    </Row>
+                    <Row style={{padding: 10}}>
+                        <Col>
                             <Card>
-                               <LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>
+                                <LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>
                             </Card>
                         </Col>
                     </Row>
                 </div>
-
             </div>
 
         );

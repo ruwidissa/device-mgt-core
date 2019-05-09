@@ -55,6 +55,17 @@ export const openReleasesModal = (app) => dispatch => {
     });
 };
 
+
+export const openLifecycleModal = (nextState) => dispatch => {
+    console.log(nextState);
+    dispatch({
+        type: ActionTypes.OPEN_LIFECYCLE_MODAL,
+        payload: {
+            nextState: nextState
+        }
+    });
+};
+
 export const getLifecycle = ()=> dispatch =>{
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/lifecycle-config";
 

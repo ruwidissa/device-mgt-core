@@ -6,8 +6,8 @@ const ActionTypes = keyMirror({
     OPEN_RELEASES_MODAL: null,
     CLOSE_RELEASES_MODAL: null,
     GET_RELEASE: null,
-    GET_LIFECYCLE: null
-
+    GET_LIFECYCLE: null,
+    OPEN_LIFECYCLE_MODAL: null
 });
 
 export default ActionTypes;

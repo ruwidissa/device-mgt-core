@@ -25,11 +25,10 @@ class LifeCycleGraph extends React.Component {
             let color = "rgb(83, 92, 104)";
             if (stateName === this.props.currentStatus) {
                 color = "rgb(192,255,0)";
-            }else if(nextStates.includes(stateName)){
+            } else if (nextStates.includes(stateName)) {
                 color = "rgb(0,192,255)";
             }
             const node = createNode(stateName, color);
-            // node.addPort()
             nodes.push(node);
             lifecycle[stateName].node = node;
         });
@@ -47,6 +46,11 @@ class LifeCycleGraph extends React.Component {
 
         nodes.forEach((node) => {
             model.addNode(node);
+            // node.addListener({
+            //     selectionChanged: (node, isSelected) => {
+            //         console.log(isSelected);
+            //     }
+            // });
         });
         links.forEach((link) => {
             model.addLink(link);
@@ -57,7 +61,7 @@ class LifeCycleGraph extends React.Component {
         engine.setDiagramModel(distributedModel);
 
         return (
-            <div style={{height: 900}}>
+            <div style={{height: 500}}>
                 <SRD.DiagramWidget diagramEngine={engine} maxNumberPointsPerLink={10} smartRouting={true}/>
             </div>
         );
@@ -85,6 +89,10 @@ let count = 0;
 
 function connectNodes(nodeFrom, nodeTo) {
     return nodeFrom.getPort(outPortName).link(nodeTo.getPort(inPortName));
+}
+
+function f() {
+    console.log(1);
 }
 
 export default LifeCycleGraph;
