@@ -151,4 +151,39 @@ public interface ApplicationManagementPublisherAdminAPI {
                     value = "application ID",
                     required = true)
             @PathParam("appId") int applicatioId);
+
+    @DELETE
+    @Path("/tags/{tagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Delete application tag",
+            notes = "This will delete application tag",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:admin:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully delete  registered tag.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting registered tag.",
+                            response = ErrorResponse.class)
+            })
+    Response deleteTag(
+            @ApiParam(
+                    name = "tagName",
+                    value = "Tag Name",
+                    required = true)
+            @PathParam("tagName") String tagName
+    );
 }

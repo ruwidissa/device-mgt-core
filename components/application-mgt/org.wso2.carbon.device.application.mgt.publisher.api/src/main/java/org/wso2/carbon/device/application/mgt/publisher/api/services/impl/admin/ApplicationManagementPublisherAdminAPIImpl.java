@@ -27,6 +27,7 @@ import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.admin.ApplicationManagementPublisherAdminAPI;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -90,6 +91,28 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while deleting the application which has application ID:: " + applicatioId;
             log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Override
+    @Consumes("application/json")
+    @Path("/tags/{tagName}")
+    public Response deleteTag(
+            @PathParam("tagName") String tagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.deleteTag(tagName);
+            String msg = "Tag " + tagName + " is deleted successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while deleting registered tag.";
+            log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }

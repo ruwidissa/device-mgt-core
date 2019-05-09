@@ -227,13 +227,18 @@ public interface ApplicationManager {
 
     void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException;
 
-
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;
 
     List<Tag> getRegisteredTags() throws ApplicationManagementException;
 
     List<Category> getRegisteredCategories() throws ApplicationManagementException;
 
-    void deleteTagMapping(int appId, String tagName) throws ApplicationManagementException;
+    void deleteApplicationTag(int appId, String tagName) throws ApplicationManagementException;
+
+    void deleteTag(String tagName) throws ApplicationManagementException;
+
+    void deleteUnusedTag(String tagName) throws ApplicationManagementException;
+
+    void updateTag(String oldTagName, String newTagName) throws ApplicationManagementException;
 
 }

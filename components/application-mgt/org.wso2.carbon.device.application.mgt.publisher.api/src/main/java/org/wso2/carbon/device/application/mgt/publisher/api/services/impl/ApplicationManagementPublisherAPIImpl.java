@@ -499,20 +499,73 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Override
     @Consumes("application/json")
     @Path("/{appId}/tags/{tagName}")
-    public Response deleteTagMapping(
+    public Response deleteApplicationTag(
             @PathParam("appId") int appId,
             @PathParam("tagName") String tagName) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.deleteTagMapping(appId, tagName);
+            applicationManager.deleteApplicationTag(appId, tagName);
             String msg = "Tag " + tagName + " is deleted successfully.";
             return Response.status(Response.Status.OK).entity(msg).build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
             log.error(msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while deleting registered tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Override
+    @Consumes("application/json")
+    @Path("/tags/{tagName}")
+    public Response deleteUnusedTag(
+            @PathParam("tagName") String tagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.deleteUnusedTag(tagName);
+            String msg = "Tag " + tagName + " is deleted successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while deleting unused tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @PUT
+    @Override
+    @Consumes("application/json")
+    @Path("/tags/{oldTagName}")
+    public Response modifyTagName(
+            @PathParam("oldTagName") String oldTagName,
+            @QueryParam("tag") String newTagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.updateTag(oldTagName, newTagName);
+            String msg = "Tag " + oldTagName + " is updated to " + newTagName + " successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while updating registered tag.";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

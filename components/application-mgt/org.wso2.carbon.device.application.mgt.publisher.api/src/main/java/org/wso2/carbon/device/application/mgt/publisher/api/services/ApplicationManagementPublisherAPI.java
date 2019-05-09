@@ -832,11 +832,15 @@ public interface ApplicationManagementPublisherAPI {
                             message = "OK. \n Successfully delete  Application tags.",
                             response = ApplicationList.class),
                     @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Given tag is not an associated tag for the given application."),
+                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while deleting application tags.",
                             response = ErrorResponse.class)
             })
-    Response deleteTagMapping(
+    Response deleteApplicationTag(
             @ApiParam(
                     name = "appId",
                     value = "ID of the Application",
@@ -847,6 +851,92 @@ public interface ApplicationManagementPublisherAPI {
                     value = "Tag Name",
                     required = true)
             @PathParam("tagName") String tagName
+    );
+
+    @DELETE
+    @Path("/tags/{tagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Delete application tag",
+            notes = "This will delete application tag",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully delete  registered tag.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to delete the application tag."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found a tag for the given tag name.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting registered tag.",
+                            response = ErrorResponse.class)
+            })
+    Response deleteUnusedTag(
+            @ApiParam(
+                    name = "tagName",
+                    value = "Tag Name",
+                    required = true)
+            @PathParam("tagName") String tagName
+    );
+
+    @PUT
+    @Path("/tags/{oldTagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "update an application tag",
+            notes = "This will update application tag",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully update the registered tag.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found a tag for the given tag name.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while updating registered tag.",
+                            response = ErrorResponse.class)
+            })
+    Response modifyTagName(
+            @ApiParam(
+                    name = "oldTagName",
+                    value = "Existing Tag Name",
+                    required = true)
+            @PathParam("oldTagName") String oldTagName,
+            @ApiParam(
+                    name = "tag",
+                    value = "Modifying Tag Name",
+                    required = true)
+            @QueryParam("tag") String newTagName
     );
 
     @GET
