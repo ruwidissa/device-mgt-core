@@ -1201,7 +1201,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             this.lifecycleStateDAO.deleteLifecycleStates(deletingAppReleaseIds);
             this.applicationReleaseDAO.deleteReleases(deletingAppReleaseIds);
-            this.applicationDAO.deleteTagMapping(applicationId, tenantId);
+            this.applicationDAO.deleteApplicationTags(applicationId, tenantId);
             this.applicationDAO.deleteCategoryMapping(applicationId, tenantId);
             this.applicationDAO.deleteApplication(applicationId, tenantId);
             ConnectionManagerUtil.commitDBTransaction();
@@ -1809,7 +1809,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 if (!removingTagList.isEmpty()) {
                     List<Integer> removingTagIds = this.applicationDAO.getTagIdsForTagNames(removingTagList, tenantId);
-                    this.applicationDAO.deleteTagMapping(removingTagIds, applicationId, tenantId);
+                    this.applicationDAO.deleteApplicationTags(removingTagIds, applicationId, tenantId);
                     applicationDAO.deleteTags(removingTagList, applicationId, tenantId);
                 }
             }
@@ -1900,21 +1900,104 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void deleteTagMapping(int appId, String tagName) throws ApplicationManagementException {
+    public void deleteApplicationTag(int appId, String tagName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ApplicationDTO applicationDTO = getApplication(appId);
             ConnectionManagerUtil.beginDBTransaction();
-            int tagId = applicationDAO.getTagIdForTagName(tagName, tenantId);
-            if (tagId == -1){
+            TagDTO tag = applicationDAO.getTagForTagName(tagName, tenantId);
+            if (tag == null){
                 String msg = "Couldn't found a tag for tag name " + tagName + ".";
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            applicationDAO.deleteTagMapping(tagId, applicationDTO.getId(), tenantId);
+            if (applicationDAO.hasTagMapping(tag.getId(), applicationDTO.getId(), tenantId)){
+                applicationDAO.deleteApplicationTags(tag.getId(), applicationDTO.getId(), tenantId);
+                ConnectionManagerUtil.commitDBTransaction();
+            } else {
+                String msg = "Tag " + tagName + " is not an application tag. Application ID: " + appId;
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting tag Id or deleting tag mapping from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void deleteTag(String tagName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            TagDTO tag = applicationDAO.getTagForTagName(tagName, tenantId);
+            if (tag == null){
+                String msg = "Couldn't found a tag for tag name " + tagName + ".";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            if (applicationDAO.hasTagMapping(tag.getId(), tenantId)){
+                applicationDAO.deleteTagMapping(tag.getId(), tenantId);
+            }
+            applicationDAO.deleteTag(tag.getId(), tenantId);
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
-            String msg = "Error occurred when getting tag Ids or deleting tag mapping from the system.";
+            String msg = "Error occurred when getting tag Id or deleting the tag from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void deleteUnusedTag(String tagName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            TagDTO tag = applicationDAO.getTagForTagName(tagName, tenantId);
+            if (tag == null){
+                String msg = "Couldn't found a tag for tag name " + tagName + ".";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            if (applicationDAO.hasTagMapping(tag.getId(), tenantId)){
+                String msg =
+                        "Tag " + tagName + " is used for applications. Hence it is not permitted to delete the tag "
+                                + tagName;
+                log.error(msg);
+                throw new ForbiddenException(msg);
+            }
+            applicationDAO.deleteTag(tag.getId(), tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting tag Ids or deleting the tag from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void updateTag(String oldTagName, String newTagName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            TagDTO tag = applicationDAO.getTagForTagName(oldTagName, tenantId);
+            if (tag == null){
+                String msg = "Couldn't found a tag for tag name " + oldTagName + ".";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            tag.setTagName(newTagName);
+            applicationDAO.updateTag(tag, tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting tag Ids or deleting the tag from the system.";
             log.error(msg);
             throw new ApplicationManagementException(msg);
         } finally {
