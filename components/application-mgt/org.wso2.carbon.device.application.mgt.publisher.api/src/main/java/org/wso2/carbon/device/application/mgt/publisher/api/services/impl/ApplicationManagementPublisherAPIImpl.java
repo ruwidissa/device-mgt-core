@@ -27,6 +27,8 @@ import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManageme
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.response.Category;
+import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
@@ -471,6 +473,38 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.OK).entity(dataHandler.getLifecycleConfiguration()).build();
         } catch (LifecycleManagementException e) {
             String msg = "Error Occurred while accessing lifecycle manager.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Consumes("application/json")
+    @Path("/tags")
+    public Response getTags() {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            List<Tag> tags = applicationManager.getRegisteredTags();
+            return Response.status(Response.Status.OK).entity(tags).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while getting registered tags.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Consumes("application/json")
+    @Path("/categories")
+    public Response getCategories() {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            List<Category> categories = applicationManager.getRegisteredCategories();
+            return Response.status(Response.Status.OK).entity(categories).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while getting registered categories.";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
