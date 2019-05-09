@@ -1,15 +1,22 @@
 import React from "react";
-import {Modal, Typography,List, Avatar} from 'antd';
+import {Modal, Typography,Icon,Input} from 'antd';
 import {connect} from 'react-redux';
+import {closeLifecycleModal} from "../../../js/actions";
+
+const { TextArea } = Input;
+const { Title } = Typography;
 
 // connecting state.releaseView with the component
 const mapStateToProps = state => {
-    console.log(state);
     return {
         nextState: state.lifecycleModal.nextState,
         visible: state.lifecycleModal.visible
     }
 };
+
+const mapDispatchToProps = dispatch => ({
+    closeLifecycleModal : () => dispatch(closeLifecycleModal())
+});
 
 const Text = Typography;
 
@@ -23,7 +30,6 @@ class ConnectedLifecycleModal extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps !== this.props) {
-            console.log(nextProps);
             this.setState({
                 visible: nextProps.visible
             })
@@ -46,6 +52,7 @@ class ConnectedLifecycleModal extends React.Component {
         this.setState({
             visible: false,
         });
+        this.props.closeLifecycleModal();
     };
 
     render() {
@@ -59,7 +66,9 @@ class ConnectedLifecycleModal extends React.Component {
                         onOk={this.handleOk}
                         onCancel={this.handleCancel}
                     >
-                        <p>Some contents...</p>
+                        <Title level={4}>{this.props.currentStatus} <Icon type="arrow-right" /> {nextState}</Title>
+                        <p>Reason:</p>
+                        <TextArea placeholder="Please enter the reason..." autosize />
                     </Modal>
                 </div>
             );
@@ -69,6 +78,6 @@ class ConnectedLifecycleModal extends React.Component {
     }
 }
 
-const LifecycleModal = connect(mapStateToProps, null)(ConnectedLifecycleModal);
+const LifecycleModal = connect(mapStateToProps, mapDispatchToProps)(ConnectedLifecycleModal);
 
 export default LifecycleModal;

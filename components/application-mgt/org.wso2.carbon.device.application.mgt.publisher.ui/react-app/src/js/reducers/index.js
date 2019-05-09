@@ -41,6 +41,13 @@ function rootReducer(state = initialState, action) {
                 nextState: action.payload.nextState
             }
         });
+    }else if (action.type === ActionTypes.CLOSE_LIFECYCLE_MODAL) {
+        return Object.assign({}, state, {
+            lifecycleModal: {
+                visible: false,
+                nextState: null
+            }
+        });
     }
     return state;
 }

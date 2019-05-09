@@ -57,12 +57,17 @@ export const openReleasesModal = (app) => dispatch => {
 
 
 export const openLifecycleModal = (nextState) => dispatch => {
-    console.log(nextState);
     dispatch({
         type: ActionTypes.OPEN_LIFECYCLE_MODAL,
         payload: {
             nextState: nextState
         }
+    });
+};
+
+export const closeLifecycleModal = () => dispatch => {
+    dispatch({
+        type: ActionTypes.CLOSE_LIFECYCLE_MODAL
     });
 };
 
