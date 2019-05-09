@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~ Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<ApplicationManagementConfiguration>
+
+    <!-- Application Mgt DB schema -->
+    <DatasourceName>jdbc/APPM_DS</DatasourceName>
+
+    <Extensions>
+        <Extension name="ApplicationManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationManagerImpl</ClassName>
+        </Extension>
+        <Extension name="ReviewManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ReviewManagerImpl</ClassName>
+        </Extension>
+        <Extension name="LifecycleStateManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager</ClassName>
+        </Extension>
+        <Extension name="SubscriptionManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.SubscriptionManagerImpl</ClassName>
+        </Extension>
+        <Extension name="ApplicationStorageManager">
+            <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
+            <Parameters>
+                <Parameter name="StoragePath">repository/resources/apps/</Parameter>
+                <Parameter name="MaxScreenShotCount">6</Parameter>
+            </Parameters>
+        </Extension>
+    </Extensions>
+
+    <!-- This is for publisher lifecycle -->
+    <!-- The current lifecycle as follows
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        [Created] -> [In-Review] -> [Approved] -> [Published] -> [Unpublished] -> [Removed]
+                        ^                               |                               ^
+                        |                               |                               |
+                        |                               |-> [Deprecated] - - - - - - - -|
+                        |                                                               |
+                        |-> [Rejected]  - - - - - - - - - - - - - - - - - - - - - - - - |
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    If there is a requirement to introduce a new state to the lifecycle, please refer above
+    diagram and add relevant state to the below configuration appropriately.
+    -->
+
+    <!-- a lifecyclestate can have following properties
+        <LifecycleState name="In-Review">
+            <IsAppInstallable>false</IsAppInstallable>
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>false</IsInitialState>
+            <IsEndState>false</IsEndState>
+            <Permission>
+                /device-mgt/applications/life-cycle/in-review
+            </Permission>
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+            </ProceedingStates>
+        </LifecycleState>
+    -->
+    <LifecycleStates>
+        <LifecycleState name="Created">
+            <IsAppUpdatable>true</IsAppUpdatable>
+            <IsInitialState>true</IsInitialState>
+            <IsDeletableState>true</IsDeletableState>
+            <Permission>/app-mgt/life-cycle/application/create</Permission>
+            <ProceedingStates>
+                <State>In-Review</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="In-Review">
+            <Permission>/app-mgt/life-cycle/application/review</Permission>
+            <ProceedingStates>
+                <State>Rejected</State>
+                <State>Approved</State>
+                <State>Created</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Approved">
+            <Permission>/app-mgt/life-cycle/application/approve</Permission>
+            <ProceedingStates>
+                <State>In-Review</State>
+                <State>Published</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Rejected">
+            <IsDeletableState>true</IsDeletableState>
+            <Permission>/app-mgt/life-cycle/application/reject</Permission>
+            <ProceedingStates>
+                <State>In-Review</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Published">
+            <IsAppInstallable>true</IsAppInstallable>
+            <Permission>/app-mgt/life-cycle/application/publish</Permission>
+            <ProceedingStates>
+                <State>Blocked</State>
+                <State>Deprecated</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Blocked">
+            <Permission>/app-mgt/life-cycle/application/block</Permission>
+            <ProceedingStates>
+                <State>Published</State>
+                <State>Deprecated</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Deprecated">
+            <Permission>/app-mgt/life-cycle/application/deprecate</Permission>
+            <ProceedingStates>
+                <State>Published</State>
+                <State>Retired</State>
+            </ProceedingStates>
+        </LifecycleState>
+        <LifecycleState name="Retired">
+            <IsEndState>true</IsEndState>
+            <Permission>/app-mgt/life-cycle/application/retire</Permission>
+        </LifecycleState>
+    </LifecycleStates>
+
+    <UIConfigs>
+        <EnableOAuth>true</EnableOAuth>
+        <EnableSSO>false</EnableSSO>
+        <EnableSSO>false</EnableSSO>
+        <AppRegistration>
+            <Tags>
+                <Tag>application_management</Tag>
+                <Tag>device_management</Tag>
+                <Tag>subscription_management</Tag>
+                <Tag>review_management</Tag>
+            </Tags>
+            <AllowToAllDomains>true</AllowToAllDomains>
+        </AppRegistration>
+        <Scopes>
+            <Scope>perm:app:review:view</Scope>
+            <Scope>perm:app:review:update</Scope>
+            <Scope>perm:app:publisher:view</Scope>
+            <Scope>perm:app:publisher:update</Scope>
+            <Scope>perm:app:store:view</Scope>
+        </Scopes>
+        <SSOConfiguration>
+            <Issuer>app-mgt</Issuer>
+        </SSOConfiguration>
+        <LoginResponse>
+            <SuccessCallback>/apps</SuccessCallback>
+            <FailureCallback>
+                <BadRequest>/pages/error/client-errors/400</BadRequest>
+                <Unauthorized>/pages/error/client-errors/401</Unauthorized>
+                <Forbidden>/pages/error/client-errors/403</Forbidden>
+                <NotFound>/pages/error/client-errors/404</NotFound>
+                <MethodNotAllowed>/pages/error/client-errors/405</MethodNotAllowed>
+                <NotAcceptable>/pages/error/client-errors/406</NotAcceptable>
+                <UnsupportedMediaType>/pages/error/client-errors/415</UnsupportedMediaType>
+                <InternalServerError>/pages/error/server-errors/500</InternalServerError>
+                <DefaultPage>/pages/error/default</DefaultPage>
+            </FailureCallback>
+        </LoginResponse>
+    </UIConfigs>
+
+    <ArtifactDownloadEndpoint>https://localhost:9443/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
+    <AppCategories>
+        <Category>EMM</Category>
+        <Category>IoT</Category>
+    </AppCategories>
+
+    <RatingConfig>
+        <MinRatingValue>1</MinRatingValue>
+        <MaxRatingValue>10</MaxRatingValue>
+    </RatingConfig>
+</ApplicationManagementConfiguration>
