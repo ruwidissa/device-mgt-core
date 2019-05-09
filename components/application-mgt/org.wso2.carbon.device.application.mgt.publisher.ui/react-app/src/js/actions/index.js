@@ -23,7 +23,6 @@ export const getApps = () => dispatch => {
         }
     });
 
-
 };
 
 export const getRelease = (uuid) => dispatch => {
@@ -86,4 +85,25 @@ export const getLifecycle = ()=> dispatch =>{
             window.location.href = 'https://localhost:9443/publisher/login';
         }
     });
+};
+
+
+export const updateLifecycleState = (uuid, nextState) => dispatch => {
+
+    const request = "method=get&content-type=application/json&payload={}&api-endpoint=/applications/lifecycle-config/"+uuid+"?action="+nextState;
+
+    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    ).then(res => {
+        if (res.status === 200) {
+            let release = res.data.data;
+            dispatch({type: ActionTypes.GET_RELEASE, payload: release});
+        }
+
+    }).catch(function (error) {
+        if (error.response.status === 401) {
+            window.location.href = 'https://localhost:9443/publisher/login';
+        }
+    });
+
+
 };
