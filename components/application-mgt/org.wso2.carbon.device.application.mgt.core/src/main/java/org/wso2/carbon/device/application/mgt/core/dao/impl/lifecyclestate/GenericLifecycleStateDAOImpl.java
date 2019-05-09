@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
@@ -40,6 +42,7 @@ import java.util.List;
  */
 public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements LifecycleStateDAO {
 
+    private static final Log log = LogFactory.getLog(GenericLifecycleStateDAOImpl.class);
     @Override
     public LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException {
 
@@ -188,8 +191,10 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt.setInt(7, appReleaseId);
             stmt.executeUpdate();
         } catch (DBConnectionException e) {
+            log.error("Error occurred while obtaining the DB connection.", e);
             throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } catch (SQLException e) {
+            log.error("Error occurred while adding lifecycle: " + state.getCurrentState(), e);
             throw new LifeCycleManagementDAOException("Error occurred while adding lifecycle: " + state.getCurrentState(), e);
         } finally {
             Util.cleanupResources(stmt, null);

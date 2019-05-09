@@ -38,6 +38,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
 import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
@@ -49,11 +50,21 @@ import java.sql.SQLException;
 public class ApplicationManagementDAOFactory {
 
     private static String databaseEngine;
+    private static DataSource dataSource;
     private static final Log log = LogFactory.getLog(ApplicationManagementDAOFactory.class);
 
     public static void init(String datasourceName) {
         ConnectionManagerUtil.resolveDataSource(datasourceName);
         databaseEngine = ConnectionManagerUtil.getDatabaseType();
+    }
+
+    public static void init(DataSource dtSource) {
+        dataSource = dtSource;
+        try {
+            databaseEngine = dataSource.getConnection().getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving config.datasource connection", e);
+        }
     }
 
     public static ApplicationDAO getApplicationDAO() {

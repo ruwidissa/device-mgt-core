@@ -111,6 +111,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             }
             return applicationRelease;
         } catch (SQLException e) {
+            log.error("SQL Exception while trying to release an application by executing the query " + sql, e);
             throw new ApplicationManagementDAOException(
                     "SQL Exception while trying to release an application by executing the query " + sql, e);
         } catch (DBConnectionException e) {

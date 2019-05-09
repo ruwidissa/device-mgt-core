@@ -13,7 +13,7 @@ public class InitTest {
 
     @BeforeSuite
     public void init() throws InvalidConfigurationException {
-        File configPath = new File("src/test/resources/application-mgt.xml");
+        File configPath = new File("src/test/resources/repository/conf/application-mgt.xml");
         ConfigurationManager.setConfigLocation(configPath.getAbsolutePath());
     }
 
