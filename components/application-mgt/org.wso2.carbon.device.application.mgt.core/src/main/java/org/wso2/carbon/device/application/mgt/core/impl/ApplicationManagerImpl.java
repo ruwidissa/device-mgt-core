@@ -101,6 +101,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default Concrete implementation of Application Management related implementations.
@@ -2004,6 +2005,86 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String msg = "Error occurred when getting tag Ids or deleting the tag from the system.";
             log.error(msg);
             throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    public List<String> addTags(List<String> tags) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            if (tags != null && !tags.isEmpty()) {
+                ConnectionManagerUtil.beginDBTransaction();
+                List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
+                List<String> registeredTagNames = new ArrayList<>();
+
+                for (TagDTO tagDTO : registeredTags) {
+                    registeredTagNames.add(tagDTO.getTagName());
+                }
+                List<String> newTags = getDifference(tags, registeredTagNames);
+                if (!newTags.isEmpty()) {
+                    this.applicationDAO.addTags(newTags, tenantId);
+                    ConnectionManagerUtil.commitDBTransaction();
+                    if (log.isDebugEnabled()) {
+                        log.debug("New tags entries are added to the AP_APP_TAG table.");
+                    }
+                }
+                return Stream.concat(registeredTagNames.stream(), newTags.stream()).collect(Collectors.toList());
+            } else{
+                String msg = "Tag list is either null of empty. In order to add new tags, tag list should be a list of "
+                        + "Stings. Therefore please verify the payload.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred either getting registered tags or adding new tags.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    public List<String> addApplicationTags(int appId, List<String> tags) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ApplicationDTO applicationDTO = getApplication(appId);
+            if (tags != null && !tags.isEmpty()) {
+                ConnectionManagerUtil.beginDBTransaction();
+                List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
+                List<String> registeredTagNames = new ArrayList<>();
+
+                for (TagDTO tagDTO : registeredTags) {
+                    registeredTagNames.add(tagDTO.getTagName());
+                }
+                List<String> newTags = getDifference(tags, registeredTagNames);
+                if (!newTags.isEmpty()) {
+                    this.applicationDAO.addTags(newTags, tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("New tags entries are added to AP_APP_TAG table. App Id:" + applicationDTO.getId());
+                    }
+                }
+
+                List<String> applicationTags = this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
+                List<String> newApplicationTags = getDifference(applicationTags, tags);
+                if (!newApplicationTags.isEmpty()) {
+                    List<Integer> newTagIds = this.applicationDAO.getTagIdsForTagNames(newApplicationTags, tenantId);
+                    this.applicationDAO.addTagMapping(newTagIds, applicationDTO.getId(), tenantId);
+                }
+                return Stream.concat(applicationTags.stream(), newApplicationTags.stream())
+                        .collect(Collectors.toList());
+            } else {
+                String msg = "Tag list is either null or empty. In order to add new tags for application which has "
+                        + "application ID: " + appId +", tag list should be a list of Stings. Therefore please "
+                        + "verify the payload.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while accessing application tags. Application ID: " + appId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

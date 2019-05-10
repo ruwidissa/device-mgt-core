@@ -939,6 +939,91 @@ public interface ApplicationManagementPublisherAPI {
             @QueryParam("to") String newTagName
     );
 
+    @POST
+    @Path("/tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add new tags.",
+            notes = "This will add new tags for the system",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully add tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Tag adding request contains unacceptable payload."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while adding new tags.",
+                            response = ErrorResponse.class)
+            })
+    Response addTags(
+            @ApiParam(
+                    name = "oldTagName",
+                    value = "Existing Tag Name",
+                    required = true)
+                    List<String> tagNames
+    );
+
+    @POST
+    @Path("/{appId}/tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add new application tags",
+            notes = "This will add new application tags",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully add application tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Application tag adding request contains unacceptable payload."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found an application for the given application id.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while adding new application tags.",
+                            response = ErrorResponse.class)
+            })
+    Response addApplicationTags(
+            @ApiParam(
+                    name = "oldTagName",
+                    value = "Existing Tag Name",
+                    required = true)
+            @PathParam("appId") int appId,
+            @ApiParam(
+                    name = "appId",
+                    value = "application Id",
+                    required = true)
+            List<String> tagNames
+    );
+
     @GET
     @Path("/categories")
     @Produces(MediaType.APPLICATION_JSON)

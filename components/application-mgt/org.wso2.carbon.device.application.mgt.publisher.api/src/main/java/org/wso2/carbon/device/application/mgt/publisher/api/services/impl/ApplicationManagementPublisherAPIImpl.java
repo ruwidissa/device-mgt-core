@@ -16,6 +16,7 @@
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
+import org.apache.axiom.attachments.utils.BAAInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -566,6 +567,51 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while updating registered tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Override
+    @Consumes("application/json")
+    @Path("/tags")
+    public Response addTags(
+            List<String> tagNames) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.addTags(tagNames);
+            String msg = "New application tags are added successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while adding new tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Override
+    @Consumes("application/json")
+    @Path("/{appId}/tags")
+    public Response addApplicationTags(
+            @PathParam("appId") int appId,
+            List<String> tagNames) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.addApplicationTags(appId, tagNames);
+            String msg = "New tags are added successfully, for application which has application ID: " + appId +".";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while adding new tags for application which has application ID: " + appId + ".";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

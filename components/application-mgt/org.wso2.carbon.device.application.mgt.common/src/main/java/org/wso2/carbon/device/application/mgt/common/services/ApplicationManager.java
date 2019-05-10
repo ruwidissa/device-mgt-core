@@ -240,4 +240,7 @@ public interface ApplicationManager {
 
     void updateTag(String oldTagName, String newTagName) throws ApplicationManagementException;
 
+    List<String> addTags(List<String> tags) throws ApplicationManagementException;
+
+    List<String> addApplicationTags(int appId, List<String> tags) throws ApplicationManagementException;
 }
