@@ -242,6 +242,7 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
                 String challengeToken = certMgtService.extractChallengeToken(cert);
 
                 if (challengeToken != null) {
+                    challengeToken = challengeToken.replace("\u0004&\u0013$","");
                     challengeToken = challengeToken.substring(challengeToken.indexOf("(") + 1).trim();
 
                     SCEPManager scepManager = CertificateMgtAPIUtils.getSCEPManagerService();
