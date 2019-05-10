@@ -1625,7 +1625,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 lifecycleState.setPreviousState(applicationReleaseDTO.getCurrentState());
                 lifecycleState.setUpdatedBy(userName);
                 applicationReleaseDTO.setCurrentState(stateName);
-                this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId);
+                if (this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId) == null) {
+                    String msg = "Application release updating is failed/.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
                 ConnectionManagerUtil.commitDBTransaction();
             } else {

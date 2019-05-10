@@ -150,8 +150,7 @@ public interface ApplicationManager {
      * @param stateName Lifecycle state to change the app
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void changeLifecycleState(String releaseUuid, String stateName)
-            throws ApplicationManagementException;
+    void changeLifecycleState(String releaseUuid, String stateName) throws ApplicationManagementException;
 
     /**
      * To update release images such as icons, banner and screenshots.

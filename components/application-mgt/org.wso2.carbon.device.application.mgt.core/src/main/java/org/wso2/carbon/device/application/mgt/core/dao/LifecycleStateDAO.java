@@ -64,8 +64,7 @@ public interface LifecycleStateDAO {
      *
      * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
      */
-    void addLifecycleState(LifecycleState state, int appReleaseId, int tenantId)
-            throws LifeCycleManagementDAOException;
+    void addLifecycleState(LifecycleState state, int appReleaseId, int tenantId) throws LifeCycleManagementDAOException;
 
     /**
      * To delete lifecycle state data of specific application release.

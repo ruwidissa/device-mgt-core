@@ -931,12 +931,12 @@ public interface ApplicationManagementPublisherAPI {
                     name = "oldTagName",
                     value = "Existing Tag Name",
                     required = true)
-            @PathParam("oldTagName") String oldTagName,
+            @QueryParam("from") String oldTagName,
             @ApiParam(
-                    name = "tag",
+                    name = "newTagName",
                     value = "Modifying Tag Name",
                     required = true)
-            @QueryParam("tag") String newTagName
+            @QueryParam("to") String newTagName
     );
 
     @GET

@@ -551,10 +551,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @PUT
     @Override
     @Consumes("application/json")
-    @Path("/tags/{oldTagName}")
+    @Path("/tags/rename")
     public Response modifyTagName(
-            @PathParam("oldTagName") String oldTagName,
-            @QueryParam("tag") String newTagName) {
+            @QueryParam("from") String oldTagName,
+            @QueryParam("to") String newTagName) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.updateTag(oldTagName, newTagName);

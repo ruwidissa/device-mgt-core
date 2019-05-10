@@ -102,7 +102,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             statement.setBoolean(15, applicationRelease.getIsSharedWithAllTenants());
             statement.setString(16, applicationRelease.getMetaData());
             statement.setString(17, applicationRelease.getSupportedOsVersions());
-            statement.setString(18, applicationRelease.getCurrentState());
+            statement.setString(18, applicationRelease.getCurrentState().toUpperCase());
             statement.setInt(19, appId);
             statement.executeUpdate();
             resultSet = statement.getGeneratedKeys();
@@ -474,9 +474,9 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             statement.setBoolean(14, applicationReleaseDTO.getIsSharedWithAllTenants());
             statement.setString(15, applicationReleaseDTO.getMetaData());
             statement.setString(16, applicationReleaseDTO.getSupportedOsVersions());
-            statement.setString(17, applicationReleaseDTO.getCurrentState());
-            statement.setInt(18, tenantId);
-            statement.setInt(19, applicationReleaseDTO.getId());
+            statement.setString(17, applicationReleaseDTO.getCurrentState().toUpperCase());
+            statement.setInt(18, applicationReleaseDTO.getId());
+            statement.setInt(19, tenantId);
             if (statement.executeUpdate() == 0) {
                 return null;
             }
