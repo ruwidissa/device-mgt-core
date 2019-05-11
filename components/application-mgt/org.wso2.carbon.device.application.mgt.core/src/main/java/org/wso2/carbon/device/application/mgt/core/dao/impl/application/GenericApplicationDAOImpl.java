@@ -773,6 +773,39 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
     }
 
+    @Override
+    public CategoryDTO getCategoryForCategoryName(String categoryName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get category for given category name.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            String sql = "SELECT AP_APP_CATEGORY.ID AS ID"
+                    + " FROM AP_APP_CATEGORY "
+                    + "WHERE AP_APP_CATEGORY.CATEGORY = ? AND "
+                    + "AP_APP_CATEGORY.TENANT_ID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, categoryName);
+                ps.setInt(2, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        CategoryDTO categoryDTO = new CategoryDTO();
+                        categoryDTO.setId(rs.getInt("ID"));
+                        categoryDTO.setCategoryName(categoryName);
+                        return categoryDTO;
+                    }
+                }
+            }
+            return null;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting category Id for given category name",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "SQL Error occurred while getting category Id for category name.", e);
+        }
+    }
 
     @Override
     public void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException {
@@ -863,6 +896,64 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred when deleting category mapping of application ID: "
                     + applicationId, e);
+        }
+    }
+
+    @Override
+    public void deleteCategory(int categoryId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete category.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM " +
+                "AP_APP_CATEGORY cat " +
+                "WHERE " +
+                "cat.ID = ? AND " +
+                "cat.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, categoryId);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting category which has ID: "
+                            + categoryId, e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when deleting category which has ID: " + categoryId, e);
+        }
+    }
+
+    @Override
+    public void updateCategory(CategoryDTO categoryDTO, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to update a category.");
+        }
+        Connection conn;
+        String sql = "UPDATE " +
+                "AP_APP_CATEGORY cat " +
+                "SET cat.CATEGORY_NAME = ? " +
+                "WHERE " +
+                "cat.ID = ? AND " +
+                "cat.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, categoryDTO.getCategoryName());
+                stmt.setInt(1, categoryDTO.getId());
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when updating category which has ID: "
+                            + categoryDTO.getId(), e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when updating category which has ID: " + categoryDTO.getId(), e);
         }
     }
 
@@ -1256,8 +1347,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
     }
 
-
-
     @Override
     public List<String> getAppCategories(int appId, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -1287,6 +1376,36 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     "Error occurred while obtaining the DB connection when adding tags", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        }
+    }
+
+    @Override
+    public boolean hasCategoryMapping (int categoryId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to verify whether tag is associated with at least one application.");
+        }
+        Connection conn;
+        String sql = "SELECT cm.AP_APP_ID AS ID "
+                + "FROM AP_APP_CATEGORY_MAPPING cm "
+                + "WHERE "
+                + "cm.AP_APP_CATEGORY_ID = ? AND "
+                + "cm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, categoryId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when verifying the existence of a category mapping",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when verifying the existence of a category mapping.", e);
         }
     }
 

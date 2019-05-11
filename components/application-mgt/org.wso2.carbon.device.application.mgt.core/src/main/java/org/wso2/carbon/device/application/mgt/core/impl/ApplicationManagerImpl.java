@@ -2010,23 +2010,22 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    @Override
     public List<String> addTags(List<String> tags) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             if (tags != null && !tags.isEmpty()) {
                 ConnectionManagerUtil.beginDBTransaction();
                 List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
-                List<String> registeredTagNames = new ArrayList<>();
+                List<String> registeredTagNames = registeredTags.stream().map(TagDTO::getTagName)
+                        .collect(Collectors.toList());
 
-                for (TagDTO tagDTO : registeredTags) {
-                    registeredTagNames.add(tagDTO.getTagName());
-                }
                 List<String> newTags = getDifference(tags, registeredTagNames);
                 if (!newTags.isEmpty()) {
                     this.applicationDAO.addTags(newTags, tenantId);
                     ConnectionManagerUtil.commitDBTransaction();
                     if (log.isDebugEnabled()) {
-                        log.debug("New tags entries are added to the AP_APP_TAG table.");
+                        log.debug("New tags are added to the AP_APP_TAG table.");
                     }
                 }
                 return Stream.concat(registeredTagNames.stream(), newTags.stream()).collect(Collectors.toList());
@@ -2053,11 +2052,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (tags != null && !tags.isEmpty()) {
                 ConnectionManagerUtil.beginDBTransaction();
                 List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
-                List<String> registeredTagNames = new ArrayList<>();
+                List<String> registeredTagNames = registeredTags.stream().map(TagDTO::getTagName)
+                        .collect(Collectors.toList());
 
-                for (TagDTO tagDTO : registeredTags) {
-                    registeredTagNames.add(tagDTO.getTagName());
-                }
                 List<String> newTags = getDifference(tags, registeredTagNames);
                 if (!newTags.isEmpty()) {
                     this.applicationDAO.addTags(newTags, tenantId);
@@ -2085,6 +2082,92 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String msg = "Error occurred while accessing application tags. Application ID: " + appId;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    public List<String> addCategories(List<String> categories) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            if (categories != null && !categories.isEmpty()) {
+                ConnectionManagerUtil.beginDBTransaction();
+                List<CategoryDTO> registeredCategories = applicationDAO.getAllCategories(tenantId);
+                List<String> registeredCategoryNames = registeredCategories.stream().map(CategoryDTO::getCategoryName)
+                        .collect(Collectors.toList());
+
+                List<String> newCategories = getDifference(categories, registeredCategoryNames);
+                if (!newCategories.isEmpty()) {
+                    this.applicationDAO.addCategories(newCategories, tenantId);
+                    ConnectionManagerUtil.commitDBTransaction();
+                    if (log.isDebugEnabled()) {
+                        log.debug("New categories are added to the AP_APP_TAG table.");
+                    }
+                }
+                return Stream.concat(registeredCategoryNames.stream(), newCategories.stream())
+                        .collect(Collectors.toList());
+            } else{
+                String msg = "Category list is either null of empty. In order to add new categories, category list "
+                        + "should be a list of Stings. Therefore please verify the payload.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred either getting registered categories or adding new categories.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void deleteCategory(String tagName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            CategoryDTO category = applicationDAO.getCategoryForCategoryName(tagName, tenantId);
+            if (category == null){
+                String msg = "Couldn't found a category for category name " + tagName + ".";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            if (applicationDAO.hasCategoryMapping(category.getId(), tenantId)){
+                String msg = "Category " + category.getCategoryName()
+                        + " is used by some applications. Therefore it is not permitted to delete the application category.";
+                log.error(msg);
+                throw new ForbiddenException(msg);
+            }
+            applicationDAO.deleteCategory(category.getId(), tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting category Id or deleting the category from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public void updateCategory(String oldCategoryName, String newCategoryName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            CategoryDTO category = applicationDAO.getCategoryForCategoryName(oldCategoryName, tenantId);
+            if (category == null){
+                String msg = "Couldn't found a category for tag name " + oldCategoryName + ".";
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            category.setCategoryName(newCategoryName);
+            applicationDAO.updateCategory(category, tenantId);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting tag Ids or deleting the category from the system.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

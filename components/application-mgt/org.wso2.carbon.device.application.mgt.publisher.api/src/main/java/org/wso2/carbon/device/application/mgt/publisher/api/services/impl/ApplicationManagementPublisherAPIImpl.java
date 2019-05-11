@@ -16,7 +16,6 @@
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
-import org.apache.axiom.attachments.utils.BAAInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

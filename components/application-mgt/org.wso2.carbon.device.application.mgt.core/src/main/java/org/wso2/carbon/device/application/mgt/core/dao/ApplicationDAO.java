@@ -79,9 +79,13 @@ public interface ApplicationDAO {
 
     List<String> getAppCategories (int appId, int tenantId) throws ApplicationManagementDAOException;
 
+    boolean hasCategoryMapping(int categoryId, int tenantId) throws ApplicationManagementDAOException;
+
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
 
     List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException;
+
+    CategoryDTO getCategoryForCategoryName(String categoryName, int tenantId) throws ApplicationManagementDAOException;
 
     void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException;
 
@@ -89,6 +93,12 @@ public interface ApplicationDAO {
             throws ApplicationManagementDAOException;
 
     void deleteCategoryMapping (int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteCategory(int categoryId, int tenantId) throws ApplicationManagementDAOException;
+
+    void updateCategory(CategoryDTO categoryDTO, int tenantId) throws ApplicationManagementDAOException;
+
+
 
     /**
      * To check application existence.

@@ -243,4 +243,11 @@ public interface ApplicationManager {
     List<String> addTags(List<String> tags) throws ApplicationManagementException;
 
     List<String> addApplicationTags(int appId, List<String> tags) throws ApplicationManagementException;
+
+    List<String> addCategories(List<String> categories) throws ApplicationManagementException;
+
+    void deleteCategory(String categoryName) throws ApplicationManagementException;
+
+    void updateCategory(String oldCategoryName, String newCategoryName) throws ApplicationManagementException;
+
 }
