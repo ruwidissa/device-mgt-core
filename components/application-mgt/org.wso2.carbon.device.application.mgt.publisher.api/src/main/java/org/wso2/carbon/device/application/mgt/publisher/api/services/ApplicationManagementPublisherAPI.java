@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Filter;
+import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
@@ -730,6 +731,10 @@ public interface ApplicationManagementPublisherAPI {
                             message = "Bad Request. \n " +
                                     "Lifecycle State changing request contains unacceptable or vulnerable data"),
                     @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to move the lifecycle state of a given application release"
+                                    + " to the given lifecycle state."),
+                    @ApiResponse(
                             code = 404,
                             message = "NOT FOUND. \n Error occurred while adding new lifecycle state.",
                             response = ErrorResponse.class),
@@ -745,10 +750,10 @@ public interface ApplicationManagementPublisherAPI {
                     required = true)
             @PathParam("uuid") String applicationUuid,
             @ApiParam(
-                    name = "action",
-                    value = "Changing lifecycle state",
+                    name = "LifecycleChanger",
+                    value = "Lifecycle Changer which contains the action and the reason for the lifecycle change.",
                     required = true)
-            @QueryParam("action") String action
+            LifecycleChanger lifecycleChanger
     );
 
     @GET

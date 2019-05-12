@@ -29,6 +29,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
+import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
@@ -84,6 +85,7 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,7 +98,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
@@ -149,7 +150,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         ApplicationDTO applicationDTO;
         List<String> unrestrictedRoles;
-        Optional<CategoryDTO> category;
+        List<Integer> categoryIds = new ArrayList<>();
         List<String> tags;
 
         //validating and verifying application data
@@ -189,7 +190,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             List<CategoryDTO> registeredCategories = this.applicationDAO.getAllCategories(tenantId);
-            String categoryName = applicationWrapper.getAppCategory();
+            List<String> appCategories = applicationWrapper.getAppCategories();
 
             if (registeredCategories.isEmpty()) {
                 ConnectionManagerUtil.rollbackDBTransaction();
@@ -198,13 +199,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
-            category = registeredCategories.stream().filter(obj -> obj.getCategoryName().equals(categoryName))
-                    .findAny();
-            if (!category.isPresent()) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                String msg = "Request contains invalid category: " + categoryName;
-                log.error(msg);
-                throw new ApplicationManagementException(msg);
+            for (String cat : appCategories) {
+                boolean isValidCategory = false;
+                for (CategoryDTO obj : registeredCategories) {
+                    if (cat.equals(obj.getCategoryName())) {
+                        categoryIds.add(obj.getId());
+                        isValidCategory = true;
+                        break;
+                    }
+                }
+                if (!isValidCategory) {
+                    String msg = "Application Creating request contains invalid categories. Hence please verify the "
+                            + "application creating payload.";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while getting database connection.";
@@ -260,6 +269,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (log.isDebugEnabled()) {
                     log.debug("New ApplicationDTO entry added to AP_APP table. App Id:" + appId);
                 }
+                //add application categories
+                this.applicationDAO.addCategoryMapping(categoryIds, appId, tenantId);
+
                 //adding application unrestricted roles
                 if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
                     this.visibilityDAO.addUnrestrictedRoles(unrestrictedRoles, appId, tenantId);
@@ -268,15 +280,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + " App Id:" + appId);
                     }
                 }
-
-                /*
-                In current flow, allow to add one category for an application. If it is required to add multiple
-                categories DAO layer is implemented to match with that requirement. Hence logic is also implemented
-                this way.
-                */
-                List<Integer> categoryIds = new ArrayList<>();
-                categoryIds.add(category.get().getId());
-                this.applicationDAO.addCategoryMapping(categoryIds, appId, tenantId);
 
                 //adding application tags
                 if (tags != null && !tags.isEmpty()) {
@@ -623,6 +626,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
+        if (filter == null) {
+            String msg = "Request Payload is null";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList = new ApplicationList();
@@ -631,24 +639,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
         List<ApplicationDTO> filteredApplications = new ArrayList<>();
         DeviceType deviceType = null;
 
-        try {
-            //set default values
-            if (filter.getLimit() == 0) {
-                filter.setLimit(20);
-            }
-            String deviceTypename = filter.getDeviceType();
-            if (!StringUtils.isEmpty(deviceTypename)) {
-                deviceType = getDeviceTypeData(deviceTypename);
-            }
-            if (deviceType == null) {
-                deviceType = new DeviceType();
-                deviceType.setId(-1);
-            }
+        //set default values
+        if (!StringUtils.isEmpty(filter.getDeviceType())) {
+            deviceType = getDeviceTypeData(filter.getDeviceType());
+        }
+        if (filter.getLimit() == 0) {
+            filter.setLimit(20);
+        }
 
+        if (deviceType == null) {
+            deviceType = new DeviceType();
+            deviceType.setId(-1);
+        }
+
+        try {
             ConnectionManagerUtil.openDBConnection();
             validateFilter(filter);
             appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
-            //todo as a performance improvement get these data from DB. Consider where in clause.
             for (ApplicationDTO applicationDTO : appDTOs) {
                 boolean isSearchingApp = true;
                 List<String> filteringTags = filter.getTags();
@@ -656,14 +663,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
 
                 if (!lifecycleStateManager.getEndState().equals(applicationDTO.getStatus())) {
-                    List<String> appUnrestrictedRoles = visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId);
+                    List<String> appUnrestrictedRoles = visibilityDAO
+                            .getUnrestrictedRoles(applicationDTO.getId(), tenantId);
+                    applicationDTO.setUnrestrictedRoles(appUnrestrictedRoles);
                     if ((appUnrestrictedRoles.isEmpty() || hasUserRole(appUnrestrictedRoles, userName)) && (
                             filteringUnrestrictedRoles == null || filteringUnrestrictedRoles.isEmpty()
                                     || hasAppUnrestrictedRole(appUnrestrictedRoles, filteringUnrestrictedRoles,
                                     userName))) {
                         if (filteringCategories != null && !filteringCategories.isEmpty()) {
-                            List<String> appTagList = applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
-                            boolean isAppCategory = filteringCategories.stream().anyMatch(appTagList::contains);
+                            List<String> appCategoryList = applicationDAO
+                                    .getAppCategories(applicationDTO.getId(), tenantId);
+                            applicationDTO.setAppCategories(appCategoryList);
+                            boolean isAppCategory = filteringCategories.stream().anyMatch(appCategoryList::contains);
                             if (!isAppCategory) {
                                 isSearchingApp = false;
                             }
@@ -699,9 +710,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationList.getPagination().setSize(filter.getOffset());
             applicationList.getPagination().setCount(applicationList.getApplications().size());
             return applicationList;
-        }  catch (UnexpectedServerErrorException e){
-            throw new ApplicationManagementException(e.getMessage(), e);
-        }catch (UserStoreException e) {
+        }  catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
                             + " has the publisher permission", e);
@@ -843,9 +852,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             List<String> tags = this.applicationDAO.getAppTags(appId, tenantId);
             List<String> categories = this.applicationDAO.getAppCategories(appId, tenantId);
             applicationDTO.setTags(tags);
-            //todo when support to add multiple categories this has to be changed
             if (!categories.isEmpty()){
-                applicationDTO.setAppCategory(categories.get(0));
+                applicationDTO.setAppCategories(categories);
             }
             if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
                 return appDtoToAppResponse(applicationDTO);
@@ -1595,10 +1603,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void changeLifecycleState(String releaseUuid, String stateName)
+    public void changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException {
+
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (lifecycleChanger == null || StringUtils.isEmpty(lifecycleChanger.getAction())) {
+            String msg = "The Action is null or empty. Please verify the request.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO
@@ -1609,23 +1624,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-
             if (lifecycleStateManager
-                    .isValidStateChange(applicationReleaseDTO.getCurrentState(), stateName, userName, tenantId)) {
-                if (lifecycleStateManager.isInstallableState(stateName) && applicationReleaseDAO
+                    .isValidStateChange(applicationReleaseDTO.getCurrentState(), lifecycleChanger.getAction(), userName,
+                            tenantId)) {
+                if (lifecycleStateManager.isInstallableState(lifecycleChanger.getAction()) && applicationReleaseDAO
                         .hasExistInstallableAppRelease(applicationReleaseDTO.getUuid(),
                                 lifecycleStateManager.getInstallableState(), tenantId)) {
                     String msg = "Installable application release is already registered for the application. "
                             + "Therefore it is not permitted to change the lifecycle state from "
-                            + applicationReleaseDTO.getCurrentState() + " to " + stateName;
+                            + applicationReleaseDTO.getCurrentState() + " to " + lifecycleChanger.getAction();
                     log.error(msg);
                     throw new ForbiddenException(msg);
                 }
                 LifecycleState lifecycleState = new LifecycleState();
-                lifecycleState.setCurrentState(stateName);
+                lifecycleState.setCurrentState(lifecycleChanger.getAction());
                 lifecycleState.setPreviousState(applicationReleaseDTO.getCurrentState());
                 lifecycleState.setUpdatedBy(userName);
-                applicationReleaseDTO.setCurrentState(stateName);
+                lifecycleState.setResonForChange(lifecycleChanger.getReason());
+                applicationReleaseDTO.setCurrentState(lifecycleChanger.getAction());
                 if (this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId) == null) {
                     String msg = "Application release updating is failed/.";
                     log.error(msg);
@@ -1635,7 +1651,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 ConnectionManagerUtil.commitDBTransaction();
             } else {
                 String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
-                        + " to '" + stateName + "'";
+                        + " to '" + lifecycleChanger.getAction() + "'";
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
@@ -2347,7 +2363,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-        if (StringUtils.isEmpty(applicationWrapper.getAppCategory())) {
+        if (applicationWrapper.getAppCategories().isEmpty()) {
             String msg = "Application category can't be empty.";
             log.error(msg);
             throw new RequestValidatingException(msg);
@@ -2459,7 +2475,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setName(applicationWrapper.getName());
         applicationDTO.setDescription(applicationWrapper.getDescription());
-        applicationDTO.setAppCategory(applicationWrapper.getAppCategory());
+        applicationDTO.setAppCategories(applicationWrapper.getAppCategories());
         applicationDTO.setType(applicationWrapper.getType());
         applicationDTO.setSubType(applicationWrapper.getSubType());
         applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
@@ -2492,7 +2508,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setId(applicationDTO.getId());
         application.setName(applicationDTO.getName());
         application.setDescription(applicationDTO.getDescription());
-        application.setAppCategory(applicationDTO.getAppCategory());
+        application.setAppCategories(applicationDTO.getAppCategories());
         application.setType(applicationDTO.getType());
         application.setSubType(applicationDTO.getSubType());
         application.setPaymentCurrency(applicationDTO.getPaymentCurrency());

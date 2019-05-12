@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
+import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
@@ -147,10 +148,11 @@ public interface ApplicationManager {
      * To get all the releases of a particular ApplicationDTO.
      *
      * @param releaseUuid UUID of the ApplicationDTO Release.
-     * @param stateName Lifecycle state to change the app
+     * @param lifecycleChanger Lifecycle changer that contains the action and the reson for the change.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void changeLifecycleState(String releaseUuid, String stateName) throws ApplicationManagementException;
+    void changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
+            throws ApplicationManagementException;
 
     /**
      * To update release images such as icons, banner and screenshots.

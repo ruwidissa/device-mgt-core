@@ -130,9 +130,8 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
             List<String> categoryNames) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.addCategories(categoryNames);
-            String msg = "New application categories are added successfully.";
-            return Response.status(Response.Status.OK).entity(msg).build();
+            List<String> categories = applicationManager.addCategories(categoryNames);
+            return Response.status(Response.Status.OK).entity(categories).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();
             log.error(msg);

@@ -1478,7 +1478,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 application.setId(rs.getInt("APP_ID"));
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
-                application.setAppCategory(rs.getString("APP_CATEGORY"));
+//                application.setAppCategories(rs.getString("APP_CATEGORY"));
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
 //                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
