@@ -753,7 +753,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "LifecycleChanger",
                     value = "Lifecycle Changer which contains the action and the reason for the lifecycle change.",
                     required = true)
-            LifecycleChanger lifecycleChanger
+            @Valid LifecycleChanger lifecycleChanger
     );
 
     @GET
