@@ -444,20 +444,45 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ResultSet rs = null;
         try {
             conn = this.getDBConnection();
-            String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP.DEVICE_TYPE_ID AS DEVICE_TYPE_ID, "
-                            + "AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE AS "
-                            + "ROLE FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
-                            + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
-                            + "WHERE AP_APP.ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID =? ) AND "
-                            + "AP_APP.TENANT_ID = ? AND AP_APP.STATUS != ?;";
+            String sql = "SELECT "
+                    + "AP_APP.ID AS APP_ID, "
+                    + "AP_APP.NAME AS APP_NAME, "
+                    + "AP_APP.DESCRIPTION AS APP_DESCRIPTION, "
+                    + "AP_APP.TYPE AS APP_TYPE, "
+                    + "AP_APP.STATUS AS APP_STATUS, "
+                    + "AP_APP.SUB_TYPE AS APP_SUB_TYPE, "
+                    + "AP_APP.CURRENCY AS APP_CURRENCY, "
+                    + "AP_APP.RATING AS APP_RATING, "
+                    + "AP_APP.DEVICE_TYPE_ID AS APP_DEVICE_TYPE_ID, "
+                    + "AP_APP_RELEASE.ID AS RELEASE_ID, "
+                    + "AP_APP_RELEASE.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                    + "AP_APP_RELEASE.VERSION AS RELEASE_VERSION, "
+                    + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
+                    + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
+                    + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                    + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
+                    + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                    + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                    + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                    + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                    + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
+                    + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
+                    + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                    + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                    + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
+                    + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                    + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                    + "FROM AP_APP "
+                    + "INNER JOIN AP_APP_RELEASE ON "
+                    + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
+                    + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                    + "WHERE "
+                    + "AP_APP.ID = (SELECT AP_APP_RELEASE.AP_APP_ID FROM AP_APP_RELEASE WHERE AP_APP_RELEASE.UUID = ?) "
+                    + "AND AP_APP.TENANT_ID = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, releaseUuid);
             stmt.setInt(2, tenantId);
-            stmt.setString(3, AppLifecycleState.RETIRED.toString());
             rs = stmt.executeQuery();
 
             if (log.isDebugEnabled()) {

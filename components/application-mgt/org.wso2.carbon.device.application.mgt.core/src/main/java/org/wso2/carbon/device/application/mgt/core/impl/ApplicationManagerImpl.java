@@ -625,11 +625,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
-        if (filter == null) {
-            String msg = "Request Payload is null";
-            log.error(msg);
-            throw new BadRequestException(msg);
-        }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList = new ApplicationList();
@@ -845,19 +840,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
                 }
             }
-            applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
-            if (applicationDTO.getApplicationReleaseDTOs().isEmpty()){
+            if (state != null && filteredApplicationReleaseDTOs.isEmpty()) {
                 return null;
             }
+            applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
 
             List<String> tags = this.applicationDAO.getAppTags(appId, tenantId);
             List<String> categories = this.applicationDAO.getAppCategories(appId, tenantId);
             applicationDTO.setTags(tags);
             if (!categories.isEmpty()){
                 applicationDTO.setAppCategories(categories);
-            }
-            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                return appDtoToAppResponse(applicationDTO);
             }
 
             List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(appId, tenantId);
@@ -944,44 +936,66 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
 
     @Override
-    public ApplicationDTO getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
+    public Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO application;
-        boolean isAppAllowed = false;
-        List<ApplicationReleaseDTO> applicationReleases;
+        boolean isVisibleApp = false;
+
         try {
             ConnectionManagerUtil.openDBConnection();
-            application = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
-            if (application == null) {
-                throw new NotFoundException("Couldn't find an application for application release UUID:: " + uuid);
-            }
-            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationReleases = getReleases(application, state);
-                application.setApplicationReleaseDTOs(applicationReleases);
-                return application;
+            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(uuid, tenantId);
+
+            if (applicationDTO == null) {
+                String msg = "Couldn't found an application for application release UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
 
-            if (!application.getUnrestrictedRoles().isEmpty()) {
-                if (hasUserRole(application.getUnrestrictedRoles(), userName)) {
-                    isAppAllowed = true;
+            List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs = new ArrayList<>();
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
+                if (!applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState()) && (
+                        state == null || applicationReleaseDTO.getCurrentState().equals(state))) {
+                    filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
                 }
-            } else {
-                isAppAllowed = true;
             }
-
-            if (!isAppAllowed) {
+            if (state != null && filteredApplicationReleaseDTOs.isEmpty()) {
                 return null;
             }
-            applicationReleases = getReleases(application, state);
-            application.setApplicationReleaseDTOs(applicationReleases);
-            return application;
+            applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
+
+            List<String> tags = this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
+            List<String> categories = this.applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
+            applicationDTO.setTags(tags);
+            applicationDTO.setAppCategories(categories);
+
+            List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId);
+            if (!unrestrictedRoles.isEmpty()) {
+                if (hasUserRole(unrestrictedRoles, userName)) {
+                    isVisibleApp = true;
+                }
+            } else {
+                isVisibleApp = true;
+            }
+
+            if (!isVisibleApp) {
+                String msg = "You are trying to access visibility restricted application. You don't have required "
+                        + "roles to view this application,";
+                log.error(msg);
+                throw new ForbiddenException(msg);
+            }
+            return appDtoToAppResponse(applicationDTO);
+        } catch (LifecycleManagementException e) {
+            String msg = "Error occurred when getting the last state of the application lifecycle flow";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while getting application with the application release UUID " + uuid);
+            String msg = "User-store exception while getting application with the application release UUID " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            //todo
-            throw new ApplicationManagementException("");
+            String msg = "Error occurred while getting, application data.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -2197,6 +2211,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
+
+    @Override
+    public String getInstallableLifecycleState() throws ApplicationManagementException {
+        if (lifecycleStateManager == null) {
+            String msg = "Application lifecycle manager is not initialed. Please contact the administrator.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        }
+        return lifecycleStateManager.getInstallableState();
+    }
+
 
     private void validateFilter(Filter filter) throws BadRequestException {
         if (filter == null) {

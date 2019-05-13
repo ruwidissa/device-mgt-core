@@ -124,7 +124,7 @@ public interface ApplicationManager {
      * @return the ApplicationDTO identified by the ID
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    ApplicationDTO getApplicationByUuid(String uuid, String state) throws ApplicationManagementException;
+    Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
@@ -251,5 +251,7 @@ public interface ApplicationManager {
     void deleteCategory(String categoryName) throws ApplicationManagementException;
 
     void updateCategory(String oldCategoryName, String newCategoryName) throws ApplicationManagementException;
+
+    String getInstallableLifecycleState() throws ApplicationManagementException;
 
 }

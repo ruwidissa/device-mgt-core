@@ -121,9 +121,9 @@ public interface ApplicationManagementPublisherAPI {
                             message = "OK. \n Successfully got application list.",
                             response = ApplicationList.class),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. There doesn't have an application which is matched with requested " +
-                                    "query."),
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application retrieving request payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",

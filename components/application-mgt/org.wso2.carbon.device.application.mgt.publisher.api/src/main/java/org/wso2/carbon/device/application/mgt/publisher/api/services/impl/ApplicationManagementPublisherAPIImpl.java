@@ -74,10 +74,14 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Override
     @Consumes("application/json")
     public Response getApplications(
-            @Valid Filter filter ){
+            @Valid Filter filter) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-
         try {
+            if (filter == null) {
+                String msg = "Request Payload is null";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.OK)
