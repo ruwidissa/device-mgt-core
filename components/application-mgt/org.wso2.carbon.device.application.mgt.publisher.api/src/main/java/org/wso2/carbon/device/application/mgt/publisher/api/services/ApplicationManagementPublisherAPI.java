@@ -923,6 +923,10 @@ public interface ApplicationManagementPublisherAPI {
                             message = "OK. \n Successfully update the registered tag.",
                             response = ApplicationList.class),
                     @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Request contains unaccepted values for query parameters."),
+                    @ApiResponse(
                             code = 404,
                             message = "NOT FOUND. \n Couldn't found a tag for the given tag name.",
                             response = ErrorResponse.class),

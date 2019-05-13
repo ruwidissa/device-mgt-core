@@ -1031,7 +1031,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             Connection conn = this.getDBConnection();
             List<Integer> distinctTagIds = new ArrayList<>();
-            String sql = "SELECT DISTINCT AP_APP_TAG.ID AS ID FROM AP_APP_TAG";
+            String sql = "SELECT DISTINCT tm.AP_APP_TAG_ID AS ID FROM AP_APP_TAG_MAPPING tm";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -1325,7 +1325,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         String sql = "UPDATE " +
                 "AP_APP_TAG tag " +
-                "SET tag.TAG_NAME = ? " +
+                "SET tag.TAG = ? " +
                 "WHERE " +
                 "tag.ID = ? AND " +
                 "tag.TENANT_ID = ?";
@@ -1333,8 +1333,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, tagDTO.getTagName());
-                stmt.setInt(1, tagDTO.getId());
-                stmt.setInt(2, tenantId);
+                stmt.setInt(2, tagDTO.getId());
+                stmt.setInt(3, tenantId);
                 stmt.executeUpdate();
             }
         } catch (DBConnectionException e) {

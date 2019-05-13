@@ -16,7 +16,6 @@
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -568,6 +567,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.updateTag(oldTagName, newTagName);
             String msg = "Tag " + oldTagName + " is updated to " + newTagName + " successfully.";
             return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
             log.error(msg);

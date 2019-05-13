@@ -85,7 +85,6 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -663,28 +662,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
 
                 if (!lifecycleStateManager.getEndState().equals(applicationDTO.getStatus())) {
+                    //get application categories, tags and unrestricted roles.
                     List<String> appUnrestrictedRoles = visibilityDAO
                             .getUnrestrictedRoles(applicationDTO.getId(), tenantId);
+                    List<String> appCategoryList = applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
+                    List<String> appTagList = applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
+
+                    //Set application categories, tags and unrestricted roles to the application DTO.
                     applicationDTO.setUnrestrictedRoles(appUnrestrictedRoles);
+                    applicationDTO.setAppCategories(appCategoryList);
+                    applicationDTO.setTags(appTagList);
+
                     if ((appUnrestrictedRoles.isEmpty() || hasUserRole(appUnrestrictedRoles, userName)) && (
                             filteringUnrestrictedRoles == null || filteringUnrestrictedRoles.isEmpty()
                                     || hasAppUnrestrictedRole(appUnrestrictedRoles, filteringUnrestrictedRoles,
                                     userName))) {
                         if (filteringCategories != null && !filteringCategories.isEmpty()) {
-                            List<String> appCategoryList = applicationDAO
-                                    .getAppCategories(applicationDTO.getId(), tenantId);
-                            applicationDTO.setAppCategories(appCategoryList);
-                            boolean isAppCategory = filteringCategories.stream().anyMatch(appCategoryList::contains);
-                            if (!isAppCategory) {
-                                isSearchingApp = false;
-                            }
+                            isSearchingApp = filteringCategories.stream().anyMatch(appCategoryList::contains);
                         }
-                        if (filteringTags != null && !filteringTags.isEmpty()) {
-                            List<String> appTagList = applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
-                            boolean isAppTag = filteringTags.stream().anyMatch(appTagList::contains);
-                            if (!isAppTag) {
-                                isSearchingApp = false;
-                            }
+                        if (filteringTags != null && !filteringTags.isEmpty() && isSearchingApp) {
+                            isSearchingApp = filteringTags.stream().anyMatch(appTagList::contains);
                         }
                         if (isSearchingApp) {
                             filteredApplications.add(applicationDTO);
@@ -701,16 +698,20 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
             }
 
-            for(ApplicationDTO appDTO : filteredApplications){
+            for (ApplicationDTO appDTO : filteredApplications) {
                 applications.add(appDtoToAppResponse(appDTO));
             }
-            applicationList.setApplications(applications);
+
             Pagination pagination = new Pagination();
+            pagination.setCount(applications.size());
+            pagination.setSize(applications.size());
+            pagination.setOffset(filter.getOffset());
+            pagination.setLimit(filter.getLimit());
+
+            applicationList.setApplications(applications);
             applicationList.setPagination(pagination);
-            applicationList.getPagination().setSize(filter.getOffset());
-            applicationList.getPagination().setCount(applicationList.getApplications().size());
             return applicationList;
-        }  catch (UserStoreException e) {
+        } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
                             + " has the publisher permission", e);
@@ -2006,6 +2007,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public void updateTag(String oldTagName, String newTagName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (StringUtils.isEmpty(oldTagName) || StringUtils.isEmpty(newTagName)) {
+            String msg = "Either old tag name or new tag name contains empty/null value. Hence please verify the "
+                    + "request.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
         try {
             ConnectionManagerUtil.beginDBTransaction();
             TagDTO tag = applicationDAO.getTagForTagName(oldTagName, tenantId);
@@ -2080,10 +2087,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
 
                 List<String> applicationTags = this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
-                List<String> newApplicationTags = getDifference(applicationTags, tags);
+                List<String> newApplicationTags = getDifference(tags, applicationTags);
                 if (!newApplicationTags.isEmpty()) {
                     List<Integer> newTagIds = this.applicationDAO.getTagIdsForTagNames(newApplicationTags, tenantId);
                     this.applicationDAO.addTagMapping(newTagIds, applicationDTO.getId(), tenantId);
+                    ConnectionManagerUtil.commitDBTransaction();
                 }
                 return Stream.concat(applicationTags.stream(), newApplicationTags.stream())
                         .collect(Collectors.toList());
@@ -2095,6 +2103,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new BadRequestException(msg);
             }
         } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while accessing application tags. Application ID: " + appId;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
