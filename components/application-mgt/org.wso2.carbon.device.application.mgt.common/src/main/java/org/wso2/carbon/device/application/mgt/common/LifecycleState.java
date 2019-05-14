@@ -49,6 +49,10 @@ public class LifecycleState {
             value = "Timestamp of the lifecycle has been updated")
     private Timestamp updatedAt;
 
+    @ApiModelProperty(name = "resonForChange",
+            value = "Reason for the application release lifecycle change from previous state to current state.")
+    private String resonForChange;
+
     public String getCurrentState() {
         return currentState;
     }
@@ -88,4 +92,8 @@ public class LifecycleState {
     public void setNextStates(List<String> nextStates) {
         this.nextStates = nextStates;
     }
+
+    public String getResonForChange() { return resonForChange; }
+
+    public void setResonForChange(String resonForChange) { this.resonForChange = resonForChange; }
 }

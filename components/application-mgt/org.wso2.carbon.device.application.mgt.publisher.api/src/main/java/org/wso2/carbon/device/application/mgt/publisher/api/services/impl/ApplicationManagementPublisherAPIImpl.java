@@ -16,7 +16,6 @@
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -35,6 +34,7 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWr
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
+import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.publisher.api.services.ApplicationManagementPublisherAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -50,6 +50,7 @@ import java.util.Map;
 import javax.activation.DataHandler;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -73,21 +74,29 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Override
     @Consumes("application/json")
     public Response getApplications(
-            @Valid Filter filter ){
+            @Valid Filter filter) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
-
         try {
+            if (filter == null) {
+                String msg = "Request Payload is null";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
             ApplicationList applications = applicationManager.getApplications(filter);
             if (applications.getApplications().isEmpty()) {
                 return Response.status(Response.Status.OK)
                         .entity("Couldn't find any application for the requested query.").build();
             }
             return Response.status(Response.Status.OK).entity(applications).build();
-        } catch(BadRequestException e){
+        } catch (BadRequestException e) {
             String msg = "Incompatible request payload is found. Please try with valid request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }catch (ApplicationManagementException e) {
+        } catch (UnexpectedServerErrorException e) {
+            String msg = "Error Occured when getting supported device types by Entgra IoTS";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting the application list for publisher ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
@@ -441,16 +450,19 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/life-cycle/{uuid}")
     public Response addLifecycleState(
             @PathParam("uuid") String applicationUuid,
-            @QueryParam("action") String action) {
+            @Valid LifecycleChanger lifecycleChanger) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            if (StringUtils.isEmpty(action)) {
-                String msg = "The Action is null or empty. Please verify the request.";
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-
-            applicationManager.changeLifecycleState( applicationUuid, action);
+            applicationManager.changeLifecycleState(applicationUuid, lifecycleChanger);
+        } catch (BadRequestException e) {
+            String msg = "Request payload contains invalid data, hence veryfy the request payload.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (ForbiddenException e) {
+            String msg = "You are trying to move the application release into  incompatible state for application "
+                    + "which has application ID: " + applicationUuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).build();
         } catch (NotFoundException e) {
             String msg = "Could,t find application release for application release uuid: " + applicationUuid;
             log.error(msg, e);
@@ -489,6 +501,129 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.OK).entity(tags).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while getting registered tags.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Override
+    @Consumes("application/json")
+    @Path("/{appId}/tags/{tagName}")
+    public Response deleteApplicationTag(
+            @PathParam("appId") int appId,
+            @PathParam("tagName") String tagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.deleteApplicationTag(appId, tagName);
+            String msg = "Tag " + tagName + " is deleted successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while deleting registered tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Override
+    @Consumes("application/json")
+    @Path("/tags/{tagName}")
+    public Response deleteUnusedTag(
+            @PathParam("tagName") String tagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.deleteUnusedTag(tagName);
+            String msg = "Tag " + tagName + " is deleted successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while deleting unused tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @PUT
+    @Override
+    @Consumes("application/json")
+    @Path("/tags/rename")
+    public Response modifyTagName(
+            @QueryParam("from") String oldTagName,
+            @QueryParam("to") String newTagName) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            applicationManager.updateTag(oldTagName, newTagName);
+            String msg = "Tag " + oldTagName + " is updated to " + newTagName + " successfully.";
+            return Response.status(Response.Status.OK).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while updating registered tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Override
+    @Consumes("application/json")
+    @Path("/tags")
+    public Response addTags(
+            List<String> tagNames) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            List<String> tags = applicationManager.addTags(tagNames);
+            return Response.status(Response.Status.OK).entity(tags).build();
+        } catch (BadRequestException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while adding new tag.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Override
+    @Consumes("application/json")
+    @Path("/{appId}/tags")
+    public Response addApplicationTags(
+            @PathParam("appId") int appId,
+            List<String> tagNames) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            List<String> applicationTags = applicationManager.addApplicationTags(appId, tagNames);
+            return Response.status(Response.Status.OK).entity(applicationTags).build();
+        } catch (NotFoundException e) {
+            String msg = e.getMessage();
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error Occurred while adding new tags for application which has application ID: " + appId + ".";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

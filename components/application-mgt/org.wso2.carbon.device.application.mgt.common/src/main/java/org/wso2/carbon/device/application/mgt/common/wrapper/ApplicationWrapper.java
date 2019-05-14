@@ -35,11 +35,11 @@ public class ApplicationWrapper {
             required = true)
     private String description;
 
-    @ApiModelProperty(name = "appCategory",
+    @ApiModelProperty(name = "appCategories",
             value = "CategoryDTO of the application",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
-    private String appCategory;
+    private List<String> appCategories;
 
     @ApiModelProperty(name = "type",
             value = "Type of the application",
@@ -85,12 +85,10 @@ public class ApplicationWrapper {
 
     public void setName(String name) { this.name = name; }
 
-    public String getAppCategory() {
-        return appCategory;
-    }
+    public List<String> getAppCategories() { return appCategories; }
 
-    public void setAppCategory(String appCategory) {
-        this.appCategory = appCategory;
+    public void setAppCategories(List<String> appCategories) {
+        this.appCategories = appCategories;
     }
 
     public List<String> getTags() { return tags; }

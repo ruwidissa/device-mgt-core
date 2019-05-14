@@ -34,7 +34,10 @@ import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManage
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
+import org.wso2.carbon.device.application.mgt.core.impl.ApplicationStorageManagerImpl;
+import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -266,19 +269,25 @@ public class Util {
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
-        if (applicationStorageManager == null) {
-            synchronized (Util.class) {
-                if (applicationStorageManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    applicationStorageManager = (ApplicationStorageManager) ctx
-                            .getOSGiService(ApplicationStorageManager.class, null);
+
+        try {
+            if (applicationStorageManager == null) {
+                synchronized (Util.class) {
                     if (applicationStorageManager == null) {
-                        String msg = "ApplicationDTO Storage Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
+                        applicationStorageManager = ApplicationManagementUtil
+                                .getApplicationStorageManagerInstance();
+                        if (applicationStorageManager == null) {
+                            String msg = "ApplicationDTO Storage Manager service has not initialized.";
+                            log.error(msg);
+                            throw new IllegalStateException(msg);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            String msg = "Error occurred while getting the application store manager";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
         return applicationStorageManager;
     }
@@ -308,14 +317,16 @@ public class Util {
     }
 
     public static DeviceManagementProviderService getDeviceManagementService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        DeviceManagementProviderService deviceManagementProviderService =
-                (DeviceManagementProviderService) ctx.getOSGiService(DeviceManagementProviderService.class, null);
-        if (deviceManagementProviderService == null) {
-            String msg = "DeviceImpl Management provider service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return deviceManagementProviderService;
+//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+//        DeviceManagementProviderService deviceManagementProviderService =
+//                (DeviceManagementProviderService) ctx.getOSGiService(DeviceManagementProviderService.class, null);
+//        if (deviceManagementProviderService == null) {
+//            String msg = "DeviceImpl Management provider service has not initialized.";
+//            log.error(msg);
+//            throw new IllegalStateException(msg);
+//        }
+       // return deviceManagementProviderService;
+
+        return  new DeviceManagementProviderServiceImpl();
     }
 }

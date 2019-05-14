@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.Filter;
+import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
@@ -45,6 +46,7 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import java.util.List;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -119,9 +121,9 @@ public interface ApplicationManagementPublisherAPI {
                             message = "OK. \n Successfully got application list.",
                             response = ApplicationList.class),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. There doesn't have an application which is matched with requested " +
-                                    "query."),
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application retrieving request payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
@@ -729,6 +731,10 @@ public interface ApplicationManagementPublisherAPI {
                             message = "Bad Request. \n " +
                                     "Lifecycle State changing request contains unacceptable or vulnerable data"),
                     @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to move the lifecycle state of a given application release"
+                                    + " to the given lifecycle state."),
+                    @ApiResponse(
                             code = 404,
                             message = "NOT FOUND. \n Error occurred while adding new lifecycle state.",
                             response = ErrorResponse.class),
@@ -744,10 +750,10 @@ public interface ApplicationManagementPublisherAPI {
                     required = true)
             @PathParam("uuid") String applicationUuid,
             @ApiParam(
-                    name = "action",
-                    value = "Changing lifecycle state",
+                    name = "LifecycleChanger",
+                    value = "Lifecycle Changer which contains the action and the reason for the lifecycle change.",
                     required = true)
-            @QueryParam("action") String action
+            @Valid LifecycleChanger lifecycleChanger
     );
 
     @GET
@@ -807,6 +813,225 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response getTags();
+
+    @DELETE
+    @Path("/{appId}/tags/{tagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get registered application tags",
+            notes = "This will get registered application tags",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully delete  Application tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Given tag is not an associated tag for the given application."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting application tags.",
+                            response = ErrorResponse.class)
+            })
+    Response deleteApplicationTag(
+            @ApiParam(
+                    name = "appId",
+                    value = "ID of the Application",
+                    required = true)
+            @PathParam("appId") int applicationId,
+            @ApiParam(
+                    name = "tagName",
+                    value = "Tag Name",
+                    required = true)
+            @PathParam("tagName") String tagName
+    );
+
+    @DELETE
+    @Path("/tags/{tagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Delete application tag",
+            notes = "This will delete application tag",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully delete  registered tag.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to delete the application tag."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found a tag for the given tag name.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting registered tag.",
+                            response = ErrorResponse.class)
+            })
+    Response deleteUnusedTag(
+            @ApiParam(
+                    name = "tagName",
+                    value = "Tag Name",
+                    required = true)
+            @PathParam("tagName") String tagName
+    );
+
+    @PUT
+    @Path("/tags/{oldTagName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "update an application tag",
+            notes = "This will update application tag",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully update the registered tag.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Request contains unaccepted values for query parameters."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found a tag for the given tag name.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while updating registered tag.",
+                            response = ErrorResponse.class)
+            })
+    Response modifyTagName(
+            @ApiParam(
+                    name = "oldTagName",
+                    value = "Existing Tag Name",
+                    required = true)
+            @QueryParam("from") String oldTagName,
+            @ApiParam(
+                    name = "newTagName",
+                    value = "Modifying Tag Name",
+                    required = true)
+            @QueryParam("to") String newTagName
+    );
+
+    @POST
+    @Path("/tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add new tags.",
+            notes = "This will add new tags for the system",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully add tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Tag adding request contains unacceptable payload."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while adding new tags.",
+                            response = ErrorResponse.class)
+            })
+    Response addTags(
+            @ApiParam(
+                    name = "oldTagName",
+                    value = "Existing Tag Name",
+                    required = true)
+                    List<String> tagNames
+    );
+
+    @POST
+    @Path("/{appId}/tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add new application tags",
+            notes = "This will add new application tags",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully add application tags.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Application tag adding request contains unacceptable payload."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Couldn't found an application for the given application id.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while adding new application tags.",
+                            response = ErrorResponse.class)
+            })
+    Response addApplicationTags(
+            @ApiParam(
+                    name = "oldTagName",
+                    value = "Existing Tag Name",
+                    required = true)
+            @PathParam("appId") int appId,
+            @ApiParam(
+                    name = "appId",
+                    value = "application Id",
+                    required = true)
+            List<String> tagNames
+    );
 
     @GET
     @Path("/categories")
