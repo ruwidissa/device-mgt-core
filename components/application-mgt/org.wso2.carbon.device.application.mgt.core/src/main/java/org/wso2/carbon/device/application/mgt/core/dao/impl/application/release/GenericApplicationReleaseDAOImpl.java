@@ -21,13 +21,11 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.application.release
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
-import org.wso2.carbon.device.application.mgt.common.ApplicationReleaseArtifactPaths;
 import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
@@ -118,7 +116,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "Database Connection Exception while trying to release a new version", e);
         } finally {
-            Util.cleanupResources(statement, resultSet);
+            DAOUtil.cleanupResources(statement, resultSet);
         }
     }
 
@@ -160,7 +158,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                return Util.loadApplicationRelease(resultSet);
+                return DAOUtil.loadApplicationRelease(resultSet);
             }
             return null;
         } catch (DBConnectionException e) {
@@ -170,7 +168,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "Error while getting release details of the application " + applicationName + " and version " + versionName + " , while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, resultSet);
+            DAOUtil.cleanupResources(statement, resultSet);
         }
     }
 
@@ -207,7 +205,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                return Util.loadApplicationRelease(resultSet);
+                return DAOUtil.loadApplicationRelease(resultSet);
             }
             return null;
         } catch (DBConnectionException e) {
@@ -219,7 +217,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     "Error while getting release details of the application id: " + applicationId
                             + " and theUUID of the application " + "release: " + releaseUuid + " , while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, resultSet);
+            DAOUtil.cleanupResources(statement, resultSet);
         }
     }
 
@@ -241,6 +239,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                         + "AR.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                         + "AR.APP_PRICE AS RELEASE_PRICE, "
                         + "AR.APP_META_INFO AS RELEASE_META_INFO, "
+                        + "AR.PACKAGE_NAME AS PACKAGE_NAME, "
                         + "AR.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                         + "AR.RATING AS RELEASE_RATING, "
                         + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
@@ -255,7 +254,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 statement.setInt(2, tenantId);
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet.next()) {
-                        return Util.loadAppRelease(resultSet);
+                        return DAOUtil.loadAppRelease(resultSet);
                     }
                     return null;
                 }
@@ -299,7 +298,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                ApplicationReleaseDTO applicationRelease = Util.loadApplicationRelease(resultSet);
+                ApplicationReleaseDTO applicationRelease = DAOUtil.loadApplicationRelease(resultSet);
                 applicationReleases.add(applicationRelease);
             }
             return applicationReleases;
@@ -311,7 +310,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     "Error while getting all the release details of the app ID: " + applicationId
                             + ", while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, resultSet);
+            DAOUtil.cleanupResources(statement, resultSet);
         }
     }
 
@@ -342,7 +341,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                ApplicationReleaseDTO appRelease = Util.loadApplicationRelease(resultSet);
+                ApplicationReleaseDTO appRelease = DAOUtil.loadApplicationRelease(resultSet);
                 applicationReleases.add(appRelease);
             }
             return applicationReleases;
@@ -354,7 +353,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     "Error while getting all the release details of the app id" + appId + " application"
                             + ", while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, resultSet);
+            DAOUtil.cleanupResources(statement, resultSet);
         }
     }
 
@@ -384,7 +383,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "SQL exception while updating the release rating value ,while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, null);
+            DAOUtil.cleanupResources(statement, null);
         }
     }
 
@@ -420,7 +419,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "SQL exception while updating the release ,while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, resultSet);
+            DAOUtil.cleanupResources(statement, resultSet);
         }
     }
 
@@ -487,7 +486,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "SQL exception while updating the release ,while executing the query " + sql, e);
         } finally {
-            Util.cleanupResources(statement, null);
+            DAOUtil.cleanupResources(statement, null);
         }
         return applicationReleaseDTO;
     }
@@ -512,7 +511,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     "SQL exception while deleting the release for release ID: " + id  + ",while executing the query sql"
                     , e);
         } finally {
-            Util.cleanupResources(statement, null);
+            DAOUtil.cleanupResources(statement, null);
         }
     }
 
@@ -566,7 +565,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -603,7 +602,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             throw new ApplicationManagementDAOException(
                     "Error occurred while obtaining the DB connection to get application release package name.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -640,7 +639,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -674,7 +673,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -721,7 +720,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 

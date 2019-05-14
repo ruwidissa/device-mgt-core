@@ -63,4 +63,6 @@ public class Constants {
      * Directory name of the release artifacts that are saved in the file system.
      */
     public static final String RELEASE_ARTIFACT = "artifact";
+
+    public static final int REVIEW_PARENT_ID = -1;
 }

@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagementDAOException;
 
@@ -66,7 +66,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         }catch (SQLException e) {
             throw new VisibilityManagementDAOException("Error occurred while adding unrestricted roles", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -100,7 +100,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         }catch (SQLException e) {
             throw new VisibilityManagementDAOException("Error occurred while adding unrestricted roles", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -167,7 +167,7 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         }catch (SQLException e) {
             throw new VisibilityManagementDAOException("Error occurred while adding unrestricted roles", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 }

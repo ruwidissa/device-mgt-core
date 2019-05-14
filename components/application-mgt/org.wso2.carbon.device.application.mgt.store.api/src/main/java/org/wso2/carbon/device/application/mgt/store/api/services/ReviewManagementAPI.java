@@ -32,7 +32,9 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.Review;
+import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
+
 import javax.validation.Valid;
 import javax.ws.rs.Path;
 import javax.ws.rs.Consumes;
@@ -63,29 +65,28 @@ import java.util.List;
                 }
         ),
         tags = {
-                @Tag(name = "review_management", description = "Review Management related APIs")
+                @Tag(name = "review_management", description = "ReviewTmp Management related APIs")
         }
 )
 @Scopes(
         scopes = {
                 @Scope(
                         name = "Get Review Details",
-                        description = "Get review details",
+                        description = "Get review details from application store.",
                         key = "perm:app:review:view",
                         permissions = {"/app-mgt/store/review/view"}
                 ),
                 @Scope(
                         name = "Update a Review",
-                        description = "Update a comment",
+                        description = "Update a Review from the application store.",
                         key = "perm:app:review:update",
                         permissions = {"/app-mgt/store/review/update"}
                 ),
         }
 )
 
-@Path("/review")
-@Api(value = "Review Management", description = "This API carries all review management related operations such as get "
-        + "all the reviews, add review, etc.")
+@Path("/reviews")
+@Api(value = "ReviewTmp Management")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ReviewManagementAPI {
     String SCOPE = "scope";
@@ -113,6 +114,9 @@ public interface ReviewManagementAPI {
                             message = "OK. \n Successfully retrieved reviews.",
                             response = PaginationResult.class,
                             responseContainer = "PaginationResult"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Not found an application release for requested UUID."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the review list.",
@@ -145,7 +149,7 @@ public interface ReviewManagementAPI {
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
             value = "Add a review",
-            notes = "This will add a new review",
+            notes = "This will add a new review for application release.",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
@@ -158,28 +162,88 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 201,
-                            message = "OK. \n Successfully add a review.",
-                            response = Review.class),
+                            message = "OK. \n Successfully add a reviewTmp.",
+                            response = ReviewTmp.class),
                     @ApiResponse(
                             code = 400,
                             message =
-                                    "Bad Request. \n"),
+                                    "Bad Request. \n Found invalid payload with the request."),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to add a review."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Not found an application release for requested UUID."),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred adding a review.",
+                            message = "Internal Server Error. \n Error occurred adding a reviewTmp.",
                             response = ErrorResponse.class)
             })
 
     Response addReview(
             @ApiParam(
-                    name = "review",
-                    value = "Review details",
-                    required = true) Review review,
+                    name = "reviewTmp",
+                    value = "ReviewTmp details",
+                    required = true) ReviewWrapper reviewWrapper,
             @ApiParam(
                     name="uuid",
-                    value="uuid of the release version of the application",
+                    value="uuid of the application release.",
                     required=true)
             @PathParam("uuid") String uuid);
+
+    @POST
+    @Path("/{uuid}/{parentReviewId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add a reply comment",
+            notes = "This will add a reply comment for a comment or review.",
+            tags = "Store Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:reviewTmp:update")
+                    })
+            }
+    )
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully add a reviewTmp.",
+                            response = ReviewTmp.class),
+                    @ApiResponse(
+                            code = 400,
+                            message =
+                                    "Bad Request. \n Found invalid payload with the request."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Not found an application release for requested UUID."),
+
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred adding a reviewTmp.",
+                            response = ErrorResponse.class)
+            })
+
+    Response addReplyComment(
+            @ApiParam(
+                    name = "review",
+                    value = "Reply comment details",
+                    required = true) ReviewWrapper reviewWrapper,
+            @ApiParam(
+                    name="uuid",
+                    value="uuid of the application release.",
+                    required=true)
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="parentReviewId",
+                    value="uuid of the application release.",
+                    required=true)
+            @PathParam("parentReviewId") int parentReviewId);
 
     @PUT
     @Path("/{uuid}/{reviewId}")
@@ -189,8 +253,8 @@ public interface ReviewManagementAPI {
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
-            value = "Edit a review",
-            notes = "This will edit the review",
+            value = "Edit a reviewTmp",
+            notes = "This will edit the reviewTmp",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
@@ -202,22 +266,22 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully updated review.",
-                            response = Review.class),
+                            message = "OK. \n Successfully updated reviewTmp.",
+                            response = ReviewTmp.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error."),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Error occurred while updating the new review.",
+                            message = "Internal Server Error. \n Error occurred while updating the new reviewTmp.",
                             response = ErrorResponse.class)
             })
     Response updateReview(
             @ApiParam(
-                    name = "review",
-                    value = "The review that need to be updated.",
+                    name = "reviewTmp",
+                    value = "The reviewTmp that need to be updated.",
                     required = true)
-            @Valid Review review,
+            @Valid ReviewWrapper updatingReview,
             @ApiParam(
                     name="uuid",
                     value = "uuid of the application release",
@@ -225,7 +289,7 @@ public interface ReviewManagementAPI {
             @PathParam("uuid") String uuid,
             @ApiParam(
                     name="reviewId",
-                    value = "review id of the updating review.",
+                    value = "reviewTmp id of the updating reviewTmp.",
                     required = true)
             @PathParam("reviewId") int reviewId);
 

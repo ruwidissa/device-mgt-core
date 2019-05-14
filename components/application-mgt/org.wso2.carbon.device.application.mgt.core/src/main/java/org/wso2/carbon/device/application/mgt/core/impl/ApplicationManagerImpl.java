@@ -65,7 +65,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
@@ -251,7 +251,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         //insert application data into databse
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
         try {
             List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
@@ -379,7 +379,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     private void deleteApplicationArtifacts(List<String> directoryPaths) throws ApplicationManagementException {
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         try {
             applicationStorageManager.deleteAllApplicationReleaseArtifacts(directoryPaths);
@@ -395,7 +395,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationReleaseDTO applicationReleaseDTO, ApplicationArtifact applicationArtifact, boolean isNewRelease)
             throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         String uuid = UUID.randomUUID().toString();
         applicationReleaseDTO.setUuid(uuid);
@@ -478,7 +478,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationReleaseDTO applicationReleaseDTO, ApplicationArtifact applicationArtifact)
             throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         // The application executable artifacts such as apks are uploaded.
         if (ApplicationType.ENTERPRISE.toString().equals(applicationType)) {
@@ -562,7 +562,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private ApplicationReleaseDTO addImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
             ApplicationArtifact applicationArtifact) throws ResourceManagementException {
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
         applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
@@ -591,7 +591,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
             ApplicationArtifact applicationArtifact) throws ResourceManagementException{
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         applicationStorageManager.deleteImageArtifacts(applicationReleaseDTO);
 
@@ -1193,7 +1193,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + applicationId);
         }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         ApplicationDTO applicationDTO = getApplication(applicationId);
         List<ApplicationReleaseDTO> applicationReleaseDTOs = applicationDTO.getApplicationReleaseDTOs();
         for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
@@ -1334,7 +1334,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void deleteApplicationRelease(String releaseUuid)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = Util.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO
@@ -1477,7 +1477,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         boolean isValidDeviceType = false;
         List<DeviceType> deviceTypes;
         try {
-            deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
+            deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
 
             for (DeviceType dt : deviceTypes) {
                 if (dt.getName().equals(deviceType)) {
@@ -1618,7 +1618,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
+    public ApplicationRelease changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1664,6 +1664,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
                 ConnectionManagerUtil.commitDBTransaction();
+                return releaseDtoToRelease(applicationReleaseDTO);
             } else {
                 String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
                         + " to '" + lifecycleChanger.getAction() + "'";
@@ -2397,6 +2398,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
+        if (applicationWrapper.getAppCategories() == null) {
+            String msg = "Application category can't be null.";
+            log.error(msg);
+            throw new RequestValidatingException(msg);
+        }
         if (applicationWrapper.getAppCategories().isEmpty()) {
             String msg = "Application category can't be empty.";
             log.error(msg);
@@ -2595,7 +2601,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throws BadRequestException, UnexpectedServerErrorException {
         List<DeviceType> deviceTypes;
         try {
-            deviceTypes = Util.getDeviceManagementService().getDeviceTypes();
+            deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
 
             if(deviceTypeAttr instanceof String){
                 for (DeviceType dt : deviceTypes) {
