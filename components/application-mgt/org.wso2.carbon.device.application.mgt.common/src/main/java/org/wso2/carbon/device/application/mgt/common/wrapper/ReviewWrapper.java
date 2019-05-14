@@ -14,18 +14,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.application.mgt.core.exception;
 
-/**
- * Exception thrown during the ApplicationDTO Management DAO operations.
- */
-public class ApplicationManagementDAOException extends Exception {
+package org.wso2.carbon.device.application.mgt.common.wrapper;
 
-    public ApplicationManagementDAOException(String message, Throwable throwable) {
-        super(message, throwable);
+public class ReviewWrapper {
+    private String content;
+    private int rating;
+
+    public String getContent() {
+        return content;
     }
 
-    public ApplicationManagementDAOException(String message) {
-        super(message, new Exception());
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 }

@@ -18,8 +18,9 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.Review;
+import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
@@ -34,15 +35,15 @@ import java.util.List;
  public interface ReviewDAO {
 
     /**
-     * To add a review to an application release.
+     * To add a reviewTmp to an application release.
      *
      * @param tenantId  tenantId.
-     * @param review   review of the application.
-     * @param uuid UUID of the application release
-     * @return If review is added successfully, it return true otherwise false
-     * @throws ReviewManagementDAOException Exceptions of the review management DAO.
+     * @param reviewDTO   reviewTmp of the application.
+     * @param appReleaseId UUID of the application release
+     * @return If reviewTmp is added successfully, it return true otherwise false
+     * @throws ReviewManagementDAOException Exceptions of the reviewTmp management DAO.
      */
-    boolean addReview(Review review, String uuid, int tenantId) throws ReviewManagementDAOException;
+    boolean addReview(ReviewDTO reviewDTO, int appReleaseId, int tenantId) throws ReviewManagementDAOException;
 
    /**
     * To verify whether user has already commented for the application release or not.
@@ -53,19 +54,19 @@ import java.util.List;
     * @return If review exists, review returns
     * @throws ReviewManagementDAOException Exceptions of the review management DAO.
     */
-    Review haveUerCommented(String uuid, String username, int tenantId) throws ReviewManagementDAOException;
+    boolean haveUerReviewed(int appReleaseId, String username, int tenantId) throws ReviewManagementDAOException;
 
     /**
      * To update already added comment.
      *
-     * @param review Updating review
-     * @param reviewId id of the updating review
-     * @param username review owner
+     * @param reviewDTO Updating reviewTmp
+     * @param reviewId id of the updating reviewTmp
+     * @param username reviewTmp owner
      * @param tenantId tenant id
      * @return row count if updating is succeed otherwise 0
-     * @throws ReviewManagementDAOException Exceptions of the review management.
+     * @throws ReviewManagementDAOException Exceptions of the reviewTmp management.
      */
-    int updateReview(Review review, int reviewId, String username, int tenantId)
+    int updateReview(ReviewDTO reviewDTO, int reviewId, int tenantId)
             throws ReviewManagementDAOException;
 
 
@@ -73,10 +74,13 @@ import java.util.List;
      * To get the comment with id.
      *
      * @param reviewId id of the review
-     * @return {@link Review}Review
+     * @return {@link ReviewTmp}ReviewTmp
      * @throws ReviewManagementDAOException Exceptions of the review management DAO.
      */
-    Review getReview(int reviewId) throws ReviewManagementDAOException;
+    ReviewDTO getReview(int reviewId) throws ReviewManagementDAOException;
+
+    ReviewDTO getReview(int appReleaseId, int reviewId) throws ReviewManagementDAOException;
+
 
     /**
      * To get all reviews
@@ -85,9 +89,9 @@ import java.util.List;
      * @param request {@link PaginationRequest}pagination request with offSet and limit
      * @param tenantId Tenant id
      * @return {@link List}List of all reviews for the application release
-     * @throws ReviewManagementDAOException      Review management DAO exception
+     * @throws ReviewManagementDAOException      ReviewTmp management DAO exception
      **/
-    List<Review> getAllReviews(String uuid, PaginationRequest request, int tenantId)
+    List<ReviewDTO> getAllReviews(String uuid, PaginationRequest request, int tenantId)
             throws ReviewManagementDAOException;
 
     /**
@@ -119,7 +123,7 @@ import java.util.List;
      * @param username username of the review owner
      * @param reviewId id of the review
      * @return If review is successfully deleted return 1, otherwise returns 0.
-     * @throws ReviewManagementDAOException Review management DAO exception.
+     * @throws ReviewManagementDAOException ReviewTmp management DAO exception.
      */
     int deleteReview(String username, int reviewId) throws ReviewManagementDAOException;
 
@@ -137,8 +141,8 @@ import java.util.List;
      * To get review count for a specific application release
      *
      * @param uuid uuid of the application release
-     * @return Review count
-     * @throws ReviewManagementDAOException Review management DAO exception
+     * @return ReviewTmp count
+     * @throws ReviewManagementDAOException ReviewTmp management DAO exception
      */
     int getReviewCount(String uuid) throws ReviewManagementDAOException;
 }

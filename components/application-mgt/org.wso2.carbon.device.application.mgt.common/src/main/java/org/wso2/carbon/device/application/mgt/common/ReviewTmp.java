@@ -23,8 +23,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.sql.Timestamp;
 
-@ApiModel(value = "Review", description = "Review represents the user's review for an application release")
-public class Review {
+@ApiModel(value = "ReviewTmp", description = "ReviewTmp represents the user's review for an application release")
+public class ReviewTmp {
 
     @ApiModelProperty(name = "id",
             value = "The Id given to the comment when it store to the App manager")
@@ -55,9 +55,9 @@ public class Review {
             value = "Rating value of the application release")
     private int rating;
 
-    @ApiModelProperty(name = "replyReview",
+    @ApiModelProperty(name = "replyReviewTmp",
             value = "Replying review")
-    private Review replyReview;
+    private ReviewTmp replyReviewTmp;
 
     public int getId() {
         return id;
@@ -115,12 +115,12 @@ public class Review {
         this.parentId = parentId;
     }
 
-    public Review getReplyReview() {
-        return replyReview;
+    public ReviewTmp getReplyReviewTmp() {
+        return replyReviewTmp;
     }
 
-    public void setReplyReview(Review replyReview) {
-        this.replyReview = replyReview;
+    public void setReplyReviewTmp(ReviewTmp replyReviewTmp) {
+        this.replyReviewTmp = replyReviewTmp;
     }
 }
 
