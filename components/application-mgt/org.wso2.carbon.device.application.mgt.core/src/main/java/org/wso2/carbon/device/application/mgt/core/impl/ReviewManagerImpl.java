@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.Rating;
+import org.wso2.carbon.device.application.mgt.common.ReviewNode;
 import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
@@ -283,7 +284,7 @@ public class ReviewManagerImpl implements ReviewManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         PaginationResult paginationResult = new PaginationResult();
         int numOfComments;
-        TreeMap<Integer, Review> reviewTree = new TreeMap<>();
+        TreeMap<Integer, ReviewNode<Review>> reviewTree = new TreeMap<>();
         if (log.isDebugEnabled()) {
             log.debug("Get all reviewTmps of the application release uuid: " + uuid);
         }
@@ -295,17 +296,13 @@ public class ReviewManagerImpl implements ReviewManager {
 
             for (Review review : reviews) {
                 if (review.getRootParentId() == -1 && review.getImmediateParentId() == -1) {
-                    reviewTree.put(review.getId(), review);
-                } else if (reviewTree.containsKey(review.getRootParentId())) {
-                    if (review.getRootParentId() == review.getImmediateParentId()) {
-                        reviewTree.get(review.getRootParentId()).getReplyComments().put(review.getId(), review);
-                    } else if (reviewTree.get(review.getRootParentId()).getReplyComments()
-                            .containsKey(review.getImmediateParentId())) {
-                        reviewTree.get(review.getRootParentId()).getReplyComments().get(review.getImmediateParentId())
-                                .getReplyComments().put(review.getId(), review);
-                    } else {
-                        //todo traverse and find
-                    }
+                    ReviewNode<Review> rootNode = new ReviewNode<>(review);
+                    reviewTree.put(review.getId(), rootNode);
+                } else if (reviewTree.containsKey(review.getImmediateParentId())) {
+                    ReviewNode<Review> childNode = new ReviewNode<>(review);
+                    reviewTree.get(review.getImmediateParentId()).addChild(childNode);
+                } else {
+                    reviewTree.put(review.getId(), findAndSetChild(reviewTree.get(review.getRootParentId()), review));
                 }
             }
             numOfComments = reviewTree.size();
@@ -327,6 +324,16 @@ public class ReviewManagerImpl implements ReviewManager {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    private ReviewNode<Review> findAndSetChild(ReviewNode<Review> node, Review review) {
+        for (ReviewNode<Review> each : node.getChildren()) {
+            if ((each.getData()).getId() == review.getImmediateParentId()) {
+                ReviewNode<Review> childNode = new ReviewNode<>(review);
+                each.addChild(childNode);
+            }
+        }
+        return node;
     }
 
     @Override

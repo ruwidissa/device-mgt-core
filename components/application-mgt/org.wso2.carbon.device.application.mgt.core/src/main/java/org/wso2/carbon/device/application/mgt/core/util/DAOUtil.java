@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.core.dao.common;
+package org.wso2.carbon.device.application.mgt.core.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
@@ -34,8 +35,6 @@ import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManage
 import org.wso2.carbon.device.application.mgt.core.config.Configuration;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
-import org.wso2.carbon.device.application.mgt.core.impl.ApplicationStorageManagerImpl;
-import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
@@ -48,9 +47,9 @@ import java.util.List;
 /**
  * This class is responsible for handling the utils of the Application Management DAO.
  */
-public class Util {
+public class DAOUtil {
 
-    private static final Log log = LogFactory.getLog(Util.class);
+    private static final Log log = LogFactory.getLog(DAOUtil.class);
 
     /**
      * To create application object from the result set retrieved from the Database.
@@ -204,6 +203,36 @@ public class Util {
         return applicationRelease;
     }
 
+    public static ReviewDTO loadReview(ResultSet rs) throws SQLException, UnexpectedServerErrorException {
+        List<ReviewDTO> reviewDTOs = loadReviews(rs);
+        if (reviewDTOs.isEmpty()) {
+            return null;
+        }
+        if (reviewDTOs.size() > 1) {
+            String msg = "Internal server error. Found more than one review for requested review ID";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return reviewDTOs.get(0);
+    }
+
+    public static List<ReviewDTO> loadReviews (ResultSet rs) throws SQLException {
+        List<ReviewDTO> reviewDTOs = new ArrayList<>();
+        while (rs.next()) {
+            ReviewDTO reviewDTO = new ReviewDTO();
+            reviewDTO.setId(rs.getInt("ID"));
+            reviewDTO.setContent(rs.getString("COMMENT"));
+            reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+            reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+            reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
+            reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
+            reviewDTO.setUsername(rs.getString("USERNAME"));
+            reviewDTO.setRating(rs.getInt("RATING"));
+            reviewDTOs.add(reviewDTO);
+        }
+        return reviewDTOs;
+    }
+
     /**
      * Cleans up the statement and resultset after executing the query
      *
@@ -248,7 +277,7 @@ public class Util {
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {
-            synchronized (Util.class) {
+            synchronized (DAOUtil.class) {
                 if (applicationManager == null) {
                     PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                     applicationManager =
@@ -272,7 +301,7 @@ public class Util {
 
         try {
             if (applicationStorageManager == null) {
-                synchronized (Util.class) {
+                synchronized (DAOUtil.class) {
                     if (applicationStorageManager == null) {
                         applicationStorageManager = ApplicationManagementUtil
                                 .getApplicationStorageManagerInstance();
@@ -299,7 +328,7 @@ public class Util {
      */
     public static SubscriptionManager getSubscriptionManager() {
         if (subscriptionManager == null) {
-            synchronized (Util.class) {
+            synchronized (DAOUtil.class) {
                 if (subscriptionManager == null) {
                     PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                     subscriptionManager =

@@ -16,20 +16,21 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.core.dao.impl.Review;
+package org.wso2.carbon.device.application.mgt.core.dao.impl.review;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.util.Constants;
 
 import java.sql.SQLException;
 import java.sql.ResultSet;
@@ -165,7 +166,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException("Error occured while getting the db connection to update reviewTmp");
         } finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
     }
 
@@ -194,27 +195,17 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             statement = conn.prepareStatement(sql);
             statement.setInt(1, reviewId);
             rs = statement.executeQuery();
-            if (rs.next()) {
-                ReviewDTO reviewDTO = new ReviewDTO();
-                reviewDTO.setId(rs.getInt("ID"));
-                reviewDTO.setContent(rs.getString("COMMENT"));
-                reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                reviewDTO.setRating(rs.getInt("RATING"));
-                reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
-                reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
-                reviewDTO.setUsername(rs.getString("USERNAME"));
-                return reviewDTO;
-            }
-            return null;
+            return DAOUtil.loadReview(rs);
         } catch (SQLException e) {
             throw new ReviewManagementDAOException(
                     "SQL Error occurred while retrieving information of the reviewTmp " + reviewId, e);
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException(
                     "DB Connection Exception occurred while retrieving information of the reviewTmp " + reviewId, e);
+        } catch (UnexpectedServerErrorException e) {
+            throw new ReviewManagementDAOException("Found more than one review for review ID: " + reviewId, e);
         } finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
     }
 
@@ -244,27 +235,17 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             statement.setInt(1, reviewId);
             statement.setInt(2, appReleaseId);
             rs = statement.executeQuery();
-            if (rs.next()) {
-                ReviewDTO reviewDTO = new ReviewDTO();
-                reviewDTO.setId(rs.getInt("ID"));
-                reviewDTO.setContent(rs.getString("COMMENT"));
-                reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                reviewDTO.setRating(rs.getInt("RATING"));
-                reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
-                reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
-                reviewDTO.setUsername(rs.getString("USERNAME"));
-                return reviewDTO;
-            }
-            return null;
+            return DAOUtil.loadReview(rs);
         } catch (SQLException e) {
             throw new ReviewManagementDAOException(
                     "SQL Error occurred while retrieving information of the reviewTmp " + reviewId, e);
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException(
                     "DB Connection Exception occurred while retrieving information of the reviewTmp " + reviewId, e);
+        } catch (UnexpectedServerErrorException e) {
+            throw new ReviewManagementDAOException("Found more than one review for review ID: " + reviewId, e);
         } finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
     }
 
@@ -277,8 +258,6 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             log.debug("Getting comment of the application release (" + uuid + ") from the database");
         }
         Connection conn;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
         List<ReviewDTO> reviewDTOs = new ArrayList<>();
         try {
             conn = this.getDBConnection();
@@ -297,32 +276,67 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                     + "AP_APP_RELEASE.UUID = ? AND "
                     + "AP_APP_REVIEW.TENANT_ID = ? AND "
                     + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                    + "LIMIT ? OFFSET ?";
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setString(1, uuid);
+                statement.setInt(2, tenantId);
+                statement.setInt(3, request.getLimit());
+                statement.setInt(4, request.getOffSet());
+                try (ResultSet rs = statement.executeQuery()) {
+                    reviewDTOs = DAOUtil.loadReviews(rs);
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException(
+                    "Error occurred while obtaining the DB connection when verifying application existence", e);
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException("DB connection error occurred while getting all reviewTmps", e);
+        } return reviewDTOs;
+    }
+
+    @Override
+    public List<ReviewDTO> getReplyComments(int parentId, PaginationRequest request, int tenantId)
+            throws ReviewManagementDAOException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Getting comment of the application release (" + parentId + ") from the database");
+        }
+        Connection conn;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        List<ReviewDTO> reviewDTOs = new ArrayList<>();
+        try {
+            conn = this.getDBConnection();
+            sql = "SELECT "
+                    + "AP_APP_REVIEW.ID AS ID, "
+                    + "AP_APP_REVIEW.COMMENT AS COMMENT, "
+                    + "AP_APP_REVIEW.CREATED_AT AS CREATED_AT, "
+                    + "AP_APP_REVIEW.MODIFIED_AT AS MODIFIED_AT, "
+                    + "AP_APP_REVIEW.USERNAME AS USERNAME, "
+                    + "AP_APP_REVIEW.PARENT_ID AS ROOT_PARENT_ID, "
+                    + "AP_APP_REVIEW.REVIEW_TYPE AS IMMEDIATE_PARENT_ID, "
+                    + "AP_APP_REVIEW.RATING AS RATING "
+                    + "FROM AP_APP_REVIEW, AP_APP_RELEASE "
+                    + "WHERE "
+                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND "
+                    + "AP_APP_RELEASE.PARENT_ID = ? AND "
+                    + "AP_APP_REVIEW.TENANT_ID = ? AND "
+                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID = AP_APP_RELEASE.ID "
                     + "LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
-            statement.setString(1, uuid);
+            statement.setInt(1, parentId);
             statement.setInt(2, tenantId);
             statement.setInt(3, request.getLimit());
             statement.setInt(4, request.getOffSet());
             rs = statement.executeQuery();
-            while (rs.next()) {
-                ReviewDTO reviewDTO = new ReviewDTO();
-                reviewDTO.setId(rs.getInt("ID"));
-                reviewDTO.setContent(rs.getString("COMMENT"));
-                reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
-                reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
-                reviewDTO.setUsername(rs.getString("USERNAME"));
-                reviewDTO.setRating(rs.getInt("RATING"));
-                reviewDTOs.add(reviewDTO);
-            }
+            reviewDTOs = DAOUtil.loadReviews(rs);
         }  catch (DBConnectionException e) {
             throw new ReviewManagementDAOException(
                     "Error occurred while obtaining the DB connection when verifying application existence", e);
         } catch (SQLException e) {
             throw new ReviewManagementDAOException("DB connection error occurred while getting all reviewTmps", e);
         }finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
         return reviewDTOs;
     }
@@ -358,7 +372,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                     "Error occured while getting DB connection to retrieve all rating values for the application release. App release UUID: "
                             + uuid, e);
         } finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
         return reviews;
     }
@@ -392,7 +406,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException("DB Connection Exception occurred while retrieving review counts", e);
         } finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
         return commentCount;
     }
@@ -421,7 +435,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 commentCount = rs.getInt("COMMENT_COUNT");
             }
         } finally {
-            Util.cleanupResources(statement, rs);
+            DAOUtil.cleanupResources(statement, rs);
         }
         return commentCount;
     }
@@ -443,7 +457,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             throw new ReviewManagementDAOException("Error occured while getting the database connection", e);
 
         } finally {
-            Util.cleanupResources(statement, null);
+            DAOUtil.cleanupResources(statement, null);
         }
     }
 
@@ -471,7 +485,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (SQLException e) {
             throw new ReviewManagementException("SQL Error occurred while deleting comments", e);
         } finally {
-            Util.cleanupResources(statement, null);
+            DAOUtil.cleanupResources(statement, null);
         }
     }
 }

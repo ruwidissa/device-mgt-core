@@ -19,15 +19,12 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.subscription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
-import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 
@@ -70,7 +67,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
                     e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -104,7 +101,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
                     e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -137,7 +134,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
                     e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -170,7 +167,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
                     e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -203,7 +200,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                         log.debug("Successfully retrieved device subscriptions for application release id "
                                 + appReleaseId);
                     }
-                    return Util.loadDeviceSubscriptions(rs);
+                    return DAOUtil.loadDeviceSubscriptions(rs);
                 }
             }
         } catch (SQLException e) {

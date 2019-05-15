@@ -94,6 +94,9 @@ import java.util.List;
     List<ReviewDTO> getAllReviews(String uuid, PaginationRequest request, int tenantId)
             throws ReviewManagementDAOException;
 
+    List<ReviewDTO> getReplyComments(int parentId, PaginationRequest request, int tenantId)
+         throws ReviewManagementDAOException;
+
     /**
      * To get list of comments using release id and application id.
      * @param uuid UUID of the application release
