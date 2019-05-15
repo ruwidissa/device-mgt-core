@@ -145,6 +145,7 @@ public class DAOUtil {
         appRelease.setAppHashValue(rs.getString("RELEASE_HASH_VALUE"));
         appRelease.setPrice(rs.getDouble("RELEASE_PRICE"));
         appRelease.setMetaData(rs.getString("RELEASE_META_INFO"));
+        appRelease.setPackageName(rs.getString("PACKAGE_NAME"));
         appRelease.setSupportedOsVersions(rs.getString("RELEASE_SUP_OS_VERSIONS"));
         appRelease.setRating(rs.getDouble("RELEASE_RATING"));
         appRelease.setCurrentState(rs.getString("RELEASE_CURRENT_STATE"));

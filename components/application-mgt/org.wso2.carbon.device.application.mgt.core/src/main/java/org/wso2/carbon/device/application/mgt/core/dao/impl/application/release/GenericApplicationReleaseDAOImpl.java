@@ -239,6 +239,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                         + "AR.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                         + "AR.APP_PRICE AS RELEASE_PRICE, "
                         + "AR.APP_META_INFO AS RELEASE_META_INFO, "
+                        + "AR.PACKAGE_NAME AS PACKAGE_NAME, "
                         + "AR.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                         + "AR.RATING AS RELEASE_RATING, "
                         + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
