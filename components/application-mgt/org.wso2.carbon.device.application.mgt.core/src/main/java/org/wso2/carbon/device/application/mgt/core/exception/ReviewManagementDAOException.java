@@ -21,7 +21,7 @@ package org.wso2.carbon.device.application.mgt.core.exception;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 
 /**
- * Exception thrown during the Review Management DAO operations.
+ * Exception thrown during the ReviewTmp Management DAO operations.
  */
 public class ReviewManagementDAOException extends ReviewManagementException {
 

@@ -53,21 +53,39 @@ public interface ApplicationDAO {
 
     List<Integer> getTagIdsForTagNames (List<String> tagNames, int tenantId) throws ApplicationManagementDAOException;
 
+    TagDTO getTagForTagName(String tagName, int tenantId) throws ApplicationManagementDAOException;
+
     List<Integer> getDistinctTagIdsInTagMapping() throws ApplicationManagementDAOException;
 
     void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
 
     List<String> getAppTags(int appId, int tenantId) throws ApplicationManagementDAOException;
 
-    void deleteTagMapping (List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+    boolean hasTagMapping(int tagId, int appId, int tenantId) throws ApplicationManagementDAOException;
 
-    void deleteTagMapping (int applicationId, int tenantId) throws ApplicationManagementDAOException;
+    boolean hasTagMapping(int tagId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteApplicationTags(List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteApplicationTags(Integer tagId, int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteApplicationTags(int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteTagMapping(int tagId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteTag(int tagId, int tenantId) throws ApplicationManagementDAOException;
+
+    void updateTag(TagDTO tagDTO, int tenantId) throws ApplicationManagementDAOException;
 
     List<String> getAppCategories (int appId, int tenantId) throws ApplicationManagementDAOException;
+
+    boolean hasCategoryMapping(int categoryId, int tenantId) throws ApplicationManagementDAOException;
 
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
 
     List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException;
+
+    CategoryDTO getCategoryForCategoryName(String categoryName, int tenantId) throws ApplicationManagementDAOException;
 
     void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException;
 
@@ -75,6 +93,12 @@ public interface ApplicationDAO {
             throws ApplicationManagementDAOException;
 
     void deleteCategoryMapping (int applicationId, int tenantId) throws ApplicationManagementDAOException;
+
+    void deleteCategory(int categoryId, int tenantId) throws ApplicationManagementDAOException;
+
+    void updateCategory(CategoryDTO categoryDTO, int tenantId) throws ApplicationManagementDAOException;
+
+
 
     /**
      * To check application existence.

@@ -1,20 +1,18 @@
-/*
- *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
- *   Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License.
- *   You may obtain a copy of the License at
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing,
- *   software distributed under the License is distributed on an
- *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
- *   specific language governing permissions and limitations
- *   under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.application.mgt.store.api.services;
 
@@ -31,15 +29,17 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -72,7 +72,7 @@ import javax.ws.rs.core.Response;
                 )
         }
 )
-@Path("/store/applications")
+@Path("/applications")
 @Api(value = "ApplicationDTO Management", description = "This API carries all app store management related operations " +
         "such as get all the applications etc.")
 @Produces(MediaType.APPLICATION_JSON)
@@ -80,7 +80,7 @@ public interface ApplicationManagementAPI {
 
     String SCOPE = "scope";
 
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -103,8 +103,9 @@ public interface ApplicationManagementAPI {
                             message = "OK. \n Successfully got application list.",
                             response = ApplicationList.class),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. Not Found Applications."),
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Application retrieving request payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",
@@ -112,34 +113,10 @@ public interface ApplicationManagementAPI {
             })
     Response getApplications(
             @ApiParam(
-                    name = "name",
-                    value = "Name of the application")
-            @QueryParam("name") String appName,
-            @ApiParam(
-                    name = "type",
-                    value = "Type of the application")
-            @QueryParam("type") String appType,
-            @ApiParam(
-                    name = "category",
-                    value = "CategoryDTO of the application")
-            @QueryParam("category") String appCategory,
-            @ApiParam(
-                    name = "exact-match",
-                    value = "Is it requesting exactly matching application or partially matching application.")
-            @QueryParam("exact-match") boolean isFullMatch,
-            @ApiParam(
-                    name = "offset",
-                    value = "Provide from which position apps should return", defaultValue = "0")
-            @QueryParam("offset") int offset,
-            @ApiParam(
-                    name = "limit",
-                    value = "Provide how many apps it should return", defaultValue = "20")
-            @QueryParam("limit") int limit,
-            @ApiParam(
-                    name = "limit",
-                    value = "Provide how many apps it should return", defaultValue = "ASC")
-            @QueryParam("sort") String sortBy
-
+                    name = "filter",
+                    value = "Application filtering data",
+                    required = true)
+            @Valid Filter filter
     );
 
     @GET

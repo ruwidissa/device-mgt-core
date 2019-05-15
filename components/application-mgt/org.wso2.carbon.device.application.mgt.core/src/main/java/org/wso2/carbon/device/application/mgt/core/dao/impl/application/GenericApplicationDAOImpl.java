@@ -444,20 +444,45 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         ResultSet rs = null;
         try {
             conn = this.getDBConnection();
-            String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                            + "AP_APP.RESTRICTED AS RESTRICTED, AP_APP.DEVICE_TYPE_ID AS DEVICE_TYPE_ID, "
-                            + "AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE AS "
-                            + "ROLE FROM ((AP_APP LEFT JOIN AP_APP_TAG ON AP_APP.ID = AP_APP_TAG.AP_APP_ID) "
-                            + "LEFT JOIN AP_UNRESTRICTED_ROLE ON AP_APP.ID = AP_UNRESTRICTED_ROLE.AP_APP_ID) "
-                            + "WHERE AP_APP.ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID =? ) AND "
-                            + "AP_APP.TENANT_ID = ? AND AP_APP.STATUS != ?;";
+            String sql = "SELECT "
+                    + "AP_APP.ID AS APP_ID, "
+                    + "AP_APP.NAME AS APP_NAME, "
+                    + "AP_APP.DESCRIPTION AS APP_DESCRIPTION, "
+                    + "AP_APP.TYPE AS APP_TYPE, "
+                    + "AP_APP.STATUS AS APP_STATUS, "
+                    + "AP_APP.SUB_TYPE AS APP_SUB_TYPE, "
+                    + "AP_APP.CURRENCY AS APP_CURRENCY, "
+                    + "AP_APP.RATING AS APP_RATING, "
+                    + "AP_APP.DEVICE_TYPE_ID AS APP_DEVICE_TYPE_ID, "
+                    + "AP_APP_RELEASE.ID AS RELEASE_ID, "
+                    + "AP_APP_RELEASE.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                    + "AP_APP_RELEASE.VERSION AS RELEASE_VERSION, "
+                    + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
+                    + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
+                    + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                    + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
+                    + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                    + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                    + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                    + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                    + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
+                    + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
+                    + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                    + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                    + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
+                    + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                    + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                    + "FROM AP_APP "
+                    + "INNER JOIN AP_APP_RELEASE ON "
+                    + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
+                    + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                    + "WHERE "
+                    + "AP_APP.ID = (SELECT AP_APP_RELEASE.AP_APP_ID FROM AP_APP_RELEASE WHERE AP_APP_RELEASE.UUID = ?) "
+                    + "AND AP_APP.TENANT_ID = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, releaseUuid);
             stmt.setInt(2, tenantId);
-            stmt.setString(3, AppLifecycleState.RETIRED.toString());
             rs = stmt.executeQuery();
 
             if (log.isDebugEnabled()) {
@@ -773,6 +798,39 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         }
     }
 
+    @Override
+    public CategoryDTO getCategoryForCategoryName(String categoryName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get category for given category name.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            String sql = "SELECT AP_APP_CATEGORY.ID AS ID"
+                    + " FROM AP_APP_CATEGORY "
+                    + "WHERE AP_APP_CATEGORY.CATEGORY = ? AND "
+                    + "AP_APP_CATEGORY.TENANT_ID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, categoryName);
+                ps.setInt(2, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        CategoryDTO categoryDTO = new CategoryDTO();
+                        categoryDTO.setId(rs.getInt("ID"));
+                        categoryDTO.setCategoryName(categoryName);
+                        return categoryDTO;
+                    }
+                }
+            }
+            return null;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting category Id for given category name",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "SQL Error occurred while getting category Id for category name.", e);
+        }
+    }
 
     @Override
     public void addCategories(List<String> categories, int tenantId) throws ApplicationManagementDAOException {
@@ -867,6 +925,64 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public void deleteCategory(int categoryId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete category.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM " +
+                "AP_APP_CATEGORY cat " +
+                "WHERE " +
+                "cat.ID = ? AND " +
+                "cat.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, categoryId);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting category which has ID: "
+                            + categoryId, e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when deleting category which has ID: " + categoryId, e);
+        }
+    }
+
+    @Override
+    public void updateCategory(CategoryDTO categoryDTO, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to update a category.");
+        }
+        Connection conn;
+        String sql = "UPDATE " +
+                "AP_APP_CATEGORY cat " +
+                "SET cat.CATEGORY_NAME = ? " +
+                "WHERE " +
+                "cat.ID = ? AND " +
+                "cat.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, categoryDTO.getCategoryName());
+                stmt.setInt(1, categoryDTO.getId());
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when updating category which has ID: "
+                            + categoryDTO.getId(), e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when updating category which has ID: " + categoryDTO.getId(), e);
+        }
+    }
+
+    @Override
     public List<Integer> getTagIdsForTagNames(List<String> tagNames, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -901,6 +1017,38 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public TagDTO getTagForTagName(String tagName, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get tag id for given tag name.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            String sql = "SELECT AP_APP_TAG.ID AS ID"
+                    + " FROM AP_APP_TAG "
+                    + "WHERE AP_APP_TAG.TAG = ? AND "
+                    + "AP_APP_TAG.TENANT_ID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, tagName);
+                ps.setInt(2, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        TagDTO tagDTO = new TagDTO();
+                        tagDTO.setId(rs.getInt("ID"));
+                        tagDTO.setTagName(tagName);
+                        return tagDTO;
+                    }
+                }
+            }
+            return null;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting tag Id for given tag name", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("SQL Error occurred while getting tag Id for tag name.", e);
+        }
+    }
+
+    @Override
     public List<Integer> getDistinctTagIdsInTagMapping() throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get distinct tag ids for given tag names");
@@ -908,7 +1056,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             Connection conn = this.getDBConnection();
             List<Integer> distinctTagIds = new ArrayList<>();
-            String sql = "SELECT DISTINCT AP_APP_TAG.ID AS ID FROM AP_APP_TAG";
+            String sql = "SELECT DISTINCT tm.AP_APP_TAG_ID AS ID FROM AP_APP_TAG_MAPPING tm";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -990,7 +1138,69 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void deleteTagMapping (List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException{
+    public boolean hasTagMapping (int tagId, int applicationId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to verify whether tag is associated with an application.");
+        }
+        Connection conn;
+        String sql = "SELECT tm.AP_APP_ID AS ID "
+                + "FROM AP_APP_TAG_MAPPING tm "
+                + "WHERE "
+                + "tm.AP_APP_TAG_ID = ? AND "
+                + "tm.AP_APP_ID = ? AND "
+                + "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, applicationId);
+                stmt.setInt(3, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when verifying the existence of a tag mapping",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred when verifying the existence of a tag mapping.",
+                    e);
+        }
+    }
+
+    @Override
+    public boolean hasTagMapping (int tagId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to verify whether tag is associated with at least one application.");
+        }
+        Connection conn;
+        String sql = "SELECT tm.AP_APP_ID AS ID "
+                + "FROM AP_APP_TAG_MAPPING tm "
+                + "WHERE "
+                + "tm.AP_APP_TAG_ID = ? AND "
+                + "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when verifying the existence of a tag mapping",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred when verifying the existence of a tag mapping.",
+                    e);
+        }
+    }
+
+    @Override
+    public void deleteApplicationTags(List<Integer> tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException{
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to delete Tag mappings.");
         }
@@ -1021,9 +1231,37 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public void deleteTagMapping (int applicationId, int tenantId) throws ApplicationManagementDAOException{
+    public void deleteApplicationTags(Integer tagId, int applicationId, int tenantId) throws ApplicationManagementDAOException{
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to delete Tag mappings.");
+            log.debug("Request received in DAO Layer to delete Tag mapping.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM "
+                + "AP_APP_TAG_MAPPING tm "
+                + "WHERE "
+                + "tm.AP_APP_TAG_ID = ? AND "
+                + "tm.AP_APP_ID = ? AND "
+                + "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, applicationId);
+                stmt.setInt(3, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting a tag mapping", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("SQL Error occurred when deleting a tag mapping", e);
+        }
+    }
+
+    @Override
+    public void deleteApplicationTags(int applicationId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete application tags.");
         }
         Connection conn;
         String sql = "DELETE FROM "
@@ -1033,18 +1271,104 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "tm.TENANT_ID = ?";
         try {
             conn = this.getDBConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, applicationId);
                 stmt.setInt(2, tenantId);
                 stmt.executeUpdate();
             }
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
-                    "Error occurred while obtaining the DB connection when deleting tag mapping of application ID: "
-                            + applicationId , e);
+                    "Error occurred while obtaining the DB connection when deleting application tags for application ID: "
+                            + applicationId, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred when deleting tag mapping of application ID: "
-                    + applicationId, e);
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when deleting application tags for application ID: " + applicationId, e);
+        }
+    }
+
+    @Override
+    public void deleteTagMapping(int tagId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete Tag mappings.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM " +
+                "AP_APP_TAG_MAPPING tm " +
+                "WHERE " +
+                "tm.AP_APP_ID = ? AND " +
+                "tm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting tag mapping of tag ID: " + tagId,
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred when deleting tag mapping of tag ID: " + tagId,
+                    e);
+        }
+    }
+
+    @Override
+    public void deleteTag(int tagId, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete Tag mappings.");
+        }
+        Connection conn;
+        String sql = "DELETE FROM " +
+                "AP_APP_TAG tag " +
+                "WHERE " +
+                "tag.ID = ? AND " +
+                "tag.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tagId);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when deleting tag which has ID: " + tagId,
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred when deleting tag which has ID: " + tagId,
+                    e);
+        }
+    }
+
+    @Override
+    public void updateTag(TagDTO tagDTO, int tenantId) throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to update the Tag.");
+        }
+        Connection conn;
+        String sql = "UPDATE " +
+                "AP_APP_TAG tag " +
+                "SET tag.TAG = ? " +
+                "WHERE " +
+                "tag.ID = ? AND " +
+                "tag.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, tagDTO.getTagName());
+                stmt.setInt(2, tagDTO.getId());
+                stmt.setInt(3, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when updating tag which has ID: " + tagDTO
+                            .getId(), e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when updating tag which has ID: " + tagDTO.getId(), e);
         }
     }
 
@@ -1077,6 +1401,36 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     "Error occurred while obtaining the DB connection when adding tags", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
+        }
+    }
+
+    @Override
+    public boolean hasCategoryMapping (int categoryId, int tenantId) throws ApplicationManagementDAOException{
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to verify whether tag is associated with at least one application.");
+        }
+        Connection conn;
+        String sql = "SELECT cm.AP_APP_ID AS ID "
+                + "FROM AP_APP_CATEGORY_MAPPING cm "
+                + "WHERE "
+                + "cm.AP_APP_CATEGORY_ID = ? AND "
+                + "cm.TENANT_ID = ?";
+        try {
+            conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, categoryId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when verifying the existence of a category mapping",
+                    e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred when verifying the existence of a category mapping.", e);
         }
     }
 
@@ -1149,7 +1503,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 application.setId(rs.getInt("APP_ID"));
                 application.setName(rs.getString("APP_NAME"));
                 application.setType(rs.getString("APP_TYPE"));
-                application.setAppCategory(rs.getString("APP_CATEGORY"));
+//                application.setAppCategories(rs.getString("APP_CATEGORY"));
                 application.setSubType(rs.getString("SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("CURRENCY"));
 //                application.setIsRestricted(rs.getBoolean("RESTRICTED"));

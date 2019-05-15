@@ -21,8 +21,9 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.Review;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.wso2.carbon.device.application.mgt.common.Review;
+import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
@@ -49,162 +50,227 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     private String sql;
 
     @Override
-    public boolean addReview(Review review, String uuid, int tenantId) throws ReviewManagementDAOException {
+    public boolean addReview(ReviewDTO reviewDTO, int appReleaseId, int tenantId) throws ReviewManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to add review for application release. ApplicationDTO UUID: " + uuid);
+            log.debug("Request received in DAO Layer to add review for application release. Application Release UUID: "
+                    + appReleaseId);
         }
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-        sql = "INSERT INTO AP_APP_REVIEW (TENANT_ID, COMMENT, PARENT_ID, RATING, USERNAME,CREATED_AT, MODIFIED_AT, "
-                + "AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?,?,?,?,?,?,?,(SELECT ID FROM AP_APP_RELEASE WHERE UUID= ?),"
-                + "(SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID=?));";
+        sql = "INSERT INTO AP_APP_REVIEW "
+                + "(TENANT_ID, "
+                + "COMMENT, "
+                + "ROOT_PARENT_ID,"
+                + "IMMEDIATE_PARENT_ID, "
+                + "RATING, "
+                + "USERNAME, "
+                + "CREATED_AT, "
+                + "MODIFIED_AT, "
+                + "AP_APP_RELEASE_ID) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? )";
         try {
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
 
             Connection conn = this.getDBConnection();
-            statement = conn.prepareStatement(sql, new String[] { "id" });
-            statement.setInt(1, tenantId);
-            statement.setString(2, review.getComment());
-            statement.setInt(3, review.getParentId());
-            statement.setInt(4, review.getRating());
-            statement.setString(5, review.getUsername());
-            statement.setTimestamp(6, timestamp);
-            statement.setTimestamp(7,timestamp);
-            statement.setString(8,uuid);
-            statement.setString(9,uuid);
-            statement.executeUpdate();
-            rs = statement.getGeneratedKeys();
-            return rs.next();
-        }
-        catch (DBConnectionException e) {
+            try (PreparedStatement statement = conn.prepareStatement(sql, new String[] { "id" });) {
+                statement.setInt(1, tenantId);
+                statement.setString(2, reviewDTO.getContent());
+                statement.setInt(3, reviewDTO.getRootParentId());
+                statement.setInt(4, reviewDTO.getImmediateParentId());
+                statement.setInt(5, reviewDTO.getRating());
+                statement.setString(6, reviewDTO.getUsername());
+                statement.setTimestamp(7, timestamp);
+                statement.setTimestamp(8, timestamp);
+                statement.setInt(9, appReleaseId);
+                statement.executeUpdate();
+                try (ResultSet rs = statement.getGeneratedKeys()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException("Error occurred while obtaining the DB connection while "
-                    + "adding review for application UUID:  "+ "Tenant Id: " + tenantId, e);
-        }catch (SQLException e) {
-            throw new ReviewManagementDAOException("Error occurred while getting application list for the tenant"
-                    + " " + tenantId + ". While executing " + sql, e);
-        }  finally {
-            Util.cleanupResources(statement, rs);
+                    + "adding review for application release which has ID:  "+ appReleaseId + "Tenant Id: " + tenantId, e);
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException(
+                    "Error occurred while executing SQL statement to add application review. Application ID: "
+                            + appReleaseId + " tenant " +  tenantId, e);
         }
     }
 
     @Override
-    public Review haveUerCommented(String uuid, String username, int tenantId) throws ReviewManagementDAOException {
+    public boolean haveUerReviewed(int appReleaseId, String username, int tenantId) throws ReviewManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug(
-                    "Request received in DAO Layer to check whether user have already commented or not for the "
-                            + "application release. ApplicationDTO UUID:  " + uuid +  " comment owner: " + username +
-                            " tenant-id " + tenantId);
+            log.debug("Request received in DAO Layer to check whether user have already reviewed or not for the "
+                    + "application release. Commenting user: " + username + " and tenant-id: " + tenantId);
         }
         Connection conn;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-        Review review = null;
-        sql = "SELECT ID, COMMENT, CREATED_AT, MODIFIED_AT, USERNAME, PARENT_ID, RATING FROM AP_APP_REVIEW WHERE "
-                + "AP_APP_RELEASE_ID = (SELECT ID FROM AP_APP_RELEASE WHERE UUID=?) AND USERNAME = ? AND TENANT_ID = ?;";
+        sql = "SELECT "
+                + "rv.ID "
+                + "FROM AP_APP_REVIEW rv "
+                + "WHERE "
+                + "rv.AP_APP_RELEASE_ID = ? AND "
+                + "rv.USERNAME = ? AND "
+                + "rv.TENANT_ID = ?";
         try {
             conn = this.getDBConnection();
-            statement = conn.prepareStatement(sql);
-            statement.setString(1, uuid);
-            statement.setString(2, username);
-            statement.setInt(3, tenantId);
-            rs = statement.executeQuery();
-            if (rs.next()){
-                review = new Review();
-                review.setId(rs.getInt("ID"));
-                review.setComment(rs.getString("COMMENT"));
-                review.setParentId(rs.getInt("PARENT_ID"));
-                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                review.setUsername(rs.getString("USERNAME"));
-                review.setRating(rs.getInt("RATING"));
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setInt(1, appReleaseId);
+                statement.setString(2, username);
+                statement.setInt(3, tenantId);
+                try (ResultSet rs = statement.executeQuery()) {
+                    return rs.next();
+
+                }
             }
-            return review;
         } catch (SQLException e) {
             throw new ReviewManagementDAOException("Error occured while accessing the Database when checking whether "
                     + "user has already commented for the application ro not", e);
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException("Error occured while getting the database connection when checking "
                     + "whether user has already commented for the application ro not", e);
-
-        } finally {
-            Util.cleanupResources(statement, rs);
         }
     }
 
     @Override
-    public int updateReview(Review review, int reviewId, String username, int tenantId)
+    public int updateReview(ReviewDTO reviewDTO, int reviewId, int tenantId)
             throws ReviewManagementDAOException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to update the comment with ID (" + reviewId + ")");
+            log.debug("Request received in DAO Layer to update the Review with ID (" + reviewId + ")");
         }
         Connection connection;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        sql = "UPDATE AP_APP_REVIEW SET COMMENT=?, RATING=?, MODIFIED_AT=? WHERE ID=? AND USERNAME=? AND TENANT_ID=?;";
+        sql = "UPDATE "
+                + "AP_APP_REVIEW "
+                + "SET "
+                + "COMMENT = ?, "
+                + "RATING = ?, "
+                + "MODIFIED_AT = ? "
+                + "WHERE ID = ? AND "
+                + "TENANT_ID = ?";
         try {
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
 
             connection = this.getDBConnection();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, review.getComment());
-            statement.setInt(2, review.getRating());
+            statement.setString(1, reviewDTO.getContent());
+            statement.setInt(2, reviewDTO.getRating());
             statement.setTimestamp(3, timestamp);
             statement.setInt(4, reviewId);
-            statement.setString(5, username);
-            statement.setInt(6, tenantId);
+            statement.setInt(5, tenantId);
             return statement.executeUpdate();
         } catch (SQLException e) {
-            throw new ReviewManagementDAOException("Error occurred while executing review updating query");
+            throw new ReviewManagementDAOException("Error occurred while executing reviewTmp updating query");
         } catch (DBConnectionException e) {
-            throw new ReviewManagementDAOException("Error occured while getting the db connection to update review");
+            throw new ReviewManagementDAOException("Error occured while getting the db connection to update reviewTmp");
         } finally {
             Util.cleanupResources(statement, rs);
         }
     }
 
     @Override
-    public Review getReview(int reviewId) throws ReviewManagementDAOException {
+    public ReviewDTO getReview(int reviewId) throws ReviewManagementDAOException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Getting review with the review id(" + reviewId + ") from the database");
+            log.debug("Getting reviewDTO with the review id(" + reviewId + ") from the database");
         }
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        Review review = null;
         try {
             conn = this.getDBConnection();
-            sql = "SELECT ID, COMMENT, CREATED_AT, MODIFIED_AT, RATING, USERNAME FROM AP_APP_REVIEW WHERE ID=?;";
+            sql = "SELECT "
+                    + "ID, "
+                    + "COMMENT,"
+                    + "ROOT_PARENT_ID,"
+                    + "IMMEDIATE_PARENT_ID, "
+                    + "CREATED_AT, "
+                    + "MODIFIED_AT, "
+                    + "RATING, "
+                    + "USERNAME "
+                    + "FROM AP_APP_REVIEW "
+                    + "WHERE ID = ?";
             statement = conn.prepareStatement(sql);
             statement.setInt(1, reviewId);
             rs = statement.executeQuery();
             if (rs.next()) {
-                review = new Review();
-                review.setId(rs.getInt("ID"));
-                review.setComment(rs.getString("COMMENT"));
-                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                review.setRating(rs.getInt("RATING"));
-                review.setUsername(rs.getString("USERNAME"));
-                return review;
+                ReviewDTO reviewDTO = new ReviewDTO();
+                reviewDTO.setId(rs.getInt("ID"));
+                reviewDTO.setContent(rs.getString("COMMENT"));
+                reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                reviewDTO.setRating(rs.getInt("RATING"));
+                reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
+                reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
+                reviewDTO.setUsername(rs.getString("USERNAME"));
+                return reviewDTO;
             }
+            return null;
         } catch (SQLException e) {
             throw new ReviewManagementDAOException(
-                    "SQL Error occurred while retrieving information of the review " + reviewId, e);
+                    "SQL Error occurred while retrieving information of the reviewTmp " + reviewId, e);
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException(
-                    "DB Connection Exception occurred while retrieving information of the review " + reviewId, e);
+                    "DB Connection Exception occurred while retrieving information of the reviewTmp " + reviewId, e);
         } finally {
             Util.cleanupResources(statement, rs);
         }
-        return review;
     }
 
     @Override
-    public List<Review> getAllReviews(String uuid, PaginationRequest request, int tenantId)
+    public ReviewDTO getReview(int appReleaseId, int reviewId) throws ReviewManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting reviewDTO with the review id(" + reviewId + ") from the database");
+        }
+        Connection conn;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getDBConnection();
+            sql = "SELECT "
+                    + "ID, "
+                    + "COMMENT,"
+                    + "ROOT_PARENT_ID,"
+                    + "IMMEDIATE_PARENT_ID, "
+                    + "CREATED_AT, "
+                    + "MODIFIED_AT, "
+                    + "RATING, "
+                    + "USERNAME "
+                    + "FROM AP_APP_REVIEW "
+                    + "WHERE ID = ? AND "
+                    + "AP_APP_RELEASE_ID = ?";
+            statement = conn.prepareStatement(sql);
+            statement.setInt(1, reviewId);
+            statement.setInt(2, appReleaseId);
+            rs = statement.executeQuery();
+            if (rs.next()) {
+                ReviewDTO reviewDTO = new ReviewDTO();
+                reviewDTO.setId(rs.getInt("ID"));
+                reviewDTO.setContent(rs.getString("COMMENT"));
+                reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                reviewDTO.setRating(rs.getInt("RATING"));
+                reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
+                reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
+                reviewDTO.setUsername(rs.getString("USERNAME"));
+                return reviewDTO;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException(
+                    "SQL Error occurred while retrieving information of the reviewTmp " + reviewId, e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException(
+                    "DB Connection Exception occurred while retrieving information of the reviewTmp " + reviewId, e);
+        } finally {
+            Util.cleanupResources(statement, rs);
+        }
+    }
+
+
+    @Override
+    public List<ReviewDTO> getAllReviews(String uuid, PaginationRequest request, int tenantId)
             throws ReviewManagementDAOException {
 
         if (log.isDebugEnabled()) {
@@ -213,16 +279,25 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         Connection conn;
         PreparedStatement statement = null;
         ResultSet rs = null;
-        List<Review> reviews = new ArrayList<>();
+        List<ReviewDTO> reviewDTOs = new ArrayList<>();
         try {
             conn = this.getDBConnection();
-            sql = "SELECT AP_APP_REVIEW.ID AS ID, AP_APP_REVIEW.COMMENT AS COMMENT, "
-                    + "AP_APP_REVIEW.CREATED_AT AS CREATED_AT, AP_APP_REVIEW.MODIFIED_AT AS MODIFIED_AT, "
-                    + "AP_APP_REVIEW.USERNAME AS USERNAME, AP_APP_REVIEW.PARENT_ID AS PARENT_ID, "
-                    + "AP_APP_REVIEW.RATING AS RATING FROM AP_APP_REVIEW, AP_APP_RELEASE WHERE "
-                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND AP_APP_RELEASE.UUID =? "
-                    + "AND AP_APP_REVIEW.TENANT_ID = ? AND "
-                    + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID LIMIT ? OFFSET ?;";
+            sql = "SELECT "
+                    + "AP_APP_REVIEW.ID AS ID, "
+                    + "AP_APP_REVIEW.COMMENT AS COMMENT, "
+                    + "AP_APP_REVIEW.CREATED_AT AS CREATED_AT, "
+                    + "AP_APP_REVIEW.MODIFIED_AT AS MODIFIED_AT, "
+                    + "AP_APP_REVIEW.USERNAME AS USERNAME, "
+                    + "AP_APP_REVIEW.ROOT_PARENT_ID AS ROOT_PARENT_ID, "
+                    + "AP_APP_REVIEW.IMMEDIATE_PARENT_ID AS IMMEDIATE_PARENT_ID, "
+                    + "AP_APP_REVIEW.RATING AS RATING "
+                    + "FROM AP_APP_REVIEW, AP_APP_RELEASE "
+                    + "WHERE "
+                    + "AP_APP_REVIEW.AP_APP_RELEASE_ID=AP_APP_RELEASE.ID AND "
+                    + "AP_APP_RELEASE.UUID = ? AND "
+                    + "AP_APP_REVIEW.TENANT_ID = ? AND "
+                    + "AP_APP_REVIEW.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                    + "LIMIT ? OFFSET ?;";
             statement = conn.prepareStatement(sql);
             statement.setString(1, uuid);
             statement.setInt(2, tenantId);
@@ -230,25 +305,26 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             statement.setInt(4, request.getOffSet());
             rs = statement.executeQuery();
             while (rs.next()) {
-                Review review = new Review();
-                review.setId(rs.getInt("ID"));
-                review.setComment(rs.getString("COMMENT"));
-                review.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                review.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
-                review.setParentId(rs.getInt("PARENT_ID"));
-                review.setUsername(rs.getString("USERNAME"));
-                review.setRating(rs.getInt("RATING"));
-                reviews.add(review);
+                ReviewDTO reviewDTO = new ReviewDTO();
+                reviewDTO.setId(rs.getInt("ID"));
+                reviewDTO.setContent(rs.getString("COMMENT"));
+                reviewDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                reviewDTO.setModifiedAt(rs.getTimestamp("MODIFIED_AT"));
+                reviewDTO.setRootParentId(rs.getInt("ROOT_PARENT_ID"));
+                reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
+                reviewDTO.setUsername(rs.getString("USERNAME"));
+                reviewDTO.setRating(rs.getInt("RATING"));
+                reviewDTOs.add(reviewDTO);
             }
         }  catch (DBConnectionException e) {
             throw new ReviewManagementDAOException(
                     "Error occurred while obtaining the DB connection when verifying application existence", e);
         } catch (SQLException e) {
-            throw new ReviewManagementDAOException("DB connection error occurred while getting all reviews", e);
+            throw new ReviewManagementDAOException("DB connection error occurred while getting all reviewTmps", e);
         }finally {
             Util.cleanupResources(statement, rs);
         }
-        return reviews;
+        return reviewDTOs;
     }
 
     @Override

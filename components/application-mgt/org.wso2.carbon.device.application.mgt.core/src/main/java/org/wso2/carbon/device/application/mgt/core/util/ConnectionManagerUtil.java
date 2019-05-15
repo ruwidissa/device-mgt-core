@@ -331,4 +331,9 @@ public class ConnectionManagerUtil {
         return false;
     }
 
+
+    public static void init(DataSource dtSource) {
+        dataSource = dtSource;
+    }
+
 }

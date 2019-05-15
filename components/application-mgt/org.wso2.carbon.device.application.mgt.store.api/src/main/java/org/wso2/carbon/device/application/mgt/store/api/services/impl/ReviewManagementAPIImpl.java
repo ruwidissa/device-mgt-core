@@ -23,10 +23,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.Rating;
-import org.wso2.carbon.device.application.mgt.common.Review;
-import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
+import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.store.api.services.ReviewManagementAPI;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
@@ -46,7 +46,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Response;
 
 /**
- * Review Management related jax-rs APIs.
+ * ReviewTmp Management related jax-rs APIs.
  */
 @Path("/review")
 public class ReviewManagementAPIImpl implements ReviewManagementAPI {
@@ -77,15 +77,15 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @Consumes("application/json")
     @Path("/{uuid}")
     public Response addReview(
-            @ApiParam Review review,
+            @ApiParam ReviewWrapper reviewWrapper,
             @PathParam("uuid") String uuid) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            boolean isReviewCreated = reviewManager.addReview(review, uuid);
+            boolean isReviewCreated = reviewManager.addReview(reviewWrapper, uuid);
             if (isReviewCreated) {
-                return Response.status(Response.Status.CREATED).entity(review).build();
+                return Response.status(Response.Status.CREATED).entity(reviewWrapper).build();
             } else {
-                String msg = "Given review is not valid. Please check the review payload.";
+                String msg = "Given reviewTmp is not valid. Please check the reviewTmp payload.";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
@@ -94,14 +94,42 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ReviewManagementException e) {
-            String msg = "Error occurred while creating the review";
+            String msg = "Error occurred while creating the reviewTmp";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (RequestValidatingException e) {
-            String msg =
-                    "Error occurred while adding for application release. UUID of the application release: " + uuid;
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occured while accessing application release for UUID: " + uuid;
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
+    @POST
+    @Consumes("application/json")
+    @Path("/{uuid}/{parentReviewId}")
+    public Response addReplyComment(
+            @ApiParam ReviewWrapper reviewWrapper,
+            @PathParam("uuid") String uuid,
+            @PathParam("parentReviewId") int parentReviewId) {
+        ReviewManager reviewManager = APIUtil.getReviewManager();
+        try {
+            boolean isRepliedForReview = reviewManager.addReplyComment(reviewWrapper, uuid, parentReviewId);
+            if (isRepliedForReview) {
+                return Response.status(Response.Status.CREATED).entity(reviewWrapper).build();
+            } else {
+                String msg = "Given reviewTmp is not valid. Please check the reviewTmp payload.";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+        } catch (NotFoundException e) {
+            String msg = "Couldn't find an application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ReviewManagementException e) {
+            String msg = "Error occurred while creating the reviewTmp";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occured while accessing application release for UUID: " + uuid;
             log.error(msg, e);
@@ -114,13 +142,13 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     @Consumes("application/json")
     @Path("/{uuid}/{reviewId}")
     public Response updateReview(
-            @ApiParam Review review,
+            @ApiParam ReviewWrapper updatingReview,
             @PathParam("uuid") String uuid,
             @PathParam("reviewId") int reviewId) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.updateReview(review, reviewId, uuid, null)) {
-                return Response.status(Response.Status.OK).entity(review).build();
+            if (reviewManager.updateReview(updatingReview, reviewId, uuid)) {
+                return Response.status(Response.Status.OK).entity(updatingReview).build();
             } else {
                 String msg = "Review updating failed. Please contact the administrator";
                 log.error(msg);
@@ -130,11 +158,18 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             String msg = "Error occurred while retrieving comments.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (RequestValidatingException e) {
-            String msg = "Error occurred while updating review. Review id: " + reviewId;
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found application release data for UUID " + uuid + " or Review for review ID: " + reviewId;
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "You dont have permission to update application release review.";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred when getting application release data for application release UUID:." + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();        }
     }
 
     @Override
@@ -147,9 +182,9 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
             if (reviewManager.deleteReview(uuid, reviewId)) {
-                return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
+                return Response.status(Response.Status.OK).entity("ReviewTmp is deleted successfully.").build();
             } else {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Review deleting is failed.")
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("ReviewTmp deleting is failed.")
                         .build();
             }
         } catch (ReviewManagementException e) {
@@ -173,7 +208,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
         try {
             rating = reviewManager.getRating(uuid);
         } catch (ReviewManagementException e) {
-            log.error("Review Management Exception occurs", e);
+            log.error("ReviewTmp Management Exception occurs", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.OK).entity(rating).build();

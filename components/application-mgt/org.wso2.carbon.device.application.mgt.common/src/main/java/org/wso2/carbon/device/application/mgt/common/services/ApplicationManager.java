@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
+import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
@@ -123,7 +124,7 @@ public interface ApplicationManager {
      * @return the ApplicationDTO identified by the ID
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    ApplicationDTO getApplicationByUuid(String uuid, String state) throws ApplicationManagementException;
+    Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException;
 
     /**
      * To get an application associated with the release.
@@ -147,10 +148,10 @@ public interface ApplicationManager {
      * To get all the releases of a particular ApplicationDTO.
      *
      * @param releaseUuid UUID of the ApplicationDTO Release.
-     * @param stateName Lifecycle state to change the app
+     * @param lifecycleChanger Lifecycle changer that contains the action and the reson for the change.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void changeLifecycleState(String releaseUuid, String stateName)
+    void changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException;
 
     /**
@@ -227,11 +228,30 @@ public interface ApplicationManager {
 
     void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException;
 
-
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;
 
     List<Tag> getRegisteredTags() throws ApplicationManagementException;
 
     List<Category> getRegisteredCategories() throws ApplicationManagementException;
+
+    void deleteApplicationTag(int appId, String tagName) throws ApplicationManagementException;
+
+    void deleteTag(String tagName) throws ApplicationManagementException;
+
+    void deleteUnusedTag(String tagName) throws ApplicationManagementException;
+
+    void updateTag(String oldTagName, String newTagName) throws ApplicationManagementException;
+
+    List<String> addTags(List<String> tags) throws ApplicationManagementException;
+
+    List<String> addApplicationTags(int appId, List<String> tags) throws ApplicationManagementException;
+
+    List<String> addCategories(List<String> categories) throws ApplicationManagementException;
+
+    void deleteCategory(String categoryName) throws ApplicationManagementException;
+
+    void updateCategory(String oldCategoryName, String newCategoryName) throws ApplicationManagementException;
+
+    String getInstallableLifecycleState() throws ApplicationManagementException;
 
 }
