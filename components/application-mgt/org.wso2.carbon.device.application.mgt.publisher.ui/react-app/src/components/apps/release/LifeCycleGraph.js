@@ -1,98 +1,101 @@
 import React from "react";
-import * as SRD from "storm-react-diagrams";
-import "storm-react-diagrams/dist/style.min.css";
-import "./LifeCycle.css";
-import {distributeElements} from "../../../js/utils/dagre-utils.ts";
+import {Graph} from 'react-d3-graph';
 
-const inPortName = "IN";
-const outPortName = "OUT";
+
+// the graph configuration, you only need to pass down properties
+// that you want to override, otherwise default ones will be used
+const myConfig = {
+    nodeHighlightBehavior: true,
+    directed: true,
+    height: 400,
+    d3: {
+        alphaTarget: 0.05,
+        gravity: -200,
+        linkLength: 200,
+        linkStrength: 1
+    },
+    node: {
+        color: "#d3d3d3",
+        fontColor: "black",
+        fontSize: 12,
+        fontWeight: "normal",
+        highlightFontSize: 12,
+        highlightFontWeight: "bold",
+        highlightStrokeColor: "SAME",
+        highlightStrokeWidth: 1.5,
+        labelProperty: "id",
+        mouseCursor: "pointer",
+        opacity: 1,
+        strokeColor: "none",
+        strokeWidth: 1.5,
+        svg: "",
+        symbolType: "circle",
+    },
+    link: {
+        highlightColor: 'lightblue'
+    }
+};
+
+const onClickNode = function(nodeId) {
+    window.alert(`Clicked node ${nodeId}`);
+};
 
 class LifeCycleGraph extends React.Component {
+
     render() {
+// graph payload (with minimalist structure)
 
         const lifecycle = this.props.lifecycle;
         const nodes = [];
         const links = [];
-
-        const engine = new SRD.DiagramEngine();
-        engine.installDefaultFactories();
-
-        const model = new SRD.DiagramModel();
         const nextStates = lifecycle[this.props.currentStatus].proceedingStates;
 
 
         Object.keys(lifecycle).forEach((stateName) => {
+            const state = lifecycle[stateName];
             let color = "rgb(83, 92, 104)";
             if (stateName === this.props.currentStatus) {
-                color = "rgb(192,255,0)";
+                color = "rgb(39, 174, 96)";
             } else if (nextStates.includes(stateName)) {
                 color = "rgb(0,192,255)";
             }
-            const node = createNode(stateName, color);
+            let node = {
+                id: stateName,
+                color: color
+            };
             nodes.push(node);
-            lifecycle[stateName].node = node;
-        });
 
-        Object.keys(lifecycle).forEach((stateName) => {
-            const state = lifecycle[stateName];
             //todo: remove checking property
             if (state.hasOwnProperty("proceedingStates")) {
 
                 state.proceedingStates.forEach((proceedingState) => {
-                    links.push(connectNodes(state.node, lifecycle[proceedingState].node));
+                    let link = {
+                        source: stateName,
+                        target: proceedingState
+                    };
+                    links.push(link);
                 });
             }
         });
 
-        nodes.forEach((node) => {
-            model.addNode(node);
-            // node.addListener({
-            //     selectionChanged: (node, isSelected) => {
-            //         console.log(isSelected);
-            //     }
-            // });
-        });
-        links.forEach((link) => {
-            model.addLink(link);
-        });
+        const data = {
+            nodes: nodes,
+            links: links
+        };
 
-
-        let distributedModel = getDistributedModel(engine, model);
-        engine.setDiagramModel(distributedModel);
 
         return (
-            <div style={{height: 500}}>
-                <SRD.DiagramWidget diagramEngine={engine} maxNumberPointsPerLink={10} smartRouting={true}/>
+            <div>
+                <Graph
+                    id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
+                    data={data}
+                    config={myConfig}
+                    onClickNode={onClickNode}
+                />
             </div>
         );
     }
 }
 
-function getDistributedModel(engine, model) {
-    const serialized = model.serializeDiagram();
-    const distributedSerializedDiagram = distributeElements(serialized);
-
-    //deserialize the model
-    let deSerializedModel = new SRD.DiagramModel();
-    deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, engine);
-    return deSerializedModel;
-}
-
-function createNode(name, color) {
-    const node = new SRD.DefaultNodeModel(name, color);
-    node.addPort(new SRD.DefaultPortModel(true, inPortName, " "));
-    node.addPort(new SRD.DefaultPortModel(false, outPortName, " "));
-    return node;
-}
-
-let count = 0;
-
-function connectNodes(nodeFrom, nodeTo) {
-    return nodeFrom.getPort(outPortName).link(nodeTo.getPort(inPortName));
-}
-
-function f() {
-    console.log(1);
-}
 
 export default LifeCycleGraph;

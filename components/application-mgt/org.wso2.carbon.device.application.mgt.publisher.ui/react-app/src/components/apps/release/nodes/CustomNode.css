@@ -1,0 +1,21 @@
+
+/* --- Shape for the nodes --- */
+
+.node {
+    width: 75px;
+    height: 30px;
+    border-radius: 20% 20% 20% 20%;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+}
+
+
+.node .name {
+    padding: 5%;
+    font-size: 0.5rem;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    color: white;
+}
