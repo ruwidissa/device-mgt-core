@@ -1,32 +1,51 @@
 import React from "react";
 import LifeCycleGraph from "./LifeCycleGraph";
 import {connect} from "react-redux";
-import {getLifecycle, openReleasesModal} from "../../../js/actions";
+import {getLifecycle, openLifecycleModal} from "../../../js/actions";
+import {Button} from "antd";
+import LifecycleModal from "./LifecycleModal";
 
 const mapDispatchToProps = dispatch => ({
-    getLifecycle: () => dispatch(getLifecycle())
+    getLifecycle: () => dispatch(getLifecycle()),
+    openLifecycleModal: (nextState) => dispatch(openLifecycleModal(nextState))
 });
 
 const mapStateToProps = state => {
     return {
-        lifecycle: state.lifecycle
+        lifecycle: state.lifecycle,
+        currentStatus : state.release.currentStatus.toUpperCase(),
+        uuid : state.release.uuid
     };
 };
 
 class ConnectedLifeCycle extends React.Component {
+
+    constructor(props){
+        super(props);
+
+        this.openModal = this.openModal.bind(this);
+    }
+
     componentDidMount() {
         this.props.getLifecycle();
     }
 
+    openModal() {
+        this.props.openLifecycleModal("IN_REVIEW");
+    }
+
     render() {
-        console.log();
         const lifecycle = this.props.lifecycle;
-        if(lifecycle != null){
+        if (lifecycle != null) {
             return (
-                <LifeCycleGraph currentStatus={this.props.currentStatus} lifecycle={this.props.lifecycle}/>
+                <div>
+                    <LifecycleModal uuid={this.props.uuid} currentStatus={this.props.currentStatus}/>
+                    <Button onClick={this.openModal}>aaaa</Button>
+                    <LifeCycleGraph openModel={this.openModal} currentStatus={this.props.currentStatus} lifecycle={this.props.lifecycle}/>
+                </div>
             );
 
-        }else {
+        } else {
             return null;
         }
     }

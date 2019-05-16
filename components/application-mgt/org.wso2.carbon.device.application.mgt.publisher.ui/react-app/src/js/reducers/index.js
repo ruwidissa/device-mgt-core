@@ -7,7 +7,11 @@ const initialState = {
         app: null
     },
     release: null,
-    lifecycle: null
+    lifecycle: null,
+    lifecycleModal:{
+        visible: false,
+        nextState: null
+    }
 };
 
 function rootReducer(state = initialState, action) {
@@ -29,6 +33,28 @@ function rootReducer(state = initialState, action) {
     } else if (action.type === ActionTypes.GET_LIFECYCLE) {
         return Object.assign({}, state, {
             lifecycle: action.payload
+        });
+    }else if (action.type === ActionTypes.OPEN_LIFECYCLE_MODAL) {
+        return Object.assign({}, state, {
+            lifecycleModal: {
+                visible: true,
+                nextState: action.payload.nextState
+            }
+        });
+    }else if (action.type === ActionTypes.CLOSE_LIFECYCLE_MODAL) {
+        return Object.assign({}, state, {
+            lifecycleModal: {
+                visible: false,
+                nextState: null
+            }
+        });
+    }else if (action.type === ActionTypes.UPDATE_LIFECYCLE_STATE) {
+        return Object.assign({}, state, {
+            lifecycleModal: {
+                visible: false,
+                nextState: null,
+            },
+            release: action.payload
         });
     }
     return state;
