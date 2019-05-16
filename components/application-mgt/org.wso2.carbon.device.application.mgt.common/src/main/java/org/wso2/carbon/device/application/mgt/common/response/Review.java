@@ -18,7 +18,7 @@
 package org.wso2.carbon.device.application.mgt.common.response;
 
 import java.sql.Timestamp;
-import java.util.TreeMap;
+import java.util.List;
 
 public class Review {
 
@@ -30,7 +30,7 @@ public class Review {
     private Timestamp createdAt;
     private Timestamp modifiedAt;
     private int rating;
-    private TreeMap<Integer, Review> replyComments;
+    private List<Review> replies;
 
     public int getId() {
         return id;
@@ -96,11 +96,7 @@ public class Review {
         this.rating = rating;
     }
 
-    public TreeMap<Integer, Review> getReplyComments() {
-        return replyComments;
-    }
+    public List<Review> getReplies() { return replies; }
 
-    public void setReplyComments(TreeMap<Integer, Review> replyComments) {
-        this.replyComments = replyComments;
-    }
+    public void setReplies(List<Review> replies) { this.replies = replies; }
 }

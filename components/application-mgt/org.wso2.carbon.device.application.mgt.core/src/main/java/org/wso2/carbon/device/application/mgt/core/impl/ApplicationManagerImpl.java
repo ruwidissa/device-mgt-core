@@ -1618,7 +1618,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
+    public ApplicationRelease changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1664,6 +1664,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
                 ConnectionManagerUtil.commitDBTransaction();
+                return releaseDtoToRelease(applicationReleaseDTO);
             } else {
                 String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
                         + " to '" + lifecycleChanger.getAction() + "'";

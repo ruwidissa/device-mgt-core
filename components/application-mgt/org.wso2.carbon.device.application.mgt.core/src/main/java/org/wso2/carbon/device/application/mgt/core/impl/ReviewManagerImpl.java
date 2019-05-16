@@ -172,8 +172,12 @@ public class ReviewManagerImpl implements ReviewManager {
             }
             ReviewDTO replyComment = reviewWrapperToDO(reviewWrapper);
             replyComment.setUsername(username);
-            replyComment.setRootParentId(parentReview.getRootParentId());
             replyComment.setImmediateParentId(parentReview.getId());
+            if (parentReview.getRootParentId() == -1) {
+                replyComment.setRootParentId(parentReview.getId());
+            } else {
+                replyComment.setRootParentId(parentReview.getRootParentId());
+            }
             if (this.reviewDAO.addReview(replyComment, applicationReleaseDTO.getId(), tenantId)) {
                 ConnectionManagerUtil.commitDBTransaction();
                 return true;
@@ -214,10 +218,22 @@ public class ReviewManagerImpl implements ReviewManager {
             review.setImmediateParentId(reviewDTO.getImmediateParentId());
             review.setCreatedAt(reviewDTO.getCreatedAt());
             review.setModifiedAt(reviewDTO.getModifiedAt());
-            review.setReplyComments(new TreeMap<>());
+            review.setReplies(new ArrayList<>());
             reviews.add(review);
         }
         return reviews;
+    }
+
+    private Review reviewDTOToReview(ReviewDTO reviewDTO){
+        Review review = new Review();
+        review.setId(reviewDTO.getId());
+        review.setContent(reviewDTO.getContent());
+        review.setRootParentId(reviewDTO.getRootParentId());
+        review.setImmediateParentId(reviewDTO.getImmediateParentId());
+        review.setCreatedAt(reviewDTO.getCreatedAt());
+        review.setModifiedAt(reviewDTO.getModifiedAt());
+        review.setReplies(new ArrayList<>());
+        return review;
     }
 
     @Override
@@ -283,38 +299,35 @@ public class ReviewManagerImpl implements ReviewManager {
             throws ReviewManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         PaginationResult paginationResult = new PaginationResult();
-        int numOfComments;
-        TreeMap<Integer, ReviewNode<Review>> reviewTree = new TreeMap<>();
+        TreeMap<Integer, ReviewNode<ReviewDTO>> reviewTree = new TreeMap<>();
         if (log.isDebugEnabled()) {
             log.debug("Get all reviewTmps of the application release uuid: " + uuid);
         }
         try {
             ConnectionManagerUtil.openDBConnection();
             List<ReviewDTO> reviewDTOs= this.reviewDAO.getAllReviews(uuid, request, tenantId);
-            List<Review> reviews = reviewDTOToReview(reviewDTOs);
-            reviews.sort(Comparator.comparing(Review::getId));
+            reviewDTOs.sort(Comparator.comparing(ReviewDTO::getId));
 
-            for (Review review : reviews) {
-                if (review.getRootParentId() == -1 && review.getImmediateParentId() == -1) {
-                    ReviewNode<Review> rootNode = new ReviewNode<>(review);
-                    reviewTree.put(review.getId(), rootNode);
-                } else if (reviewTree.containsKey(review.getImmediateParentId())) {
-                    ReviewNode<Review> childNode = new ReviewNode<>(review);
-                    reviewTree.get(review.getImmediateParentId()).addChild(childNode);
+            for (ReviewDTO reviewDTO : reviewDTOs) {
+                if (reviewDTO.getRootParentId() == -1 && reviewDTO.getImmediateParentId() == -1) {
+                    ReviewNode<ReviewDTO> rootNode = new ReviewNode<>(reviewDTO);
+                    reviewTree.put(reviewDTO.getId(), rootNode);
+                } else if (reviewTree.containsKey(reviewDTO.getImmediateParentId())) {
+                    ReviewNode<ReviewDTO> childNode = new ReviewNode<>(reviewDTO);
+                    reviewTree.get(reviewDTO.getImmediateParentId()).addChild(childNode);
                 } else {
-                    reviewTree.put(review.getId(), findAndSetChild(reviewTree.get(review.getRootParentId()), review));
+                    reviewTree.put(reviewDTO.getId(), findAndSetChild(reviewTree.get(reviewDTO.getRootParentId()), reviewDTO));
                 }
             }
-            numOfComments = reviewTree.size();
-            if (numOfComments > 0) {
-                paginationResult.setData(new ArrayList<>(reviewTree.values()));
-                paginationResult.setRecordsFiltered(numOfComments);
-                paginationResult.setRecordsTotal(numOfComments);
-            } else {
-                paginationResult.setData(new ArrayList<ReviewTmp>());
-                paginationResult.setRecordsFiltered(0);
-                paginationResult.setRecordsTotal(0);
+            int numOfReviews = reviewTree.size();
+            List<Review> results = new ArrayList<>();
+
+            for (ReviewNode<ReviewDTO> reviewNode : reviewTree.values()){
+                results.add(printTree(null, reviewNode));
             }
+            paginationResult.setData(new ArrayList<>(results));
+            paginationResult.setRecordsFiltered(numOfReviews);
+            paginationResult.setRecordsTotal(numOfReviews);
             return paginationResult;
         } catch (ReviewManagementDAOException e) {
             throw new ReviewManagementException("Error occured while getting all reviewTmps for application uuid: " + uuid,
@@ -326,14 +339,28 @@ public class ReviewManagerImpl implements ReviewManager {
         }
     }
 
-    private ReviewNode<Review> findAndSetChild(ReviewNode<Review> node, Review review) {
-        for (ReviewNode<Review> each : node.getChildren()) {
-            if ((each.getData()).getId() == review.getImmediateParentId()) {
-                ReviewNode<Review> childNode = new ReviewNode<>(review);
+    private ReviewNode<ReviewDTO> findAndSetChild(ReviewNode<ReviewDTO> node, ReviewDTO reviewDTO) {
+        for (ReviewNode<ReviewDTO> each : node.getChildren()) {
+            if ((each.getData()).getId() == reviewDTO.getImmediateParentId()) {
+                ReviewNode<ReviewDTO> childNode = new ReviewNode<>(reviewDTO);
                 each.addChild(childNode);
             }
         }
         return node;
+    }
+
+    private Review printTree(Review parentReview, ReviewNode<ReviewDTO> node) {
+        Review review = reviewDTOToReview(node.getData());
+        if (parentReview != null){
+            parentReview.getReplies().add(review);
+        }
+        if (node.getChildren().isEmpty()){
+            return review;
+        }
+        for (ReviewNode<ReviewDTO> reviewDTOReviewNode : node.getChildren()) {
+            printTree(review, reviewDTOReviewNode);
+        }
+        return review;
     }
 
     @Override
