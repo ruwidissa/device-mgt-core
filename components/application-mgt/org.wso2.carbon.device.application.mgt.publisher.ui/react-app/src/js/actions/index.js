@@ -94,7 +94,7 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
         reason: reason
     };
 
-    const request = "method=get&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/applications/life-cycle/" + uuid;
+    const request = "method=post&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/application-mgt-publisher/v1.0/applications/life-cycle/" + uuid;
 
     console.log(request);
 
