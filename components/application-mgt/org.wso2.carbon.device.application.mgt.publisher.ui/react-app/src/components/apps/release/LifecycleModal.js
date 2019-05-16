@@ -1,7 +1,7 @@
 import React from "react";
-import {Modal, Typography,Icon,Input} from 'antd';
+import {Modal, Typography, Icon, Input, Form, Checkbox, Button} from 'antd';
 import {connect} from 'react-redux';
-import {closeLifecycleModal} from "../../../js/actions";
+import {closeLifecycleModal, updateLifecycleState} from "../../../js/actions";
 
 const { TextArea } = Input;
 const { Title } = Typography;
@@ -15,7 +15,8 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-    closeLifecycleModal : () => dispatch(closeLifecycleModal())
+    closeLifecycleModal : () => dispatch(closeLifecycleModal()),
+    updateLifecycleState : (uuid, nextState, reason) => dispatch(updateLifecycleState(uuid, nextState, reason))
 });
 
 const Text = Typography;
@@ -24,6 +25,7 @@ class ConnectedLifecycleModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            loading: false,
             visible: false
         };
     }
@@ -46,13 +48,22 @@ class ConnectedLifecycleModal extends React.Component {
         this.setState({
             visible: false,
         });
+        this.props.closeLifecycleModal();
     };
 
     handleCancel = (e) => {
         this.setState({
             visible: false,
+            loading: false
         });
         this.props.closeLifecycleModal();
+    };
+    handleSubmit = event => {
+        this.setState({ loading: true });
+        event.preventDefault();
+        console.log(this.reason);
+        console.log("uuid", this.props.uuid);
+        this.props.updateLifecycleState(this.props.uuid, this.props.nextState, this.reason.state.value)
     };
 
     render() {
@@ -63,12 +74,31 @@ class ConnectedLifecycleModal extends React.Component {
                     <Modal
                         title="Change State"
                         visible={this.state.visible}
-                        onOk={this.handleOk}
                         onCancel={this.handleCancel}
+                        footer={null}
                     >
                         <Title level={4}>{this.props.currentStatus} <Icon type="arrow-right" /> {nextState}</Title>
                         <p>Reason:</p>
-                        <TextArea placeholder="Please enter the reason..." autosize />
+                        <form onSubmit={this.handleSubmit}>
+                            <Form.Item>
+                                <label htmlFor="username">username</label>
+
+                                <Input placeholder="Basic usage"  ref={(input) => this.reason = input}/>
+                            </Form.Item>
+                            {/*<Form.Item>*/}
+                            {/*<TextArea*/}
+                                {/*placeholder="Please enter the reason..."*/}
+                                {/*ref={(input) => this.input = input}*/}
+                                {/*autosize*/}
+                            {/*/>*/}
+                            {/*</Form.Item>*/}
+                            <Button key="back" onClick={this.handleCancel}>
+                                Cancel
+                            </Button>,
+                            <Button key="submit" type="primary" htmlType="submit" loading={this.state.loading}>
+                                Submit
+                            </Button>
+                        </form>
                     </Modal>
                 </div>
             );

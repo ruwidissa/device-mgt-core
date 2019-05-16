@@ -27,7 +27,7 @@ export const getApps = () => dispatch => {
 
 export const getRelease = (uuid) => dispatch => {
 
-    const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/release/"+uuid;
+    const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/release/" + uuid;
 
     return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
@@ -49,7 +49,7 @@ export const openReleasesModal = (app) => dispatch => {
     dispatch({
         type: ActionTypes.OPEN_RELEASES_MODAL,
         payload: {
-            app:app
+            app: app
         }
     });
 };
@@ -70,7 +70,7 @@ export const closeLifecycleModal = () => dispatch => {
     });
 };
 
-export const getLifecycle = ()=> dispatch =>{
+export const getLifecycle = () => dispatch => {
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/lifecycle-config";
 
     return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
@@ -88,20 +88,31 @@ export const getLifecycle = ()=> dispatch =>{
 };
 
 
-export const updateLifecycleState = (uuid, nextState) => dispatch => {
+export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
 
-    const request = "method=get&content-type=application/json&payload={}&api-endpoint=/applications/lifecycle-config/"+uuid+"?action="+nextState;
+    const payload = {
+        nextState: nextState,
+        reason: reason
+    };
+
+    const request = "method=get&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/applications/lifecycle-config/" + uuid;
+
+    console.log(request);
 
     return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
-            let release = res.data.data;
-            dispatch({type: ActionTypes.GET_RELEASE, payload: release});
+            dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: {currentStatus: nextState}});
         }
 
     }).catch(function (error) {
         if (error.response.status === 401) {
             window.location.href = 'https://localhost:9443/publisher/login';
+        } else if (error.response.status === 500) {
+            dispatch({
+                type: ActionTypes.CLOSE_LIFECYCLE_MODAL
+            });
+            alert("error");
         }
     });
 

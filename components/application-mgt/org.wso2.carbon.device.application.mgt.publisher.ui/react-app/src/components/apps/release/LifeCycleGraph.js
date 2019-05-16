@@ -1,6 +1,11 @@
 import React from "react";
 import {Graph} from 'react-d3-graph';
+import {connect} from "react-redux";
+import {getLifecycle, openLifecycleModal} from "../../../js/actions";
 
+const mapDispatchToProps = dispatch => ({
+    openLifecycleModal: (nextState) => dispatch(openLifecycleModal(nextState))
+});
 
 // the graph configuration, you only need to pass down properties
 // that you want to override, otherwise default ones will be used
@@ -36,11 +41,23 @@ const myConfig = {
     }
 };
 
-const onClickNode = function(nodeId) {
-    window.alert(`Clicked node ${nodeId}`);
-};
 
-class LifeCycleGraph extends React.Component {
+
+class ConnectedLifeCycleGraph extends React.Component {
+
+
+    constructor(props){
+        super(props);
+        this.nextStates = null;
+        this.onClickNode = this.onClickNode.bind(this);
+    }
+
+    onClickNode = function(nodeId) {
+        const nextStates = this.nextStates;
+        if(nextStates.includes(nodeId)){
+            this.props.openLifecycleModal(nodeId);
+        }
+    };
 
     render() {
 // graph payload (with minimalist structure)
@@ -48,7 +65,7 @@ class LifeCycleGraph extends React.Component {
         const lifecycle = this.props.lifecycle;
         const nodes = [];
         const links = [];
-        const nextStates = lifecycle[this.props.currentStatus].proceedingStates;
+        this.nextStates = lifecycle[this.props.currentStatus].proceedingStates;
 
 
         Object.keys(lifecycle).forEach((stateName) => {
@@ -56,7 +73,7 @@ class LifeCycleGraph extends React.Component {
             let color = "rgb(83, 92, 104)";
             if (stateName === this.props.currentStatus) {
                 color = "rgb(39, 174, 96)";
-            } else if (nextStates.includes(stateName)) {
+            } else if (this.nextStates.includes(stateName)) {
                 color = "rgb(0,192,255)";
             }
             let node = {
@@ -67,7 +84,6 @@ class LifeCycleGraph extends React.Component {
 
             //todo: remove checking property
             if (state.hasOwnProperty("proceedingStates")) {
-
                 state.proceedingStates.forEach((proceedingState) => {
                     let link = {
                         source: stateName,
@@ -90,12 +106,12 @@ class LifeCycleGraph extends React.Component {
                     id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
                     data={data}
                     config={myConfig}
-                    onClickNode={onClickNode}
+                    onClickNode={this.onClickNode}
                 />
             </div>
         );
     }
 }
 
-
+const LifeCycleGraph = connect(null,mapDispatchToProps)(ConnectedLifeCycleGraph);
 export default LifeCycleGraph;

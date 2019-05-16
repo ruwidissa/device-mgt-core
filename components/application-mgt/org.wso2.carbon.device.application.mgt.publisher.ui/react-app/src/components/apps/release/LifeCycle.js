@@ -13,7 +13,8 @@ const mapDispatchToProps = dispatch => ({
 const mapStateToProps = state => {
     return {
         lifecycle: state.lifecycle,
-        currentStatus : state.release.currentStatus.toUpperCase()
+        currentStatus : state.release.currentStatus.toUpperCase(),
+        uuid : state.release.uuid
     };
 };
 
@@ -38,9 +39,9 @@ class ConnectedLifeCycle extends React.Component {
         if (lifecycle != null) {
             return (
                 <div>
-                    <LifecycleModal currentStatus={this.props.currentStatus}/>
+                    <LifecycleModal uuid={this.props.uuid} currentStatus={this.props.currentStatus}/>
                     <Button onClick={this.openModal}>aaaa</Button>
-                    <LifeCycleGraph currentStatus={this.props.currentStatus} lifecycle={this.props.lifecycle}/>
+                    <LifeCycleGraph openModel={this.openModal} currentStatus={this.props.currentStatus} lifecycle={this.props.lifecycle}/>
                 </div>
             );
 
