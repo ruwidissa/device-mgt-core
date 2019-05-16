@@ -21,20 +21,6 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.application;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
-import org.wso2.carbon.device.application.mgt.common.ApplicationList;
-import org.wso2.carbon.device.application.mgt.common.Filter;
-import org.wso2.carbon.device.application.mgt.common.Pagination;
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
-import org.wso2.carbon.device.application.mgt.core.dao.impl.application.GenericApplicationDAOImpl;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * This is a ApplicationDAO Implementation specific to Oracle.

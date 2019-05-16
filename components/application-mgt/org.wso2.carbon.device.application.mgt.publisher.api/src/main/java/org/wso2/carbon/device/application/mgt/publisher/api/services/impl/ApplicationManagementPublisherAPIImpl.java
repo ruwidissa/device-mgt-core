@@ -453,7 +453,9 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Valid LifecycleChanger lifecycleChanger) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.changeLifecycleState(applicationUuid, lifecycleChanger);
+            ApplicationRelease applicationRelease = applicationManager
+                    .changeLifecycleState(applicationUuid, lifecycleChanger);
+            return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = "Request payload contains invalid data, hence veryfy the request payload.";
             log.error(msg, e);
@@ -472,7 +474,6 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.CREATED).entity("Lifecycle state added successfully.").build();
     }
 
     @GET

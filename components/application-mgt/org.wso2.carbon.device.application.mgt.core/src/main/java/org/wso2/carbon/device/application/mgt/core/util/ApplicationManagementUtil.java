@@ -32,7 +32,7 @@ import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManag
 import java.lang.reflect.Constructor;
 
 /**
- * This Util class is responsible for making sure single instance of each Extension Manager is used throughout for
+ * This DAOUtil class is responsible for making sure single instance of each Extension Manager is used throughout for
  * all the tasks.
  */
 public class ApplicationManagementUtil {

@@ -64,5 +64,5 @@ public class Constants {
      */
     public static final String RELEASE_ARTIFACT = "artifact";
 
-    public static final int MAXIMUM_REVIEWS_PER_USER = 10;
+    public static final int REVIEW_PARENT_ID = -1;
 }

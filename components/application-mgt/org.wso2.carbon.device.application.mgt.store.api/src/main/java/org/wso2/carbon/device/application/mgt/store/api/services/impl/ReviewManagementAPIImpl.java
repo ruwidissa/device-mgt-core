@@ -85,7 +85,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             if (isReviewCreated) {
                 return Response.status(Response.Status.CREATED).entity(reviewWrapper).build();
             } else {
-                String msg = "Given reviewTmp is not valid. Please check the reviewTmp payload.";
+                String msg = "Review is not valid. Please check the reviewTmp payload.";
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
