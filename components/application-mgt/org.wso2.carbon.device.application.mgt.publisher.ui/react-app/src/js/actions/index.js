@@ -87,22 +87,22 @@ export const getLifecycle = () => dispatch => {
     });
 };
 
-
 export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
 
     const payload = {
-        nextState: nextState,
+        action: nextState,
         reason: reason
     };
 
-    const request = "method=get&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/applications/lifecycle-config/" + uuid;
+    const request = "method=get&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/applications/lifecycle/" + uuid;
 
     console.log(request);
 
     return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
-            dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: {currentStatus: nextState}});
+            let release = res.data.data;
+            dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: release});
         }
 
     }).catch(function (error) {

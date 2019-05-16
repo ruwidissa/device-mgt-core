@@ -49,15 +49,12 @@ function rootReducer(state = initialState, action) {
             }
         });
     }else if (action.type === ActionTypes.UPDATE_LIFECYCLE_STATE) {
-        const release = {};
         return Object.assign({}, state, {
             lifecycleModal: {
                 visible: false,
                 nextState: null,
             },
-            release:{
-                currentStatus : action.payload.currentStatus
-            }
+            release: action.payload
         });
     }
     return state;
