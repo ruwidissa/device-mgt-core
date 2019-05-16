@@ -101,18 +101,25 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
     return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
-            let release = res.data.data;
-            dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: release});
+            if(res.data.data.hasOwnProperty("release")) {
+                let release = res.data.data;
+                dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: release});
+            }else{
+                alert("error");
+                dispatch({
+                    type: ActionTypes.CLOSE_LIFECYCLE_MODAL
+                });
+            }
         }
 
     }).catch(function (error) {
         if (error.response.status === 401) {
             window.location.href = 'https://localhost:9443/publisher/login';
         } else if (error.response.status === 500) {
+            alert("error");
             dispatch({
                 type: ActionTypes.CLOSE_LIFECYCLE_MODAL
             });
-            alert("error");
         }
     });
 

@@ -78,12 +78,11 @@ class ConnectedLifecycleModal extends React.Component {
                         footer={null}
                     >
                         <Title level={4}>{this.props.currentStatus} <Icon type="arrow-right" /> {nextState}</Title>
-                        <p>Reason:</p>
                         <form onSubmit={this.handleSubmit}>
                             <Form.Item>
-                                <label htmlFor="username">username</label>
+                                <label htmlFor="username">Reason</label>
 
-                                <Input placeholder="Basic usage"  ref={(input) => this.reason = input}/>
+                                <Input placeholder="Enter the reason"  ref={(input) => this.reason = input}/>
                             </Form.Item>
                             {/*<Form.Item>*/}
                             {/*<TextArea*/}
