@@ -65,8 +65,7 @@ import java.util.List;
      * @return row count if updating is succeed otherwise 0
      * @throws ReviewManagementDAOException Exceptions of the reviewTmp management.
      */
-    int updateReview(ReviewDTO reviewDTO, int reviewId, int tenantId)
-            throws ReviewManagementDAOException;
+    int updateReview(ReviewDTO reviewDTO, int reviewId, int tenantId) throws ReviewManagementDAOException;
 
 
     /**

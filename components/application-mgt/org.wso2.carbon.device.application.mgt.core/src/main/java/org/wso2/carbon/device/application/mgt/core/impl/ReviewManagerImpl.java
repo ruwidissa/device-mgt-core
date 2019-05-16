@@ -210,15 +210,7 @@ public class ReviewManagerImpl implements ReviewManager {
         List<Review> reviews = new ArrayList<>();
 
         for (ReviewDTO reviewDTO : reviewDTOs){
-            Review review = new Review();
-            review.setId(reviewDTO.getId());
-            review.setContent(reviewDTO.getContent());
-            review.setRootParentId(reviewDTO.getRootParentId());
-            review.setImmediateParentId(reviewDTO.getImmediateParentId());
-            review.setCreatedAt(reviewDTO.getCreatedAt());
-            review.setModifiedAt(reviewDTO.getModifiedAt());
-            review.setReplies(new ArrayList<>());
-            reviews.add(review);
+            reviews.add(reviewDTOToReview(reviewDTO));
         }
         return reviews;
     }
@@ -244,7 +236,7 @@ public class ReviewManagerImpl implements ReviewManager {
             log.debug("ReviewTmp updating request is received for the reviewTmp id " + reviewId);
         }
         try {
-            ConnectionManagerUtil.openDBConnection();
+            ConnectionManagerUtil.beginDBTransaction();
             ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
             if (applicationReleaseDTO == null) {
                 String msg = "Couldn't found an application release for UUID: " + uuid;
@@ -261,7 +253,7 @@ public class ReviewManagerImpl implements ReviewManager {
             }
 
             if (!username.equals(reviewDTO.getUsername())) {
-                String msg = "You are trying to update a review which is triggered by " + reviewDTO.getUsername()
+                String msg = "You are trying to update a review which is created by " + reviewDTO.getUsername()
                         + ". Hence you are not permitted to update the review.";
                 log.error(msg);
                 throw new ForbiddenException(msg);
@@ -275,8 +267,13 @@ public class ReviewManagerImpl implements ReviewManager {
                 reviewDTO.setRating(updatingReview.getRating());
             }
             reviewDTO.setContent(updatingReview.getContent());
-            return this.reviewDAO.updateReview(reviewDTO, reviewId, tenantId) == 1;
+            if (this.reviewDAO.updateReview(reviewDTO, reviewId, tenantId) == 1){
+                ConnectionManagerUtil.commitDBTransaction();
+                return true;
+            }
+            return false;
         } catch (ReviewManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured while  getting reviewTmp with reviewTmp id " + reviewId + ".";
             log.error(msg);
             throw new ReviewManagementException(msg, e);
@@ -288,6 +285,10 @@ public class ReviewManagerImpl implements ReviewManager {
             String msg = "Error occured when getting application release data for application release UUID: " + uuid;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "DB transaction error occurred when updating comment which has comment id: " + reviewId;
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
