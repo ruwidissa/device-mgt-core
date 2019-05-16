@@ -24,7 +24,7 @@ import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 
@@ -64,7 +64,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
                     + " lifecycle state for a specific application", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -89,7 +89,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
                     + " lifecycle state for a specific application", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -120,7 +120,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
                     + " lifecycle state for a specific application", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -199,7 +199,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             log.error("Error occurred while adding lifecycle: " + state.getCurrentState(), e);
             throw new LifeCycleManagementDAOException("Error occurred while adding lifecycle: " + state.getCurrentState(), e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 

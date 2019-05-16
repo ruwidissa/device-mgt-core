@@ -22,17 +22,25 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.Rating;
-import org.wso2.carbon.device.application.mgt.common.Review;
+import org.wso2.carbon.device.application.mgt.common.ReviewNode;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.services.*;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
@@ -42,6 +50,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -64,34 +73,124 @@ public class ReviewManagerImpl implements ReviewManager {
     }
 
     @Override
-    public boolean addReview(Review review, String uuid) throws ReviewManagementException, NotFoundException {
+    public boolean addReview(ReviewWrapper reviewWrapper, String uuid)
+            throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        boolean isSuccess = false;
+
+        if (reviewWrapper == null) {
+            String msg = "Request payload is null. Please verify the request payload.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        if (reviewWrapper.getRating() < 0) {
+            String msg = "You are trying to add invalid rating value as rating. Therefore please verify the request "
+                    + "payload.";
+            log.error(msg);
+            throw new ForbiddenException(msg);
+        }
         try {
-            ConnectionManagerUtil.openDBConnection();
-            if (!this.applicationReleaseDAO.verifyReleaseExistenceByUuid(uuid, tenantId)){
-                throw new NotFoundException("Couldn't find application release for the application UUID: " + uuid);
+            ConnectionManagerUtil.beginDBTransaction();
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find application release for the application UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
             }
-            Review existingReview = this.reviewDAO.haveUerCommented(uuid, username, tenantId);
-            if (existingReview != null && isAuthorizedUser(username, existingReview.getUsername(), tenantId)
-                    && review.getRating() > 0 && review.getRating() != existingReview.getRating()) {
-                Runnable task = () -> calculateRating(review.getRating(), existingReview.getRating(), uuid, tenantId);
-                new Thread(task).start();
-                isSuccess = updateReview(review, existingReview.getId(), uuid, existingReview);
-            } else if (review.getRating() > 0) {
-                Runnable task = () -> calculateRating(review.getRating(), -12345, uuid, tenantId);
-                new Thread(task).start();
-                review.setUsername(username);
-                isSuccess = this.reviewDAO.addReview(review, uuid, tenantId);
+            if (this.reviewDAO.haveUerReviewed(applicationReleaseDTO.getId(), username, tenantId)) {
+                String msg =
+                        "User " + username + " has already reviewed the application release which has UUID: " + uuid
+                                + ". Hence you can't add another review for same application release. But you can update "
+                                + "the review that you have already added for ths application release.";
+                log.error(msg);
+                throw new ForbiddenException(msg);
             }
-            return isSuccess;
+            Runnable task = () -> calculateRating(reviewWrapper.getRating(), -12345, uuid, tenantId);
+            new Thread(task).start();
+
+            ReviewDTO reviewDTO = reviewWrapperToDO(reviewWrapper);
+            reviewDTO.setUsername(username);
+            reviewDTO.setRootParentId(-1);
+            reviewDTO.setImmediateParentId(-1);
+            if (this.reviewDAO.addReview(reviewDTO, applicationReleaseDTO.getId(), tenantId)) {
+                ConnectionManagerUtil.commitDBTransaction();
+                return true;
+            }
+            ConnectionManagerUtil.rollbackDBTransaction();
+            return false;
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurs when adding Review for application release with UUID: " + uuid
+                    + " is failed";
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "DB transaction error occurred when adding review for application release which has "
+                    + "application UUID: " + uuid;
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred when getting application release data for application release UUID:." + uuid;
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
+        } catch (ReviewManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when getting review data or adding review data for application release which "
+                    + "has UUID: " + uuid;
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public boolean addReplyComment(ReviewWrapper reviewWrapper, String uuid, int parentReviewId)
+            throws ReviewManagementException, ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+
+        if (reviewWrapper == null) {
+            String msg = "Request payload is null. Please verify the request payload.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't find application release for the application UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            ReviewDTO parentReview = this.reviewDAO.getReview(applicationReleaseDTO.getId(), parentReviewId);
+            if (parentReview == null) {
+                String msg = "Couldn't find an review which has review ID: " + parentReviewId
+                        + " for application release which has UUID: " + uuid;
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            ReviewDTO replyComment = reviewWrapperToDO(reviewWrapper);
+            replyComment.setUsername(username);
+            replyComment.setImmediateParentId(parentReview.getId());
+            if (parentReview.getRootParentId() == -1) {
+                replyComment.setRootParentId(parentReview.getId());
+            } else {
+                replyComment.setRootParentId(parentReview.getRootParentId());
+            }
+            if (this.reviewDAO.addReview(replyComment, applicationReleaseDTO.getId(), tenantId)) {
+                ConnectionManagerUtil.commitDBTransaction();
+                return true;
+            }
+            return false;
         } catch (DBConnectionException e) {
             throw new ReviewManagementException(
-                    "DB Connection error occurs ,Review for application release with UUID: " + uuid +  " is failed", e);
-        }  catch (UserStoreException e) {
-            throw new ReviewManagementException("Error occured while verifying user's permission to update the review.",
+                    "DB Connection error occurs ,ReviewTmp for application release with UUID: " + uuid + " is failed",
                     e);
+        } catch (TransactionManagementException e) {
+            String msg = "DB transaction error occurred when adding reply comment for comment which has comment id: "
+                    + parentReviewId;
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             throw new ReviewManagementException(
                     "Error occured while verifying whether application release is exists or not.", e);
@@ -100,106 +199,182 @@ public class ReviewManagerImpl implements ReviewManager {
         }
     }
 
-    @Override
-    public boolean updateReview(Review review, int reviewId, String uuid, Review existingReview)
-            throws ReviewManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        boolean isConnectionOpen = false;
-        if (log.isDebugEnabled()) {
-            log.debug("Review updating request is received for the review id " + reviewId);
+    private ReviewDTO reviewWrapperToDO(ReviewWrapper reviewWrapper){
+        ReviewDTO reviewDTO = new ReviewDTO();
+        reviewDTO.setContent(reviewWrapper.getContent());
+        reviewDTO.setRating(reviewWrapper.getRating());
+        return reviewDTO;
+    }
+
+    private List<Review> reviewDTOToReview(List<ReviewDTO> reviewDTOs){
+        List<Review> reviews = new ArrayList<>();
+
+        for (ReviewDTO reviewDTO : reviewDTOs){
+            Review review = new Review();
+            review.setId(reviewDTO.getId());
+            review.setContent(reviewDTO.getContent());
+            review.setRootParentId(reviewDTO.getRootParentId());
+            review.setImmediateParentId(reviewDTO.getImmediateParentId());
+            review.setCreatedAt(reviewDTO.getCreatedAt());
+            review.setModifiedAt(reviewDTO.getModifiedAt());
+            review.setReplies(new ArrayList<>());
+            reviews.add(review);
         }
-        try {
-            if (existingReview == null) {
-                ConnectionManagerUtil.openDBConnection();
-                isConnectionOpen = true;
-                existingReview = this.reviewDAO.getReview(reviewId);
-                if (existingReview != null && isAuthorizedUser(username, existingReview.getUsername(), tenantId)) {
-                    if (review.getRating() > 0 && review.getRating() != existingReview.getRating()) {
-                        Review finalExistingReview = existingReview;
-                        Runnable task = () -> calculateRating(review.getRating(), finalExistingReview.getRating(),
-                                uuid, tenantId);
-                        new Thread(task).start();
-                    }
-                } else {
-                    throw new ReviewManagementException(
-                            "Please check the existence of the review, Review-Id: " + reviewId
-                                    + " or permission of the " + username + " to update the review.");
-                }
-            }
-            if (review.getComment().isEmpty()) {
-                review.setComment(existingReview.getComment());
-            }
-            if (review.getRating() == 0) {
-                review.setRating(existingReview.getRating());
-            }
-            return this.reviewDAO.updateReview(review, reviewId, username, tenantId) == 1;
-        } catch (ReviewManagementDAOException e) {
-            throw new ReviewManagementException("Error occured while  getting review with review id " + reviewId + ".",
-                    e);
-        } catch (DBConnectionException e) {
-            throw new ReviewManagementException(
-                    "DB Connection error occurs updating review with review id " + reviewId + ".", e);
-        } catch (UserStoreException e) {
-            throw new ReviewManagementException(
-                    "Error occured while verifying user's permission to update the review. review id: " + reviewId
-                            + ".", e);
-        } finally {
-            if (isConnectionOpen) {
-                ConnectionManagerUtil.closeDBConnection();
-            }
-        }
+        return reviews;
+    }
+
+    private Review reviewDTOToReview(ReviewDTO reviewDTO){
+        Review review = new Review();
+        review.setId(reviewDTO.getId());
+        review.setContent(reviewDTO.getContent());
+        review.setRootParentId(reviewDTO.getRootParentId());
+        review.setImmediateParentId(reviewDTO.getImmediateParentId());
+        review.setCreatedAt(reviewDTO.getCreatedAt());
+        review.setModifiedAt(reviewDTO.getModifiedAt());
+        review.setReplies(new ArrayList<>());
+        return review;
     }
 
     @Override
-    public PaginationResult getAllReviews(PaginationRequest request, String uuid)
-            throws ReviewManagementException {
+    public boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid)
+            throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        PaginationResult paginationResult = new PaginationResult();
-        int numOfComments;
-        List<Review> reviews;
-        TreeMap<Integer, Review> hierarchicalReviewSet = new TreeMap<>();
+        String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (log.isDebugEnabled()) {
-            log.debug("Get all reviews of the application release uuid: " + uuid);
+            log.debug("ReviewTmp updating request is received for the reviewTmp id " + reviewId);
         }
         try {
             ConnectionManagerUtil.openDBConnection();
-            reviews = this.reviewDAO.getAllReviews(uuid, request, tenantId);
+            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (applicationReleaseDTO == null) {
+                String msg = "Couldn't found an application release for UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            ReviewDTO reviewDTO = this.reviewDAO.getReview(applicationReleaseDTO.getId(), reviewId);
+            if (reviewDTO == null) {
+                String msg =
+                        "Couldn't found a review for application release which has UUID: " + uuid + " and review ID: "
+                                + reviewId;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
 
-            for (Review review : reviews) {
-                if (hierarchicalReviewSet.containsKey(review.getParentId())) {
-                    Review parentReview = hierarchicalReviewSet.get(review.getParentId());
-                    parentReview.setReplyReview(review);
-                    hierarchicalReviewSet.replace(review.getParentId(), parentReview);
-                } else {
-                    hierarchicalReviewSet.put(review.getId(), review);
-                }
+            if (!username.equals(reviewDTO.getUsername())) {
+                String msg = "You are trying to update a review which is triggered by " + reviewDTO.getUsername()
+                        + ". Hence you are not permitted to update the review.";
+                log.error(msg);
+                throw new ForbiddenException(msg);
             }
-            numOfComments = hierarchicalReviewSet.size();
-            if (numOfComments > 0) {
-                paginationResult.setData(new ArrayList<>(hierarchicalReviewSet.values()));
-                paginationResult.setRecordsFiltered(numOfComments);
-                paginationResult.setRecordsTotal(numOfComments);
-            } else {
-                paginationResult.setData(new ArrayList<Review>());
-                paginationResult.setRecordsFiltered(0);
-                paginationResult.setRecordsTotal(0);
+
+            if (reviewDTO.getRootParentId() == -1 && reviewDTO.getImmediateParentId() == -1
+                    && updatingReview.getRating() > 0 && updatingReview.getRating() != reviewDTO.getRating()) {
+                Runnable task = () -> calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid,
+                        tenantId);
+                new Thread(task).start();
+                reviewDTO.setRating(updatingReview.getRating());
             }
-            return paginationResult;
+            reviewDTO.setContent(updatingReview.getContent());
+            return this.reviewDAO.updateReview(reviewDTO, reviewId, tenantId) == 1;
         } catch (ReviewManagementDAOException e) {
-            throw new ReviewManagementException("Error occured while getting all reviews for application uuid: " + uuid,
-                    e);
+            String msg = "Error occured while  getting reviewTmp with reviewTmp id " + reviewId + ".";
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ReviewManagementException("Error occured while getting the DB connection.", e);
+            String msg = "DB Connection error occurs updating reviewTmp with reviewTmp id " + reviewId + ".";
+            log.error(msg);
+            throw new ReviewManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occured when getting application release data for application release UUID: " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
     }
 
     @Override
+    public PaginationResult getAllReviews(PaginationRequest request, String uuid)
+            throws ReviewManagementException, ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        PaginationResult paginationResult = new PaginationResult();
+        TreeMap<Integer, ReviewNode<ReviewDTO>> reviewTree = new TreeMap<>();
+        if (log.isDebugEnabled()) {
+            log.debug("Get all reviewTmps of the application release uuid: " + uuid);
+        }
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationReleaseDTO releaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
+            if (releaseDTO == null){
+                String msg = "Couldn't found an application release for UUID: " + uuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            List<ReviewDTO> reviewDTOs= this.reviewDAO.getAllReviews(releaseDTO.getId(), request, tenantId);
+            for (ReviewDTO reviewDTO : reviewDTOs){
+                ReviewNode<ReviewDTO> rootNode = new ReviewNode<>(reviewDTO);
+                reviewTree.put(reviewDTO.getId(), rootNode);
+                List<ReviewDTO> replyComments = this.reviewDAO.getReplyComments(reviewDTO.getId(), tenantId);
+                replyComments.sort(Comparator.comparing(ReviewDTO::getId));
+                for (ReviewDTO reply : replyComments){
+                    reviewTree.put(reply.getRootParentId(),
+                            findAndSetChild(reviewTree.get(reply.getRootParentId()), reply));
+                }
+            }
+            int numOfReviews = reviewTree.size();
+            List<Review> results = new ArrayList<>();
+
+            for (ReviewNode<ReviewDTO> reviewNode : reviewTree.values()){
+                results.add(constructReviewResponse(null, reviewNode));
+            }
+            paginationResult.setData(new ArrayList<>(results));
+            paginationResult.setRecordsFiltered(numOfReviews);
+            paginationResult.setRecordsTotal(numOfReviews);
+            return paginationResult;
+        } catch (ReviewManagementDAOException e) {
+            throw new ReviewManagementException("Error occured while getting all reviewTmps for application uuid: " + uuid,
+                    e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementException("Error occured while getting the DB connection.", e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting application release details for application release UUId " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    private ReviewNode<ReviewDTO> findAndSetChild(ReviewNode<ReviewDTO> node, ReviewDTO reviewDTO) {
+        if (node.getData().getId() == reviewDTO.getImmediateParentId()){
+            ReviewNode<ReviewDTO> childNode = new ReviewNode<>(reviewDTO);
+            node.addChild(childNode);
+            return node;
+        }
+        for (ReviewNode<ReviewDTO> each : node.getChildren()) {
+            findAndSetChild(each, reviewDTO);
+        }
+        return node;
+    }
+
+    private Review constructReviewResponse(Review parentReview, ReviewNode<ReviewDTO> node) {
+        Review review = reviewDTOToReview(node.getData());
+        if (parentReview != null){
+            parentReview.getReplies().add(review);
+        }
+        if (node.getChildren().isEmpty()){
+            return review;
+        }
+        for (ReviewNode<ReviewDTO> reviewDTOReviewNode : node.getChildren()) {
+            constructReviewResponse(review, reviewDTOReviewNode);
+        }
+        return review;
+    }
+
+    @Override
     public boolean deleteReview(String uuid, int reviewId)
             throws ReviewManagementException, ReviewDoesNotExistException {
-        Review existingReview;
+        ReviewDTO existingReview;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {

@@ -150,8 +150,9 @@ public interface ApplicationManager {
      * @param releaseUuid UUID of the ApplicationDTO Release.
      * @param lifecycleChanger Lifecycle changer that contains the action and the reson for the change.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
+     * @return
      */
-    void changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
+    ApplicationRelease changeLifecycleState(String releaseUuid, LifecycleChanger lifecycleChanger)
             throws ApplicationManagementException;
 
     /**

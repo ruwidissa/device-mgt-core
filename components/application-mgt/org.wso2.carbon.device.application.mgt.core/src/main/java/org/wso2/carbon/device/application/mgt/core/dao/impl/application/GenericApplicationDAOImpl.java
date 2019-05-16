@@ -30,7 +30,7 @@ import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.device.application.mgt.core.dao.common.Util;
+import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -90,7 +90,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding the application", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -120,7 +120,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException(
                     "DB connection error occured while checking whether application exist or not.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -158,6 +158,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                 + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
                 + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                + "AP_APP_RELEASE.PACKAGE_NAME AS PACKAGE_NAME, "
                 + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                 + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
                 + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
@@ -248,7 +249,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
             stmt.setInt(paramIndex, filter.getOffset());
             rs = stmt.executeQuery();
-            return Util.loadApplications(rs);
+            return DAOUtil.loadApplications(rs);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while getting application list for the tenant"
                     + " " + tenantId + ". While executing " + sql, e);
@@ -259,7 +260,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (JSONException e) {
             throw new ApplicationManagementDAOException("Error occurred while parsing JSON ", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -294,7 +295,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection for "
                                                                 + "getting app release id", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -338,7 +339,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
         return count;
     }
@@ -373,7 +374,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                                   + appType + "and app name " + appName);
             }
 
-            return Util.loadApplication(rs);
+            return DAOUtil.loadApplication(rs);
 
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
@@ -386,7 +387,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (UnexpectedServerErrorException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -416,7 +417,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 log.debug("Successfully retrieved basic details of the application with the id:" + id);
             }
 
-            return Util.loadApplication(rs);
+            return DAOUtil.loadApplication(rs);
 
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
@@ -429,7 +430,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (UnexpectedServerErrorException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -468,6 +469,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                     + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
                     + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                    + "AP_APP_RELEASE.PACKAGE_NAME AS PACKAGE_NAME, "
                     + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                     + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
                     + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
@@ -490,7 +492,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                                   + releaseUuid);
             }
 
-            return Util.loadApplication(rs);
+            return DAOUtil.loadApplication(rs);
 
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
@@ -503,7 +505,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (UnexpectedServerErrorException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -542,6 +544,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
                     + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
                     + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                    + "AP_APP_RELEASE.PACKAGE_NAME AS PACKAGE_NAME, "
                     + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
                     + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
                     + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
@@ -562,7 +565,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 log.debug("Successfully retrieved basic details of the application with the id "
                         + applicationId);
             }
-            return Util.loadApplication(rs);
+            return DAOUtil.loadApplication(rs);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while getting application details with app id " + applicationId +
@@ -574,7 +577,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (UnexpectedServerErrorException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -607,7 +610,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -662,7 +665,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while deleting the application: ", e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -693,7 +696,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -730,7 +733,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -767,7 +770,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while getting categories", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -859,7 +862,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding categories.", e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -892,7 +895,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding data into category mapping.", e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -1101,7 +1104,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding tags", e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -1459,7 +1462,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             throw new ApplicationManagementDAOException(
                     "Error occurred while deleting tags of application: " + applicationId, e);
         } finally {
-            Util.cleanupResources(stmt, null);
+            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -1497,7 +1500,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
             ApplicationDTO application = null;
             while (rs.next()) {
-                ApplicationReleaseDTO appRelease = Util.loadApplicationRelease(rs);
+                ApplicationReleaseDTO appRelease = DAOUtil.loadApplicationRelease(rs);
                 application = new ApplicationDTO();
 
                 application.setId(rs.getInt("APP_ID"));
@@ -1528,7 +1531,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
@@ -1557,7 +1560,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while getting application List", e);
         } finally {
-            Util.cleanupResources(stmt, rs);
+            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 
