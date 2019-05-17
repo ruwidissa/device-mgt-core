@@ -170,7 +170,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("reviewId") int reviewId) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.updateReview(updatingReview, reviewId, uuid)) {
+            if (reviewManager.updateReview(updatingReview, reviewId, uuid, false)) {
                 return Response.status(Response.Status.OK).entity(updatingReview).build();
             } else {
                 String msg = "Review updating failed. Please contact the administrator";

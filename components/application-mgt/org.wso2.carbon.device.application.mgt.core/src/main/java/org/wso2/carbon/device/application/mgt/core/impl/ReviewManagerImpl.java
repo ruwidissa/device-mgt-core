@@ -228,7 +228,7 @@ public class ReviewManagerImpl implements ReviewManager {
     }
 
     @Override
-    public boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid)
+    public boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid, boolean isPriviledgedUser)
             throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -252,7 +252,7 @@ public class ReviewManagerImpl implements ReviewManager {
                 throw new NotFoundException(msg);
             }
 
-            if (!username.equals(reviewDTO.getUsername())) {
+            if (!isPriviledgedUser && !username.equals(reviewDTO.getUsername())) {
                 String msg = "You are trying to update a review which is created by " + reviewDTO.getUsername()
                         + ". Hence you are not permitted to update the review.";
                 log.error(msg);
