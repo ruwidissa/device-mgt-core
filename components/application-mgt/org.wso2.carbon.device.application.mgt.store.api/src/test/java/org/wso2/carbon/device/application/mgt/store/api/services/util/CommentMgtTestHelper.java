@@ -17,32 +17,32 @@
  */
 package org.wso2.carbon.device.application.mgt.store.api.services.util;
 
-import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 
 /**
- * Helper class for ReviewTmp Management API test cases.
+ * Helper class for Review Management API test cases.
  */
 
 public class CommentMgtTestHelper {
 
-    private static final String COMMENT_TEXT = "Dummy ReviewTmp";
+    private static final String COMMENT_TEXT = "Dummy Review";
     private static final String CREATED_BY = "TEST_CREATED_BY";
     private static final String MODIFIED_BY = "TEST_MODIFIED_BY";
     private static final int PARENT_ID = 123;
     private static final int COMMENT_ID = 1;
 
     /**
-     * Creates a ReviewTmp with given text and given uuid.
-     * If the text is null, the COMMENT_TEXT will be used as the Dummy ReviewTmp.
+     * Creates a Review with given text and given uuid.
+     * If the text is null, the COMMENT_TEXT will be used as the Dummy Review.
      *
-     * @param commentText : Text of the ReviewTmp
-     * @return ReviewTmp
+     * @param commentText : Text of the Review
+     * @return Review
      */
-    public static ReviewTmp getDummyComment(String commentText, String uuid) {
-        ReviewTmp reviewTmp = new ReviewTmp();
+    public static Review getDummyComment(String commentText, String uuid) {
+        Review reviewTmp = new Review();
         reviewTmp.setId(COMMENT_ID);
         reviewTmp.setUsername(CREATED_BY);
-        reviewTmp.setComment(commentText != null ? commentText : COMMENT_TEXT);
+        reviewTmp.setContent(commentText != null ? commentText : COMMENT_TEXT);
 
         return reviewTmp;
     }

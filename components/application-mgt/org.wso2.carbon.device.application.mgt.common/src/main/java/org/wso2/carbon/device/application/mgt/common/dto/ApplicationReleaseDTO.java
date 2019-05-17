@@ -75,7 +75,7 @@ public class ApplicationReleaseDTO {
     @ApiModelProperty(name = "price",
             value = "Price of the application release",
             required = true)
-    private Double price;
+    private double price;
 
     @ApiModelProperty(name = "appHashValue",
             value = "Hash value of the application release")
@@ -97,7 +97,7 @@ public class ApplicationReleaseDTO {
 
     @ApiModelProperty(name = "rating",
             value = "Rating value of the application release")
-    private Double rating;
+    private double rating;
 
     @ApiModelProperty(name = "url",
             value = "URL which is used for WEB-CLIP")
@@ -126,11 +126,11 @@ public class ApplicationReleaseDTO {
         this.ratedUsers = ratedUsers;
     }
 
-    public Double getRating() {
+    public double getRating() {
         return rating;
     }
 
-    public void setRating(Double rating) {
+    public void setRating(double rating) {
         this.rating = rating;
     }
 
@@ -178,11 +178,11 @@ public class ApplicationReleaseDTO {
         return version;
     }
 
-    public Double getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 

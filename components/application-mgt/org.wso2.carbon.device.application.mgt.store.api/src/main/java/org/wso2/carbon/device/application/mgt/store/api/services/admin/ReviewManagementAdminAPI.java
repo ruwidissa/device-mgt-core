@@ -29,7 +29,7 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 
 import javax.validation.Valid;
@@ -53,12 +53,12 @@ info = @Info(
         extensions = {
                 @Extension(properties = {
                         @ExtensionProperty(name = "name", value = "ReviewManagementAdminService"),
-                        @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/review"),
+                        @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/admin/review"),
                 })
         }
 ),
 tags = {
-        @Tag(name = "review_management", description = "ReviewTmp Management related Admin APIs")
+        @Tag(name = "review_management", description = "Review Management related Admin APIs")
 }
 )
 @Scopes(
@@ -73,7 +73,7 @@ scopes = {
 )
 
 @Path("/admin/reviews")
-@Api(value = "ReviewTmp Management")
+@Api(value = "Review Management")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ReviewManagementAdminAPI {
 String SCOPE = "scope";
@@ -100,7 +100,7 @@ String SCOPE = "scope";
             @ApiResponse(
                     code = 200,
                     message = "OK. \n Successfully updated reviewTmp.",
-                    response = ReviewTmp.class),
+                    response = Review.class),
             @ApiResponse(
                     code = 400,
                     message = "Bad Request. \n Invalid request or validation error."),

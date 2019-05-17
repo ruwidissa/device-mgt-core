@@ -2555,6 +2555,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setDeviceType(deviceType.getName());
+        application.setRating(applicationDTO.getAppRating());
         List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
                 .stream().map(this::releaseDtoToRelease).collect(Collectors.toList());
         application.setApplicationReleases(applicationReleases);
@@ -2577,6 +2578,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationRelease.setCurrentStatus(applicationReleaseDTO.getCurrentState());
         applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
+        applicationRelease.setRating(applicationReleaseDTO.getRating());
         applicationRelease
                 .setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName());
         applicationRelease.setIconPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName());

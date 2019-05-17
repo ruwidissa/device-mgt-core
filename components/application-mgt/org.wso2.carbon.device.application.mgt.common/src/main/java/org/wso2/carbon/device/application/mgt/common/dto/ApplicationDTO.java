@@ -81,7 +81,7 @@ public class ApplicationDTO {
 
     @ApiModelProperty(name = "appRating",
             value = "Rating of the aplication")
-    private int appRating;
+    private double appRating;
 
     @ApiModelProperty(name = "status",
             value = "Application status",
@@ -176,7 +176,7 @@ public class ApplicationDTO {
 
     public void setDescription(String description) { this.description = description; }
 
-    public int getAppRating() { return appRating; }
+    public double getAppRating() { return appRating; }
 
-    public void setAppRating(int appRating) { this.appRating = appRating; }
+    public void setAppRating(double appRating) { this.appRating = appRating; }
 }

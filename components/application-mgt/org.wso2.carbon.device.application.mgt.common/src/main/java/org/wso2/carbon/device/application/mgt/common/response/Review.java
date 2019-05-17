@@ -17,19 +17,40 @@
 
 package org.wso2.carbon.device.application.mgt.common.response;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.sql.Timestamp;
 import java.util.List;
 
+@ApiModel(value = "Review", description = "Review represents the user's review for an application release")
 public class Review {
 
+    @ApiModelProperty(name = "id", value = "Review ID.")
     private int id;
+
+    @ApiModelProperty(name = "content", value = "Review message.")
     private String content;
+
+    @ApiModelProperty(name = "rootParentId", value = "Root Parent id of the review")
     private int rootParentId;
+
+    @ApiModelProperty(name = "immediateParentId", value = "Immediate Parent id of the review")
     private int immediateParentId;
+
+    @ApiModelProperty(name = "username", value = "Username odf the Review creator")
     private String username;
+
+    @ApiModelProperty(name = "createdAt", value = "Review created timestamp.")
     private Timestamp createdAt;
+
+    @ApiModelProperty(name = "createdAt", value = "Review modified timestamp.")
     private Timestamp modifiedAt;
+
+    @ApiModelProperty(name = "rating", value = "Rating value of the application release")
     private int rating;
+
+    @ApiModelProperty(name = "replies", value = "Replying reviews")
     private List<Review> replies;
 
     public int getId() {

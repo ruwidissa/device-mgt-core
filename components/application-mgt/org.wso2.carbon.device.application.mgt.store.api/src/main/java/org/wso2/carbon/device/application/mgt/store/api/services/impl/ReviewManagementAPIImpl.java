@@ -47,7 +47,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.core.Response;
 
 /**
- * ReviewTmp Management related jax-rs APIs.
+ * Review Management related jax-rs APIs.
  */
 @Path("/reviews")
 public class ReviewManagementAPIImpl implements ReviewManagementAPI {
@@ -204,20 +204,25 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
 
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.deleteReview(uuid, reviewId)) {
-                return Response.status(Response.Status.OK).entity("ReviewTmp is deleted successfully.").build();
-            } else {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("ReviewTmp deleting is failed.")
-                        .build();
-            }
+            reviewManager.deleteReview(uuid, reviewId, false);
+            return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
+
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application review to delete which match with the request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "You are not permitted to delete the review.";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ReviewManagementException e) {
             String msg = "Error occurred while deleting the comment.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (ReviewDoesNotExistException e) {
-            String msg = "Couldn't find a review for review-id: " + reviewId + " to delete.";
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting application release data.";
             log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 
@@ -231,7 +236,7 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
         try {
             rating = reviewManager.getRating(uuid);
         } catch (ReviewManagementException e) {
-            log.error("ReviewTmp Management Exception occurs", e);
+            log.error("Review Management Exception occurs", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.OK).entity(rating).build();

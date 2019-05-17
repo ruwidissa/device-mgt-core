@@ -75,7 +75,7 @@ public class ApplicationRelease {
     @ApiModelProperty(name = "price",
             value = "Price of the application release",
             required = true)
-    private Double price;
+    private double price;
 
     @ApiModelProperty(name = "isSharedWithAllTenants",
             value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
@@ -95,6 +95,10 @@ public class ApplicationRelease {
             value = "ApplicationDTO release supported OS versions")
     private String supportedOsVersions;
 
+    @ApiModelProperty(name = "rating",
+            value = "Application Rating")
+    private double rating;
+
     public String getReleaseType() {
         return releaseType;
     }
@@ -111,11 +115,11 @@ public class ApplicationRelease {
         this.metaData = metaData;
     }
 
-    public Double getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
@@ -182,4 +186,8 @@ public class ApplicationRelease {
     public String getCurrentStatus() { return currentStatus; }
 
     public void setCurrentStatus(String currentStatus) { this.currentStatus = currentStatus; }
+
+    public double getRating() { return rating; }
+
+    public void setRating(double rating) { this.rating = rating; }
 }

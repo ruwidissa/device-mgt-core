@@ -120,7 +120,7 @@ public class APIUtil {
     }
 
     /**
-     * To get the ReviewTmp Manager from the osgi context.
+     * To get the Review Manager from the osgi context.
      * @return ReviewManager instance in the current osgi context.
      */
     public static ReviewManager getReviewManager() {
@@ -131,7 +131,7 @@ public class APIUtil {
                     reviewManager =
                             (ReviewManager) ctx.getOSGiService(ReviewManager.class, null);
                     if (reviewManager == null) {
-                        String msg = "ReviewTmp Manager service has not initialized.";
+                        String msg = "Review Manager service has not initialized.";
                         log.error(msg);
                         throw new IllegalStateException(msg);
                     }

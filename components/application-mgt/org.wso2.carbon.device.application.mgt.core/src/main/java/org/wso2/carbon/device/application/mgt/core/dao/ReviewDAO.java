@@ -18,7 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
@@ -72,7 +72,7 @@ import java.util.List;
      * To get the comment with id.
      *
      * @param reviewId id of the review
-     * @return {@link ReviewTmp}ReviewTmp
+     * @return {@link Review}
      * @throws ReviewManagementDAOException Exceptions of the review management DAO.
      */
     ReviewDTO getReview(int reviewId) throws ReviewManagementDAOException;
@@ -87,7 +87,7 @@ import java.util.List;
      * @param request {@link PaginationRequest}pagination request with offSet and limit
      * @param tenantId Tenant id
      * @return {@link List}List of all reviews for the application release
-     * @throws ReviewManagementDAOException      ReviewTmp management DAO exception
+     * @throws ReviewManagementDAOException      Review management DAO exception
      **/
     List<ReviewDTO> getAllReviews(int releaseId, PaginationRequest request, int tenantId)
             throws ReviewManagementDAOException;
@@ -124,9 +124,14 @@ import java.util.List;
      * @param username username of the review owner
      * @param reviewId id of the review
      * @return If review is successfully deleted return 1, otherwise returns 0.
-     * @throws ReviewManagementDAOException ReviewTmp management DAO exception.
+     * @throws ReviewManagementDAOException Review management DAO exception.
      */
-    int deleteReview(String username, int reviewId) throws ReviewManagementDAOException;
+    void deleteReview(int reviewId, int tenantId) throws ReviewManagementDAOException;
+
+ void deleteReviews(List<Integer> reviewIds, int tenantId) throws ReviewManagementDAOException;
+
+
+ void deleteAllChildCommentsOfReview(int rootParentId, int tenantId) throws ReviewManagementDAOException;
 
     /**
      * To delete comments using application details.
@@ -142,8 +147,8 @@ import java.util.List;
      * To get review count for a specific application release
      *
      * @param uuid uuid of the application release
-     * @return ReviewTmp count
-     * @throws ReviewManagementDAOException ReviewTmp management DAO exception
+     * @return Review count
+     * @throws ReviewManagementDAOException Review management DAO exception
      */
     int getReviewCount(String uuid) throws ReviewManagementDAOException;
 }

@@ -20,11 +20,9 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
-import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.admin.ReviewManagementAdminAPI;
@@ -37,7 +35,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 /**
- * ReviewTmp Management related jax-rs APIs.
+ * Review Management related jax-rs APIs.
  */
 @Path("/admin/reviews")
 public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
@@ -84,20 +82,21 @@ public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
 
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.deleteReview(uuid, reviewId)) {
-                return Response.status(Response.Status.OK).entity("ReviewTmp is deleted successfully.").build();
-            } else {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("ReviewTmp deleting is failed.")
-                        .build();
-            }
+            reviewManager.deleteReview(uuid, reviewId, true);
+            return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
+
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application review to delete which match with the request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ReviewManagementException e) {
             String msg = "Error occurred while deleting the comment.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (ReviewDoesNotExistException e) {
-            String msg = "Couldn't find a review for review-id: " + reviewId + " to delete.";
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting application release data.";
             log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 }
