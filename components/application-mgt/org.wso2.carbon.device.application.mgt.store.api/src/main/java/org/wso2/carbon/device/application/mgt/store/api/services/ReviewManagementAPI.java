@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 
 import javax.validation.Valid;
@@ -65,7 +65,7 @@ import java.util.List;
                 }
         ),
         tags = {
-                @Tag(name = "review_management", description = "ReviewTmp Management related APIs")
+                @Tag(name = "review_management", description = "Review Management related APIs")
         }
 )
 @Scopes(
@@ -86,7 +86,7 @@ import java.util.List;
 )
 
 @Path("/reviews")
-@Api(value = "ReviewTmp Management")
+@Api(value = "Review Management")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ReviewManagementAPI {
     String SCOPE = "scope";
@@ -163,7 +163,7 @@ public interface ReviewManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully add a reviewTmp.",
-                            response = ReviewTmp.class),
+                            response = Review.class),
                     @ApiResponse(
                             code = 400,
                             message =
@@ -183,7 +183,7 @@ public interface ReviewManagementAPI {
     Response addReview(
             @ApiParam(
                     name = "reviewTmp",
-                    value = "ReviewTmp details",
+                    value = "Review details",
                     required = true) ReviewWrapper reviewWrapper,
             @ApiParam(
                     name="uuid",
@@ -204,7 +204,7 @@ public interface ReviewManagementAPI {
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:reviewTmp:update")
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:update")
                     })
             }
     )
@@ -214,7 +214,7 @@ public interface ReviewManagementAPI {
                     @ApiResponse(
                             code = 201,
                             message = "OK. \n Successfully add a reviewTmp.",
-                            response = ReviewTmp.class),
+                            response = Review.class),
                     @ApiResponse(
                             code = 400,
                             message =
@@ -267,7 +267,7 @@ public interface ReviewManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully updated reviewTmp.",
-                            response = ReviewTmp.class),
+                            response = Review.class),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error."),
@@ -316,6 +316,9 @@ public interface ReviewManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully deleted the review"),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to delete the review."),
                     @ApiResponse(
                             code = 404,
                             message = "Not Found. \n No activity found with the given ID.",

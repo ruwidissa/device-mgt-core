@@ -19,11 +19,10 @@
 package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.wso2.carbon.device.application.mgt.common.Rating;
-import org.wso2.carbon.device.application.mgt.common.ReviewTmp;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 
@@ -37,7 +36,7 @@ public interface ReviewManager {
      *
      * @param reviewWrapper  reviewTmp of the application.
      * @param uuid     uuid of the application release.
-     * @return {@link ReviewTmp} ReviewTmp added
+     * @return {@link Review} Added review
      * @throws ReviewManagementException Exceptions of the reviewTmp management.
      */
     boolean addReview(ReviewWrapper reviewWrapper, String uuid)
@@ -61,29 +60,28 @@ public interface ReviewManager {
      * To delete review using review id.
      *
      * @param uuid UUID of the application release
-     * @param commentId id of the comment
      * @return If review is successfully deleted return true, otherwise returns false
      * @throws ReviewManagementException Exceptions of the comment management
      */
-    boolean deleteReview(String uuid, int commentId)
-            throws ReviewManagementException, ReviewDoesNotExistException;
+    void deleteReview(String uuid, int reviewId, boolean isPriviledgedUser)
+            throws ReviewManagementException, ApplicationManagementException;
 
     /**
      * To update a reviewTmp.
      *
      * @param reviewId id of the reviewTmp
      * @param uuid UUID of the application release
-     * @return {@link ReviewTmp}updated reviewTmp
+     * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the reviewTmp management
      */
-    boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid)
+    boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid, boolean isPriviledgedUser)
             throws ReviewManagementException, ApplicationManagementException;
 
     /**
      * To get the overall rating for a application release
      *
      * @param appReleaseUuuid   UUID of the application release.
-     * @return {@link ReviewTmp}updated review
+     * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the review management
      */
     Rating getRating(String appReleaseUuuid) throws ReviewManagementException;

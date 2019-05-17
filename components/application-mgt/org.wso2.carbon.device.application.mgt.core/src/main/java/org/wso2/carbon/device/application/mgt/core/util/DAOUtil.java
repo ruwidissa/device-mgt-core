@@ -81,7 +81,7 @@ public class DAOUtil {
                 application.setSubType(rs.getString("APP_SUB_TYPE"));
                 application.setPaymentCurrency(rs.getString("APP_CURRENCY"));
                 application.setStatus(rs.getString("APP_STATUS"));
-                application.setAppRating(rs.getInt("APP_RATING"));
+                application.setAppRating(rs.getDouble("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
                 application.getApplicationReleaseDTOs().add(loadAppRelease(rs));
             } else {

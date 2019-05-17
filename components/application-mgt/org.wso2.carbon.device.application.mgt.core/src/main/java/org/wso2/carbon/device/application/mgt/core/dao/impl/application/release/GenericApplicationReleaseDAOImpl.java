@@ -393,7 +393,8 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
      * @param uuid UUID of the application Release.
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    @Override public Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException {
+    @Override
+    public Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException {
         Connection connection;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
@@ -422,6 +423,37 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             DAOUtil.cleanupResources(statement, resultSet);
         }
     }
+
+    @Override
+    public List<Double> getReleaseRatings(String uuid, int tenantId) throws ApplicationManagementDAOException {
+        Connection connection;
+        List<Double> ratingValues = new ArrayList<>();
+        String sql = "SELECT "
+                + "RATING "
+                + "FROM AP_APP_RELEASE "
+                + "WHERE "
+                + "AP_APP_ID = (SELECT  AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND "
+                + "TENANT_ID = ?";
+        try {
+            connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, uuid);
+                statement.setInt(2, tenantId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        ratingValues.add(resultSet.getDouble("RATING"));
+                    } return ratingValues;
+                }
+            }
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Database connection exception while trying to update the application release", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException(
+                    "SQL exception while updating the release ,while executing the query " + sql, e);
+        }
+    }
+
 
     /**
      * To insert the application release properties.

@@ -202,6 +202,9 @@ public interface ApplicationDAO {
      */
     boolean updateApplication(ApplicationDTO application, int tenantId) throws ApplicationManagementDAOException;
 
+    void updateApplicationRating(String uuid, double rating, int tenantId) throws ApplicationManagementDAOException;
+
+
     /**
      * To delete the application
      *

@@ -649,6 +649,37 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public void updateApplicationRating(String uuid, double rating, int tenantId)
+            throws ApplicationManagementDAOException {
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            String sql = "UPDATE AP_APP AP " +
+                    "SET " +
+                    "AP.RATING = ? " +
+                    "WHERE " +
+                    "AP.ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND " +
+                    "AP.TENANT_ID = ?";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setDouble(1, rating);
+                stmt.setString(2, uuid);
+                stmt.setInt(3, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update the application rating.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when obtaining database connection for updating the application rating.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+
+    @Override
     public void retireApplication(int appId) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;

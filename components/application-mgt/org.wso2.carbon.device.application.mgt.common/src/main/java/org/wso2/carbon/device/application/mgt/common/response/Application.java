@@ -73,6 +73,10 @@ public class Application {
             example = "IoS, Android, Arduino, RaspberryPi etc")
     private String deviceType;
 
+    @ApiModelProperty(name = "rating",
+            value = "Application Rating")
+    private double rating;
+
     @ApiModelProperty(name = "applicationReleases",
             value = "List of application releases",
             required = true)
@@ -128,4 +132,8 @@ public class Application {
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public double getRating() { return rating; }
+
+    public void setRating(double rating) { this.rating = rating; }
 }

@@ -106,6 +106,9 @@ public interface ApplicationReleaseDAO {
      */
     Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
+    List<Double> getReleaseRatings(String uuid, int tenantId) throws ApplicationManagementDAOException;
+
+
 
     /**
      * To delete a particular release.

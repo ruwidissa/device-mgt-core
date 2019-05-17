@@ -433,25 +433,76 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public int deleteReview(String username, int reviewId) throws ReviewManagementDAOException {
+    public void deleteReview(int reviewId, int tenantId) throws ReviewManagementDAOException {
         Connection conn;
-        PreparedStatement statement = null;
         try {
             conn = this.getDBConnection();
-            sql = "DELETE FROM AP_APP_REVIEW WHERE ID=? AND USERNAME = ?;";
-            statement = conn.prepareStatement(sql);
-            statement.setInt(1, reviewId);
-            statement.setString(2, username);
-            return statement.executeUpdate();
+            sql = "DELETE "
+                    + "FROM AP_APP_REVIEW "
+                    + "WHERE "
+                    + "ID = ? AND "
+                    + "TENANT_ID = ?";
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
+                statement.setInt(1, reviewId);
+                statement.setInt(2, tenantId);
+                statement.executeUpdate();
+            }
         } catch (SQLException e) {
             throw new ReviewManagementDAOException("Error occured while accessing the Database", e);
         } catch (DBConnectionException e) {
             throw new ReviewManagementDAOException("Error occured while getting the database connection", e);
 
-        } finally {
-            DAOUtil.cleanupResources(statement, null);
         }
     }
+
+    @Override
+    public void deleteReviews(List<Integer> reviewIds, int tenantId) throws ReviewManagementDAOException{
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            sql = "DELETE "
+                    + "FROM AP_APP_REVIEW "
+                    + "WHERE "
+                    + "ID = ? AND "
+                    + "TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer reviewId : reviewIds) {
+                    stmt.setInt(1, reviewId);
+                    stmt.setInt(2, tenantId);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException("Error occured while accessing the Database", e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException("Error occured while getting the database connection", e);
+
+        }
+    }
+
+    @Override
+    public void deleteAllChildCommentsOfReview(int rootParentId, int tenantId) throws ReviewManagementDAOException {
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            sql = "DELETE "
+                    + "FROM AP_APP_REVIEW "
+                    + "WHERE "
+                    + "ROOT_PARENT_ID = ? AND "
+                    + "TENANT_ID = ?";
+            try (PreparedStatement statement = conn.prepareStatement(sql)){
+                statement.setInt(1, rootParentId);
+                statement.setInt(2, tenantId);
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new ReviewManagementDAOException("Error occured while accessing the Database", e);
+        } catch (DBConnectionException e) {
+            throw new ReviewManagementDAOException("Error occured while getting the database connection", e);
+        }
+    }
+
 
     @Override
     public void deleteReviews(String appType, String appName, String version) throws ReviewManagementException {
