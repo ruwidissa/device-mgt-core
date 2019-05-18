@@ -122,6 +122,7 @@
     "perm:users:update",
     "perm:users:send-invitation",
     "perm:admin-users:view",
+    "perm:admin:devices:update-enrollment",
     "perm:groups:devices",
     "perm:groups:update",
     "perm:groups:add",

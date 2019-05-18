@@ -43,6 +43,9 @@ function onRequest(context) {
         if (uiPermissions.ADD_DEVICE) {
             viewModel.permissions.enroll = true;
         }
+        if (uiPermissions.UPDATE_ENROLLMENT) {
+            viewModel.permissions.updateEnrollment = true;
+        }
         viewModel.currentUser = currentUser;
         var deviceCount = 0;
         if (groupId) {

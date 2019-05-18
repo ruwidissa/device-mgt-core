@@ -620,6 +620,9 @@ var userModule = function () {
         if (publicMethods.isAuthorized("/permission/admin/device-mgt/topics/view")) {
             permissions["VIEW_TOPICS"] = true;
         }
+        if (publicMethods.isAuthorized("/permission/admin/device-mgt/admin/devices/update-enrollment")) {
+            permissions["UPDATE_ENROLLMENT"] = true;
+        }
 
         return permissions;
     };
