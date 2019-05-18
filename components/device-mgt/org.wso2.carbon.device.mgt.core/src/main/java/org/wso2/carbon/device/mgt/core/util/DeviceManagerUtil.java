@@ -464,8 +464,8 @@ public final class DeviceManagerUtil {
 
     public static DeviceIDHolder validateDeviceIdentifiers(List<DeviceIdentifier> deviceIDs) {
 
-        List<String> errorDeviceIdList = new ArrayList<String>();
-        List<DeviceIdentifier> validDeviceIDList = new ArrayList<DeviceIdentifier>();
+        List<DeviceIdentifier> errorDeviceIdList = new ArrayList<>();
+        List<DeviceIdentifier> validDeviceIDList = new ArrayList<>();
 
         int deviceIDCounter = 0;
         for (DeviceIdentifier deviceIdentifier : deviceIDs) {
@@ -474,8 +474,9 @@ public final class DeviceManagerUtil {
             String deviceID = deviceIdentifier.getId();
 
             if (deviceID == null || deviceID.isEmpty()) {
-                errorDeviceIdList.add(String.format(OperationMgtConstants.DeviceConstants.DEVICE_ID_NOT_FOUND,
+                log.warn(String.format(OperationMgtConstants.DeviceConstants.DEVICE_ID_NOT_FOUND,
                         deviceIDCounter));
+                errorDeviceIdList.add(deviceIdentifier);
                 continue;
             }
 
@@ -484,10 +485,10 @@ public final class DeviceManagerUtil {
                 if (isValidDeviceIdentifier(deviceIdentifier)) {
                     validDeviceIDList.add(deviceIdentifier);
                 } else {
-                    errorDeviceIdList.add(deviceID);
+                    errorDeviceIdList.add(deviceIdentifier);
                 }
             } catch (DeviceManagementException e) {
-                errorDeviceIdList.add(deviceID);
+                errorDeviceIdList.add(deviceIdentifier);
             }
         }
 

@@ -25,9 +25,13 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
+import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import javax.ws.rs.core.Response;
-
+import java.util.List;
 
 /**
  * Holds util methods required for ApplicationDTO-Mgt API component.
@@ -165,29 +169,41 @@ public class APIUtil {
         return appmDataHandler;
     }
 
-//    public static Filter constructFilter( String appName, String appType, String appCategory, String tags,
-//            boolean isFullMatch, String releaseState, int offset, int limit, String sortBy) {
-//        Filter filter = new Filter();
-//        filter.setOffset(offset);
-//        filter.setLimit(limit);
-//        filter.setSortBy(sortBy);
-//        filter.setFullMatch(isFullMatch);
-//        if (!StringUtils.isEmpty(appName)) {
-//            filter.setAppName(appName);
-//        }
-//        if (!StringUtils.isEmpty(appType)) {
-//            filter.setAppType(appType);
-//        }
-//        if (!StringUtils.isEmpty(appCategory)) {
-//            filter.setAppCategories(appCategory);
-//        }
-//        if (!StringUtils.isEmpty(tags)) {
-//            filter.setAppCategories(appCategory);
-//        }
-//        if (!StringUtils.isEmpty(releaseState)) {
-//            filter.setAppReleaseState(releaseState);
-//        }
-//        return filter;
-//    }
+    public static <T> DeviceType getDeviceTypeData(T deviceTypeAttr)
+            throws BadRequestException, UnexpectedServerErrorException {
+        List<DeviceType> deviceTypes;
+        try {
+            deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
+
+            if(deviceTypeAttr instanceof String){
+                for (DeviceType dt : deviceTypes) {
+                    if (dt.getName().equals(deviceTypeAttr)) {
+                        return dt;
+                    }
+                }
+            } else if (deviceTypeAttr instanceof  Integer){
+                for (DeviceType dt : deviceTypes) {
+                    if (dt.getId() == (Integer) deviceTypeAttr) {
+                        return dt;
+                    }
+                }
+            } else {
+                String msg = "Invalid device type class is received. Device type class: " + deviceTypeAttr.getClass()
+                        .getName();
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+
+            String msg =
+                    "Invalid device type Attribute is found with the request. Device Type attribute: " + deviceTypeAttr;
+            log.error(msg);
+            throw new BadRequestException(msg);
+
+        } catch (DeviceManagementException e) {
+            String msg = "Error occured when getting device types which are supported by the Entgra IoTS";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+    }
 
 }

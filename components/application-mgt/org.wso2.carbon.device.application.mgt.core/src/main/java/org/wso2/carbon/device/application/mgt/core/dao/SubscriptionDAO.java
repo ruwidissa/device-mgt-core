@@ -25,7 +25,9 @@ import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManageme
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface provides the list of operations that are supported with subscription database.
@@ -43,8 +45,16 @@ public interface SubscriptionDAO {
      * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
-    void subscribeDeviceToApplication(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
+    void subscribeDeviceToApplicationTmp(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
             int releaseId,  String installStatus) throws ApplicationManagementDAOException;
+
+    List<Integer> subscribeDeviceToApplication(String subscribedBy, List<Integer> deviceIds, String subscribedFrom,
+            String installStatus, int releaseId, int tenantId ) throws ApplicationManagementDAOException;
+
+    List<Integer> updateDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
+            String subscribedFrom, String installStatus, int releaseId, int tenantId) throws ApplicationManagementDAOException;
+
+    void addOperationMapping (int operationId, List<Integer> deviceSubscriptionId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * Adds a mapping between user and the application which the application is installed on. This mapping will be
@@ -53,11 +63,10 @@ public interface SubscriptionDAO {
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
      * @param userList list of user names of the users whose devices are subscribed to the application
-     * @param appId id of the {@link ApplicationDTO} which installs
      * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
-    void subscribeUserToApplication(int tenantId, String subscribedBy, List<String> userList, int appId, int releaseId)
+    void subscribeUserToApplication(int tenantId, String subscribedBy, List<String> userList, int releaseId)
             throws ApplicationManagementDAOException;
 
     /**
@@ -90,5 +99,17 @@ public interface SubscriptionDAO {
 
     List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
             ApplicationManagementDAOException;
+
+    Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int tenantId) throws
+            ApplicationManagementDAOException;
+
+    List<String> getSubscribedUsernames(List<String> users, int tenantId) throws
+            ApplicationManagementDAOException;
+
+    void updateUserSubscription(int tenantId, String updateBy, boolean isUnsubscribed, List<String> userList,
+            int releaseId) throws ApplicationManagementDAOException;
+
+    List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId) throws ApplicationManagementDAOException;
+
 
 }

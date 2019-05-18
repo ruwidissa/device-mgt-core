@@ -159,126 +159,144 @@ public class OperationManagerImpl implements OperationManager {
         try {
             DeviceIDHolder deviceValidationResult = DeviceManagerUtil.validateDeviceIdentifiers(deviceIds);
             List<DeviceIdentifier> validDeviceIds = deviceValidationResult.getValidDeviceIDList();
-            if (!validDeviceIds.isEmpty()) {
-                if (log.isDebugEnabled() && deviceIds.get(0).getType() != null) {
-                    log.debug("Adding operation for Device type : " + deviceIds.get(0).getType() + ", tenant ID:"
-                            + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() + ", domain:"
-                            + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain()
-                            + ", device count:" + deviceIds.size() + " operation type:" + operation.getCode());
+
+            if (validDeviceIds.isEmpty()) {
+                String msg = "Invalid device Identifiers found.";
+                log.error(msg);
+                throw new InvalidDeviceException(msg);
+            }
+            if (log.isDebugEnabled() && deviceIds.get(0).getType() != null) {
+                log.debug("Adding operation for Device type : " + deviceIds.get(0).getType() + ", tenant ID:"
+                        + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId() + ", domain:"
+                        + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain() + ", device count:"
+                        + deviceIds.size() + " operation type:" + operation.getCode());
+            }
+//            Map<Integer, List<DeviceIdentifier>> ignoredDeviceIdentifierMap = new HashMap<>();
+//            Map<Integer, List<DeviceIdentifier>> authorizedDeviceIdentifierMap = new HashMap<>();
+            DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
+            List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
+            if (authorizedDeviceIds.isEmpty()) {
+                log.warn("User : " + getUser() + " is not authorized to perform operations on given device-list.");
+                Activity activity = new Activity();
+                //Send the operation statuses only for admin triggered operations
+                activity.setActivityStatus(
+                        this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
+                return activity;
+            }
+
+            boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
+            String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (initiatedBy == null && isScheduledOperation) {
+                if (log.isDebugEnabled()) {
+                    log.debug("initiatedBy : " + SYSTEM);
                 }
-                DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
-                List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
-                if (authorizedDeviceIds.size() <= 0) {
-                    log.warn("User : " + getUser() + " is not authorized to perform operations on given device-list.");
-                    Activity activity = new Activity();
-                    //Send the operation statuses only for admin triggered operations
-                    String deviceType = validDeviceIds.get(0).getType();
-                    activity.setActivityStatus(this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult,
-                            deviceType));
-                    return activity;
+                operation.setInitiatedBy(SYSTEM);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("initiatedBy : " + initiatedBy);
                 }
+                operation.setInitiatedBy(initiatedBy);
+            }
 
-                boolean isScheduledOperation = this.isTaskScheduledOperation(operation);
-                String initiatedBy = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-                if (initiatedBy == null && isScheduledOperation) {
-                    if(log.isDebugEnabled()) {
-                        log.debug("initiatedBy : "  + SYSTEM);
-                    }
-                    operation.setInitiatedBy(SYSTEM);
-                } else {
-                    if(log.isDebugEnabled()) {
-                        log.debug("initiatedBy : "  + initiatedBy);
-                    }
-                    operation.setInitiatedBy(initiatedBy);
-                }
+            OperationManagementDAOFactory.beginTransaction();
+            org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto = OperationDAOUtil
+                    .convertOperation(operation);
+            int enrolmentId;
+            String operationCode = operationDto.getCode();
 
-                OperationManagementDAOFactory.beginTransaction();
-                org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto =
-                        OperationDAOUtil.convertOperation(operation);
-                int enrolmentId;
-                String operationCode = operationDto.getCode();
+            List<Device> authorizedDevices = new ArrayList<>();
+            List<Device> ignoredDevices = new ArrayList<>();
+            for (DeviceIdentifier deviceId : authorizedDeviceIds) {
+                Device device = getDevice(deviceId);
+                authorizedDevices.add(device);
+            }
 
-                List<Device> authorizedDevices = new ArrayList<>();
-                List<Device> ignoredDevices = new ArrayList<>();
-                for (DeviceIdentifier deviceId : authorizedDeviceIds) {
-                    Device device = getDevice(deviceId);
-                    authorizedDevices.add(device);
-                }
-
-                if (operationDto.getControl() ==
-                    org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
-                    int existingOperationID;
-                    for (Device device : authorizedDevices) {
-                        enrolmentId = device.getEnrolmentInfo().getId();
-                        existingOperationID = operationDAO.getExistingOperationID(enrolmentId, operationCode);
-                        if (existingOperationID > 0) {
-                            ignoredDevices.add(device);
-                            operation.setId(existingOperationID);
-                            this.sendNotification(operation, device);
-                        }
-                    }
-                }
-
-                if (ignoredDevices.size() > 0) {
-                    if (authorizedDevices.size() == ignoredDevices.size()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("All the devices contain a pending operation for the Operation Code: "
-                                    + operationCode);
-                        }
-                        Activity activity = new Activity();
-                        //Send the operation statuses only for admin triggered operations
-                        String deviceType = validDeviceIds.get(0).getType();
-                        activity.setActivityStatus(this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult,
-                                deviceType));
-                        return activity;
-                    } else {
-                        authorizedDevices.removeAll(ignoredDevices);
-                    }
-                }
-
-                int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
-
-                boolean isScheduled = false;
-                NotificationStrategy notificationStrategy = getNotificationStrategy();
-
-                // check whether device list is greater than batch size notification strategy has enable to send push
-                // notification using scheduler task
-                if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
-                        getPushNotificationConfiguration().getSchedulerBatchSize() <= authorizedDeviceIds.size() &&
-                        notificationStrategy != null) {
-                    isScheduled = notificationStrategy.getConfig().isScheduled();
-                }
-
-                //TODO have to create a sql to load device details from deviceDAO using single query.
+            if (operationDto.getControl()
+                    == org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
+                int existingOperationID;
                 for (Device device : authorizedDevices) {
                     enrolmentId = device.getEnrolmentInfo().getId();
-                    //Do not repeat the task operations
-                    operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
-                }
-                OperationManagementDAOFactory.commitTransaction();
-
-                if (!isScheduled) {
-                    for (Device device : authorizedDevices) {
+                    existingOperationID = operationDAO.getExistingOperationID(enrolmentId, operationCode);
+                    if (existingOperationID > 0) {
+                        ignoredDevices.add(device);
+                        operation.setId(existingOperationID);
                         this.sendNotification(operation, device);
+//                        List<DeviceIdentifier> deviceIdentifiers;
+//                        if (ignoredDeviceIdentifierMap.containsKey(existingOperationID)) {
+//                            deviceIdentifiers = ignoredDeviceIdentifierMap.get(existingOperationID);
+//                        } else {
+//                            deviceIdentifiers = new ArrayList<>();
+//                        }
+//                        DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+//                        deviceIdentifier.setType(device.getType());
+//                        deviceIdentifier.setId(device.getDeviceIdentifier());
+//                        deviceIdentifiers.add(deviceIdentifier);
+//                        ignoredDeviceIdentifierMap.put(existingOperationID, deviceIdentifiers);
                     }
                 }
-
-                Activity activity = new Activity();
-                activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
-                activity.setCode(operationCode);
-                activity.setCreatedTimeStamp(new Date().toString());
-                activity.setType(Activity.Type.valueOf(operationDto.getType().toString()));
-                //For now set the operation statuses only for admin triggered operations
-                if (!isScheduledOperation) {
-                    //Get the device-type from 1st valid DeviceIdentifier. We know the 1st element is definitely there.
-                    String deviceType = validDeviceIds.get(0).getType();
-                    activity.setActivityStatus(this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult,
-                            deviceType));
-                }
-                return activity;
-            } else {
-                throw new InvalidDeviceException("Invalid device Identifiers found.");
             }
+
+            if (!ignoredDevices.isEmpty()) {
+                if (authorizedDevices.size() == ignoredDevices.size()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(
+                                "All the devices contain a pending operation for the Operation Code: " + operationCode);
+                    }
+                    Activity activity = new Activity();
+                    //Send the operation statuses only for admin triggered operations
+                    activity.setActivityStatus(
+                            this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
+                    return activity;
+                } else {
+                    authorizedDevices.removeAll(ignoredDevices);
+                }
+            }
+
+            int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
+
+            boolean isScheduled = false;
+            NotificationStrategy notificationStrategy = getNotificationStrategy();
+
+            // check whether device list is greater than batch size notification strategy has enable to send push
+            // notification using scheduler task
+            if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
+                    getPushNotificationConfiguration().getSchedulerBatchSize() <= authorizedDeviceIds.size()
+                    && notificationStrategy != null) {
+                isScheduled = notificationStrategy.getConfig().isScheduled();
+            }
+
+            //TODO have to create a sql to load device details from deviceDAO using single query.
+            List<DeviceIdentifier> authorizedDeviceIdentifiers = new ArrayList<>();
+            for (Device device : authorizedDevices) {
+                enrolmentId = device.getEnrolmentInfo().getId();
+                //Do not repeat the task operations
+                operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
+//                DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+//                deviceIdentifier.setId(device.getDeviceIdentifier());
+//                deviceIdentifier.setType(device.getType());
+//                authorizedDeviceIdentifiers.add(deviceIdentifier);
+            }
+
+//            authorizedDeviceIdentifierMap.put(operationId, authorizedDeviceIdentifiers);
+            OperationManagementDAOFactory.commitTransaction();
+
+            if (!isScheduled) {
+                for (Device device : authorizedDevices) {
+                    this.sendNotification(operation, device);
+                }
+            }
+
+            Activity activity = new Activity();
+            activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
+            activity.setCode(operationCode);
+            activity.setCreatedTimeStamp(new Date().toString());
+            activity.setType(Activity.Type.valueOf(operationDto.getType().toString()));
+            //For now set the operation statuses only for admin triggered operations
+            if (!isScheduledOperation) {
+                activity.setActivityStatus(
+                        this.getActivityStatus(deviceValidationResult, deviceAuthorizationResult));
+            }
+            return activity;
         } catch (OperationManagementDAOException e) {
             OperationManagementDAOFactory.rollbackTransaction();
             throw new OperationManagementException("Error occurred while adding operation", e);
@@ -332,22 +350,22 @@ public class OperationManagerImpl implements OperationManager {
         }
     }
 
-    private List<ActivityStatus> getActivityStatus(DeviceIDHolder deviceIdValidationResult, DeviceIDHolder deviceAuthResult,
-                                                   String deviceType) {
+    private List<ActivityStatus> getActivityStatus(DeviceIDHolder deviceIdValidationResult,
+            DeviceIDHolder deviceAuthResult) {
         List<ActivityStatus> activityStatuses = new ArrayList<>();
         ActivityStatus activityStatus;
         //Add the invalid DeviceIds
-        for (String id : deviceIdValidationResult.getErrorDeviceIdList()) {
+        for (DeviceIdentifier id : deviceIdValidationResult.getErrorDeviceIdList()) {
             activityStatus = new ActivityStatus();
-            activityStatus.setDeviceIdentifier(new DeviceIdentifier(id, deviceType));
+            activityStatus.setDeviceIdentifier(id);
             activityStatus.setStatus(ActivityStatus.Status.INVALID);
             activityStatuses.add(activityStatus);
         }
 
         //Add the unauthorized DeviceIds
-        for (String id : deviceAuthResult.getErrorDeviceIdList()) {
+        for (DeviceIdentifier id : deviceAuthResult.getErrorDeviceIdList()) {
             activityStatus = new ActivityStatus();
-            activityStatus.setDeviceIdentifier(new DeviceIdentifier(id, deviceType));
+            activityStatus.setDeviceIdentifier(id);
             activityStatus.setStatus(ActivityStatus.Status.UNAUTHORIZED);
             activityStatuses.add(activityStatus);
         }
@@ -365,7 +383,7 @@ public class OperationManagerImpl implements OperationManager {
     private DeviceIDHolder authorizeDevices(
             Operation operation, List<DeviceIdentifier> deviceIds) throws OperationManagementException {
         List<DeviceIdentifier> authorizedDeviceList;
-        List<String> unAuthorizedDeviceList = new ArrayList<>();
+        List<DeviceIdentifier> unAuthorizedDeviceList = new ArrayList<>();
         DeviceIDHolder deviceIDHolder = new DeviceIDHolder();
         try {
             if (operation != null && isAuthenticationSkippedOperation(operation)) {
@@ -379,7 +397,7 @@ public class OperationManagerImpl implements OperationManager {
                     if (isAuthorized) {
                         authorizedDeviceList.add(devId);
                     } else {
-                        unAuthorizedDeviceList.add(devId.getId());
+                        unAuthorizedDeviceList.add(devId);
                     }
                 }
             }

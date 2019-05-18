@@ -27,14 +27,14 @@ import java.util.List;
  */
 public class DeviceIDHolder {
 
-	private List<String> errorDeviceIdList;
+	private List<DeviceIdentifier> errorDeviceIdList;
 	private List<DeviceIdentifier> validDeviceIDList;
 
-	public List<String> getErrorDeviceIdList() {
+	public List<DeviceIdentifier> getErrorDeviceIdList() {
 		return errorDeviceIdList;
 	}
 
-	public void setErrorDeviceIdList(List<String> errorDeviceIdList) {
+	public void setErrorDeviceIdList(List<DeviceIdentifier> errorDeviceIdList) {
 		this.errorDeviceIdList = errorDeviceIdList;
 	}
 
