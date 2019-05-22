@@ -92,13 +92,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -250,7 +245,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         }
 
-        //insert application data into databse
+        //insert application data into database
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
         try {
@@ -1059,6 +1054,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return roleList;
     }
 
+    //todo no usage
     public ApplicationDTO getApplication(String appType, String appName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -1159,33 +1155,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 //        return filterAppReleaseByCurrentState(applicationReleases, releaseState);
     }
 
-//    private List<ApplicationReleaseDTO> filterAppReleaseByCurrentState(List<ApplicationReleaseDTO> applicationReleases,
-//            String state) {
-//        List<ApplicationReleaseDTO> filteredReleases = new ArrayList<>();
-//
-//        if (state != null && !state.isEmpty()) {
-//            for (ApplicationReleaseDTO applicationRelease : applicationReleases) {
-//                if (state.equals(applicationRelease.getLifecycleStateChangeFlow().getCurrentState())) {
-//                    filteredReleases.add(applicationRelease);
-//                }
-//            }
-//
-//            if (AppLifecycleState.PUBLISHED.toString().equals(state) && filteredReleases.size() > 1) {
-//                log.warn("There are more than one application releases is found which is in PUBLISHED state");
-//                filteredReleases.sort((r1, r2) -> {
-//                    if (r1.getLifecycleStateChangeFlow().getUpdatedAt().after(r2.getLifecycleStateChangeFlow().getUpdatedAt())) {
-//                        return -1;
-//                    } else if (r2.getLifecycleStateChangeFlow().getUpdatedAt().after(r1.getLifecycleStateChangeFlow().getUpdatedAt())) {
-//                        return 1;
-//                    }
-//                    return 0;
-//                });
-//            }
-//            return filteredReleases;
-//        }
-//        return applicationReleases;
-//    }
-
     @Override
     public void deleteApplication(int applicationId) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
@@ -1281,53 +1250,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-    }
-
-    private List<String> searchLifecycleStateFlow(String start, String finish) throws ApplicationManagementException {
-        Map<String, String> nextNodeMap = new HashMap<>();
-        List<String> directions = new LinkedList<>();
-        Queue<String> queue = new LinkedList<>();
-
-        String currentNode = start;
-        queue.add(currentNode);
-
-        Set<String> visitedNodes = new HashSet<>();
-        visitedNodes.add(currentNode);
-        while (!queue.isEmpty()) {
-            currentNode = queue.remove();
-            if (currentNode.equals(finish)) {
-                break;
-            } else {
-                List<String> nextStates = lifecycleStateManager.getNextLifecycleStates(currentNode);
-                if (nextStates.contains(finish)) {
-                    queue = new LinkedList<>();
-                    queue.add(finish);
-                    nextNodeMap.put(currentNode, finish);
-                } else {
-                    for (String node : nextStates) {
-                        if (!visitedNodes.contains(node)) {
-                            queue.add(node);
-                            visitedNodes.add(node);
-                            nextNodeMap.put(currentNode, node);
-                        }
-                    }
-                }
-            }
-        }
-
-        //If all nodes are explored and the destination node hasn't been found.
-        if (!currentNode.equals(finish)) {
-            String errorMsg = "can't found a feasible path from " + start + " to " + finish;
-            throw new ApplicationManagementException(errorMsg);
-        }
-
-        //Reconstruct path
-        for (String node = start; node != null; node = nextNodeMap.get(node)) {
-            if (!node.equals(start)) {
-                directions.add(node);
-            }
-        }
-        return directions;
     }
 
     @Override
@@ -1544,49 +1466,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
-        }
-    }
-
-    /**
-     * To get role restricted application list.
-     *
-     * @param applicationList list of applications.
-     * @param userName        user name
-     * @return ApplicationDTO related with the UUID
-     */
-//    private ApplicationList getRoleRestrictedApplicationList(ApplicationList applicationList, String userName)
-//            throws ApplicationManagementException {
-//        ApplicationList roleRestrictedApplicationList = new ApplicationList();
-//        ArrayList<ApplicationDTO> unRestrictedApplications = new ArrayList<>();
-//        for (ApplicationDTO application : applicationList.getApplications()) {
-//            if (application.getUnrestrictedRoles().isEmpty()) {
-//                unRestrictedApplications.add(application);
-//            } else {
-//                try {
-//                    if (hasUserRole(application.getUnrestrictedRoles(), userName)) {
-//                        unRestrictedApplications.add(application);
-//                    }
-//                } catch (UserStoreException e) {
-//                    throw new ApplicationManagementException("Role restriction verifying is failed");
-//                }
-//            }
-//        }
-//        roleRestrictedApplicationList.setApplications(unRestrictedApplications);
-//        return roleRestrictedApplicationList;
-//    }
-
-    /**
-     * To validate a app release creating request and app updating request to make sure all the pre-conditions
-     * satisfied.
-     *
-     * @param applicationRelease ApplicationReleaseDTO that need to be created.
-     * @throws ApplicationManagementException ApplicationDTO Management Exception.
-     */
-    private void validateAppReleasePayload(ApplicationReleaseDTO applicationRelease)
-            throws ApplicationManagementException {
-        if (applicationRelease.getVersion() == null) {
-            throw new ApplicationManagementException("ApplicationReleaseDTO version name is a mandatory parameter for "
-                    + "creating release. It cannot be found.");
         }
     }
 
@@ -2430,9 +2309,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-
     }
-
 
     @Override
     public void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper,

@@ -160,7 +160,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     + " users.");
         }
 
-        //todo check valid user list
+        //todo check valid user list - throw BadRequest exception
         ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
         DeviceType appDeviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
         List<DeviceIdentifier> operationTriggeredDeviceIdentifiers = new ArrayList<>();

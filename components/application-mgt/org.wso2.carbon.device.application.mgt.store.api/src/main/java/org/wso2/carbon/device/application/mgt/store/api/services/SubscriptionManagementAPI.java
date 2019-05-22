@@ -28,6 +28,8 @@ import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponseTmp;
 import org.wso2.carbon.device.application.mgt.common.EnterpriseInstallationDetails;
@@ -181,6 +183,26 @@ public interface SubscriptionManagementAPI {
     )
     @ApiResponses(
             value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully add an operation to install application for user devices..",
+                            response = PaginationResult.class,
+                            responseContainer = "PaginationResult"),
+                    @ApiResponse(
+                            code = 400,
+                            message =
+                                    "Bad Request. \n Found invalid payload with the request."),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to install application release."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Not found an application release for requested UUID."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while adding operation to install "
+                                    + "application for users.",
+                            response = ErrorResponse.class)
 
             })
     Response installApplicationForRoles (

@@ -94,7 +94,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     public Response installApplicationForUsers(
             @PathParam("uuid") String uuid,
             @Valid List<String> users) {
-        if (users.isEmpty()){
+        if (users.isEmpty()) {
             String msg = "In order to install application release which has UUID " + uuid + ", you should provide list "
                     + "of users. But found an empty list of users.";
             log.error(msg);
@@ -104,23 +104,27 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             ApplicationInstallResponse response = subscriptionManager.installApplicationForUsers(uuid, users);
             return Response.status(Response.Status.OK).entity(response).build();
-
-            //todo
-        } catch(BadRequestException e){
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
             String msg = "Found invalid payload for installing application which has UUID: " + uuid
                     + ". Hence verify the payload";
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        } catch(ForbiddenException e){
-            String msg = "Application release is not in the installable state. Hence you are not permitted to install the aplication.";
+        } catch (ForbiddenException e) {
+            String msg = "Application release is not in the installable state. Hence you are not permitted to install "
+                    + "the application.";
             log.error(msg);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
-        }catch (ApplicationManagementException e) {
-            String msg =
-                    "Error occurred while installing the application release which has UUID: " + uuid + " for devices";
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while installing the application release which has UUID: " + uuid
+                    + " for user devices";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }    }
+        }
+    }
 
     @Override
     @POST
