@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.Rating;
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewDoesNotExistException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
