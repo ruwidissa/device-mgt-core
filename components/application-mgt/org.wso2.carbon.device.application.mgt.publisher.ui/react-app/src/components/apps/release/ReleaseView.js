@@ -1,5 +1,5 @@
 import React from "react";
-import {Avatar, Row, Col, Typography} from "antd";
+import {Avatar, Row, Col, Typography, Button} from "antd";
 import "../../../App.css";
 
 const {Title, Text} = Typography;
@@ -11,13 +11,22 @@ class ReleaseView extends React.Component {
         return (
             <div className="release">
                 <Row>
-                    <Col md={4} sm={6} xs={8} className="release-icon">
-                        <img src={release.iconPath}/>
+                    <Col xl={4} sm={6} xs={8} className="release-icon">
+                        <img src={release.iconPath} alt="icon"/>
                     </Col>
-                    <Col md={18} sm={12}>
+                    <Col xl={10} sm={11} className="release-title">
                         <Title level={2}>App Name</Title>
                         <Text>{release.version}</Text><br/>
-                        <Text type="secondary">{release.description}</Text>
+                        <Text type="secondary">{release.description}</Text><br/>
+                    </Col>
+                    <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
+                        <div>
+                            <Button.Group style={{float: "right"}}>
+                                <Button htmlType="button" icon="shop">Open in store</Button>
+                                <Button htmlType="button" type="primary" icon="edit">edit</Button>
+                            </Button.Group>
+                        </div>
+
                     </Col>
                 </Row>
                 <br/>
