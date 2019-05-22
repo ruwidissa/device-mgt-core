@@ -31,15 +31,13 @@ class ReleaseView extends React.Component {
                 </Row>
                 <br/>
                 <Row>
-                    <Col lg={6} md={8} xs={8} className="release-screenshot">
-                        <img src={release.screenshotPath1}/>
-                    </Col>
-                    <Col lg={6} md={8} xs={8} className="release-screenshot">
-                        <img src={release.screenshotPath2}/>
-                    </Col>
-                    <Col lg={6} md={8} xs={8} className="release-screenshot">
-                        <img src={release.screenshotPath3}/>
-                    </Col>
+                    {release.screenshots.map((screenshotUrl)=>{
+                        return (
+                            <Col key={"col-"+screenshotUrl} lg={6} md={8} xs={8} className="release-screenshot">
+                                <img key={screenshotUrl} src={screenshotUrl}/>
+                            </Col>
+                        )
+                    })}
                 </Row>
             </div>
         );
