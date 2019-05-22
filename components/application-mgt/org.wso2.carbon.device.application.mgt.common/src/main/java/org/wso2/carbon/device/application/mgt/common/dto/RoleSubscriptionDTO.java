@@ -19,8 +19,7 @@ package org.wso2.carbon.device.application.mgt.common.dto;
 
 import java.sql.Timestamp;
 
-public class DeviceSubscriptionDTO {
-
+public class RoleSubscriptionDTO {
     private int id;
     private String subscribedBy;
     private Timestamp subscribedTimestamp;
@@ -28,8 +27,7 @@ public class DeviceSubscriptionDTO {
     private String unsubscribedBy;
     private Timestamp unsubscribedTimestamp;
     private String subscribedFrom;
-    private String status;
-    private int deviceId;
+    private String roleName;
 
     public int getId() { return id; }
 
@@ -63,11 +61,7 @@ public class DeviceSubscriptionDTO {
 
     public void setSubscribedFrom(String subscribedFrom) { this.subscribedFrom = subscribedFrom; }
 
-    public String getStatus() { return status; }
+    public String getRoleName() { return roleName; }
 
-    public void setStatus(String status) { this.status = status; }
-
-    public int getDeviceId() { return deviceId; }
-
-    public void setDeviceId(int deviceId) { this.deviceId = deviceId; }
+    public void setRoleName(String roleName) { this.roleName = roleName; }
 }

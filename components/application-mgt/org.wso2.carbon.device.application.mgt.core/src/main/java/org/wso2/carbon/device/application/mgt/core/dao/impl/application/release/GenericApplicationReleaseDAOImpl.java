@@ -254,7 +254,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 statement.setInt(2, tenantId);
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet.next()) {
-                        return DAOUtil.loadAppRelease(resultSet);
+                        return DAOUtil.constructAppReleaseDTO(resultSet);
                     }
                     return null;
                 }

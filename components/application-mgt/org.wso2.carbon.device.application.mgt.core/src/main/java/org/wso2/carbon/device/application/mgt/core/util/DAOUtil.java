@@ -83,10 +83,10 @@ public class DAOUtil {
                 application.setStatus(rs.getString("APP_STATUS"));
                 application.setAppRating(rs.getDouble("APP_RATING"));
                 application.setDeviceTypeId(rs.getInt("APP_DEVICE_TYPE_ID"));
-                application.getApplicationReleaseDTOs().add(loadAppRelease(rs));
+                application.getApplicationReleaseDTOs().add(constructAppReleaseDTO(rs));
             } else {
                 if (application != null && application.getApplicationReleaseDTOs() != null) {
-                    application.getApplicationReleaseDTOs().add(loadAppRelease(rs));
+                    application.getApplicationReleaseDTOs().add(constructAppReleaseDTO(rs));
                 }
             }
             hasNext = rs.next();
@@ -108,18 +108,23 @@ public class DAOUtil {
     public static List<DeviceSubscriptionDTO> loadDeviceSubscriptions(ResultSet rs) throws SQLException {
         List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = new ArrayList<>();
         while (rs.next()) {
-            DeviceSubscriptionDTO deviceSubscriptionDTO = new DeviceSubscriptionDTO();
-            deviceSubscriptionDTO.setId(rs.getInt("ID"));
-            deviceSubscriptionDTO.setSubscribedBy(rs.getString("SUBSCRIBED_BY"));
-            deviceSubscriptionDTO.setSubscribedTimestamp(rs.getTimestamp("SUBSCRIBED_AT"));
-            deviceSubscriptionDTO.setUnsubscribed(rs.getBoolean("IS_UNSUBSCRIBED"));
-            deviceSubscriptionDTO.setUnsubscribedBy(rs.getString("UNSUBSCRIBED_BY"));
-            deviceSubscriptionDTO.setUnsubscribedTimestapm(rs.getTimestamp("UNSUBSCRIBED_AT"));
-            deviceSubscriptionDTO.setSubscribedFrom(rs.getString("SUBSCRIBED_FROM"));
-            deviceSubscriptionDTO.setDeviceId(rs.getInt("DEVICE_ID"));
-            deviceSubscriptionDTOS.add(deviceSubscriptionDTO);
+            deviceSubscriptionDTOS.add(constructDeviceSubscriptionDTO(rs));
         }
         return deviceSubscriptionDTOS;
+    }
+
+    public static DeviceSubscriptionDTO constructDeviceSubscriptionDTO(ResultSet rs ) throws SQLException {
+        DeviceSubscriptionDTO deviceSubscriptionDTO = new DeviceSubscriptionDTO();
+        deviceSubscriptionDTO.setId(rs.getInt("ID"));
+        deviceSubscriptionDTO.setSubscribedBy(rs.getString("SUBSCRIBED_BY"));
+        deviceSubscriptionDTO.setSubscribedTimestamp(rs.getTimestamp("SUBSCRIBED_AT"));
+        deviceSubscriptionDTO.setUnsubscribed(rs.getBoolean("IS_UNSUBSCRIBED"));
+        deviceSubscriptionDTO.setUnsubscribedBy(rs.getString("UNSUBSCRIBED_BY"));
+        deviceSubscriptionDTO.setUnsubscribedTimestamp(rs.getTimestamp("UNSUBSCRIBED_AT"));
+        deviceSubscriptionDTO.setSubscribedFrom(rs.getString("SUBSCRIBED_FROM"));
+        deviceSubscriptionDTO.setDeviceId(rs.getInt("DEVICE_ID"));
+        deviceSubscriptionDTO.setStatus(rs.getString("STATUS"));
+        return  deviceSubscriptionDTO;
     }
 
     /**
@@ -129,7 +134,7 @@ public class DAOUtil {
      * @return {@link ApplicationReleaseDTO} object populated with the data
      * @throws SQLException If unable to populate {@link ApplicationReleaseDTO} object with the data
      */
-    public static ApplicationReleaseDTO loadAppRelease(ResultSet rs) throws SQLException {
+    public static ApplicationReleaseDTO constructAppReleaseDTO(ResultSet rs) throws SQLException {
         ApplicationReleaseDTO appRelease = new ApplicationReleaseDTO();
         appRelease.setId(rs.getInt("RELEASE_ID"));
         appRelease.setDescription(rs.getString("RELEASE_DESCRIPTION"));

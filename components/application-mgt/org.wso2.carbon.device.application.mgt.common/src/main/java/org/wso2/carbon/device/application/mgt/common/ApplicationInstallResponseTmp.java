@@ -24,21 +24,20 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 
 import java.util.List;
 
-public class ApplicationInstallResponse {
+public class ApplicationInstallResponseTmp {
     @ApiModelProperty(
-            name = "installedDevices",
+            name = "successfulDevices",
             value = "List of successful devices",
             dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
     )
-    private List<DeviceIdentifier> installedDevices;
-
+    private List<DeviceIdentifier> successfulDevices;
 
     @ApiModelProperty(
-            name = "alreadyInstalledDevices",
-            value = "List of devices that application release is already installed.",
+            name = "failedDevices",
+            value = "List of failed devices",
             dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
     )
-    private List<DeviceIdentifier> alreadyInstalledDevices;
+    private List<DeviceIdentifier> failedDevices;
 
     @ApiModelProperty(
             name = "activity",
@@ -46,12 +45,20 @@ public class ApplicationInstallResponse {
     )
     private Activity activity;
 
-    public List<DeviceIdentifier> getInstalledDevices() {
-        return installedDevices;
+    public List<DeviceIdentifier> getSuccessfulDevices() {
+        return successfulDevices;
     }
 
-    public void setInstalledDevices(List<DeviceIdentifier> installedDevices) {
-        this.installedDevices = installedDevices;
+    public void setSuccessfulDevices(List<DeviceIdentifier> successfulDevices) {
+        this.successfulDevices = successfulDevices;
+    }
+
+    public List<DeviceIdentifier> getFailedDevices() {
+        return failedDevices;
+    }
+
+    public void setFailedDevices(List<DeviceIdentifier> failedDevices) {
+        this.failedDevices = failedDevices;
     }
 
     public Activity getActivity() {
@@ -60,13 +67,5 @@ public class ApplicationInstallResponse {
 
     public void setActivity(Activity activity) {
         this.activity = activity;
-    }
-
-    public List<DeviceIdentifier> getAlreadyInstalledDevices() {
-        return alreadyInstalledDevices;
-    }
-
-    public void setAlreadyInstalledDevices(List<DeviceIdentifier> alreadyInstalledDevices) {
-        this.alreadyInstalledDevices = alreadyInstalledDevices;
     }
 }

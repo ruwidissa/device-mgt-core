@@ -29,19 +29,22 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
+import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponseTmp;
 import org.wso2.carbon.device.application.mgt.common.EnterpriseInstallationDetails;
 import org.wso2.carbon.device.application.mgt.common.InstallationDetails;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * API to handle subscription management related tasks.
@@ -67,14 +70,14 @@ import javax.ws.rs.core.Response;
                 @org.wso2.carbon.apimgt.annotations.api.Scope(
                         name = "Install an ApplicationDTO",
                         description = "Install an application",
-                        key = "perm:subscription:install",
-                        permissions = {"/device-mgt/subscription/install"}
+                        key = "perm:app:subscription:install",
+                        permissions = {"/app-mgt/store/subscription/install"}
                 ),
                 @org.wso2.carbon.apimgt.annotations.api.Scope(
-                        name = "Install an ApplicationDTO",
-                        description = "Install an application",
-                        key = "perm:application-mgt:login",
-                        permissions = {"/device-mgt/application-mgt/login"}
+                        name = "Uninstall an Application",
+                        description = "Uninstall an application",
+                        key = "perm:app:subscription:uninstall",
+                        permissions = {"/app-mgt/store/subscription/uninstall"}
                 )
         }
 )
@@ -86,6 +89,307 @@ import javax.ws.rs.core.Response;
 public interface SubscriptionManagementAPI {
 
     String SCOPE = "scope";
+
+    @POST
+    @Path("/install/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:install")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response installApplicationForDevices(
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<DeviceIdentifier> deviceIdentifiers
+    );
+
+    @POST
+    @Path("/install/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:install")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response installApplicationForUsers(
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<String> users
+    );
+
+    @POST
+    @Path("/install/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:install")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response installApplicationForRoles (
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<String> roles
+    );
+
+    @POST
+    @Path("/install/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:install")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response installApplicationForGroups (
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<String> groups
+    );
+
+//    ###########################
+
+
+    @POST
+    @Path("/uninstall/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response uninstallApplicationForDevices(
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<DeviceIdentifier> deviceIdentifiers
+    );
+
+    @POST
+    @Path("/uninstall/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response uninstallApplicationForUsers(
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<String> users
+    );
+
+    @POST
+    @Path("/uninstall/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response uninstallApplicationForRoles (
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<String> roles
+    );
+
+    @POST
+    @Path("/uninstall/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response uninstallApplicationForGroups (
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The application ID and list of devices/users/roles",
+                    required = true
+            )
+            @Valid List<String> groups
+    );
+
+
+
+
+
+
+
+
+
+//    ----------------------------------------------
 
     @POST
     @Path("/install-application")
@@ -109,7 +413,7 @@ public interface SubscriptionManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully sent the install application operation.",
-                            response = ApplicationInstallResponse.class
+                            response = ApplicationInstallResponseTmp.class
                     ),
                     @ApiResponse(
                             code = 304,
@@ -154,7 +458,7 @@ public interface SubscriptionManagementAPI {
                     @ApiResponse(
                             code = 200,
                             message = "OK. \n Successfully sent the install application operation.",
-                            response = ApplicationInstallResponse.class
+                            response = ApplicationInstallResponseTmp.class
                     ),
                     @ApiResponse(
                             code = 304,

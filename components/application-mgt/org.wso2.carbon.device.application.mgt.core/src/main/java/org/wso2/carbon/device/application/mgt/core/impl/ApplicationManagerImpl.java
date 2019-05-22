@@ -2565,7 +2565,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO){
         String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
                 .getArtifactDownloadEndpoint();
-        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid();
+        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
+                + Constants.FORWARD_SLASH;
+        List<String> screenshotPaths = new ArrayList<>();
         ApplicationRelease applicationRelease = new ApplicationRelease();
         applicationRelease.setDescription(applicationReleaseDTO.getDescription());
         applicationRelease.setVersion(applicationReleaseDTO.getVersion());
@@ -2580,22 +2582,20 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
         applicationRelease.setRating(applicationReleaseDTO.getRating());
         applicationRelease
-                .setInstallerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName());
-        applicationRelease.setIconPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName());
-        applicationRelease.setBannerPath(basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getBannerName());
+                .setInstallerPath(basePath + applicationReleaseDTO.getInstallerName());
+        applicationRelease.setIconPath(basePath + applicationReleaseDTO.getIconName());
+        applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
 
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
-            applicationRelease.setScreenshotPath1(
-                    basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getScreenshotName1());
+            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName1());
         }
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName2())) {
-            applicationRelease.setScreenshotPath2(
-                    basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getScreenshotName2());
+            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName2());
         }
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName3())) {
-            applicationRelease.setScreenshotPath3(
-                    basePath + Constants.FORWARD_SLASH + applicationReleaseDTO.getScreenshotName3());
+            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName3());
         }
+        applicationRelease.setScreenshots(screenshotPaths);
         return applicationRelease;
     }
 

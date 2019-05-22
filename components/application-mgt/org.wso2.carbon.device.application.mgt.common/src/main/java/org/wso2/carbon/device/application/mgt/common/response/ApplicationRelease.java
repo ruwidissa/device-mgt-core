@@ -21,6 +21,8 @@ package org.wso2.carbon.device.application.mgt.common.response;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 @ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
 public class ApplicationRelease {
 
@@ -48,17 +50,9 @@ public class ApplicationRelease {
             value = "icon file storing location")
     private String iconPath;
 
-    @ApiModelProperty(name = "screenshotPath1",
+    @ApiModelProperty(name = "screenshots",
             value = "Screenshot storing location")
-    private String screenshotPath1;
-
-    @ApiModelProperty(name = "screenshotPath2",
-            value = "Screenshot storing location")
-    private String screenshotPath2;
-
-    @ApiModelProperty(name = "screenshotPath3",
-            value = "Screenshot storing location")
-    private String screenshotPath3;
+    private List<String> screenshots;
 
     @ApiModelProperty(name = "releaseType",
             value = "Release type of the application release",
@@ -163,18 +157,6 @@ public class ApplicationRelease {
 
     public void setIconPath(String iconPath) { this.iconPath = iconPath; }
 
-    public String getScreenshotPath1() { return screenshotPath1; }
-
-    public void setScreenshotPath1(String screenshotPath1) { this.screenshotPath1 = screenshotPath1; }
-
-    public String getScreenshotPath2() { return screenshotPath2; }
-
-    public void setScreenshotPath2(String screenshotPath2) { this.screenshotPath2 = screenshotPath2; }
-
-    public String getScreenshotPath3() { return screenshotPath3; }
-
-    public void setScreenshotPath3(String screenshotPath3) { this.screenshotPath3 = screenshotPath3; }
-
     public boolean isSharedWithAllTenants() { return isSharedWithAllTenants; }
 
     public void setSharedWithAllTenants(boolean sharedWithAllTenants) { isSharedWithAllTenants = sharedWithAllTenants; }
@@ -190,4 +172,8 @@ public class ApplicationRelease {
     public double getRating() { return rating; }
 
     public void setRating(double rating) { this.rating = rating; }
+
+    public List<String> getScreenshots() { return screenshots; }
+
+    public void setScreenshots(List<String> screenshots) { this.screenshots = screenshots; }
 }
