@@ -33,7 +33,8 @@ class ConnectedLifecycleModal extends React.Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps !== this.props) {
             this.setState({
-                visible: nextProps.visible
+                visible: nextProps.visible,
+                loading: false
             })
         }
     }

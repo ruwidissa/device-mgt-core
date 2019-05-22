@@ -1,4 +1,5 @@
 import React from "react";
+import '../../../../App.css';
 import {PageHeader, Typography, Input, Button, Row, Col, Avatar, Card} from "antd";
 import {connect} from "react-redux";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
@@ -62,17 +63,15 @@ class ConnectedRelease extends React.Component {
                 <PageHeader
                     breadcrumb={{routes}}
                 />
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
+                <div className="main-container">
                     <Row style={{padding: 10}}>
-                        <Col span={16}>
+                        <Col lg={16} md={24} style={{padding: 3}}>
                             <Card>
                                 <ReleaseView release={release}/>
                             </Card>
                         </Col>
-                    </Row>
-                    <Row style={{padding: 10}}>
-                        <Col>
-                            <Card>
+                        <Col lg={8} md={24} style={{padding: 3}}>
+                            <Card lg={8} md={24}>
                                 <LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>
                             </Card>
                         </Col>

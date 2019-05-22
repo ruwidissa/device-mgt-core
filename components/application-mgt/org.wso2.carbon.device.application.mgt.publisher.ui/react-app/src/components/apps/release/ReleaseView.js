@@ -1,29 +1,43 @@
 import React from "react";
-import {Avatar, Row, Col, Typography} from "antd";
+import {Avatar, Row, Col, Typography, Button} from "antd";
+import "../../../App.css";
 
 const {Title, Text} = Typography;
 
 class ReleaseView extends React.Component {
     render() {
         const release = this.props.release;
+        console.log(release);
         return (
-            <div>
+            <div className="release">
                 <Row>
-                    <Col span={4}>
-                        <Avatar size={128} shape="square"
-                                src={release.iconPath}/>
+                    <Col xl={4} sm={6} xs={8} className="release-icon">
+                        <img src={release.iconPath} alt="icon"/>
                     </Col>
-                    <Col span={18}>
+                    <Col xl={10} sm={11} className="release-title">
                         <Title level={2}>App Name</Title>
                         <Text>{release.version}</Text><br/>
-                        <Text type="secondary">{release.description}</Text>
+                        <Text type="secondary">{release.description}</Text><br/>
+                    </Col>
+                    <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
+                        <div>
+                            <Button.Group style={{float: "right"}}>
+                                <Button htmlType="button" icon="shop">Open in store</Button>
+                                <Button htmlType="button" type="primary" icon="edit">edit</Button>
+                            </Button.Group>
+                        </div>
+
                     </Col>
                 </Row>
                 <br/>
                 <Row>
-                    <Col span={6}>
-                        <img style={{width:"100%"}} src={release.screenshotPath1}/>
-                    </Col>
+                    {release.screenshots.map((screenshotUrl)=>{
+                        return (
+                            <Col key={"col-"+screenshotUrl} lg={6} md={8} xs={8} className="release-screenshot">
+                                <img key={screenshotUrl} src={screenshotUrl}/>
+                            </Col>
+                        )
+                    })}
                 </Row>
             </div>
         );
