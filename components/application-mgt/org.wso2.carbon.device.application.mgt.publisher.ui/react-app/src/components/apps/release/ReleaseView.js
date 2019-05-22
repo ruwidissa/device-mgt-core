@@ -11,10 +11,10 @@ class ReleaseView extends React.Component {
         return (
             <div className="release">
                 <Row>
-                    <Col span={4} className="release-icon">
+                    <Col md={4} sm={6} xs={8} className="release-icon">
                         <img src={release.iconPath}/>
                     </Col>
-                    <Col span={18}>
+                    <Col md={18} sm={12}>
                         <Title level={2}>App Name</Title>
                         <Text>{release.version}</Text><br/>
                         <Text type="secondary">{release.description}</Text>
@@ -22,13 +22,13 @@ class ReleaseView extends React.Component {
                 </Row>
                 <br/>
                 <Row>
-                    <Col span={6} className="release-screenshot">
+                    <Col lg={6} md={8} xs={8} className="release-screenshot">
                         <img src={release.screenshotPath1}/>
                     </Col>
-                    <Col span={6} className="release-screenshot">
+                    <Col lg={6} md={8} xs={8} className="release-screenshot">
                         <img src={release.screenshotPath2}/>
                     </Col>
-                    <Col span={6} className="release-screenshot">
+                    <Col lg={6} md={8} xs={8} className="release-screenshot">
                         <img src={release.screenshotPath3}/>
                     </Col>
                 </Row>

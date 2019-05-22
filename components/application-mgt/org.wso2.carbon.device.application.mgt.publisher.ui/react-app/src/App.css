@@ -19,10 +19,21 @@
 .logo {
   width: 120px;
   height: 31px;
-  margin: 16px 0 16px 20px;
+  margin: 0 0 16px 20px;
   float: left;
 }
 
 .logo img{
   height: 35px;
+}
+
+.main-container{
+  background: #f0f2f5;
+  min-height: 780px
+}
+
+@media only screen and (min-width: 768px) {
+  .main-container{
+    padding: 24px;
+  }
 }
