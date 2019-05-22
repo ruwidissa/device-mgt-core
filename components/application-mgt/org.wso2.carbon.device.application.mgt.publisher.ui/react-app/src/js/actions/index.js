@@ -96,20 +96,17 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
 
     const request = "method=post&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/application-mgt-publisher/v1.0/applications/life-cycle/" + uuid;
 
-    console.log(request);
 
     return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
-        if (res.status === 200) {
-            if(res.data.data.hasOwnProperty("release")) {
-                let release = res.data.data;
-                dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: release});
-            }else{
-                alert("error");
-                dispatch({
-                    type: ActionTypes.CLOSE_LIFECYCLE_MODAL
-                });
-            }
+        if (res.status === 201) {
+            let release = res.data.data;
+            dispatch({type: ActionTypes.UPDATE_LIFECYCLE_STATE, payload: release});
+        }else {
+            alert("error");
+            dispatch({
+                type: ActionTypes.CLOSE_LIFECYCLE_MODAL
+            });
         }
 
     }).catch(function (error) {
