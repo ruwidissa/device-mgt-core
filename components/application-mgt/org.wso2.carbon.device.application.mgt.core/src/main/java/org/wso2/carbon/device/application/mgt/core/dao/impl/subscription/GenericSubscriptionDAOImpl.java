@@ -443,7 +443,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT DS.DM_DEVICE_ID "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
-                            + "WHERE US.DM_DEVICE_ID IN (", ") AND TENANT_ID = ?");
+                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {

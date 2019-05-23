@@ -18,5 +18,5 @@
 package org.wso2.carbon.device.application.mgt.common;
 
 public enum SubsciptionType {
-    USER, ROLE, DEVICE_GROUP
+    USER, ROLE, GROUP, DEVICE
 }

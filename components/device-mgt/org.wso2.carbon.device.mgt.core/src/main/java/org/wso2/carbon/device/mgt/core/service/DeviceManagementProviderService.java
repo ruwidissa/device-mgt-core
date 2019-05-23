@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.service;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
@@ -496,7 +497,7 @@ public interface DeviceManagementProviderService {
 
     void sendRegistrationEmail(EmailMetaInfo metaInfo) throws DeviceManagementException, ConfigurationManagementException;
 
-    FeatureManager getFeatureManager(String deviceType) throws DeviceManagementException;
+    FeatureManager getFeatureManager(String deviceType) throws DeviceTypeNotFoundException;
 
     /**
      * Proxy method to get the tenant configuration of a given platform.

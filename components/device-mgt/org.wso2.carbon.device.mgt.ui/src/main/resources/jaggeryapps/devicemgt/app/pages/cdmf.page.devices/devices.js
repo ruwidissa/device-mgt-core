@@ -43,6 +43,9 @@ function onRequest(context) {
         if (uiPermissions.ADD_DEVICE) {
             viewModel.permissions.enroll = true;
         }
+        if (uiPermissions.UPDATE_ENROLLMENT) {
+            viewModel.permissions.updateEnrollment = true;
+        }
         viewModel.currentUser = currentUser;
         var deviceCount = 0;
         if (groupId) {
@@ -56,12 +59,12 @@ function onRequest(context) {
             var typesListResponse = deviceModule.getDeviceTypes();
             var deviceTypes = [];
             if (typesListResponse["status"] == "success") {
-                var data = typesListResponse.content.deviceTypes;
+                var data = typesListResponse.content;
                 if (data) {
                     for (var i = 0; i < data.length; i++) {
-                        var config = utility.getDeviceTypeConfig(data[i]);
+                        var config = utility.getDeviceTypeConfig(data[i].name);
 						var category = "iot";
-						var label =  data[i];
+						var label =  data[i].name;
 						var analyticsEnabled = "false";
 						var groupingEnabled = "true";
 						var analyticsView = null;
@@ -75,10 +78,10 @@ function onRequest(context) {
                         }
 
                         deviceTypes.push({
-                                             "type": data[i],
+                                             "type": data[i].name,
                                              "category": category,
                                              "label": label,
-                                             "thumb": utility.getDeviceThumb(data[i]),
+                                             "thumb": utility.getDeviceThumb(data[i].name),
                                              "analyticsEnabled": analyticsEnabled,
                                              "groupingEnabled": groupingEnabled,
                                              "analyticsView" : analyticsView
