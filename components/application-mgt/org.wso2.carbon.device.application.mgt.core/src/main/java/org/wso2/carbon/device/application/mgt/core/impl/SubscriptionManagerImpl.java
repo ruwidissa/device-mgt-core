@@ -129,9 +129,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         applicationInstallResponse.setActivity(activity);
         applicationInstallResponse.setAlreadyInstalledDevices(installedDeviceIdentifiers);
 
-        int operationId = Integer
-                .parseInt(activity.getActivityId().split(DeviceManagementConstants.OperationAttributes.ACTIVITY)[1]);
-        addDeviceSubscriptionForUser(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
+//        int operationId = Integer
+//                .parseInt(activity.getActivityId().split(DeviceManagementConstants.OperationAttributes.ACTIVITY)[1]);
+        int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
+        addDeviceSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
                 operationTriggeredDeviceIds, new ArrayList<>(deviceSubscriptions.keySet()), null, operationId,
                 SubsciptionType.DEVICE.toString());
         return applicationInstallResponse;
@@ -271,15 +272,17 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         applicationInstallResponse.setActivity(activity);
         applicationInstallResponse.setAlreadyInstalledDevices(installedDeviceIdentifiers);
 
-        int operationId = Integer
-                .parseInt(activity.getActivityId().split(DeviceManagementConstants.OperationAttributes.ACTIVITY)[1]);
-        addDeviceSubscriptionForUser(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
+//        int operationId = Integer
+//                .parseInt(activity.getActivityId().split(DeviceManagementConstants.OperationAttributes.ACTIVITY)[1]);
+        int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
+
+        addDeviceSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
                 operationTriggeredDeviceIds, new ArrayList<>(deviceSubscriptions.keySet()), userList, operationId, SubsciptionType.USER.toString());
         return applicationInstallResponse;
     }
 
-    private void addDeviceSubscriptionForUser(int applicationReleaseId, List<Integer> deviceIds,
-            List<Integer> subDeviceIds, List<String> userList, int operationId, String subType)
+    private void addDeviceSubscriptions(int applicationReleaseId, List<Integer> deviceIds,
+            List<Integer> subDeviceIds, List<String> subscribers, int operationId, String subType)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String subscriber = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -289,13 +292,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<Integer> deviceSubscriptingIds;
 
             if (SubsciptionType.USER.toString().equals(subType)){
-                List<String> subscribedUsers = subscriptionDAO.getSubscribedUsernames(userList, tenantId);
+                List<String> subscribedUsers = subscriptionDAO.getSubscribedUsernames(subscribers, tenantId);
                 if (!subscribedUsers.isEmpty()) {
                     subscriptionDAO
                             .updateUserSubscription(tenantId, subscriber, false, subscribedUsers, applicationReleaseId);
-                    userList.removeAll(subscribedUsers);
+                    subscribers.removeAll(subscribedUsers);
                 }
-                subscriptionDAO.subscribeUserToApplication(tenantId, subscriber, userList, applicationReleaseId);
+                subscriptionDAO.subscribeUserToApplication(tenantId, subscriber, subscribers, applicationReleaseId);
             }
 
             if (!subDeviceIds.isEmpty()) {
