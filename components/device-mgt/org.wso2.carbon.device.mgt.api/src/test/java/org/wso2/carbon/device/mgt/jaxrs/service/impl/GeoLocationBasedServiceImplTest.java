@@ -1,6 +1,7 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
 public class GeoLocationBasedServiceImplTest {
     private DeviceManagementProviderService deviceManagementProviderService;
     private PrivilegedCarbonContext context;

@@ -15,6 +15,11 @@
   specific language governing permissions and limitations
   under the License.
 }}
+
+{{#zone "topCss"}}
+    {{css "css/platform-configuration.css"}}
+{{/zone}}
+
 {{#zone "content"}}
     {{#if isAuthorized}}
     <div class="row">
@@ -37,7 +42,7 @@
                 <br>
 
                 <div class="wr-advance-operations">
-                    <div class="row no-gutter">
+                    <div class="row">
                         <div class="wr-hidden-operations-nav col-lg-4">
 
                             {{#unless isCloud}}
@@ -63,7 +68,11 @@
                                         <span class="fw-stack fw-move-right fw-move-bottom">
                                             <i class="fw fw-circle fw-stack-2x fw-stroke fw-inverse"></i>
                                             <i class="fw fw-circle fw-stack-2x"></i>
-                                            <i class="fw fw-{{name}} fw-stack-1x fw-inverse"></i>
+                                            {{#if unitName}}
+                                                <i class="fw fw-{{name}} fw-stack-1x fw-inverse"></i>
+                                            {{else}}
+                                                <i class="fw fw-devices fw-stack-1x fw-inverse"></i>
+                                            {{/if}}
                                         </span>
                                     </span>
                                     {{label}} Configurations
@@ -124,7 +133,11 @@
                             <!-- general-->
                             {{#each deviceTypes}}
                                 <div class="wr-hidden-operation" data-operation="{{name}}" style="display: none;">
-                                    {{unit unitName}}
+                                    {{#if unitName}}
+                                        {{unit unitName deviceType=name}}
+                                    {{else}}
+                                        {{unit "cdmf.unit.dynamic.platform.configuration" deviceType=name}}
+                                    {{/if}}
                                 </div>
                             {{/each}}
 

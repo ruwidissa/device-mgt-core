@@ -48,7 +48,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * This class holds the unit tests for the class {@link DeviceTypeManagementService}
  */
-@PowerMockIgnore("javax.ws.rs.*")
+@PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
 @SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils"})
 @PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class})
 public class DeviceTypeManagementServiceTest {
@@ -89,7 +89,7 @@ public class DeviceTypeManagementServiceTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.getDeviceTypes()).thenThrow(new DeviceManagementException());
-        Response response = this.deviceTypeManagementService.getDeviceTypes();
+        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "The response status should be 500.");
@@ -100,7 +100,7 @@ public class DeviceTypeManagementServiceTest {
     public void testExistingDeviceTypesModifiedError() throws Exception {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Mockito.when(this.deviceManagementProviderService.getAvailableDeviceTypes()).thenThrow(new
+        Mockito.when(this.deviceManagementProviderService.getDeviceTypes()).thenThrow(new
                 DeviceManagementException());
         Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
@@ -142,8 +142,9 @@ public class DeviceTypeManagementServiceTest {
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString())).thenReturn(null);
         Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
-        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
-                "The response status should be 404.");
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
+                "The response status should be 200.");
+        Assert.assertEquals(response.getEntity().toString(), "[]", "The response should be [].");
         Mockito.reset(deviceManagementProviderService);
     }
 
@@ -151,7 +152,7 @@ public class DeviceTypeManagementServiceTest {
     public void testGetDeviceTypes() throws Exception {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Response response = this.deviceTypeManagementService.getDeviceTypes();
+        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "The response status should be 200.");
@@ -163,7 +164,7 @@ public class DeviceTypeManagementServiceTest {
                 .toReturn(this.deviceManagementProviderService);
         List<DeviceType> deviceTypes = DeviceMgtAPITestHelper.getDummyDeviceTypeList(5);
         Mockito.when(this.deviceManagementProviderService.getDeviceTypes()).thenReturn(deviceTypes);
-        Response response = this.deviceTypeManagementService.getDeviceTypes();
+        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "The response state should be 200");

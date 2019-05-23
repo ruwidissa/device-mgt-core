@@ -59,10 +59,10 @@ if (uriMatcher.match("/{context}/api/data-tables/invoker/filters")) {
     result.deviceTypes = [];
     var deviceTypesRes = deviceModule.getDeviceTypes();
     if (deviceTypesRes.status === "success") {
-        var deviceTypes = deviceTypesRes["content"]["deviceTypes"];
+        var deviceTypes = deviceTypesRes["content"];
         for (i = 0; i < deviceTypes.length; i++) {
-            var deviceTypeName = deviceTypes[i];
-            var deviceTypeLabel = deviceTypeName;
+            var deviceTypeName = deviceTypes[i].name;
+            var deviceTypeLabel = deviceTypeName.charAt(0).toUpperCase() + deviceTypeName.slice(1);
             var configs = utility.getDeviceTypeConfig(deviceTypeLabel);
             if (configs) {
                 if (configs[DTYPE_CONF_DEVICE_TYPE_KEY][DTYPE_CONF_DEVICE_TYPE_LABEL_KEY]) {

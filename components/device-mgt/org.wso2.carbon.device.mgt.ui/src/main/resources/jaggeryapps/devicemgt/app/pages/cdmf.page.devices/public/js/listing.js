@@ -811,6 +811,68 @@ function attachDeviceEvents() {
 
     /**
      * Following click function would execute
+     * when a user clicks on "Update Enrollment" link
+     * on Device Management page.
+     */
+    $("a.update-enrollment-link").click(function () {
+        var deviceIdentifiers = [];
+        var deviceId = $(this).data("deviceid");
+        var deviceType = $(this).data("devicetype");
+
+        if (deviceId && deviceType) {
+            deviceIdentifiers = [{"id": deviceId, "type": deviceType}];
+        } else {
+            deviceIdentifiers = getSelectedDevices();
+        }
+
+        if (deviceIdentifiers.length === 0) {
+            $(modalPopupContent).html($('#no-device-selected').html());
+            $("a#no-device-selected-link").click(function () {
+                hidePopup();
+            });
+            showPopup();
+            return;
+        }
+
+        $(modalPopupContent).html($('#update-enrollment-modal-content').html());
+        showPopup();
+
+        $("a#update-enrollment-yes-link").click(function () {
+            var username = $("#update-enrollment-name").val();
+            console.log(username);
+            if (username) {
+                var i;
+                var deviceIds = [];
+                for (i=0; i<deviceIdentifiers.length; i++) {
+                    deviceIds.push(deviceIdentifiers[i].id);
+                }
+                var serviceURL = "/api/device-mgt/v1.0/admin/devices/device-owner?owner=" + username;
+                invokerUtil.put(serviceURL, deviceIds, function (message) {
+                    $(modalPopupContent).html($('#update-enrollment-200-content').html());
+                    setTimeout(function () {
+                        hidePopup();
+                        location.reload(false);
+                    }, 2000);
+                }, function (jqXHR) {
+                    displayDeviceErrors(jqXHR);
+                });
+            } else {
+                $("div#update-enrollment-error-msg").text("Username cannot be empty");
+                $("div#update-enrollment-error-content").removeClass("hidden");
+                setTimeout(function() {
+                    $("div#update-enrollment-error-content").addClass("hidden");
+                    $("div#update-enrollment-error-msg").text();
+                }, 2000)
+            }
+        });
+
+        $("a#update-enrollment-cancel-link").click(function () {
+            hidePopup();
+        });
+    });
+
+    /**
+     * Following click function would execute
      * when a user clicks on "Add to Group" link
      * on Device Management page in WSO2 devicemgt Console.
      */

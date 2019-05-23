@@ -209,6 +209,22 @@
                                                 {{/if}}
                                             </a>
                                         </li>
+                                        <!--update enrollment-->
+                                        {{#if permissions.updateEnrollment}}
+                                            <li>
+                                                <a href="#" style="width: 100px;height: 80px;"
+                                                   data-click-event="remove-form"
+                                                   class="btn square-element update-enrollment-link"
+                                                   data-toggle="modal" data-target="#modalDemo">
+                                                    <span class="icon fw-stack">
+                                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                                        <i class="fw fw-user fw-stack-1x"></i>
+                                                    </span>
+                                                    Update Enrollment
+                                                </a>
+                                            </li>
+                                        {{/if}}
+                                        <!--/update enrollment-->
                                     </ul>
                                 </th>
                             </tr>
@@ -513,6 +529,58 @@
                         </div>
                     </div>
                 </div>
+                <!--update enrollment modal-->
+                <div id="update-enrollment-modal-content" class="hide">
+                    <div class="modal-header">
+                        <h3 class="pull-left modal-title">
+                            Please enter the username to update the enrollment device(s).
+                        </h3>
+                        <div id="update-enrollment-error-content" class="pull-left modal-title hidden"
+                             style="color: #d9534f;">
+                            <strong>
+                                <span><i class="fw fw-error"></i></span>
+                                <div id="update-enrollment-error-msg" style="display: inline">
+                                </div>
+                            </strong>
+                        </div>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i
+                                class="fw fw-cancel"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                        <input id="update-enrollment-name" style="color:#3f3f3f;padding:5px;" type="text"
+                               placeholder="[ username ]" size="60" required>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="buttons">
+                            <a href="#" id="update-enrollment-yes-link" class="btn-operations">
+                                Update
+                            </a>
+                            <a href="#" id="update-enrollment-cancel-link" class="btn-operations">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="update-enrollment-200-content" class="hide">
+                    <div class="modal-header">
+                        <h3 class="pull-left modal-title">
+                            Successfully updated enrollment.
+                        </h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i
+                                class="fw fw-cancel"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                    </div>
+                    <div class="modal-footer">
+                        <div class="buttons">
+                            <a href="javascript:hidePopup()" class="btn-operations">Ok</a>
+                        </div>
+                    </div>
+                </div>
+                <!--/update enrollment modal-->
             </div>
         </div>
     </div>

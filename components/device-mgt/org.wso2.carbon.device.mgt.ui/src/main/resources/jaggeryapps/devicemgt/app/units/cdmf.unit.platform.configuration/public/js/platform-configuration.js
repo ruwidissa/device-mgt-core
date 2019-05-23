@@ -16,6 +16,8 @@
  * under the License.
  */
 
+var configRowId = 0;
+
 $(document).ready(function () {
 
     var configParams = {
@@ -41,25 +43,25 @@ $(document).ready(function () {
     }
 
     invokerUtil.get(
-            "/api/device-mgt/v1.0/configuration",
-            function (data) {
-                data = JSON.parse(data);
-                if (data && data.configuration) {
-                    for (var i = 0; i < data.configuration.length; i++) {
-                        var config = data.configuration[i];
-                        if (config.name == configParams["NOTIFIER_FREQUENCY"]) {
-                            $("input#monitoring-config-frequency").val(config.value / 1000);
-                        }
+        "/api/device-mgt/v1.0/configuration",
+        function (data) {
+            data = JSON.parse(data);
+            if (data && data.configuration) {
+                for (var i = 0; i < data.configuration.length; i++) {
+                    var config = data.configuration[i];
+                    if (config.name == configParams["NOTIFIER_FREQUENCY"]) {
+                        $("input#monitoring-config-frequency").val(config.value / 1000);
                     }
                 }
-            }, function (data) {
-                console.log(data);
-            });
+            }
+        }, function (data) {
+            console.log(data);
+        });
 
     /**
      * Following click function would execute
      * when a user clicks on "Save" button
-     * on General platform configuration page in WSO2 EMM Console.
+     * on General platform configuration page in Entgra devicemgt Console.
      */
     $("button#save-general-btn").click(function () {
         var notifierFrequency = $("input#monitoring-config-frequency").val();
@@ -87,33 +89,33 @@ $(document).ready(function () {
 
             var addConfigAPI = "/api/device-mgt/v1.0/configuration";
             invokerUtil.put(
-                    addConfigAPI,
-                    addConfigFormData,
-                    function (data, textStatus, jqXHR) {
-                        data = jqXHR.status;
-                        if (data == 200) {
-                            $("#config-save-form").addClass("hidden");
-                            $("#record-created-msg").removeClass("hidden");
-                        } else if (data == 500) {
-                            $(errorMsg).text("Exception occurred at backend.");
-                        } else if (data == 403) {
-                            $(errorMsg).text("Action was not permitted.");
-                        } else {
-                            $(errorMsg).text("An unexpected error occurred.");
-                        }
-
-                        $(errorMsgWrapper).removeClass("hidden");
-                    }, function (data) {
-                        data = data.status;
-                        if (data == 500) {
-                            $(errorMsg).text("Exception occurred at backend.");
-                        } else if (data == 403) {
-                            $(errorMsg).text("Action was not permitted.");
-                        } else {
-                            $(errorMsg).text("An unexpected error occurred.");
-                        }
-                        $(errorMsgWrapper).removeClass("hidden");
+                addConfigAPI,
+                addConfigFormData,
+                function (data, textStatus, jqXHR) {
+                    data = jqXHR.status;
+                    if (data == 200) {
+                        $("#config-save-form").addClass("hidden");
+                        $("#record-created-msg").removeClass("hidden");
+                    } else if (data == 500) {
+                        $(errorMsg).text("Exception occurred at backend.");
+                    } else if (data == 403) {
+                        $(errorMsg).text("Action was not permitted.");
+                    } else {
+                        $(errorMsg).text("An unexpected error occurred.");
                     }
+
+                    $(errorMsgWrapper).removeClass("hidden");
+                }, function (data) {
+                    data = data.status;
+                    if (data == 500) {
+                        $(errorMsg).text("Exception occurred at backend.");
+                    } else if (data == 403) {
+                        $(errorMsg).text("Action was not permitted.");
+                    } else {
+                        $(errorMsg).text("An unexpected error occurred.");
+                    }
+                    $(errorMsgWrapper).removeClass("hidden");
+                }
             );
         }
     });
@@ -153,4 +155,122 @@ var artifactGeoUpload = function () {
         $(modalPopupContent).html(content.html());
         showPopup();
     }, contentType);
+};
+
+var loadDynamicDeviceTypeConfig = function (deviceType) {
+    var configAPI = '/api/device-mgt/v1.0/device-types/' + deviceType + '/configs';
+    invokerUtil.get(
+        configAPI,
+        function (data) {
+            data = JSON.parse(data);
+            var fieldWrapper = "#" + deviceType + "-config-field-wrapper";
+            $(fieldWrapper).html("");
+            if (data.configuration) {
+                var config;
+                var i;
+                for (i = 0; i < data.configuration.length; i++) {
+                    config = data.configuration[i];
+                    onDynamicConfigAddNew(deviceType, config.name, config.value);
+                }
+            }
+            $(fieldWrapper).append(
+                '<div class="row form-group ' + deviceType + '-config-row"' +
+                ' id="' + deviceType + '-config-row-' + (++configRowId) + '">' +
+                '<div class="col-xs-3">' +
+                '<input type="text" class="form-control ' + deviceType + '-config-name" placeholder="name"/>' +
+                '</div>' +
+                '<div class="col-xs-4">' +
+                '<textarea aria-describedby="basic-addon1" placeholder="value" data-error-msg="invalid value"' +
+                ' class="form-control ' + deviceType + '-config-value" rows="1" cols="30"></textarea>' +
+                '</div>' +
+                '<button type="button" class="wr-btn wr-btn-horizontal"' +
+                ' onclick="onDynamicConfigAddNew(\'' + deviceType + '\', \'\', \'\')">' +
+                '<i class="fa fa-plus"></i>' +
+                '</button>' +
+                '</div>'
+            );
+        }, function (data) {
+            console.log(data);
+        }
+    );
+};
+
+var onDynamicConfigSubmit = function (deviceType) {
+
+    var errorMsgWrapper = "#" + deviceType + "-config-error-msg";
+    var errorMsg = "#" + deviceType + "-config-error-msg span";
+
+    var addConfigFormData = {};
+    var configList = [];
+
+    $('.' + deviceType + '-config-row').each(function () {
+        var configName = $(this).find("." + deviceType + "-config-name").val();
+        var configVal = $(this).find("." + deviceType + "-config-value").val();
+        if (configName && configName.trim() !== "" && configVal && configVal.trim() !== "") {
+            var configurationEntry = {};
+            configurationEntry.name = configName.trim();
+            configurationEntry.contentType = "text";
+            configurationEntry.value = configVal.trim();
+            configList.push(configurationEntry);
+        }
+    });
+
+    addConfigFormData.type = deviceType;
+    addConfigFormData.configuration = configList;
+
+    var addConfigAPI = '/api/device-mgt/v1.0/admin/device-types/' + deviceType + '/configs';
+
+    invokerUtil.post(
+        addConfigAPI,
+        addConfigFormData,
+        function (data, textStatus, jqXHR) {
+            data = jqXHR.status;
+            if (data == 200) {
+                $("#config-save-form").addClass("hidden");
+                $("#record-created-msg").removeClass("hidden");
+            } else if (data == 500) {
+                $(errorMsg).text("Exception occurred at backend.");
+            } else if (data == 400) {
+                $(errorMsg).text("Configurations cannot be empty.");
+            } else {
+                $(errorMsg).text("An unexpected error occurred.");
+            }
+
+            $(errorMsgWrapper).removeClass("hidden");
+        }, function (data) {
+            data = data.status;
+            if (data == 500) {
+                $(errorMsg).text("Exception occurred at backend.");
+            } else if (data == 403) {
+                $(errorMsg).text("Action was not permitted.");
+            } else {
+                $(errorMsg).text("An unexpected error occurred.");
+            }
+            $(errorMsgWrapper).removeClass("hidden");
+        }
+    );
+};
+
+var onDynamicConfigAddNew = function (deviceType, name, value) {
+    $("#" + deviceType + "-config-field-wrapper").append(
+        '<div class="row form-group ' + deviceType + '-config-row"' +
+        ' id="' + deviceType + '-config-row-' + (++configRowId) + '">' +
+        '<div class="col-xs-3">' +
+        '<input type="text" class="form-control ' + deviceType + '-config-name" placeholder="name"' +
+        ' value="' + name + '"/>' +
+        '</div>' +
+        '<div class="col-xs-4">' +
+        '<textarea aria-describedby="basic-addon1" placeholder="value" data-error-msg="invalid value"' +
+        ' class="form-control ' + deviceType + '-config-value" rows="1" cols="30">' + value + '</textarea>' +
+        '</div>' +
+        '<button type="button" class="wr-btn wr-btn-horizontal"' +
+        ' onclick="onDynamicConfigRemove(\'' + deviceType + '\', ' + configRowId + ')">' +
+        '<i class="fa fa-minus"></i>' +
+        '</button>' +
+        '</div>'
+    );
+};
+
+var onDynamicConfigRemove = function (deviceType, rawId) {
+    $("#" + deviceType + "-config-row-" + rawId).remove()
 };

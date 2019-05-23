@@ -303,7 +303,7 @@ deviceModule = function () {
 			}
 			return serviceInvokers.XMLHttp.get(
 				url, function (responsePayload) {
-					return parse(responsePayload["responseText"])["count"];
+					return parse(responsePayload["responseText"]).length;
 				},
 				function (responsePayload) {
 					log.error(responsePayload["responseText"]);

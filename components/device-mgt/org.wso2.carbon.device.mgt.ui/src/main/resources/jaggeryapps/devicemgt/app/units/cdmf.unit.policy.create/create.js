@@ -50,7 +50,7 @@ function onRequest(context) {
 	types.isAuthorizedViewGroups = userModule.isAuthorized("/permission/admin/device-mgt/groups/view");
 	types["types"] = [];
 
-	var typesListResponse = deviceModule.getDeviceTypesConfig();
+	var typesListResponse = deviceModule.getDeviceTypes();
 	if (typesListResponse["status"] == "success") {
 		for (var type in typesListResponse["content"]) {
 			var content = {};
