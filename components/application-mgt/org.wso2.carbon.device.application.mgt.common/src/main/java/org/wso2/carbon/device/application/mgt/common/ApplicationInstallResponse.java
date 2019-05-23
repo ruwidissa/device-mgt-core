@@ -26,14 +26,6 @@ import java.util.List;
 
 public class ApplicationInstallResponse {
     @ApiModelProperty(
-            name = "installedDevices",
-            value = "List of successful devices",
-            dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
-    )
-    private List<DeviceIdentifier> installedDevices;
-
-
-    @ApiModelProperty(
             name = "alreadyInstalledDevices",
             value = "List of devices that application release is already installed.",
             dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
@@ -45,14 +37,6 @@ public class ApplicationInstallResponse {
             value = "Activity corresponding to the operation"
     )
     private Activity activity;
-
-    public List<DeviceIdentifier> getInstalledDevices() {
-        return installedDevices;
-    }
-
-    public void setInstalledDevices(List<DeviceIdentifier> installedDevices) {
-        this.installedDevices = installedDevices;
-    }
 
     public Activity getActivity() {
         return activity;

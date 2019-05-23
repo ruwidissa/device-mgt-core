@@ -64,7 +64,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         }
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            ApplicationInstallResponseTmp response = subscriptionManager
+            ApplicationInstallResponse response = subscriptionManager
                     .installApplicationForDevices(uuid, deviceIdentifiers);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (NotFoundException e) {
@@ -205,7 +205,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         }
 
         try {
-            ApplicationInstallResponseTmp response = subscriptionManager.installApplicationForDevices(applicationUUID,
+            ApplicationInstallResponse response = subscriptionManager.installApplicationForDevices(applicationUUID,
                     installationDetails.getDeviceIdentifiers());
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (ApplicationManagementException e) {

@@ -33,10 +33,10 @@ public interface SubscriptionManager {
      * To install an application to given list of devices.
      * @param applicationUUID ID of the application to install
      * @param deviceList list of device ID's to install the application
-     * @return {@link ApplicationInstallResponseTmp} object which contains installed application and devices
+     * @return {@link ApplicationInstallResponse} object which contains installed application and devices
      * @throws ApplicationManagementException if unable to install the application to the given devices
      */
-    ApplicationInstallResponseTmp installApplicationForDevices(String applicationUUID, List<DeviceIdentifier> deviceList)
+    ApplicationInstallResponse installApplicationForDevices(String applicationUUID, List<DeviceIdentifier> deviceList)
             throws ApplicationManagementException;
 
     /**
