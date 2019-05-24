@@ -37,11 +37,6 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceNotFoundException;
-import org.wso2.carbon.device.mgt.common.app.mgt.DeviceApplicationMapping;
-import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecutionFailedException;
-import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
-import org.wso2.carbon.device.mgt.core.dao.ApplicationMappingDAO;
-import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
@@ -74,6 +69,8 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
+import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecutionFailedException;
+import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
@@ -92,6 +89,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -134,7 +132,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private DeviceTypeDAO deviceTypeDAO;
     private EnrollmentDAO enrollmentDAO;
     private ApplicationDAO applicationDAO;
-    private ApplicationMappingDAO applicationMappingDAO;
     private DeviceManagementPluginRepository pluginRepository;
 
     public DeviceManagementProviderServiceImpl() {
@@ -151,7 +148,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
         this.deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
         this.enrollmentDAO = DeviceManagementDAOFactory.getEnrollmentDAO();
-        this.applicationMappingDAO = DeviceManagementDAOFactory.getApplicationMappingDAO();
     }
 
     @Override
@@ -2580,20 +2576,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new PullNotificationExecutionFailedException(message);
         }
         pullNotificationSubscriber.execute(deviceIdentifier, operation);
-    }
-
-    public void addDeviceApplicationMapping(DeviceApplicationMapping deviceApp) throws DeviceManagementException {
-        try {
-            DeviceManagementDAOFactory.openConnection();
-            applicationMappingDAO.addDeviceApplicationMapping(deviceApp);
-        } catch (DeviceManagementDAOException e) {
-            throw new DeviceManagementException("Error occurred while adding device application mapping for device "
-                    + deviceApp.getDeviceIdentifier() + " and application " + deviceApp.getApplicationUUID(), e);
-        } catch (SQLException e) {
-            throw new DeviceManagementException("Error occurred while opening a connection to the data source", e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
-        }
     }
 
     /**

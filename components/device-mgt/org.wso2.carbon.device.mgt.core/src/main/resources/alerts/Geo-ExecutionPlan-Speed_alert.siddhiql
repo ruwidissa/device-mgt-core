@@ -19,10 +19,6 @@ from dataIn[speed >= $speedAlertValue and id == "$deviceId" and owner == "$owner
 select id, owner, latitude, longitude, timeStamp, type, speed, heading, "ALERTED" as state, str:concat("The ", type, " device `", id, "` of $owner is traveling at ", math:round(speed), "km/h and is exceeding the $speedAlertValuekm/h speed limit") as information, true as notify
 insert into dataOut;
 
-from dataIn[id != "$deviceId"]
-select id , latitude, longitude,timeStamp, type, speed, heading ,eventId , "NORMAL" as state, "" as information
-insert into dataOut;
-
 from dataIn[speed < $speedAlertValue and id == "$deviceId" and owner == "$owner"]
 select id, owner, latitude, longitude, timeStamp, type, speed, heading, "NORMAL" as state, str:concat("The ", type, " device `", id, "` of $owner is travailing at normal speed.") as information, false as notify
 insert into dataOut;
