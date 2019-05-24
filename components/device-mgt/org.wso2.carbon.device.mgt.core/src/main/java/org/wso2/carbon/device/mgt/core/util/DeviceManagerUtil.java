@@ -463,25 +463,16 @@ public final class DeviceManagerUtil {
     }
 
     public static DeviceIDHolder validateDeviceIdentifiers(List<DeviceIdentifier> deviceIDs) {
-
         List<DeviceIdentifier> errorDeviceIdList = new ArrayList<>();
         List<DeviceIdentifier> validDeviceIDList = new ArrayList<>();
-
-        int deviceIDCounter = 0;
         for (DeviceIdentifier deviceIdentifier : deviceIDs) {
-
-            deviceIDCounter++;
             String deviceID = deviceIdentifier.getId();
-
             if (deviceID == null || deviceID.isEmpty()) {
-                log.warn(String.format(OperationMgtConstants.DeviceConstants.DEVICE_ID_NOT_FOUND,
-                        deviceIDCounter));
-                errorDeviceIdList.add(deviceIdentifier);
+                log.warn("When adding operation for devices, found a device identifiers which doesn't have defined "
+                        + "the identity of the device, with the request. Hence ignoring the device identifier.");
                 continue;
             }
-
             try {
-
                 if (isValidDeviceIdentifier(deviceIdentifier)) {
                     validDeviceIDList.add(deviceIdentifier);
                 } else {
@@ -491,7 +482,6 @@ public final class DeviceManagerUtil {
                 errorDeviceIdList.add(deviceIdentifier);
             }
         }
-
         DeviceIDHolder deviceIDHolder = new DeviceIDHolder();
         deviceIDHolder.setValidDeviceIDList(validDeviceIDList);
         deviceIDHolder.setErrorDeviceIdList(errorDeviceIdList);
@@ -505,10 +495,8 @@ public final class DeviceManagerUtil {
         if (device == null || device.getDeviceIdentifier() == null ||
                 device.getDeviceIdentifier().isEmpty() || device.getEnrolmentInfo() == null) {
             return false;
-        } else if (EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
-            return false;
-        }
-        return true;
+        } else
+            return !EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus());
     }
 
     public static boolean isDeviceExists(DeviceIdentifier deviceIdentifier) throws DeviceManagementException {
