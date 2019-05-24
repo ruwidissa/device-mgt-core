@@ -457,7 +457,7 @@ public interface DeviceManagementService {
                     String ifModifiedSince);
 
     @PUT
-    @Path("/{type}/{id}/status")
+    @Path("/{type}/{id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",

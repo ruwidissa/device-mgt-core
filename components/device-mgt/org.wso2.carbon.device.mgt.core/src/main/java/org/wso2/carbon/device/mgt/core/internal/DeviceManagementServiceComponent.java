@@ -149,9 +149,6 @@ public class DeviceManagementServiceComponent {
 
     @SuppressWarnings("unused")
     protected void activate(ComponentContext componentContext) {
-
-        log.info("CALLING Crazy   .............");
-
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Initializing device management core bundle");
