@@ -365,6 +365,10 @@ public interface ReviewManagementAPI {
                             response = List.class,
                             responseContainer = "List"),
                     @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n No Application release found for application release UUID.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting ratings",
                             response = ErrorResponse.class)

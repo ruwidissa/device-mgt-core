@@ -39,6 +39,9 @@ public interface SubscriptionManager {
     ApplicationInstallResponse installApplicationForDevices(String applicationUUID, List<DeviceIdentifier> deviceList)
             throws ApplicationManagementException;
 
+    ApplicationInstallResponse addBulkApInstallation(String applicationUUID, List<String> subscriberList,
+            String subType) throws ApplicationManagementException;
+
     /**
      * To install an application to given list of users.
      * @param applicationUUID ID of the application to install

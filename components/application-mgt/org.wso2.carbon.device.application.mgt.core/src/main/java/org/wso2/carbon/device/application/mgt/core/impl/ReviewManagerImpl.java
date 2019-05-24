@@ -1,20 +1,20 @@
-/*
- *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
  */
+
 package org.wso2.carbon.device.application.mgt.core.impl;
 
 import org.apache.commons.logging.Log;
@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 /**
  * This class is the default implementation for the Managing the reviews.
@@ -467,26 +468,29 @@ public class ReviewManagerImpl implements ReviewManager {
         }
     }
 
-    @Override public Rating getRating(String appReleaseUuuid) throws ReviewManagementException {
+    @Override public Rating getRating(String appReleaseUuuid) throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
             Rating rating = this.applicationReleaseDAO.getRating(appReleaseUuuid, tenantId);
             if (rating == null) {
-                throw new ReviewManagementException(
+                throw new NotFoundException(
                         "Couldn't find rating for application release UUID: " + appReleaseUuuid
                                 + ". Please check the existence of the application release");
             }
 
             List<Integer> ratingValues = this.reviewDAO.getAllRatingValues(appReleaseUuuid, tenantId);
             TreeMap<Integer, Integer> ratingVariety = new TreeMap<>();
-            for (Integer ratingVal : ratingValues) {
+            ratingValues.forEach(ratingVal -> {
                 if (ratingVariety.containsKey(ratingVal)) {
                     ratingVariety.replace(ratingVal, ratingVariety.get(ratingVal) + 1);
                 } else {
                     ratingVariety.put(ratingVal, 1);
                 }
-            }
+            });
+            IntStream.rangeClosed(1, Constants.MAX_RATING).filter(i -> !ratingVariety.containsKey(i))
+                    .forEach(i -> ratingVariety.put(i, 0));
+
             rating.setRatingVariety(ratingVariety);
             return rating;
         } catch (ApplicationManagementDAOException e) {

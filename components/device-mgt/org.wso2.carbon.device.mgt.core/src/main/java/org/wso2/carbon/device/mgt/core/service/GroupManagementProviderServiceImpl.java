@@ -619,6 +619,30 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         return devices;
     }
 
+    public List<Device> getAllDevicesOfGroup(String groupName) throws GroupManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Group devices of group: " + groupName);
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Device> devices;
+        try {
+            GroupManagementDAOFactory.openConnection();
+            devices = this.groupDAO.getAllDevicesOfGroup(groupName, tenantId);
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while getting devices in group.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDevices for group name: " + groupName;
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
     /**
      * {@inheritDoc}
      */

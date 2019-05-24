@@ -234,8 +234,13 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
         Rating rating;
         try {
             rating = reviewManager.getRating(uuid);
-        } catch (ReviewManagementException e) {
-            log.error("Review Management Exception occurs", e);
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ReviewManagementException | ApplicationManagementException e) {
+            String msg = "Error occured while getting review data for application release UUID: " + uuid;
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.OK).entity(rating).build();

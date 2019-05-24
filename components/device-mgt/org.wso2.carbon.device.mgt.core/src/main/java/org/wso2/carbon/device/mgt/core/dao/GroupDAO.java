@@ -190,6 +190,8 @@ public interface GroupDAO {
     List<Device> getDevices(int groupId, int startIndex, int rowCount, int tenantId)
             throws GroupManagementDAOException;
 
+    List<Device> getAllDevicesOfGroup(String groupName, int tenantId) throws GroupManagementDAOException;
+
     /**
      * Get all user roles for device group.
      *
