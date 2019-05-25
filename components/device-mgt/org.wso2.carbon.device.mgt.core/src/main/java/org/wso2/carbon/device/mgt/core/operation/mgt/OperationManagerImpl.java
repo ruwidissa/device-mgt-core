@@ -171,8 +171,6 @@ public class OperationManagerImpl implements OperationManager {
                         + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain() + ", device count:"
                         + deviceIds.size() + " operation type:" + operation.getCode());
             }
-//            Map<Integer, List<DeviceIdentifier>> ignoredDeviceIdentifierMap = new HashMap<>();
-//            Map<Integer, List<DeviceIdentifier>> authorizedDeviceIdentifierMap = new HashMap<>();
             DeviceIDHolder deviceAuthorizationResult = this.authorizeDevices(operation, validDeviceIds);
             List<DeviceIdentifier> authorizedDeviceIds = deviceAuthorizationResult.getValidDeviceIDList();
             if (authorizedDeviceIds.isEmpty()) {
@@ -221,17 +219,6 @@ public class OperationManagerImpl implements OperationManager {
                         ignoredDevices.add(device);
                         operation.setId(existingOperationID);
                         this.sendNotification(operation, device);
-//                        List<DeviceIdentifier> deviceIdentifiers;
-//                        if (ignoredDeviceIdentifierMap.containsKey(existingOperationID)) {
-//                            deviceIdentifiers = ignoredDeviceIdentifierMap.get(existingOperationID);
-//                        } else {
-//                            deviceIdentifiers = new ArrayList<>();
-//                        }
-//                        DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
-//                        deviceIdentifier.setType(device.getType());
-//                        deviceIdentifier.setId(device.getDeviceIdentifier());
-//                        deviceIdentifiers.add(deviceIdentifier);
-//                        ignoredDeviceIdentifierMap.put(existingOperationID, deviceIdentifiers);
                     }
                 }
             }
@@ -266,20 +253,12 @@ public class OperationManagerImpl implements OperationManager {
             }
 
             //TODO have to create a sql to load device details from deviceDAO using single query.
-            List<DeviceIdentifier> authorizedDeviceIdentifiers = new ArrayList<>();
             for (Device device : authorizedDevices) {
                 enrolmentId = device.getEnrolmentInfo().getId();
                 //Do not repeat the task operations
                 operationMappingDAO.addOperationMapping(operationId, enrolmentId, isScheduled);
-//                DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
-//                deviceIdentifier.setId(device.getDeviceIdentifier());
-//                deviceIdentifier.setType(device.getType());
-//                authorizedDeviceIdentifiers.add(deviceIdentifier);
             }
-
-//            authorizedDeviceIdentifierMap.put(operationId, authorizedDeviceIdentifiers);
             OperationManagementDAOFactory.commitTransaction();
-
             if (!isScheduled) {
                 for (Device device : authorizedDevices) {
                     this.sendNotification(operation, device);

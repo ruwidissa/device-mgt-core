@@ -33,6 +33,14 @@ public class ApplicationInstallResponse {
     private List<DeviceIdentifier> alreadyInstalledDevices;
 
     @ApiModelProperty(
+            name = "errorDevices",
+            value = "List of devices that either device identity is not exist or device type doesn't compatible with the supported device type of the .",
+            dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
+    )
+    private List<DeviceIdentifier> errorDevices;
+
+
+    @ApiModelProperty(
             name = "activity",
             value = "Activity corresponding to the operation"
     )
@@ -53,4 +61,8 @@ public class ApplicationInstallResponse {
     public void setAlreadyInstalledDevices(List<DeviceIdentifier> alreadyInstalledDevices) {
         this.alreadyInstalledDevices = alreadyInstalledDevices;
     }
+
+    public List<DeviceIdentifier> getErrorDevices() { return errorDevices; }
+
+    public void setErrorDevices(List<DeviceIdentifier> errorDevices) { this.errorDevices = errorDevices; }
 }
