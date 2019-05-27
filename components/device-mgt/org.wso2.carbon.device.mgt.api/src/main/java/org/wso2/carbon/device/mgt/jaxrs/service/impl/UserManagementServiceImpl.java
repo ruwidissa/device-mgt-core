@@ -143,7 +143,13 @@ public class UserManagementServiceImpl implements UserManagementService {
                                 "was refused.").build()).build();
             }
 
-            String initialUserPassword = this.generateInitialUserPassword();
+            String initialUserPassword;
+            if (userInfo.getPassword() != null) {
+                initialUserPassword = userInfo.getPassword();
+            } else {
+                initialUserPassword = this.generateInitialUserPassword();
+            }
+
             Map<String, String> defaultUserClaims =
                     this.buildDefaultUserClaims(userInfo.getFirstname(), userInfo.getLastname(),
                             userInfo.getEmailAddress());
