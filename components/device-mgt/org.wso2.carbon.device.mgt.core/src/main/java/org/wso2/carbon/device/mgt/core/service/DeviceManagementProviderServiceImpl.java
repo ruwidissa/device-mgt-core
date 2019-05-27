@@ -15,6 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.lang.StringUtils;
@@ -814,6 +831,53 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public Device getDevice(String deviceId, boolean requireDeviceInfo) throws DeviceManagementException {
+        if (deviceId == null) {
+            String message = "Received null device identifier for method getDevice";
+            log.error(message);
+            throw new DeviceManagementException(message);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get device by device id :" + deviceId + " '" +
+                    "' and requiredDeviceInfo: " + requireDeviceInfo);
+        }
+        int tenantId = this.getTenantId();
+        Device device;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            device = deviceDAO.getDevice(deviceId, tenantId);
+            if (device == null) {
+                String message = "No device is found upon the id '" +
+                        deviceId + "'";
+                if (log.isDebugEnabled()) {
+                    log.debug(message);
+                }
+                return null;
+            }
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, device.getType());
+            this.addDeviceToCache(deviceIdentifier, device);
+        } catch (DeviceManagementDAOException e) {
+            String message = "Error occurred while obtaining the device for '" + deviceId + "'";
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } catch (SQLException e) {
+            String message = "Error occurred while opening a connection to the data source";
+            log.error(message);
+            throw new DeviceManagementException(message, e);
+        } catch (Exception e) {
+            String message = "Error occurred in getDevice: " + deviceId;
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        if (requireDeviceInfo) {
+            device = this.getAllDeviceInfo(device);
+        }
+        return device;
+    }
+
+    @Override
     public Device getDevice(DeviceIdentifier deviceId, String owner, boolean requireDeviceInfo)
             throws DeviceManagementException {
         if (deviceId == null) {
@@ -1063,6 +1127,47 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred in getDevice for device: " + deviceId.getId();
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        if (requireDeviceInfo) {
+            device = this.getAllDeviceInfo(device);
+        }
+        return device;
+    }
+
+    @Override
+    public Device getDevice(String deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException {
+        if (deviceId == null || since == null) {
+            String message = "Received incomplete data for getDevice";
+            log.error(message);
+            throw new DeviceManagementException(message);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get device since '" + since.toString() + "' with identifier: " + deviceId + "");
+        }
+        Device device;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            device = deviceDAO.getDevice(deviceId, since, this.getTenantId());
+            if (device == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No device is found upon the id '" + deviceId + "'");
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String message = "Error occurred while obtaining the device for id '" + deviceId + "'";
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } catch (SQLException e) {
+            String message = "Error occurred while opening a connection to the data source";
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } catch (Exception e) {
+            String message = "Error occurred in getDevice for device: " + deviceId;
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }

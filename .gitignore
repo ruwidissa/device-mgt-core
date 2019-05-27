@@ -8,6 +8,7 @@ target
 *.ipr
 .idea
 *.ids
+.editorconfig
 # Mac crap
 .DS_Store
 

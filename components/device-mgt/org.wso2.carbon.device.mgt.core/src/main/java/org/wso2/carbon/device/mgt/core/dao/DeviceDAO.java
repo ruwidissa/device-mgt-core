@@ -15,6 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
 
 package org.wso2.carbon.device.mgt.core.dao;
 
@@ -128,6 +145,17 @@ public interface DeviceDAO {
      */
     Device getDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
 
+
+    /**
+     * This method is used to retrieve a device of a given device-identifier and tenant-id.
+     *
+     * @param deviceIdentifier device id.
+     * @param tenantId tenant id.
+     * @return returns the device object.
+     * @throws DeviceManagementDAOException
+     */
+    Device getDevice(String deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
+
     /**
      * This method is used to retrieve a device of a given device-identifier and owner and tenant-id.
      *
@@ -151,6 +179,19 @@ public interface DeviceDAO {
      */
     Device getDevice(DeviceIdentifier deviceIdentifier, Date ifModifiedSince, int tenantId) throws
                                                                                             DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve a device of a given device-identifier and tenant-id which modified
+     * later than the ifModifiedSince param.
+     *
+     * @param deviceIdentifier device id.
+     * @param ifModifiedSince last modified time.
+     * @param tenantId tenant id.
+     * @return returns the device object.
+     * @throws DeviceManagementDAOException
+     */
+    Device getDevice(String deviceIdentifier, Date ifModifiedSince, int tenantId) throws
+            DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve a device of a given device-identifier and owner and tenant-id which modified
