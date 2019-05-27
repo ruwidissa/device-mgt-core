@@ -64,6 +64,7 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +93,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (log.isDebugEnabled()) {
             log.debug("Install application which has UUID: " + applicationUUID + " to " + deviceIdentifiers.size()
                     + "devices.");
+        }
+        if (deviceIdentifiers.isEmpty()){
+            String msg = "In order to install application release which has UUID " + applicationUUID + ", you should "
+                    + "provide list of device identifiers. But found an empty list of identifiers.";
+            log.error(msg);
+            throw new BadRequestException(msg);
         }
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();

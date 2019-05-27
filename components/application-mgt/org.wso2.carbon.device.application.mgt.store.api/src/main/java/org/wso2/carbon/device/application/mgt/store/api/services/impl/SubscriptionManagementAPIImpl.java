@@ -17,17 +17,13 @@
  */
 package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
-import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponseTmp;
-import org.wso2.carbon.device.application.mgt.common.EnterpriseInstallationDetails;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.store.api.services.SubscriptionManagementAPI;
-import org.wso2.carbon.device.application.mgt.common.InstallationDetails;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
@@ -56,12 +52,6 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     public Response installApplicationForDevices(
             @PathParam("uuid") String uuid,
             @Valid List<DeviceIdentifier> deviceIdentifiers) {
-        if (deviceIdentifiers.isEmpty()){
-            String msg = "In order to install application release which has UUID " + uuid + ", you should provide list "
-                    + "of device identifiers. But found an empty list of identifiers.";
-            log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             ApplicationInstallResponse response = subscriptionManager
@@ -120,6 +110,8 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
+
+    //todo remove following unwanted APIs
 
     @Override
     @POST
