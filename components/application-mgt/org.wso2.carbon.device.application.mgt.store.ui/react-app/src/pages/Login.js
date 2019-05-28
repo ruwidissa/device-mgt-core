@@ -1,7 +1,11 @@
 import React from "react";
-import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox,} from 'antd';
+import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
 import styles from './Login.less';
+import axios from 'axios';
+import config from "../../public/conf/config.json";
+
 const {Title} = Typography;
+const {Text} = Typography;
 
 class Login extends React.Component {
     render() {
@@ -33,33 +37,77 @@ class Login extends React.Component {
 }
 
 class NormalLoginForm extends React.Component {
-    handleSubmit = (e) => {
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                console.log('Received values of form: ', values);
-            }
-        });
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            inValid: false,
+            loading : false
+        };
     }
 
+    handleSubmit = (e) => {
+        const thisForm = this;
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            thisForm.setState({
+                inValid: false
+            });
+            if (!err) {
+                thisForm.setState({
+                    loading: true
+                });
+                console.log('Received values of form: ', values);
+                let data = "username=" + values.username + "&password=" + values.password + "&platform=store";
+                axios.post('https://'+config.serverConfig.hostname+':'+config.serverConfig.httpsPort+config.serverConfig.loginUri, data
+                ).then(res => {
+                    if (res.status === 200) {
+                        window.location = res.data.url;
+                    }
+                }).catch(function (error) {
+                    if (error.response.status === 400) {
+                        thisForm.setState({
+                            inValid: true,
+                            loading: false
+                        });
+                    }
+                });
+            }
+
+        });
+    };
+
     render() {
-        const { getFieldDecorator } = this.props.form;
+        const {getFieldDecorator} = this.props.form;
+        let errorMsg = "";
+        if (this.state.inValid) {
+            errorMsg = <Text type="danger">Invalid Login Details</Text>;
+        }
+        let loading = "";
+        if (this.state.loading) {
+            loading = <Text type="secondary">Loading..</Text>;
+        }
         return (
             <Form onSubmit={this.handleSubmit} className="login-form">
                 <Form.Item>
-                    {getFieldDecorator('userName', {
-                        rules: [{ required: true, message: 'Please input your username!' }],
+                    {getFieldDecorator('username', {
+                        rules: [{required: true, message: 'Please input your username!'}],
                     })(
-                        <Input style={{height: 32}} prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
+                        <Input style={{height: 32}} prefix={<Icon type="user" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                               placeholder="Username"/>
                     )}
                 </Form.Item>
                 <Form.Item>
                     {getFieldDecorator('password', {
-                        rules: [{ required: true, message: 'Please input your Password!' }],
+                        rules: [{required: true, message: 'Please input your Password!'}],
                     })(
-                        <Input style={{height: 32}} className={styles.input} prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
+                        <Input style={{height: 32}} className={styles.input}
+                               prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>} type="password"
+                               placeholder="Password"/>
                     )}
                 </Form.Item>
+                {loading}
+                {errorMsg}
                 <Form.Item>
                     {getFieldDecorator('remember', {
                         valuePropName: 'checked',
@@ -67,17 +115,17 @@ class NormalLoginForm extends React.Component {
                     })(
                         <Checkbox>Remember me</Checkbox>
                     )}
+                    <br/>
                     <a className="login-form-forgot" href="">Forgot password</a>
                     <Button block type="primary" htmlType="submit" className="login-form-button">
                         Log in
                     </Button>
-                    Or <a href="">register now!</a>
                 </Form.Item>
             </Form>
         );
     }
 }
 
-const WrappedNormalLoginForm = Form.create({ name: 'normal_login' })(NormalLoginForm);
+const WrappedNormalLoginForm = Form.create({name: 'normal_login'})(NormalLoginForm);
 
 export default Login;
