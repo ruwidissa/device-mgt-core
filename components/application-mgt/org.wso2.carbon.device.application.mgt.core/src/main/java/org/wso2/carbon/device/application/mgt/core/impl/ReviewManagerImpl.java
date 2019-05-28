@@ -224,6 +224,7 @@ public class ReviewManagerImpl implements ReviewManager {
         review.setCreatedAt(reviewDTO.getCreatedAt());
         review.setModifiedAt(reviewDTO.getModifiedAt());
         review.setRating(reviewDTO.getRating());
+        review.setUsername(reviewDTO.getUsername());
         review.setReplies(new ArrayList<>());
         return review;
     }
