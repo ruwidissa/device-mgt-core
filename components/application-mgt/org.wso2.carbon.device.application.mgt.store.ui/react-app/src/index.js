@@ -1,41 +1,53 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { renderRoutes } from "react-router-config";
-import Dashboard from "./pages/dashboard/Dashboard"
+import App from "./App";
 import Login from "./pages/Login";
-import {BrowserRouter} from "react-router-dom";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Apps from "./pages/dashboard/apps/Apps";
+import Release from "./pages/dashboard/apps/release/Release";
+import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
+import './index.css';
+import store from "./js/store/index";
+import {Provider} from "react-redux";
 
 
 const routes = [
     {
-        component: App,
+        path: '/store/login',
+        exact: true,
+        component: Login
+    },
+    {
+        path: '/store/apps',
+        exact: false,
+        component: Dashboard,
         routes: [
             {
-                path: "/publisher",
-                exact: true,
-                component: Dashboard,
-                routes: [
-                    {
-                        path: "/publisher/a",
-                        component: Login
-                    }
-                ]
+                path: '/store/apps',
+                component: Apps,
+                exact: true
             },
             {
-                path: "/publisher/login",
-                component: Login
+                path: '/store/apps/new-app',
+                component: AddNewApp,
+                exact: true
+            },
+            {
+                path: '/store/apps/:uuid',
+                exact: true,
+                component: Release
             }
         ]
     }
 ];
 
-ReactDOM.render( <BrowserRouter>
-    {/* kick it all off with the root route */}
-    {renderRoutes(routes)}
-</BrowserRouter>, document.getElementById('root'));
+
+ReactDOM.render(
+    <Provider store={store}>
+        <App routes={routes}/>
+    </Provider>,
+    document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
