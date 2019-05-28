@@ -84,5 +84,5 @@ public interface ReviewManager {
      * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the review management
      */
-    Rating getRating(String appReleaseUuuid) throws ReviewManagementException;
+    Rating getRating(String appReleaseUuuid) throws ReviewManagementException, ApplicationManagementException;
 }

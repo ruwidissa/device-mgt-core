@@ -87,20 +87,26 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         this.applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
     }
 
-    @Override
-    public ApplicationInstallResponse installApplicationForDevices(String applicationUUID,
+    @Override public ApplicationInstallResponse installApplicationForDevices(String applicationUUID,
             List<DeviceIdentifier> deviceIdentifiers) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Install application which has UUID: " + applicationUUID + " to " + deviceIdentifiers.size()
                     + "devices.");
         }
+        if (deviceIdentifiers.isEmpty()){
+            String msg = "In order to install application release which has UUID " + applicationUUID + ", you should "
+                    + "provide list of device identifiers. But found an empty list of identifiers.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
         ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
         DeviceIDHolder filteredDeviceHolder = filterDeviceIdentifiers(applicationDTO, deviceIdentifiers);
-        List<DeviceIdentifier> errorDeviceIdentifierList = filteredDeviceHolder.getErrorDeviceIdList();
+        List<DeviceIdentifier> errorDeviceIdentifiers = filteredDeviceHolder.getErrorDeviceIdList();
         List<Device> filteredDeviceObjs = new ArrayList<>();
 
+        //getting device objects by using device identifiers
         for (DeviceIdentifier deviceIdentifier : filteredDeviceHolder.getValidDeviceIDList()) {
             try {
                 Device device = deviceManagementProviderService.getDevice(deviceIdentifier, false);
@@ -108,7 +114,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     String msg = "Couldn't found an device for device identifier " + deviceIdentifier.getId()
                             + " and device type: " + deviceIdentifier.getType();
                     log.warn(msg);
-                    errorDeviceIdentifierList.add(deviceIdentifier);
+                    errorDeviceIdentifiers.add(deviceIdentifier);
                 } else {
                     filteredDeviceObjs.add(device);
                 }
@@ -116,86 +122,111 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 String msg = "Error occurred when getting device data for device identifier " + deviceIdentifier.getId()
                         + " and device type " + deviceIdentifier.getType();
                 log.warn(msg);
-                errorDeviceIdentifierList.add(deviceIdentifier);
+                errorDeviceIdentifiers.add(deviceIdentifier);
                 throw new ApplicationManagementException(msg, e);
             }
         }
 
-        SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(filteredDeviceObjs);
-        if (subscribingDeviceIdHolder.getCompatibleDevices().isEmpty()){
-            ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
-            applicationInstallResponse.setAlreadyInstalledDevices(subscribingDeviceIdHolder.getInstalledDevices());
-            applicationInstallResponse.setErrorDevices(errorDeviceIdentifierList);
+        if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
+            DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            String deviceTypeName = deviceType.getName();
+            ApplicationInstallResponse applicationInstallResponse = installToDevices(deviceTypeName, filteredDeviceObjs,
+                    applicationDTO, SubsciptionType.DEVICE.toString(), null);
+            applicationInstallResponse.setErrorDevices(errorDeviceIdentifiers);
+            return applicationInstallResponse;
+        } else {
+            //todo improve thos
+            ApplicationInstallResponse applicationInstallResponse = installToDevices(null, filteredDeviceObjs,
+                    applicationDTO, SubsciptionType.DEVICE.toString(), null);
+            applicationInstallResponse.setErrorDevices(errorDeviceIdentifiers);
             return applicationInstallResponse;
         }
-        Activity activity = installToDevices(applicationDTO,
-                new ArrayList<>(subscribingDeviceIdHolder.getCompatibleDevices().keySet()),
-                deviceIdentifiers.get(0).getType());
+    }
+
+    @Override
+    public ApplicationInstallResponse addBulkApInstallation(String applicationUUID, List<String> subscriberList,
+            String subType) throws ApplicationManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Install application release which has UUID " + applicationUUID + " to " + subscriberList.size()
+                    + " users.");
+        }
+
+        try {
+            if (subscriberList.isEmpty()) {
+                String msg = "In order to install application release which has UUID " + applicationUUID + ", you shou"
+                        + "ld provide list of subscribers. But found an empty list of users.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (SubsciptionType.USER.toString().equals(subType) && !SubsciptionType.ROLE.toString().equals(subType)
+                    && SubsciptionType.GROUP.toString().equals(subType)) {
+                String msg = "Found invalid subscription type to install application release witch has UUID: "
+                        + applicationUUID + ". Subscription type is " + subType;
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+
+            ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
+            DeviceManagementProviderService deviceManagementProviderService = HelperUtil
+                    .getDeviceManagementProviderService();
+            GroupManagementProviderService groupManagementProviderService = HelperUtil
+                    .getGroupManagementProviderService();
+            List<Device> filteredDevices = new ArrayList<>();
+            List<Device> subscriberDevices = new ArrayList<>();
+            for (String subscriber : subscriberList) {
+                if (SubsciptionType.USER.toString().equals(subType)) {
+                    subscriberDevices.addAll(deviceManagementProviderService.getDevicesOfUser(subscriber));
+                } else if (SubsciptionType.ROLE.toString().equals(subType)) {
+                    subscriberDevices.addAll(deviceManagementProviderService.getAllDevicesOfRole(subscriber));
+                } else if (SubsciptionType.GROUP.toString().equals(subType)) {
+                    subscriberDevices.addAll(groupManagementProviderService.getAllDevicesOfGroup(subscriber));
+                }
+            }
+
+            if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
+                DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+                String deviceTypeName = deviceType.getName();
+                for (Device device : subscriberDevices) {
+                    if (deviceTypeName.equals(device.getType())) {
+                        filteredDevices.add(device);
+                    }
+                }
+                return installToDevices(deviceTypeName, filteredDevices, applicationDTO, subType, subscriberList);
+            } else {
+                //todo improve this
+                return installToDevices(null, subscriberDevices, applicationDTO, subType, subscriberList);
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting devices of given users or given roles.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while getting devices of given groups";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    private ApplicationInstallResponse installToDevices(String deviceType, List<Device> devices,
+            ApplicationDTO applicationDTO, String subType, List<String> subscribers)
+            throws ApplicationManagementException {
+
+        SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(devices);
+        if (subscribingDeviceIdHolder.getCompatibleDevices().isEmpty()) {
+            ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
+            applicationInstallResponse.setAlreadyInstalledDevices(subscribingDeviceIdHolder.getInstalledDevices());
+            return applicationInstallResponse;
+        }
+        Activity activity = addAppInstallOperationToDevices(applicationDTO,
+                new ArrayList<>(subscribingDeviceIdHolder.getCompatibleDevices().keySet()), deviceType);
 
         ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
         applicationInstallResponse.setActivity(activity);
         applicationInstallResponse.setAlreadyInstalledDevices(subscribingDeviceIdHolder.getInstalledDevices());
-        applicationInstallResponse.setErrorDevices(errorDeviceIdentifierList);
 
         addSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(), activity,
                 subscribingDeviceIdHolder.getCompatibleDevices(),
-                new ArrayList<>(subscribingDeviceIdHolder.getDeviceSubscriptions().keySet()), null,
-                SubsciptionType.DEVICE.toString());
-        return applicationInstallResponse;
-    }
-
-    @Override
-    public ApplicationInstallResponse installApplicationForUsers(String applicationUUID,
-            List<String> userList) throws ApplicationManagementException {
-        if (log.isDebugEnabled()) {
-            log.debug("Install application release which has UUID " + applicationUUID + " to " + userList.size()
-                    + " users.");
-        }
-
-        //todo check valid user list - throw BadRequest exception
-        ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
-        DeviceType appDeviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        Map<DeviceIdentifier, Integer> compatibleDevices = new HashMap<>();
-        List<DeviceIdentifier> installedDeviceIdentifiers = new ArrayList<>();
-        Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
-
-        for (String user : userList) {
-            try {
-                List<Device> userDevices = HelperUtil.getDeviceManagementProviderService().getDevicesOfUser(user);
-                List<Device> filteredDevices = new ArrayList<>();
-
-                //todo improve for web clips
-                for (Device device : userDevices) {
-                    if (appDeviceType.getName().equals(device.getType())) {
-                        filteredDevices.add(device);
-                    }
-                }
-
-                SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(filteredDevices);
-                compatibleDevices.putAll(subscribingDeviceIdHolder.getCompatibleDevices());
-                deviceSubscriptions.putAll(subscribingDeviceIdHolder.getDeviceSubscriptions());
-                installedDeviceIdentifiers.addAll(subscribingDeviceIdHolder.getInstalledDevices());
-            } catch (DeviceManagementException e) {
-                String msg = "Error occurred when extracting the device list of user[" + user + "].";
-                log.error(msg);
-                throw new ApplicationManagementException(msg, e);
-            }
-        }
-
-        if (compatibleDevices.keySet().isEmpty()){
-            ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
-            applicationInstallResponse.setAlreadyInstalledDevices(installedDeviceIdentifiers);
-            return applicationInstallResponse;
-        }
-        Activity activity = installToDevices(applicationDTO, new ArrayList<>(compatibleDevices.keySet()),
-                appDeviceType.getName());
-
-        ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
-        applicationInstallResponse.setActivity(activity);
-        applicationInstallResponse.setAlreadyInstalledDevices(installedDeviceIdentifiers);
-
-        addSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(), activity, compatibleDevices,
-                new ArrayList<>(deviceSubscriptions.keySet()), userList, SubsciptionType.USER.toString());
+                new ArrayList<>(subscribingDeviceIdHolder.getDeviceSubscriptions().keySet()), subscribers, subType);
         return applicationInstallResponse;
     }
 
@@ -261,28 +292,34 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
     private DeviceIDHolder filterDeviceIdentifiers(ApplicationDTO applicationDTO,
             List<DeviceIdentifier> deviceIdentifiers) throws ApplicationManagementException {
-        DeviceType deviceType = null;
         List<DeviceIdentifier> errorDeviceIdList = new ArrayList<>();
         List<DeviceIdentifier> validDeviceIDList = new ArrayList<>();
         if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
-            deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        }
-
-        for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
-            if (StringUtils.isEmpty(deviceIdentifier.getId()) || StringUtils.isEmpty(deviceIdentifier.getType())) {
-                log.warn("Found a device identifier which has either empty identity of the device or empty device "
-                        + "type. Hence ignoring the device identifier. ");
-                continue;
+            DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+                if (StringUtils.isEmpty(deviceIdentifier.getId()) || StringUtils.isEmpty(deviceIdentifier.getType())) {
+                    log.warn("Found a device identifier which has either empty identity of the device or empty device "
+                            + "type. Hence ignoring the device identifier. ");
+                    continue;
+                }
+                if (!deviceType.getName().equals(deviceIdentifier.getType())) {
+                    String msg =
+                            "Found a device identifier which is not matched with the application device Type. Application "
+                                    + "device type is " + deviceType.getName() + " and the identifier of which has a "
+                                    + "different device type is " + deviceIdentifier.getId();
+                    log.warn(msg);
+                    errorDeviceIdList.add(deviceIdentifier);
+                } else {
+                    validDeviceIDList.add(deviceIdentifier);
+                }
             }
-            if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType()) && deviceType != null
-                    && !deviceType.getName().equals(deviceIdentifier.getType())) {
-                String msg =
-                        "Found a device identifier which is not matched with the application device Type. Application "
-                                + "device type is " + deviceType.getName() + " and the identifier of which has a "
-                                + "different device type is " + deviceIdentifier.getId();
-                log.warn(msg);
-                errorDeviceIdList.add(deviceIdentifier);
-            } else {
+        } else {
+            for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+                if (StringUtils.isEmpty(deviceIdentifier.getId()) || StringUtils.isEmpty(deviceIdentifier.getType())) {
+                    log.warn("Found a device identifier which has either empty identity of the device or empty device "
+                            + "type. Hence ignoring the device identifier. ");
+                    continue;
+                }
                 validDeviceIDList.add(deviceIdentifier);
             }
         }
@@ -317,6 +354,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
                 subscriptionDAO.subscribeUserToApplication(tenantId, subscriber, subscribers, applicationReleaseId);
             }
+
+            //todo add for other subscription types
 
             List<Integer> deviceIds = new ArrayList<>();
             List<ActivityStatus> activityStatuses = activity.getActivityStatus();
@@ -378,6 +417,62 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.closeDBConnection();
         }
 
+    }
+
+    //todo remove below methods
+
+    @Override public ApplicationInstallResponse installApplicationForUsers(String applicationUUID,
+            List<String> userList) throws ApplicationManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Install application release which has UUID " + applicationUUID + " to " + userList.size()
+                    + " users.");
+        }
+
+        //todo check valid user list - throw BadRequest exception
+        ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
+        DeviceType appDeviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+        Map<DeviceIdentifier, Integer> compatibleDevices = new HashMap<>();
+        List<DeviceIdentifier> installedDeviceIdentifiers = new ArrayList<>();
+        Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
+
+        for (String user : userList) {
+            try {
+                List<Device> userDevices = HelperUtil.getDeviceManagementProviderService().getDevicesOfUser(user);
+                List<Device> filteredDevices = new ArrayList<>();
+
+                //todo improve for web clips
+                for (Device device : userDevices) {
+                    if (appDeviceType.getName().equals(device.getType())) {
+                        filteredDevices.add(device);
+                    }
+                }
+
+                SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(filteredDevices);
+                compatibleDevices.putAll(subscribingDeviceIdHolder.getCompatibleDevices());
+                deviceSubscriptions.putAll(subscribingDeviceIdHolder.getDeviceSubscriptions());
+                installedDeviceIdentifiers.addAll(subscribingDeviceIdHolder.getInstalledDevices());
+            } catch (DeviceManagementException e) {
+                String msg = "Error occurred when extracting the device list of user[" + user + "].";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            }
+        }
+
+        if (compatibleDevices.keySet().isEmpty()) {
+            ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
+            applicationInstallResponse.setAlreadyInstalledDevices(installedDeviceIdentifiers);
+            return applicationInstallResponse;
+        }
+        Activity activity = addAppInstallOperationToDevices(applicationDTO, new ArrayList<>(compatibleDevices.keySet()),
+                appDeviceType.getName());
+
+        ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
+        applicationInstallResponse.setActivity(activity);
+        applicationInstallResponse.setAlreadyInstalledDevices(installedDeviceIdentifiers);
+
+        addSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(), activity, compatibleDevices,
+                new ArrayList<>(deviceSubscriptions.keySet()), userList, SubsciptionType.USER.toString());
+        return applicationInstallResponse;
     }
 
     //todo not implemented below code properly
@@ -476,8 +571,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return null;
     }
 
-    private Activity installToDevices(ApplicationDTO application, List<DeviceIdentifier> deviceIdentifierList,
-            String deviceType) throws ApplicationManagementException {
+    private Activity addAppInstallOperationToDevices(ApplicationDTO application,
+            List<DeviceIdentifier> deviceIdentifierList, String deviceType) throws ApplicationManagementException {
         DeviceManagementProviderService deviceManagementProviderService = HelperUtil
                 .getDeviceManagementProviderService();
         try {

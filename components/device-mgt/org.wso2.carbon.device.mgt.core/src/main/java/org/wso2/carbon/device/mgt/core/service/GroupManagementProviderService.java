@@ -166,6 +166,9 @@ public interface GroupManagementProviderService {
      */
     List<Device> getDevices(int groupId, int startIndex, int rowCount) throws GroupManagementException;
 
+    List<Device> getAllDevicesOfGroup(String groupName) throws GroupManagementException;
+
+
     /**
      * This method is used to retrieve the device count of a given group.
      *

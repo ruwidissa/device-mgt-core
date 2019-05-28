@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 /**
  * This class is the default implementation for the Managing the reviews.
@@ -467,26 +468,29 @@ public class ReviewManagerImpl implements ReviewManager {
         }
     }
 
-    @Override public Rating getRating(String appReleaseUuuid) throws ReviewManagementException {
+    @Override public Rating getRating(String appReleaseUuuid) throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
             Rating rating = this.applicationReleaseDAO.getRating(appReleaseUuuid, tenantId);
             if (rating == null) {
-                throw new ReviewManagementException(
+                throw new NotFoundException(
                         "Couldn't find rating for application release UUID: " + appReleaseUuuid
                                 + ". Please check the existence of the application release");
             }
 
             List<Integer> ratingValues = this.reviewDAO.getAllRatingValues(appReleaseUuuid, tenantId);
             TreeMap<Integer, Integer> ratingVariety = new TreeMap<>();
-            for (Integer ratingVal : ratingValues) {
+            ratingValues.forEach(ratingVal -> {
                 if (ratingVariety.containsKey(ratingVal)) {
                     ratingVariety.replace(ratingVal, ratingVariety.get(ratingVal) + 1);
                 } else {
                     ratingVariety.put(ratingVal, 1);
                 }
-            }
+            });
+            IntStream.rangeClosed(1, Constants.MAX_RATING).filter(i -> !ratingVariety.containsKey(i))
+                    .forEach(i -> ratingVariety.put(i, 0));
+
             rating.setRatingVariety(ratingVariety);
             return rating;
         } catch (ApplicationManagementDAOException e) {
