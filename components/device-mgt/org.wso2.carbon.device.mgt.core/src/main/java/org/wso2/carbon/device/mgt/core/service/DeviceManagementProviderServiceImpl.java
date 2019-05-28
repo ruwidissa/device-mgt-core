@@ -1423,7 +1423,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
             DeviceManagementDAOFactory.beginTransaction();
             if (enrolmentInfo != null) {
-                success = enrollmentDAO.setStatus(enrolmentInfo.getId(), currentOwner, status, tenantId);
+                success = enrollmentDAO.setStatus(enrolmentInfo.getId(), status, tenantId);
             }
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
