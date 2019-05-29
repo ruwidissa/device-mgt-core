@@ -4,6 +4,7 @@ import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
 import DetailedRating from "./DetailedRating";
+import Reviews from "./review/Reviews";
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
@@ -52,6 +53,7 @@ class ReleaseView extends React.Component {
                             <DetailedRating uuid={release.uuid}/>
                         </Col>
                     </Row>
+                    <Reviews uuid={release.uuid}/>
                 </div>
             </div>
         );
