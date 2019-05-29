@@ -49,7 +49,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
 info = @Info(
         version = "1.0.0",
-        title = "Store Management Admin Service",
+        title = "Admin Review Management Admin Service",
         extensions = {
                 @Extension(properties = {
                         @ExtensionProperty(name = "name", value = "ReviewManagementAdminService"),
@@ -73,7 +73,7 @@ scopes = {
 )
 
 @Path("/admin/reviews")
-@Api(value = "Review Management")
+@Api(value = "Review Management Admin API")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ReviewManagementAdminAPI {
 String SCOPE = "scope";

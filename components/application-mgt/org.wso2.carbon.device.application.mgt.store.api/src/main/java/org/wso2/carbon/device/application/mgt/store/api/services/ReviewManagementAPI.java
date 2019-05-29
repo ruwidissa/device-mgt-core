@@ -56,7 +56,7 @@ import java.util.List;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "Store Management Service",
+                title = "Review Management Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ReviewManagementService"),
@@ -86,7 +86,7 @@ import java.util.List;
 )
 
 @Path("/reviews")
-@Api(value = "Review Management")
+@Api(value = "Review Management API")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ReviewManagementAPI {
     String SCOPE = "scope";
