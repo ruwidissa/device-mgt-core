@@ -1,58 +1,60 @@
 import React from "react";
-import { Layout, Menu, Breadcrumb } from 'antd';
+import {Layout, Menu, Icon} from 'antd';
 
-const { Header, Content, Footer } = Layout;
+const {Header, Content, Footer} = Layout;
 
-import styles from './Dashboard.less';
 import Logo from "../../../public/images/logo.svg";
-import Login from "../Login";
-import {renderRoutes} from "react-router-config";
-import {NavLink} from "react-router-dom";
-
+import {Link, NavLink} from "react-router-dom";
+import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
+import {Switch, Redirect} from 'react-router'
+import "../../App.css";
 
 class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            route : props.route
+            routes: props.routes
         }
-        console.log(props);
     }
 
     render() {
         return (
-            <Layout className="layout">
-                <Header>
-                    <div style={{backgroundImage: "url(" + { Logo} + ")"}} className={styles.logo}/>
-                    <Menu
-                        theme="light"
-                        mode="horizontal"
-                        defaultSelectedKeys={['2']}
-                        style={{ lineHeight: '64px' }}
-                    >
-                        <Menu.Item key="1">nav 1</Menu.Item>
-                        <Menu.Item key="2">nav 2</Menu.Item>
-                        <Menu.Item key="3">nav 3</Menu.Item>
-                    </Menu>
-                </Header>
-                <Content style={{ padding: '0 50px' }}>
-                    <Breadcrumb style={{ margin: '16px 0' }}>
-                        <Breadcrumb.Item>Home</Breadcrumb.Item>
-                        <Breadcrumb.Item>List</Breadcrumb.Item>
-                        <Breadcrumb.Item>App</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <NavLink exact to="/publisher/a" className="nav-link" >
-                        Items
-                    </NavLink>
+            <div>
+                <Layout className="layout">
+                    <Header>
+                        <div className="logo">
+                            <img src={Logo}/>
+                        </div>
+                        <Menu
+                            theme="light"
+                            mode="horizontal"
+                            defaultSelectedKeys={['2']}
+                            style={{lineHeight: '64px'}}
+                        >
+                            <Menu.Item key="1"><Link to="/store/apps"><Icon type="appstore"/>Apps</Link></Menu.Item>
+                            <Menu.Item key="2"><Link to="/store/apps"><Icon
+                                type="line-chart"/>Apps</Link></Menu.Item>
+                            <Menu.Item key="3"><Link to="/store/apps/new-app"><Icon type="upload"/>Add New
+                                App</Link></Menu.Item>
+                        </Menu>
+                    </Header>
+                </Layout>
+                <Layout>
+                    <Content style={{padding: '0 0'}}>
+                        <Switch>
+                            <Redirect exact from="/store" to="/store/apps"/>
+                            {this.state.routes.map((route) => (
+                                <RouteWithSubRoutes key={route.path} {...route} />
+                            ))}
 
-                    {/* child routes won't render without this */}
-                    {renderRoutes(this.state.route.routes, { someProp: "these extra props are optional" })}
-                    <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>Content</div>
-                </Content>
-                <Footer style={{ textAlign: 'center' }}>
-                    ©2019 entgra.io
-                </Footer>
-            </Layout>
+                        </Switch>
+
+                    </Content>
+                    <Footer style={{textAlign: 'center'}}>
+                        ©2019 entgra.io
+                    </Footer>
+                </Layout>
+            </div>
         );
     }
 }
