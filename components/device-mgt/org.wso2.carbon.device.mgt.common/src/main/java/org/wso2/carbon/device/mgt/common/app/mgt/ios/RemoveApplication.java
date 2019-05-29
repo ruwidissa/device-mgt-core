@@ -16,39 +16,27 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.beans.android;
+package org.wso2.carbon.device.mgt.common.app.mgt.ios;
 
 import com.google.gson.Gson;
 
 import java.io.Serializable;
 
-/**
- * This class represents the Appstore AuthenticationImpl information.
- */
-public class AppStoreApplication implements Serializable {
+public class RemoveApplication implements Serializable {
 
-	private String type;
-	private String appIdentifier;
+    private String bundleId;
 
-	public String getType() {
-		return type;
-	}
+    public String getBundleId() {
+        return bundleId;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setBundleId(String bundleId) {
+        this.bundleId = bundleId;
+    }
 
-	public String getAppIdentifier() {
-		return appIdentifier;
-	}
-
-	public void setAppIdentifier(String appIdentifier) {
-		this.appIdentifier = appIdentifier;
-	}
-
-	public String toJSON() {
+    public String toJSON() {
         Gson gson = new Gson();
         return gson.toJson(this);
-	}
+    }
 
 }

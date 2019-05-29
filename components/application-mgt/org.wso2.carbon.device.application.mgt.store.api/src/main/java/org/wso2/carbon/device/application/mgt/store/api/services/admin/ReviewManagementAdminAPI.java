@@ -49,7 +49,7 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
 info = @Info(
         version = "1.0.0",
-        title = "Admin Review Management Admin Service",
+        title = "Review Management Admin Service",
         extensions = {
                 @Extension(properties = {
                         @ExtensionProperty(name = "name", value = "ReviewManagementAdminService"),

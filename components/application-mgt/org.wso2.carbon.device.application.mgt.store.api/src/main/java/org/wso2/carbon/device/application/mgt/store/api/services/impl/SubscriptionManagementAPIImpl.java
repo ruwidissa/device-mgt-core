@@ -80,14 +80,15 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
     @Override
     @POST
-    @Path("/install/{uuid}/{subType}")
-    public Response addBulkAppInstalltion(
+    @Path("/install/{uuid}/{subType}/{action}")
+    public Response performBulkAppInstallation(
             @PathParam("uuid") String uuid,
-            @PathParam("uuid") String subType,
+            @PathParam("subType") String subType,
+            @PathParam("action") String sction,
             @Valid List<String> subscribers) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            ApplicationInstallResponse response = subscriptionManager.addBulkApInstallation(uuid, subscribers, subType);
+            ApplicationInstallResponse response = subscriptionManager.performBulkAppInstallation(uuid, subscribers, subType);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";

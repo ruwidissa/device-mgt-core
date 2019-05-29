@@ -129,7 +129,7 @@ public interface SubscriptionManagementAPI {
     );
 
     @POST
-    @Path("/install/{uuid}/{subType}")
+    @Path("/install/{uuid}/{subType}/{action}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -149,7 +149,7 @@ public interface SubscriptionManagementAPI {
             value = {
 
             })
-    Response addBulkAppInstalltion(
+    Response performBulkAppInstallation(
             @ApiParam(
                     name = "uuid",
                     value = "The application release UUID",
@@ -162,6 +162,12 @@ public interface SubscriptionManagementAPI {
                     required = true
             )
             @PathParam("subType") String subType,
+            @ApiParam(
+                    name = "action",
+                    value = "Performing action.",
+                    required = true
+            )
+            @PathParam("action") String action,
             @ApiParam(
                     name = "subscribers",
                     value = "Subscriber list of the application release.",

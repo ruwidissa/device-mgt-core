@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.util;
 
+import org.wso2.carbon.device.mgt.common.app.mgt.ios.AppStoreApplication;
+import org.wso2.carbon.device.mgt.common.app.mgt.ios.EnterpriseApplication;
+import org.wso2.carbon.device.mgt.common.app.mgt.ios.RemoveApplication;
+import org.wso2.carbon.device.mgt.common.app.mgt.ios.WebClip;
 import org.wso2.carbon.device.mgt.jaxrs.beans.MobileApp;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ios.AppStoreApplication;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ios.EnterpriseApplication;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ios.RemoveApplication;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ios.WebClip;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 

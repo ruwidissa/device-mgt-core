@@ -619,7 +619,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList = new ApplicationList();
         List<ApplicationDTO> appDTOs;

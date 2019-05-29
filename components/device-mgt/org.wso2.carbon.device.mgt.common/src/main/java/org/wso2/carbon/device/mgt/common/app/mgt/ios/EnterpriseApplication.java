@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.beans.ios;
+package org.wso2.carbon.device.mgt.common.app.mgt.ios;
 
 import com.google.gson.Gson;
 

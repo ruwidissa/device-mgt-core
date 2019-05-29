@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.util;
 
-import org.wso2.carbon.device.mgt.jaxrs.beans.MobileApp;
-import org.wso2.carbon.device.mgt.jaxrs.beans.android.AppStoreApplication;
-import org.wso2.carbon.device.mgt.jaxrs.beans.android.EnterpriseApplication;
+import org.wso2.carbon.device.mgt.common.app.mgt.android.AppStoreApplication;
+import org.wso2.carbon.device.mgt.common.app.mgt.android.EnterpriseApplication;
+import org.wso2.carbon.device.mgt.common.app.mgt.android.WebApplication;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
-import org.wso2.carbon.device.mgt.jaxrs.beans.android.WebApplication;
+import org.wso2.carbon.device.mgt.jaxrs.beans.MobileApp;
 import org.wso2.carbon.device.mgt.jaxrs.exception.UnknownApplicationTypeException;
 
 /**
