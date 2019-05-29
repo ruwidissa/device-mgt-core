@@ -20,7 +20,7 @@
 package org.wso2.carbon.device.mgt.core.privacy;
 
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.PrivacyComplianceException;
+import org.wso2.carbon.device.mgt.common.exceptions.PrivacyComplianceException;
 
 public interface PrivacyComplianceProvider {
 

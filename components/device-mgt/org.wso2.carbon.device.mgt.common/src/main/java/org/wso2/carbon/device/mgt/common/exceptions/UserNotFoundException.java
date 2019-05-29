@@ -1,4 +1,4 @@
-package org.wso2.carbon.device.mgt.common;
+package org.wso2.carbon.device.mgt.common.exceptions;
 /*
  * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *

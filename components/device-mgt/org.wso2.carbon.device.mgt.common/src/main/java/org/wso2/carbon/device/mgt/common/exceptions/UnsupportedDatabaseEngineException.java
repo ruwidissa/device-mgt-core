@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.common;
+package org.wso2.carbon.device.mgt.common.exceptions;
 
 /**
  * This runtime exception will be thrown if the server has configured with unsupported DB engine.

@@ -51,8 +51,11 @@ import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.app.mgt.Application;
+import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.exceptions.UnknownApplicationTypeException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -65,6 +68,8 @@ import org.wso2.carbon.device.mgt.core.operation.mgt.util.DeviceIDHolder;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
+import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -640,62 +645,43 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return response;
     }
 
-    private Operation generateOperationPayloadByDeviceType(String deviceType, ApplicationDTO application, String action) {
-        ProfileOperation operation = new ProfileOperation();
-        operation.setCode(INSTALL_APPLICATION);
-        operation.setType(Operation.Type.PROFILE);
+    private Operation generateOperationPayloadByDeviceType(String deviceType, ApplicationDTO application, String action)
+            throws ApplicationManagementException {
+        try {
 
-//        if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
-//            if (ApplicationType.ENTERPRISE.toString().equalsIgnoreCase(application.getType())) {
-//                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                }
-//            } else if (ApplicationType.PUBLIC.toString().equalsIgnoreCase(application.getType())) {
-//                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                }
-//
-//            } else if (ApplicationType.WEB_CLIP.toString().equalsIgnoreCase(application.getType())) {
-//                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                }
-//            }
-//        } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
-//            if (ApplicationType.ENTERPRISE.toString().equalsIgnoreCase(application.getType())) {
-//                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                }
-//            } else if (ApplicationType.PUBLIC.toString().equalsIgnoreCase(application.getType())) {
-//                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                }
-//            } else if (ApplicationType.WEB_CLIP.toString().equalsIgnoreCase())
-//                application.getType() {
-//                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-//                    log.error("aaaa");
-//                }
-//            }
-//
-//        }
+            //todo rethink and modify the {@link MobileApp} usage
+            MobileApp mobileApp = new MobileApp();
+            if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                    return MDMAndroidOperationUtil.createInstallAppOperation(mobileApp);
+                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                    return MDMAndroidOperationUtil.createAppUninstallOperation(mobileApp);
+                } else {
+                    String msg = "Invalid Action is found. Action: " + action;
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+            } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
+                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                    return MDMIOSOperationUtil.createInstallAppOperation(mobileApp);
+                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                    return MDMIOSOperationUtil.createAppUninstallOperation(mobileApp);
+                } else {
+                    String msg = "Invalid Action is found. Action: " + action;
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+            } else {
+                String msg = "Invalid device type is found. Device Type: " + deviceType;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
 
-
-        //todo: generate operation payload correctly for all types of devices.
-        operation.setPayLoad(
-                "{'type':'enterprise', 'url':'" + application.getApplicationReleaseDTOs().get(0).getInstallerName()
-                        + "', 'app':'" + application.getApplicationReleaseDTOs().get(0).getUuid() + "'}");
-        return operation;
+        } catch (UnknownApplicationTypeException e) {
+            String msg = "Unknown Application type is found.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        }
     }
 
     /**

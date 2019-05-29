@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.util;
+package org.wso2.carbon.device.mgt.common;
 
 /**
  * This class holds all the constants used for IOS and Android.

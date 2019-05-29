@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.beans;
+package org.wso2.carbon.device.mgt.common.app.mgt;
 
 public enum MobileAppTypes {
     ENTERPRISE,WEBAPP,PUBLIC

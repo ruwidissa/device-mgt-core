@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -16,29 +16,29 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.common;
+package org.wso2.carbon.device.mgt.common.exceptions;
 
-public class IllegalTransactionStateException extends RuntimeException {
+public class UnknownApplicationTypeException extends Exception {
 
-    private static final long serialVersionUID = -3151279331929070297L;
+    private static final long serialVersionUID = -3151279311929080299L;
 
-    public IllegalTransactionStateException(String msg, Exception nestedEx) {
+    public UnknownApplicationTypeException(String msg, Exception nestedEx) {
         super(msg, nestedEx);
     }
 
-    public IllegalTransactionStateException(String message, Throwable cause) {
+    public UnknownApplicationTypeException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public IllegalTransactionStateException(String msg) {
+    public UnknownApplicationTypeException(String msg) {
         super(msg);
     }
 
-    public IllegalTransactionStateException() {
+    public UnknownApplicationTypeException() {
         super();
     }
 
-    public IllegalTransactionStateException(Throwable cause) {
+    public UnknownApplicationTypeException(Throwable cause) {
         super(cause);
     }
 
