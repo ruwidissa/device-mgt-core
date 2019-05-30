@@ -478,5 +478,13 @@ public interface DeviceDAO {
      * fails.
      */
     List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId) throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to permanently delete the device and its related details
+     * @param deviceIdentifier device id
+     * @param tenantId tenant id
+     * @throws DeviceManagementDAOException
+     */
+    void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
 }
 
