@@ -15,32 +15,92 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.device.mgt.common;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 import java.util.List;
 import io.swagger.annotations.*;
 
-@ApiModel(value = "Feature", description = "This class carries all information related to a devices enrollment" +
-                                                 " status.")
+@ApiModel(
+        value = "Feature",
+        description = "This class carries all information related to a device feature."
+)
 public class Feature implements Serializable {
 
-    @ApiModelProperty(name = "id", value = "Feature Id.", required = true )
+    @ApiModelProperty(
+            name = "id",
+            value = "Feature Id.",
+            required = true
+    )
     private int id;
-    @ApiModelProperty(name = "code", value = "The code of the feature. For example the code to lock a device" +
-                                             " is DEVICE_LOCK.", required = true )
+
+    @ApiModelProperty(
+            name = "code",
+            value = "The code of the feature. For example the code to lock a device  is DEVICE_LOCK.",
+            required = true
+    )
     private String code;
-    @ApiModelProperty(name = "name", value = "A name that describes a feature.", required = true )
+
+    @ApiModelProperty(
+            name = "name",
+            value = "A name that describes a feature.",
+            required = true
+    )
     private String name;
-    @ApiModelProperty(name = "description", value = "Provides a description of the features..", required = true )
+
+    @ApiModelProperty(
+            name = "description",
+            value = "Provides a description of the features.",
+            required = true
+    )
     private String description;
-    @ApiModelProperty(name = "deviceType", value = "Provide the device type for the respective feature. " +
-                                                   "Features allow you to perform operations on any device type, " +
-                                                   "such as android, iOS or windows..", required = true )
+
+    @ApiModelProperty(
+            name = "type",
+            value = "Type of the feature.",
+            required = true
+    )
+    private String type;
+
+    @ApiModelProperty(
+            name = "hidden",
+            value = "If the feature is hidden from the UI."
+    )
+    private boolean hidden;
+
+    @ApiModelProperty(
+            name = "deviceType",
+            value = "Provide the device type for the respective feature.  Features allow you to perform operations " +
+                    "on any device type, such as android, iOS or windows.",
+            required = true
+    )
     private String deviceType;
     
-    @ApiModelProperty(name = "metadataEntries", value = "Properties related to features.", required = true )
+    @ApiModelProperty(
+            name = "metadataEntries",
+            value = "Properties related to features.",
+            required = true
+    )
     private List<MetadataEntry> metadataEntries;
 
     @XmlElement
@@ -96,9 +156,27 @@ public class Feature implements Serializable {
         this.description = description;
     }
 
+    @XmlAttribute
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
     public static class MetadataEntry implements Serializable {
 
         private int id;
+        private String name;
         private Object value;
 
         public int getId() {
@@ -107,6 +185,14 @@ public class Feature implements Serializable {
 
         public void setId(int id) {
             this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         public Object getValue() {
