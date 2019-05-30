@@ -513,6 +513,67 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public boolean deleteDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
+        if (deviceId == null) {
+            String msg = "Required values are not set to permanently delete device";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Permanently deleting device: " + deviceId.getId() + " of type '" + deviceId.getType() + "'");
+        }
+        DeviceManager deviceManager = this.getDeviceManager(deviceId.getType());
+        if (deviceManager == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Device Manager associated with the device type '" + deviceId.getType() + "' is null. " +
+                          "Therefore, not attempting method 'deleteDevice'");
+            }
+            return false;
+        }
+
+        int tenantId = this.getTenantId();
+
+        Device device = this.getDevice(deviceId, false);
+        if (device == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Device not found for id '" + deviceId.getId() + "'");
+            }
+            return false;
+        }
+
+        if (!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
+            String msg = "Device " + deviceId.getId() + " of type " + deviceId.getType() + " is not dis-enrolled to " +
+                         "permanently delete the device";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        } else {
+            try {
+                DeviceManagementDAOFactory.beginTransaction();
+                deviceDAO.deleteDevice(deviceId, tenantId);
+                DeviceManagementDAOFactory.commitTransaction();
+                this.removeDeviceFromCache(deviceId);
+            } catch (DeviceManagementDAOException e) {
+                DeviceManagementDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while permanently deleting '" + deviceId.getType() +
+                             "' device with the identifier '" + deviceId.getId() + "'";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                String msg = "Error occurred while initiating transaction";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (Exception e) {
+                String msg = "Error occurred while permanently deleting device: " + deviceId.getId();
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+        }
+        return true;
+    }
+
+    @Override
     public boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException {
         Device device = this.getDevice(deviceId, false);
         return device != null;

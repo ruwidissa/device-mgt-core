@@ -582,6 +582,8 @@ public interface DeviceManagementProviderService {
 
     boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
 
+    boolean deleteDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
+
     boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException;
 
     boolean isActive(DeviceIdentifier deviceId) throws DeviceManagementException;
