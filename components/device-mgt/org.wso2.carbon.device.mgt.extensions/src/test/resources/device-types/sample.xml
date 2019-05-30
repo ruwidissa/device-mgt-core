@@ -31,16 +31,23 @@
 	<!--END-->
 
 	<Features>
-		<Feature code="abc">
+		<Feature type="operation" hidden="true" code="abc">
 			<Name>abc</Name>
 			<Description>this is a feature</Description>
-			<Operation context="/bulb/{state}" method="PUT" type="application/json">
-				<QueryParameters>
-					<Parameter>deviceId</Parameter>
-				</QueryParameters>
-				<FormParameters>
-					<Parameter>test</Parameter>
-				</FormParameters>
+			<Operation hidden="true">
+				<params>
+					<queryParams>
+						<Parameter>deviceId</Parameter>
+					</queryParams>
+					<formParams>
+						<Parameter>test</Parameter>
+					</formParams>
+				</params>
+				<metadata>
+					<uri>/bulb/{state}</uri>
+					<method>POST</method>
+					<contentType>application/json</contentType>
+				</metadata>
 			</Operation>
 		</Feature>
 	</Features>

@@ -19,13 +19,19 @@
   -->
 <DeviceTypeConfiguration name="raspberrypi">
     <Features>
-        <Feature code="bulb">
+        <Feature type="operation" code="bulb">
             <Name>Control Bulb</Name>
             <Description>Control Bulb on Raspberrypi</Description>
-            <Operation context="/raspberrypi/device/{deviceId}/bulb" method="POST">
-                <QueryParameters>
-                    <Parameter>state</Parameter>
-                </QueryParameters>
+            <Operation hidden="false">
+                <params>
+                    <queryParams>
+                        <Parameter>state</Parameter>
+                    </queryParams>
+                </params>
+                <metadata>
+                    <uri>/raspberrypi/device/{deviceId}/bulb</uri>
+                    <method>POST</method>
+                </metadata>
             </Operation>
         </Feature>
     </Features>
