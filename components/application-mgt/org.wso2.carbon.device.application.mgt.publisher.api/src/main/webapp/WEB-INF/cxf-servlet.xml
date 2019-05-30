@@ -26,6 +26,7 @@
     <jaxrs:server id="applicationMgtService" address="/">
         <jaxrs:serviceBeans>
             <ref bean="applicationMgtServiceBean"/>
+            <ref bean="applicationMgtAdminServiceBean"/>
             <ref bean="swaggerResource"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
@@ -53,6 +54,7 @@
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 
     <bean id="applicationMgtServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.ApplicationManagementPublisherAPIImpl"/>
+    <bean id="applicationMgtAdminServiceBean" class="org.wso2.carbon.device.application.mgt.publisher.api.services.impl.admin.ApplicationManagementPublisherAdminAPIImpl"/>
     <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.addons.JSONMessageHandler"/>
     <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.addons.MultipartCustomProvider"/>
 

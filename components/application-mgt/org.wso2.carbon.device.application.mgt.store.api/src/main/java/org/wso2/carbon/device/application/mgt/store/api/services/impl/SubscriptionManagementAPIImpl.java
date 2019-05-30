@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
+import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -48,14 +49,15 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
     @Override
     @POST
-    @Path("/install/{uuid}/devices")
-    public Response installApplicationForDevices(
+    @Path("/install/{uuid}/devices/{action}")
+    public Response performAppOperationForDevices(
             @PathParam("uuid") String uuid,
+            @PathParam("action") String action,
             @Valid List<DeviceIdentifier> deviceIdentifiers) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             ApplicationInstallResponse response = subscriptionManager
-                    .installApplicationForDevices(uuid, deviceIdentifiers);
+                    .performBulkAppInstallation(uuid, deviceIdentifiers, SubsciptionType.DEVICE.toString(), action);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUI: " + uuid;
@@ -67,7 +69,8 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
-            String msg = "Application release is not in the installable state. Hence you are not permitted to install the aplication.";
+            String msg = "Application release is not in the installable state. Hence you are not permitted to install "
+                    + "the application.";
             log.error(msg);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -81,14 +84,15 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     @Override
     @POST
     @Path("/install/{uuid}/{subType}/{action}")
-    public Response performBulkAppInstallation(
+    public Response performBulkAppOperation(
             @PathParam("uuid") String uuid,
             @PathParam("subType") String subType,
-            @PathParam("action") String sction,
+            @PathParam("action") String action,
             @Valid List<String> subscribers) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            ApplicationInstallResponse response = subscriptionManager.performBulkAppInstallation(uuid, subscribers, subType);
+            ApplicationInstallResponse response = subscriptionManager
+                    .performBulkAppInstallation(uuid, subscribers, subType, action);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
@@ -111,101 +115,4 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
-
-    //todo remove following unwanted APIs
-
-    @Override
-    @POST
-    @Path("/install/{uuid}/users")
-    public Response installApplicationForUsers(
-            @PathParam("uuid") String uuid,
-            @Valid List<String> users) {
-        if (users.isEmpty()) {
-            String msg = "In order to install application release which has UUID " + uuid + ", you should provide list "
-                    + "of users. But found an empty list of users.";
-            log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }
-        try {
-            SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-            ApplicationInstallResponse response = subscriptionManager.installApplicationForUsers(uuid, users);
-            return Response.status(Response.Status.OK).entity(response).build();
-        } catch (NotFoundException e) {
-            String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
-            log.error(msg);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (BadRequestException e) {
-            String msg = "Found invalid payload for installing application which has UUID: " + uuid
-                    + ". Hence verify the payload";
-            log.error(msg);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        } catch (ForbiddenException e) {
-            String msg = "Application release is not in the installable state. Hence you are not permitted to install "
-                    + "the application.";
-            log.error(msg);
-            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while installing the application release which has UUID: " + uuid
-                    + " for user devices";
-            log.error(msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
-
-    @Override
-    @POST
-    @Path("/install/{uuid}/roles")
-    public Response installApplicationForRoles(
-            @PathParam("uuid") String uuid,
-            @Valid List<String> roles) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("").build();
-    }
-
-    @Override
-    @POST
-    @Path("/install/{uuid}/groups")
-    public Response installApplicationForGroups(
-            @PathParam("uuid") String uuid,
-            @Valid List<String> groups) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("").build();
-    }
-
-
-    @Override
-    @POST
-    @Path("/uninstall/{uuid}/devices")
-    public Response uninstallApplicationForDevices(
-            @PathParam("uuid") String uuid,
-            @Valid List<DeviceIdentifier> deviceIdentifiers) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("").build();
-    }
-
-    @Override
-    @POST
-    @Path("/uninstall/{uuid}/users")
-    public Response uninstallApplicationForUsers(
-            @PathParam("uuid") String uuid,
-            @Valid List<String> users) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("").build();
-    }
-
-    @Override
-    @POST
-    @Path("/uninstall/{uuid}/roles")
-    public Response uninstallApplicationForRoles(
-            @PathParam("uuid") String uuid,
-            @Valid List<String> roles) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("").build();
-    }
-
-    @Override
-    @POST
-    @Path("/uninstall/{uuid}/groups")
-    public Response uninstallApplicationForGroups(
-            @PathParam("uuid") String uuid,
-            @Valid List<String> groups) {
-        return Response.status(Response.Status.BAD_REQUEST).entity("").build();
-
-    }
-
 }
