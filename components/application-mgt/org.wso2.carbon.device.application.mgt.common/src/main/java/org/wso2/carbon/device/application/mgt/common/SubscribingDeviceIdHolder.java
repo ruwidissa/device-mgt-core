@@ -26,7 +26,7 @@ import java.util.Map;
 public class SubscribingDeviceIdHolder {
     private Map<DeviceIdentifier, Integer> subscribedDevices = new HashMap<>();
     private Map<DeviceIdentifier, Integer> subscribableDevices = new HashMap<>();
-    private Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
+//    private Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
 
     public Map<DeviceIdentifier, Integer> getSubscribedDevices() {
         return subscribedDevices;
@@ -44,11 +44,11 @@ public class SubscribingDeviceIdHolder {
         this.subscribableDevices = subscribableDevices;
     }
 
-    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions() {
-        return deviceSubscriptions;
-    }
-
-    public void setDeviceSubscriptions(Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions) {
-        this.deviceSubscriptions = deviceSubscriptions;
-    }
+//    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions() {
+//        return deviceSubscriptions;
+//    }
+//
+//    public void setDeviceSubscriptions(Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions) {
+//        this.deviceSubscriptions = deviceSubscriptions;
+//    }
 }
