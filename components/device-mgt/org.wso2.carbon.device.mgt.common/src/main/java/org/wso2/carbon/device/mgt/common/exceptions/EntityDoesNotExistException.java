@@ -16,28 +16,30 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.common;
+package org.wso2.carbon.device.mgt.common.exceptions;
 
-public class InvalidDeviceException extends Exception {
-    private static final long serialVersionUID = -3151279311929070297L;
+public class EntityDoesNotExistException extends RuntimeException {
 
-    public InvalidDeviceException(String msg, Exception nestedEx) {
+    private static final long serialVersionUID = -3161279331929070297L;
+
+    public EntityDoesNotExistException(String msg, Exception nestedEx) {
         super(msg, nestedEx);
     }
 
-    public InvalidDeviceException(String message, Throwable cause) {
+    public EntityDoesNotExistException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public InvalidDeviceException(String msg) {
+    public EntityDoesNotExistException(String msg) {
         super(msg);
     }
 
-    public InvalidDeviceException() {
+    public EntityDoesNotExistException() {
         super();
     }
 
-    public InvalidDeviceException(Throwable cause) {
+    public EntityDoesNotExistException(Throwable cause) {
         super(cause);
     }
+
 }

@@ -16,29 +16,30 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.mgt.jaxrs.exception;
+package org.wso2.carbon.device.mgt.common.exceptions;
 
-public class UnknownApplicationTypeException extends Exception {
+/**
+ * This exception is thrown when configured with invalid configuration.
+ */
+public class InvalidConfigurationException extends  RuntimeException {
 
-    private static final long serialVersionUID = -3151279311929080299L;
-
-    public UnknownApplicationTypeException(String msg, Exception nestedEx) {
+    public InvalidConfigurationException(String msg, Exception nestedEx) {
         super(msg, nestedEx);
     }
 
-    public UnknownApplicationTypeException(String message, Throwable cause) {
+    public InvalidConfigurationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public UnknownApplicationTypeException(String msg) {
+    public InvalidConfigurationException(String msg) {
         super(msg);
     }
 
-    public UnknownApplicationTypeException() {
+    public InvalidConfigurationException() {
         super();
     }
 
-    public UnknownApplicationTypeException(Throwable cause) {
+    public InvalidConfigurationException(Throwable cause) {
         super(cause);
     }
 

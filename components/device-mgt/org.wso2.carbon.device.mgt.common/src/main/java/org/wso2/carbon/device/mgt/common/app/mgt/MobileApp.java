@@ -16,10 +16,11 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.beans;
+package org.wso2.carbon.device.mgt.common.app.mgt;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
 
 import java.util.Properties;
 

@@ -16,22 +16,43 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.beans.ios;
+package org.wso2.carbon.device.mgt.common.app.mgt.android;
 
 import com.google.gson.Gson;
 
 import java.io.Serializable;
 
-public class RemoveApplication implements Serializable {
+/**
+ * This class represents the Enterprise AuthenticationImpl information.
+ */
+public class EnterpriseApplication implements Serializable {
 
-    private String bundleId;
+    private String type;
+    private String url;
+    private String appIdentifier;
 
-    public String getBundleId() {
-        return bundleId;
+    public String getAppIdentifier() {
+        return appIdentifier;
     }
 
-    public void setBundleId(String bundleId) {
-        this.bundleId = bundleId;
+    public void setAppIdentifier(String appIdentifier) {
+        this.appIdentifier = appIdentifier;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String toJSON() {
