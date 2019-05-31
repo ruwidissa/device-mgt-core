@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.jaxrs.beans;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
 
 import java.util.List;
 

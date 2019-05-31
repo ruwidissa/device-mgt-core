@@ -18,13 +18,10 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
 
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.netbeans.lib.cvsclient.commandLine.command.log;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.PrivacyComplianceException;
+import org.wso2.carbon.device.mgt.common.exceptions.PrivacyComplianceException;
 import org.wso2.carbon.device.mgt.jaxrs.beans.PasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.UserManagementAdminService;
 import org.wso2.carbon.device.mgt.jaxrs.util.CredentialManagementResponseBuilder;

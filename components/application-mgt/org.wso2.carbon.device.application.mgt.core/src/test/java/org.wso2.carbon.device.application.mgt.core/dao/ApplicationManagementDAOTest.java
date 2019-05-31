@@ -10,7 +10,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagem
 import org.wso2.carbon.device.application.mgt.core.dto.ApplicationsDTO;
 import org.wso2.carbon.device.application.mgt.core.dto.DeviceTypeCreator;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;

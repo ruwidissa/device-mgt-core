@@ -26,11 +26,11 @@ import java.util.List;
 
 public class ApplicationInstallResponse {
     @ApiModelProperty(
-            name = "alreadyInstalledDevices",
+            name = "ignoredDeviceIdentifiers",
             value = "List of devices that application release is already installed.",
             dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
     )
-    private List<DeviceIdentifier> alreadyInstalledDevices;
+    private List<DeviceIdentifier> ignoredDeviceIdentifiers;
 
     @ApiModelProperty(
             name = "errorDevices",
@@ -44,22 +44,22 @@ public class ApplicationInstallResponse {
             name = "activity",
             value = "Activity corresponding to the operation"
     )
-    private Activity activity;
+    private List<Activity> activities;
 
-    public Activity getActivity() {
-        return activity;
+    public List<Activity> getActivities() {
+        return activities;
     }
 
-    public void setActivity(Activity activity) {
-        this.activity = activity;
+    public void setActivities(List<Activity> activity) {
+        this.activities = activity;
     }
 
-    public List<DeviceIdentifier> getAlreadyInstalledDevices() {
-        return alreadyInstalledDevices;
+    public List<DeviceIdentifier> getIgnoredDeviceIdentifiers() {
+        return ignoredDeviceIdentifiers;
     }
 
-    public void setAlreadyInstalledDevices(List<DeviceIdentifier> alreadyInstalledDevices) {
-        this.alreadyInstalledDevices = alreadyInstalledDevices;
+    public void setIgnoredDeviceIdentifiers(List<DeviceIdentifier> ignoredDeviceIdentifiers) {
+        this.ignoredDeviceIdentifiers = ignoredDeviceIdentifiers;
     }
 
     public List<DeviceIdentifier> getErrorDevices() { return errorDevices; }

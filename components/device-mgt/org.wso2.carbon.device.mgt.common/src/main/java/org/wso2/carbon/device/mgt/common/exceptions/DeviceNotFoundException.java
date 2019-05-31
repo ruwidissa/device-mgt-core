@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
- * You may obtain a copy of the License at
+ * you may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -15,33 +15,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.device.mgt.common.exceptions;
 
+public class DeviceNotFoundException extends Exception {
 
-package org.wso2.carbon.device.mgt.common;
+    private static final long serialVersionUID = -3151279311996070297L;
 
-public class PrivacyComplianceException extends Exception {
-
-    private static final long serialVersionUID = -3127931192903344297L;
-
-    public PrivacyComplianceException(String msg, Exception nestedEx) {
+    public DeviceNotFoundException(String msg, Exception nestedEx) {
         super(msg, nestedEx);
     }
 
-    public PrivacyComplianceException(String message, Throwable cause) {
+    public DeviceNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public PrivacyComplianceException(String msg) {
+    public DeviceNotFoundException(String msg) {
         super(msg);
     }
 
-    public PrivacyComplianceException() {
+    public DeviceNotFoundException() {
         super();
     }
 
-    public PrivacyComplianceException(Throwable cause) {
+    public DeviceNotFoundException(Throwable cause) {
         super(cause);
     }
 
 }
-

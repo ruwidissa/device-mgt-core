@@ -20,37 +20,35 @@ package org.wso2.carbon.device.application.mgt.common;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SubscribingDeviceIdHolder {
-    private List<DeviceIdentifier> installedDevices = new ArrayList<>();
-    private Map<DeviceIdentifier, Integer> compatibleDevices = new HashMap<>();
-    private Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
+    private Map<DeviceIdentifier, Integer> subscribedDevices = new HashMap<>();
+    private Map<DeviceIdentifier, Integer> subscribableDevices = new HashMap<>();
+//    private Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
 
-    public List<DeviceIdentifier> getInstalledDevices() {
-        return installedDevices;
+    public Map<DeviceIdentifier, Integer> getSubscribedDevices() {
+        return subscribedDevices;
     }
 
-    public void setInstalledDevices(List<DeviceIdentifier> installedDevices) {
-        this.installedDevices = installedDevices;
+    public void setSubscribedDevices(Map<DeviceIdentifier, Integer> subscribedDevices) {
+        this.subscribedDevices = subscribedDevices;
     }
 
-    public Map<DeviceIdentifier, Integer> getCompatibleDevices() {
-        return compatibleDevices;
+    public Map<DeviceIdentifier, Integer> getSubscribableDevices() {
+        return subscribableDevices;
     }
 
-    public void setCompatibleDevices(Map<DeviceIdentifier, Integer> compatibleDevices) {
-        this.compatibleDevices = compatibleDevices;
+    public void setSubscribableDevices(Map<DeviceIdentifier, Integer> subscribableDevices) {
+        this.subscribableDevices = subscribableDevices;
     }
 
-    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions() {
-        return deviceSubscriptions;
-    }
-
-    public void setDeviceSubscriptions(Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions) {
-        this.deviceSubscriptions = deviceSubscriptions;
-    }
+//    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions() {
+//        return deviceSubscriptions;
+//    }
+//
+//    public void setDeviceSubscriptions(Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions) {
+//        this.deviceSubscriptions = deviceSubscriptions;
+//    }
 }

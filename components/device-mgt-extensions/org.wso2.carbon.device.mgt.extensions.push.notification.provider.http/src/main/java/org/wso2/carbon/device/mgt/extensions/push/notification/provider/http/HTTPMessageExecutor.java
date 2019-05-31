@@ -8,7 +8,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.InvalidConfigurationException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationContext;
 
 import java.net.UnknownHostException;

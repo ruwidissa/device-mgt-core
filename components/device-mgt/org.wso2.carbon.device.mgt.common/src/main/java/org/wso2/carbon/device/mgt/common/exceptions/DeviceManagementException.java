@@ -15,29 +15,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.common;
+package org.wso2.carbon.device.mgt.common.exceptions;
 
-public class DeviceNotFoundException extends Exception {
+public class DeviceManagementException extends Exception {
 
-    private static final long serialVersionUID = -3151279311996070297L;
+    private static final long serialVersionUID = -3151279311929070297L;
 
-    public DeviceNotFoundException(String msg, Exception nestedEx) {
+    public DeviceManagementException(String msg, Exception nestedEx) {
         super(msg, nestedEx);
     }
 
-    public DeviceNotFoundException(String message, Throwable cause) {
+    public DeviceManagementException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DeviceNotFoundException(String msg) {
+    public DeviceManagementException(String msg) {
         super(msg);
     }
 
-    public DeviceNotFoundException() {
+    public DeviceManagementException() {
         super();
     }
 
-    public DeviceNotFoundException(Throwable cause) {
+    public DeviceManagementException(Throwable cause) {
         super(cause);
     }
 

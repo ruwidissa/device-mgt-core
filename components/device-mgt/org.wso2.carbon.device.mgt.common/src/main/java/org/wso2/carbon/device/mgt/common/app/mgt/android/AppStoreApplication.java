@@ -16,36 +16,19 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.jaxrs.beans.android;
+package org.wso2.carbon.device.mgt.common.app.mgt.android;
 
 import com.google.gson.Gson;
 
 import java.io.Serializable;
 
 /**
- * This class represents the Web AuthenticationImpl information.
+ * This class represents the Appstore AuthenticationImpl information.
  */
-public class WebApplication implements Serializable {
+public class AppStoreApplication implements Serializable {
 
-	private String name;
-	private String url;
 	private String type;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
+	private String appIdentifier;
 
 	public String getType() {
 		return type;
@@ -55,9 +38,17 @@ public class WebApplication implements Serializable {
 		this.type = type;
 	}
 
-    public String toJSON() {
+	public String getAppIdentifier() {
+		return appIdentifier;
+	}
+
+	public void setAppIdentifier(String appIdentifier) {
+		this.appIdentifier = appIdentifier;
+	}
+
+	public String toJSON() {
         Gson gson = new Gson();
         return gson.toJson(this);
-    }
+	}
 
 }

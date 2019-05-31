@@ -27,14 +27,14 @@ import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
-import org.wso2.carbon.device.mgt.jaxrs.exception.UnknownApplicationTypeException;
+import org.wso2.carbon.device.mgt.common.exceptions.UnknownApplicationTypeException;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.ApplicationManagementAdminService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.device.mgt.jaxrs.util.MDMAndroidOperationUtil;
-import org.wso2.carbon.device.mgt.jaxrs.util.MDMIOSOperationUtil;
+import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
+import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
-import org.wso2.carbon.device.mgt.jaxrs.beans.MobileApp;
+import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
