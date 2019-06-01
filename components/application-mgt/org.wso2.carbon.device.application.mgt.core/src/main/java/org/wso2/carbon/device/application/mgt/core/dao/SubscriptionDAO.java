@@ -23,9 +23,7 @@ import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,24 +33,12 @@ import java.util.Map;
  */
 public interface SubscriptionDAO {
 
-    /**
-     * Adds a mapping between devices and the application which the application is installed on.
-     *
-     * @param tenantId id of the tenant
-     * @param subscribedBy username of the user who subscribe the application
-     * @param deviceList List of {@link Device} which the application is installed on
-     * @param appId id of the {@link ApplicationDTO} which installs
-     * @param releaseId id of the {@link ApplicationReleaseDTO}
-     * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
-     */
-    void subscribeDeviceToApplicationTmp(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
-            int releaseId,  String installStatus) throws ApplicationManagementDAOException;
-
-    List<Integer> subscribeDeviceToApplication(String subscribedBy, List<Integer> deviceIds, String subscribedFrom,
+    List<Integer> addDeviceSubscription(String subscribedBy, List<Integer> deviceIds, String subscribedFrom,
             String installStatus, int releaseId, int tenantId ) throws ApplicationManagementDAOException;
 
-    List<Integer> updateDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
-            String subscribedFrom, String installStatus, int releaseId, int tenantId) throws ApplicationManagementDAOException;
+    List<Integer> updateDeviceSubscription(String updateBy, List<Integer> deviceIds, boolean isUnsubscribed,
+            String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
+            throws ApplicationManagementDAOException;
 
     void addOperationMapping (int operationId, List<Integer> deviceSubscriptionId, int tenantId) throws ApplicationManagementDAOException;
 
@@ -62,40 +48,18 @@ public interface SubscriptionDAO {
      *
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
-     * @param userList list of user names of the users whose devices are subscribed to the application
+     * @param users list of user names of the users whose devices are subscribed to the application
      * @param releaseId id of the {@link ApplicationReleaseDTO}
      * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
      */
-    void subscribeUserToApplication(int tenantId, String subscribedBy, List<String> userList, int releaseId)
+    void addUserSubscriptions(int tenantId, String subscribedBy, List<String> users, int releaseId)
             throws ApplicationManagementDAOException;
 
-    /**
-     * Adds a mapping between user and the application which the application is installed on. This mapping will be
-     * added when an enterprise installation triggered to the role.
-     *
-     * @param tenantId id of the tenant
-     * @param subscribedBy username of the user who subscribe the application
-     * @param roleList list of roles which belongs devices are subscribed to the application
-     * @param appId id of the {@link ApplicationDTO} which installs
-     * @param releaseId id of the {@link ApplicationReleaseDTO}
-     * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
-     */
-    void subscribeRoleToApplication(int tenantId, String subscribedBy, List<String> roleList, int appId, int releaseId)
+    void addRoleSubscriptions(int tenantId, String subscribedBy, List<String> roles, int releaseId)
             throws ApplicationManagementDAOException;
 
-    /**
-     * Adds a mapping between user and the application which the application is installed on. This mapping will be
-     * added when an enterprise installation triggered to the role.
-     *
-     * @param tenantId id of the tenant
-     * @param subscribedBy username of the user who subscribe the application
-     * @param groupList list of {@link DeviceGroup} which belongs the devices that are subscribed to the application
-     * @param appId id of the {@link ApplicationDTO} which installs
-     * @param releaseId id of the {@link ApplicationReleaseDTO}
-     * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
-     */
-    void subscribeGroupToApplication(int tenantId, String subscribedBy, List<DeviceGroup> groupList, int appId,
-            int releaseId) throws ApplicationManagementDAOException;
+    void addGroupSubscriptions(int tenantId, String subscribedBy, List<String> groups, int releaseId)
+            throws ApplicationManagementDAOException;
 
     List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
             ApplicationManagementDAOException;
@@ -106,8 +70,14 @@ public interface SubscriptionDAO {
     List<String> getSubscribedUsernames(List<String> users, int tenantId) throws
             ApplicationManagementDAOException;
 
-    void updateUserSubscription(int tenantId, String updateBy, boolean isUnsubscribed, List<String> userList,
-            int releaseId) throws ApplicationManagementDAOException;
+    List<String> getSubscribedRolenames(List<String> roles, int tenantId) throws
+            ApplicationManagementDAOException;
+
+    List<String> getSubscribedGroupnames(List<String> groups, int tenantId) throws
+            ApplicationManagementDAOException;
+
+    void updateSubscriptions(int tenantId, String updateBy, List<String> paramList,
+            int releaseId, String subType, String action) throws ApplicationManagementDAOException;
 
     List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId) throws ApplicationManagementDAOException;
 
