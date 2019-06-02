@@ -43,7 +43,7 @@ import java.util.List;
  * Implementation of Application Management related APIs.
  */
 @Produces({"application/json"})
-@Path("/applications")
+@Path("/admin/applications")
 public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationManagementPublisherAdminAPI {
 
     private static Log log = LogFactory.getLog(ApplicationManagementPublisherAdminAPIImpl.class);

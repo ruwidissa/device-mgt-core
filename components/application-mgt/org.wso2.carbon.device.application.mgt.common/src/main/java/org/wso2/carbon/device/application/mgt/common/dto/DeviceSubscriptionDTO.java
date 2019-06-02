@@ -27,7 +27,7 @@ public class DeviceSubscriptionDTO {
     private boolean isUnsubscribed;
     private String unsubscribedBy;
     private Timestamp unsubscribedTimestamp;
-    private String subscribedFrom;
+    private String actionTriggeredFrom;
     private String status;
     private int deviceId;
 
@@ -59,9 +59,9 @@ public class DeviceSubscriptionDTO {
         this.unsubscribedTimestamp = unsubscribedTimestamp;
     }
 
-    public String getSubscribedFrom() { return subscribedFrom; }
+    public String getActionTriggeredFrom() { return actionTriggeredFrom; }
 
-    public void setSubscribedFrom(String subscribedFrom) { this.subscribedFrom = subscribedFrom; }
+    public void setActionTriggeredFrom(String actionTriggeredFrom) { this.actionTriggeredFrom = actionTriggeredFrom; }
 
     public String getStatus() { return status; }
 
