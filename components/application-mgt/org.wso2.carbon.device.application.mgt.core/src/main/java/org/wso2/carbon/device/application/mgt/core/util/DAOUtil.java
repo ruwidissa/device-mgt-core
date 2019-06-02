@@ -121,7 +121,7 @@ public class DAOUtil {
         deviceSubscriptionDTO.setUnsubscribed(rs.getBoolean("IS_UNSUBSCRIBED"));
         deviceSubscriptionDTO.setUnsubscribedBy(rs.getString("UNSUBSCRIBED_BY"));
         deviceSubscriptionDTO.setUnsubscribedTimestamp(rs.getTimestamp("UNSUBSCRIBED_AT"));
-        deviceSubscriptionDTO.setSubscribedFrom(rs.getString("SUBSCRIBED_FROM"));
+        deviceSubscriptionDTO.setActionTriggeredFrom(rs.getString("ACTION_TRIGGERED_FROM"));
         deviceSubscriptionDTO.setDeviceId(rs.getInt("DEVICE_ID"));
         deviceSubscriptionDTO.setStatus(rs.getString("STATUS"));
         return  deviceSubscriptionDTO;

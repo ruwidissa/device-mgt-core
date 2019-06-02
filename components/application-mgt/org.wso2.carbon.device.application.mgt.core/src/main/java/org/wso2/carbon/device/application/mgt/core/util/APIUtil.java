@@ -18,18 +18,26 @@
 
 package org.wso2.carbon.device.application.mgt.core.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
+import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Holds util methods required for ApplicationDTO-Mgt API component.
@@ -202,6 +210,65 @@ public class APIUtil {
             log.error(msg);
             throw new UnexpectedServerErrorException(msg);
         }
+    }
+
+    public static Application appDtoToAppResponse(ApplicationDTO applicationDTO)
+            throws BadRequestException, UnexpectedServerErrorException {
+
+        Application application = new Application();
+        DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
+        application.setId(applicationDTO.getId());
+        application.setName(applicationDTO.getName());
+        application.setDescription(applicationDTO.getDescription());
+        application.setAppCategories(applicationDTO.getAppCategories());
+        application.setType(applicationDTO.getType());
+        application.setSubType(applicationDTO.getSubType());
+        application.setPaymentCurrency(applicationDTO.getPaymentCurrency());
+        application.setTags(applicationDTO.getTags());
+        application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
+        application.setDeviceType(deviceType.getName());
+        application.setRating(applicationDTO.getAppRating());
+        List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
+                .stream().map(APIUtil::releaseDtoToRelease).collect(Collectors.toList());
+        application.setApplicationReleases(applicationReleases);
+        return application;
+    }
+
+    public static ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO){
+        String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
+                .getArtifactDownloadEndpoint();
+        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
+                + Constants.FORWARD_SLASH;
+        List<String> screenshotPaths = new ArrayList<>();
+        ApplicationRelease applicationRelease = new ApplicationRelease();
+        applicationRelease.setDescription(applicationReleaseDTO.getDescription());
+        applicationRelease.setVersion(applicationReleaseDTO.getVersion());
+        applicationRelease.setUuid(applicationReleaseDTO.getUuid());
+        applicationRelease.setReleaseType(applicationReleaseDTO.getReleaseType());
+        applicationRelease.setPrice(applicationReleaseDTO.getPrice());
+        applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
+        applicationRelease.setMetaData(applicationReleaseDTO.getMetaData());
+        applicationRelease.setUrl(applicationReleaseDTO.getUrl());
+        applicationRelease.setCurrentStatus(applicationReleaseDTO.getCurrentState());
+        applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
+        applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
+        applicationRelease.setRating(applicationReleaseDTO.getRating());
+        applicationRelease
+                .setInstallerPath(basePath + applicationReleaseDTO.getInstallerName());
+        applicationRelease.setIconPath(basePath + applicationReleaseDTO.getIconName());
+        applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
+
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
+            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName1());
+        }
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName2())) {
+            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName2());
+        }
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName3())) {
+            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName3());
+        }
+        applicationRelease.setScreenshots(screenshotPaths);
+        return applicationRelease;
     }
 
 }

@@ -17,7 +17,6 @@
 
 package org.wso2.carbon.device.application.mgt.common;
 
-import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
 import java.util.HashMap;
@@ -26,8 +25,6 @@ import java.util.Map;
 public class SubscribingDeviceIdHolder {
     private Map<DeviceIdentifier, Integer> subscribedDevices = new HashMap<>();
     private Map<DeviceIdentifier, Integer> subscribableDevices = new HashMap<>();
-//    private Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = new HashMap<>();
-
     public Map<DeviceIdentifier, Integer> getSubscribedDevices() {
         return subscribedDevices;
     }
@@ -43,12 +40,4 @@ public class SubscribingDeviceIdHolder {
     public void setSubscribableDevices(Map<DeviceIdentifier, Integer> subscribableDevices) {
         this.subscribableDevices = subscribableDevices;
     }
-
-//    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions() {
-//        return deviceSubscriptions;
-//    }
-//
-//    public void setDeviceSubscriptions(Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions) {
-//        this.deviceSubscriptions = deviceSubscriptions;
-//    }
 }

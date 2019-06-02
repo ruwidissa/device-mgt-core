@@ -19,14 +19,14 @@ package org.wso2.carbon.device.application.mgt.core.dao.impl.subscription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.SubAction;
+import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.AbstractDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,41 +44,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     private static Log log = LogFactory.getLog(GenericSubscriptionDAOImpl.class);
 
     @Override
-    public void subscribeDeviceToApplicationTmp(int tenantId, String subscribedBy, List<Device> deviceList, int appId,
-            int releaseId, String installStatus) throws ApplicationManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        try {
-            conn = this.getDBConnection();
-            long time = System.currentTimeMillis() / 1000;
-            String sql = "INSERT INTO AP_DEVICE_SUBSCRIPTION(TENANT_ID, SUBSCRIBED_BY, SUBSCRIBED_TIMESTAMP, "
-                    + "DM_DEVICE_ID, AP_APP_RELEASE_ID, AP_APP_ID, INSTALL_STATUS) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql);
-            for (Device device : deviceList) {
-                stmt.setInt(1, tenantId);
-                stmt.setString(2, subscribedBy);
-                stmt.setLong(3, time);
-                stmt.setInt(4, device.getId());
-                stmt.setInt(5, releaseId);
-                stmt.setInt(6, appId);
-                stmt.setString(7, installStatus);
-                stmt.addBatch();
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding a mapping to device ID[" + device.getId() + "] to the application [" + appId
-                            + "], release[" + releaseId + "]");
-                }
-            }
-            stmt.executeBatch();
-        } catch (SQLException | DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
-                    e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, null);
-        }
-    }
-
-    @Override
-    public List<Integer> subscribeDeviceToApplication(String subscribedBy, List<Integer> deviceIds,
+    public List<Integer> addDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
             String subscribedFrom, String installStatus, int releaseId, int tenantId)
             throws ApplicationManagementDAOException {
         Connection conn;
@@ -87,7 +53,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     + "AP_DEVICE_SUBSCRIPTION("
                     + "SUBSCRIBED_BY, "
                     + "SUBSCRIBED_TIMESTAMP, "
-                    + "SUBSCRIBED_FROM, "
+                    + "ACTION_TRIGGERED_FROM, "
                     + "STATUS, "
                     + "DM_DEVICE_ID, "
                     + "AP_APP_RELEASE_ID,"
@@ -122,30 +88,34 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<Integer> updateDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
-            String subscribedFrom, String installStatus, int releaseId, int tenantId) throws ApplicationManagementDAOException {
+    public List<Integer> updateDeviceSubscription(String updateBy, List<Integer> deviceIds,
+            boolean isUnsubscribed, String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
+            throws ApplicationManagementDAOException {
 
         Connection conn;
         try {
             conn = this.getDBConnection();
-            String sql = "UPDATE AP_USER_SUBSCRIPTION "
-                    + "SET "
-                    + "SUBSCRIBED_BY = ?, "
-                    + "SUBSCRIBED_TIMESTAMP = ?, "
-                    + "SUBSCRIBED_FROM = ?, "
-                    + "STATUS = ? "
-                    + "WHERE "
-                    + "DM_DEVICE_ID = ? AND "
-                    + "AP_APP_RELEASE_ID = ? AND "
-                    + "TENANT_ID = ?";
+            String sql = "UPDATE AP_USER_SUBSCRIPTION " + "SET ";
+
+            if (isUnsubscribed) {
+                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
+            } else {
+                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
+            }
+            sql += "ACTION_TRIGGERED_FROM = ?, " +
+                    "STATUS = ? " +
+                    "WHERE " +
+                    "DM_DEVICE_ID = ? AND " +
+                    "AP_APP_RELEASE_ID = ? AND " +
+                    "TENANT_ID = ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 Calendar calendar = Calendar.getInstance();
                 Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
                 for (Integer deviceId : deviceIds) {
-                    stmt.setString(1, subscribedBy);
+                    stmt.setString(1, updateBy);
                     stmt.setTimestamp(2, timestamp);
-                    stmt.setString(3, subscribedFrom);
+                    stmt.setString(3, actionTriggeredFrom);
                     stmt.setString(4, installStatus);
                     stmt.setInt(5, deviceId);
                     stmt.setInt(6, releaseId);
@@ -162,8 +132,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         }
-
-
         return deviceIds;
     }
 
@@ -198,7 +166,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public void subscribeUserToApplication(int tenantId, String subscribedBy, List<String> userList, int releaseId)
+    public void addUserSubscriptions(int tenantId, String subscribedBy, List<String> users, int releaseId)
             throws ApplicationManagementDAOException {
         Connection conn;
         try {
@@ -212,7 +180,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     + "VALUES (?, ?, ?, ?, ?)";
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                for (String user : userList) {
+                for (String user : users) {
                     Calendar calendar = Calendar.getInstance();
                     Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
                     stmt.setInt(1, tenantId);
@@ -234,68 +202,74 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public void subscribeRoleToApplication(int tenantId, String subscribedBy, List<String> roleList, int appId,
-            int releaseId) throws ApplicationManagementDAOException {
+    public void addRoleSubscriptions(int tenantId, String subscribedBy, List<String> roles, int releaseId)
+            throws ApplicationManagementDAOException {
         Connection conn;
-        PreparedStatement stmt = null;
         try {
+            String sql = "INSERT INTO "
+                    + "AP_ROLE_SUBSCRIPTION("
+                    + "TENANT_ID, "
+                    + "SUBSCRIBED_BY, "
+                    + "SUBSCRIBED_TIMESTAMP, "
+                    + "ROLE_NAME, "
+                    + "AP_APP_RELEASE_ID) "
+                    + "VALUES (?, ?, ?, ?, ?)";
             conn = this.getDBConnection();
-            long time = System.currentTimeMillis() / 1000;
-            String sql = "INSERT INTO AP_ROLE_SUBSCRIPTION(TENANT_ID, SUBSCRIBED_BY, SUBSCRIBED_TIMESTAMP, "
-                    + "ROLE_NAME, AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql);
-            for (String role : roleList) {
-                stmt.setInt(1, tenantId);
-                stmt.setString(2, subscribedBy);
-                stmt.setLong(3, time);
-                stmt.setString(4, role);
-                stmt.setInt(5, releaseId);
-                stmt.setInt(6, appId);
-                stmt.addBatch();
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding a mapping to role[" + role + "] to the application [" + appId + "], release["
-                            + releaseId + "]");
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (String role : roles) {
+                    Calendar calendar = Calendar.getInstance();
+                    Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+                    stmt.setInt(1, tenantId);
+                    stmt.setString(2, subscribedBy);
+                    stmt.setTimestamp(3, timestamp);
+                    stmt.setString(4, role);
+                    stmt.setInt(5, releaseId);
+                    stmt.addBatch();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding a mapping to role[" + role + "] to the application release[" + releaseId + "]");
+                    }
                 }
+                stmt.executeBatch();
             }
-            stmt.executeBatch();
         } catch (SQLException | DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
+            throw new ApplicationManagementDAOException("Error occurred while adding role subscription to APPM DB",
                     e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public void subscribeGroupToApplication(int tenantId, String subscribedBy, List<DeviceGroup> groupList, int appId,
-            int releaseId) throws ApplicationManagementDAOException {
+    public void addGroupSubscriptions(int tenantId, String subscribedBy, List<String> groups, int releaseId)
+            throws ApplicationManagementDAOException {
         Connection conn;
-        PreparedStatement stmt = null;
         try {
+            String sql = "INSERT INTO "
+                    + "AP_GROUP_SUBSCRIPTION("
+                    + "TENANT_ID, "
+                    + "SUBSCRIBED_BY, "
+                    + "SUBSCRIBED_TIMESTAMP, "
+                    + "GROUP_NAME, "
+                    + "AP_APP_RELEASE_ID) "
+                    + "VALUES (?, ?, ?, ?, ?)";
             conn = this.getDBConnection();
-            long time = System.currentTimeMillis() / 1000;
-            String sql = "INSERT INTO AP_GROUP_SUBSCRIPTION(TENANT_ID, SUBSCRIBED_BY, SUBSCRIBED_TIMESTAMP, "
-                    + "DM_GROUP_ID, AP_APP_RELEASE_ID, AP_APP_ID) VALUES (?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql);
-            for (DeviceGroup group : groupList) {
-                stmt.setInt(1, tenantId);
-                stmt.setString(2, subscribedBy);
-                stmt.setLong(3, time);
-                stmt.setInt(4, group.getGroupId());
-                stmt.setInt(5, releaseId);
-                stmt.setInt(6, appId);
-                stmt.addBatch();
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding a mapping to group ID[" + group.getGroupId() + "] to the application [" + appId
-                            + "], release[" + releaseId + "]");
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (String group : groups) {
+                    Calendar calendar = Calendar.getInstance();
+                    Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+                    stmt.setInt(1, tenantId);
+                    stmt.setString(2, subscribedBy);
+                    stmt.setTimestamp(3, timestamp);
+                    stmt.setString(4, group);
+                    stmt.setInt(5, releaseId);
+                    stmt.addBatch();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding a mapping to group[" + group + "] to the application release[" + releaseId + "]");
+                    }
                 }
+                stmt.executeBatch();
             }
-            stmt.executeBatch();
         } catch (SQLException | DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
+            throw new ApplicationManagementDAOException("Error occurred while adding group subscription to APPM DB",
                     e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, null);
         }
     }
 
@@ -316,7 +290,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     + "DS.UNSUBSCRIBED AS IS_UNSUBSCRIBED, "
                     + "DS.UNSUBSCRIBED_BY AS UNSUBSCRIBED_BY, "
                     + "DS.UNSUBSCRIBED_TIMESTAMP AS UNSUBSCRIBED_AT, "
-                    + "DS.SUBSCRIBED_FROM AS SUBSCRIBED_FROM, "
+                    + "DS.ACTION_TRIGGERED_FROM AS ACTION_TRIGGERED_FROM, "
                     + "DS.DM_DEVICE_ID AS DEVICE_ID "
                     + "FROM AP_DEVICE_SUBSCRIPTION DS "
                     + "WHERE DS.AP_APP_RELEASE_ID = ? AND DS.TENANT_ID=?";
@@ -363,7 +337,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                             + "DS.UNSUBSCRIBED AS IS_UNSUBSCRIBED, "
                             + "DS.UNSUBSCRIBED_BY AS UNSUBSCRIBED_BY, "
                             + "DS.UNSUBSCRIBED_TIMESTAMP AS UNSUBSCRIBED_AT, "
-                            + "DS.SUBSCRIBED_FROM AS SUBSCRIBED_FROM, "
+                            + "DS.ACTION_TRIGGERED_FROM AS ACTION_TRIGGERED_FROM, "
                             + "DS.DM_DEVICE_ID AS DEVICE_ID, "
                             + "DS.STATUS AS STATUS "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
@@ -431,6 +405,83 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
+    @Override
+    public List<String> getSubscribedRolenames(List<String> roles, int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Request received in DAO Layer to get already subscribed role names for given list of role names.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            int index = 1;
+            List<String> subscribedUsers = new ArrayList<>();
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT RS.ROLE_NAME AS ROLE "
+                            + "FROM AP_ROLE_SUBSCRIPTION RS "
+                            + "WHERE RS.ROLE_NAME IN (", ") AND TENANT_ID = ?");
+            roles.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (String roleName : roles) {
+                    ps.setObject(index++, roleName);
+                }
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        subscribedUsers.add(rs.getString("ROLE"));
+                    }
+                }
+            }
+            return subscribedUsers;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting subscribed roles for given "
+                            + "role names.", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("SWL Error occurred while getting subscribes roles for given"
+                    + " role names.", e);
+        }
+    }
+
+    @Override
+    public List<String> getSubscribedGroupnames(List<String> groups, int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get already subscribed groups for given list of group names.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            int index = 1;
+            List<String> subscribedUsers = new ArrayList<>();
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT GS.GROUP_NAME AS GROUP "
+                            + "FROM AP_GROUP_SUBSCRIPTION GS "
+                            + "WHERE GS.GROUP_NAME IN (", ") AND TENANT_ID = ?");
+            groups.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (String groupName : groups) {
+                    ps.setObject(index++, groupName);
+                }
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        subscribedUsers.add(rs.getString("GROUP"));
+                    }
+                }
+            }
+            return subscribedUsers;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting subscribed groups for given "
+                            + "group names.", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("SWL Error occurred while getting subscribed groups for given"
+                    + " group names.", e);
+        }
+    }
+
     @Override public List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -468,25 +519,42 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }    }
 
     @Override
-    public void updateUserSubscription(int tenantId, String updateBy, boolean isUnsubscribed,
-            List<String> userList, int releaseId) throws ApplicationManagementDAOException {
+    public void updateSubscriptions(int tenantId, String updateBy, List<String> paramList, int releaseId,
+            String subType, String action) throws ApplicationManagementDAOException {
         Connection conn;
         try {
             conn = this.getDBConnection();
-            String sql = "UPDATE AP_USER_SUBSCRIPTION SET ";
-
-            if (isUnsubscribed){
-                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP ";
-            } else {
-                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP =? ";
+            String sql = "UPDATE ";
+            if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
+                sql += "AP_USER_SUBSCRIPTION ";
+            } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+                sql += "AP_ROLE_SUBSCRIPTION ";
+            } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                sql += "AP_GROUP_SUBSCRIPTION ";
             }
 
-            sql += "WHERE USER_NAME = ? AND AP_APP_RELEASE_ID = ? AND AND TENANT_ID = ?";
+            if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                sql += "SET UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
+            } else {
+                sql += "SET SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
+            }
+
+            sql += "WHERE ";
+
+            if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
+                sql += "USER_NAME = ? ";
+            } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+                sql += "ROLE_NAME = ? ";
+            } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                sql += "GROUP_NAME = ? ";
+            }
+
+            sql += "AND AP_APP_RELEASE_ID = ? AND AND TENANT_ID = ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 Calendar calendar = Calendar.getInstance();
                 Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
-                for (String username : userList) {
+                for (String username : paramList) {
                     stmt.setString(1, updateBy);
                     stmt.setTimestamp(2, timestamp);
                     stmt.setString(3, username);

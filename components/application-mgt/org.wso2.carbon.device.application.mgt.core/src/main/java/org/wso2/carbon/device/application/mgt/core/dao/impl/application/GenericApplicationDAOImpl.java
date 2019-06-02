@@ -813,7 +813,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         try {
             Connection conn = this.getDBConnection();
             List<Integer> distinctCategoryIds = new ArrayList<>();
-            String sql = "SELECT DISTINCT AP_APP_CATEGORY.ID AS ID FROM AP_APP_CATEGORY";
+            String sql = "SELECT DISTINCT AP_APP_CATEGORY_ID AS ID FROM AP_APP_CATEGORY_MAPPING;";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
