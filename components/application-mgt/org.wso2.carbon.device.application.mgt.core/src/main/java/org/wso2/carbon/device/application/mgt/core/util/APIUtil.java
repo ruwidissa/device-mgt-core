@@ -28,6 +28,10 @@ import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -210,6 +214,64 @@ public class APIUtil {
             log.error(msg);
             throw new UnexpectedServerErrorException(msg);
         }
+    }
+
+    public static <T> ApplicationDTO convertToAppDTO(T param)
+            throws BadRequestException, UnexpectedServerErrorException {
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+
+        if (param instanceof ApplicationWrapper){
+            ApplicationWrapper applicationWrapper = (ApplicationWrapper) param;
+            DeviceType deviceType = getDeviceTypeData(applicationWrapper.getDeviceType());
+            applicationDTO.setName(applicationWrapper.getName());
+            applicationDTO.setDescription(applicationWrapper.getDescription());
+            applicationDTO.setAppCategories(applicationWrapper.getAppCategories());
+            applicationDTO.setType(applicationWrapper.getType());
+            applicationDTO.setSubType(applicationWrapper.getSubType());
+            applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
+            applicationDTO.setTags(applicationWrapper.getTags());
+            applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
+            applicationDTO.setDeviceTypeId(deviceType.getId());
+            List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
+                    .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
+            applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
+        } else if (param instanceof WebClipWrapper){
+            WebClipWrapper webClipWrapper = (WebClipWrapper) param;
+            applicationDTO.setName(webClipWrapper.getName());
+            applicationDTO.setDescription(webClipWrapper.getDescription());
+            applicationDTO.setAppCategories(webClipWrapper.getCategories());
+            applicationDTO.setSubType(webClipWrapper.getSubMethod());
+            applicationDTO.setPaymentCurrency(webClipWrapper.getPaymentCurrency());
+            applicationDTO.setTags(webClipWrapper.getTags());
+            applicationDTO.setUnrestrictedRoles(webClipWrapper.getUnrestrictedRoles());
+            List<ApplicationReleaseDTO> applicationReleaseEntities = webClipWrapper.getWebClipReleaseWrappers()
+                    .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
+            applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
+        }
+
+        return applicationDTO;
+    }
+
+    public static <T> ApplicationReleaseDTO releaseWrapperToReleaseDTO(T param){
+        ApplicationReleaseDTO applicationReleaseDTO = new ApplicationReleaseDTO();
+        if (param instanceof ApplicationReleaseWrapper){
+            ApplicationReleaseWrapper applicationReleaseWrapper = (ApplicationReleaseWrapper) param;
+            applicationReleaseDTO.setDescription(applicationReleaseWrapper.getDescription());
+            applicationReleaseDTO.setReleaseType(applicationReleaseWrapper.getReleaseType());
+            applicationReleaseDTO.setPrice(applicationReleaseWrapper.getPrice());
+            applicationReleaseDTO.setIsSharedWithAllTenants(applicationReleaseWrapper.getIsSharedWithAllTenants());
+            applicationReleaseDTO.setMetaData(applicationReleaseWrapper.getMetaData());
+            applicationReleaseDTO.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
+        } else if (param instanceof WebClipReleaseWrapper){
+            WebClipReleaseWrapper webClipReleaseWrapper = (WebClipReleaseWrapper) param;
+            applicationReleaseDTO.setDescription(webClipReleaseWrapper.getDescription());
+            applicationReleaseDTO.setReleaseType(webClipReleaseWrapper.getReleaseType());
+            applicationReleaseDTO.setPrice(webClipReleaseWrapper.getPrice());
+            applicationReleaseDTO.setInstallerName(webClipReleaseWrapper.getUrl());
+            applicationReleaseDTO.setIsSharedWithAllTenants(webClipReleaseWrapper.getIsSharedWithAllTenants());
+            applicationReleaseDTO.setMetaData(webClipReleaseWrapper.getMetaData());
+        }
+        return applicationReleaseDTO;
     }
 
     public static Application appDtoToAppResponse(ApplicationDTO applicationDTO)

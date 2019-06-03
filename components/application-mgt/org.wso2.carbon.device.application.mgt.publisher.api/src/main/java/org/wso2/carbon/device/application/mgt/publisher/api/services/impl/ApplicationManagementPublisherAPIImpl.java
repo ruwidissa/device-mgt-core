@@ -32,6 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -179,8 +180,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateAppCreatingRequest(applicationWrapper);
-            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0),
-                    applicationWrapper.getType());
+            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0));
             applicationManager.validateBinaryArtifact(binaryFile, applicationWrapper.getType());
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
@@ -207,6 +207,44 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @POST
     @Consumes("multipart/mixed")
+    @Path("/web-app")
+    public Response createWebApp(
+            @Multipart("webapp") WebClipWrapper webClipWrapper,
+            @Multipart("icon") Attachment iconFile,
+            @Multipart("banner") Attachment bannerFile,
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
+        try {
+            applicationManager.validateAppCreatingRequest(webClipWrapper);
+            applicationManager.validateReleaseCreatingRequest(webClipWrapper.getWebClipReleaseWrappers().get(0));
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
+
+            // Created new application entry
+            Application application = applicationManager.createWebClip(webClipWrapper,
+                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
+            if (application != null) {
+                return Response.status(Response.Status.CREATED).entity(application).build();
+            } else {
+                String msg = "Web app creation is failed";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating the web application";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while handling the web app creating request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Consumes("multipart/mixed")
     @Path("/{appType}/{appId}")
     public Response createRelease(
             @PathParam("appType") String appType,
@@ -221,7 +259,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper, appType);
+            applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper);
             applicationManager.validateBinaryArtifact(binaryFile, appType);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 

@@ -20,36 +20,36 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
-public class ApplicationReleaseWrapper {
+public class WebClipReleaseWrapper {
 
     @ApiModelProperty(name = "description",
-            value = "Description of the application release")
+            value = "Description of the web clip release")
     private String description;
 
     @ApiModelProperty(name = "releaseType",
-            value = "Release type of the application release",
+            value = "Release type of the web clip release",
             required = true,
             example = "alpha, beta etc")
     private String releaseType;
 
     @ApiModelProperty(name = "price",
-            value = "Price of the application release",
+            value = "Price of the web clip release",
             required = true)
     private Double price;
 
     @ApiModelProperty(name = "isSharedWithAllTenants",
-            value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
+            value = "If web clip release is shared with all tenants it is equal to 1 otherwise 0",
             required = true)
     private boolean isSharedWithAllTenants;
 
     @ApiModelProperty(name = "metaData",
-            value = "Meta data of the application release",
+            value = "Meta data of the web clip release",
             required = true)
     private String metaData;
 
-    @ApiModelProperty(name = "supportedOsVersions",
-            value = "ApplicationDTO release supported OS versions")
-    private String supportedOsVersions;
+    @ApiModelProperty(name = "url",
+            value = "URL which is used for WEB-CLIP")
+    private String url;
 
     public String getReleaseType() {
         return releaseType;
@@ -83,11 +83,15 @@ public class ApplicationReleaseWrapper {
         return metaData;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
-
-    public String getSupportedOsVersions() { return supportedOsVersions; }
-
-    public void setSupportedOsVersions(String supportedOsVersions) { this.supportedOsVersions = supportedOsVersions; }
 }

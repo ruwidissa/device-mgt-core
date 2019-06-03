@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -57,6 +58,8 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorage
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
@@ -64,6 +67,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
+import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
@@ -149,7 +153,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         //validating and verifying application data
         try {
             ConnectionManagerUtil.openDBConnection();
-            applicationDTO = appWrapperToAppDTO(applicationWrapper);
+            applicationDTO = APIUtil.convertToAppDTO(applicationWrapper);
             unrestrictedRoles = applicationWrapper.getUnrestrictedRoles();
             tags = applicationWrapper.getTags();
 
@@ -316,7 +320,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         .addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
                 applicationReleaseEntities.add(applicationReleaseDTO);
                 applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
-                Application application = appDtoToAppResponse(applicationDTO);
+                Application application = APIUtil.appDtoToAppResponse(applicationDTO);
                 ConnectionManagerUtil.commitDBTransaction();
                 return application;
             }
@@ -618,6 +622,182 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
+    public Application createWebClip(WebClipWrapper webClipWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (log.isDebugEnabled()) {
+            log.debug("Application create request is received for the tenant : " + tenantId + " From" + " the user : "
+                    + userName);
+        }
+
+        List<Integer> categoryIds;
+        ApplicationDTO applicationDTO = APIUtil.convertToAppDTO(webClipWrapper);
+        List<String> unrestrictedRoles = applicationDTO.getUnrestrictedRoles();
+        List<String> tags = applicationDTO.getTags();
+        List<String> categories = applicationDTO.getAppCategories();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            categoryIds = applicationDAO.getCategoryIdsForCategoryNames(categories, tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting data which is related to application. application name: "
+                    + webClipWrapper.getName() + ".";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+
+        ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+        String uuid = UUID.randomUUID().toString();
+        applicationReleaseDTO.setUuid(uuid);
+        String md5 = DigestUtils.md5Hex(applicationReleaseDTO.getInstallerName());
+        applicationReleaseDTO.setAppHashValue(md5);
+        applicationDTO.setType(ApplicationType.WEB_CLIP.toString());
+
+        //uploading application artifacts
+        try {
+            applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact);
+            applicationDTO.getApplicationReleaseDTOs().clear();
+            applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
+        } catch (ResourceManagementException e) {
+            String msg = "Error Occured when uploading artifacts of the application: " + webClipWrapper.getName();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+
+        //insert application data into database
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        try {
+            List<ApplicationReleaseDTO> applicationReleaseEntities = new ArrayList<>();
+
+            ConnectionManagerUtil.beginDBTransaction();
+            // Insert to application table
+            int appId = this.applicationDAO.createApplication(applicationDTO, tenantId);
+            if (appId == -1) {
+                log.error("Application data storing is Failed.");
+                ConnectionManagerUtil.rollbackDBTransaction();
+                deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
+                return null;
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("New ApplicationDTO entry added to AP_APP table. App Id:" + appId);
+                }
+                //add application categories
+                this.applicationDAO.addCategoryMapping(categoryIds, appId, tenantId);
+
+                //adding application unrestricted roles
+                if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
+                    this.visibilityDAO.addUnrestrictedRoles(unrestrictedRoles, appId, tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("New restricted roles to app ID mapping added to AP_UNRESTRICTED_ROLE table."
+                                + " App Id:" + appId);
+                    }
+                }
+
+                //adding application tags
+                if (tags != null && !tags.isEmpty()) {
+                    List<TagDTO> registeredTags = applicationDAO.getAllTags(tenantId);
+                    List<String> registeredTagNames = new ArrayList<>();
+                    List<Integer> tagIds = new ArrayList<>();
+
+                    for (TagDTO tagDTO : registeredTags) {
+                        registeredTagNames.add(tagDTO.getTagName());
+                    }
+                    List<String> newTags = getDifference(tags, registeredTagNames);
+                    if (!newTags.isEmpty()) {
+                        this.applicationDAO.addTags(newTags, tenantId);
+                        if (log.isDebugEnabled()) {
+                            log.debug("New tags entry added to AP_APP_TAG table. App Id:" + appId);
+                        }
+                        tagIds = this.applicationDAO.getTagIdsForTagNames(tags, tenantId);
+                    } else {
+                        for (TagDTO tagDTO : registeredTags) {
+                            for (String tagName : tags) {
+                                if (tagName.equals(tagDTO.getTagName())) {
+                                    tagIds.add(tagDTO.getId());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    this.applicationDAO.addTagMapping(tagIds, appId, tenantId);
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Creating a new release. App Id:" + appId);
+                }
+                String initialLifecycleState = lifecycleStateManager.getInitialState();
+                applicationReleaseDTO.setCurrentState(initialLifecycleState);
+                applicationReleaseDTO = this.applicationReleaseDAO
+                        .createRelease(applicationReleaseDTO, appId, tenantId);
+                LifecycleState lifecycleState = getLifecycleStateInstance(initialLifecycleState,
+                        initialLifecycleState);
+                this.lifecycleStateDAO
+                        .addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
+                applicationReleaseEntities.add(applicationReleaseDTO);
+                applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
+                Application application = APIUtil.appDtoToAppResponse(applicationDTO);
+                ConnectionManagerUtil.commitDBTransaction();
+                return application;
+            }
+        } catch (LifeCycleManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg =
+                    "Error occurred while adding lifecycle state. application name: " + webClipWrapper.getName() + ".";
+            log.error(msg);
+            try {
+                applicationStorageManager.deleteAllApplicationReleaseArtifacts(
+                        Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
+            } catch (ApplicationStorageManagementException ex) {
+                String errorLog =
+                        "Error occurred when deleting application artifacts. Application artifacts are tried to "
+                                + "delete because of lifecycle state adding issue in the application creating operation.";
+                log.error(errorLog);
+                throw new ApplicationManagementException(errorLog, e);
+            }
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while adding application or application release. application name: "
+                    + webClipWrapper.getName() + ".";
+            log.error(msg);
+            deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
+            throw new ApplicationManagementException(msg, e);
+        } catch (LifecycleManagementException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when getting initial lifecycle state. application name: " + webClipWrapper
+                    .getName() + ".";
+            log.error(msg);
+            deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (VisibilityManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg =
+                    "Error occurred while adding unrestricted roles. application name: " + webClipWrapper.getName()
+                            + ".";
+            log.error(msg);
+            deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while disabling AutoCommit.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+
+    }
+
+    @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -688,7 +868,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             for (ApplicationDTO appDTO : filteredApplications) {
-                applications.add(appDtoToAppResponse(appDTO));
+                applications.add(APIUtil.appDtoToAppResponse(appDTO));
             }
 
             Pagination pagination = new Pagination();
@@ -752,7 +932,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     .createRelease(applicationReleaseDTO, applicationDTO.getId(), tenantId);
             this.lifecycleStateDAO
                     .addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
-            applicationRelease = releaseDtoToRelease(applicationReleaseDTO);
+            applicationRelease = APIUtil.releaseDtoToRelease(applicationReleaseDTO);
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
         } catch (TransactionManagementException e) {
@@ -807,7 +987,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
             ApplicationReleaseDTO applicationReleaseDTO = addApplicationReleaseArtifacts(applicationDTO.getType(),
-                    deviceType.getName(), releaseWrapperToReleaseDTO(applicationReleaseWrapper), applicationArtifact,
+                    deviceType.getName(), APIUtil.releaseWrapperToReleaseDTO(applicationReleaseWrapper), applicationArtifact,
                     true);
             return addImageArtifacts(applicationReleaseDTO, applicationArtifact);
         } catch (ResourceManagementException e) {
@@ -861,7 +1041,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
-            return appDtoToAppResponse(applicationDTO);
+            return APIUtil.appDtoToAppResponse(applicationDTO);
         } catch (LifecycleManagementException e){
             String msg = "Error occurred when getting the last state of the application lifecycle flow";
             log.error(msg);
@@ -911,7 +1091,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
-            return releaseDtoToRelease(applicationReleaseDTO);
+            return APIUtil.releaseDtoToRelease(applicationReleaseDTO);
         } catch (LifecycleManagementException e) {
             String msg = "Error occurred when getting the end state of the application lifecycle flow";
             log.error(msg);
@@ -977,7 +1157,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
-            return appDtoToAppResponse(applicationDTO);
+            return APIUtil.appDtoToAppResponse(applicationDTO);
         } catch (LifecycleManagementException e) {
             String msg = "Error occurred when getting the last state of the application lifecycle flow";
             log.error(msg);
@@ -1542,7 +1722,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 this.lifecycleStateDAO.addLifecycleState(lifecycleState, applicationReleaseDTO.getId(), tenantId);
                 ConnectionManagerUtil.commitDBTransaction();
-                return releaseDtoToRelease(applicationReleaseDTO);
+                return APIUtil.releaseDtoToRelease(applicationReleaseDTO);
             } else {
                 String msg = "Invalid lifecycle state transition from '" + applicationReleaseDTO.getCurrentState() + "'"
                         + " to '" + lifecycleChanger.getAction() + "'";
@@ -2267,77 +2447,187 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
 
     @Override
-    public void validateAppCreatingRequest(ApplicationWrapper applicationWrapper) throws RequestValidatingException {
+    public <T> void validateAppCreatingRequest(T param) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
 
-        String applicationType = applicationWrapper.getType();
+        if (param instanceof ApplicationWrapper){
+           ApplicationWrapper applicationWrapper = (ApplicationWrapper) param;
+            if (StringUtils.isEmpty(applicationWrapper.getName())) {
+                String msg = "Application name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (applicationWrapper.getAppCategories() == null) {
+                String msg = "Application category can't be null.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (applicationWrapper.getAppCategories().isEmpty()) {
+                String msg = "Application category can't be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (StringUtils.isEmpty(applicationWrapper.getType())) {
+                String msg = "Application type can't be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (StringUtils.isEmpty(applicationWrapper.getDeviceType())) {
+                String msg = "Device type can't be empty for the application.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
 
-        if (StringUtils.isEmpty(applicationWrapper.getName())) {
-            String msg = "Application name cannot be empty.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-        if (applicationWrapper.getAppCategories() == null) {
-            String msg = "Application category can't be null.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-        if (applicationWrapper.getAppCategories().isEmpty()) {
-            String msg = "Application category can't be empty.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-        if (StringUtils.isEmpty(applicationType)) {
-            String msg = "Application type can't be empty.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-        if (StringUtils.isEmpty(applicationWrapper.getDeviceType())) {
-            String msg = "Device type can't be empty for the application.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
+            List<ApplicationReleaseWrapper> applicationReleaseWrappers;
+            applicationReleaseWrappers = applicationWrapper.getApplicationReleaseWrappers();
 
-        List<ApplicationReleaseWrapper> applicationReleaseWrappers;
-        applicationReleaseWrappers = applicationWrapper.getApplicationReleaseWrappers();
+            if (applicationReleaseWrappers == null || applicationReleaseWrappers.size() != 1) {
+                String msg = "Invalid application creating request. Application creating request must have single "
+                        + "application release.  Application name:" + applicationWrapper.getName() + " and type: " +
+                        applicationWrapper.getType();
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } else if (param instanceof WebClipWrapper) {
+            WebClipWrapper webClipWrapper = (WebClipWrapper) param;
+            if (StringUtils.isEmpty(webClipWrapper.getName())) {
+                String msg = "Web Clip name cannot be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (webClipWrapper.getCategories() == null) {
+                String msg = "Web Clip category can't be null.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (webClipWrapper.getCategories().isEmpty()) {
+                String msg = "Web clip category can't be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
 
-        if (applicationReleaseWrappers == null || applicationReleaseWrappers.size() != 1) {
-            String msg =
-                    "Invalid application creating request. ApplicationDTO creating request must have single application "
-                            + "release.  ApplicationDTO name:" + applicationWrapper.getName() + " and type: " + applicationWrapper
-                            .getType();
-            log.error(msg);
-            throw new RequestValidatingException(msg);
+            List<WebClipReleaseWrapper> webClipReleaseWrappers;
+            webClipReleaseWrappers = webClipWrapper.getWebClipReleaseWrappers();
+
+            if (webClipReleaseWrappers == null || webClipReleaseWrappers.size() != 1) {
+                String msg = "Invalid web clip creating request. Web clip creating request must have single "
+                        + "web clip release. Web clip name:" + webClipWrapper.getName() + ".";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+
+            try {
+                ConnectionManagerUtil.openDBConnection();
+                List<String> unrestrictedRoles = webClipWrapper.getUnrestrictedRoles();
+
+                if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
+                    if (!isValidRestrictedRole(unrestrictedRoles)) {
+                        String msg = "Unrestricted role list contain role/roles which are not in the user store.";
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
+                    if (!hasUserRole(unrestrictedRoles, userName)) {
+                        String msg = "You are trying to restrict the visibility of the application for a role set, but "
+                                + "in order to perform the action at least one role should be assigned to user: "
+                                + userName;
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                }
+
+                Filter filter = new Filter();
+                filter.setFullMatch(true);
+                filter.setAppName(webClipWrapper.getName().trim());
+                filter.setOffset(0);
+                filter.setLimit(1);
+                List<ApplicationDTO> applicationList = applicationDAO.getApplications(filter, -1, tenantId);
+                if (!applicationList.isEmpty()) {
+                    String msg =
+                            "Already an application registered with same name - " + applicationList.get(0).getName()
+                                    + ".";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+
+                List<CategoryDTO> registeredCategories = this.applicationDAO.getAllCategories(tenantId);
+                List<String> appCategories = webClipWrapper.getCategories();
+
+                if (registeredCategories.isEmpty()) {
+                    ConnectionManagerUtil.rollbackDBTransaction();
+                    String msg =
+                            "Registered application category set is empty. Since it is mandatory to add application "
+                                    + "category when adding new application, registered application category list shouldn't be null.";
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
+                }
+                for (String cat : appCategories) {
+                    boolean isValidCategory = false;
+                    for (CategoryDTO obj : registeredCategories) {
+                        if (cat.equals(obj.getCategoryName())) {
+                            isValidCategory = true;
+                            break;
+                        }
+                    }
+                    if (!isValidCategory) {
+                        String msg =
+                                "Application Creating request contains invalid categories. Hence please verify the "
+                                        + "application creating payload.";
+                        log.error(msg);
+                        throw new BadRequestException(msg);
+                    }
+                }
+            } catch (DBConnectionException e) {
+                String msg = "Error occurred while getting database connection.";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            } catch (ApplicationManagementDAOException e) {
+                String msg = "Error occurred while getting data which is related to web clip. web clip name: "
+                        + webClipWrapper.getName() + ".";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            } catch (UserStoreException e) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Error occurred when validating the unrestricted roles given for the web clip";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
         }
     }
 
     @Override
-    public void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper,
-            String applicationType) throws RequestValidatingException {
+    public <T> void validateReleaseCreatingRequest(T param) throws ApplicationManagementException {
 
-        if (applicationReleaseWrapper == null){
-            String msg = "Application Release shouldn't be null.";
+        if (param == null){
+            String msg = "In order to validate release creating request param shouldn't be null.";
             log.error(msg);
-            throw new RequestValidatingException(msg);
+            throw new BadRequestException(msg);
         }
 
-        if (ApplicationType.WEB_CLIP.toString().equals(applicationType)) {
+        if (param instanceof ApplicationReleaseWrapper){
+            ApplicationReleaseWrapper applicationReleaseWrapper = (ApplicationReleaseWrapper) param;
+
+            if (StringUtils.isEmpty(applicationReleaseWrapper.getSupportedOsVersions())){
+                String msg = "Supported OS Version shouldn't be null or empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } if (param instanceof WebClipReleaseWrapper){
+            WebClipReleaseWrapper webClipReleaseWrapper = (WebClipReleaseWrapper) param;
             UrlValidator urlValidator = new UrlValidator();
             if (StringUtils
-                    .isEmpty(applicationReleaseWrapper.getUrl())){
+                    .isEmpty(webClipReleaseWrapper.getUrl())){
                 String msg = "URL should't be null for the application release creating request for application type WEB_CLIP";
                 log.error(msg);
-                throw new RequestValidatingException(msg);
+                throw new BadRequestException(msg);
             }
-            if (!urlValidator.isValid(applicationReleaseWrapper.getUrl())){
+            if (!urlValidator.isValid(webClipReleaseWrapper.getUrl())){
                 String msg = "Request payload contains an invalid Web Clip URL.";
                 log.error(msg);
-                throw new RequestValidatingException(msg);
+                throw new BadRequestException(msg);
             }
-        }
-        if (StringUtils.isEmpty(applicationReleaseWrapper.getSupportedOsVersions())){
-            String msg = "Supported OS Version shouldn't be null or empty.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
         }
     }
 
@@ -2381,98 +2671,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-    }
-
-
-    private ApplicationDTO appWrapperToAppDTO(ApplicationWrapper applicationWrapper)
-            throws BadRequestException, UnexpectedServerErrorException {
-
-        DeviceType deviceType = getDeviceTypeData(applicationWrapper.getDeviceType());
-        ApplicationDTO applicationDTO = new ApplicationDTO();
-        applicationDTO.setName(applicationWrapper.getName());
-        applicationDTO.setDescription(applicationWrapper.getDescription());
-        applicationDTO.setAppCategories(applicationWrapper.getAppCategories());
-        applicationDTO.setType(applicationWrapper.getType());
-        applicationDTO.setSubType(applicationWrapper.getSubType());
-        applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
-        applicationDTO.setTags(applicationWrapper.getTags());
-        applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
-        applicationDTO.setDeviceTypeId(deviceType.getId());
-        List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
-                .stream().map(this::releaseWrapperToReleaseDTO).collect(Collectors.toList());
-        applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
-        return applicationDTO;
-    }
-
-    private ApplicationReleaseDTO releaseWrapperToReleaseDTO(ApplicationReleaseWrapper applicationReleaseWrapper){
-        ApplicationReleaseDTO applicationReleaseDTO = new ApplicationReleaseDTO();
-        applicationReleaseDTO.setDescription(applicationReleaseWrapper.getDescription());
-        applicationReleaseDTO.setReleaseType(applicationReleaseWrapper.getReleaseType());
-        applicationReleaseDTO.setPrice(applicationReleaseWrapper.getPrice());
-        applicationReleaseDTO.setIsSharedWithAllTenants(applicationReleaseWrapper.getIsSharedWithAllTenants());
-        applicationReleaseDTO.setMetaData(applicationReleaseWrapper.getMetaData());
-        applicationReleaseDTO.setUrl(applicationReleaseWrapper.getUrl());
-        applicationReleaseDTO.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
-        return applicationReleaseDTO;
-    }
-
-    private Application appDtoToAppResponse(ApplicationDTO applicationDTO)
-            throws BadRequestException, UnexpectedServerErrorException {
-
-        Application application = new Application();
-        DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        application.setId(applicationDTO.getId());
-        application.setName(applicationDTO.getName());
-        application.setDescription(applicationDTO.getDescription());
-        application.setAppCategories(applicationDTO.getAppCategories());
-        application.setType(applicationDTO.getType());
-        application.setSubType(applicationDTO.getSubType());
-        application.setPaymentCurrency(applicationDTO.getPaymentCurrency());
-        application.setTags(applicationDTO.getTags());
-        application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
-        application.setDeviceType(deviceType.getName());
-        application.setRating(applicationDTO.getAppRating());
-        List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
-                .stream().map(this::releaseDtoToRelease).collect(Collectors.toList());
-        application.setApplicationReleases(applicationReleases);
-        return application;
-    }
-
-    private ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO){
-        String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
-                .getArtifactDownloadEndpoint();
-        String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
-                + Constants.FORWARD_SLASH;
-        List<String> screenshotPaths = new ArrayList<>();
-        ApplicationRelease applicationRelease = new ApplicationRelease();
-        applicationRelease.setDescription(applicationReleaseDTO.getDescription());
-        applicationRelease.setVersion(applicationReleaseDTO.getVersion());
-        applicationRelease.setUuid(applicationReleaseDTO.getUuid());
-        applicationRelease.setReleaseType(applicationReleaseDTO.getReleaseType());
-        applicationRelease.setPrice(applicationReleaseDTO.getPrice());
-        applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
-        applicationRelease.setMetaData(applicationReleaseDTO.getMetaData());
-        applicationRelease.setUrl(applicationReleaseDTO.getUrl());
-        applicationRelease.setCurrentStatus(applicationReleaseDTO.getCurrentState());
-        applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
-        applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
-        applicationRelease.setRating(applicationReleaseDTO.getRating());
-        applicationRelease
-                .setInstallerPath(basePath + applicationReleaseDTO.getInstallerName());
-        applicationRelease.setIconPath(basePath + applicationReleaseDTO.getIconName());
-        applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
-
-        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
-            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName1());
-        }
-        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName2())) {
-            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName2());
-        }
-        if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName3())) {
-            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName3());
-        }
-        applicationRelease.setScreenshots(screenshotPaths);
-        return applicationRelease;
     }
 
     private <T> DeviceType getDeviceTypeData( T deviceTypeAttr)

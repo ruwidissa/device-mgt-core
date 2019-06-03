@@ -42,6 +42,7 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
 
 import java.util.List;
 import javax.validation.Valid;
@@ -333,6 +334,71 @@ public interface ApplicationManagementPublisherAPI {
             @ApiParam(
                     name = "screenshot3",
                     value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot3") Attachment screenshot3
+    );
+
+    @POST
+    @Path("/web-app")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes("multipart/mixed")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Create an web app",
+            notes = "This will create a new web app",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully created a web application.",
+                            response = ApplicationDTO.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Web app creating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while creating the web app.",
+                            response = ErrorResponse.class)
+            })
+    Response createWebApp(
+            @ApiParam(
+                    name = "webapp",
+                    value = "The web app that need to be created.",
+                    required = true)
+            @Multipart("webapp") WebClipWrapper webClipWrapper,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon of the uploading web app",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "Banner of the uploading web app",
+                    required = true)
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "Screen Shots of the uploading web app",
+                    required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading web app",
+                    required = false)
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading web app",
                     required = false)
             @Multipart(value = "screenshot3") Attachment screenshot3
     );

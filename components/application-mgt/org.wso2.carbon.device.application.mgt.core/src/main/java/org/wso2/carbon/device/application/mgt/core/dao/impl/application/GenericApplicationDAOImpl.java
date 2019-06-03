@@ -806,6 +806,40 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public List<Integer> getCategoryIdsForCategoryNames(List<String> categoryNames, int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get tag ids for given tag names");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            int index = 1;
+            List<Integer> tagIds = new ArrayList<>();
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT AP_APP_CATEGORY.ID AS ID FROM AP_APP_CATEGORY WHERE AP_APP_CATEGORY.CATEGORY IN (", ") AND TENANT_ID = ?");
+            categoryNames.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (String categoryName : categoryNames) {
+                    ps.setObject(index++, categoryName);
+                }
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        tagIds.add(rs.getInt("ID"));
+                    }
+                }
+            }
+            return tagIds;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting categories", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while getting categories", e);
+        }
+    }
+
+    @Override
     public List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get distinct category ids for given tag names");
