@@ -65,6 +65,7 @@ import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
@@ -1734,6 +1735,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public  List<String> getStartupOperations(String deviceType) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
+
+        StartupOperationConfig startupOperationConfig = dms.getStartupOperationConfig();
+        if (startupOperationConfig != null) {
+            return startupOperationConfig.getStartupOperations();
+        }
+        return null;
+    }
+
+    @Override
     public int getDeviceMonitoringFrequency(String deviceType) {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
@@ -1746,6 +1760,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
         return dms.getOperationMonitoringConfig();
+    }
+
+    @Override
+    public StartupOperationConfig getStartupOperationConfig(String deviceType) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
+        return dms.getStartupOperationConfig();
     }
 
     @Override

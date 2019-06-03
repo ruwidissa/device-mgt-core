@@ -46,6 +46,7 @@ import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -654,9 +655,13 @@ public interface DeviceManagementProviderService {
 
     List<MonitoringOperation> getMonitoringOperationList(String deviceType);
 
+    List<String> getStartupOperations(String deviceType);
+
     int getDeviceMonitoringFrequency(String deviceType);
 
     OperationMonitoringTaskConfig getDeviceMonitoringConfig(String deviceType);
+
+    StartupOperationConfig getStartupOperationConfig(String deviceType);
 
     boolean isDeviceMonitoringEnabled(String deviceType);
 
