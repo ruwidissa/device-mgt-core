@@ -323,7 +323,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @DELETE
     @Override
     @Path("/type/{device-type}/id/{device-id}")
-    public Response deleteDevice(@PathParam("device-type") String deviceType, @PathParam("device-id") String deviceId) {
+    public Response deleteDevice(@PathParam("device-type") String deviceType,
+                                 @PathParam("device-id") String deviceId,
+                                 @QueryParam("permanentDelete") boolean permanentDelete) {
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         try {
@@ -333,13 +335,19 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            boolean response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+            boolean response;
+
+            if (permanentDelete) {
+                response = deviceManagementProviderService.deleteDevice(deviceIdentifier);
+            } else {
+                response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+            }
             return Response.status(Response.Status.OK).entity(response).build();
 
         } catch (DeviceManagementException e) {
             String msg = "Error encountered while deleting device of type : " + deviceType + " and " +
                     "ID : " + deviceId;
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()
             ).build();
