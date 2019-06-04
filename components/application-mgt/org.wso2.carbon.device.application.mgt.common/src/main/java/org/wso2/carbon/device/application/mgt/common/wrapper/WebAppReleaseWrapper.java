@@ -19,17 +19,22 @@ package org.wso2.carbon.device.application.mgt.common.wrapper;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotNull;
+
+//todo add version attribute
 @ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
-public class WebClipReleaseWrapper {
+public class WebAppReleaseWrapper {
 
     @ApiModelProperty(name = "description",
             value = "Description of the web clip release")
+    @NotNull
     private String description;
 
     @ApiModelProperty(name = "releaseType",
             value = "Release type of the web clip release",
             required = true,
             example = "alpha, beta etc")
+    @NotNull
     private String releaseType;
 
     @ApiModelProperty(name = "price",
@@ -40,6 +45,7 @@ public class WebClipReleaseWrapper {
     @ApiModelProperty(name = "isSharedWithAllTenants",
             value = "If web clip release is shared with all tenants it is equal to 1 otherwise 0",
             required = true)
+    @NotNull
     private boolean isSharedWithAllTenants;
 
     @ApiModelProperty(name = "metaData",
@@ -47,8 +53,15 @@ public class WebClipReleaseWrapper {
             required = true)
     private String metaData;
 
+    @ApiModelProperty(name = "version",
+            value = "Version of the web app release.",
+            required = true)
+    @NotNull
+    private String version;
+
     @ApiModelProperty(name = "url",
             value = "URL which is used for WEB-CLIP")
+    @NotNull
     private String url;
 
     public String getReleaseType() {
@@ -94,4 +107,12 @@ public class WebClipReleaseWrapper {
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public boolean isSharedWithAllTenants() { return isSharedWithAllTenants; }
+
+    public void setSharedWithAllTenants(boolean sharedWithAllTenants) { isSharedWithAllTenants = sharedWithAllTenants; }
+
+    public String getVersion() { return version; }
+
+    public void setVersion(String version) { this.version = version; }
 }

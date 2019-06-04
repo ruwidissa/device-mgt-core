@@ -35,7 +35,7 @@ import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public interface ApplicationManager {
     Application createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException, RequestValidatingException;
 
-    Application createWebClip(WebClipWrapper webClipWrapper, ApplicationArtifact applicationArtifact)
+    Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
     /**

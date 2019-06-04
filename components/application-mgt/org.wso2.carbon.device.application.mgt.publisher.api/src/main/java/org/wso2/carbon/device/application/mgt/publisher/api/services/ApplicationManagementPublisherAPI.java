@@ -42,7 +42,7 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
 import javax.validation.Valid;
@@ -375,7 +375,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "webapp",
                     value = "The web app that need to be created.",
                     required = true)
-            @Multipart("webapp") WebClipWrapper webClipWrapper,
+            @Multipart("webapp") WebAppWrapper webAppWrapper,
             @ApiParam(
                     name = "icon",
                     value = "Icon of the uploading web app",

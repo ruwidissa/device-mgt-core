@@ -58,8 +58,8 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorage
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipReleaseWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
@@ -622,7 +622,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public Application createWebClip(WebClipWrapper webClipWrapper, ApplicationArtifact applicationArtifact)
+    public Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -632,7 +632,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         List<Integer> categoryIds;
-        ApplicationDTO applicationDTO = APIUtil.convertToAppDTO(webClipWrapper);
+        ApplicationDTO applicationDTO = APIUtil.convertToAppDTO(webAppWrapper);
         List<String> unrestrictedRoles = applicationDTO.getUnrestrictedRoles();
         List<String> tags = applicationDTO.getTags();
         List<String> categories = applicationDTO.getAppCategories();
@@ -645,7 +645,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred while getting data which is related to application. application name: "
-                    + webClipWrapper.getName() + ".";
+                    + webAppWrapper.getName() + ".";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -665,7 +665,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationDTO.getApplicationReleaseDTOs().clear();
             applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
         } catch (ResourceManagementException e) {
-            String msg = "Error Occured when uploading artifacts of the application: " + webClipWrapper.getName();
+            String msg = "Error Occured when uploading artifacts of the application: " + webAppWrapper.getName();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         }
@@ -748,7 +748,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg =
-                    "Error occurred while adding lifecycle state. application name: " + webClipWrapper.getName() + ".";
+                    "Error occurred while adding lifecycle state. application name: " + webAppWrapper.getName() + ".";
             log.error(msg);
             try {
                 applicationStorageManager.deleteAllApplicationReleaseArtifacts(
@@ -764,13 +764,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while adding application or application release. application name: "
-                    + webClipWrapper.getName() + ".";
+                    + webAppWrapper.getName() + ".";
             log.error(msg);
             deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
             throw new ApplicationManagementException(msg, e);
         } catch (LifecycleManagementException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred when getting initial lifecycle state. application name: " + webClipWrapper
+            String msg = "Error occurred when getting initial lifecycle state. application name: " + webAppWrapper
                     .getName() + ".";
             log.error(msg);
             deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
@@ -782,7 +782,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (VisibilityManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg =
-                    "Error occurred while adding unrestricted roles. application name: " + webClipWrapper.getName()
+                    "Error occurred while adding unrestricted roles. application name: " + webAppWrapper.getName()
                             + ".";
             log.error(msg);
             deleteApplicationArtifacts(Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
@@ -2489,37 +2489,37 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-        } else if (param instanceof WebClipWrapper) {
-            WebClipWrapper webClipWrapper = (WebClipWrapper) param;
-            if (StringUtils.isEmpty(webClipWrapper.getName())) {
+        } else if (param instanceof WebAppWrapper) {
+            WebAppWrapper webAppWrapper = (WebAppWrapper) param;
+            if (StringUtils.isEmpty(webAppWrapper.getName())) {
                 String msg = "Web Clip name cannot be empty.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            if (webClipWrapper.getCategories() == null) {
+            if (webAppWrapper.getCategories() == null) {
                 String msg = "Web Clip category can't be null.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            if (webClipWrapper.getCategories().isEmpty()) {
+            if (webAppWrapper.getCategories().isEmpty()) {
                 String msg = "Web clip category can't be empty.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
 
-            List<WebClipReleaseWrapper> webClipReleaseWrappers;
-            webClipReleaseWrappers = webClipWrapper.getWebClipReleaseWrappers();
+            List<WebAppReleaseWrapper> webAppReleaseWrappers;
+            webAppReleaseWrappers = webAppWrapper.getWebAppReleaseWrappers();
 
-            if (webClipReleaseWrappers == null || webClipReleaseWrappers.size() != 1) {
+            if (webAppReleaseWrappers == null || webAppReleaseWrappers.size() != 1) {
                 String msg = "Invalid web clip creating request. Web clip creating request must have single "
-                        + "web clip release. Web clip name:" + webClipWrapper.getName() + ".";
+                        + "web clip release. Web clip name:" + webAppWrapper.getName() + ".";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
 
             try {
                 ConnectionManagerUtil.openDBConnection();
-                List<String> unrestrictedRoles = webClipWrapper.getUnrestrictedRoles();
+                List<String> unrestrictedRoles = webAppWrapper.getUnrestrictedRoles();
 
                 if (unrestrictedRoles != null && !unrestrictedRoles.isEmpty()) {
                     if (!isValidRestrictedRole(unrestrictedRoles)) {
@@ -2538,7 +2538,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
                 Filter filter = new Filter();
                 filter.setFullMatch(true);
-                filter.setAppName(webClipWrapper.getName().trim());
+                filter.setAppName(webAppWrapper.getName().trim());
                 filter.setOffset(0);
                 filter.setLimit(1);
                 List<ApplicationDTO> applicationList = applicationDAO.getApplications(filter, -1, tenantId);
@@ -2551,7 +2551,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
 
                 List<CategoryDTO> registeredCategories = this.applicationDAO.getAllCategories(tenantId);
-                List<String> appCategories = webClipWrapper.getCategories();
+                List<String> appCategories = webAppWrapper.getCategories();
 
                 if (registeredCategories.isEmpty()) {
                     ConnectionManagerUtil.rollbackDBTransaction();
@@ -2583,7 +2583,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new ApplicationManagementException(msg, e);
             } catch (ApplicationManagementDAOException e) {
                 String msg = "Error occurred while getting data which is related to web clip. web clip name: "
-                        + webClipWrapper.getName() + ".";
+                        + webAppWrapper.getName() + ".";
                 log.error(msg);
                 throw new ApplicationManagementException(msg, e);
             } catch (UserStoreException e) {
@@ -2614,16 +2614,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-        } if (param instanceof WebClipReleaseWrapper){
-            WebClipReleaseWrapper webClipReleaseWrapper = (WebClipReleaseWrapper) param;
+        } if (param instanceof WebAppReleaseWrapper){
+            WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
             UrlValidator urlValidator = new UrlValidator();
             if (StringUtils
-                    .isEmpty(webClipReleaseWrapper.getUrl())){
+                    .isEmpty(webAppReleaseWrapper.getUrl())){
                 String msg = "URL should't be null for the application release creating request for application type WEB_CLIP";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            if (!urlValidator.isValid(webClipReleaseWrapper.getUrl())){
+            if (!urlValidator.isValid(webAppReleaseWrapper.getUrl())){
                 String msg = "Request payload contains an invalid Web Clip URL.";
                 log.error(msg);
                 throw new BadRequestException(msg);

@@ -30,8 +30,8 @@ import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipReleaseWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -235,16 +235,17 @@ public class APIUtil {
             List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
                     .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
             applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
-        } else if (param instanceof WebClipWrapper){
-            WebClipWrapper webClipWrapper = (WebClipWrapper) param;
-            applicationDTO.setName(webClipWrapper.getName());
-            applicationDTO.setDescription(webClipWrapper.getDescription());
-            applicationDTO.setAppCategories(webClipWrapper.getCategories());
-            applicationDTO.setSubType(webClipWrapper.getSubMethod());
-            applicationDTO.setPaymentCurrency(webClipWrapper.getPaymentCurrency());
-            applicationDTO.setTags(webClipWrapper.getTags());
-            applicationDTO.setUnrestrictedRoles(webClipWrapper.getUnrestrictedRoles());
-            List<ApplicationReleaseDTO> applicationReleaseEntities = webClipWrapper.getWebClipReleaseWrappers()
+        } else if (param instanceof WebAppWrapper){
+            WebAppWrapper webAppWrapper = (WebAppWrapper) param;
+            applicationDTO.setName(webAppWrapper.getName());
+            applicationDTO.setDescription(webAppWrapper.getDescription());
+            applicationDTO.setAppCategories(webAppWrapper.getCategories());
+            applicationDTO.setSubType(webAppWrapper.getSubMethod());
+            applicationDTO.setPaymentCurrency(webAppWrapper.getPaymentCurrency());
+            applicationDTO.setType(webAppWrapper.getType());
+            applicationDTO.setTags(webAppWrapper.getTags());
+            applicationDTO.setUnrestrictedRoles(webAppWrapper.getUnrestrictedRoles());
+            List<ApplicationReleaseDTO> applicationReleaseEntities = webAppWrapper.getWebAppReleaseWrappers()
                     .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
             applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
         }
@@ -262,14 +263,15 @@ public class APIUtil {
             applicationReleaseDTO.setIsSharedWithAllTenants(applicationReleaseWrapper.getIsSharedWithAllTenants());
             applicationReleaseDTO.setMetaData(applicationReleaseWrapper.getMetaData());
             applicationReleaseDTO.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
-        } else if (param instanceof WebClipReleaseWrapper){
-            WebClipReleaseWrapper webClipReleaseWrapper = (WebClipReleaseWrapper) param;
-            applicationReleaseDTO.setDescription(webClipReleaseWrapper.getDescription());
-            applicationReleaseDTO.setReleaseType(webClipReleaseWrapper.getReleaseType());
-            applicationReleaseDTO.setPrice(webClipReleaseWrapper.getPrice());
-            applicationReleaseDTO.setInstallerName(webClipReleaseWrapper.getUrl());
-            applicationReleaseDTO.setIsSharedWithAllTenants(webClipReleaseWrapper.getIsSharedWithAllTenants());
-            applicationReleaseDTO.setMetaData(webClipReleaseWrapper.getMetaData());
+        } else if (param instanceof WebAppReleaseWrapper){
+            WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
+            applicationReleaseDTO.setDescription(webAppReleaseWrapper.getDescription());
+            applicationReleaseDTO.setReleaseType(webAppReleaseWrapper.getReleaseType());
+            applicationReleaseDTO.setVersion(webAppReleaseWrapper.getVersion());
+            applicationReleaseDTO.setPrice(webAppReleaseWrapper.getPrice());
+            applicationReleaseDTO.setInstallerName(webAppReleaseWrapper.getUrl());
+            applicationReleaseDTO.setIsSharedWithAllTenants(webAppReleaseWrapper.getIsSharedWithAllTenants());
+            applicationReleaseDTO.setMetaData(webAppReleaseWrapper.getMetaData());
         }
         return applicationReleaseDTO;
     }
@@ -278,7 +280,11 @@ public class APIUtil {
             throws BadRequestException, UnexpectedServerErrorException {
 
         Application application = new Application();
-        DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
+        //This is for handling web-apps
+        if (applicationDTO.getDeviceTypeId() > 0) {
+            DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            application.setDeviceType(deviceType.getName());
+        }
         application.setId(applicationDTO.getId());
         application.setName(applicationDTO.getName());
         application.setDescription(applicationDTO.getDescription());
@@ -288,7 +294,6 @@ public class APIUtil {
         application.setPaymentCurrency(applicationDTO.getPaymentCurrency());
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
-        application.setDeviceType(deviceType.getName());
         application.setRating(applicationDTO.getAppRating());
         List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
                 .stream().map(APIUtil::releaseDtoToRelease).collect(Collectors.toList());

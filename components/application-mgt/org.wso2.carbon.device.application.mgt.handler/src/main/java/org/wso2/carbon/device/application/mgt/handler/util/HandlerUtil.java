@@ -24,8 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONException;
@@ -59,6 +61,12 @@ public class HandlerUtil {
                 response = client.execute(method);
             } else if (httpMethod instanceof HttpGet) {
                 HttpGet method = (HttpGet) httpMethod;
+                response = client.execute(method);
+            } else if (httpMethod instanceof HttpPut) {
+                HttpPut method = (HttpPut) httpMethod;
+                response = client.execute(method);
+            } else if (httpMethod instanceof HttpDelete) {
+                HttpDelete method = (HttpDelete) httpMethod;
                 response = client.execute(method);
             }
 

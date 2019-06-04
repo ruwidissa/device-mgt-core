@@ -1028,7 +1028,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         String sql = "UPDATE " +
                 "AP_APP_CATEGORY cat " +
-                "SET cat.CATEGORY_NAME = ? " +
+                "SET cat.CATEGORY = ? " +
                 "WHERE " +
                 "cat.ID = ? AND " +
                 "cat.TENANT_ID = ?";

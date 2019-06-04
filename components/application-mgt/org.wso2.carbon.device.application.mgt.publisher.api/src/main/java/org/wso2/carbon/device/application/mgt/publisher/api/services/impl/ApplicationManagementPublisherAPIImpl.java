@@ -32,7 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
-import org.wso2.carbon.device.application.mgt.common.wrapper.WebClipWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -209,7 +209,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Consumes("multipart/mixed")
     @Path("/web-app")
     public Response createWebApp(
-            @Multipart("webapp") WebClipWrapper webClipWrapper,
+            @Multipart("webapp") WebAppWrapper webAppWrapper,
             @Multipart("icon") Attachment iconFile,
             @Multipart("banner") Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
@@ -218,12 +218,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            applicationManager.validateAppCreatingRequest(webClipWrapper);
-            applicationManager.validateReleaseCreatingRequest(webClipWrapper.getWebClipReleaseWrappers().get(0));
+            applicationManager.validateAppCreatingRequest(webAppWrapper);
+            applicationManager.validateReleaseCreatingRequest(webAppWrapper.getWebAppReleaseWrappers().get(0));
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new application entry
-            Application application = applicationManager.createWebClip(webClipWrapper,
+            Application application = applicationManager.createWebClip(webAppWrapper,
                     constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();

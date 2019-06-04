@@ -19,32 +19,44 @@ package org.wso2.carbon.device.application.mgt.common.wrapper;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@ApiModel(value = "WebClipWrapper", description = "WebClipWrapper represents an ApplicationDTO in ApplicationDTO Store")
-public class WebClipWrapper {
+@ApiModel(value = "WebAppWrapper", description = "WebAppWrapper represents an ApplicationDTO in ApplicationDTO Store")
+public class WebAppWrapper {
 
     @ApiModelProperty(name = "name",
             value = "Name of the web clip",
             required = true)
+    @NotNull
     private String name;
 
     @ApiModelProperty(name = "description",
             value = "Description of the web clip",
             required = true)
+    @NotNull
     private String description;
 
     @ApiModelProperty(name = "categories",
             value = "List of Categories",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
+    @NotNull
     private List<String> categories;
 
     @ApiModelProperty(name = "subType",
             value = "Subscription method of the web clip",
             required = true,
             example = "PAID, FREE")
+    @NotNull
     private String subMethod;
+
+    @ApiModelProperty(name = "Web App Type",
+            value = "Type of the web app",
+            required = true,
+            example = "WEB_APP, WEB_CLIP")
+    @NotNull
+    private String type;
 
     @ApiModelProperty(name = "paymentCurrency",
             value = "Payment currency of the web clip",
@@ -54,16 +66,19 @@ public class WebClipWrapper {
 
     @ApiModelProperty(name = "tags",
             value = "List of tags")
+    @NotNull
     private List<String> tags;
 
     @ApiModelProperty(name = "unrestrictedRoles",
             value = "List of roles that users should have to view the web clip")
+    @NotNull
     private List<String> unrestrictedRoles;
 
     @ApiModelProperty(name = "applicationReleaseWrappers",
             value = "List of web clip releases",
             required = true)
-    private List<WebClipReleaseWrapper> webClipReleaseWrappers;
+    @NotNull
+    private List<WebAppReleaseWrapper> webAppReleaseWrappers;
 
     public String getName() {
         return name;
@@ -87,10 +102,10 @@ public class WebClipWrapper {
 
     public void setDescription(String description) { this.description = description; }
 
-    public List<WebClipReleaseWrapper> getWebClipReleaseWrappers() { return webClipReleaseWrappers; }
+    public List<WebAppReleaseWrapper> getWebAppReleaseWrappers() { return webAppReleaseWrappers; }
 
-    public void setWebClipReleaseWrappers(List<WebClipReleaseWrapper> webClipReleaseWrappers) {
-        this.webClipReleaseWrappers = webClipReleaseWrappers; }
+    public void setWebAppReleaseWrappers(List<WebAppReleaseWrapper> webAppReleaseWrappers) {
+        this.webAppReleaseWrappers = webAppReleaseWrappers; }
 
     public List<String> getCategories() { return categories; }
 
@@ -99,4 +114,8 @@ public class WebClipWrapper {
     public String getSubMethod() { return subMethod; }
 
     public void setSubMethod(String subMethod) { this.subMethod = subMethod; }
+
+    public String getType() { return type; }
+
+    public void setType(String type) { this.type = type; }
 }
