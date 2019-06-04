@@ -21,7 +21,9 @@ package org.wso2.carbon.device.application.mgt.core.util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.ApplicationType;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
@@ -280,10 +282,11 @@ public class APIUtil {
             throws BadRequestException, UnexpectedServerErrorException {
 
         Application application = new Application();
-        //This is for handling web-apps
-        if (applicationDTO.getDeviceTypeId() > 0) {
+        if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
             DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
             application.setDeviceType(deviceType.getName());
+        } else {
+            application.setDeviceType("ANY");
         }
         application.setId(applicationDTO.getId());
         application.setName(applicationDTO.getName());
@@ -306,8 +309,11 @@ public class APIUtil {
                 .getArtifactDownloadEndpoint();
         String basePath = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
                 + Constants.FORWARD_SLASH;
+
         List<String> screenshotPaths = new ArrayList<>();
         ApplicationRelease applicationRelease = new ApplicationRelease();
+        UrlValidator urlValidator = new UrlValidator();
+
         applicationRelease.setDescription(applicationReleaseDTO.getDescription());
         applicationRelease.setVersion(applicationReleaseDTO.getVersion());
         applicationRelease.setUuid(applicationReleaseDTO.getUuid());
@@ -315,15 +321,20 @@ public class APIUtil {
         applicationRelease.setPrice(applicationReleaseDTO.getPrice());
         applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
         applicationRelease.setMetaData(applicationReleaseDTO.getMetaData());
-        applicationRelease.setUrl(applicationReleaseDTO.getUrl());
         applicationRelease.setCurrentStatus(applicationReleaseDTO.getCurrentState());
         applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
         applicationRelease.setRating(applicationReleaseDTO.getRating());
-        applicationRelease
-                .setInstallerPath(basePath + applicationReleaseDTO.getInstallerName());
         applicationRelease.setIconPath(basePath + applicationReleaseDTO.getIconName());
         applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
+
+        if (urlValidator.isValid(applicationReleaseDTO.getInstallerName())){
+            applicationRelease
+                    .setInstallerPath(applicationReleaseDTO.getInstallerName());
+        } else {
+            applicationRelease
+                    .setInstallerPath(basePath + applicationReleaseDTO.getInstallerName());
+        }
 
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
             screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName1());

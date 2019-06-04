@@ -1036,8 +1036,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, categoryDTO.getCategoryName());
-                stmt.setInt(1, categoryDTO.getId());
-                stmt.setInt(2, tenantId);
+                stmt.setInt(2, categoryDTO.getId());
+                stmt.setInt(3, tenantId);
                 stmt.executeUpdate();
             }
         } catch (DBConnectionException e) {
