@@ -16,6 +16,7 @@
     "d3": "^5.9.2",
     "dagre": "^0.8.4",
     "keymirror": "^0.1.1",
+    "rc-tween-one": "^2.4.1",
     "react": "^16.8.4",
     "react-d3-graph": "^2.0.2",
     "react-dom": "^16.8.4",

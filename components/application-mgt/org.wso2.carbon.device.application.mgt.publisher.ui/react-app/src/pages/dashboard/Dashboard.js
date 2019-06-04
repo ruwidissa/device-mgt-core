@@ -32,10 +32,10 @@ class Dashboard extends React.Component {
                             style={{lineHeight: '64px'}}
                         >
                             <Menu.Item key="1"><Link to="/publisher/apps"><Icon type="appstore"/>Apps</Link></Menu.Item>
-                            <Menu.Item key="2"><Link to="/publisher/apps"><Icon
-                                type="line-chart"/>Apps</Link></Menu.Item>
                             <Menu.Item key="3"><Link to="/publisher/apps/new-app"><Icon type="upload"/>Add New
                                 App</Link></Menu.Item>
+                            <Menu.Item key="2"><Link to="/publisher/manage"><Icon
+                                type="control"/>Manage</Link></Menu.Item>
                         </Menu>
                     </Header>
                 </Layout>

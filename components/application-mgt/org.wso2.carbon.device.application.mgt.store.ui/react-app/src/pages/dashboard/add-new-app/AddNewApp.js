@@ -50,7 +50,7 @@ const props = {
     onChange(info) {
         const status = info.file.status;
         if (status !== 'uploading') {
-            console.log(info.file, info.fileList);
+            // console.log(info.file, info.fileList);
         }
         if (status === 'done') {
             message.success(`${info.file.name} file uploaded successfully.`);
@@ -98,7 +98,7 @@ class EditableTagGroup extends React.Component {
 
     handleClose = (removedTag) => {
         const tags = this.state.tags.filter(tag => tag !== removedTag);
-        console.log(tags);
+        // console.log(tags);
         this.setState({tags});
     }
 
@@ -116,7 +116,7 @@ class EditableTagGroup extends React.Component {
         if (inputValue && tags.indexOf(inputValue) === -1) {
             tags = [...tags, inputValue];
         }
-        console.log(tags);
+        // console.log(tags);
         this.setState({
             tags,
             inputVisible: false,

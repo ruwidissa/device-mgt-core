@@ -7,6 +7,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import Release from "./pages/dashboard/apps/release/Release";
 import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
+import Mange from "./pages/dashboard/manage/Manage";
 import './index.css';
 import store from "./js/store/index";
 import {Provider} from "react-redux";
@@ -37,6 +38,17 @@ const routes = [
                 path: '/publisher/apps/releases/:uuid',
                 exact: true,
                 component: Release
+            }
+        ]
+    },{
+        path: '/publisher/manage',
+        exact: false,
+        component: Dashboard,
+        routes: [
+            {
+                path: '/publisher/manage',
+                component: Mange,
+                exact: true
             }
         ]
     }

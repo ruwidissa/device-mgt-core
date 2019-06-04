@@ -57,7 +57,6 @@ class NormalLoginForm extends React.Component {
                 thisForm.setState({
                     loading: true
                 });
-                console.log('Received values of form: ', values);
                 let data = "username=" + values.username + "&password=" + values.password + "&platform=store";
                 axios.post('https://'+config.serverConfig.hostname+':'+config.serverConfig.httpsPort+config.serverConfig.loginUri, data
                 ).then(res => {
