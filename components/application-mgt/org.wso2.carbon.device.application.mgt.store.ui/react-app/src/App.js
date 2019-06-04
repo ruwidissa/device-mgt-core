@@ -15,7 +15,7 @@ class App extends React.Component {
     }
 
     render() {
-        console.log(this.routes);
+        // console.log(this.routes);
         return (
             <Router>
                 <div>

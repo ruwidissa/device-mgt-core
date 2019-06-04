@@ -29,7 +29,7 @@ class ConnectedAppCard extends React.Component {
     render() {
         const app = this.props.app;
         const release = this.props.app.applicationReleases[0];
-        console.log(this.props);
+        // console.log(this.props);
 
         const description = (
             <div className="appCard">

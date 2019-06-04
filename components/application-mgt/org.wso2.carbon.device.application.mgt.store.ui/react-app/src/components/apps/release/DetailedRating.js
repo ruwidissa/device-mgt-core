@@ -27,6 +27,8 @@ class ConnectedDetailedRating extends React.Component{
     render() {
         const detailedRating = this.props.detailedRating;
 
+        console.log(detailedRating);
+
         if(detailedRating ==null){
             return null;
         }
@@ -42,7 +44,15 @@ class ConnectedDetailedRating extends React.Component{
 
         const maximumRating = Math.max(...ratingArray);
 
-        console.log(maximumRating);
+        const ratingBarPercentages = [0,0,0,0,0];
+
+        if(maximumRating>0){
+            for(let i = 0; i<5; i++){
+                ratingBarPercentages[i] = (ratingVariety[(i+1).toString()])/maximumRating*100;
+            }
+        }
+
+        console.log(ratingBarPercentages);
 
         return (
             <Row className="d-rating">
@@ -62,23 +72,23 @@ class ConnectedDetailedRating extends React.Component{
                 <div className="bar-containers">
                     <div className="bar-container">
                         <span className="number">5</span>
-                        <span className="bar rate-5" style={{width: (ratingVariety["5"]/maximumRating*100)+"%"}}> </span>
+                        <span className="bar rate-5" style={{width: ratingBarPercentages[4]+"%"}}> </span>
                     </div>
                     <div className="bar-container">
                         <span className="number">4</span>
-                        <span className="bar rate-4" style={{width: (ratingVariety["4"]/maximumRating*100)+"%"}}> </span>
+                        <span className="bar rate-4" style={{width: ratingBarPercentages[3]+"%"}}> </span>
                     </div>
                     <div className="bar-container">
                         <span className="number">3</span>
-                        <span className="bar rate-3" style={{width: (ratingVariety["3"]/maximumRating*100)+"%"}}> </span>
+                        <span className="bar rate-3" style={{width: ratingBarPercentages[2]+"%"}}> </span>
                     </div>
                     <div className="bar-container">
                         <span className="number">2</span>
-                        <span className="bar rate-2" style={{width: (ratingVariety["2"]/maximumRating*100)+"%"}}> </span>
+                        <span className="bar rate-2" style={{width: ratingBarPercentages[1]+"%"}}> </span>
                     </div>
                     <div className="bar-container">
                         <span className="number">1</span>
-                        <span className="bar rate-1" style={{width: (ratingVariety["1"]/maximumRating*100)+"%"}}> </span>
+                        <span className="bar rate-1" style={{width: ratingBarPercentages[0]+"%"}}> </span>
                     </div>
                 </div>
             </Row>
