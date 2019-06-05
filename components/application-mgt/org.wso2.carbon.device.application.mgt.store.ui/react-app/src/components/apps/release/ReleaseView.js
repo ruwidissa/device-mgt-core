@@ -5,6 +5,8 @@ import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
 import DetailedRating from "./DetailedRating";
 import Reviews from "./review/Reviews";
+import AddReview from "./review/AddReview";
+
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
@@ -23,8 +25,8 @@ class ReleaseView extends React.Component {
                             <StarRatings
                                 rating={release.rating}
                                 starRatedColor="#777"
-                                starDimension = "20px"
-                                starSpacing = "2px"
+                                starDimension="20px"
+                                starSpacing="2px"
                                 numberOfStars={5}
                                 name='rating'
                             />
@@ -51,6 +53,9 @@ class ReleaseView extends React.Component {
                     <Row>
                         <Col lg={18}>
                             <DetailedRating uuid={release.uuid}/>
+                        </Col>
+                        <Col lg={6}>
+                            <AddReview uuid={release.uuid}/>
                         </Col>
                     </Row>
                     <Reviews uuid={release.uuid}/>

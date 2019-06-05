@@ -256,7 +256,7 @@ class ManageCategories extends React.Component {
             loading: true,
             isEditModalVisible: false,
         });
-        const request = "method=put&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories?from="+currentlyEditingId+"%26to="+editingValue;
+        const request = "method=put&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/rename?from="+currentlyEditingId+"%26to="+editingValue;
         axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
