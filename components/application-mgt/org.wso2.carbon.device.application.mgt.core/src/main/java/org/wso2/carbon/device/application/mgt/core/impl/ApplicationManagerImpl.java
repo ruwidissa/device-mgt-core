@@ -29,6 +29,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
+import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
@@ -58,6 +59,8 @@ import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorage
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
@@ -414,13 +417,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (log.isDebugEnabled()) {
-            log.debug("Application create request is received for the tenant : " + tenantId + " From" + " the user : "
+            log.debug("Web clip create request is received for the tenant : " + tenantId + " From" + " the user : "
                     + userName);
         }
 
         ApplicationDTO applicationDTO = APIUtil.convertToAppDTO(webAppWrapper);
         ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
         String uuid = UUID.randomUUID().toString();
+        //todo check installer name exists or not, do it in the validation method
         String md5 = DigestUtils.md5Hex(applicationReleaseDTO.getInstallerName());
         applicationReleaseDTO.setUuid(uuid);
         applicationReleaseDTO.setAppHashValue(md5);
@@ -430,7 +434,49 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationDTO.getApplicationReleaseDTOs().clear();
             applicationDTO.getApplicationReleaseDTOs().add(addImageArtifacts(applicationReleaseDTO, applicationArtifact));
         } catch (ResourceManagementException e) {
-            String msg = "Error Occured when uploading artifacts of the application: " + webAppWrapper.getName();
+            String msg = "Error Occured when uploading artifacts of the web clip: " + webAppWrapper.getName();
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }
+
+        //insert application data into database
+        return addAppDataIntoDB(applicationDTO, tenantId);
+    }
+
+    @Override
+    public Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        String publicAppStorePath = "";
+        if (log.isDebugEnabled()) {
+            log.debug("Public app creating request is received for the tenant : " + tenantId + " From" + " the user : "
+                    + userName);
+        }
+
+        if (DeviceTypes.ANDROID.toString().equals(publicAppWrapper.getDeviceType())) {
+            publicAppStorePath = Constants.GOOGLE_PLAY_STORE_URL;
+        } else if (DeviceTypes.IOS.toString().equals(publicAppWrapper.getDeviceType())) {
+            publicAppStorePath = Constants.APPLE_STORE_URL;
+        }
+
+        ApplicationDTO applicationDTO = APIUtil.convertToAppDTO(publicAppWrapper);
+        ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+        String uuid = UUID.randomUUID().toString();
+        String appInstallerUrl = publicAppStorePath + applicationReleaseDTO.getPackageName();
+        //todo check app package name exist or not, do it in validation method
+        applicationReleaseDTO.setInstallerName(appInstallerUrl);
+        String md5 = DigestUtils.md5Hex(appInstallerUrl);
+        applicationReleaseDTO.setUuid(uuid);
+        applicationReleaseDTO.setAppHashValue(md5);
+
+        //uploading application artifacts
+        try {
+            applicationDTO.getApplicationReleaseDTOs().clear();
+            applicationDTO.getApplicationReleaseDTOs()
+                    .add(addImageArtifacts(applicationReleaseDTO, applicationArtifact));
+        } catch (ResourceManagementException e) {
+            String msg = "Error Occured when uploading artifacts of the public app: " + publicAppWrapper.getName();
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         }
@@ -2255,11 +2301,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            if (StringUtils.isEmpty(applicationWrapper.getType())) {
-                String msg = "Application type can't be empty.";
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
             if (StringUtils.isEmpty(applicationWrapper.getDeviceType())) {
                 String msg = "Device type can't be empty for the application.";
                 log.error(msg);
@@ -2273,8 +2314,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             if (applicationReleaseWrappers == null || applicationReleaseWrappers.size() != 1) {
                 String msg = "Invalid application creating request. Application creating request must have single "
-                        + "application release.  Application name:" + applicationWrapper.getName() + " and type: "
-                        + applicationWrapper.getType();
+                        + "application release.  Application name:" + applicationWrapper.getName() + ".";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -2298,6 +2338,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+            if (StringUtils.isEmpty(webAppWrapper.getType()) || (!ApplicationType.WEB_CLIP.toString()
+                    .equals(webAppWrapper.getType()) && !ApplicationType.WEB_APP.toString()
+                    .equals(webAppWrapper.getType()))) {
+                String msg = "Web app wrapper contains invalid application type with the request. Hence please verify "
+                        + "the request payload..";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
 
             List<WebAppReleaseWrapper> webAppReleaseWrappers;
             webAppReleaseWrappers = webAppWrapper.getWebAppReleaseWrappers();
@@ -2309,6 +2357,43 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new BadRequestException(msg);
             }
             unrestrictedRoles = webAppWrapper.getUnrestrictedRoles();
+        } else if (param instanceof PublicAppWrapper) {
+            PublicAppWrapper publicAppWrapper = (PublicAppWrapper) param;
+            appName = publicAppWrapper.getName();
+            if (StringUtils.isEmpty(appName)) {
+                String msg = "Application name cannot be empty for public app.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            appCategories = publicAppWrapper.getCategories();
+            if (appCategories == null) {
+                String msg = "Application category can't be null.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (appCategories.isEmpty()) {
+                String msg = "Application category can't be empty.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (StringUtils.isEmpty(publicAppWrapper.getDeviceType())) {
+                String msg = "Device type can't be empty for the public application.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            DeviceType deviceType = getDeviceTypeData(publicAppWrapper.getDeviceType());
+            deviceTypeId = deviceType.getId();
+
+            List<PublicAppReleaseWrapper> publicAppReleaseWrappers;
+            publicAppReleaseWrappers = publicAppWrapper.getPublicAppReleaseWrappers();
+
+            if (publicAppReleaseWrappers == null || publicAppReleaseWrappers.size() != 1) {
+                String msg = "Invalid public app creating request. Request must have single release. Application name:"
+                        + publicAppWrapper.getName() + ".";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            unrestrictedRoles = publicAppWrapper.getUnrestrictedRoles();
         } else {
             String msg = "Invalid payload found with the request. Hence verify the request payload object.";
             log.error(msg);
@@ -2390,35 +2475,62 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     @Override
     public <T> void validateReleaseCreatingRequest(T param) throws ApplicationManagementException {
-
-        if (param == null){
+        if (param == null) {
             String msg = "In order to validate release creating request param shouldn't be null.";
             log.error(msg);
             throw new BadRequestException(msg);
         }
 
-        if (param instanceof ApplicationReleaseWrapper){
+        if (param instanceof ApplicationReleaseWrapper) {
             ApplicationReleaseWrapper applicationReleaseWrapper = (ApplicationReleaseWrapper) param;
-
-            if (StringUtils.isEmpty(applicationReleaseWrapper.getSupportedOsVersions())){
+            if (StringUtils.isEmpty(applicationReleaseWrapper.getSupportedOsVersions())) {
                 String msg = "Supported OS Version shouldn't be null or empty.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-        } if (param instanceof WebAppReleaseWrapper){
+        }
+        if (param instanceof WebAppReleaseWrapper) {
             WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
             UrlValidator urlValidator = new UrlValidator();
-            if (StringUtils
-                    .isEmpty(webAppReleaseWrapper.getUrl())){
-                String msg = "URL should't be null for the application release creating request for application type WEB_CLIP";
+            if (StringUtils.isEmpty(webAppReleaseWrapper.getVersion())) {
+                String msg = "Version shouldn't be empty or null for the WEB CLIP release creating request.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            if (!urlValidator.isValid(webAppReleaseWrapper.getUrl())){
+            if (StringUtils.isEmpty(webAppReleaseWrapper.getUrl())) {
+                String msg = "URL should't be null for the application release creating request for application type "
+                        + "WEB_CLIP";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (!urlValidator.isValid(webAppReleaseWrapper.getUrl())) {
                 String msg = "Request payload contains an invalid Web Clip URL.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+        } else if (param instanceof PublicAppReleaseWrapper) {
+            PublicAppReleaseWrapper publicAppReleaseWrapper = (PublicAppReleaseWrapper) param;
+            if (StringUtils.isEmpty(publicAppReleaseWrapper.getSupportedOsVersions())) {
+                String msg = "Supported OS Version shouldn't be null or empty for public app release creating request.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (StringUtils.isEmpty(publicAppReleaseWrapper.getVersion())) {
+                String msg = "Version shouldn't be empty or null for the Public App release creating request.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            if (StringUtils.isEmpty(publicAppReleaseWrapper.getPackageName())) {
+                String msg = "Package name shouldn't be empty or null for the Public App release creating request.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+
+        } else {
+            String msg = "Invalid payload found with the release creating request. Hence verify the release creating "
+                    + "request payload object.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         }
     }
 
@@ -2431,6 +2543,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
+        //todo remove this check, because banner is not mandatory to have
         if (bannerFile == null) {
             String msg = "Banner file is not found with the application release creating request.";
             log.error(msg);
@@ -2444,21 +2557,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException {
+    public void validateBinaryArtifact(Attachment binaryFile) throws RequestValidatingException {
 
-        if (StringUtils.isEmpty(applicationType)) {
-            String msg = "Application type can't be empty.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-        if (!isValidAppType(applicationType)) {
-            String msg = "App Type contains in the application creating payload doesn't match with supported app types.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
-        if (binaryFile == null && ApplicationType.ENTERPRISE.toString().equals(applicationType)) {
-            String msg = "Binary file is not found with the application release creating request. ApplicationDTO type: "
-                    + applicationType;
+        if (binaryFile == null) {
+            String msg = "Binary file is not found with the application release creating request for ENTERPRISE app "
+                    + "creating request.";
             log.error(msg);
             throw new RequestValidatingException(msg);
         }

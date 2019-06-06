@@ -35,6 +35,7 @@ import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
@@ -55,6 +56,9 @@ public interface ApplicationManager {
             throws ApplicationManagementException, RequestValidatingException;
 
     Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException;
+
+    Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
     /**
@@ -226,7 +230,7 @@ public interface ApplicationManager {
     void validateImageArtifacts(Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
             throws RequestValidatingException;
 
-    void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException;
+    void validateBinaryArtifact(Attachment binaryFile) throws RequestValidatingException;
 
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;
 

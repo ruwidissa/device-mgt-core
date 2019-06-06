@@ -60,7 +60,6 @@ public class ApplicationManagementTest extends BaseTestCase {
         applicationWrapper.setDeviceType("android");
         applicationWrapper.setName("Test Application");
         applicationWrapper.setSubType("Test Sub type");
-        applicationWrapper.setType("ENTERPRISE");
 
         List<String> tags = new ArrayList<>();
         tags.add("abc");

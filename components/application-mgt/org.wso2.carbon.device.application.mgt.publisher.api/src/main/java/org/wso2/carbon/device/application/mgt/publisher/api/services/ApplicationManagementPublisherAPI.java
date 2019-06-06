@@ -42,6 +42,7 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
@@ -270,6 +271,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @POST
+    @Path("/ent-app")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes("multipart/mixed")
     @ApiOperation(
@@ -300,7 +302,7 @@ public interface ApplicationManagementPublisherAPI {
                             message = "Internal Server Error. \n Error occurred while creating the application.",
                             response = ErrorResponse.class)
             })
-    Response createApplication(
+    Response createEntApp(
             @ApiParam(
                     name = "application",
                     value = "The application that need to be created.",
@@ -404,9 +406,72 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @POST
+    @Path("/public-app")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes("multipart/mixed")
-    @Path("/{appType}/{appId}")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Create an public app",
+            notes = "This will create a new public app",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully created a public app.",
+                            response = ApplicationDTO.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "public app creating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while creating the public app.",
+                            response = ErrorResponse.class)
+            })
+    Response createPubApp(
+            @ApiParam(
+                    name = "public-app",
+                    value = "The public app that need to be created.",
+                    required = true)
+            @Multipart("public-app") PublicAppWrapper publicAppWrapper,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon of the uploading public app",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "Banner of the uploading public app",
+                    required = true)
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "Screen Shots of the uploading public app",
+                    required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading public app")
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading public app")
+            @Multipart(value = "screenshot3") Attachment screenshot3
+    );
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes("multipart/mixed")
+    @Path("/ent-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -435,12 +500,7 @@ public interface ApplicationManagementPublisherAPI {
                             message = "Internal Server Error. \n Error occurred while creating the application.",
                             response = ErrorResponse.class)
             })
-    Response createRelease(
-            @ApiParam(
-                    name = "appType",
-                    value = "Application Type.",
-                    required = true)
-            @PathParam("appType") String appType,
+    Response createEntAppRelease(
             @ApiParam(
                     name = "appId",
                     value = "Id of the application.",

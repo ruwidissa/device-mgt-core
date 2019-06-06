@@ -38,6 +38,11 @@ public class Constants {
     public static final String APP_EXTENSION = ".app";
 
     public static final String FORWARD_SLASH = "/";
+    public static final String ANY = "ANY";
+    public static final String DEFAULT_PCK_NAME = "default.app.com";
+
+    public static final String GOOGLE_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=";
+    public static final String APPLE_STORE_URL = "https://itunes.apple.com/country/app/app-name/id";
 
     /**
      * Database types supported by Application Management.

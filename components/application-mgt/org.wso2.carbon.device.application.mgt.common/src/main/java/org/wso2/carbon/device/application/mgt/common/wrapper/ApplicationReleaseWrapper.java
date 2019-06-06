@@ -19,27 +19,33 @@ package org.wso2.carbon.device.application.mgt.common.wrapper;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.constraints.NotNull;
+
 @ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
 public class ApplicationReleaseWrapper {
 
     @ApiModelProperty(name = "description",
             value = "Description of the application release")
+    @NotNull
     private String description;
 
     @ApiModelProperty(name = "releaseType",
             value = "Release type of the application release",
             required = true,
             example = "alpha, beta etc")
+    @NotNull
     private String releaseType;
 
     @ApiModelProperty(name = "price",
             value = "Price of the application release",
             required = true)
+    @NotNull
     private Double price;
 
     @ApiModelProperty(name = "isSharedWithAllTenants",
             value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
             required = true)
+    @NotNull
     private boolean isSharedWithAllTenants;
 
     @ApiModelProperty(name = "metaData",
@@ -49,6 +55,7 @@ public class ApplicationReleaseWrapper {
 
     @ApiModelProperty(name = "supportedOsVersions",
             value = "ApplicationDTO release supported OS versions")
+    @NotNull
     private String supportedOsVersions;
 
     public String getReleaseType() {
