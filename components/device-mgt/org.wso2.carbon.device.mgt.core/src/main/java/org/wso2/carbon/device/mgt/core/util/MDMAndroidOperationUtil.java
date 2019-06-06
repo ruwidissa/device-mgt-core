@@ -51,7 +51,9 @@ public class MDMAndroidOperationUtil {
 				EnterpriseApplication enterpriseApplication =
 						new EnterpriseApplication();
 				enterpriseApplication.setType(application.getType().toString());
-				enterpriseApplication.setUrl(application.getLocation());
+				//TODO: replace needs to be removed after doing the proper config update in application-mgt.xml
+				enterpriseApplication.setUrl(application.getLocation().replace("https://localhost:9443",
+				                                                               "http://192.168.8.6:9763"));
 				operation.setPayLoad(enterpriseApplication.toJSON());
 				break;
 			case PUBLIC:

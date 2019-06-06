@@ -50,6 +50,7 @@ import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
+import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnknownApplicationTypeException;
@@ -460,6 +461,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             MobileApp mobileApp = new MobileApp();
             if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                    mobileApp.setType(MobileAppTypes.ENTERPRISE);
+                    mobileApp.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                     return MDMAndroidOperationUtil.createInstallAppOperation(mobileApp);
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                     return MDMAndroidOperationUtil.createAppUninstallOperation(mobileApp);
