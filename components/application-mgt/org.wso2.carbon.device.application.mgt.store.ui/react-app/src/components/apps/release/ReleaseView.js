@@ -1,15 +1,72 @@
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Rate} from "antd";
+import {Divider, Row, Col, Typography, Button, Rate, notification} from "antd";
 import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
 import DetailedRating from "./DetailedRating";
 import Reviews from "./review/Reviews";
 import AddReview from "./review/AddReview";
+import axios from "axios";
+import config from "../../../../public/conf/config.json";
 
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            loading: false
+        }
+    }
+
+    installApp = () =>{
+        const {uuid} = this.props.release;
+        const payload = ["admin"];
+        const request = "method=post&content-type=application/json&payload="+JSON.stringify(payload)+"&api-endpoint=/application-mgt-store/v1.0/subscription/install/"+uuid+"/user/install";
+
+        this.setState({
+            loading: true,
+        });
+
+        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        ).then(res => {
+            if (res.status === 201) {
+                this.setState({
+                    loading: false
+                });
+                notification["success"]({
+                    message: 'Done!',
+                    description:
+                        'App installed successfully.',
+                });
+            }else{
+                this.setState({
+                    loading: false
+                });
+                notification["error"]({
+                    message: 'Something went wrong',
+                    description:
+                        "We are unable to install the app.",
+                });
+            }
+
+        }).catch((error) =>{
+            if (error.response.status === 401) {
+                window.location.href = 'https://localhost:9443/store/login';
+            } else{
+                this.setState({
+                    loading: false,
+                    visible: false
+                });
+                notification["error"]({
+                    message: 'Something went wrong',
+                    description:
+                        "We are unable to add your review right now.",
+                });
+            }
+        });
+    };
+
     render() {
         const release = this.props.release;
         return (
@@ -34,8 +91,7 @@ class ReleaseView extends React.Component {
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
                             <div>
                                 <Button.Group style={{float: "right"}}>
-                                    <Button htmlType="button" icon="usergroup-add">Enterprise Install</Button>
-                                    <Button htmlType="button" type="primary" icon="download">Install</Button>
+                                    <Button onClick={this.installApp} loading={this.state.loading}  htmlType="button" type="primary" icon="download">Install</Button>
                                 </Button.Group>
                             </div>
                         </Col>
