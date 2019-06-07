@@ -68,7 +68,7 @@ class AddReview extends React.Component {
                 });
 
                 setTimeout(()=>{
-                    window.location.reload();
+                    window.location.href= uuid;
                 },2000)
             }else{
                 this.setState({
