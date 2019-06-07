@@ -459,9 +459,10 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             //todo rethink and modify the {@link MobileApp} usage
             MobileApp mobileApp = new MobileApp();
+            MobileAppTypes mobileAppType = MobileAppTypes.valueOf(application.getType());
             if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    mobileApp.setType(MobileAppTypes.ENTERPRISE);
+                    mobileApp.setType(mobileAppType);
                     mobileApp.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                     return MDMAndroidOperationUtil.createInstallAppOperation(mobileApp);
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
