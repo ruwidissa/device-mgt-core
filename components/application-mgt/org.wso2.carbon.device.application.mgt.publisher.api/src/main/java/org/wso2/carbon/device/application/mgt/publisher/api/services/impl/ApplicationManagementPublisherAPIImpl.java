@@ -32,6 +32,8 @@ import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
@@ -167,7 +169,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @POST
     @Consumes("multipart/mixed")
-    public Response createApplication(
+    @Path("/ent-app")
+    public Response createEntApp(
             @Multipart("application") ApplicationWrapper applicationWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
@@ -179,9 +182,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateAppCreatingRequest(applicationWrapper);
-            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0),
-                    applicationWrapper.getType());
-            applicationManager.validateBinaryArtifact(binaryFile, applicationWrapper.getType());
+            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0));
+            applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new application entry
@@ -207,9 +209,84 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @POST
     @Consumes("multipart/mixed")
-    @Path("/{appType}/{appId}")
-    public Response createRelease(
-            @PathParam("appType") String appType,
+    @Path("/web-app")
+    public Response createWebApp(
+            @Multipart("webapp") WebAppWrapper webAppWrapper,
+            @Multipart("icon") Attachment iconFile,
+            @Multipart("banner") Attachment bannerFile,
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
+        try {
+            applicationManager.validateAppCreatingRequest(webAppWrapper);
+            applicationManager.validateReleaseCreatingRequest(webAppWrapper.getWebAppReleaseWrappers().get(0));
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
+
+            // Created new application entry
+            Application application = applicationManager.createWebClip(webAppWrapper,
+                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
+            if (application != null) {
+                return Response.status(Response.Status.CREATED).entity(application).build();
+            } else {
+                String msg = "Web app creation is failed";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating the web application";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while handling the web app creating request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Consumes("multipart/mixed")
+    @Path("/public-app")
+    public Response createPubApp(
+            @Multipart("public-app") PublicAppWrapper publicAppWrapper,
+            @Multipart("icon") Attachment iconFile,
+            @Multipart("banner") Attachment bannerFile,
+            @Multipart("screenshot1") Attachment screenshot1,
+            @Multipart("screenshot2") Attachment screenshot2,
+            @Multipart("screenshot3") Attachment screenshot3) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
+        try {
+            applicationManager.validateAppCreatingRequest(publicAppWrapper);
+            applicationManager.validateReleaseCreatingRequest(publicAppWrapper.getPublicAppReleaseWrappers().get(0));
+            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
+
+            // Created new application entry
+            Application application = applicationManager.createPublicApp(publicAppWrapper,
+                    constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
+            if (application != null) {
+                return Response.status(Response.Status.CREATED).entity(application).build();
+            } else {
+                String msg = "Web app creation is failed";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while creating the public app.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (RequestValidatingException e) {
+            String msg = "Error occurred while handling the public app creating request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    @POST
+    @Consumes("multipart/mixed")
+    @Path("/ent-app/{appId}")
+    public Response createEntAppRelease(
             @PathParam("appId") int appId,
             @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
@@ -221,8 +298,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper, appType);
-            applicationManager.validateBinaryArtifact(binaryFile, appType);
+            applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper);
+            applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new application release
@@ -301,7 +378,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            applicationManager.validateBinaryArtifact(binaryFile, appType);
+            //todo check again
+            applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.updateApplicationArtifact(deviceType, appType, applicationReleaseUuid,
                     constructApplicationArtifact(binaryFile, null, null, null));
             return Response.status(Response.Status.OK)
@@ -364,7 +442,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            applicationManager.validateBinaryArtifact(binaryFile, appType);
+            //todo check again
+            applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, screenshots);
             if (!applicationManager.updateRelease(deviceType, appType, applicationUUID, applicationReleaseWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots))) {

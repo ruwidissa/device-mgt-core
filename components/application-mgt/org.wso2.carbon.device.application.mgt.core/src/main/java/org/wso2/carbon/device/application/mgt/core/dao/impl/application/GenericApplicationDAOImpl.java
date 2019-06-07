@@ -806,6 +806,40 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public List<Integer> getCategoryIdsForCategoryNames(List<String> categoryNames, int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get tag ids for given tag names");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            int index = 1;
+            List<Integer> tagIds = new ArrayList<>();
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT AP_APP_CATEGORY.ID AS ID FROM AP_APP_CATEGORY WHERE AP_APP_CATEGORY.CATEGORY IN (", ") AND TENANT_ID = ?");
+            categoryNames.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (String categoryName : categoryNames) {
+                    ps.setObject(index++, categoryName);
+                }
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        tagIds.add(rs.getInt("ID"));
+                    }
+                }
+            }
+            return tagIds;
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementDAOException(
+                    "Error occurred while obtaining the DB connection when getting categories", e);
+        } catch (SQLException e) {
+            throw new ApplicationManagementDAOException("Error occurred while getting categories", e);
+        }
+    }
+
+    @Override
     public List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get distinct category ids for given tag names");
@@ -994,7 +1028,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         Connection conn;
         String sql = "UPDATE " +
                 "AP_APP_CATEGORY cat " +
-                "SET cat.CATEGORY_NAME = ? " +
+                "SET cat.CATEGORY = ? " +
                 "WHERE " +
                 "cat.ID = ? AND " +
                 "cat.TENANT_ID = ?";
@@ -1002,8 +1036,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, categoryDTO.getCategoryName());
-                stmt.setInt(1, categoryDTO.getId());
-                stmt.setInt(2, tenantId);
+                stmt.setInt(2, categoryDTO.getId());
+                stmt.setInt(3, tenantId);
                 stmt.executeUpdate();
             }
         } catch (DBConnectionException e) {

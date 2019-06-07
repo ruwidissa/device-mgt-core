@@ -21,37 +21,49 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 
-@ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
-public class ApplicationReleaseWrapper {
+@ApiModel(value = "Public App Release Wrapper", description = "This class holds the details when releasing an Public App"
+        + " Release to application store")
+public class PublicAppReleaseWrapper {
 
     @ApiModelProperty(name = "description",
-            value = "Description of the application release")
+            value = "Description of the public app release")
     @NotNull
     private String description;
 
     @ApiModelProperty(name = "releaseType",
-            value = "Release type of the application release",
+            value = "Release type of the public app release",
             required = true,
             example = "alpha, beta etc")
     @NotNull
     private String releaseType;
 
     @ApiModelProperty(name = "price",
-            value = "Price of the application release",
+            value = "Price of the public app release",
             required = true)
-    @NotNull
     private Double price;
 
     @ApiModelProperty(name = "isSharedWithAllTenants",
-            value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
+            value = "If public app release is shared with all tenants it is equal to 1 otherwise 0",
             required = true)
     @NotNull
     private boolean isSharedWithAllTenants;
 
     @ApiModelProperty(name = "metaData",
-            value = "Meta data of the application release",
+            value = "Meta data of the public app release",
             required = true)
     private String metaData;
+
+    @ApiModelProperty(name = "version",
+            value = "Version of the public app release.",
+            required = true)
+    @NotNull
+    private String version;
+
+    @ApiModelProperty(name = "packageName",
+            value = "Package name of the public app release.",
+            required = true)
+    @NotNull
+    private String packageName;
 
     @ApiModelProperty(name = "supportedOsVersions",
             value = "ApplicationDTO release supported OS versions")
@@ -93,6 +105,18 @@ public class ApplicationReleaseWrapper {
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public boolean isSharedWithAllTenants() { return isSharedWithAllTenants; }
+
+    public void setSharedWithAllTenants(boolean sharedWithAllTenants) { isSharedWithAllTenants = sharedWithAllTenants; }
+
+    public String getVersion() { return version; }
+
+    public void setVersion(String version) { this.version = version; }
+
+    public String getPackageName() { return packageName; }
+
+    public void setPackageName(String packageName) { this.packageName = packageName; }
 
     public String getSupportedOsVersions() { return supportedOsVersions; }
 

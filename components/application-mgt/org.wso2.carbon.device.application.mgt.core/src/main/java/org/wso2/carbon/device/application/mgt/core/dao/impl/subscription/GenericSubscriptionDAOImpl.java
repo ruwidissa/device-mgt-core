@@ -549,7 +549,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 sql += "GROUP_NAME = ? ";
             }
 
-            sql += "AND AP_APP_RELEASE_ID = ? AND AND TENANT_ID = ?";
+            sql += "AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 Calendar calendar = Calendar.getInstance();

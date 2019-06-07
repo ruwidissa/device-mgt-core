@@ -35,6 +35,8 @@ import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
 
@@ -52,6 +54,12 @@ public interface ApplicationManager {
      */
     Application createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException, RequestValidatingException;
+
+    Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException;
+
+    Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException;
 
     /**
      * Updates an already existing application.
@@ -203,19 +211,14 @@ public interface ApplicationManager {
     /***
      * To validate the application creating request
      *
-     * @param applicationWrapper {@link ApplicationDTO}
-     * @throws RequestValidatingException if the payload contains invalid inputs.
      */
-    void validateAppCreatingRequest(ApplicationWrapper applicationWrapper) throws RequestValidatingException;
+    <T> void validateAppCreatingRequest(T param) throws ApplicationManagementException;
 
     /***
      *
-     * @param applicationReleaseWrapper {@link ApplicationReleaseDTO}
-     * @param applicationType Type of the application
      * @throws RequestValidatingException throws if payload does not satisfy requrements.
      */
-    void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper, String applicationType)
-            throws RequestValidatingException;
+    <T> void validateReleaseCreatingRequest(T param) throws ApplicationManagementException;
 
     /***
      *
@@ -227,7 +230,7 @@ public interface ApplicationManager {
     void validateImageArtifacts(Attachment iconFile, Attachment bannerFile, List<Attachment> attachmentList)
             throws RequestValidatingException;
 
-    void validateBinaryArtifact(Attachment binaryFile, String applicationType) throws RequestValidatingException;
+    void validateBinaryArtifact(Attachment binaryFile) throws RequestValidatingException;
 
     void addAplicationCategories(List<String> categories) throws ApplicationManagementException;
 

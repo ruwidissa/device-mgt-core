@@ -83,6 +83,9 @@ public interface ApplicationDAO {
 
     List<CategoryDTO> getAllCategories(int tenantId) throws ApplicationManagementDAOException;
 
+    List<Integer> getCategoryIdsForCategoryNames(List<String> CatgeoryNames, int tenantId)
+            throws ApplicationManagementDAOException;
+
     List<Integer> getDistinctCategoryIdsInCategoryMapping() throws ApplicationManagementDAOException;
 
     CategoryDTO getCategoryForCategoryName(String categoryName, int tenantId) throws ApplicationManagementDAOException;

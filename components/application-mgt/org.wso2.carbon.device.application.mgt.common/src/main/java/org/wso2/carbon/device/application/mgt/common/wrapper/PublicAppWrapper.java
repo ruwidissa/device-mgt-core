@@ -22,66 +22,63 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@ApiModel(value = "ApplicationWrapper", description = "ApplicationWrapper represents the an ApplicationDTO in ApplicationDTO Store")
-public class ApplicationWrapper {
-
+@ApiModel(value = "PublicAppWrapper", description = "PublicAppWrapper represents an Application in App Store")
+public class PublicAppWrapper {
 
     @ApiModelProperty(name = "name",
-            value = "Name of the application",
+            value = "Name of the public app",
             required = true)
     @NotNull
     private String name;
 
     @ApiModelProperty(name = "description",
-            value = "Description of the application",
+            value = "Description of the public app",
             required = true)
     @NotNull
     private String description;
 
-    @ApiModelProperty(name = "appCategories",
-            value = "CategoryDTO of the application",
+    @ApiModelProperty(name = "categories",
+            value = "List of Categories",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
     @NotNull
-    private List<String> appCategories;
-
+    private List<String> categories;
 
     @ApiModelProperty(name = "subType",
-            value = "Subscription type of the application",
+            value = "Subscription method of the public app",
             required = true,
             example = "PAID, FREE")
     @NotNull
-    private String subType;
-
-    @ApiModelProperty(name = "paymentCurrency",
-            value = "Payment currency of the application",
-            required = true,
-            example = "$")
-    private String paymentCurrency;
-
-    @ApiModelProperty(name = "tags",
-            value = "List of application tags")
-    @NotNull
-    private List<String> tags;
-
-    @ApiModelProperty(name = "unrestrictedRoles",
-            value = "List of roles that users should have to access the application")
-    @NotNull
-    private List<String> unrestrictedRoles;
+    private String subMethod;
 
     @ApiModelProperty(name = "deviceType",
-            value = "Related device type of the application",
+            value = "Related device type of the public app",
             required = true,
             example = "IoS, Android, Arduino, RaspberryPi etc")
     @NotNull
     private String deviceType;
 
+    @ApiModelProperty(name = "paymentCurrency",
+            value = "Payment currency of the web clip",
+            required = true,
+            example = "$")
+    private String paymentCurrency;
+
+    @ApiModelProperty(name = "tags",
+            value = "List of tags")
+    @NotNull
+    private List<String> tags;
+
+    @ApiModelProperty(name = "unrestrictedRoles",
+            value = "List of roles that users should have to view the public app")
+    @NotNull
+    private List<String> unrestrictedRoles;
+
     @ApiModelProperty(name = "applicationReleaseWrappers",
-            value = "List of application releases",
+            value = "List of public app releases",
             required = true)
     @NotNull
-    private List<ApplicationReleaseWrapper> applicationReleaseWrappers;
-
+    private List<PublicAppReleaseWrapper> publicAppReleaseWrappers;
 
     public String getName() {
         return name;
@@ -89,38 +86,36 @@ public class ApplicationWrapper {
 
     public void setName(String name) { this.name = name; }
 
-    public List<String> getAppCategories() { return appCategories; }
-
-    public void setAppCategories(List<String> appCategories) {
-        this.appCategories = appCategories;
-    }
-
     public List<String> getTags() { return tags; }
 
     public void setTags(List<String> tags) { this.tags = tags; }
-
-    public String getSubType() { return subType; }
-
-    public void setSubType(String subType) { this.subType = subType; }
-
-    public String getPaymentCurrency() { return paymentCurrency; }
-
-    public void setPaymentCurrency(String paymentCurrency) { this.paymentCurrency = paymentCurrency; }
-
-    public List<ApplicationReleaseWrapper> getApplicationReleaseWrappers() { return applicationReleaseWrappers; }
-
-    public void setApplicationReleaseWrappers(List<ApplicationReleaseWrapper> applicationReleaseWrappers) {
-        this.applicationReleaseWrappers = applicationReleaseWrappers; }
-
-    public List<String> getUnrestrictedRoles() { return unrestrictedRoles; }
-
-    public void setUnrestrictedRoles(List<String> unrestrictedRoles) { this.unrestrictedRoles = unrestrictedRoles; }
 
     public String getDeviceType() { return deviceType; }
 
     public void setDeviceType(String deviceType) { this.deviceType = deviceType; }
 
+    public String getPaymentCurrency() { return paymentCurrency; }
+
+    public void setPaymentCurrency(String paymentCurrency) { this.paymentCurrency = paymentCurrency; }
+
+    public List<String> getUnrestrictedRoles() { return unrestrictedRoles; }
+
+    public void setUnrestrictedRoles(List<String> unrestrictedRoles) { this.unrestrictedRoles = unrestrictedRoles; }
+
     public String getDescription() { return description; }
 
     public void setDescription(String description) { this.description = description; }
+
+    public List<PublicAppReleaseWrapper> getPublicAppReleaseWrappers() { return publicAppReleaseWrappers; }
+
+    public void setPublicAppReleaseWrappers(List<PublicAppReleaseWrapper> publicAppReleaseWrappers) {
+        this.publicAppReleaseWrappers = publicAppReleaseWrappers; }
+
+    public List<String> getCategories() { return categories; }
+
+    public void setCategories(List<String> categories) { this.categories = categories; }
+
+    public String getSubMethod() { return subMethod; }
+
+    public void setSubMethod(String subMethod) { this.subMethod = subMethod; }
 }

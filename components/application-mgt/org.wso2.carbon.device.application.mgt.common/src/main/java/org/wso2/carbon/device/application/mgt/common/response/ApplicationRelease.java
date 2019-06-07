@@ -81,10 +81,6 @@ public class ApplicationRelease {
             required = true)
     private String metaData;
 
-    @ApiModelProperty(name = "url",
-            value = "URL which is used for WEB-CLIP")
-    private String url;
-
     @ApiModelProperty(name = "supportedOsVersions",
             value = "ApplicationDTO release supported OS versions")
     private String supportedOsVersions;
@@ -123,14 +119,6 @@ public class ApplicationRelease {
 
     public String getMetaData() {
         return metaData;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getDescription() { return description; }
