@@ -1,0 +1,72 @@
+.d-rating .numeric-data{
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 20px 0 20px 0;
+    vertical-align: top;
+    text-align: center;
+    width: 30%;
+}
+
+.d-rating .bar-containers{
+    box-sizing: border-box;
+    display: inline-block;
+    padding: 20px 20px 20px 30px;
+    vertical-align: top;
+    width: 70%;
+}
+
+.d-rating .bar-containers .bar-container{
+    color: #737373;
+    font-weight: 400;
+    height: 20px;
+    margin-bottom: 4px;
+    position: relative;
+    width: 100%;
+}
+
+.d-rating .bar-containers .bar-container .number{
+    font-size: 11px;
+    left: -16px;
+    letter-spacing: 1px;
+    position: absolute;
+}
+
+.d-rating .bar-containers .bar-container .bar{
+    transition: width .25s ease;
+    display: inline-block;
+    height: 100%;
+    opacity: .8;
+    border-radius: 5px;
+}
+
+.bar-container .rate-5{
+    background: #57bb8a;
+}
+
+.bar-container .rate-4{
+    background: #9ace6a;
+}
+
+.bar-container .rate-3{
+    background: #ffcf02;
+}
+
+.bar-container .rate-2{
+    background: #ff9f02;
+}
+
+.bar-container .rate-1{
+    background: #ff6f31;
+}
+
+.d-rating .numeric-data .rate{
+    color: #333;
+    font-size: 64px;
+    font-weight: 100;
+    line-height: 64px;
+    padding-bottom: 6px;
+}
+
+.d-rating .numeric-data .people-count{
+    padding-top: 6px;
+}

@@ -48,8 +48,7 @@ public class MDMAndroidOperationUtil {
 
 		switch (application.getType()) {
 			case ENTERPRISE:
-				EnterpriseApplication enterpriseApplication =
-						new EnterpriseApplication();
+				EnterpriseApplication enterpriseApplication = new EnterpriseApplication();
 				enterpriseApplication.setType(application.getType().toString());
 				enterpriseApplication.setUrl(application.getLocation());
 				operation.setPayLoad(enterpriseApplication.toJSON());

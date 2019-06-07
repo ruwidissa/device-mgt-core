@@ -47,15 +47,16 @@
     </context-param>
 
     <!-- Below configuration is used to redirect http requests to https -->
-    <security-constraint>
-        <web-resource-collection>
-            <web-resource-name>ApplicationMgt-Admin</web-resource-name>
-            <url-pattern>/*</url-pattern>
-        </web-resource-collection>
-        <user-data-constraint>
-            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-        </user-data-constraint>
-    </security-constraint>
+    <!-- Below configuration is commented because artifact download API is accessed from the device -->
+<!--    <security-constraint>-->
+<!--        <web-resource-collection>-->
+<!--            <web-resource-name>ApplicationMgt-Admin</web-resource-name>-->
+<!--            <url-pattern>/*</url-pattern>-->
+<!--        </web-resource-collection>-->
+<!--        <user-data-constraint>-->
+<!--            <transport-guarantee>CONFIDENTIAL</transport-guarantee>-->
+<!--        </user-data-constraint>-->
+<!--    </security-constraint>-->
 
     <!--publish to apim-->
     <context-param>
