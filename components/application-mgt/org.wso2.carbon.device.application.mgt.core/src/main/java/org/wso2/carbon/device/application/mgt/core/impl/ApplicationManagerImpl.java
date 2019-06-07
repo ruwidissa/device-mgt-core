@@ -2489,8 +2489,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-        }
-        if (param instanceof WebAppReleaseWrapper) {
+        } else if (param instanceof WebAppReleaseWrapper) {
             WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
             UrlValidator urlValidator = new UrlValidator();
             if (StringUtils.isEmpty(webAppReleaseWrapper.getVersion())) {
