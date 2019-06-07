@@ -28,7 +28,7 @@ class Dashboard extends React.Component {
                         <Menu
                             theme="light"
                             mode="horizontal"
-                            defaultSelectedKeys={['2']}
+                            defaultSelectedKeys={['1']}
                             style={{lineHeight: '64px'}}
                         >
                             <Menu.Item key="1"><Link to="/publisher/apps"><Icon type="appstore"/>Apps</Link></Menu.Item>
