@@ -740,16 +740,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease createRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
+    public ApplicationRelease createEntAppRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationRelease applicationRelease;
         if (log.isDebugEnabled()) {
-            log.debug("ApplicationDTO release request is received for the application id: " + applicationId);
+            log.debug("Application release creating request is received for the application id: " + applicationId);
         }
 
         ApplicationDTO applicationDTO = getApplication(applicationId);
         try {
+            if (!ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
+                String msg =
+                        "It is possible to add new application release for " + ApplicationType.ENTERPRISE.toString()
+                                + " app type. But you are requesting to add new application release for "
+                                + applicationDTO.getType() + " app type.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
             ApplicationReleaseDTO applicationReleaseDTO = uploadReleaseArtifacts(applicationReleaseWrapper,
                     applicationDTO, applicationArtifact);
             ConnectionManagerUtil.beginDBTransaction();

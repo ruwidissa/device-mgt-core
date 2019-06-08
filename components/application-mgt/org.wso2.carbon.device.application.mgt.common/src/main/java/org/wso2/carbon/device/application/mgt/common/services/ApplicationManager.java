@@ -192,7 +192,7 @@ public interface ApplicationManager {
      * @param applicationReleaseWrapper ApplicatonRelease that need to be be created.
      * @return the unique id of the application release, if the application release succeeded else -1
      */
-    ApplicationRelease createRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
+    ApplicationRelease createEntAppRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
