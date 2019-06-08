@@ -94,6 +94,7 @@ import java.net.URISyntaxException;
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -152,7 +153,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
             Map<String, String> defaultUserClaims =
                     this.buildDefaultUserClaims(userInfo.getFirstname(), userInfo.getLastname(),
-                            userInfo.getEmailAddress());
+                            userInfo.getEmailAddress(), true);
             // calling addUser method of carbon user api
             List<String> tmpRoles = new ArrayList<>();
             String[] userInfoRoles = userInfo.getRoles();
@@ -279,7 +280,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
             Map<String, String> defaultUserClaims =
                     this.buildDefaultUserClaims(userInfo.getFirstname(), userInfo.getLastname(),
-                            userInfo.getEmailAddress());
+                            userInfo.getEmailAddress(), false);
             if (StringUtils.isNotEmpty(userInfo.getPassword())) {
                 // Decoding Base64 encoded password
                 userStoreManager.updateCredentialByAdmin(username,
@@ -427,11 +428,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             userList = new ArrayList<>(users.length);
             BasicUserInfo user;
             for (String username : users) {
-                user = new BasicUserInfo();
-                user.setUsername(username);
-                user.setEmailAddress(getClaimValue(username, Constants.USER_CLAIM_EMAIL_ADDRESS));
-                user.setFirstname(getClaimValue(username, Constants.USER_CLAIM_FIRST_NAME));
-                user.setLastname(getClaimValue(username, Constants.USER_CLAIM_LAST_NAME));
+                user = getBasicUserInfo(username);
                 userList.add(user);
             }
 
@@ -899,11 +896,17 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
     }
 
-    private Map<String, String> buildDefaultUserClaims(String firstName, String lastName, String emailAddress) {
+    private Map<String, String> buildDefaultUserClaims(String firstName, String lastName, String emailAddress,
+                                                       boolean isFresh) {
         Map<String, String> defaultUserClaims = new HashMap<>();
         defaultUserClaims.put(Constants.USER_CLAIM_FIRST_NAME, firstName);
         defaultUserClaims.put(Constants.USER_CLAIM_LAST_NAME, lastName);
         defaultUserClaims.put(Constants.USER_CLAIM_EMAIL_ADDRESS, emailAddress);
+        if (isFresh) {
+            defaultUserClaims.put(Constants.USER_CLAIM_CREATED, String.valueOf(Instant.now().getEpochSecond()));
+        } else {
+            defaultUserClaims.put(Constants.USER_CLAIM_MODIFIED, String.valueOf(Instant.now().getEpochSecond()));
+        }
         if (log.isDebugEnabled()) {
             log.debug("Default claim map is created for new user: " + defaultUserClaims.toString());
         }
@@ -936,6 +939,8 @@ public class UserManagementServiceImpl implements UserManagementService {
         userInfo.setEmailAddress(getClaimValue(username, Constants.USER_CLAIM_EMAIL_ADDRESS));
         userInfo.setFirstname(getClaimValue(username, Constants.USER_CLAIM_FIRST_NAME));
         userInfo.setLastname(getClaimValue(username, Constants.USER_CLAIM_LAST_NAME));
+        userInfo.setCreatedDate(getClaimValue(username, Constants.USER_CLAIM_CREATED));
+        userInfo.setModifiedDate(getClaimValue(username, Constants.USER_CLAIM_MODIFIED));
         return userInfo;
     }
 
