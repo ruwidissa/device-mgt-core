@@ -234,6 +234,8 @@ public class DAOUtil {
             reviewDTO.setImmediateParentId(rs.getInt("IMMEDIATE_PARENT_ID"));
             reviewDTO.setUsername(rs.getString("USERNAME"));
             reviewDTO.setRating(rs.getInt("RATING"));
+            reviewDTO.setReleaseUuid(rs.getString("UUID"));
+            reviewDTO.setReleaseVersion(rs.getString("VERSION"));
             reviewDTOs.add(reviewDTO);
         }
         return reviewDTOs;

@@ -28,6 +28,8 @@ public class ReviewDTO {
     private int rating;
     private int rootParentId;
     private int immediateParentId;
+    private String releaseUuid;
+    private String releaseVersion;
 
     public int getId() {
         return id;
@@ -84,4 +86,12 @@ public class ReviewDTO {
     public int getImmediateParentId() { return immediateParentId; }
 
     public void setImmediateParentId(int immediateParentId) { this.immediateParentId = immediateParentId; }
+
+    public String getReleaseUuid() { return releaseUuid; }
+
+    public void setReleaseUuid(String releaseUuid) { this.releaseUuid = releaseUuid; }
+
+    public String getReleaseVersion() { return releaseVersion; }
+
+    public void setReleaseVersion(String releaseVersion) { this.releaseVersion = releaseVersion; }
 }

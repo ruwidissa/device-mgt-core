@@ -388,7 +388,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred when adding subscription data for application release UUID: "
+            String msg = "Error occurred when adding subscription data for application release ID: "
                     + applicationReleaseId;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
@@ -398,7 +398,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg =
-                    "SQL Error occurred when adding new device subscription to application release which has UUID: "
+                    "SQL Error occurred when adding new device subscription to application release which has ID: "
                             + applicationReleaseId;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);

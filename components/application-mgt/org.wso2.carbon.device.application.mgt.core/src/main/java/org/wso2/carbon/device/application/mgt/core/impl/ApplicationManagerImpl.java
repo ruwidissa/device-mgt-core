@@ -1924,6 +1924,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         try {
             ConnectionManagerUtil.beginDBTransaction();
+            if (applicationDAO.getTagForTagName(newTagName, tenantId) != null){
+                String msg =
+                        "You are trying to modify tag name into existing tag. Therefore you can't modify tag name from "
+                                + oldTagName + " to new tag name " + newTagName;
+                log.error(msg);
+                throw new BadRequestException(msg);
+
+            }
             TagDTO tag = applicationDAO.getTagForTagName(oldTagName, tenantId);
             if (tag == null){
                 String msg = "Couldn't found a tag for tag name " + oldTagName + ".";
@@ -2129,7 +2137,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (!StringUtils.isEmpty(appType)) {
             boolean isValidAppType = false;
             for (ApplicationType applicationType : ApplicationType.values()) {
-                if (applicationType.toString().equals(appType)) {
+                if (applicationType.toString().equalsIgnoreCase(appType)) {
                     isValidAppType = true;
                     break;
                 }

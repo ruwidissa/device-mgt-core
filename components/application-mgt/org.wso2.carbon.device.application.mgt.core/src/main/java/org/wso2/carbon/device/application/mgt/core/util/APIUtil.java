@@ -190,13 +190,13 @@ public class APIUtil {
         try {
             deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
 
-            if(deviceTypeAttr instanceof String){
+            if (deviceTypeAttr instanceof String) {
                 for (DeviceType dt : deviceTypes) {
                     if (dt.getName().equals(deviceTypeAttr)) {
                         return dt;
                     }
                 }
-            } else if (deviceTypeAttr instanceof  Integer){
+            } else if (deviceTypeAttr instanceof Integer) {
                 for (DeviceType dt : deviceTypes) {
                     if (dt.getId() == (Integer) deviceTypeAttr) {
                         return dt;
