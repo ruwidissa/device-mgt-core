@@ -8,22 +8,30 @@ import Reviews from "./review/Reviews";
 import AddReview from "./review/AddReview";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
+import AppInstallModal from "./install/AppInstallModal";
 
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
-            loading: false
+            loading: false,
+            appInstallModalVisible: false
         }
     }
 
-    installApp = () =>{
+    installApp = (type,payload) => {
         const {uuid} = this.props.release;
-        const payload = ["admin"];
-        const request = "method=post&content-type=application/json&payload="+JSON.stringify(payload)+"&api-endpoint=/application-mgt-store/v1.0/subscription/install/"+uuid+"/user/install";
 
+        const parameters = {
+            method: "post",
+            'content-type': "application/json",
+            payload: JSON.stringify(payload),
+            'api-endpoint': "/application-mgt-store/v1.0/subscription/install/" + uuid + "/"+type+"/install"
+        };
+
+        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
         this.setState({
             loading: true,
         });
@@ -32,14 +40,15 @@ class ReleaseView extends React.Component {
         ).then(res => {
             if (res.status === 201) {
                 this.setState({
-                    loading: false
+                    loading: false,
+                    appInstallModalVisible: false
                 });
                 notification["success"]({
                     message: 'Done!',
                     description:
                         'App installed successfully.',
                 });
-            }else{
+            } else {
                 this.setState({
                     loading: false
                 });
@@ -50,10 +59,10 @@ class ReleaseView extends React.Component {
                 });
             }
 
-        }).catch((error) =>{
+        }).catch((error) => {
             if (error.response.status === 401) {
                 window.location.href = 'https://localhost:9443/store/login';
-            } else{
+            } else {
                 this.setState({
                     loading: false,
                     visible: false
@@ -67,10 +76,24 @@ class ReleaseView extends React.Component {
         });
     };
 
+    showAppInstallModal = () => {
+        this.setState({
+            appInstallModalVisible: true
+        });
+    };
+
+    closeAppInstallModal = () => {
+        this.setState({
+            appInstallModalVisible: false
+        });
+    };
+
     render() {
         const release = this.props.release;
         return (
             <div>
+                <AppInstallModal uuid={release.uuid} visible={this.state.appInstallModalVisible}
+                                 onClose={this.closeAppInstallModal} onInstall={this.installApp}/>
                 <div className="release">
                     <Row>
                         <Col xl={4} sm={6} xs={8} className="release-icon">
@@ -91,7 +114,8 @@ class ReleaseView extends React.Component {
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
                             <div>
                                 <Button.Group style={{float: "right"}}>
-                                    <Button onClick={this.installApp} loading={this.state.loading}  htmlType="button" type="primary" icon="download">Install</Button>
+                                    <Button onClick={this.showAppInstallModal} loading={this.state.loading}
+                                            htmlType="button" type="primary" icon="download">Install</Button>
                                 </Button.Group>
                             </div>
                         </Col>
