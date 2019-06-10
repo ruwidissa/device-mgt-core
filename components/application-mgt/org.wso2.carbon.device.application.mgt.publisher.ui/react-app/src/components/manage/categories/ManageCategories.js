@@ -65,17 +65,19 @@ class ManageCategories extends React.Component {
                         "Category Removed Successfully!",
                 });
 
-                this.setState({
-                    loading: false
+
+                console.log("g");
+                const {categories} = this.state;
+                const remainingElements = categories.filter(function (value) {
+                    return value.categoryName !== id;
+
                 });
-                // this.setState({
-                //     categories: [...categories, ...tempElements],
-                //     tempElements: [],
-                //     inputVisible: false,
-                //     inputValue: '',
-                //     loading: false,
-                //     isAddNewVisible: false
-                // });
+
+
+                this.setState({
+                    loading: false,
+                    categories: remainingElements
+                });
             }
 
         }).catch((error) => {
@@ -135,12 +137,12 @@ class ManageCategories extends React.Component {
     };
 
     renderTempElement = (category) => {
-        const {tempElements} = this.state;
         const tagElem = (
             <Tag
                 closable
-                onClose={e => {
+                onClose={e=>{
                     e.preventDefault();
+                    const {tempElements} = this.state;
                     const remainingElements = tempElements.filter(function (value) {
 
                         return value.categoryName !== category.categoryName;

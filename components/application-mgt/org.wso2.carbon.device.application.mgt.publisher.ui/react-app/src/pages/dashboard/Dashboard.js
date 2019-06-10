@@ -4,9 +4,9 @@ import {Layout, Menu, Icon} from 'antd';
 const {Header, Content, Footer} = Layout;
 
 import Logo from "../../../public/images/logo.svg";
-import {Link, NavLink} from "react-router-dom";
+import {BrowserRouter,Switch,Link, NavLink} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
-import {Switch, Redirect} from 'react-router'
+import {Redirect} from 'react-router'
 import "../../App.css";
 
 class Dashboard extends React.Component {
@@ -41,13 +41,15 @@ class Dashboard extends React.Component {
                 </Layout>
                 <Layout>
                     <Content style={{padding: '0 0'}}>
-                        <Switch>
-                            <Redirect exact from="/publisher" to="/publisher/apps"/>
-                            {this.state.routes.map((route) => (
-                                <RouteWithSubRoutes key={route.path} {...route} />
-                            ))}
+                        <BrowserRouter>
+                            <Switch>
+                                <Redirect exact from="/publisher" to="/publisher/apps"/>
+                                {this.state.routes.map((route) => (
+                                    <RouteWithSubRoutes key={route.path} {...route} />
+                                ))}
 
-                        </Switch>
+                            </Switch>
+                        </BrowserRouter>
 
                     </Content>
                     <Footer style={{textAlign: 'center'}}>

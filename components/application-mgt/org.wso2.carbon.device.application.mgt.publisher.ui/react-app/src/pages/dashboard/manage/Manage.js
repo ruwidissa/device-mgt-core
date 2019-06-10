@@ -35,7 +35,7 @@ class Manage extends React.Component {
         return (
             <div>
                 <PageHeader
-                    breadcrumb={{routes}}
+                    // breadcrumb={{routes}}
                     title = "Manage"
                 >
                     <div className="wrap">
