@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package io.entgra.request.handler.util;
+
+public class HandlerConstants {
+    public static final String PUBLISHER_APPLICATION_NAME = "application-mgt-publisher";
+    public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
+    public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/config/ui-config";
+    public static final String TOKEN_ENDPOINT = "/oauth2/token";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String BASIC = "Basic ";
+    public static final String COLON = ":";
+    public static final String TAGS_KEY = "tags";
+    public static final String APP_NAME_KEY = "applicationName";
+    public static final String SESSION_AUTH_DATA_KEY = "application-mgt";
+    public static final String AUTHORIZATION_HEADER_KEY = "Authorization";
+    public static final String UI_CONFIG_KEY = "ui-config";
+    public static final String PLATFORM = "platform";
+    public static final String SERVER_HOST = "server-host";
+    public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
+    public static final String LOGIN_RESPONSE_KEY = "loginResponse";
+    public static final String FAILURE_CALLBACK_KEY = "failureCallback";
+    public static final String API_COMMON_CONTEXT = "/api";
+    public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
+    public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
+
+    public static final int INTERNAL_ERROR_CODE = 500;
+    public static final long TIMEOUT = 1200;
+}
