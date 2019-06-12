@@ -8,7 +8,7 @@ const {Text} = Typography;
 const {Option} = Select;
 
 
-class UserInstall extends React.Component {
+class GroupInstall extends React.Component {
 
     constructor(props) {
         super(props);
@@ -23,7 +23,6 @@ class UserInstall extends React.Component {
     };
 
     fetchUser = value => {
-        console.log('fetching user', value);
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
         this.setState({data: [], fetching: true});
@@ -33,7 +32,7 @@ class UserInstall extends React.Component {
             method: "get",
             'content-type': "application/json",
             payload: "{}",
-            'api-endpoint': "/device-mgt/v1.0/users/search?username=" + value
+            'api-endpoint': "/device-mgt/v1.0/admin/groups?name=" + value
         };
 
         const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
@@ -48,18 +47,18 @@ class UserInstall extends React.Component {
 
                 console.log(res.data.data);
 
-                const data = res.data.data.users.map(user => ({
-                    text: user.username,
-                    value: user.username,
+                const data = res.data.data.deviceGroups.map(group => ({
+                    text: group.name,
+                    value: group.name,
                 }));
 
                 this.setState({data, fetching: false});
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty(status) && error.response.status === 401) {
+            if (error.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
             } else {
                 message.error('Something went wrong... :(');
             }
@@ -76,13 +75,13 @@ class UserInstall extends React.Component {
         });
     };
 
-    install = () => {
+    install = () =>{
         const {value} = this.state;
         const data = [];
-        value.map(val => {
+        value.map(val=>{
             data.push(val.key);
         });
-        this.props.onInstall("user", data);
+        this.props.onInstall("group",data);
     };
 
     render() {
@@ -93,12 +92,13 @@ class UserInstall extends React.Component {
             <div>
                 <Text>Lorem ipsum dolor sit amet, ne tation labores quo, errem facilisis expetendis vel in. Ut choro
                     decore ubique sed,</Text>
-                <p>Select users</p>
+                <br/>
+                <br/>
                 <Select
                     mode="multiple"
                     labelInValue
                     value={value}
-                    placeholder="Enter the username"
+                    placeholder="Search groups"
                     notFoundContent={fetching ? <Spin size="small"/> : null}
                     filterOption={false}
                     onSearch={this.fetchUser}
@@ -109,7 +109,7 @@ class UserInstall extends React.Component {
                         <Option key={d.value}>{d.text}</Option>
                     ))}
                 </Select>
-                <div style={{paddingTop: 10, textAlign: "right"}}>
+                <div style={{paddingTop:10, textAlign:"right"}}>
                     <Button htmlType="button" type="primary" onClick={this.install}>Install</Button>
                 </div>
             </div>
@@ -117,4 +117,4 @@ class UserInstall extends React.Component {
     }
 }
 
-export default UserInstall;
+export default GroupInstall;
