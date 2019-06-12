@@ -30,7 +30,7 @@ class DetailedRating extends React.Component{
     getData = (uuid)=>{
         const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid+"/rating";
 
-        return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 let detailedRating = res.data.data;
@@ -41,7 +41,7 @@ class DetailedRating extends React.Component{
 
         }).catch(function (error) {
             if (error.response.status === 401) {
-                window.location.href = 'https://localhost:9443/store/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             }
         });
     };

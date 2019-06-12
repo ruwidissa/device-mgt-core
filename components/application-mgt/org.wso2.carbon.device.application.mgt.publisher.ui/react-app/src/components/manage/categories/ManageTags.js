@@ -21,7 +21,7 @@ class ManageTags extends React.Component {
 
     componentDidMount() {
         const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/tags";
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -33,7 +33,7 @@ class ManageTags extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
 
@@ -56,7 +56,7 @@ class ManageTags extends React.Component {
             loading: true
         });
         const request = "method=delete&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/" + id;
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -81,7 +81,7 @@ class ManageTags extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
             }
@@ -196,7 +196,7 @@ class ManageTags extends React.Component {
         const dataArray = JSON.stringify(tempElements.map(category => category.categoryName));
 
         const request = "method=post&content-type=application/json&payload=" + dataArray + "&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories";
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -218,7 +218,7 @@ class ManageTags extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
             }
@@ -257,7 +257,7 @@ class ManageTags extends React.Component {
             isEditModalVisible: false,
         });
         const request = "method=put&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories?from="+currentlyEditingId+"%26to="+editingValue;
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -278,7 +278,7 @@ class ManageTags extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
             }
