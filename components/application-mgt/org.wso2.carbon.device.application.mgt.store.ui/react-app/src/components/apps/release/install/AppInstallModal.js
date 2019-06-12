@@ -1,6 +1,8 @@
 import React from "react";
 import {Button, Modal, Tabs} from "antd";
 import UserInstall from "./UserInstall";
+import GroupInstall from "./GroupInstall";
+import RoleInstall from "./RoleInstall";
 
 const { TabPane } = Tabs;
 
@@ -20,13 +22,13 @@ class AppInstallModal extends React.Component{
                             <UserInstall onInstall={this.props.onInstall}/>
                         </TabPane>
                         <TabPane tab="Device" key="2">
-                            Tab 2
+                            Device install
                         </TabPane>
                         <TabPane tab="Role" key="3">
-                            Tab 3
+                            <RoleInstall onInstall={this.props.onInstall}/>
                         </TabPane>
                         <TabPane tab="Group" key="4">
-                            Tab 3
+                            <GroupInstall onInstall={this.props.onInstall}/>
                         </TabPane>
                     </Tabs>
                 </Modal>
