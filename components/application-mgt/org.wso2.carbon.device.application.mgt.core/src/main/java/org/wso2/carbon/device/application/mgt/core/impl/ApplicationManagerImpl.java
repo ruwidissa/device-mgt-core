@@ -19,6 +19,7 @@ package org.wso2.carbon.device.application.mgt.core.impl;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -2601,6 +2602,49 @@ public class ApplicationManagerImpl implements ApplicationManager {
             String msg = "Error occured when getting device types which are supported by the Entgra IoTS";
             log.error(msg);
             throw new UnexpectedServerErrorException(msg);
+        }
+    }
+
+    public String getPlistArtifact(String releaseUuid) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            if (applicationDTO == null) {
+                String msg = "Couldn't find application for the release UUID: " + releaseUuid;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+            String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
+                    .getArtifactDownloadEndpoint();
+            String artifactDownloadURL = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
+                              + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName();
+            String plistContent = "&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTDPLIST1.0//EN&quot; &quot;" +
+                                  "http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&lt;plist version=&quot;" +
+                                  "1.0&quot;&gt;&lt;dict&gt;&lt;key&gt;items&lt;/key&gt;&lt;array&gt;&lt;dict&gt;&lt;" +
+                                  "key&gt;assets&lt;/key&gt;&lt;array&gt;&lt;dict&gt;&lt;key&gt;kind&lt;/key&gt;&lt;" +
+                                  "string&gt;software-package&lt;/string&gt;&lt;key&gt;url&lt;/key&gt;&lt;string&gt;" +
+                                  "$downloadURL&lt;/string&gt;&lt;/dict&gt;&lt;/array&gt;&lt;key&gt;metadata&lt;" +
+                                  "/key&gt;&lt;dict&gt;&lt;key&gt;bundle-identifier&lt;/key&gt;&lt;string&gt;" +
+                                  "$packageName&lt;/string&gt;&lt;key&gt;bundle-version&lt;/key&gt;&lt;string&gt;" +
+                                  "$bundleVersion&lt;/string&gt;&lt;key&gt;kind&lt;/key&gt;&lt;string&gt;" +
+                                  "software&lt;/string&gt;&lt;key&gt;title&lt;/key&gt;&lt;string&gt;$appName&lt;" +
+                                  "/string&gt;&lt;/dict&gt;&lt;/dict&gt;&lt;/array&gt;&lt;/dict&gt;&lt;/plist&gt;";
+            plistContent = plistContent.replace("$downloadURL", artifactDownloadURL)
+                    .replace("$packageName", applicationReleaseDTO.getPackageName())
+                    .replace("$bundleVersion", applicationReleaseDTO.getVersion())
+                    .replace("$appName", applicationDTO.getName());
+            return StringEscapeUtils.unescapeXml(plistContent);
+        } catch (DBConnectionException e) {
+            throw new ApplicationManagementException(
+                    "Error occurred while obtaining the database connection for getting application for the release UUID: "
+                    + releaseUuid, e);
+        } catch (ApplicationManagementDAOException e) {
+            throw new ApplicationManagementException(
+                    "Error occurred while getting application data for release UUID: " + releaseUuid, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 }

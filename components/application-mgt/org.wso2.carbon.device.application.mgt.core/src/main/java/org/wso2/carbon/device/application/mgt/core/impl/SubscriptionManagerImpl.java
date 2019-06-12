@@ -35,6 +35,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManageme
 import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
+import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
@@ -46,9 +47,11 @@ import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.MDMAppConstants;
 import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
 import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
@@ -70,6 +73,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -474,6 +478,17 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
             } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                    String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
+                            .getArtifactDownloadEndpoint();
+                    String plistDownloadEndpoint = artifactDownloadEndpoint + Constants.FORWARD_SLASH +
+                                                   MDMAppConstants.IOSConstants.PLIST + Constants.FORWARD_SLASH +
+                                                   application.getApplicationReleases().get(0).getUuid();
+                    mobileApp.setType(mobileAppType);
+                    mobileApp.setLocation(plistDownloadEndpoint);
+                    Properties properties = new Properties();
+                    properties.put(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP, true);
+                    properties.put(MDMAppConstants.IOSConstants.IS_REMOVE_APP, true);
+                    mobileApp.setProperties(properties);
                     return MDMIOSOperationUtil.createInstallAppOperation(mobileApp);
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                     return MDMIOSOperationUtil.createAppUninstallOperation(mobileApp);
