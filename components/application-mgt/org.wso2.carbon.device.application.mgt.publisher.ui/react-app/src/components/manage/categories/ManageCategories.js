@@ -65,14 +65,11 @@ class ManageCategories extends React.Component {
                         "Category Removed Successfully!",
                 });
 
-
-                console.log("g");
                 const {categories} = this.state;
                 const remainingElements = categories.filter(function (value) {
                     return value.categoryName !== id;
 
                 });
-
 
                 this.setState({
                     loading: false,

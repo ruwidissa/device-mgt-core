@@ -13,6 +13,7 @@ class AppInstallModal extends React.Component{
                     visible={this.props.visible}
                     // onOk={this.handleOk}
                     onCancel={this.props.onClose}
+                    footer={null}
                 >
                     <Tabs defaultActiveKey="1">
                         <TabPane tab="User" key="1">
