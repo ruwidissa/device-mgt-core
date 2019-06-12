@@ -6,7 +6,7 @@ export const getApps = () => dispatch => {
 
     const request = "method=post&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/applications";
 
-    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
             let apps = [];
@@ -19,7 +19,7 @@ export const getApps = () => dispatch => {
 
     }).catch(function (error) {
         if (error.response.status === 401) {
-            window.location.href = 'https://localhost:9443/store/login';
+            window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
         }
     });
 
@@ -29,7 +29,7 @@ export const getRelease = (uuid) => dispatch => {
 
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/applications/" + uuid;
 
-    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
             let release = res.data.data.applicationReleases[0];
@@ -43,7 +43,7 @@ export const getRelease = (uuid) => dispatch => {
         }
     }).catch(function (error) {
         if (error.response.status === 401) {
-            window.location.href = 'https://localhost:9443/store/login';
+            window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
         }else if(error.response.status===404){
             dispatch({
                 type: ActionTypes.GET_RELEASE,
@@ -94,7 +94,7 @@ export const setLoading = (stateToLoad) => dispatch => {
 export const getLifecycle = () => dispatch => {
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/applications/lifecycle-config";
 
-    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
             let lifecycle = res.data.data;
@@ -103,7 +103,7 @@ export const getLifecycle = () => dispatch => {
 
     }).catch(function (error) {
         if (error.response.status === 401) {
-            window.location.href = 'https://localhost:9443/store/login';
+            window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
         }
     });
 };
@@ -118,7 +118,7 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
     const request = "method=post&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/application-mgt-store/v1.0/applications/life-cycle/" + uuid;
 
 
-    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 201) {
             let release = res.data.data;
@@ -132,7 +132,7 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
 
     }).catch(function (error) {
         if (error.response.status === 401) {
-            window.location.href = 'https://localhost:9443/store/login';
+            window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
         } else if (error.response.status === 500) {
             alert("error");
             dispatch({
@@ -147,7 +147,7 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
 export const getDetailedRating = (uuid) => dispatch => {
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid+"/rating";
 
-    return axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
     ).then(res => {
         if (res.status === 200) {
             let detailedRating = res.data.data;
@@ -156,7 +156,7 @@ export const getDetailedRating = (uuid) => dispatch => {
 
     }).catch(function (error) {
         if (error.response.status === 401) {
-            window.location.href = 'https://localhost:9443/store/login';
+            window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
         } else{
             dispatch({
                 type: ActionTypes.GET_DETAILED_RATING, payload: null

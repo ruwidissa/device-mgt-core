@@ -16,6 +16,7 @@
     "d3": "^5.9.2",
     "dagre": "^0.8.4",
     "keymirror": "^0.1.1",
+    "lodash.debounce": "^4.0.8",
     "rc-viewer": "0.0.9",
     "react": "^16.8.4",
     "react-d3-graph": "^2.0.2",

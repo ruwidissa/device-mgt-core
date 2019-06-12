@@ -27,8 +27,8 @@ class Reviews extends React.Component {
     }
 
     fetchData = (offset, limit, callback) => {
-        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/" + this.props.uuid+"?offset="+offset+"%26limit="+limit;
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/" + this.props.uuid + "?offset=" + offset + "%26limit=" + limit;
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 let reviews = res.data.data.data;
@@ -37,8 +37,8 @@ class Reviews extends React.Component {
 
         }).catch(function (error) {
             if (error.response.status === 401) {
-                window.location.href = 'https://localhost:9443/store/login';
-            }else{
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+            } else {
                 message.warning('Something went wrong');
 
             }
@@ -46,7 +46,7 @@ class Reviews extends React.Component {
     };
 
     handleInfiniteOnLoad = (count) => {
-        const offset = count*limit;
+        const offset = count * limit;
         let data = this.state.data;
         this.setState({
             loading: true,
@@ -59,13 +59,13 @@ class Reviews extends React.Component {
             return;
         }
         this.fetchData(offset, limit, res => {
-            if(res.length>0){
+            if (res.length > 0) {
                 data = data.concat(res);
                 this.setState({
                     data,
                     loading: false,
                 });
-            }else {
+            } else {
                 this.setState({
                     hasMore: false,
                     loading: false

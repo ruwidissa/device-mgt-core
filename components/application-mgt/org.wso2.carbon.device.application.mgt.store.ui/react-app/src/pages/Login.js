@@ -58,7 +58,7 @@ class NormalLoginForm extends React.Component {
                     loading: true
                 });
                 let data = "username=" + values.username + "&password=" + values.password + "&platform=store";
-                axios.post('https://'+config.serverConfig.hostname+':'+config.serverConfig.httpsPort+config.serverConfig.loginUri, data
+                axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname+':'+config.serverConfig.httpsPort+config.serverConfig.loginUri, data
                 ).then(res => {
                     if (res.status === 200) {
                         window.location = res.data.url;

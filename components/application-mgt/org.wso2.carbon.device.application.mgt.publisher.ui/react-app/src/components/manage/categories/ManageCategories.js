@@ -21,7 +21,7 @@ class ManageCategories extends React.Component {
 
     componentDidMount() {
         const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/categories";
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -33,7 +33,7 @@ class ManageCategories extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
 
@@ -56,7 +56,7 @@ class ManageCategories extends React.Component {
             loading: true
         });
         const request = "method=delete&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/" + id;
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -65,23 +65,22 @@ class ManageCategories extends React.Component {
                         "Category Removed Successfully!",
                 });
 
-                this.setState({
-                    loading: false
+                const {categories} = this.state;
+                const remainingElements = categories.filter(function (value) {
+                    return value.categoryName !== id;
+
                 });
-                // this.setState({
-                //     categories: [...categories, ...tempElements],
-                //     tempElements: [],
-                //     inputVisible: false,
-                //     inputValue: '',
-                //     loading: false,
-                //     isAddNewVisible: false
-                // });
+
+                this.setState({
+                    loading: false,
+                    categories: remainingElements
+                });
             }
 
         }).catch((error) => {
             if (error.response.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
             }
@@ -135,12 +134,12 @@ class ManageCategories extends React.Component {
     };
 
     renderTempElement = (category) => {
-        const {tempElements} = this.state;
         const tagElem = (
             <Tag
                 closable
-                onClose={e => {
+                onClose={e=>{
                     e.preventDefault();
+                    const {tempElements} = this.state;
                     const remainingElements = tempElements.filter(function (value) {
 
                         return value.categoryName !== category.categoryName;
@@ -196,7 +195,7 @@ class ManageCategories extends React.Component {
         const dataArray = JSON.stringify(tempElements.map(category => category.categoryName));
 
         const request = "method=post&content-type=application/json&payload=" + dataArray + "&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories";
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -218,7 +217,7 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
             }
@@ -257,7 +256,7 @@ class ManageCategories extends React.Component {
             isEditModalVisible: false,
         });
         const request = "method=put&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/rename?from="+currentlyEditingId+"%26to="+editingValue;
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -278,7 +277,7 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
             }
