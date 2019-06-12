@@ -92,4 +92,33 @@ public interface ArtifactDownloadAPI {
                     required = true)
             @PathParam("fileName") String fileName);
 
+    @GET
+    @Path("/plist/{uuid}")
+    @Produces(MediaType.TEXT_XML)
+    @ApiOperation(
+            produces = MediaType.TEXT_XML,
+            httpMethod = "GET",
+            value = "Get plist artifact content of an application",
+            notes = "Get plist artifact content of an application"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved plist artifact content.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. Plist artifact content not found for the application."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while retrieving plist artifact content.",
+                            response = ErrorResponse.class)
+            })
+    Response getPlistArtifact(
+            @ApiParam(
+                    name = "uuid",
+                    value = "UUID of the application release.",
+                    required = true)
+            @PathParam("uuid") String uuid);
 }

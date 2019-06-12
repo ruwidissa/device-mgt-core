@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.api.services.ArtifactDownloadAPI;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -68,6 +69,26 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting the application release artifact file. ";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Produces(MediaType.TEXT_XML)
+    @Path("/plist/{uuid}")
+    public Response getPlistArtifact(@PathParam("uuid") String uuid) {
+        ApplicationManager applicationManager = APIUtil.getApplicationManager();
+        try {
+            String plistContent = applicationManager.getPlistArtifact(uuid);
+            return Response.status(Response.Status.OK).entity(plistContent).build();
+        } catch (NotFoundException e) {
+            String msg = "Couldn't find an application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting the application plist artifact file.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

@@ -48,10 +48,7 @@ public class MDMIOSOperationUtil {
             case ENTERPRISE:
                 EnterpriseApplication enterpriseApplication =
                         new EnterpriseApplication();
-                enterpriseApplication.setBundleId(application.getId());
-                enterpriseApplication.setIdentifier(application.getIdentifier());
                 enterpriseApplication.setManifestURL(application.getLocation());
-
                 Properties properties = application.getProperties();
                 enterpriseApplication.setPreventBackupOfAppData((Boolean) properties.
                         get(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP));
