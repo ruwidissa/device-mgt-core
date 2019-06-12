@@ -38,7 +38,7 @@ class UserInstall extends React.Component {
 
         const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
         console.log(request);
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {
@@ -59,7 +59,7 @@ class UserInstall extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty(status) && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = 'https://localhost:9443/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
             } else {
                 message.error('Something went wrong... :(');
             }

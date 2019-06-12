@@ -54,7 +54,7 @@ class AddReview extends React.Component {
 
         const request = "method=post&content-type=application/json&payload="+JSON.stringify(payload)+"&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid;
 
-        axios.post('https://' + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
         ).then(res => {
             if (res.status === 201) {
                 this.setState({
@@ -84,7 +84,7 @@ class AddReview extends React.Component {
 
         }).catch((error) =>{
             if (error.response.status === 401) {
-                window.location.href = 'https://localhost:9443/store/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
             } else{
                 this.setState({
                     loading: false,

@@ -4,6 +4,7 @@
     "value": "lightBaseTheme"
   },
   "serverConfig": {
+    "protocol": "https",
     "hostname": "localhost",
     "httpsPort": "9443",
     "invokerUri": "/api/application-mgt-handler/v1.0/invoke",
