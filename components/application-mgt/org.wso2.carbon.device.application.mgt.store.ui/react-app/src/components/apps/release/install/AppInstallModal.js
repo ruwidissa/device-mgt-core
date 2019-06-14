@@ -3,10 +3,14 @@ import {Button, Modal, Tabs} from "antd";
 import UserInstall from "./UserInstall";
 import GroupInstall from "./GroupInstall";
 import RoleInstall from "./RoleInstall";
+import DeviceInstall from "./DeviceInstall";
 
 const { TabPane } = Tabs;
 
 class AppInstallModal extends React.Component{
+    state={
+        data:[]
+    };
     render() {
         return (
             <div>
@@ -17,12 +21,12 @@ class AppInstallModal extends React.Component{
                     onCancel={this.props.onClose}
                     footer={null}
                 >
-                    <Tabs defaultActiveKey="1">
+                    <Tabs defaultActiveKey="1" onChange={()=>{console.log("changed");}}>
                         <TabPane tab="User" key="1">
                             <UserInstall onInstall={this.props.onInstall}/>
                         </TabPane>
                         <TabPane tab="Device" key="2">
-                            Device install
+                            <DeviceInstall onInstall={this.props.onInstall}/>
                         </TabPane>
                         <TabPane tab="Role" key="3">
                             <RoleInstall onInstall={this.props.onInstall}/>
