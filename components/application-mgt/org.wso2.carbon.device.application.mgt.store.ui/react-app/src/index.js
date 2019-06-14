@@ -6,7 +6,6 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import Release from "./pages/dashboard/apps/release/Release";
-import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
 import store from "./js/store/index";
 import {Provider} from "react-redux";
@@ -24,17 +23,12 @@ const routes = [
         component: Dashboard,
         routes: [
             {
-                path: '/store/android',
+                path: '/store/:deviceType',
                 component: Apps,
                 exact: true
             },
             {
-                path: '/store/apps/new-app',
-                component: AddNewApp,
-                exact: true
-            },
-            {
-                path: '/store/android/:uuid',
+                path: '/store/:deviceType/apps/:uuid',
                 exact: true,
                 component: Release
             }

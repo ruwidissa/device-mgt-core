@@ -32,7 +32,7 @@ class ConnectedAppCard extends React.Component {
 
         const description = (
             <div className="appCard">
-                <Link to={"/store/"+app.deviceType+"/" + release.uuid}>
+                <Link to={"/store/"+app.deviceType+"/apps/" + release.uuid}>
                     <Row className="release">
                         <Col span={24} className="release-icon">
                             <img src={release.iconPath} alt="icon"/>

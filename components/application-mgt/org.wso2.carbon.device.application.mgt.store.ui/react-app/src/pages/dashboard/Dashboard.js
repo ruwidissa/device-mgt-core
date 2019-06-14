@@ -18,6 +18,9 @@ class Dashboard extends React.Component {
     }
 
     render() {
+        const {deviceType} = this.props.match.params;
+        console.log(this.props.match.params);
+        console.log(deviceType);
         return (
             <div>
                 <Layout className="layout">
@@ -28,12 +31,12 @@ class Dashboard extends React.Component {
                         <Menu
                             theme="light"
                             mode="horizontal"
-                            defaultSelectedKeys={['1']}
+                            defaultSelectedKeys={["android"]}
                             style={{lineHeight: '64px'}}
                         >
-                            <Menu.Item key="1"><Link to="/store/android"><Icon type="android" theme="filled"/>Android</Link></Menu.Item>
-                            <Menu.Item key="2"><Link to="/store/apps"><Icon type="apple" theme="filled"/>iOS</Link></Menu.Item>
-                            <Menu.Item key="3"><Link to="/store/apps/new-app"><Icon type="upload"/>Web Clips</Link></Menu.Item>
+                            <Menu.Item key="android"><Link to="/store/android"><Icon type="android" theme="filled"/>Android</Link></Menu.Item>
+                            <Menu.Item key="ios"><Link to="/store/ios"><Icon type="apple" theme="filled"/>iOS</Link></Menu.Item>
+                            <Menu.Item key="webclip"><Link to="/store/webclips"><Icon type="upload"/>Web Clips</Link></Menu.Item>
                         </Menu>
                     </Header>
                 </Layout>

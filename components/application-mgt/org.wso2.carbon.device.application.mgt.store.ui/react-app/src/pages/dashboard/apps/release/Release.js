@@ -26,6 +26,7 @@ class Release extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        const {uuid} = this.props.match.params;
         if (prevProps !== this.props) {
             this.fetchData(uuid);
         }
