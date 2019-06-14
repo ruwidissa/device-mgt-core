@@ -19,12 +19,12 @@ const routes = [
         component: Login
     },
     {
-        path: '/store/apps',
+        path: '/store',
         exact: false,
         component: Dashboard,
         routes: [
             {
-                path: '/store/apps',
+                path: '/store/android',
                 component: Apps,
                 exact: true
             },
@@ -34,7 +34,7 @@ const routes = [
                 exact: true
             },
             {
-                path: '/store/apps/:uuid',
+                path: '/store/android/:uuid',
                 exact: true,
                 component: Release
             }

@@ -89,7 +89,8 @@ class ReleaseView extends React.Component {
     };
 
     render() {
-        const release = this.props.release;
+        const app = this.props.app;
+        const release = app.applicationReleases[0];
         return (
             <div>
                 <AppInstallModal uuid={release.uuid} visible={this.state.appInstallModalVisible}
