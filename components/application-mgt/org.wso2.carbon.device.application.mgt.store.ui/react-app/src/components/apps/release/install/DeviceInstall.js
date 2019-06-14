@@ -106,9 +106,6 @@ class DeviceInstall extends React.Component {
         }),
     };
 
-
-
-
     componentDidMount() {
         this.fetch();
     }

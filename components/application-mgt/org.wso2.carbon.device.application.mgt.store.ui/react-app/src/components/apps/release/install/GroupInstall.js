@@ -110,7 +110,7 @@ class GroupInstall extends React.Component {
                     ))}
                 </Select>
                 <div style={{paddingTop:10, textAlign:"right"}}>
-                    <Button htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
                 </div>
             </div>
         );
