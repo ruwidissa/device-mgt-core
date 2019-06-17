@@ -7,11 +7,6 @@ import config from "../../../../public/conf/config.json";
 
 const {Title} = Typography;
 
-// connecting state.apps with the component
-const mapStateToProps = state => {
-    return {apps: state.apps}
-};
-
 const columns = [
     {
         title: '',
@@ -71,7 +66,7 @@ const columns = [
     },
 ];
 
-class ConnectedAppsTable extends React.Component {
+class AppsTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -174,7 +169,5 @@ class ConnectedAppsTable extends React.Component {
         );
     }
 }
-
-const AppsTable = connect(mapStateToProps, {getApps})(ConnectedAppsTable);
 
 export default AppsTable;
