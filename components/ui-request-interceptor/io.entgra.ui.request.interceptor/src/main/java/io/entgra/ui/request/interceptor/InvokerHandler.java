@@ -63,21 +63,10 @@ import static io.entgra.ui.request.interceptor.util.HandlerUtil.execute;
 public class InvokerHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(LoginHandler.class);
     private static final long serialVersionUID = -6508020875358160165L;
-//    private static final HeaderGroup nonForwardingHeaders = new HeaderGroup();
     private static AuthData authData;
     private static String apiEndpoint;
     private static String serverUrl;
     private static String platform;
-
-//    static {
-//        // Initializing hop-by-hop headers to omit them from forwarding to the backend
-//        String[] headers = {HttpHeaders.CONNECTION, HttpHeaders.TRANSFER_ENCODING, HttpHeaders.PROXY_AUTHENTICATE,
-//                HttpHeaders.PROXY_AUTHORIZATION, HttpHeaders.UPGRADE, HttpHeaders.TE, HttpHeaders.TRAILER,
-//                HandlerConstants.KEEP_ALIVE, HandlerConstants.PUBLIC};
-//        for (String header : headers) {
-//            nonForwardingHeaders.addHeader(new BasicHeader(header, null));
-//        }
-//    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -221,6 +210,7 @@ public class InvokerHandler extends HttpServlet {
             }
         }
     }
+
     /***
      *
      * @param req {@link HttpServletRequest}
@@ -232,35 +222,32 @@ public class InvokerHandler extends HttpServlet {
             throws IOException {
         serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
         apiEndpoint = req.getPathInfo();
+        String sessionAuthDataKey = req.getHeader(HandlerConstants.X_PLATFORM_HEADER);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Unauthorized, You are not logged in. Please log in to the portal");
-            ProxyResponse proxyResponse = new ProxyResponse();
-            proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
-            proxyResponse.setExecutorResponse(
-                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
-            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+            handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
-        authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+
+        if (StringUtils.isEmpty(sessionAuthDataKey)) {
+            log.error("\"X-Platform\" header is empty in the request. Header is required to obtain the auth data from" +
+                      " session.");
+            handleError(req, resp, HttpStatus.SC_BAD_REQUEST);
+            return false;
+        }
+
+        authData = (AuthData) session.getAttribute(sessionAuthDataKey);
         platform = (String) session.getAttribute(HandlerConstants.PLATFORM);
         if (authData == null) {
             log.error("Unauthorized, Access token not found in the current session");
-            ProxyResponse proxyResponse = new ProxyResponse();
-            proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
-            proxyResponse.setExecutorResponse(
-                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
-            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+            handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
         if (apiEndpoint == null || req.getMethod() == null) {
             log.error("Bad Request, Either destination api-endpoint or method is empty");
-            ProxyResponse proxyResponse = new ProxyResponse();
-            proxyResponse.setCode(HttpStatus.SC_BAD_REQUEST);
-            proxyResponse.setExecutorResponse(
-                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_BAD_REQUEST));
-            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+            handleError(req, resp, HttpStatus.SC_BAD_REQUEST);
             return false;
         }
         return true;
@@ -307,11 +294,7 @@ public class InvokerHandler extends HttpServlet {
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");
-            ProxyResponse proxyResponse = new ProxyResponse();
-            proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
-            proxyResponse.setExecutorResponse(
-                    HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
-            HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+            handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
@@ -352,11 +335,24 @@ public class InvokerHandler extends HttpServlet {
         }
 
         log.error("Error Occurred in token renewal process.");
-        ProxyResponse proxyResponse = new ProxyResponse();
-        proxyResponse.setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-        proxyResponse.setExecutorResponse(
-                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_INTERNAL_SERVER_ERROR));
-        HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+        handleError(req, resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         return false;
+    }
+
+    /**
+     * Handle error requests
+     *
+     * @param req {@link HttpServletRequest}
+     * @param resp {@link HttpServletResponse}
+     * @param errorCode HTTP error status code
+     * @throws IOException If error occurred when trying to send the error response.
+     */
+    private static void handleError(HttpServletRequest req, HttpServletResponse resp, int errorCode)
+            throws IOException {
+        ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setCode(errorCode);
+        proxyResponse.setExecutorResponse(
+                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(errorCode));
+        HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
     }
 }

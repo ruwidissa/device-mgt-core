@@ -23,8 +23,7 @@ public class HandlerConstants {
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
     public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/config/ui-config";
     public static final String TOKEN_ENDPOINT = "/oauth2/token";
-    public static final String PUBLIC = "Public";
-    public static final String KEEP_ALIVE = "Keep-Alive";
+    public static final String X_PLATFORM_HEADER = "X-Platform";
     public static final String BASIC = "Basic ";
     public static final String BEARER = "Bearer ";
     public static final String COLON = ":";
@@ -33,7 +32,6 @@ public class HandlerConstants {
     public static final String SESSION_AUTH_DATA_KEY = "application-mgt";
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String PLATFORM = "platform";
-    public static final String SERVER_HOST = "server-host";
     public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
     public static final String LOGIN_RESPONSE_KEY = "loginResponse";
     public static final String FAILURE_CALLBACK_KEY = "failureCallback";
