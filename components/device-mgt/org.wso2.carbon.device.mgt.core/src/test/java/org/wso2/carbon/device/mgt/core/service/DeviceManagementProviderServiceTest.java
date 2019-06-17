@@ -1,18 +1,39 @@
 /*
-* Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ *
+ */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.logging.Log;
@@ -70,6 +91,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     private static final String ALTERNATE_DEVICE_ID = "1128";
     private DeviceManagementProviderService providerService;
     private static final String DEVICE_TYPE = "RANDOM_DEVICE_TYPE";
+    private static final String DEVICE_OWNER = "admin";
     private DeviceDetailsDAO deviceDetailsDAO = DeviceManagementDAOFactory.getDeviceDetailsDAO();
 
     DeviceManagementProviderService deviceMgtService;
@@ -350,7 +372,6 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
         Assert.assertTrue(device.getDeviceIdentifier().equalsIgnoreCase(DEVICE_ID));
     }
 
-
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})
     public void testGetDeviceWithInfo() throws DeviceManagementException {
         Device device = deviceMgtService.getDevice(new DeviceIdentifier(DEVICE_ID, DEVICE_TYPE)
@@ -358,6 +379,52 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
         if (!isMock()) {
             Assert.assertTrue(device.getDeviceInfo() != null);
         }
+    }
+
+    @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})
+    public void testGetDeviceByID() throws DeviceManagementException {
+        Device device = deviceMgtService.getDevice(DEVICE_ID, true);
+        if (!isMock()) {
+            Assert.assertTrue(device.getDeviceIdentifier().equalsIgnoreCase(DEVICE_ID));
+        }
+    }
+
+    @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"}, expectedExceptions =
+            DeviceManagementException.class)
+    public void testGetDeviceByIDWithNullID() throws DeviceManagementException {
+        deviceMgtService.getDevice((String) null, true);
+    }
+
+    @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})
+    public void testGetDeviceByIDAndSinceDate() throws DeviceManagementException, DeviceDetailsMgtDAOException
+            , TransactionManagementException {
+        Device initialDevice = deviceMgtService.getDevice(new DeviceIdentifier(DEVICE_ID,
+                DEVICE_TYPE));
+        addDeviceInformation(initialDevice);
+        Device device = deviceMgtService.getDevice(DEVICE_ID, yesterday(), true);
+        if (!isMock()) {
+            Assert.assertTrue(device != null);
+        }
+    }
+
+    @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"}, expectedExceptions =
+            DeviceManagementException.class)
+    public void testGetDeviceByIDAndSinceDateWithNullID() throws DeviceManagementException, DeviceDetailsMgtDAOException
+            , TransactionManagementException {
+        Device initialDevice = deviceMgtService.getDevice(new DeviceIdentifier(DEVICE_ID,
+                DEVICE_TYPE));
+        addDeviceInformation(initialDevice);
+        deviceMgtService.getDevice((String)null, yesterday(), true);
+    }
+
+    @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"}, expectedExceptions =
+            DeviceManagementException.class)
+    public void testGetDeviceByIDAndSinceDateWithNullDate() throws DeviceManagementException,
+                DeviceDetailsMgtDAOException, TransactionManagementException {
+        Device initialDevice = deviceMgtService.getDevice(new DeviceIdentifier(DEVICE_ID,
+                DEVICE_TYPE));
+        addDeviceInformation(initialDevice);
+        deviceMgtService.getDevice(DEVICE_ID, (Date)null, true);
     }
 
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})
@@ -435,7 +502,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"}, expectedExceptions =
             DeviceManagementException.class)
     public void testDeviceByOwnerWithNullDeviceID() throws DeviceManagementException {
-        deviceMgtService.getDevice(null, "admin", true);
+        deviceMgtService.getDevice((DeviceIdentifier) null, "admin", true);
     }
 
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"})
@@ -496,7 +563,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     @Test(dependsOnMethods = {"testSuccessfulDeviceEnrollment"}, expectedExceptions =
             DeviceManagementException.class)
     public void testDeviceByDateWithNullDeviceID() throws DeviceManagementException {
-        deviceMgtService.getDevice(null, yesterday());
+        deviceMgtService.getDevice((DeviceIdentifier) null, yesterday());
     }
 
     private void addDeviceInformation(Device initialDevice) throws TransactionManagementException, DeviceDetailsMgtDAOException {

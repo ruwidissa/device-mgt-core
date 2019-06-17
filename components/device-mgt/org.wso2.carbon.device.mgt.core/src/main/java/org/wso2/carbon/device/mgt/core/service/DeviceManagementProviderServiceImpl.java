@@ -15,6 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +67,7 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -498,6 +516,67 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public boolean deleteDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
+        if (deviceId == null) {
+            String msg = "Required values are not set to permanently delete device";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Permanently deleting device: " + deviceId.getId() + " of type '" + deviceId.getType() + "'");
+        }
+        DeviceManager deviceManager = this.getDeviceManager(deviceId.getType());
+        if (deviceManager == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Device Manager associated with the device type '" + deviceId.getType() + "' is null. " +
+                          "Therefore, not attempting method 'deleteDevice'");
+            }
+            return false;
+        }
+
+        int tenantId = this.getTenantId();
+
+        Device device = this.getDevice(deviceId, false);
+        if (device == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Device not found for id '" + deviceId.getId() + "'");
+            }
+            return false;
+        }
+
+        if (!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
+            String msg = "Device " + deviceId.getId() + " of type " + deviceId.getType() + " is not dis-enrolled to " +
+                         "permanently delete the device";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        } else {
+            try {
+                DeviceManagementDAOFactory.beginTransaction();
+                deviceDAO.deleteDevice(deviceId, tenantId);
+                DeviceManagementDAOFactory.commitTransaction();
+                this.removeDeviceFromCache(deviceId);
+            } catch (DeviceManagementDAOException e) {
+                DeviceManagementDAOFactory.rollbackTransaction();
+                String msg = "Error occurred while permanently deleting '" + deviceId.getType() +
+                             "' device with the identifier '" + deviceId.getId() + "'";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (TransactionManagementException e) {
+                String msg = "Error occurred while initiating transaction";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (Exception e) {
+                String msg = "Error occurred while permanently deleting device: " + deviceId.getId();
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+        }
+        return true;
+    }
+
+    @Override
     public boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException {
         Device device = this.getDevice(deviceId, false);
         return device != null;
@@ -817,6 +896,53 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public Device getDevice(String deviceId, boolean requireDeviceInfo) throws DeviceManagementException {
+        if (deviceId == null) {
+            String message = "Received null device identifier for method getDevice";
+            log.error(message);
+            throw new DeviceManagementException(message);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get device by device id :" + deviceId + " '" +
+                    "' and requiredDeviceInfo: " + requireDeviceInfo);
+        }
+        int tenantId = this.getTenantId();
+        Device device;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            device = deviceDAO.getDevice(deviceId, tenantId);
+            if (device == null) {
+                String message = "No device is found upon the id '" +
+                        deviceId + "'";
+                if (log.isDebugEnabled()) {
+                    log.debug(message);
+                }
+                return null;
+            }
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, device.getType());
+            this.addDeviceToCache(deviceIdentifier, device);
+        } catch (DeviceManagementDAOException e) {
+            String message = "Error occurred while obtaining the device for '" + deviceId + "'";
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } catch (SQLException e) {
+            String message = "Error occurred while opening a connection to the data source";
+            log.error(message);
+            throw new DeviceManagementException(message, e);
+        } catch (Exception e) {
+            String message = "Error occurred in getDevice: " + deviceId;
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        if (requireDeviceInfo) {
+            device = this.getAllDeviceInfo(device);
+        }
+        return device;
+    }
+
+    @Override
     public Device getDevice(DeviceIdentifier deviceId, String owner, boolean requireDeviceInfo)
             throws DeviceManagementException {
         if (deviceId == null) {
@@ -1076,6 +1202,47 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public Device getDevice(String deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException {
+        if (deviceId == null || since == null) {
+            String message = "Received incomplete data for getDevice";
+            log.error(message);
+            throw new DeviceManagementException(message);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get device since '" + since.toString() + "' with identifier: " + deviceId + "");
+        }
+        Device device;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            device = deviceDAO.getDevice(deviceId, since, this.getTenantId());
+            if (device == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No device is found upon the id '" + deviceId + "'");
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String message = "Error occurred while obtaining the device for id '" + deviceId + "'";
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } catch (SQLException e) {
+            String message = "Error occurred while opening a connection to the data source";
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } catch (Exception e) {
+            String message = "Error occurred in getDevice for device: " + deviceId;
+            log.error(message, e);
+            throw new DeviceManagementException(message, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        if (requireDeviceInfo) {
+            device = this.getAllDeviceInfo(device);
+        }
+        return device;
+    }
+
+    @Override
     public Device getDevice(DeviceIdentifier deviceId, String owner, Date since, boolean requireDeviceInfo)
             throws DeviceManagementException {
         if (deviceId == null || since == null) {
@@ -1321,7 +1488,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
             DeviceManagementDAOFactory.beginTransaction();
             if (enrolmentInfo != null) {
-                success = enrollmentDAO.setStatus(enrolmentInfo.getId(), currentOwner, status, tenantId);
+                success = enrollmentDAO.setStatus(enrolmentInfo.getId(), status, tenantId);
             }
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDeviceFromCache(deviceId);
@@ -1632,6 +1799,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public  List<String> getStartupOperations(String deviceType) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
+
+        StartupOperationConfig startupOperationConfig = dms.getStartupOperationConfig();
+        if (startupOperationConfig != null) {
+            return startupOperationConfig.getStartupOperations();
+        }
+        return null;
+    }
+
+    @Override
     public int getDeviceMonitoringFrequency(String deviceType) {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
@@ -1644,6 +1824,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
         return dms.getOperationMonitoringConfig();
+    }
+
+    @Override
+    public StartupOperationConfig getStartupOperationConfig(String deviceType) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
+        return dms.getStartupOperationConfig();
     }
 
     @Override

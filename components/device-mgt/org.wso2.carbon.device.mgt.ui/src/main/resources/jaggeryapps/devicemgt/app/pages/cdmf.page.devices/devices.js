@@ -96,9 +96,11 @@ function onRequest(context) {
     var mdmProps = require("/app/modules/conf-reader/main.js")["conf"];
     var serverUrl = mdmProps["httpsURL"];
     var portalUrl = mdmProps["portalURL"];
+    var backendRestEndpoints = mdmProps["backendRestEndpoints"];
     var userDomain = context.user.domain;
     viewModel.serverUrl = serverUrl;
     viewModel.portalUrl = portalUrl;
     viewModel.userDomain = userDomain;
+    viewModel.apiContext = backendRestEndpoints["deviceMgt"];
     return viewModel;
 }

@@ -19,15 +19,15 @@
   -->
 <DeviceTypeConfiguration name="android_sense">
     <Features>
-        <Feature code="keywords">
+        <Feature type="operation" code="keywords">
             <Name>Add Keywords</Name>
             <Description>Send keywords to the device</Description>
         </Feature>
-        <Feature code="threshold">
+        <Feature type="operation" code="threshold">
             <Name>Add Threshold</Name>
             <Description>Send Threshold to the device</Description>
         </Feature>
-        <Feature code="remove_words">
+        <Feature type="operation" code="remove_words">
             <Name>Remove words</Name>
             <Description>Remove Threshold from the device</Description>
         </Feature>
