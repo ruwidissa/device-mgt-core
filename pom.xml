@@ -44,7 +44,7 @@
         <module>components/certificate-mgt</module>
         <module>components/webapp-authenticator-framework</module>
         <module>components/email-sender</module>
-        <module>components/request-handler</module>
+        <module>components/ui-request-interceptor</module>
         <module>features/device-mgt</module>
         <module>features/apimgt-extensions</module>
         <module>features/application-mgt</module>
@@ -53,7 +53,7 @@
         <module>features/certificate-mgt</module>
         <module>features/oauth-extensions</module>
         <module>features/email-sender</module>
-        <module>features/request-handler</module>
+        <module>features/ui-request-interceptor</module>
         <module>features/jwt-client</module>
 	    <module>features/device-mgt-extensions</module>
     </modules>
