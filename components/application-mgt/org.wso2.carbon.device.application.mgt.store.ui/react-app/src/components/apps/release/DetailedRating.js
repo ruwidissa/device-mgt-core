@@ -1,31 +1,52 @@
 import React from "react";
 import {Row, Typography, Icon} from "antd";
 import StarRatings from "react-star-ratings";
+import axios from "axios";
 import "./DetailedRating.css";
-import {connect} from "react-redux";
-import {getDetailedRating} from "../../../js/actions";
+import config from "../../../../public/conf/config.json";
 
 const { Text } = Typography;
 
-// connecting state. with the component
-const mapStateToProps= state => {
-    return {detailedRating : state.detailedRating}
-};
+class DetailedRating extends React.Component{
 
-const mapDispatchToProps = dispatch => ({
-    getDetailedRating: (uuid) => dispatch(getDetailedRating(uuid))
-});
-
-
-
-class ConnectedDetailedRating extends React.Component{
-
-    componentDidMount() {
-        this.props.getDetailedRating(this.props.uuid);
+    constructor(props){
+        super(props);
+        this.state={
+            detailedRating: null
+        }
     }
 
+    componentDidMount() {
+        this.getData(this.props.uuid);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.uuid !== this.props.uuid) {
+            this.getData(this.props.uuid);
+        }
+    }
+
+    getData = (uuid)=>{
+        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid+"/rating";
+
+        return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        ).then(res => {
+            if (res.status === 200) {
+                let detailedRating = res.data.data;
+                this.setState({
+                    detailedRating
+                })
+            }
+
+        }).catch(function (error) {
+            if (error.response.status === 401) {
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+            }
+        });
+    };
+
     render() {
-        const detailedRating = this.props.detailedRating;
+        const detailedRating = this.state.detailedRating;
 
         console.log(detailedRating);
 
@@ -96,6 +117,5 @@ class ConnectedDetailedRating extends React.Component{
     }
 }
 
-const DetailedRating = connect(mapStateToProps,mapDispatchToProps)(ConnectedDetailedRating);
 
 export default DetailedRating;
