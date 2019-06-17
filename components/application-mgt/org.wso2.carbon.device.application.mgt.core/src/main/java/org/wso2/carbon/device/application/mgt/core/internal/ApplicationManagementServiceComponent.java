@@ -85,7 +85,7 @@ public class ApplicationManagementServiceComponent {
 
             ApplicationManager applicationManager = ApplicationManagementUtil.getApplicationManagerInstance();
             applicationManager
-                    .addAplicationCategories(ConfigurationManager.getInstance().getConfiguration().getAppCategories());
+                    .addApplicationCategories(ConfigurationManager.getInstance().getConfiguration().getAppCategories());
             DataHolder.getInstance().setApplicationManager(applicationManager);
             bundleContext.registerService(ApplicationManager.class.getName(), applicationManager, null);
 

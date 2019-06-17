@@ -203,7 +203,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         categories.add("Test Category");
         categories.add("Test Category2");
         ApplicationManager manager = new ApplicationManagerImpl();
-        manager.addAplicationCategories(categories);
+        manager.addApplicationCategories(categories);
 
     }
 

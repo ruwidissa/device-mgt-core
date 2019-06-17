@@ -232,7 +232,7 @@ public interface ApplicationManager {
 
     void validateBinaryArtifact(Attachment binaryFile) throws RequestValidatingException;
 
-    void addAplicationCategories(List<String> categories) throws ApplicationManagementException;
+    void addApplicationCategories(List<String> categories) throws ApplicationManagementException;
 
     List<Tag> getRegisteredTags() throws ApplicationManagementException;
 

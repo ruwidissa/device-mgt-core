@@ -1582,7 +1582,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void addAplicationCategories(List<String> categories) throws ApplicationManagementException {
+    public void addApplicationCategories(List<String> categories) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
