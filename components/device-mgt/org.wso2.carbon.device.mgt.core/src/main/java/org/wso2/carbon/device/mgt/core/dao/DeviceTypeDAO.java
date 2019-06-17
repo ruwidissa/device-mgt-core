@@ -18,6 +18,7 @@
 package org.wso2.carbon.device.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 
 import java.util.List;
 
@@ -64,6 +65,18 @@ public interface DeviceTypeDAO {
 	List<String> getSharedDeviceTypes() throws DeviceManagementDAOException;
 
 	/**
+	 * Check if the private device types in the provided tenant matched the device type and version provided.
+	 * If so, this is a device type version created by the tenant provided, hence modifiable.
+	 * @param deviceTypeID device type ID of interest
+	 * @param versionName name of the device type version ID of interest
+	 * @param tenantId tenant ID of interest
+	 * @return if modifiable
+	 * @throws DeviceManagementDAOException
+	 */
+	boolean isDeviceTypeVersionModifiable(int deviceTypeID, String versionName, int tenantId)
+			throws DeviceManagementDAOException;
+
+	/**
 	 * @param id retrieve the device type with its id.
 	 * @return the device type associated with the id.
 	 * @throws DeviceManagementDAOException
@@ -87,4 +100,32 @@ public interface DeviceTypeDAO {
 	 */
 	void removeDeviceType(String name, int tenantId) throws DeviceManagementDAOException;
 
+	/**
+	 * Add a set of device type versions to the database
+	 * @param deviceTypeVersion device type version details
+	 * @return success or failure
+	 * @throws DeviceManagementDAOException
+	 */
+	boolean addDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementDAOException;
+
+	/**
+	 * Get device type details
+	 * @param deviceTypeId device type id
+	 * @param typeName device type name
+	 * @return list of versions of device types
+	 * @throws DeviceManagementDAOException
+	 */
+	List<DeviceTypeVersion> getDeviceTypeVersions(int deviceTypeId, String typeName)
+			throws DeviceManagementDAOException;
+
+	/**
+	 * Update device type version
+	 * @param deviceTypeVersion device type version details
+	 * @return update status
+	 * @throws DeviceManagementException
+	 */
+	boolean updateDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementDAOException;
+
+	DeviceTypeVersion getDeviceTypeVersion(int deviceTypeId, String version)
+			throws DeviceManagementDAOException;
 }

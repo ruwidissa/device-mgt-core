@@ -42,11 +42,14 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
+import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -179,4 +182,137 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
         }
         return Response.status(isSaved ? Response.Status.OK : Response.Status.BAD_REQUEST).build();
     }
+
+    @Override
+    @Path("{deviceTypeName}/versions")
+    @POST
+    public Response addDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
+                                         DeviceTypeVersionWrapper versionWrapper) {
+        if (versionWrapper != null && deviceTypeName != null && !deviceTypeName.isEmpty()
+                && versionWrapper.getVersionName() != null && !versionWrapper.getVersionName().isEmpty()) {
+            try {
+                // Handle device type availability in current tenant.
+                DeviceTypeVersion deviceTypeVersion = DeviceMgtAPIUtils.getDeviceManagementService()
+                        .getDeviceTypeVersion(deviceTypeName, versionWrapper.getVersionName());
+                if (deviceTypeVersion != null) {
+                    String msg = "Device type version already available, " + deviceTypeName;
+                    return Response.status(Response.Status.CONFLICT).entity(msg).build();
+                }
+
+                // Handle device type availability in current tenant.
+                DeviceType deviceType = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceType(deviceTypeName);
+                if (deviceType != null) {
+                    boolean result = DeviceMgtAPIUtils.getDeviceManagementService()
+                            .addDeviceTypeVersion(DeviceMgtAPIUtils.convertDeviceTypeVersionWrapper(deviceTypeName,
+                                    deviceType.getId(), versionWrapper));
+                    if (result) {
+                        return Response.serverError().entity("Could not add the version").build();
+                    } else {
+                        return Response.status(Response.Status.OK).build();
+                    }
+                } else {
+                    String msg = "Device type is not available " + versionWrapper.getVersionName();
+                    return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+                }
+
+            } catch (DeviceManagementException e) {
+                String msg = "Error occurred while adding a device type version.";
+                log.error(msg, e);
+                return Response.serverError().entity(msg).build();
+            }
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+    }
+
+    @GET
+    @Path("/{deviceTypeName}/versions")
+    @Override
+    public Response getDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName) {
+        try {
+            List<DeviceTypeVersion> deviceTypes = DeviceMgtAPIUtils.getDeviceManagementService()
+                    .getDeviceTypeVersions(deviceTypeName);
+            return Response.status(Response.Status.OK).entity(deviceTypes).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting device type version for device type: " + deviceTypeName;
+            log.error(msg, e);
+            return Response.serverError().entity(msg).build();
+        }
+    }
+
+    @PUT
+    @Override
+    @Path("{deviceTypeName}/versions")
+    public Response updateDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
+                                            DeviceTypeVersionWrapper deviceTypeVersion) {
+        if (deviceTypeVersion != null && deviceTypeVersion.getVersionName() == null || deviceTypeVersion
+                .getVersionName().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Device type version cannot be empty.").build();
+        } else if (deviceTypeName == null || deviceTypeName.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Device type name cannot be empty.").build();
+        }
+
+        try {
+            boolean isAuthorized = DeviceMgtAPIUtils.getDeviceManagementService()
+                    .isDeviceTypeVersionChangeAuthorized(deviceTypeName, deviceTypeVersion.getVersionName());
+            if (!isAuthorized) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Unauthorized to modify version.")
+                        .build();
+            }
+
+            DeviceType deviceType = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceType(deviceTypeName);
+            if (deviceType != null) {
+                boolean result = DeviceMgtAPIUtils.getDeviceManagementService().updateDeviceTypeVersion(DeviceMgtAPIUtils
+                        .convertDeviceTypeVersionWrapper(deviceTypeName, deviceType.getId(), deviceTypeVersion));
+                if (result) {
+                    return Response.serverError().entity("Could not update the version").build();
+                } else {
+                    return Response.status(Response.Status.OK).build();
+                }
+            } else {
+                String msg = "Device type is not available " + deviceTypeName;
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while updating device type: " + deviceTypeName ;
+            log.error(msg, e);
+            return Response.serverError().entity(msg).build();
+        }
+    }
+
+    @DELETE
+    @Override
+    @Path("{deviceTypeName}/versions/{version}")
+    public Response deleteDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
+                                            @PathParam("version") String version) {
+        if (version == null || version.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Device type version cannot be empty.").build();
+        } else if (deviceTypeName == null || deviceTypeName.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Device type name cannot be empty.").build();
+        }
+
+        DeviceTypeVersion deviceTypeVersion = new DeviceTypeVersion();
+        deviceTypeVersion.setDeviceTypeName(deviceTypeName);
+        deviceTypeVersion.setVersionName(version);
+        deviceTypeVersion.setVersionStatus("REMOVED");
+        try {
+            boolean isAuthorized = DeviceMgtAPIUtils.getDeviceManagementService().isDeviceTypeVersionChangeAuthorized
+                    (deviceTypeVersion.getDeviceTypeName(), deviceTypeVersion.getVersionName());
+            if (!isAuthorized) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("Unauthorized to modify version.")
+                        .build();
+            }
+            boolean result = DeviceMgtAPIUtils.getDeviceManagementService().updateDeviceTypeVersion(deviceTypeVersion);
+            if (result) {
+                return Response.serverError().entity("Could not delete the version").build();
+            } else {
+                return Response.status(Response.Status.OK).build();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while updating device type: " + deviceTypeVersion.getDeviceTypeId() ;
+            log.error(msg, e);
+            return Response.serverError().entity(msg).build();
+        }
+    }
+
 }

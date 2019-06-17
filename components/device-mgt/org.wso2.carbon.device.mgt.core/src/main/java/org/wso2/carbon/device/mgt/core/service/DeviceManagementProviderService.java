@@ -40,6 +40,7 @@ import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecu
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 
@@ -671,4 +672,15 @@ public interface DeviceManagementProviderService {
 
     boolean updateEnrollment(String owner, List<String> deviceIdentifiers)
             throws DeviceManagementException, UserNotFoundException, InvalidDeviceException;
+
+    boolean addDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException;
+
+    List<DeviceTypeVersion> getDeviceTypeVersions(String typeName) throws DeviceManagementException;
+
+    boolean updateDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException;
+
+    boolean isDeviceTypeVersionChangeAuthorized(String typeName, String version) throws DeviceManagementException;
+
+    DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
+            DeviceManagementException;
 }
