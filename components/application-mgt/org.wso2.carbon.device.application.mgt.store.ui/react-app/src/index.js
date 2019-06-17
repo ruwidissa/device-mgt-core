@@ -7,9 +7,6 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import Release from "./pages/dashboard/apps/release/Release";
 import './index.css';
-import store from "./js/store/index";
-import {Provider} from "react-redux";
-
 
 const routes = [
     {
@@ -38,9 +35,7 @@ const routes = [
 
 
 ReactDOM.render(
-    <Provider store={store}>
-        <App routes={routes}/>
-    </Provider>,
+    <App routes={routes}/>,
     document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
