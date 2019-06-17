@@ -35,6 +35,7 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.ConfigProperties;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceStatusTaskConfiguration;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
@@ -72,6 +73,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private InitialOperationConfig initialOperationConfig;
     private PullNotificationSubscriber pullNotificationSubscriber;
     private DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
+    private DeviceTypePlatformDetails deviceTypePlatformDetails;
     private GeneralConfig generalConfig;
     private boolean isRegistryBasedConfigs = false;
     private boolean isScheduled = false;
@@ -88,6 +90,8 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.initialOperationConfig = new InitialOperationConfig();
         this.setInitialOperationConfig(deviceTypeConfiguration);
         this.deviceStatusTaskPluginConfig = new DeviceStatusTaskPluginConfig();
+        this.deviceTypePlatformDetails = new DeviceTypePlatformDetails();
+        this.setDeviceTypePlatformDetails(deviceTypeConfiguration);
         this.setDeviceStatusTaskPluginConfig(deviceTypeConfiguration.getDeviceStatusTaskConfiguration());
         this.setPolicyMonitoringManager(deviceTypeConfiguration.getPolicyMonitoring());
         this.setPullNotificationSubscriber(deviceTypeConfiguration.getPullNotificationSubscriberConfig());
@@ -220,6 +224,11 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     }
 
     @Override
+    public DeviceTypePlatformDetails getDeviceTypePlatformDetails() {
+        return deviceTypePlatformDetails;
+    }
+
+    @Override
     public GeneralConfig getGeneralConfig() {
         return generalConfig;
     }
@@ -301,6 +310,13 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.generalConfig = new GeneralConfig();
         if (deviceTypeConfiguration.getPolicyMonitoring() != null) {
             this.generalConfig.setPolicyMonitoringEnabled(deviceTypeConfiguration.getPolicyMonitoring().isEnabled());
+        }
+    }
+
+    protected void setDeviceTypePlatformDetails(DeviceTypeConfiguration deviceTypeConfiguration) {
+        DeviceTypePlatformDetails deviceTypeVersions = deviceTypeConfiguration.getDeviceTypePlatformDetails();
+        if (deviceTypeVersions != null) {
+            deviceTypePlatformDetails.setDeviceTypePlatformVersion(deviceTypeVersions.getDeviceTypePlatformVersion());
         }
     }
 }

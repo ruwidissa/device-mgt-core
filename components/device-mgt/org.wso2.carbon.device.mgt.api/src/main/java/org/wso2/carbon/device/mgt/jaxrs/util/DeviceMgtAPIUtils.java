@@ -49,10 +49,12 @@ import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagement
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
@@ -716,5 +718,15 @@ public class DeviceMgtAPIUtils {
             }
         }
         return false;
+    }
+
+    public static DeviceTypeVersion convertDeviceTypeVersionWrapper(String deviceTypeName, int deviceTypeId,
+            DeviceTypeVersionWrapper deviceTypeVersion) {
+        DeviceTypeVersion typeVersion = new DeviceTypeVersion();
+        typeVersion.setDeviceTypeId(deviceTypeId);
+        typeVersion.setDeviceTypeName(deviceTypeName);
+        typeVersion.setVersionName(deviceTypeVersion.getVersionName());
+        typeVersion.setVersionStatus(deviceTypeVersion.getVersionStatus());
+        return typeVersion;
     }
 }

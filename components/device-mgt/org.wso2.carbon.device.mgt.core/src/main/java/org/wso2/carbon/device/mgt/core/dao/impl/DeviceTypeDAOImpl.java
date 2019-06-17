@@ -24,7 +24,14 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -188,6 +195,34 @@ public class DeviceTypeDAOImpl implements DeviceTypeDAO {
 	}
 
 	@Override
+	public boolean isDeviceTypeVersionModifiable(int deviceTypeID, String versionName, int tenantId) throws
+			DeviceManagementDAOException {
+		Connection conn;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			conn = this.getConnection();
+			String sql =
+					"SELECT dt.ID as DEVICE_TYPE_IDENTIFIER, dt.NAME as DEVICE_TYPE_NAME " +
+							"FROM DM_DEVICE_TYPE_PLATFORM dv,  DM_DEVICE_TYPE dt " +
+							"WHERE dt.ID = dv.DEVICE_TYPE_ID AND  dv.DEVICE_TYPE_ID = ? AND dv.VERSION_NAME = ?" +
+							" AND dt.PROVIDER_TENANT_ID = ? AND dt.SHARED_WITH_ALL_TENANTS = ?";
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, deviceTypeID);
+			stmt.setString(2, versionName);
+			stmt.setInt(3, tenantId);
+			stmt.setBoolean(4, false);
+
+			rs = stmt.executeQuery();
+			return rs.next();
+		} catch (SQLException e) {
+			throw new DeviceManagementDAOException("Error occurred while fetching the registered device types", e);
+		} finally {
+			DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+		}
+	}
+
+	@Override
 	public DeviceType getDeviceType(int id) throws DeviceManagementDAOException {
 		Connection conn;
 		PreparedStatement stmt = null;
@@ -258,6 +293,121 @@ public class DeviceTypeDAOImpl implements DeviceTypeDAO {
 
 	@Override
 	public void removeDeviceType(String type, int tenantId) throws DeviceManagementDAOException {
+
+	}
+
+	@Override
+	public boolean addDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementDAOException {
+		Connection conn;
+		PreparedStatement stmt = null;
+		try {
+			conn = this.getConnection();
+			String sql = "INSERT INTO DM_DEVICE_TYPE_PLATFORM (DEVICE_TYPE_ID, VERSION_NAME) VALUES (?,?)";
+			if (deviceTypeVersion.getVersionStatus() != null) {
+				sql = "INSERT INTO DM_DEVICE_TYPE_PLATFORM (DEVICE_TYPE_ID, VERSION_NAME, VERSION_STATUS) " +
+						"VALUES (?,?,?)";
+			}
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, deviceTypeVersion.getDeviceTypeId());
+			stmt.setString(2, deviceTypeVersion.getVersionName());
+			if (deviceTypeVersion.getVersionStatus() != null) {
+				stmt.setString(3, deviceTypeVersion.getVersionStatus());
+			}
+			return stmt.execute();
+		} catch (SQLException e) {
+			throw new DeviceManagementDAOException(
+					"Error occurred while adding the version: " + deviceTypeVersion.getVersionName()
+							+ " to device type: " + deviceTypeVersion.getDeviceTypeId(), e);
+		} finally {
+			DeviceManagementDAOUtil.cleanupResources(stmt, null);
+		}
+	}
+
+	@Override
+	public List<DeviceTypeVersion> getDeviceTypeVersions(int deviceTypeId, String typeName)
+			throws DeviceManagementDAOException {
+		Connection conn;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		List<DeviceTypeVersion> deviceTypesVersions = new ArrayList<>();
+		try {
+			conn = this.getConnection();
+			String sql = "SELECT * FROM DM_DEVICE_TYPE_PLATFORM where DEVICE_TYPE_ID = ?";
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, deviceTypeId);
+			rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				DeviceTypeVersion deviceTypeVersion = new DeviceTypeVersion();
+				deviceTypeVersion.setId(rs.getInt("ID"));
+				deviceTypeVersion.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
+				deviceTypeVersion.setDeviceTypeName(typeName); // Adding this for the sake of completeness of DTO
+				deviceTypeVersion.setVersionName(rs.getString("VERSION_NAME"));
+				deviceTypeVersion.setVersionStatus(rs.getString("VERSION_STATUS"));
+				deviceTypesVersions.add(deviceTypeVersion);
+			}
+			return deviceTypesVersions;
+		} catch (SQLException e) {
+			throw new DeviceManagementDAOException("Error occurred while fetching device type versions for device " +
+					"type: " + deviceTypeId, e);
+		} finally {
+			DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+		}
+	}
+
+	@Override
+	public boolean updateDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion)
+			throws DeviceManagementDAOException {
+		Connection conn;
+		PreparedStatement stmt = null;
+		try {
+			conn = this.getConnection();
+			String sql = "UPDATE DM_DEVICE_TYPE_PLATFORM SET " +
+					" VERSION_STATUS = ? WHERE DEVICE_TYPE_ID = ? AND VERSION_NAME = ?";
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, deviceTypeVersion.getVersionStatus());
+			stmt.setInt(2, deviceTypeVersion.getDeviceTypeId());
+			stmt.setString(3, deviceTypeVersion.getVersionName());
+			return stmt.execute();
+		} catch (SQLException e) {
+			throw new DeviceManagementDAOException(
+					"Error occurred while updating details of the version: " + deviceTypeVersion.getVersionName() +
+							" and device type: " + deviceTypeVersion.getDeviceTypeId(), e);
+		} finally {
+			DeviceManagementDAOUtil.cleanupResources(stmt, null);
+		}
+	}
+
+	@Override
+	public DeviceTypeVersion getDeviceTypeVersion(int deviceTypeId, String version)
+			throws DeviceManagementDAOException {
+		Connection conn;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		DeviceTypeVersion deviceTypeVersion = null;
+		try {
+			conn = this.getConnection();
+			String sql =
+					"SELECT * FROM DM_DEVICE_TYPE_PLATFORM WHERE DEVICE_TYPE_ID = ? AND VERSION_NAME = ?";
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, deviceTypeId);
+			stmt.setString(2, version);
+			rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				deviceTypeVersion = new DeviceTypeVersion();
+				deviceTypeVersion.setId(rs.getInt("ID"));
+				deviceTypeVersion.setDeviceTypeId(rs.getInt("DEVICE_TYPE_ID"));
+				deviceTypeVersion.setVersionName(rs.getString("VERSION_NAME"));
+				deviceTypeVersion.setVersionStatus(rs.getString("VERSION_STATUS"));
+			}
+			return deviceTypeVersion;
+		} catch (SQLException e) {
+			throw new DeviceManagementDAOException("Error occurred while fetching device type version for device " +
+					"type: " + deviceTypeId + ", and version " + version, e);
+		} finally {
+			DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+		}
 
 	}
 

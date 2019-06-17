@@ -73,6 +73,8 @@ import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecu
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformVersion;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.DeviceManagementPluginRepository;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
@@ -90,6 +92,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDA
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -2109,6 +2112,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         try {
             pluginRepository.addDeviceManagementProvider(deviceManagementService);
+            initializeDeviceTypeVersions(deviceManagementService);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while registering device management plugin '" +
                     deviceManagementService.getType() + "'";
@@ -3034,4 +3038,166 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             + "constructing is failed", e);
         }
     }
+
+    private void initializeDeviceTypeVersions(DeviceManagementService deviceManagementService) {
+        DeviceTypePlatformDetails deviceTypePlatformDetails = deviceManagementService.getDeviceTypePlatformDetails();
+        String deviceType = deviceManagementService.getType();
+        try {
+            if (deviceTypePlatformDetails != null && deviceTypePlatformDetails.getDeviceTypePlatformVersion() != null
+                    && deviceTypePlatformDetails.getDeviceTypePlatformVersion().size() > 0) {
+
+                List<DeviceTypePlatformVersion> fromXML = deviceTypePlatformDetails.getDeviceTypePlatformVersion();
+                List<DeviceTypePlatformVersion> newPlatformsToBeAdded = new ArrayList<>();
+                List<DeviceTypeVersion> existingPlatformVersions = getDeviceTypeVersions(deviceType);
+
+                for (DeviceTypePlatformVersion versionFromXml : fromXML) {
+                    boolean match = false;
+                    if (existingPlatformVersions != null && existingPlatformVersions.size() > 0) {
+                        for (DeviceTypeVersion existingVersion : existingPlatformVersions) {
+                            if (existingVersion.getVersionName().equals(versionFromXml.getVersionsName())) {
+                                match = true;
+                            }
+                        }
+                    }
+
+                    if (!match) {
+                        newPlatformsToBeAdded.add(versionFromXml);
+                    }
+                }
+
+                DeviceTypeVersion deviceTypeVersion;
+                for (DeviceTypePlatformVersion version : newPlatformsToBeAdded) {
+                    deviceTypeVersion = new DeviceTypeVersion();
+                    deviceTypeVersion.setDeviceTypeId(getDeviceType(deviceType).getId());
+                    deviceTypeVersion.setDeviceTypeName(deviceManagementService.getType());
+                    deviceTypeVersion.setVersionName(version.getVersionsName());
+                    addDeviceTypeVersion(deviceTypeVersion);
+                }
+            }
+        } catch (DeviceManagementException e) {
+            log.error("Error while adding versions for device type: " + deviceManagementService.getType(), e);
+        }
+    }
+
+    @Override
+    public boolean addDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException {
+        boolean success;
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            success = deviceTypeDAO.addDeviceTypeVersion(deviceTypeVersion);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while adding versions to device type: " + deviceTypeVersion.getDeviceTypeName();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return success;
+    }
+
+    @Override
+    public List<DeviceTypeVersion> getDeviceTypeVersions(String typeName) throws
+            DeviceManagementException {
+        List<DeviceTypeVersion> versions = null;
+        DeviceType deviceType = getDeviceType(typeName);
+        if (deviceType != null) {
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                versions = deviceTypeDAO.getDeviceTypeVersions(deviceType.getId(), typeName);
+            } catch (DeviceManagementDAOException e) {
+                String msg = "Error occurred while getting versions of device type: " + typeName;
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the data source";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+        }
+        return versions;
+    }
+
+    @Override
+    public boolean updateDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException {
+        boolean success;
+        try {
+            DeviceType deviceType = getDeviceType(deviceTypeVersion.getDeviceTypeName());
+            DeviceManagementDAOFactory.beginTransaction();
+            deviceTypeVersion.setDeviceTypeId(deviceType.getId());
+            success = deviceTypeDAO.updateDeviceTypeVersion(deviceTypeVersion);
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while updating versions to device type: "
+                    + deviceTypeVersion.getDeviceTypeName();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return success;
+    }
+
+    @Override
+    public boolean isDeviceTypeVersionChangeAuthorized(String deviceTypeName, String version) throws
+            DeviceManagementException {
+        boolean success = false;
+        try {
+            // Get the device type details of the deviceTypeName provided in current tenant.
+            DeviceType deviceType = getDeviceType(deviceTypeName);
+            DeviceManagementDAOFactory.openConnection();
+            if (deviceType != null) {
+                success = deviceTypeDAO.isDeviceTypeVersionModifiable(deviceType.getId(), version, this.getTenantId());
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while getting authorization details of device type : " + deviceTypeName;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting db connection to authorize details of device type : " +
+                    deviceTypeName;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return success;
+    }
+
+    public DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
+            DeviceManagementException {
+        DeviceTypeVersion versions = null;
+        DeviceType deviceType = getDeviceType(deviceTypeName);
+        if (deviceType != null) {
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                versions = deviceTypeDAO.getDeviceTypeVersion(deviceType.getId(), version);
+            } catch (DeviceManagementDAOException e) {
+                String msg = "Error occurred while getting versions of device type: " + deviceTypeName + " ,version: "
+                        + version;
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the data source";
+                log.error(msg, e);
+                throw new DeviceManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+        }
+        return versions;
+    }
+
 }
