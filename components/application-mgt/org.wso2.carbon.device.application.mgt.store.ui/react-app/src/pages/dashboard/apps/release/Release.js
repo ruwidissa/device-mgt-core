@@ -15,7 +15,8 @@ class Release extends React.Component {
         this.routes = props.routes;
         this.state={
             loading: true,
-            app: null
+            app: null,
+            uuid: null
         }
 
     }
@@ -26,8 +27,9 @@ class Release extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {uuid} = this.props.match.params;
-        if (prevProps !== this.props) {
+        console.log(prevState);
+        if (prevState.uuid !== this.state.uuid) {
+            const {uuid} = this.props.match.params;
             this.fetchData(uuid);
         }
     }
@@ -53,7 +55,8 @@ class Release extends React.Component {
 
                 this.setState({
                     app: app,
-                    loading: false
+                    loading: false,
+                    uuid: uuid
                 })
             }
 
@@ -80,7 +83,7 @@ class Release extends React.Component {
 
 
         return (
-            <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
+            <div style={{background: '#f0f2f5', minHeight: 780}}>
                 <Row style={{padding: 10}}>
                     <Col lg={4}>
 

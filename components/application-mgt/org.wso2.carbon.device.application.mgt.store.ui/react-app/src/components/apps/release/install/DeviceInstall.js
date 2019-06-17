@@ -1,12 +1,12 @@
 import React from "react";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
-import {Button, message, Table} from "antd";
+import {Button, message, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
-
+const {Text} = Typography;
 const columns = [
     {
         title: 'Device',
@@ -196,7 +196,9 @@ class DeviceInstall extends React.Component {
         const {data,pagination,loading,selectedRows} = this.state;
         return (
             <div>
+                <Text>Start installing the application for one or more users by entering the corresponding user name. Select install to automatically start downloading the application for the respective user/users. </Text>
                 <Table
+                    style={{paddingTop:20}}
                     columns={columns}
                     rowKey={record => record.deviceIdentifier}
                     dataSource={data}

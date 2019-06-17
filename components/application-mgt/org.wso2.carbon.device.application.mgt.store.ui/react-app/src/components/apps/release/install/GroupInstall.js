@@ -90,8 +90,7 @@ class GroupInstall extends React.Component {
 
         return (
             <div>
-                <Text>Lorem ipsum dolor sit amet, ne tation labores quo, errem facilisis expetendis vel in. Ut choro
-                    decore ubique sed,</Text>
+                <Text>Start installing the application for one or more groups by entering the corresponding group name. Select install to automatically start downloading the application for the respective device group/ groups.</Text>
                 <br/>
                 <br/>
                 <Select

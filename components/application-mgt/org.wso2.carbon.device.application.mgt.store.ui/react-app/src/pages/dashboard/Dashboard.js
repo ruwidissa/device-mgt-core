@@ -18,9 +18,6 @@ class Dashboard extends React.Component {
     }
 
     render() {
-        const {deviceType} = this.props.match.params;
-        console.log(this.props.match.params);
-        console.log(deviceType);
         return (
             <div>
                 <Layout className="layout">
@@ -36,7 +33,7 @@ class Dashboard extends React.Component {
                         >
                             <Menu.Item key="android"><Link to="/store/android"><Icon type="android" theme="filled"/>Android</Link></Menu.Item>
                             <Menu.Item key="ios"><Link to="/store/ios"><Icon type="apple" theme="filled"/>iOS</Link></Menu.Item>
-                            <Menu.Item key="webclip"><Link to="/store/webclips"><Icon type="upload"/>Web Clips</Link></Menu.Item>
+                            <Menu.Item key="webclip"><Link to="/store/web-clip"><Icon type="upload"/>Web Clips</Link></Menu.Item>
                         </Menu>
                     </Header>
                 </Layout>

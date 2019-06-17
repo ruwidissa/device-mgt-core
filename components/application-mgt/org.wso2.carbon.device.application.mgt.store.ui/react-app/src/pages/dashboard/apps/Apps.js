@@ -1,10 +1,7 @@
 import React from "react";
 import "antd/dist/antd.css";
-import {PageHeader, Typography,Input, Button, Row, Col} from "antd";
 import AppList from "../../../components/apps/AppList";
-import ReleaseModal from "../../../components/apps/ReleaseModal";
 
-const Search = Input.Search;
 
 const routes = [
     {
@@ -30,12 +27,13 @@ class Apps extends React.Component {
 
     }
 
+
     render() {
+        const {deviceType} = this.props.match.params;
         return (
             <div>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
-                    <ReleaseModal/>
-                    <AppList/>
+                    {deviceType!==null && <AppList deviceType={deviceType}/>}
                 </div>
 
             </div>
