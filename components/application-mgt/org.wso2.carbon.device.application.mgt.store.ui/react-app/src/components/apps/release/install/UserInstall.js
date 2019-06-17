@@ -86,13 +86,11 @@ class UserInstall extends React.Component {
     };
 
     render() {
-
         const {fetching, data, value} = this.state;
 
         return (
             <div>
-                <Text>Lorem ipsum dolor sit amet, ne tation labores quo, errem facilisis expetendis vel in. Ut choro
-                    decore ubique sed,</Text>
+                <Text>Start installing the application for one or more users by entering the corresponding user name. Select install to automatically start downloading the application for the respective user/users. </Text>
                 <p>Select users</p>
                 <Select
                     mode="multiple"
@@ -110,7 +108,7 @@ class UserInstall extends React.Component {
                     ))}
                 </Select>
                 <div style={{paddingTop: 10, textAlign: "right"}}>
-                    <Button htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
                 </div>
             </div>
         );

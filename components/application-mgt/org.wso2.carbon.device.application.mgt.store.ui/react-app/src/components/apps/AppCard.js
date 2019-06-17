@@ -1,21 +1,13 @@
-import {
-    Skeleton, Switch, Card, Icon, Avatar, Typography, Col, Row, Rate
-} from 'antd';
+import {Card, Typography, Col, Row} from 'antd';
 import React from "react";
-import {openReleasesModal} from "../../js/actions";
-import {connect} from "react-redux";
 import {Link} from "react-router-dom";
 import "../../App.css";
 import StarRatings from 'react-star-ratings';
 
 const {Meta} = Card;
-const {Text, Title} = Typography;
+const {Text} = Typography;
 
-const mapDispatchToProps = dispatch => ({
-    openReleasesModal: (app) => dispatch(openReleasesModal(app))
-});
-
-class ConnectedAppCard extends React.Component {
+class AppCard extends React.Component {
 
     constructor(props) {
         super(props);
@@ -29,11 +21,10 @@ class ConnectedAppCard extends React.Component {
     render() {
         const app = this.props.app;
         const release = this.props.app.applicationReleases[0];
-        // console.log(this.props);
 
         const description = (
             <div className="appCard">
-                <Link to={"/store/apps/" + release.uuid}>
+                <Link to={"/store/"+app.deviceType+"/apps/" + release.uuid}>
                     <Row className="release">
                         <Col span={24} className="release-icon">
                             <img src={release.iconPath} alt="icon"/>
@@ -65,7 +56,5 @@ class ConnectedAppCard extends React.Component {
         );
     }
 }
-
-const AppCard = connect(null, mapDispatchToProps)(ConnectedAppCard);
 
 export default AppCard;

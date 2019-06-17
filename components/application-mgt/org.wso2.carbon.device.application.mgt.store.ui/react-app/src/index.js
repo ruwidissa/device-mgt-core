@@ -6,11 +6,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import Release from "./pages/dashboard/apps/release/Release";
-import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import './index.css';
-import store from "./js/store/index";
-import {Provider} from "react-redux";
-
 
 const routes = [
     {
@@ -19,22 +15,17 @@ const routes = [
         component: Login
     },
     {
-        path: '/store/apps',
+        path: '/store',
         exact: false,
         component: Dashboard,
         routes: [
             {
-                path: '/store/apps',
+                path: '/store/:deviceType',
                 component: Apps,
                 exact: true
             },
             {
-                path: '/store/apps/new-app',
-                component: AddNewApp,
-                exact: true
-            },
-            {
-                path: '/store/apps/:uuid',
+                path: '/store/:deviceType/apps/:uuid',
                 exact: true,
                 component: Release
             }
@@ -44,9 +35,7 @@ const routes = [
 
 
 ReactDOM.render(
-    <Provider store={store}>
-        <App routes={routes}/>
-    </Provider>,
+    <App routes={routes}/>,
     document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change

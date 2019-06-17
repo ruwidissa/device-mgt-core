@@ -1,73 +1,98 @@
 import React from "react";
 import '../../../../App.css';
-import {Skeleton, Typography, Row, Col, Card} from "antd";
-import {connect} from "react-redux";
+import {Skeleton, Typography, Row, Col, Card, message} from "antd";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
-import {getRelease, setLoading} from "../../../../js/actions";
+import axios from "axios";
+import config from "../../../../../public/conf/config.json";
 
 const {Title} = Typography;
 
-const routes = [
-    {
-        path: 'index',
-        breadcrumbName: 'store',
-    },
-    {
-        path: 'first',
-        breadcrumbName: 'Dashboard',
-    },
-    {
-        path: 'second',
-        breadcrumbName: 'Apps',
-    },
-];
-
-const mapStateToProps = state => {
-    return {
-        release: state.release,
-        releaseLoading: state.loadingState.release
-    }
-};
-
-const mapDispatchToProps = dispatch => ({
-    getRelease: (uuid) => dispatch(getRelease(uuid)),
-    setLoading: (stateToLoad) => dispatch(setLoading(stateToLoad))
-});
-
-class ConnectedRelease extends React.Component {
+class Release extends React.Component {
     routes;
 
     constructor(props) {
         super(props);
         this.routes = props.routes;
+        this.state={
+            loading: true,
+            app: null,
+            uuid: null
+        }
 
     }
 
     componentDidMount() {
-        const {uuid} = this.props.match.params;
-        this.props.setLoading("release");
-        this.props.getRelease(uuid);
+        const {uuid, deviceType} = this.props.match.params;
+        this.fetchData(uuid);
+        this.props.changeSelectedMenuItem(deviceType);
     }
 
-    render() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log(prevState);
+        if (prevState.uuid !== this.state.uuid) {
+            const {uuid,deviceType} = this.props.match.params;
+            this.fetchData(uuid);
+            this.props.changeSelectedMenuItem(deviceType);
+        }
+    }
 
-        const release = this.props.release;
+    fetchData = (uuid)=>{
+        const parameters = {
+            method: "get",
+            'content-type': "application/json",
+            payload: "{}",
+            'api-endpoint': "/application-mgt-store/v1.0/applications/" + uuid
+        };
+
+        //url-encode parameters
+        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
+
+        //send request to the invoker
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        ).then(res => {
+            if (res.status === 200) {
+                let app = res.data.data;
+
+                console.log(app);
+
+                this.setState({
+                    app: app,
+                    loading: false,
+                    uuid: uuid
+                })
+            }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+            } else {
+                message.error('Something went wrong... :(');
+            }
+
+            this.setState({loading: false});
+        });
+    };
+
+    render() {
+        const {app, loading} = this.state;
         let content = <Title level={3}>No Releases Found</Title>;
 
-        if (release != null) {
-            content = <ReleaseView release={release}/>;
+        if (app != null && app.applicationReleases.length!==0) {
+            content = <ReleaseView app={app}/>;
         }
 
 
         return (
-            <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
+            <div style={{background: '#f0f2f5', minHeight: 780}}>
                 <Row style={{padding: 10}}>
                     <Col lg={4}>
 
                     </Col>
                     <Col lg={16} md={24} style={{padding: 3}}>
                         <Card>
-                            <Skeleton loading={this.props.releaseLoading} avatar={{size: 'large'}} active paragraph={{rows: 8}}>
+                            <Skeleton loading={loading} avatar={{size: 'large'}} active paragraph={{rows: 8}}>
                                 {content}
                             </Skeleton>
                         </Card>
@@ -76,29 +101,8 @@ class ConnectedRelease extends React.Component {
 
             </div>
         );
-
-
-        // //todo remove uppercase
-        // return (
-        //     <div>
-        //         <div className="main-container">
-        //             <Row style={{padding: 10}}>
-        //                 <Col lg={4}>
-        //
-        //                 </Col>
-        //                 <Col lg={16} md={24} style={{padding: 3}}>
-        //                     <Card>
-        //                         <ReleaseView release={release}/>
-        //                     </Card>
-        //                 </Col>
-        //             </Row>
-        //         </div>
-        //     </div>
-        //
-        // );
     }
 }
 
-const Release = connect(mapStateToProps, mapDispatchToProps)(ConnectedRelease);
 
 export default Release;

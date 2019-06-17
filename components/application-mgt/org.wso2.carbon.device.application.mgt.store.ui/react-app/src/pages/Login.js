@@ -92,7 +92,7 @@ class NormalLoginForm extends React.Component {
                     {getFieldDecorator('username', {
                         rules: [{required: true, message: 'Please input your username!'}],
                     })(
-                        <Input style={{height: 32}} prefix={<Icon type="user" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                        <Input name="username" style={{height: 32}} prefix={<Icon type="user" style={{color: 'rgba(0,0,0,.25)'}}/>}
                                placeholder="Username"/>
                     )}
                 </Form.Item>
@@ -100,7 +100,7 @@ class NormalLoginForm extends React.Component {
                     {getFieldDecorator('password', {
                         rules: [{required: true, message: 'Please input your Password!'}],
                     })(
-                        <Input style={{height: 32}} className={styles.input}
+                        <Input name="password" style={{height: 32}} className={styles.input}
                                prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>} type="password"
                                placeholder="Password"/>
                     )}

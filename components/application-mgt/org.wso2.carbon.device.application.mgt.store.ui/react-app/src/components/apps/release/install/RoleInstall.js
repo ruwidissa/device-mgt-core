@@ -90,8 +90,7 @@ class RoleInstall extends React.Component {
 
         return (
             <div>
-                <Text>Lorem ipsum dolor sit amet, ne tation labores quo, errem facilisis expetendis vel in. Ut choro
-                    decore ubique sed,</Text>
+                <Text>Start installing the application for one or more roles by entering the corresponding role name. Select install to automatically start downloading the application for the respective user role/roles.</Text>
                 <br/>
                 <br/>
                 <Select
@@ -110,7 +109,7 @@ class RoleInstall extends React.Component {
                     ))}
                 </Select>
                 <div style={{paddingTop:10, textAlign:"right"}}>
-                    <Button htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
                 </div>
             </div>
         );

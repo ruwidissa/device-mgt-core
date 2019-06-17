@@ -21,8 +21,8 @@ class DetailedRating extends React.Component{
         this.getData(this.props.uuid);
     }
 
-    componentDidUpdate(nextProps) {
-        if (nextProps !== this.props) {
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.uuid !== this.props.uuid) {
             this.getData(this.props.uuid);
         }
     }

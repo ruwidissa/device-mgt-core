@@ -89,7 +89,8 @@ class ReleaseView extends React.Component {
     };
 
     render() {
-        const release = this.props.release;
+        const app = this.props.app;
+        const release = app.applicationReleases[0];
         return (
             <div>
                 <AppInstallModal uuid={release.uuid} visible={this.state.appInstallModalVisible}
@@ -100,10 +101,10 @@ class ReleaseView extends React.Component {
                             <img src={release.iconPath} alt="icon"/>
                         </Col>
                         <Col xl={10} sm={11} className="release-title">
-                            <Title level={2}>App Name</Title>
+                            <Title level={2}>{app.name}</Title>
                             <Text>Version : {release.version}</Text><br/><br/>
                             <StarRatings
-                                rating={release.rating}
+                                rating={app.rating}
                                 starRatedColor="#777"
                                 starDimension="20px"
                                 starSpacing="2px"
