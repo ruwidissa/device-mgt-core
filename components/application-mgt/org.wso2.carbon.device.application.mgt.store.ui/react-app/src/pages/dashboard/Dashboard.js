@@ -13,11 +13,21 @@ class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            routes: props.routes
+            routes: props.routes,
+            selectedKeys : []
         }
     }
 
+    changeSelectedMenuItem = (key) =>{
+        console.log("called", key);
+        this.setState({
+            selectedKeys: [key]
+        })
+    };
+
     render() {
+        const {selectedKeys} = this.state;
+        console.log(selectedKeys);
         return (
             <div>
                 <Layout className="layout">
@@ -28,12 +38,12 @@ class Dashboard extends React.Component {
                         <Menu
                             theme="light"
                             mode="horizontal"
-                            defaultSelectedKeys={["android"]}
+                            selectedKeys={selectedKeys}
                             style={{lineHeight: '64px'}}
                         >
                             <Menu.Item key="android"><Link to="/store/android"><Icon type="android" theme="filled"/>Android</Link></Menu.Item>
                             <Menu.Item key="ios"><Link to="/store/ios"><Icon type="apple" theme="filled"/>iOS</Link></Menu.Item>
-                            <Menu.Item key="webclip"><Link to="/store/web-clip"><Icon type="upload"/>Web Clips</Link></Menu.Item>
+                            <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web Clips</Link></Menu.Item>
                         </Menu>
                     </Header>
                 </Layout>
@@ -42,7 +52,7 @@ class Dashboard extends React.Component {
                         <Switch>
                             <Redirect exact from="/store" to="/store/android"/>
                             {this.state.routes.map((route) => (
-                                <RouteWithSubRoutes key={route.path} {...route} />
+                                <RouteWithSubRoutes changeSelectedMenuItem={this.changeSelectedMenuItem} key={route.path} {...route} />
                             ))}
 
                         </Switch>
