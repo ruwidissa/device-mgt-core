@@ -15,6 +15,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
 package org.wso2.carbon.device.mgt.core.service;
 
 import org.wso2.carbon.device.mgt.common.Device;
@@ -29,6 +47,7 @@ import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
@@ -191,6 +210,17 @@ public interface DeviceManagementProviderService {
     Device getDevice(DeviceIdentifier deviceId, boolean requireDeviceInfo) throws DeviceManagementException;
 
     /**
+     * Returns the device of specified id.
+     *
+     * @param deviceId device Id
+     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return Device returns null when device is not available.
+     * @throws DeviceManagementException
+     */
+    Device getDevice(String deviceId, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /**
      * Returns the device of specified id owned by user with given username.
      *
      * @param deviceId - Device Id
@@ -224,6 +254,18 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException
      */
     Device getDevice(DeviceIdentifier deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /**
+     * Returns the device of specified id.
+     *
+     * @param deviceId device Id
+     * @param since - Date value where the resource was last modified
+     * @param requireDeviceInfo - A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return Device returns null when device is not available.
+     * @throws DeviceManagementException
+     */
+    Device getDevice(String deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException;
 
     /**
      * Returns the device of specified id and owned by user with given username.
@@ -541,6 +583,8 @@ public interface DeviceManagementProviderService {
 
     boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
 
+    boolean deleteDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
+
     boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException;
 
     boolean isActive(DeviceIdentifier deviceId) throws DeviceManagementException;
@@ -614,9 +658,13 @@ public interface DeviceManagementProviderService {
 
     List<MonitoringOperation> getMonitoringOperationList(String deviceType);
 
+    List<String> getStartupOperations(String deviceType);
+
     int getDeviceMonitoringFrequency(String deviceType);
 
     OperationMonitoringTaskConfig getDeviceMonitoringConfig(String deviceType);
+
+    StartupOperationConfig getStartupOperationConfig(String deviceType);
 
     boolean isDeviceMonitoringEnabled(String deviceType);
 

@@ -16,6 +16,24 @@
  * under the License.
  */
 
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 var operationModule = function () {
     var log = new Log("/app/modules/business-controllers/operation.js");
     var utility = require('/app/modules/utility.js').utility;
@@ -38,8 +56,9 @@ var operationModule = function () {
     }
 
     privateMethods.getOperationsFromFeatures = function (deviceType, operationType) {
-        var url = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"] + "/device-types/" + deviceType + "/features";
-        var featuresList = serviceInvokers.XMLHttp.get(url, function (responsePayload) {
+        var url = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"] + "/device-types/"
+            + deviceType + "/features?featureType=" + operationType + "&hidden=false";
+        return serviceInvokers.XMLHttp.get(url, function (responsePayload) {
                 var features = JSON.parse(responsePayload.responseText);
                 var featureList = [];
                 var feature;
@@ -51,20 +70,40 @@ var operationModule = function () {
                     feature["contentType"] = features[i].contentType;
                     feature["deviceType"] = deviceType;
                     feature["params"] = [];
-                    var featuresEntry = utility.getDeviceTypeConfig(deviceType)["deviceType"]["features"];
-                    if (featuresEntry) {
-                        var featureEntry = featuresEntry[features[i].code];
-                        if (featureEntry) {
-                            var permissionEntry = featureEntry["permission"];
-                            if (permissionEntry) {
-                                feature["permission"] = permissionEntry
-                            }
-                        }
-                    }
                     var metaData = features[i].metadataEntries;
                     if (metaData) {
                         for (var j = 0; j < metaData.length; j++) {
-                            feature["params"].push(metaData[j].value);
+                            if (metaData[j].name === "operationMeta") {
+                                var operationMeta = metaData[j].value;
+                                var params = {};
+                                params["method"] = operationMeta.method;
+                                params["pathParams"] = operationMeta.pathParams;
+                                params["queryParams"] = operationMeta.queryParams;
+                                params["formParams"] = operationMeta.formParams ? operationMeta.formParams : [];
+                                params["uri"] = operationMeta.uri;
+                                params["contentType"] = operationMeta.contentType;
+                                feature["params"].push(params);
+                                feature["permission"] = operationMeta.permission;
+                                if (operationMeta.icon) {
+                                    //Check if icon is a path or font
+                                    if (operationMeta.icon.indexOf("path:") === 0) {
+                                        feature["icon"] = operationMeta.icon.replace("path:", "");
+                                    } else {
+                                        feature["iconFont"] = operationMeta.icon;
+                                    }
+                                }
+                                if (operationMeta.uiParams && operationMeta.uiParams.length > 0) {
+                                    feature["uiParams"] = operationMeta.uiParams;
+                                }
+                                if (operationMeta.filters) {
+                                    feature["filters"] = operationMeta.filters;
+                                }
+                                if (operationMeta.ownershipDescription) {
+                                    feature["ownershipDescription"] = operationMeta.ownershipDescription;
+                                }
+                                continue;
+                            }
+                            feature["metadata"].push(metaData[j].value);
                         }
                         featureList.push(feature);
                     }
@@ -76,39 +115,27 @@ var operationModule = function () {
                 return response;
             }
         );
-        return featuresList;
     };
 
     publicMethods.getControlOperations = function (device) {
         var deviceType = device.type;
         var operations = privateMethods.getOperationsFromFeatures(deviceType, "operation");
-        var features = utility.getDeviceTypeConfig(deviceType).deviceType.features;
         for (var op in operations) {
-            var iconIdentifier = operations[op].operation;
-            if (features && features[iconIdentifier]) {
-                var icon = features[iconIdentifier].icon;
-                //TODO: need improve this check to get feature availability from agent side
-                var filter = features[iconIdentifier].filter;
-                if (device && filter && filter.property && device[filter.property] !== filter.value) {
-                    operations[op]["isDisabled"] = true;
-                    operations[op]["disabledText"] = filter.text;
-                } else {
-                    operations[op]["isDisabled"] = false;
+            if (operations.hasOwnProperty(op)) {
+                operations[op]["isDisabled"] = false;
+                if (device && operations[op].filters && operations[op].filters.length > 0) {
+                    var filters = operations[op].filters;
+                    for (var filter in filters) {
+                        if (filters.hasOwnProperty(filter)) {
+                            if (device[filters[filter].property] !== filters[filter].value) {
+                                operations[op]["isDisabled"] = true;
+                                operations[op]["disabledText"] = operations[op]["disabledText"] ?
+                                    operations[op]["disabledText"] + ", " + filters[filter].description :
+                                    filters[filter].description;
+                            }
+                        }
+                    }
                 }
-                if (icon) {
-                    operations[op]["iconFont"] = icon;
-                } else if (iconPath) {
-                    var iconPath = utility.getOperationIcon(deviceType, iconIdentifier);
-                    operations[op]["icon"] = iconPath;
-                }
-                var formParams = features[iconIdentifier].formParams;
-                if (formParams) {
-                    operations[op]["uiParams"] = formParams;
-                }
-                // var icon = utility.getOperationIcon(deviceType, iconIdentifier);
-                // if (icon) {
-                //     log.error("icon found : " + icon );
-                //     operations[op]["icon"] = icon;
             }
         }
         return operations;

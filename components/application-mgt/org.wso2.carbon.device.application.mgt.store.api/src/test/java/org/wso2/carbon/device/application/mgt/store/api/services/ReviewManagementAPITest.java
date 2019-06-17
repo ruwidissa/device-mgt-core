@@ -58,7 +58,7 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 //    @Test
 //    public void testGetAllCommentsWithValidDetails() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Response response = this.commentManagementAPI.getAllReviews("a", 1, 2);
+//        Response response = this.commentManagementAPI.getAllReleaseReviews("a", 1, 2);
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
 //            "The response status should be 200.");
@@ -69,8 +69,8 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 //    public void testGetAllCommentsInternalError() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
 //        Mockito.doThrow(new ReviewManagementException()).when(this.reviewManager)
-//            .getAllReviews(Mockito.any(), Mockito.anyString());
-//        Response response = this.commentManagementAPI.getAllReviews("a", 1, 4);
+//            .getAllReleaseReviews(Mockito.any(), Mockito.anyString());
+//        Response response = this.commentManagementAPI.getAllReleaseReviews("a", 1, 4);
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
 //            "The response status should be 500.");
@@ -80,7 +80,7 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 //    @Test
 //    public void testGetAllCommentsNotFoundError() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Response response = this.commentManagementAPI.getAllReviews(null, 1, 3);
+//        Response response = this.commentManagementAPI.getAllReleaseReviews(null, 1, 3);
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
 //            "The response status should be 404.");
@@ -192,7 +192,7 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 //    @Test
 //    public void testGetStars() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Response response = this.commentManagementAPI.getRating("a");
+//        Response response = this.commentManagementAPI.getAppReleaseRating("a");
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
 //            "The response status should be 200.");
@@ -202,9 +202,9 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 //    @Test
 //    public void testGetStarsCommentError() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Mockito.when(this.commentManagementAPI.getRating(Mockito.anyString()))
+//        Mockito.when(this.commentManagementAPI.getAppReleaseRating(Mockito.anyString()))
 //            .thenThrow(new ReviewManagementException());
-//        Response response = this.commentManagementAPI.getRating("a");
+//        Response response = this.commentManagementAPI.getAppReleaseRating("a");
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
 //            "The response status should be 500.");
@@ -214,9 +214,9 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 //    @Test
 //    public void testGetStarsApplicationError() throws Exception {
 //        PowerMockito.stub(PowerMockito.method(APIUtil.class, "getReviewManager")).toReturn(this.reviewManager);
-//        Mockito.when(this.commentManagementAPI.getRating(Mockito.anyString()))
+//        Mockito.when(this.commentManagementAPI.getAppReleaseRating(Mockito.anyString()))
 //            .thenThrow(new ApplicationManagementException());
-//        Response response = this.commentManagementAPI.getRating("a");
+//        Response response = this.commentManagementAPI.getAppReleaseRating("a");
 //        Assert.assertNotNull(response, "The response object is null.");
 //        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
 //            "The response status should be 500.");

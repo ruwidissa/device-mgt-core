@@ -16,12 +16,35 @@
  *   under the License.
  *
  */
+
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.device.mgt.extensions.device.type.template.feature;
 
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Operation;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.OperationMetadata;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Params;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.UIParameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,10 +60,15 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
     private List<Feature> features = new ArrayList<>();
     private static final String METHOD = "method";
     private static final String URI = "uri";
+    private static final String OPERATION_META = "operationMeta";
     private static final String CONTENT_TYPE = "contentType";
+    private static final String PERMISSION = "permission";
+    private static final String ICON = "icon";
+    private static final String FILTERS = "filters";
     private static final String PATH_PARAMS = "pathParams";
     private static final String QUERY_PARAMS = "queryParams";
     private static final String FORM_PARAMS = "formParams";
+    private static final String UI_PARAMS = "uiParams";
     private static final Pattern PATH_PARAM_REGEX = Pattern.compile("\\{(.*?)\\}");
 
     public ConfigurationBasedFeatureManager(
@@ -50,6 +78,7 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
             deviceFeature.setCode(feature.getCode());
             deviceFeature.setName(feature.getName());
             deviceFeature.setDescription(feature.getDescription());
+            deviceFeature.setType(feature.getType());
             Operation operation = feature.getOperation();
             List<Feature.MetadataEntry> metadataEntries = null;
             if (feature.getMetaData() != null) {
@@ -64,31 +93,53 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
                 }
             }
             if (operation != null) {
-                Map<String, Object> apiParams = new HashMap<>();
-                apiParams.put(METHOD, operation.getMethod().toUpperCase());
-                apiParams.put(URI, operation.getContext());
-                apiParams.put(CONTENT_TYPE, operation.getType());
+                deviceFeature.setHidden(operation.isHidden());
+                Map<String, Object> operationMeta = new HashMap<>();
+                OperationMetadata metadata = operation.getMetadata();
+
                 List<String> pathParams = new ArrayList<>();
-                List<String> queryParams = new ArrayList<>();
-                List<String> formParams = new ArrayList<>();
-                setPathParams(operation.getContext(), pathParams);
-                apiParams.put(PATH_PARAMS, pathParams);
-                if (operation.getQueryParameters() != null) {
-                    queryParams = operation.getQueryParameters().getParameter();
+
+                if (metadata != null) {
+                    operationMeta.put(METHOD, metadata.getMethod().toUpperCase());
+                    operationMeta.put(URI, metadata.getUri());
+                    if (StringUtils.isNotEmpty(metadata.getContentType())) {
+                        operationMeta.put(CONTENT_TYPE, metadata.getContentType());
+                    }
+                    if (StringUtils.isNotEmpty(metadata.getPermission())) {
+                        operationMeta.put(PERMISSION, metadata.getPermission());
+                    }
+                    if (metadata.getFilterList() != null && metadata.getFilterList().size() > 0) {
+                        operationMeta.put(FILTERS, metadata.getFilterList());
+                    }
+                    operationMeta.put(ICON, operation.getIcon());
+                    setPathParams(metadata.getUri(), pathParams);
                 }
-                apiParams.put(QUERY_PARAMS, queryParams);
-                if (operation.getFormParameters() != null) {
-                    formParams = operation.getFormParameters().getParameter();
+                operationMeta.put(PATH_PARAMS, pathParams);
+
+                Params params = operation.getParams();
+                if (params != null) {
+                    List<String> queryParams = params.getQueryParameters() != null ?
+                            params.getQueryParameters().getParameter() : new ArrayList<>();
+                    List<String> formParams = params.getFormParameters() != null ?
+                            params.getFormParameters().getParameter() : new ArrayList<>();
+                    List<UIParameter> uiParams = params.getUiParameters() != null ?
+                            params.getUiParameters().getUiParameterList() : new ArrayList<>();
+                    operationMeta.put(QUERY_PARAMS, queryParams);
+                    operationMeta.put(UI_PARAMS, uiParams);
+                    operationMeta.put(FORM_PARAMS, formParams);
                 }
-                apiParams.put(FORM_PARAMS, formParams);
+
                 if (metadataEntries == null) {
                     metadataEntries = new ArrayList<>();
                 }
                 Feature.MetadataEntry metadataEntry = new Feature.MetadataEntry();
-                metadataEntry.setId(-1);
-                metadataEntry.setValue(apiParams);
+                metadataEntry.setId(0);
+                metadataEntry.setName(OPERATION_META);
+                metadataEntry.setValue(operationMeta);
                 metadataEntries.add(metadataEntry);
                 deviceFeature.setMetadataEntries(metadataEntries);
+            } else {
+                deviceFeature.setHidden(true);
             }
             this.features.add(deviceFeature);
         }
@@ -118,6 +169,49 @@ public class ConfigurationBasedFeatureManager implements FeatureManager {
     @Override
     public List<Feature> getFeatures() throws DeviceManagementException {
         return features;
+    }
+
+    @Override
+    public List<Feature> getFeatures(String type) throws DeviceManagementException {
+        if (StringUtils.isEmpty(type)) {
+            return this.getFeatures();
+        }
+
+        if (features == null) {
+            return null;
+        } else {
+            List<Feature> filteredFeatures = new ArrayList<>();
+            for (Feature feature : this.getFeatures()) {
+                if (type.equals(feature.getType())) {
+                    filteredFeatures.add(feature);
+                }
+            }
+            return filteredFeatures;
+        }
+    }
+
+    @Override
+    public List<Feature> getFeatures(String type, boolean isHidden) throws DeviceManagementException {
+        if (features == null) {
+            return null;
+        } else {
+            List<Feature> filteredFeatures = new ArrayList<>();
+            if (StringUtils.isEmpty(type)) {
+                for (Feature feature : this.getFeatures()) {
+                    if (isHidden == feature.isHidden()) {
+                        filteredFeatures.add(feature);
+                    }
+                }
+                return filteredFeatures;
+            } else {
+                for (Feature feature : this.getFeatures()) {
+                    if (isHidden == feature.isHidden() && type.equals(feature.getType())) {
+                        filteredFeatures.add(feature);
+                    }
+                }
+                return filteredFeatures;
+            }
+        }
     }
 
     @Override

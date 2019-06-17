@@ -1,23 +1,42 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ *
+ */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -44,6 +63,8 @@ import java.util.StringJoiner;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
+    private static final org.apache.commons.logging.Log log = LogFactory.getLog(AbstractDeviceDAOImpl.class);
+
     @Override
     public int addDevice(int typeId, Device device, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
@@ -55,7 +76,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             String sql = "INSERT INTO DM_DEVICE(DESCRIPTION, NAME, DEVICE_TYPE_ID, DEVICE_IDENTIFICATION, " +
                     "LAST_UPDATED_TIMESTAMP, TENANT_ID) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, new String[] {"id"});
+            stmt = conn.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, device.getDescription());
             stmt.setString(2, device.getName());
             stmt.setInt(3, typeId);
@@ -87,7 +108,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             String sql = "UPDATE DM_DEVICE SET NAME = ?, DESCRIPTION = ?, LAST_UPDATED_TIMESTAMP = ? " +
                     "WHERE DEVICE_TYPE_ID = (SELECT ID FROM DM_DEVICE_TYPE WHERE NAME = ? AND (PROVIDER_TENANT_ID = ? OR SHARED_WITH_ALL_TENANTS = ?)) " +
                     "AND DEVICE_IDENTIFICATION = ? AND TENANT_ID = ?";
-            stmt = conn.prepareStatement(sql, new String[] {"id"});
+            stmt = conn.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, device.getName());
             stmt.setString(2, device.getDescription());
             stmt.setTimestamp(3, new Timestamp(new Date().getTime()));
@@ -146,6 +167,53 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
+    public Device getDevice(String deviceIdentifier, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Device device = null;
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT " +
+                         "d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
+                         "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
+                         "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID " +
+                         "FROM " +
+                         "DM_ENROLMENT e," +
+                         " (SELECT d.ID, d.DESCRIPTION, d.NAME, t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION " +
+                         "FROM " +
+                         "DM_DEVICE d, DM_DEVICE_TYPE t " +
+                         "WHERE " +
+                         "t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ?) d1 " +
+                         "WHERE " +
+                         "d1.ID = e.DEVICE_ID " +
+                         "AND TENANT_ID = ? " +
+                         "ORDER BY e.DATE_OF_LAST_UPDATE DESC, e.STATUS ASC";
+            // Status adeed as an orderby clause to fix a bug : when an existing device is
+            // re-enrolled, earlier enrollment is marked as removed and a new enrollment is added.
+            // However, both enrollments share the same time stamp. When retrieving the device
+            // due to same timestamp, enrollment information is incorrect, intermittently. Hence
+            // status also should be taken into consideration when ordering. This should not present a
+            // problem for other status transitions, as there would be an intermediary removed
+            // state in between.
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, deviceIdentifier);
+            stmt.setInt(2, tenantId);
+            stmt.setInt(3, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                device = DeviceManagementDAOUtil.loadMatchingDevice(rs, false);
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while listing device " +
+                    "'" + deviceIdentifier + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return device;
+    }
+
+    @Override
     public Device getDevice(DeviceIdentifier deviceIdentifier, String owner, int tenantId)
             throws DeviceManagementDAOException {
         Connection conn;
@@ -181,7 +249,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     @Override
     public Device getDevice(DeviceIdentifier deviceIdentifier, Date since, int tenantId)
-                                                                                 throws DeviceManagementDAOException {
+            throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -189,11 +257,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
-                         "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
-                         "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                         "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_DETAIL dt " +
-                         "WHERE t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND dt.DEVICE_ID = d.ID " +
-                         "AND dt.UPDATE_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC" ;
+                    "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
+                    "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
+                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_DETAIL dt " +
+                    "WHERE t.NAME = ? AND  t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND dt.DEVICE_ID = d.ID " +
+                    "AND dt.UPDATE_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
             stmt = conn.prepareStatement(sql);
             int paramIdx = 1;
             stmt.setString(paramIdx++, deviceIdentifier.getType());
@@ -207,7 +275,52 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while listing device for type " +
-                                                   "'" + deviceIdentifier.getType() + "'", e);
+                    "'" + deviceIdentifier.getType() + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return device;
+    }
+
+    @Override
+    public Device getDevice(String deviceIdentifier, Date since, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Device device = null;
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
+                         "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
+                         "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID " +
+                         "FROM" +
+                         " DM_ENROLMENT e, " +
+                         "(SELECT d.ID, d.DESCRIPTION, d.NAME, " +
+                         "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION " +
+                         "FROM" +
+                         " DM_DEVICE d, DM_DEVICE_TYPE t," +
+                         " DM_DEVICE_DETAIL dt " +
+                         "WHERE " +
+                         "t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND" +
+                         " dt.DEVICE_ID = d.ID AND dt.UPDATE_TIMESTAMP > ?) d1 " +
+                         "WHERE" +
+                         " d1.ID = e.DEVICE_ID AND TENANT_ID = ? " +
+                         "ORDER BY " +
+                         "e.DATE_OF_LAST_UPDATE DESC";
+            stmt = conn.prepareStatement(sql);
+            int paramIdx = 1;
+            stmt.setString(paramIdx++, deviceIdentifier);
+            stmt.setInt(paramIdx++, tenantId);
+            stmt.setLong(paramIdx++, since.getTime());
+            stmt.setInt(paramIdx, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                device = DeviceManagementDAOUtil.loadMatchingDevice(rs, false);
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while listing device for id " +
+                    "'" + deviceIdentifier + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -228,7 +341,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
                     "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_DETAIL dt " +
                     "WHERE t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ? AND dt.DEVICE_ID = d.ID " +
-                    "AND dt.UPDATE_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? AND e.OWNER = ?" ;
+                    "AND dt.UPDATE_TIMESTAMP > ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ? AND e.OWNER = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceIdentifier.getType());
             stmt.setString(2, deviceIdentifier.getId());
@@ -250,8 +363,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public Device getDevice(DeviceIdentifier deviceIdentifier, EnrolmentInfo.Status status, int tenantId) throws
-                                                                                         DeviceManagementDAOException {
+    public Device getDevice(DeviceIdentifier deviceIdentifier, EnrolmentInfo.Status status, int tenantId)
+            throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -259,11 +372,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
-                         "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
-                         "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                         "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
-                         "t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ?) d1 WHERE d1.ID = e.DEVICE_ID " +
-                         "AND TENANT_ID = ? AND e.STATUS = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
+                    "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
+                    "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
+                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
+                    "t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? AND d.TENANT_ID = ?) d1 WHERE d1.ID = e.DEVICE_ID " +
+                    "AND TENANT_ID = ? AND e.STATUS = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceIdentifier.getType());
             stmt.setString(2, deviceIdentifier.getId());
@@ -276,7 +389,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while listing devices for type " +
-                                                   "'" + deviceIdentifier.getType() + "'", e);
+                    "'" + deviceIdentifier.getType() + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -293,13 +406,13 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, e.TENANT_ID, " +
-                    "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
-                    "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
-                    "t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? ) d1 WHERE d1.ID = e.DEVICE_ID ORDER BY e.DATE_OF_LAST_UPDATE DESC";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, deviceIdentifier.getType());
-            stmt.setString(2, deviceIdentifier.getId());
+                        "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
+                        "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
+                        "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
+                        "t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? ) d1 WHERE d1.ID = e.DEVICE_ID ORDER BY e.DATE_OF_LAST_UPDATE DESC";
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, deviceIdentifier.getType());
+                stmt.setString(2, deviceIdentifier.getId());
             rs = stmt.executeQuery();
             if (rs.next()) {
                 device = DeviceManagementDAOUtil.loadDevice(rs);
@@ -323,11 +436,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, " +
-                         "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
-                         "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                         "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
-                         "d.ID = ? AND t.ID = d.DEVICE_TYPE_ID AND d.TENANT_ID = ?) d1 WHERE d1.ID = e.DEVICE_ID " +
-                         "AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
+                    "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
+                    "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
+                    "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
+                    "d.ID = ? AND t.ID = d.DEVICE_TYPE_ID AND d.TENANT_ID = ?) d1 WHERE d1.ID = e.DEVICE_ID " +
+                    "AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
             stmt.setInt(2, tenantId);
@@ -338,7 +451,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving device for id " +
-                                                   "'" + deviceId + "'", e);
+                    "'" + deviceId + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -421,11 +534,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT e1.OWNER, e1.OWNERSHIP, e1.ENROLMENT_ID, e1.DEVICE_ID, e1.STATUS, e1.DATE_OF_LAST_UPDATE," +
-                         " e1.DATE_OF_ENROLMENT, d.DESCRIPTION, d.NAME AS DEVICE_NAME, d.DEVICE_IDENTIFICATION, t.NAME " +
-                         "AS DEVICE_TYPE FROM DM_DEVICE d, (SELECT e.OWNER, e.OWNERSHIP, e.ID AS ENROLMENT_ID, " +
-                         "e.DEVICE_ID, e.STATUS, e.DATE_OF_LAST_UPDATE, e.DATE_OF_ENROLMENT FROM DM_ENROLMENT e WHERE " +
-                         "e.TENANT_ID = ? AND LOWER(e.OWNER) = LOWER(?) ORDER BY e.DATE_OF_LAST_UPDATE DESC) e1, DM_DEVICE_TYPE t WHERE d.ID = e1.DEVICE_ID " +
-                         "AND t.ID = d.DEVICE_TYPE_ID";
+                    " e1.DATE_OF_ENROLMENT, d.DESCRIPTION, d.NAME AS DEVICE_NAME, d.DEVICE_IDENTIFICATION, t.NAME " +
+                    "AS DEVICE_TYPE FROM DM_DEVICE d, (SELECT e.OWNER, e.OWNERSHIP, e.ID AS ENROLMENT_ID, " +
+                    "e.DEVICE_ID, e.STATUS, e.DATE_OF_LAST_UPDATE, e.DATE_OF_ENROLMENT FROM DM_ENROLMENT e WHERE " +
+                    "e.TENANT_ID = ? AND LOWER(e.OWNER) = LOWER(?) ORDER BY e.DATE_OF_LAST_UPDATE DESC) e1, DM_DEVICE_TYPE t WHERE d.ID = e1.DEVICE_ID " +
+                    "AND t.ID = d.DEVICE_TYPE_ID";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             stmt.setString(2, username);
@@ -497,8 +610,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d1.DEVICE_ID) AS DEVICE_COUNT FROM DM_ENROLMENT e, (SELECT d.ID AS DEVICE_ID FROM " +
-                         "DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?) d1 WHERE " +
-                         "d1.DEVICE_ID = e.DEVICE_ID AND LOWER(e.OWNER) = LOWER(?) AND TENANT_ID = ?";
+                    "DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?) d1 WHERE " +
+                    "d1.DEVICE_ID = e.DEVICE_ID AND LOWER(e.OWNER) = LOWER(?) AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             stmt.setString(2, username);
@@ -580,7 +693,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     @Override
     public boolean setEnrolmentStatusInBulk(String deviceType, String status,
-                                      int tenantId, List<String> devices) throws DeviceManagementDAOException {
+                                            int tenantId, List<String> devices) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         try {
@@ -625,8 +738,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d1.DEVICE_ID) AS DEVICE_COUNT FROM DM_ENROLMENT e, (SELECT d.ID AS DEVICE_ID FROM " +
-                  "DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?) d1 WHERE " +
-                  "d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ?";
+                    "DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?) d1 WHERE " +
+                    "d1.DEVICE_ID = e.DEVICE_ID AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             stmt.setInt(2, tenantId);
@@ -665,7 +778,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d1.ID) AS DEVICE_COUNT FROM DM_ENROLMENT e, (SELECT d.ID, d.NAME, d.DEVICE_IDENTIFICATION, " +
-                         "t.NAME AS DEVICE_TYPE FROM DM_DEVICE d, DM_DEVICE_TYPE t";
+                    "t.NAME AS DEVICE_TYPE FROM DM_DEVICE d, DM_DEVICE_TYPE t";
 
             //Add query for last updated timestamp
             if (since != null) {
@@ -739,7 +852,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving information of all " +
-                                                   "registered devices", e);
+                    "registered devices", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -755,8 +868,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d1.ID) AS DEVICE_COUNT FROM DM_ENROLMENT e, (SELECT d.ID FROM DM_DEVICE d, " +
-            "DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND t.NAME = ? " +
-            "AND d.TENANT_ID = ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ?";
+                    "DM_DEVICE_TYPE t WHERE DEVICE_TYPE_ID = t.ID AND t.NAME = ? " +
+                    "AND d.TENANT_ID = ?) d1 WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, type);
             stmt.setInt(2, tenantId);
@@ -781,8 +894,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(e1.DEVICE_ID) AS DEVICE_COUNT FROM DM_DEVICE d, (SELECT e.DEVICE_ID " +
-                         "FROM DM_ENROLMENT e WHERE e.TENANT_ID = ? AND LOWER(e.OWNER) = LOWER(?)) " +
-                         "e1, DM_DEVICE_TYPE t WHERE d.ID = e1.DEVICE_ID AND t.ID = d.DEVICE_TYPE_ID";
+                    "FROM DM_ENROLMENT e WHERE e.TENANT_ID = ? AND LOWER(e.OWNER) = LOWER(?)) " +
+                    "e1, DM_DEVICE_TYPE t WHERE d.ID = e1.DEVICE_ID AND t.ID = d.DEVICE_TYPE_ID";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             stmt.setString(2, username);
@@ -793,7 +906,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while fetching the list of devices belongs to '" +
-                                                   username + "'", e);
+                    username + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -808,8 +921,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d1.ID) AS DEVICE_COUNT FROM DM_ENROLMENT e, (SELECT d.ID FROM DM_DEVICE d, " +
-                         "DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.NAME LIKE ? AND d.TENANT_ID = ?) d1 " +
-                         "WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ?";
+                    "DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID AND d.NAME LIKE ? AND d.TENANT_ID = ?) d1 " +
+                    "WHERE d1.ID = e.DEVICE_ID AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceName + "%");
             stmt.setInt(2, tenantId);
@@ -821,7 +934,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while fetching the device count that matches " +
-                                                   "'" + deviceName + "'", e);
+                    "'" + deviceName + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -836,8 +949,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT COUNT(d.ID) AS DEVICE_COUNT FROM (SELECT e.DEVICE_ID FROM DM_ENROLMENT e WHERE " +
-                         "TENANT_ID = ? AND OWNERSHIP = ?) e, DM_DEVICE d, " +
-                         "DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
+                    "TENANT_ID = ? AND OWNERSHIP = ?) e, DM_DEVICE d, " +
+                    "DM_DEVICE_TYPE t WHERE d.ID = e.DEVICE_ID AND d.DEVICE_TYPE_ID = t.ID AND d.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             stmt.setString(2, ownerShip);
@@ -849,7 +962,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while fetching the list of devices that matches to ownership " +
-                                                   "'" + ownerShip + "'", e);
+                    "'" + ownerShip + "'", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -923,7 +1036,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             conn = this.getConnection();
             String sql = "INSERT INTO DM_ENROLMENT(DEVICE_ID, OWNER, OWNERSHIP, STATUS,DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, TENANT_ID) VALUES(?, ?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, new String[] {"id"});
+            stmt = conn.prepareStatement(sql, new String[]{"id"});
             stmt.setInt(1, device.getId());
             stmt.setString(2, device.getEnrolmentInfo().getOwner());
             stmt.setString(3, device.getEnrolmentInfo().getOwnership().toString());
@@ -1044,10 +1157,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         try {
             conn = this.getConnection();
             String sql = "SELECT ID AS ENROLMENT_ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, DATE_OF_ENROLMENT, " +
-                         "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE DEVICE_ID = (SELECT d.ID " +
-                         "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID " +
-                         "AND d.DEVICE_IDENTIFICATION = ? AND t.NAME = ? AND d.TENANT_ID = ?) " +
-                         "AND TENANT_ID = ? AND STATUS in ('ACTIVE','UNREACHABLE','INACTIVE')";
+                    "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE DEVICE_ID = (SELECT d.ID " +
+                    "FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE d.DEVICE_TYPE_ID = t.ID " +
+                    "AND d.DEVICE_IDENTIFICATION = ? AND t.NAME = ? AND d.TENANT_ID = ?) " +
+                    "AND TENANT_ID = ? AND STATUS in ('ACTIVE','UNREACHABLE','INACTIVE')";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceId.getId());
             stmt.setString(2, deviceId.getType());
@@ -1060,8 +1173,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             return enrolmentInfo;
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving the enrolment " +
-                                                   "information of device '" + deviceId.getId() + "' of type : "
-                                                   + deviceId.getType(), e);
+                    "information of device '" + deviceId.getId() + "' of type : "
+                    + deviceId.getType(), e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -1130,7 +1243,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
      *
      * @param timestamp Timestamp in long, after which the devices have been updated.
      * @param tenantId  Tenant id of the currently logged in user.
-     * @return          A collection of devices that have been updated after the provided timestamp
+     * @return A collection of devices that have been updated after the provided timestamp
      * @throws DeviceManagementDAOException
      */
     public List<Device> getDevices(long timestamp, int tenantId) throws DeviceManagementDAOException {
@@ -1194,7 +1307,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         List<GeoCluster> geoClusters = new ArrayList<>();
         try {
             conn = this.getConnection();
-            String sql ="SELECT AVG(DEVICE_LOCATION.LATITUDE) AS LATITUDE,AVG(DEVICE_LOCATION.LONGITUDE) AS LONGITUDE," +
+            String sql = "SELECT AVG(DEVICE_LOCATION.LATITUDE) AS LATITUDE,AVG(DEVICE_LOCATION.LONGITUDE) AS LONGITUDE," +
                     " MIN(DEVICE_LOCATION.LATITUDE) AS MIN_LATITUDE, MAX(DEVICE_LOCATION.LATITUDE) AS MAX_LATITUDE," +
                     " MIN(DEVICE_LOCATION.LONGITUDE) AS MIN_LONGITUDE," +
                     " MAX(DEVICE_LOCATION.LONGITUDE) AS MAX_LONGITUDE," +
@@ -1217,7 +1330,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             stmt.setDouble(3, northEast.getLatitude());
             stmt.setDouble(4, southWest.getLongitude());
             stmt.setDouble(5, northEast.getLongitude());
-            stmt.setDouble(6,tenantId);
+            stmt.setDouble(6, tenantId);
             if (deviceType != null && !deviceType.isEmpty()) {
                 stmt.setString(7, deviceType);
             }
@@ -1230,13 +1343,13 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 double min_longitude = rs.getDouble("MIN_LONGITUDE");
                 double max_longitude = rs.getDouble("MAX_LONGITUDE");
                 String device_identification = rs.getString("DEVICE_IDENTIFICATION");
-                String device_type=rs.getString("TYPE");
+                String device_type = rs.getString("TYPE");
                 String last_seen = rs.getString("LAST_UPDATED_TIMESTAMP");
                 long count = rs.getLong("COUNT");
                 String geohashPrefix = rs.getString("GEOHASH_PREFIX");
                 geoClusters.add(new GeoCluster(new GeoCoordinate(latitude, longitude),
-                        new GeoCoordinate(min_latitude,min_longitude), new GeoCoordinate(max_latitude,max_longitude),
-                        count, geohashPrefix,device_identification,device_type,last_seen));
+                        new GeoCoordinate(min_latitude, min_longitude), new GeoCoordinate(max_latitude, max_longitude),
+                        count, geohashPrefix, device_identification, device_type, last_seen));
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving information of  " +
@@ -1294,5 +1407,379 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     e);
         }
     }
+    
+    public void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        try {
+            conn = this.getConnection();
+            int deviceId = getDeviceId(conn, deviceIdentifier, tenantId);
+            if (deviceId == -1) {
+                String msg = "Device " + deviceIdentifier.getId() + " of type " + deviceIdentifier.getType() +
+                             " is not found";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            } else {
+                int enrollmentId = getEnrollmentId(conn, deviceId, tenantId);
+                if (enrollmentId == -1) {
+                    String msg = "Enrollment not found for the device " + deviceIdentifier.getId() + " of type " +
+                                 deviceIdentifier.getType();
+                    log.error(msg);
+                    throw new DeviceManagementDAOException(msg);
+                } else {
+                    removeDeviceDetail(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device detail data");
+                    }
+                    removeDeviceLocation(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device location data");
+                    }
+                    removeDeviceInfo(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device info data");
+                    }
+                    removeDeviceNotification(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device notification data");
+                    }
+                    removeDeviceApplicationMapping(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device application mapping data");
+                    }
+                    removeDevicePolicyApplied(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device applied policy data");
+                    }
+                    removeDevicePolicy(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device policy data");
+                    }
+                    removeEnrollmentDeviceDetail(conn, enrollmentId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed enrollment device detail data");
+                    }
+                    removeEnrollmentDeviceLocation(conn, enrollmentId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed enrollment device location data");
+                    }
+                    removeEnrollmentDeviceInfo(conn, enrollmentId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed enrollment device info data");
+                    }
+                    removeEnrollmentDeviceApplicationMapping(conn, enrollmentId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed enrollment device application mapping data");
+                    }
+                    removeDeviceOperationResponse(conn, enrollmentId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device operation response data");
+                    }
+                    removeEnrollmentOperationMapping(conn, enrollmentId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed enrollment operation mapping data");
+                    }
+                    removeDeviceEnrollment(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device enrollment data");
+                    }
+                    removeDeviceGroupMapping(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully removed device group mapping data");
+                    }
+                    removeDevice(conn, deviceId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully permanently deleted the device");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while deleting the device", e);
+        }
+    }
 
+    private int getDeviceId(Connection conn, DeviceIdentifier deviceIdentifier, int tenantId)
+            throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int deviceId = -1;
+        try {
+            String sql = "SELECT ID FROM DM_DEVICE WHERE DEVICE_IDENTIFICATION = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, deviceIdentifier.getId());
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                deviceId = rs.getInt("ID");
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving device id of the device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return deviceId;
+    }
+
+    private int getEnrollmentId(Connection conn, int deviceId, int tenantId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int enrollmentId = -1;
+        try {
+            String sql = "SELECT ID FROM DM_ENROLMENT WHERE DEVICE_ID = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                enrollmentId = rs.getInt("ID");
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving enrollment id of the device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return enrollmentId;
+    }
+
+    private void removeDeviceDetail(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_DETAIL WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device detail", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceLocation(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_LOCATION WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device location", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceInfo(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_INFO WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device info", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceNotification(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_NOTIFICATION WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device notification", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceApplicationMapping(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device application mapping", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDevicePolicyApplied(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_POLICY_APPLIED WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device policy applied", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDevicePolicy(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_POLICY WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device policy", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeEnrollmentDeviceDetail(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_DETAIL WHERE ENROLMENT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, enrollmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing enrollment device detail", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeEnrollmentDeviceLocation(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_LOCATION WHERE ENROLMENT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, enrollmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing enrollment device location", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeEnrollmentDeviceInfo(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_INFO WHERE ENROLMENT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, enrollmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing enrollment device info", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeEnrollmentDeviceApplicationMapping(Connection conn, int enrollmentId)
+            throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE ENROLMENT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, enrollmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing enrollment device application " +
+                                                   "mapping", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceOperationResponse(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE WHERE ENROLMENT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, enrollmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device operation response", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeEnrollmentOperationMapping(Connection conn, int enrollmentId)
+            throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, enrollmentId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing enrollment operation mapping", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceEnrollment(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_ENROLMENT WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device enrollment", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDeviceGroupMapping(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE_GROUP_MAP WHERE DEVICE_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device group mapping", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    private void removeDevice(Connection conn, int deviceId) throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            String sql = "DELETE FROM DM_DEVICE WHERE ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
 }

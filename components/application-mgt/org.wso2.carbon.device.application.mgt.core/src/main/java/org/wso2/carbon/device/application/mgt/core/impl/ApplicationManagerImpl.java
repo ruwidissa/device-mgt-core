@@ -740,16 +740,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease createRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
+    public ApplicationRelease createEntAppRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationRelease applicationRelease;
         if (log.isDebugEnabled()) {
-            log.debug("ApplicationDTO release request is received for the application id: " + applicationId);
+            log.debug("Application release creating request is received for the application id: " + applicationId);
         }
 
         ApplicationDTO applicationDTO = getApplication(applicationId);
         try {
+            if (!ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
+                String msg =
+                        "It is possible to add new application release for " + ApplicationType.ENTERPRISE.toString()
+                                + " app type. But you are requesting to add new application release for "
+                                + applicationDTO.getType() + " app type.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
             ApplicationReleaseDTO applicationReleaseDTO = uploadReleaseArtifacts(applicationReleaseWrapper,
                     applicationDTO, applicationArtifact);
             ConnectionManagerUtil.beginDBTransaction();
@@ -1916,6 +1924,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         try {
             ConnectionManagerUtil.beginDBTransaction();
+            if (applicationDAO.getTagForTagName(newTagName, tenantId) != null){
+                String msg =
+                        "You are trying to modify tag name into existing tag. Therefore you can't modify tag name from "
+                                + oldTagName + " to new tag name " + newTagName;
+                log.error(msg);
+                throw new BadRequestException(msg);
+
+            }
             TagDTO tag = applicationDAO.getTagForTagName(oldTagName, tenantId);
             if (tag == null){
                 String msg = "Couldn't found a tag for tag name " + oldTagName + ".";
@@ -2121,7 +2137,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (!StringUtils.isEmpty(appType)) {
             boolean isValidAppType = false;
             for (ApplicationType applicationType : ApplicationType.values()) {
-                if (applicationType.toString().equals(appType)) {
+                if (applicationType.toString().equalsIgnoreCase(appType)) {
                     isValidAppType = true;
                     break;
                 }
@@ -2489,8 +2505,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-        }
-        if (param instanceof WebAppReleaseWrapper) {
+        } else if (param instanceof WebAppReleaseWrapper) {
             WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
             UrlValidator urlValidator = new UrlValidator();
             if (StringUtils.isEmpty(webAppReleaseWrapper.getVersion())) {

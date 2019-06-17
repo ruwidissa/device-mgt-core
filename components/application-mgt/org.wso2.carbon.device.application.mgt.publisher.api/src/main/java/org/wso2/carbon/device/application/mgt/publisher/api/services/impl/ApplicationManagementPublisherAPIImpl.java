@@ -143,6 +143,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @PathParam("uuid") String uuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
+            //todo return application
             ApplicationRelease applicationRelease = applicationManager.getApplicationReleaseByUUID(uuid);
             if (applicationRelease == null){
                 String msg = "Application release is in the end state of the application lifecycle flow.";
@@ -186,7 +187,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
-            // Created new application entry
+            // Created new Ent App
             Application application = applicationManager.createApplication(applicationWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
             if (application != null) {
@@ -224,7 +225,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateReleaseCreatingRequest(webAppWrapper.getWebAppReleaseWrappers().get(0));
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
-            // Created new application entry
+            // Created new Web App
             Application application = applicationManager.createWebClip(webAppWrapper,
                     constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
             if (application != null) {
@@ -262,7 +263,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateReleaseCreatingRequest(publicAppWrapper.getPublicAppReleaseWrappers().get(0));
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
-            // Created new application entry
+            // Created new Public App
             Application application = applicationManager.createPublicApp(publicAppWrapper,
                     constructApplicationArtifact(null, iconFile, bannerFile, attachmentList));
             if (application != null) {
@@ -302,8 +303,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
-            // Created new application release
-            ApplicationRelease release = applicationManager.createRelease(appId, applicationReleaseWrapper,
+            // Created new Ent App release
+            ApplicationRelease release = applicationManager.createEntAppRelease(appId, applicationReleaseWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
             if (release != null) {
                 return Response.status(Response.Status.CREATED).entity(release).build();

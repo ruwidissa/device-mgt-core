@@ -39,7 +39,7 @@ public interface ReviewManager {
      * @return {@link Review} Added review
      * @throws ReviewManagementException Exceptions of the reviewTmp management.
      */
-    boolean addReview(ReviewWrapper reviewWrapper, String uuid)
+    boolean addReview(ReviewWrapper reviewWrapper, String uuid, boolean allowMultipleReviews)
             throws ReviewManagementException, ApplicationManagementException;
 
     boolean addReplyComment(ReviewWrapper reviewWrapper, String uuid, int parentReviewId)
@@ -53,14 +53,19 @@ public interface ReviewManager {
      * @return {@link PaginationResult} pagination result with starting offSet and limit
      * @throws ReviewManagementException Exceptions of the comment management.
      */
-    PaginationResult getAllReviews(PaginationRequest request, String uuid)
+    PaginationResult getAllReleaseReviews(PaginationRequest request, String uuid)
             throws ReviewManagementException, ApplicationManagementException;
+
+    PaginationResult getAllAppReviews(PaginationRequest request, String uuid) throws ReviewManagementException,
+            ApplicationManagementException;
+
+    PaginationResult getAllAppReviewsOfUser(PaginationRequest request, String uuid) throws ReviewManagementException,
+            ApplicationManagementException;
 
     /**
      * To delete review using review id.
      *
      * @param uuid UUID of the application release
-     * @return If review is successfully deleted return true, otherwise returns false
      * @throws ReviewManagementException Exceptions of the comment management
      */
     void deleteReview(String uuid, int reviewId, boolean isPriviledgedUser)
@@ -70,19 +75,21 @@ public interface ReviewManager {
      * To update a reviewTmp.
      *
      * @param reviewId id of the reviewTmp
-     * @param uuid UUID of the application release
      * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the reviewTmp management
      */
-    boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid, boolean isPriviledgedUser)
+    boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid, boolean isPrivilegedUser)
             throws ReviewManagementException, ApplicationManagementException;
 
     /**
      * To get the overall rating for a application release
      *
-     * @param appReleaseUuuid   UUID of the application release.
+     * @param appReleaseUuid   UUID of the application release.
      * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the review management
      */
-    Rating getRating(String appReleaseUuuid) throws ReviewManagementException, ApplicationManagementException;
+    Rating getAppReleaseRating(String appReleaseUuid) throws ReviewManagementException, ApplicationManagementException;
+
+    Rating getAppRating(String appReleaseUuid) throws ReviewManagementException, ApplicationManagementException;
+
 }

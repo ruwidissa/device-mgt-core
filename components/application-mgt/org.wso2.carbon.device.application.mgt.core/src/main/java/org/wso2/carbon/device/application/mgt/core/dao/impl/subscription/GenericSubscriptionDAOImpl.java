@@ -144,7 +144,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     + "OPERATION_ID, "
                     + "AP_DEVICE_SUBSCRIPTION_ID, "
                     + "TENANT_ID) "
-                    + "VALUES (?, ?, ?, ?, ?)";
+                    + "VALUES (?, ?, ?)";
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 for (Integer subId : deviceSubscriptionIds) {

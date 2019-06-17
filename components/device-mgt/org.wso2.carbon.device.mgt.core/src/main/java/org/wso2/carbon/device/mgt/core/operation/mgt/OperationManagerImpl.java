@@ -1129,7 +1129,7 @@ public class OperationManagerImpl implements OperationManager {
             DeviceManagementDAOFactory.beginTransaction();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             String user = this.getUser();
-            updateStatus = enrollmentDAO.setStatus(enrolmentId, user, status, tenantId);
+            updateStatus = enrollmentDAO.setStatus(enrolmentId, status, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();

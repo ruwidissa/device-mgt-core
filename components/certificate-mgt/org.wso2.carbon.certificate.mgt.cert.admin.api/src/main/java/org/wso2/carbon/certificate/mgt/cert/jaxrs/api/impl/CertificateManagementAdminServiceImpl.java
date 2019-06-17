@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Path("/admin/certificates")
 public class CertificateManagementAdminServiceImpl implements CertificateManagementAdminService {
@@ -242,6 +244,11 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
                 String challengeToken = certMgtService.extractChallengeToken(cert);
 
                 if (challengeToken != null) {
+                    Pattern regexPattern = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9-]+$");
+                    Matcher regexMatcher = regexPattern.matcher(challengeToken);
+                    if (regexMatcher.find()) {
+                        challengeToken = regexMatcher.group();
+                    }
                     challengeToken = challengeToken.substring(challengeToken.indexOf("(") + 1).trim();
 
                     SCEPManager scepManager = CertificateMgtAPIUtils.getSCEPManagerService();
