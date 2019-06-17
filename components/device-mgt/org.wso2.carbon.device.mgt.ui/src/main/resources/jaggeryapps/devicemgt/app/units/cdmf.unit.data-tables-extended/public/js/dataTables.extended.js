@@ -291,7 +291,7 @@ $.fn.datatables_extended = function (settings) {
                         thisTable = $(this).closest('.dataTables_wrapper').find('.dataTable').dataTable();
                     if ($(button).html() == 'Select All') {
                         $(button).html('Deselect All');
-                        $('.bulk-action-row').removeClass('hidden');
+                        $('.bulk-action-row:not(.sub-action)').removeClass('hidden');
                         thisTable.api().rows().every(function () {
                             $(this.node()).addClass(rowSelectedClass);
                         });
@@ -312,7 +312,7 @@ $.fn.datatables_extended = function (settings) {
                     var rowSelectedClass = 'DTTT_selected selected';
                     $(this).toggleClass(rowSelectedClass);
                     if ($('.table-selectable .DTTT_selected').length > 0) {
-                        $('.bulk-action-row').removeClass('hidden');
+                        $('.bulk-action-row:not(.sub-action)').removeClass('hidden');
                     } else {
                         $('.bulk-action-row').addClass('hidden');
                     }

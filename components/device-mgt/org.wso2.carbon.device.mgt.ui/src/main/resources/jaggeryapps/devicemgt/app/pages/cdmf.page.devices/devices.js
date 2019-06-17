@@ -43,6 +43,9 @@ function onRequest(context) {
         if (uiPermissions.ADD_DEVICE) {
             viewModel.permissions.enroll = true;
         }
+        if (uiPermissions.UPDATE_ENROLLMENT) {
+            viewModel.permissions.updateEnrollment = true;
+        }
         viewModel.currentUser = currentUser;
         var deviceCount = 0;
         if (groupId) {
@@ -93,9 +96,11 @@ function onRequest(context) {
     var mdmProps = require("/app/modules/conf-reader/main.js")["conf"];
     var serverUrl = mdmProps["httpsURL"];
     var portalUrl = mdmProps["portalURL"];
+    var backendRestEndpoints = mdmProps["backendRestEndpoints"];
     var userDomain = context.user.domain;
     viewModel.serverUrl = serverUrl;
     viewModel.portalUrl = portalUrl;
     viewModel.userDomain = userDomain;
+    viewModel.apiContext = backendRestEndpoints["deviceMgt"];
     return viewModel;
 }

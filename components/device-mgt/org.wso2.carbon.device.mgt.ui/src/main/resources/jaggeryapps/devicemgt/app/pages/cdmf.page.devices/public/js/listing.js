@@ -16,6 +16,24 @@
  * under the License.
  */
 
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 /**
  * Following function would execute
  * when a user clicks on the list item
@@ -811,6 +829,68 @@ function attachDeviceEvents() {
 
     /**
      * Following click function would execute
+     * when a user clicks on "Update Enrollment" link
+     * on Device Management page.
+     */
+    $("a.update-enrollment-link").click(function () {
+        var deviceIdentifiers = [];
+        var deviceId = $(this).data("deviceid");
+        var deviceType = $(this).data("devicetype");
+
+        if (deviceId && deviceType) {
+            deviceIdentifiers = [{"id": deviceId, "type": deviceType}];
+        } else {
+            deviceIdentifiers = getSelectedDevices();
+        }
+
+        if (deviceIdentifiers.length === 0) {
+            $(modalPopupContent).html($('#no-device-selected').html());
+            $("a#no-device-selected-link").click(function () {
+                hidePopup();
+            });
+            showPopup();
+            return;
+        }
+
+        $(modalPopupContent).html($('#update-enrollment-modal-content').html());
+        showPopup();
+
+        $("a#update-enrollment-yes-link").click(function () {
+            var username = $("#update-enrollment-name").val();
+            console.log(username);
+            if (username) {
+                var i;
+                var deviceIds = [];
+                for (i=0; i<deviceIdentifiers.length; i++) {
+                    deviceIds.push(deviceIdentifiers[i].id);
+                }
+                var serviceURL = "/api/device-mgt/v1.0/admin/devices/device-owner?owner=" + username;
+                invokerUtil.put(serviceURL, deviceIds, function (message) {
+                    $(modalPopupContent).html($('#update-enrollment-200-content').html());
+                    setTimeout(function () {
+                        hidePopup();
+                        location.reload(false);
+                    }, 2000);
+                }, function (jqXHR) {
+                    displayDeviceErrors(jqXHR);
+                });
+            } else {
+                $("div#update-enrollment-error-msg").text("Username cannot be empty");
+                $("div#update-enrollment-error-content").removeClass("hidden");
+                setTimeout(function() {
+                    $("div#update-enrollment-error-content").addClass("hidden");
+                    $("div#update-enrollment-error-msg").text();
+                }, 2000)
+            }
+        });
+
+        $("a#update-enrollment-cancel-link").click(function () {
+            hidePopup();
+        });
+    });
+
+    /**
+     * Following click function would execute
      * when a user clicks on "Add to Group" link
      * on Device Management page in WSO2 devicemgt Console.
      */
@@ -890,6 +970,121 @@ function attachDeviceEvents() {
             hidePopup();
         });
     });
+
+    /**
+     * Following click function would execute when a user clicks on "Add Operation" link
+     * on Device Management page in device mgt Console.
+     */
+    $('a.add-operation-link').click(function () {
+        var operationsRow = $("#device-type-operations-bar");
+        if (!operationsRow.hasClass("hidden")) {
+            operationsRow.addClass("hidden");
+            $("#device-type-operations").html("");
+            return;
+        }
+        var deviceIdentifiers = getSelectedDevices();
+        if (deviceIdentifiers.length === 0) {
+            $(modalPopupContent).html($('#no-device-selected').html());
+            $("a#no-device-selected-link").click(function () {
+                hidePopup();
+            });
+            showPopup();
+            return;
+        }
+
+        var selectedDeviceType = deviceIdentifiers[0].type;
+        var deviceList = "";
+        var count = 1;
+        deviceIdentifiers.forEach(function (deviceIdentifier) {
+            if (selectedDeviceType !== deviceIdentifier.type) {
+                ++count;
+            }
+            deviceList = !deviceList ? deviceIdentifier.id : deviceList + "," +  deviceIdentifier.id;
+        });
+
+        // If multiple devices of multiple device types selected
+        if (count > 1) {
+            $(modalPopupContent).html($('#multiple-device-types-selected').html());
+            $("a#multiple-device-types-selected-link").click(function () {
+                hidePopup();
+            });
+            showPopup();
+            return;
+        }
+        var apiContext = $("#device-listing").data("api-context");
+        var serviceURL =  apiContext + "/device-types/" + selectedDeviceType + "/features?featureType=operation" +
+            "&hidden=false";
+        invokerUtil.get(serviceURL, function (data) {
+            showOperationBar(JSON.parse(data), selectedDeviceType, deviceList);
+        });
+    });
+}
+
+function showOperationBar(features, deviceType, deviceList) {
+    var featureList = [];
+    var feature;
+    for (var i = 0; i < features.length; i++) {
+        feature = {};
+        feature.operation = features[i].code;
+        feature.name = features[i].name;
+        feature.description = features[i].description;
+        feature.deviceType = deviceType;
+        feature.params = [];
+        var metaData = features[i].metadataEntries;
+        if (metaData) {
+            for (var j = 0; j < metaData.length; j++) {
+                if (metaData[j].name === "operationMeta") {
+                    var operationMeta = metaData[j].value;
+                    var params = {};
+                    params.method = operationMeta.method;
+                    params.pathParams = operationMeta.pathParams;
+                    params.queryParams = operationMeta.queryParams;
+                    params.formParams = operationMeta.formParams ? operationMeta.formParams : [];
+                    params.uri = operationMeta.uri;
+                    params.contentType = operationMeta.contentType;
+                    feature.params.push(params);
+                    feature.permission = operationMeta.permission;
+                    if (operationMeta.icon) {
+                        if (operationMeta.icon.indexOf("path:") === 0) {
+                            feature.icon = operationMeta.icon.replace("path:", "");
+                        } else {
+                            feature.iconFont = operationMeta.icon;
+                        }
+                    }
+                    if (operationMeta.uiParams && operationMeta.uiParams.length > 0) {
+                        feature.uiParams = operationMeta.uiParams;
+                    }
+                    continue;
+                }
+                feature.metadata.push(metaData[j].value);
+            }
+            featureList.push(feature);
+        }
+    }
+
+    if (featureList.length > 0) {
+        var baseUnitPath = context + "/public/cdmf.unit.device.type." + deviceType + ".operation-bar";
+        var operationBarScriptSrc = baseUnitPath + "/js/operation-bar.js";
+        var operationBarTemplateSrc = baseUnitPath + "/templates/operation-bar.hbs";
+        var operationBarCacheKey = deviceType + "-operation-bar";
+
+        $.template(operationBarCacheKey, operationBarTemplateSrc, function (template) {
+            var content = template({"controlOperations": featureList, "devices" : deviceList});
+            $("#device-type-operations").html(content);
+            var operationRow = $("#device-type-operations-bar");
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = operationBarScriptSrc;
+            operationRow.prepend(script);
+            operationRow.removeClass("hidden");
+        });
+    } else {
+        $(modalPopupContent).html($('#no-features-available').html());
+        $("a#no-features-available-selected-link").click(function () {
+            hidePopup();
+        });
+        showPopup();
+    }
 }
 
 function removeDevices(deviceIdentifiers) {

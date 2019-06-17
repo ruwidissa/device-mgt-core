@@ -1,19 +1,37 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * you may obtain a copy of the License at
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied.  See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ *
+ */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
@@ -52,13 +70,17 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
+import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceAgentService;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
@@ -75,6 +97,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class DeviceManagementServiceImplTest {
 
     private static final Log log = LogFactory.getLog(DeviceManagementServiceImplTest.class);
+    private static final String TEST_DEVICE_IDENTIFIER = "TEST_DEVICE_IDENTIFIER";
     private static final String TEST_DEVICE_TYPE = "TEST-DEVICE-TYPE";
     private static final String TEST_DEVICE_NAME = "TEST-DEVICE";
     private static final String DEFAULT_USERNAME = "admin";
@@ -86,6 +109,7 @@ public class DeviceManagementServiceImplTest {
     private DeviceManagementService deviceManagementService;
     private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
     private DeviceManagementProviderService deviceManagementProviderService;
+    private static Device demoDevice;
 
     @ObjectFactory
     public IObjectFactory getObjectFactory() {
@@ -100,6 +124,7 @@ public class DeviceManagementServiceImplTest {
                 .mock(DeviceManagementProviderServiceImpl.class, Mockito.RETURNS_MOCKS);
         this.deviceManagementService = new DeviceManagementServiceImpl();
         this.deviceAccessAuthorizationService = Mockito.mock(DeviceAccessAuthorizationServiceImpl.class);
+        demoDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
     }
 
     @Test(description = "Testing if the device is enrolled when the device is enrolled.")
@@ -179,6 +204,103 @@ public class DeviceManagementServiceImplTest {
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, null, null, null, DEFAULT_OWNERSHIP,
                         DEFAULT_STATUS, 1, null, null, true, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+    }
+
+    @Test(description = "Testing get devices by identifier with correct request.")
+    public void testGetDeviceByID() throws DeviceAccessAuthorizationException {
+        String ifModifiedSince = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(new Date());
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser"))
+                .toReturn(DEFAULT_USERNAME);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+                Mockito.mock(DeviceAccessAuthorizationService.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
+                                              "getDeviceAccessAuthorizationService"))
+                .toReturn(deviceAccessAuthorizationService);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn(DEFAULT_USERNAME);
+        Mockito.when(deviceAccessAuthorizationService.isUserAuthorized(Mockito.any(DeviceIdentifier.class),
+                                                                       Mockito.anyString())).thenReturn(true);
+
+        Response response = this.deviceManagementService
+                .getDeviceByID(TEST_DEVICE_IDENTIFIER, ifModifiedSince,true);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+        response = this.deviceManagementService
+                .getDeviceByID(TEST_DEVICE_IDENTIFIER, null,true);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+
+    }
+
+    @Test(description = "Testing get devices by identifier when unauthorized user.")
+    public void testGetDeviceByIDWithErroneousUnauthorizedException()
+            throws DeviceAccessAuthorizationException {
+        String ifModifiedSince = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(new Date());
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser"))
+                .toReturn(DEFAULT_USERNAME);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+                Mockito.mock(DeviceAccessAuthorizationService.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
+                                              "getDeviceAccessAuthorizationService"))
+                .toReturn(deviceAccessAuthorizationService);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn(DEFAULT_USERNAME);
+        Mockito.when(deviceAccessAuthorizationService.isDeviceAdminUser()).thenReturn(false);
+
+        Response response = this.deviceManagementService
+                .getDeviceByID(TEST_DEVICE_IDENTIFIER, ifModifiedSince,true);
+        Assert.assertEquals(response.getStatus(), Response.Status.UNAUTHORIZED.getStatusCode());
+
+    }
+
+    @Test(description = "Testing get device when DeviceAccessAuthorizationService is not available",
+            expectedExceptions = ExceptionInInitializerError.class)
+    public void testGetDeviceByIDWithErroneousDeviceAccessAuthorizationService()
+            throws DeviceAccessAuthorizationException {
+        String ifModifiedSince = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(new Date());
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser"))
+                .toReturn(DEFAULT_USERNAME);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn(DEFAULT_USERNAME);
+        Mockito.when(deviceAccessAuthorizationService.isDeviceAdminUser()).thenReturn(true);
+
+        this.deviceManagementService.getDeviceByID(TEST_DEVICE_IDENTIFIER, ifModifiedSince,true);
+
+    }
+
+    @Test(description = "Testing get device when DeviceManagementProviderService is not available",
+            expectedExceptions = NoClassDefFoundError.class)
+    public void testGetDeviceByIDWithErroneousDeviceManagementProviderService()
+            throws DeviceAccessAuthorizationException {
+        String ifModifiedSince = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(new Date());
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser"))
+                .toReturn(DEFAULT_USERNAME);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class, Mockito.RETURNS_MOCKS);
+        DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+                Mockito.mock(DeviceAccessAuthorizationService.class, Mockito.RETURNS_MOCKS);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class,
+                                              "getDeviceAccessAuthorizationService"))
+                .toReturn(deviceAccessAuthorizationService);
+        PowerMockito.stub(PowerMockito.method(CarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(-1234);
+        Mockito.when(carbonContext.getUsername()).thenReturn(DEFAULT_USERNAME);
+        Mockito.when(deviceAccessAuthorizationService.isDeviceAdminUser()).thenReturn(true);
+
+        this.deviceManagementService.getDeviceByID(TEST_DEVICE_IDENTIFIER, ifModifiedSince,true);
     }
 
     @Test(description = "Testing get devices when DeviceAccessAuthorizationService is not available")
@@ -359,7 +481,8 @@ public class DeviceManagementServiceImplTest {
     public void testDeleteDevice() {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString());
+        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString()
+                , false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
@@ -369,7 +492,8 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService
                 .getDevice(Mockito.any(DeviceIdentifier.class), Mockito.anyBoolean())).thenReturn(null);
-        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString());
+        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString()
+                , false);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }
@@ -380,7 +504,8 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.disenrollDevice(Mockito.any(DeviceIdentifier.class)))
                 .thenThrow(new DeviceManagementException());
-        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString());
+        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString()
+                , false);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }

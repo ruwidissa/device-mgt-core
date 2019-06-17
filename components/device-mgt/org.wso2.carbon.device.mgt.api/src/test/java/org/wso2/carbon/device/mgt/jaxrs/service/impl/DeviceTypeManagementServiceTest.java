@@ -113,7 +113,7 @@ public class DeviceTypeManagementServiceTest {
     public void testGetDeviceTypeFeatures() throws Exception {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, MODIFIED_SINCE);
+        Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, null, "false", MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "The response status should be 200.");
@@ -126,8 +126,9 @@ public class DeviceTypeManagementServiceTest {
         FeatureManager featureManager = Mockito.mock(FeatureManager.class);
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString())).thenReturn
                 (featureManager);
-        Mockito.when((featureManager).getFeatures()).thenThrow(new DeviceManagementException());
-        Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, MODIFIED_SINCE);
+        Mockito.when((featureManager).getFeatures(Mockito.anyString())).thenThrow(new DeviceManagementException());
+        Mockito.when((featureManager).getFeatures(Mockito.anyString(), Mockito.anyBoolean())).thenThrow(new DeviceManagementException());
+        Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, null, "false", MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "The response status should be 500.");
@@ -140,11 +141,10 @@ public class DeviceTypeManagementServiceTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.getFeatureManager(Mockito.anyString())).thenReturn(null);
-        Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, MODIFIED_SINCE);
+        Response response = this.deviceTypeManagementService.getFeatures(TEST_DEVICE_TYPE, null, "false", MODIFIED_SINCE);
         Assert.assertNotNull(response, "The response object is null.");
-        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
-                "The response status should be 200.");
-        Assert.assertEquals(response.getEntity().toString(), "[]", "The response should be [].");
+        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
+                "The response status should be 404.");
         Mockito.reset(deviceManagementProviderService);
     }
 

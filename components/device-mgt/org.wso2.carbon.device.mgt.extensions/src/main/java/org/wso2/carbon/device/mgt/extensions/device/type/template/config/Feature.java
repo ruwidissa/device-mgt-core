@@ -14,8 +14,26 @@
  *   KIND, either express or implied.  See the License for the
  *   specific language governing permissions and limitations
  *   under the License.
- *
  */
+
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.device.mgt.extensions.device.type.template.config;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,41 +51,46 @@ import java.util.List;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Feature">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="Name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="Description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="Operation" type="{}Operation"/>
- *       &lt;/sequence>
- *       &lt;attribute name="code" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * <xs:element name="Feature">
+ *   <xs:complexType>
+ *     <xs:sequence>
+ *       <xs:element name="Name" type="xs:string" />
+ *       <xs:element name="Description" type="xs:string" />
+ *       <xs:element name="Operation" type="{}Operation" />
+ *     </xs:sequence>
+ *     <xs:attribute name="type" type="xs:string" />
+ *     <xs:attribute name="code" type="xs:string" />
+ *   </xs:complexType>
+ * </xs:element>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Feature", propOrder = {
     "name",
     "description",
-    "operation", "metaData"
+    "operation",
+    "metaData"
 })
 public class Feature {
 
     @XmlElement(name = "Name", required = true)
     protected String name;
+
     @XmlElement(name = "Description", required = true)
     protected String description;
-    @XmlElement(name = "Operation", required = true)
+
+    @XmlElement(name = "Operation")
     protected Operation operation;
+
+    @XmlAttribute(name = "type", required = true)
+    protected String type;
+
     @XmlAttribute(name = "code")
     protected String code;
+
     @XmlElementWrapper(name = "MetaData")
     @XmlElement(name = "Property", required = true)
-    protected List<String> metaData;
+    private List<String> metaData;
 
     /**
      * Gets the value of the name property.
@@ -171,5 +194,13 @@ public class Feature {
 
     public void setMetaData(List<String> metaData) {
         this.metaData = metaData;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

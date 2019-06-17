@@ -16,6 +16,24 @@
  *   under the License.
  *
  */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
+
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.apache.commons.lang.StringUtils;
@@ -305,7 +323,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @DELETE
     @Override
     @Path("/type/{device-type}/id/{device-id}")
-    public Response deleteDevice(@PathParam("device-type") String deviceType, @PathParam("device-id") String deviceId) {
+    public Response deleteDevice(@PathParam("device-type") String deviceType,
+                                 @PathParam("device-id") String deviceId,
+                                 @QueryParam("permanentDelete") boolean permanentDelete) {
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         try {
@@ -315,13 +335,19 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            boolean response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+            boolean response;
+
+            if (permanentDelete) {
+                response = deviceManagementProviderService.deleteDevice(deviceIdentifier);
+            } else {
+                response = deviceManagementProviderService.disenrollDevice(deviceIdentifier);
+            }
             return Response.status(Response.Status.OK).entity(response).build();
 
         } catch (DeviceManagementException e) {
             String msg = "Error encountered while deleting device of type : " + deviceType + " and " +
                     "ID : " + deviceId;
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()
             ).build();
@@ -448,6 +474,77 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @GET
+    @Path("/type/any/id/{id}")
+    @Override
+    public Response getDeviceByID(
+            @PathParam("id") @Size(max = 45) String id,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @QueryParam("requireDeviceInfo") boolean requireDeviceInfo) {
+        Device device;
+        try {
+            RequestValidationUtil.validateDeviceIdentifier("any", id);
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+                    DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
+
+            // this is the user who initiates the request
+            String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+
+            Date sinceDate = null;
+            if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+                SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+                try {
+                    sinceDate = format.parse(ifModifiedSince);
+                } catch (ParseException e) {
+                    String message = "Error occurred while parse the since date.Invalid date string is provided in " +
+                                 "'If-Modified-Since' header";
+                    log.error(message, e);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(
+                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
+                                    "string is provided in 'If-Modified-Since' header").build()).build();
+                }
+            }
+            if (sinceDate != null) {
+                device = dms.getDevice(id, sinceDate, requireDeviceInfo);
+                if (device == null) {
+                    String message = "No device is modified after the timestamp provided in 'If-Modified-Since' header";
+                    log.error(message);
+                    return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
+                     "after the timestamp provided in 'If-Modified-Since' header").build();
+                }
+            } else {
+                device = dms.getDevice(id, requireDeviceInfo);
+            }
+            if (device == null) {
+                String message = "Device does not exist with id '" + id + "'";
+                log.error(message);
+                return Response.status(Response.Status.NOT_FOUND).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(404l).setMessage(message).build()).build();
+            }
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(id, device.getType());
+            // check whether the user is authorized
+            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
+                String message = "User '" + authorizedUser + "' is not authorized to retrieve the given " +
+                                 "device id '" + id + "'";
+                log.error(message);
+                return Response.status(Response.Status.UNAUTHORIZED).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(message).build()).build();
+            }
+        } catch (DeviceManagementException e) {
+            String message = "Error occurred while fetching the device information.";
+            log.error(message, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(message).build()).build();
+        } catch (DeviceAccessAuthorizationException e) {
+            String message = "Error occurred while checking the device authorization.";
+            log.error(message, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(message).build()).build();
+        }
+        return Response.status(Response.Status.OK).entity(device).build();
+    }
+
+    @GET
     @Path("/{type}/{id}/location")
     @Override
     public Response getDeviceLocation(
@@ -491,7 +588,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             deviceInfo = informationManager.getDeviceInfo(deviceIdentifier);
 
         } catch (DeviceDetailsMgtException e) {
-            String msg = "Error occurred while getting the device information of id : " + id + " type : " + type ;
+            String msg = "Error occurred while getting the device information of id : " + id + " type : " + type;
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -681,8 +778,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     /**
      * Change device status.
      *
-     * @param type Device type
-     * @param id Device id
+     * @param type       Device type
+     * @param id         Device id
      * @param newsStatus Device new status
      * @return {@link Response} object
      */
@@ -766,7 +863,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 String date = new SimpleDateFormat(DATE_FORMAT_NOW).format(new Date());
                 operation.setCreatedTimeStamp(date);
                 Activity activity = DeviceMgtAPIUtils.getDeviceManagementService().addOperation(type, operation,
-                                                                                       deviceIdentifiers);
+                        deviceIdentifiers);
                 return Response.status(Response.Status.CREATED).entity(activity).build();
             } else {
                 String message = "Only Command and Config operation is supported through this api";

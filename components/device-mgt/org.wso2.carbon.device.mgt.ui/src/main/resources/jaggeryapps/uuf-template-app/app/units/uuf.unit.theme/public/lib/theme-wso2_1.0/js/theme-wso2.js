@@ -385,7 +385,7 @@ var responsiveTextRatio = 0.2,
                     $('body').on('click', '[data-type=selectable]', function(){
                         $(this).toggleClass(ROW_SELECTED_CLASS);
                         if ($('.table-selectable .DTTT_selected').length > 0) {
-                            $('.bulk-action-row').removeClass('hidden');
+                            $('.bulk-action-row:not(.sub-action)').removeClass('hidden');
                         } else {
                             $('.bulk-action-row').addClass('hidden');
                         }
