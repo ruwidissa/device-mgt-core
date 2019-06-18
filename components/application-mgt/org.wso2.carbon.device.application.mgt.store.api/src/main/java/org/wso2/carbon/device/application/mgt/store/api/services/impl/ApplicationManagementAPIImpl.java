@@ -60,10 +60,6 @@ public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
             }
             filter.setAppReleaseState(applicationManager.getInstallableLifecycleState());
             ApplicationList applications = applicationManager.getApplications(filter);
-            if (applications.getApplications().isEmpty()) {
-                return Response.status(Response.Status.OK)
-                        .entity("Couldn't find any application for the requested query.").build();
-            }
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();
