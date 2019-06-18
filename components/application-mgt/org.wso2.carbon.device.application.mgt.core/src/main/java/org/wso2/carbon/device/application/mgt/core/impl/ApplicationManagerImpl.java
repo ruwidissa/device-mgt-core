@@ -2559,12 +2559,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new RequestValidatingException(msg);
         }
-        //todo remove this check, because banner is not mandatory to have
-        if (bannerFile == null) {
-            String msg = "Banner file is not found with the application release creating request.";
-            log.error(msg);
-            throw new RequestValidatingException(msg);
-        }
         if (attachmentList == null || attachmentList.isEmpty()) {
             String msg = "Screenshots are not found with the application release creating request.";
             log.error(msg);
