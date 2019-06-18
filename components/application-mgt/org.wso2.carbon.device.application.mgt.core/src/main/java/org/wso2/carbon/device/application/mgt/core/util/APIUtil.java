@@ -355,7 +355,10 @@ public class APIUtil {
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
         applicationRelease.setRating(applicationReleaseDTO.getRating());
         applicationRelease.setIconPath(basePath + applicationReleaseDTO.getIconName());
-        applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
+
+        if (!StringUtils.isEmpty(applicationReleaseDTO.getBannerName())){
+            applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
+        }
 
         if (urlValidator.isValid(applicationReleaseDTO.getInstallerName())){
             applicationRelease

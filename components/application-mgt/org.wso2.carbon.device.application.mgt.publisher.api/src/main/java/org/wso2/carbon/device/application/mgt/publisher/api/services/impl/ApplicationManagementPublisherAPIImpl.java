@@ -46,9 +46,9 @@ import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.activation.DataHandler;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -85,10 +85,6 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
             ApplicationList applications = applicationManager.getApplications(filter);
-            if (applications.getApplications().isEmpty()) {
-                return Response.status(Response.Status.OK)
-                        .entity("Couldn't find any application for the requested query.").build();
-            }
             return Response.status(Response.Status.OK).entity(applications).build();
         } catch (BadRequestException e) {
             String msg = "Incompatible request payload is found. Please try with valid request payload.";
@@ -175,7 +171,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("application") ApplicationWrapper applicationWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
+            @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
@@ -214,7 +210,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createWebApp(
             @Multipart("webapp") WebAppWrapper webAppWrapper,
             @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
+            @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
@@ -252,7 +248,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response createPubApp(
             @Multipart("public-app") PublicAppWrapper publicAppWrapper,
             @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
+            @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
@@ -292,7 +288,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
+            @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
@@ -331,7 +327,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     public Response updateApplicationImageArtifacts(
             @PathParam("uuid") String applicationReleaseUuid,
             @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
+            @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
@@ -436,7 +432,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
-            @Multipart("banner") Attachment bannerFile,
+            @Multipart(value = "banner", required = false) Attachment bannerFile,
             @Multipart("screenshot1") Attachment screenshot1,
             @Multipart("screenshot2") Attachment screenshot2,
             @Multipart("screenshot3") Attachment screenshot3) {
@@ -825,7 +821,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
 
             if (attachmentList != null) {
-                Map<String, InputStream> scrrenshotData = new HashMap<>();
+                Map<String, InputStream> scrrenshotData = new TreeMap<>();
                 for (Attachment sc : attachmentList) {
                     dataHandler = sc.getDataHandler();
                     String screenshotrFileName = dataHandler.getName();

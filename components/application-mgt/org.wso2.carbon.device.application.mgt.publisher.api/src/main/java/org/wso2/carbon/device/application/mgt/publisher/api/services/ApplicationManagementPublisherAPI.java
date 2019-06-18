@@ -320,8 +320,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
-                    value = "Banner of the uploading application",
-                    required = true)
+                    value = "Banner of the uploading application")
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
@@ -385,8 +384,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
-                    value = "Banner of the uploading web app",
-                    required = true)
+                    value = "Banner of the uploading web app")
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
@@ -450,8 +448,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
-                    value = "Banner of the uploading public app",
-                    required = true)
+                    value = "Banner of the uploading public app")
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
@@ -523,8 +520,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
-                    value = "Banner of the uploading application",
-                    required = true)
+                    value = "Banner of the uploading application")
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
@@ -635,8 +631,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
-                    value = "Banner of the uploading application",
-                    required = true)
+                    value = "Banner of the uploading application")
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
@@ -776,8 +771,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
-                    value = "banner file of the application release.",
-                    required = true)
+                    value = "banner file of the application release.")
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
