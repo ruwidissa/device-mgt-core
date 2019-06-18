@@ -48,7 +48,11 @@ class Release extends React.Component {
         const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
 
         //send request to the invoker
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/"+uuid,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 let app = res.data.data;
