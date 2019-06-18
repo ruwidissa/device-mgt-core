@@ -8,7 +8,6 @@ const {Title, Text, Paragraph} = Typography;
 class ReleaseView extends React.Component {
     render() {
         const release = this.props.release;
-        console.log(release);
         return (
             <div>
                 <div className="release">
@@ -19,7 +18,6 @@ class ReleaseView extends React.Component {
                         <Col xl={10} sm={11} className="release-title">
                             <Title level={2}>App Name</Title>
                             <Text>{release.version}</Text><br/>
-                            <Text type="secondary">{release.description}</Text><br/>
                         </Col>
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
                             <div>
@@ -50,12 +48,7 @@ class ReleaseView extends React.Component {
                     </Row>
                     <Divider/>
                     <Paragraph type="secondary" ellipsis={{rows: 3, expandable: true}}>
-                        Ant Design, a design language for background applications, is refined by Ant UED Team. Ant
-                        Design, a design language for background applications, is refined by Ant UED Team. Ant Design,
-                        a design language for background applications, is refined by Ant UED Team. Ant Design, a
-                        design language for background applications, is refined by Ant UED Team. Ant Design, a design
-                        language for background applications, is refined by Ant UED Team. Ant Design, a design
-                        language for background applications, is refined by Ant UED Team.
+                        {release.description}
                     </Paragraph>
                 </div>
             </div>
