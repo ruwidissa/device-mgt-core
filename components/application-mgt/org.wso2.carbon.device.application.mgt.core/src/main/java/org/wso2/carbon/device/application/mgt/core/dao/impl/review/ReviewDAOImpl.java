@@ -276,14 +276,14 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                     + "AP_APP_REVIEW.USERNAME AS USERNAME, "
                     + "AP_APP_REVIEW.ROOT_PARENT_ID AS ROOT_PARENT_ID, "
                     + "AP_APP_REVIEW.IMMEDIATE_PARENT_ID AS IMMEDIATE_PARENT_ID, "
-                    + "AP_APP_REVIEW.RATING AS RATING "
+                    + "AP_APP_REVIEW.RATING AS RATING, "
                     + "AP_APP_RELEASE.UUID AS UUID, "
                     + "AP_APP_RELEASE.VERSION AS VERSION "
                     + "FROM AP_APP_REVIEW INNER JOIN AP_APP_RELEASE ON "
                     + "AP_APP_REVIEW.AP_APP_RELEASE_ID = AP_APP_RELEASE.ID "
                     + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID = ? AND "
                     + "AP_APP_REVIEW.ROOT_PARENT_ID = ? AND "
-                    + "AP_APP_REVIEW.ACTIVE_REVIEW = true "
+                    + "AP_APP_REVIEW.ACTIVE_REVIEW = true AND "
                     + "AP_APP_REVIEW.TENANT_ID = ? "
                     + "LIMIT ? OFFSET ?";
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -331,7 +331,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                                 + "AP_APP_RELEASE.VERSION AS VERSION "
                                 + "FROM AP_APP_REVIEW INNER JOIN AP_APP_RELEASE ON "
                                 + "AP_APP_REVIEW.AP_APP_RELEASE_ID = AP_APP_RELEASE.ID "
-                                + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID (",
+                                + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID IN (",
                         ") AND AP_APP_REVIEW.ROOT_PARENT_ID = ? AND "
                                 + "AP_APP_REVIEW.ACTIVE_REVIEW = true AND "
                                 + "AP_APP_REVIEW.TENANT_ID = ? "
@@ -387,7 +387,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                             + "AP_APP_RELEASE.VERSION AS VERSION "
                             + "FROM AP_APP_REVIEW INNER JOIN AP_APP_RELEASE ON "
                             + "AP_APP_REVIEW.AP_APP_RELEASE_ID = AP_APP_RELEASE.ID "
-                            + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID (",
+                            + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID IN (",
                     ") AND AP_APP_REVIEW.ROOT_PARENT_ID = ? AND "
                             + "AP_APP_REVIEW.ACTIVE_REVIEW = true AND "
                             + "AP_APP_REVIEW.USERNAME = ? AND "
@@ -517,7 +517,6 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 for (String uuid : uuids) {
                     ps.setObject(index++, uuid);
                 }
-                ps.setInt(index++, tenantId);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
