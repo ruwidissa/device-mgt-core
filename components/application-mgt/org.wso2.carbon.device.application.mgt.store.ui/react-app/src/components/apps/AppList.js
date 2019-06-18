@@ -14,9 +14,7 @@ class AppList extends React.Component {
     }
 
     componentDidMount() {
-        console.log("mounted");
         const {deviceType} = this.props;
-        console.log(this.props);
         this.props.changeSelectedMenuItem(deviceType);
         this.fetchData(deviceType);
     }
