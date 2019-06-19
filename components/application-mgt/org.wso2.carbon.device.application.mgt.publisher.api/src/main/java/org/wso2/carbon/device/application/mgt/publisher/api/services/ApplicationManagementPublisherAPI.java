@@ -217,7 +217,7 @@ public interface ApplicationManagementPublisherAPI {
                             message = "Internal Server Error. \n Error occurred while getting relevant application release.",
                             response = ErrorResponse.class)
             })
-    Response getApplicationRelease(
+    Response getApplicationByUUID(
             @ApiParam(
                     name = "uuid",
                     value = "application release uuid",

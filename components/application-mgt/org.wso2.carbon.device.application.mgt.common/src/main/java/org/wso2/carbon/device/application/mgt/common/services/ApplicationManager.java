@@ -122,7 +122,7 @@ public interface ApplicationManager {
      * @return the Application Release identified by the UUID
      * @throws ApplicationManagementException Application Management Exception.
      */
-    ApplicationRelease getApplicationReleaseByUUID(String uuid) throws ApplicationManagementException;
+    Application getApplicationByUuid(String uuid) throws ApplicationManagementException;
 
     /**
      * To get the ApplicationDTO for given application relase UUID.

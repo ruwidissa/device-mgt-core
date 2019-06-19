@@ -90,7 +90,7 @@ import java.util.List;
      * @return {@link List}List of all reviews for the application release
      * @throws ReviewManagementDAOException      Review management DAO exception
      **/
-    List<ReviewDTO> getAllActiveReleaseReviews(int releaseId, PaginationRequest request, int tenantId)
+    List<ReviewDTO> getAllReleaseReviews(int releaseId, PaginationRequest request, int tenantId)
             throws ReviewManagementDAOException;
 
     List<ReviewDTO> getAllActiveAppReviews(List<Integer> releaseIds, PaginationRequest request, int tenantId)
