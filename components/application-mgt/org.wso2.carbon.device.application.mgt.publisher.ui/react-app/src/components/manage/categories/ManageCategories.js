@@ -20,9 +20,11 @@ class ManageCategories extends React.Component {
     };
 
     componentDidMount() {
-        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/categories";
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/categories",
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
                 this.setState({
@@ -55,8 +57,11 @@ class ManageCategories extends React.Component {
         this.setState({
             loading: true
         });
-        const request = "method=delete&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/" + id;
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.delete(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/categories/"+id,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -192,10 +197,14 @@ class ManageCategories extends React.Component {
             loading: true
         });
 
-        const dataArray = JSON.stringify(tempElements.map(category => category.categoryName));
+        const data = tempElements.map(category => category.categoryName);
 
-        const request = "method=post&content-type=application/json&payload=" + dataArray + "&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories";
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(
+        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/categories",
+            data,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -255,8 +264,13 @@ class ManageCategories extends React.Component {
             loading: true,
             isEditModalVisible: false,
         });
-        const request = "method=put&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/rename?from="+currentlyEditingId+"%26to="+editingValue;
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+
+        axios.put(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/categories/rename?from="+currentlyEditingId+"&to="+editingValue,
+            {},
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({

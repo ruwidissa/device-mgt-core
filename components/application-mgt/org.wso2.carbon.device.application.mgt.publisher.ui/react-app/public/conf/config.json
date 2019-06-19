@@ -7,10 +7,10 @@
     "protocol": "https",
     "hostname": "localhost",
     "httpsPort": "9443",
-    "invokerUri": "/api/application-mgt-handler/v1.0/invoke",
-    "loginUri": "/api/application-mgt-handler/v1.0/login"
+    "invokerUri": "/ui-request-handler/invoke/application-mgt-publisher/v1.0",
+    "loginUri": "/ui-request-handler/login",
+    "platform": "publisher"
   },
-  "serverUrl": "https://localhost:9443",
   "defaultPlatformIcons": {
     "default": {
       "icon": "mobile",

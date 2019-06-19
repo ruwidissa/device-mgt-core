@@ -9,7 +9,7 @@ class ManageTags extends React.Component {
     state = {
         loading: false,
         searchText: '',
-        categories: [],
+        tags: [],
         tempElements: [],
         inputVisible: false,
         inputValue: '',
@@ -20,13 +20,15 @@ class ManageTags extends React.Component {
     };
 
     componentDidMount() {
-        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/tags";
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/tags",
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }).then(res => {
             if (res.status === 200) {
-                let categories = JSON.parse(res.data.data);
+                let tags = JSON.parse(res.data.data);
                 this.setState({
-                    categories: categories,
+                    tags: tags,
                     loading: false
                 });
             }
@@ -51,31 +53,34 @@ class ManageTags extends React.Component {
         });
     };
 
-    deleteCategory = (id) => {
+    deleteTag = (id) => {
+
         this.setState({
             loading: true
         });
-        const request = "method=delete&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories/" + id;
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+
+        axios.delete(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/tags/"+id,
+            {
+                headers: {'X-Platform': config.serverConfig.platform}
+            }).then(res => {
             if (res.status === 200) {
                 notification["success"]({
                     message: "Done!",
                     description:
-                        "Category Removed Successfully!",
+                        "Tag Removed Successfully!",
+                });
+
+                const {tags} = this.state;
+                const remainingElements = tags.filter(function (value) {
+                    return value.tagName !== id;
+
                 });
 
                 this.setState({
-                    loading: false
+                    loading: false,
+                    tags: remainingElements
                 });
-                // this.setState({
-                //     categories: [...categories, ...tempElements],
-                //     tempElements: [],
-                //     inputVisible: false,
-                //     inputValue: '',
-                //     loading: false,
-                //     isAddNewVisible: false
-                // });
             }
 
         }).catch((error) => {
@@ -91,31 +96,31 @@ class ManageTags extends React.Component {
         });
     };
 
-    renderElement = (category) => {
-        const categoryName = category.tagName;
+    renderElement = (tag) => {
+        const tagName = tag.tagName;
         const tagElem = (
             <Tag
                 color="gold"
             >
-                {categoryName}
+                {tagName}
                 <Divider type="vertical"/>
                 <Tooltip title="edit">
                     <Icon onClick={() => {
-                        this.openEditModal(categoryName)
+                        this.openEditModal(tagName)
                     }} style={{color: 'rgba(0,0,0,0.45)'}} type="edit"/>
                 </Tooltip>
                 <Divider type="vertical"/>
                 <Tooltip title="delete">
                     <Popconfirm
-                        title="Are you sure delete this category?"
+                        title="Are you sure delete this tag?"
                         onConfirm={() => {
-                            if (category.isTagDeletable) {
-                                this.deleteCategory(categoryName);
+                            if (tag.isTagDeletable) {
+                                this.deleteTag(tagName);
                             } else {
                                 notification["error"]({
-                                    message: 'Cannot delete "' + categoryName + '"',
+                                    message: 'Cannot delete "' + tagName + '"',
                                     description:
-                                        "This category is currently used. Please unassign the category from apps.",
+                                        "This tag is currently used. Please unassign the tag from apps.",
                                 });
                             }
                         }}
@@ -128,13 +133,13 @@ class ManageTags extends React.Component {
             </Tag>
         );
         return (
-            <span key={category.tagName} style={{display: 'inline-block'}}>
+            <span key={tag.tagName} style={{display: 'inline-block'}}>
                 {tagElem}
             </span>
         );
     };
 
-    renderTempElement = (category) => {
+    renderTempElement = (tag) => {
         const {tempElements} = this.state;
         const tagElem = (
             <Tag
@@ -143,7 +148,7 @@ class ManageTags extends React.Component {
                     e.preventDefault();
                     const remainingElements = tempElements.filter(function (value) {
 
-                        return value.categoryName !== category.categoryName;
+                        return value.tagName !== tag.tagName;
 
                     });
                     this.setState({
@@ -151,11 +156,11 @@ class ManageTags extends React.Component {
                     });
                 }}
             >
-                {category.categoryName}
+                {tag.tagName}
             </Tag>
         );
         return (
-            <span key={category.categoryName} style={{display: 'inline-block'}}>
+            <span key={tag.tagName} style={{display: 'inline-block'}}>
                 {tagElem}
             </span>
         );
@@ -170,13 +175,13 @@ class ManageTags extends React.Component {
     };
 
     handleInputConfirm = () => {
-        const {inputValue, categories} = this.state;
+        const {inputValue, tags} = this.state;
         let {tempElements} = this.state;
         if (inputValue) {
-            if ((categories.findIndex(i => i.categoryName === inputValue) === -1) && (tempElements.findIndex(i => i.categoryName === inputValue) === -1)) {
-                tempElements = [...tempElements, {categoryName: inputValue, isTagDeletable: true}];
+            if ((tags.findIndex(i => i.tagName === inputValue) === -1) && (tempElements.findIndex(i => i.tagName === inputValue) === -1)) {
+                tempElements = [...tempElements, {tagName: inputValue, isTagDeletable: true}];
             } else {
-                message.warning('Category already exists');
+                message.warning('Tag already exists');
             }
         }
 
@@ -188,25 +193,27 @@ class ManageTags extends React.Component {
     };
 
     handleSave = () => {
-        const {tempElements, categories} = this.state;
+        const {tempElements, tags} = this.state;
         this.setState({
             loading: true
         });
 
-        const dataArray = JSON.stringify(tempElements.map(category => category.categoryName));
+        const data = tempElements.map(tag => tag.tagName);
 
-        const request = "method=post&content-type=application/json&payload=" + dataArray + "&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories";
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/tags",
+            data,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }).then(res => {
             if (res.status === 200) {
                 notification["success"]({
                     message: "Done!",
                     description:
-                        "New Categories were added successfully",
+                        "New tags were added successfully",
                 });
 
                 this.setState({
-                    categories: [...categories, ...tempElements],
+                    tags: [...tags, ...tempElements],
                     tempElements: [],
                     inputVisible: false,
                     inputValue: '',
@@ -250,26 +257,31 @@ class ManageTags extends React.Component {
 
     editItem = () => {
 
-        const {editingValue, currentlyEditingId, categories} = this.state;
+        const {editingValue, currentlyEditingId, tags} = this.state;
 
         this.setState({
             loading: true,
             isEditModalVisible: false,
         });
-        const request = "method=put&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/admin/applications/categories?from="+currentlyEditingId+"%26to="+editingValue;
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+
+        axios.put(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/tags/rename?from="+currentlyEditingId+"&to="+editingValue,
+            {},
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
                     message: "Done!",
                     description:
-                        "Category was edited successfully",
+                        "Tag was edited successfully",
                 });
 
-                categories[categories.findIndex(i => i.categoryName === currentlyEditingId)].categoryName = editingValue;
+                tags[tags.findIndex(i => i.tagName === currentlyEditingId)].tagName = editingValue;
 
                 this.setState({
-                    categories: categories,
+                    tags: tags,
                     loading: false,
                     editingValue: null
                 });
@@ -298,8 +310,8 @@ class ManageTags extends React.Component {
     };
 
     render() {
-        const {categories, inputVisible, inputValue, tempElements, isAddNewVisible} = this.state;
-        const categoriesElements = categories.map(this.renderElement);
+        const {tags, inputVisible, inputValue, tempElements, isAddNewVisible} = this.state;
+        const tagsElements = tags.map(this.renderElement);
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
             <div>
@@ -349,7 +361,7 @@ class ManageTags extends React.Component {
                                     {!inputVisible && (
                                         <Tag onClick={this.showInput}
                                              style={{background: '#fff', borderStyle: 'dashed'}}>
-                                            <Icon type="plus"/> New Category
+                                            <Icon type="plus"/> New Tag
                                         </Tag>
                                     )}
                                 </TweenOneGroup>
@@ -386,7 +398,7 @@ class ManageTags extends React.Component {
                                 leave={{opacity: 0, width: 0, scale: 0, duration: 200}}
                                 appear={false}
                             >
-                                {categoriesElements}
+                                {tagsElements}
                             </TweenOneGroup>
                         </div>
                     </Spin>

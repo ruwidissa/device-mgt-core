@@ -100,22 +100,26 @@ class AppsTable extends React.Component {
     fetch = (params = {}) => {
         this.setState({loading: true});
 
+        if(!params.hasOwnProperty("page")){
+           params.page = 1;
+        }
+
         const extraParams = {
             offset: 10 * (params.page - 1),
             limit: 10
         };
         // note: encode with '%26' not '&'
-        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('%26');
-        const parameters = {
-            method: "post",
-            'content-type': "application/json",
-            payload: JSON.stringify({}),
-            'api-endpoint': "/application-mgt-publisher/v1.0/applications?" + encodedExtraParams
+        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
+        const data = {
         };
 
-        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
-        console.log(request);
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        console.log(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications?"+encodedExtraParams);
+        axios.post(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications?"+encodedExtraParams,
+            data,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 let apps = [];
@@ -136,7 +140,7 @@ class AppsTable extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {

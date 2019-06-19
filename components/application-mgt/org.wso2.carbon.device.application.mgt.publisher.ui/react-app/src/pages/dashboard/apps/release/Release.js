@@ -1,12 +1,11 @@
 import React from "react";
 import '../../../../App.css';
-import {PageHeader, Typography, Input, Button, Row, Col, Avatar, Card} from "antd";
-import {connect} from "react-redux";
+import {PageHeader, Typography, Row, Col, message, Card} from "antd";
+import axios from 'axios';
+import config from "../../../../../public/conf/config.json";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
-import {getRelease} from "../../../../js/actions";
 import LifeCycle from "../../../../components/apps/release/LifeCycle";
 
-const Search = Input.Search;
 const {Title} = Typography;
 
 const routes = [
@@ -24,31 +23,67 @@ const routes = [
     },
 ];
 
-const mapStateToProps = state => {
-    return {release: state.release}
-};
 
-const mapDispatchToProps = dispatch => ({
-    getRelease: (uuid) => dispatch(getRelease(uuid))
-});
-
-class ConnectedRelease extends React.Component {
+class Release extends React.Component {
     routes;
 
     constructor(props) {
         super(props);
         this.routes = props.routes;
-
+        this.state={
+            loading: true,
+            app: null,
+            uuid: null
+        }
     }
 
     componentDidMount() {
         const {uuid} = this.props.match.params;
-        this.props.getRelease(uuid);
+        this.fetchData(uuid);
     }
 
-    render() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevState.uuid !== this.state.uuid) {
+            const {uuid} = this.props.match.params;
+            this.fetchData(uuid);
+        }
+    }
 
-        const release = this.props.release;
+    fetchData = (uuid)=>{
+
+        //send request to the invoker
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/release/"+uuid,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
+        ).then(res => {
+            if (res.status === 200) {
+                let app = res.data.data;
+                this.setState({
+                    app: app,
+                    loading: false,
+                    uuid: uuid
+                })
+            }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+            } else {
+                message.error('Something went wrong... :(');
+            }
+
+            this.setState({loading: false});
+        });
+    };
+
+    render() {
+        const {app} = this.state;
+        const release = app;
+
         if (release == null) {
             return (
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
@@ -72,7 +107,7 @@ class ConnectedRelease extends React.Component {
                         </Col>
                         <Col lg={8} md={24} style={{padding: 3}}>
                             <Card lg={8} md={24}>
-                                <LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>
+                                {/*<LifeCycle currentStatus={release.currentStatus.toUpperCase()}/>*/}
                             </Card>
                         </Col>
                     </Row>
@@ -82,7 +117,5 @@ class ConnectedRelease extends React.Component {
         );
     }
 }
-
-const Release = connect(mapStateToProps,mapDispatchToProps)(ConnectedRelease);
 
 export default Release;
