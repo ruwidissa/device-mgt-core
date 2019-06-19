@@ -238,8 +238,8 @@ public class ReviewManagerImpl implements ReviewManager {
         Review review = new Review();
         review.setId(reviewDTO.getId());
         review.setContent(reviewDTO.getContent());
-        review.setRootParentId(reviewDTO.getRootParentId());
-        review.setImmediateParentId(reviewDTO.getImmediateParentId());
+        review.setReleaseUuid(reviewDTO.getReleaseUuid());
+        review.setReleaseVersion(reviewDTO.getReleaseVersion());
         review.setCreatedAt(reviewDTO.getCreatedAt());
         review.setModifiedAt(reviewDTO.getModifiedAt());
         review.setRating(reviewDTO.getRating());
@@ -353,7 +353,7 @@ public class ReviewManagerImpl implements ReviewManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            return getReviewTree(this.reviewDAO.getAllActiveReleaseReviews(releaseDTO.getId(), request, tenantId));
+            return getReviewTree(this.reviewDAO.getAllReleaseReviews(releaseDTO.getId(), request, tenantId));
         } catch (ReviewManagementDAOException e) {
             throw new ReviewManagementException("Error occured while getting all reviews for application uuid: " + uuid,
                     e);

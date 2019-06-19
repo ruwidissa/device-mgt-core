@@ -135,18 +135,17 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @GET
     @Consumes("application/json")
     @Path("/release/{uuid}")
-    public Response getApplicationRelease(
+    public Response getApplicationByUUID(
             @PathParam("uuid") String uuid) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            //todo return application
-            ApplicationRelease applicationRelease = applicationManager.getApplicationReleaseByUUID(uuid);
-            if (applicationRelease == null){
+            Application application = applicationManager.getApplicationByUuid(uuid);
+            if (application == null){
                 String msg = "Application release is in the end state of the application lifecycle flow.";
                 log.error(msg);
                 return Response.status(Response.Status.OK).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity(applicationRelease).build();
+            return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
             String msg = "Application Release with UUID: " + uuid + " is not found";
             log.error(msg, e);
