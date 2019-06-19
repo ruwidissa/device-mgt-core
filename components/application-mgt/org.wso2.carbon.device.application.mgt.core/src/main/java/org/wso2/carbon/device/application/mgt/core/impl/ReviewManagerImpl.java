@@ -289,7 +289,6 @@ public class ReviewManagerImpl implements ReviewManager {
                     log.error(msg);
                     throw new ReviewManagementException(msg);
                 }
-                uuid = reviewDTO.getReleaseUuid();
             } else if (updatingReview.getRating() > 0 && updatingReview.getRating() != reviewDTO.getRating()) {
                 Runnable task = () -> ReviewManagerImpl.this
                         .calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid, tenantId);
