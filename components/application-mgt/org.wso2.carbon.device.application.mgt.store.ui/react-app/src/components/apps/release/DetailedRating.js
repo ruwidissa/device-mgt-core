@@ -1,11 +1,12 @@
 import React from "react";
 import {Row, Typography, Icon} from "antd";
 import StarRatings from "react-star-ratings";
-import axios from "axios";
 import "./DetailedRating.css";
 import config from "../../../../public/conf/config.json";
+import axios from "axios";
 
 const { Text } = Typography;
+
 
 class DetailedRating extends React.Component{
 
@@ -17,20 +18,24 @@ class DetailedRating extends React.Component{
     }
 
     componentDidMount() {
-        this.getData(this.props.uuid);
+        const {type,uuid} = this.props;
+        this.getData(type,uuid);
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.uuid !== this.props.uuid) {
-            this.getData(this.props.uuid);
+            const {type,uuid} = this.props;
+            this.getData(type,uuid);
         }
     }
 
-    getData = (uuid)=>{
-        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid+"/rating";
+    getData = (type, uuid)=>{
 
-        return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+        return axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }).then(res => {
             if (res.status === 200) {
                 let detailedRating = res.data.data;
                 this.setState({
@@ -47,8 +52,6 @@ class DetailedRating extends React.Component{
 
     render() {
         const detailedRating = this.state.detailedRating;
-
-        console.log(detailedRating);
 
         if(detailedRating ==null){
             return null;
@@ -72,8 +75,6 @@ class DetailedRating extends React.Component{
                 ratingBarPercentages[i] = (ratingVariety[(i+1).toString()])/maximumRating*100;
             }
         }
-
-        console.log(ratingBarPercentages);
 
         return (
             <Row className="d-rating">

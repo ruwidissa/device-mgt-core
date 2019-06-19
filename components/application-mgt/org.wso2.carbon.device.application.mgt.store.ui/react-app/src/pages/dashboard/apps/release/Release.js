@@ -28,7 +28,6 @@ class Release extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log(prevState);
         if (prevState.uuid !== this.state.uuid) {
             const {uuid,deviceType} = this.props.match.params;
             this.fetchData(uuid);
@@ -39,15 +38,13 @@ class Release extends React.Component {
     fetchData = (uuid)=>{
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/"+uuid,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/"+uuid,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }
         ).then(res => {
             if (res.status === 200) {
                 let app = res.data.data;
-
-                console.log(app);
 
                 this.setState({
                     app: app,
@@ -56,7 +53,7 @@ class Release extends React.Component {
                 })
             }
 
-        }).catch((error) => {
+        }).catch((error) => { console.log(error);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');

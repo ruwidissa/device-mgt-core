@@ -12,7 +12,6 @@ class AppDetailsDrawer extends React.Component {
         if (app == null) {
             return null;
         }
-        console.log(app);
         return (
             <div>
 

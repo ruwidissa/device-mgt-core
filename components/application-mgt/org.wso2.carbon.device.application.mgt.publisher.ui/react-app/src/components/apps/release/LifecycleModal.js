@@ -62,8 +62,6 @@ class ConnectedLifecycleModal extends React.Component {
     handleSubmit = event => {
         this.setState({ loading: true });
         event.preventDefault();
-        console.log(this.reason);
-        console.log("uuid", this.props.uuid);
         this.props.updateLifecycleState(this.props.uuid, this.props.nextState, this.reason.state.value)
     };
 

@@ -30,6 +30,7 @@ class DetailedRating extends React.Component{
     }
 
     getData = (type, uuid)=>{
+        console.log();
 
         return axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
@@ -38,7 +39,6 @@ class DetailedRating extends React.Component{
             }).then(res => {
             if (res.status === 200) {
                 let detailedRating = res.data.data;
-                console.log(type,uuid);
                 this.setState({
                     detailedRating
                 })
@@ -48,15 +48,12 @@ class DetailedRating extends React.Component{
             if (error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             }
-
-            console.log(error);
         });
     };
 
     render() {
         const detailedRating = this.state.detailedRating;
 
-        console.log(detailedRating);
 
         if(detailedRating ==null){
             return null;
@@ -81,7 +78,6 @@ class DetailedRating extends React.Component{
             }
         }
 
-        console.log(ratingBarPercentages);
 
         return (
             <Row className="d-rating">

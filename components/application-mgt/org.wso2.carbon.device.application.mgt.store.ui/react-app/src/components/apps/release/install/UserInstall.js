@@ -23,7 +23,6 @@ class UserInstall extends React.Component {
     };
 
     fetchUser = value => {
-        console.log('fetching user', value);
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
         this.setState({data: [], fetching: true});
@@ -31,7 +30,7 @@ class UserInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/device-mgt/v1.0/users/search?username=" + value,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/device-mgt/v1.0/users/search?username=" + value,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }
@@ -41,8 +40,6 @@ class UserInstall extends React.Component {
                     // for fetch callback order
                     return;
                 }
-
-                console.log(res.data.data);
 
                 const data = res.data.data.users.map(user => ({
                     text: user.username,

@@ -28,10 +28,10 @@ class Reviews extends React.Component {
 
     fetchData = (offset, limit, callback) => {
 
-        const {uuid} = this.props;
+        const {uuid, type} = this.props;
 
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/app/"+uuid,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
             {
                 headers: {'X-Platform': config.serverConfig.platform}
             }).then(res => {

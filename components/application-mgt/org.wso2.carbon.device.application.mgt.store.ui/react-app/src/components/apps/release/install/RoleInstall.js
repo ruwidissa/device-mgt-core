@@ -35,17 +35,13 @@ class RoleInstall extends React.Component {
             'api-endpoint': "/device-mgt/v1.0/roles?filter=" + value
         };
 
-        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
-        console.log(request);
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store, request
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {
                     // for fetch callback order
                     return;
                 }
-
-                console.log(res.data.data);
 
                 const data = res.data.data.roles.map(role => ({
                     text: role,
@@ -55,7 +51,7 @@ class RoleInstall extends React.Component {
                 this.setState({data, fetching: false});
             }
 
-        }).catch((error) => {
+        }).catch((error) => { console.log(error);
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';

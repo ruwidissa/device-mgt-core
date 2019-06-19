@@ -21,7 +21,7 @@ class AppInstallModal extends React.Component{
                     onCancel={this.props.onClose}
                     footer={null}
                 >
-                    <Tabs defaultActiveKey="1" onChange={()=>{console.log("changed");}}>
+                    <Tabs defaultActiveKey="1">
                         <TabPane tab="User" key="1">
                             <UserInstall onInstall={this.props.onInstall}/>
                         </TabPane>

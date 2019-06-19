@@ -72,7 +72,7 @@ class ReleaseView extends React.Component {
                             <DetailedRating type="release" uuid={release.uuid}/>
                         </Col>
                     </Row>
-                    <Reviews uuid={release.uuid}/>
+                    <Reviews type="release" uuid={release.uuid}/>
                 </div>
             </div>
         );

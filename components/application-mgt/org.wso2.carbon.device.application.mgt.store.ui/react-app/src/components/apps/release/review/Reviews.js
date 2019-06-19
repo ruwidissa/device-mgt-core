@@ -27,9 +27,14 @@ class Reviews extends React.Component {
     }
 
     fetchData = (offset, limit, callback) => {
-        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/" + this.props.uuid + "?offset=" + offset + "%26limit=" + limit;
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+
+        const {uuid, type} = this.props;
+
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
+            {
+                headers: {'X-Platform': config.serverConfig.platform}
+            }).then(res => {
             if (res.status === 200) {
                 let reviews = res.data.data.data;
                 callback(reviews);

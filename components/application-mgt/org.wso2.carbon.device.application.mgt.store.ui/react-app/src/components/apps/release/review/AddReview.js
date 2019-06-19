@@ -54,8 +54,12 @@ class AddReview extends React.Component {
 
         const request = "method=post&content-type=application/json&payload="+JSON.stringify(payload)+"&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid;
 
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
-        ).then(res => {
+        axios.post(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid,
+            payload,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }).then(res => {
             if (res.status === 201) {
                 this.setState({
                     loading: false,

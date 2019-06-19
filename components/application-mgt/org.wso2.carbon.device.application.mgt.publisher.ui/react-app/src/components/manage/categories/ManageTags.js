@@ -240,7 +240,6 @@ class ManageTags extends React.Component {
     saveInputRef = input => (this.input = input);
 
     closeEditModal = e => {
-        console.log(e);
         this.setState({
             isEditModalVisible: false,
             currentlyEditingId: null

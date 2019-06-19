@@ -53,14 +53,13 @@ class Release extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/" + uuid,
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/release/"+ uuid,
             {
                 headers: {'X-Platform': config.serverConfig.platform}
             }
         ).then(res => {
             if (res.status === 200) {
                 let app = res.data.data;
-                console.log(app);
                 this.setState({
                     app: app,
                     loading: false,

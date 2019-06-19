@@ -95,7 +95,7 @@ class DeviceInstall extends React.Component {
 
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-            console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+            // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             this.setState({
                 selectedRows: selectedRows
             })
@@ -138,11 +138,10 @@ class DeviceInstall extends React.Component {
         const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
 
         //send request to the invoker
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store, request
         ).then(res => {
             if (res.status === 200) {
                 const pagination = {...this.state.pagination};
-                console.log(res.data.data.devices);
                 this.setState({
                     loading: false,
                     data: res.data.data.devices,
@@ -151,7 +150,7 @@ class DeviceInstall extends React.Component {
 
             }
 
-        }).catch((error) => {
+        }).catch((error) => { console.log(error);
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
