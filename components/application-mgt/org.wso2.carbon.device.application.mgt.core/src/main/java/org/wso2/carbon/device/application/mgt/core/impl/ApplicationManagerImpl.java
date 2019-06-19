@@ -896,49 +896,50 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public ApplicationRelease getApplicationReleaseByUUID(String uuid) throws ApplicationManagementException{
+    public Application getApplicationByUuid(String uuid) throws ApplicationManagementException{
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        boolean isVisibleAppRelease = false;
+        boolean isVisibleApp = false;
+
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationReleaseDTO applicationReleaseDTO = applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
-            if (applicationReleaseDTO == null) {
-                String msg = "Couldn't find an application release for the UUID: " + uuid;
+            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(uuid, tenantId);
+
+            if (applicationDTO == null) {
+                String msg = "Couldn't found an application for application release UUID: " + uuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            if (applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState())) {
-                return null;
-            }
 
-            List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRolesByUUID(uuid, tenantId);
+            List<String> tags = this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
+            List<String> categories = this.applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
+            applicationDTO.setTags(tags);
+            applicationDTO.setAppCategories(categories);
+
+            List<String> unrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId);
             if (!unrestrictedRoles.isEmpty()) {
                 if (hasUserRole(unrestrictedRoles, userName)) {
-                    isVisibleAppRelease = true;
+                    isVisibleApp = true;
                 }
             } else {
-                isVisibleAppRelease = true;
+                isVisibleApp = true;
             }
 
-            if (!isVisibleAppRelease) {
-                String msg = "You are trying to access release of visibility restricted application. You don't have "
-                        + "required roles to view this application,";
+            if (!isVisibleApp) {
+                String msg = "You are trying to access visibility restricted application. You don't have required "
+                        + "roles to view this application,";
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
-            return APIUtil.releaseDtoToRelease(applicationReleaseDTO);
-        } catch (LifecycleManagementException e) {
-            String msg = "Error occurred when getting the end state of the application lifecycle flow";
-            log.error(msg);
-            throw new ApplicationManagementException(msg, e);
+            return APIUtil.appDtoToAppResponse(applicationDTO);
         } catch (UserStoreException e) {
-            String msg = "User-store exception while getting application with the application release UUID: " + uuid;
+            String msg = "User-store exception occurred while getting application for application release UUID " + uuid;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            //todo
-            throw new ApplicationManagementException("");
+            String msg = "Error occurred while getting dta which are related to Application.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

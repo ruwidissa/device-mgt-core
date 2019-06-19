@@ -289,6 +289,7 @@ public class ReviewManagerImpl implements ReviewManager {
                     log.error(msg);
                     throw new ReviewManagementException(msg);
                 }
+                uuid = reviewDTO.getReleaseUuid();
             } else if (updatingReview.getRating() > 0 && updatingReview.getRating() != reviewDTO.getRating()) {
                 Runnable task = () -> ReviewManagerImpl.this
                         .calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid, tenantId);
@@ -353,7 +354,7 @@ public class ReviewManagerImpl implements ReviewManager {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            return getReviewTree(this.reviewDAO.getAllActiveReleaseReviews(releaseDTO.getId(), request, tenantId));
+            return getReviewTree(this.reviewDAO.getAllReleaseReviews(releaseDTO.getId(), request, tenantId));
         } catch (ReviewManagementDAOException e) {
             throw new ReviewManagementException("Error occured while getting all reviews for application uuid: " + uuid,
                     e);

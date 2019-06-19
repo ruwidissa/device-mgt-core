@@ -258,7 +258,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
 
 
     @Override
-    public List<ReviewDTO> getAllActiveReleaseReviews(int releaseId, PaginationRequest request, int tenantId)
+    public List<ReviewDTO> getAllReleaseReviews(int releaseId, PaginationRequest request, int tenantId)
             throws ReviewManagementDAOException {
 
         if (log.isDebugEnabled()) {
@@ -283,7 +283,6 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                     + "AP_APP_REVIEW.AP_APP_RELEASE_ID = AP_APP_RELEASE.ID "
                     + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID = ? AND "
                     + "AP_APP_REVIEW.ROOT_PARENT_ID = ? AND "
-                    + "AP_APP_REVIEW.ACTIVE_REVIEW = true AND "
                     + "AP_APP_REVIEW.TENANT_ID = ? "
                     + "LIMIT ? OFFSET ?";
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
