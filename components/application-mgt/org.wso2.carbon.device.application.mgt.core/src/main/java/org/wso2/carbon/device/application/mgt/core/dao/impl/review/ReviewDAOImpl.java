@@ -110,7 +110,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         try {
             conn = this.getDBConnection();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT rv.ID FROM AP_APP_REVIEW " + "WHERE rv.AP_APP_RELEASE_ID IN (",
+                    "SELECT rv.ID FROM AP_APP_REVIEW rv " + "WHERE rv.AP_APP_RELEASE_ID IN (",
                     ") AND rv.USERNAME = ? AND rv.TENANT_ID = ?");
             appReleaseIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
