@@ -37,16 +37,6 @@ class Release extends React.Component {
     }
 
     fetchData = (uuid)=>{
-        const parameters = {
-            method: "get",
-            'content-type': "application/json",
-            payload: "{}",
-            'api-endpoint': "/application-mgt-store/v1.0/applications/" + uuid
-        };
-
-        //url-encode parameters
-        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
-
         //send request to the invoker
         axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/"+uuid,

@@ -30,7 +30,7 @@ class Release extends React.Component {
     constructor(props) {
         super(props);
         this.routes = props.routes;
-        this.state={
+        this.state = {
             loading: true,
             app: null,
             uuid: null
@@ -49,17 +49,18 @@ class Release extends React.Component {
         }
     }
 
-    fetchData = (uuid)=>{
+    fetchData = (uuid) => {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/release/"+uuid,
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/" + uuid,
             {
-                headers: { 'X-Platform': config.serverConfig.platform }
+                headers: {'X-Platform': config.serverConfig.platform}
             }
         ).then(res => {
             if (res.status === 200) {
                 let app = res.data.data;
+                console.log(app);
                 this.setState({
                     app: app,
                     loading: false,
@@ -82,12 +83,11 @@ class Release extends React.Component {
 
     render() {
         const {app} = this.state;
-        const release = app;
 
-        if (release == null) {
+        if (app == null) {
             return (
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
-                    <Title level={3}>No Releases Found</Title>
+                    <Title level={3}>No Apps Found</Title>
                 </div>
             );
         }
@@ -95,14 +95,11 @@ class Release extends React.Component {
         //todo remove uppercase
         return (
             <div>
-                <PageHeader
-                    breadcrumb={{routes}}
-                />
                 <div className="main-container">
                     <Row style={{padding: 10}}>
                         <Col lg={16} md={24} style={{padding: 3}}>
                             <Card>
-                                <ReleaseView release={release}/>
+                                <ReleaseView app={app}/>
                             </Card>
                         </Col>
                         <Col lg={8} md={24} style={{padding: 3}}>

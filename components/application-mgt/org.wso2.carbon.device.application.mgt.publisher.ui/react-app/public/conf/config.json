@@ -7,7 +7,12 @@
     "protocol": "https",
     "hostname": "localhost",
     "httpsPort": "9443",
-    "invokerUri": "/ui-request-handler/invoke/application-mgt-publisher/v1.0",
+    "invoker": {
+      "uri": "/ui-request-handler/invoke",
+      "publisher": "/application-mgt-publisher/v1.0",
+      "store": "/application-mgt-store/v1.0",
+      "admin" : ""
+    },
     "loginUri": "/ui-request-handler/login",
     "platform": "publisher"
   },

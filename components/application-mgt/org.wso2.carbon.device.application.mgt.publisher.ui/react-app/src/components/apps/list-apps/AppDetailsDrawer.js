@@ -85,7 +85,7 @@ class AppDetailsDrawer extends React.Component {
                     />
                     <Divider dashed={true}/>
 
-                    <DetailedRating uuid={app.applicationReleases[0].uuid}/>
+                    <DetailedRating type="app" uuid={app.applicationReleases[0].uuid}/>
                 </Drawer>
             </div>
         );

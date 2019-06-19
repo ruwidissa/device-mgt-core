@@ -1,13 +1,20 @@
 import React from "react";
-import {Divider, Row, Col, Typography, Button} from "antd";
+import {Divider, Row, Col, Typography, Button, Drawer} from "antd";
+import StarRatings from "react-star-ratings";
+import Reviews from "./review/Reviews";
 import "../../../App.css";
 import config from "../../../../public/conf/config.json";
+import DetailedRating from "../detailed-rating/DetailedRating";
 
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
     render() {
-        const release = this.props.release;
+        const app = this.props.app;
+        const release = (app !== null) ? app.applicationReleases[0] : null;
+        if(release == null){
+            return null;
+        }
         return (
             <div>
                 <div className="release">
@@ -16,8 +23,16 @@ class ReleaseView extends React.Component {
                             <img src={release.iconPath} alt="icon"/>
                         </Col>
                         <Col xl={10} sm={11} className="release-title">
-                            <Title level={2}>App Name</Title>
-                            <Text>{release.version}</Text><br/>
+                            <Title level={2}>{app.name}</Title>
+                            <Text>Version : {release.version}</Text><br/><br/>
+                            <StarRatings
+                                rating={release.rating}
+                                starRatedColor="#777"
+                                starDimension="20px"
+                                starSpacing="2px"
+                                numberOfStars={5}
+                                name='rating'
+                            />
                         </Col>
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
                             <div>
@@ -28,7 +43,7 @@ class ReleaseView extends React.Component {
                                             icon="shop"
                                             disabled={release.currentStatus !== "PUBLISHED"}
                                             onClick={() => {
-                                                window.open("https://"+ config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+"/store/apps/"+release.uuid)
+                                                window.open("https://"+ config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+"/store/"+app.deviceType+"/apps/"+release.uuid)
                                             }}>
                                         Open in store
                                     </Button>
@@ -50,6 +65,14 @@ class ReleaseView extends React.Component {
                     <Paragraph type="secondary" ellipsis={{rows: 3, expandable: true}}>
                         {release.description}
                     </Paragraph>
+                    <Divider/>
+                    <Text>REVIEWS</Text>
+                    <Row>
+                        <Col lg={18}>
+                            <DetailedRating type="release" uuid={release.uuid}/>
+                        </Col>
+                    </Row>
+                    <Reviews uuid={release.uuid}/>
                 </div>
             </div>
         );

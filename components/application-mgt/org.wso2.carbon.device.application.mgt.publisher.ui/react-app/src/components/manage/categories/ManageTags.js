@@ -21,7 +21,7 @@ class ManageTags extends React.Component {
 
     componentDidMount() {
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/tags",
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags",
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }).then(res => {
@@ -60,7 +60,7 @@ class ManageTags extends React.Component {
         });
 
         axios.delete(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/tags/"+id,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/tags/"+id,
             {
                 headers: {'X-Platform': config.serverConfig.platform}
             }).then(res => {
@@ -200,7 +200,7 @@ class ManageTags extends React.Component {
 
         const data = tempElements.map(tag => tag.tagName);
 
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/tags",
+        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags",
             data,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
@@ -265,7 +265,7 @@ class ManageTags extends React.Component {
         });
 
         axios.put(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/tags/rename?from="+currentlyEditingId+"&to="+editingValue,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags/rename?from="+currentlyEditingId+"&to="+editingValue,
             {},
             {
                 headers: { 'X-Platform': config.serverConfig.platform }

@@ -6,7 +6,7 @@ export const getApps = () => dispatch => {
 
     const request = "method=post&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications";
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 200) {
             let apps = [];
@@ -29,7 +29,7 @@ export const getRelease = (uuid) => dispatch => {
 
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/release/" + uuid;
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 200) {
             let release = res.data.data;
@@ -73,7 +73,7 @@ export const closeLifecycleModal = () => dispatch => {
 export const getLifecycle = () => dispatch => {
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/lifecycle-config";
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 200) {
             let lifecycle = res.data.data;
@@ -97,7 +97,7 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
     const request = "method=post&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/application-mgt-publisher/v1.0/applications/life-cycle/" + uuid;
 
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 201) {
             let release = res.data.data;

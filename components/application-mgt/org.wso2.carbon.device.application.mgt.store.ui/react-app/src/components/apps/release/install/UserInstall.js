@@ -29,16 +29,12 @@ class UserInstall extends React.Component {
         this.setState({data: [], fetching: true});
 
 
-        const parameters = {
-            method: "get",
-            'content-type': "application/json",
-            payload: "{}",
-            'api-endpoint': "/device-mgt/v1.0/users/search?username=" + value
-        };
-
-        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
-        console.log(request);
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        //send request to the invoker
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/device-mgt/v1.0/users/search?username=" + value,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {

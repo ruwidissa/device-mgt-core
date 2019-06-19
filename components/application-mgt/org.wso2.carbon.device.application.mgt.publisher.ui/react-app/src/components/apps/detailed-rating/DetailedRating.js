@@ -18,25 +18,27 @@ class DetailedRating extends React.Component{
     }
 
     componentDidMount() {
-        this.getData(this.props.uuid);
+        const {type,uuid} = this.props;
+        this.getData(type,uuid);
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.uuid !== this.props.uuid) {
-            this.getData(this.props.uuid);
+            const {type,uuid} = this.props;
+            this.getData(type,uuid);
         }
     }
 
-    getData = (uuid)=>{
-        const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-store/v1.0/reviews/"+uuid+"/rating";
+    getData = (type, uuid)=>{
 
         return axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/reviews/"+uuid+"/rating",
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }).then(res => {
             if (res.status === 200) {
                 let detailedRating = res.data.data;
+                console.log(type,uuid);
                 this.setState({
                     detailedRating
                 })
@@ -46,6 +48,8 @@ class DetailedRating extends React.Component{
             if (error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             }
+
+            console.log(error);
         });
     };
 
