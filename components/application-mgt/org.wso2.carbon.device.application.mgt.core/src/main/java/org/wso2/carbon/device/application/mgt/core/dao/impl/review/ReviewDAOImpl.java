@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.core.dao.impl.Review;
+package org.wso2.carbon.device.application.mgt.core.dao.impl.review;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
