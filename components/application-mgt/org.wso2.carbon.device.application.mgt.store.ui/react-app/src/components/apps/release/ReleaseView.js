@@ -21,14 +21,14 @@ class ReleaseView extends React.Component {
         }
     }
 
-    installApp = (type,payload) => {
+    installApp = (type, payload) => {
         const {uuid} = this.props.release;
 
         const parameters = {
             method: "post",
             'content-type': "application/json",
             payload: JSON.stringify(payload),
-            'api-endpoint': "/application-mgt-store/v1.0/subscription/install/" + uuid + "/"+type+"/install"
+            'api-endpoint': "/application-mgt-store/v1.0/subscription/install/" + uuid + "/" + type + "/install"
         };
 
         const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
@@ -36,7 +36,7 @@ class ReleaseView extends React.Component {
             loading: true,
         });
 
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri, request
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store, request
         ).then(res => {
             if (res.status === 201) {
                 this.setState({
@@ -60,8 +60,9 @@ class ReleaseView extends React.Component {
             }
 
         }).catch((error) => {
+            console.log(error);
             if (error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
                 this.setState({
                     loading: false,
@@ -133,13 +134,13 @@ class ReleaseView extends React.Component {
                     <Text>REVIEWS</Text>
                     <Row>
                         <Col lg={18}>
-                            <DetailedRating uuid={release.uuid}/>
+                            <DetailedRating type="app" uuid={release.uuid}/>
                         </Col>
                         <Col lg={6}>
                             <AddReview uuid={release.uuid}/>
                         </Col>
                     </Row>
-                    <Reviews uuid={release.uuid}/>
+                    <Reviews type="app" uuid={release.uuid}/>
                 </div>
             </div>
         );

@@ -19,7 +19,6 @@ class Dashboard extends React.Component {
     }
 
     changeSelectedMenuItem = (key) =>{
-        console.log("called", key);
         this.setState({
             selectedKeys: [key]
         })
@@ -27,7 +26,6 @@ class Dashboard extends React.Component {
 
     render() {
         const {selectedKeys} = this.state;
-        console.log(selectedKeys);
         return (
             <div>
                 <Layout className="layout">

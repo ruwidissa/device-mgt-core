@@ -12,7 +12,6 @@ class AppDetailsDrawer extends React.Component {
         if (app == null) {
             return null;
         }
-        console.log(app);
         return (
             <div>
 
@@ -85,7 +84,7 @@ class AppDetailsDrawer extends React.Component {
                     />
                     <Divider dashed={true}/>
 
-                    <DetailedRating uuid={app.applicationReleases[0].uuid}/>
+                    <DetailedRating type="app" uuid={app.applicationReleases[0].uuid}/>
                 </Drawer>
             </div>
         );

@@ -41,7 +41,7 @@ class Apps extends React.Component {
                         <Col span={6} offset={18}>
                             <Search
                                 placeholder="search"
-                                onSearch={value => console.log(value)}
+                                // onSearch={value => console.log(value)}
                                 style={{ width: 200}}
                             />
                             <Button style={{margin:5}}>Advanced Search</Button>

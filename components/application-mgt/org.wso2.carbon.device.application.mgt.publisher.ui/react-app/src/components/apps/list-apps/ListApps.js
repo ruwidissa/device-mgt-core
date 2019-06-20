@@ -26,7 +26,6 @@ class ConnectedListApps extends React.Component {
 
    //handler to show app drawer
     showDrawer = (app) => {
-        console.log(app);
         this.setState({
             isDrawerVisible: true,
             selectedApp: app
@@ -56,7 +55,7 @@ class ConnectedListApps extends React.Component {
                             <Col span={18} style={{textAlign: "right"}}>
                                 <Search
                                     placeholder="input search text"
-                                    onSearch={value => console.log(value)}
+                                    // onSearch={value => console.log(value)}
                                     style={{width: 200}}
                                 />
                             </Col>

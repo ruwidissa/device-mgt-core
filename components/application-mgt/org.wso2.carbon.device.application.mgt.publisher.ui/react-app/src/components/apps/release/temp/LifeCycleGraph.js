@@ -92,7 +92,7 @@ function connectNodes(nodeFrom, nodeTo) {
 }
 
 function f() {
-    console.log(1);
+    // console.log(1);
 }
 
 export default LifeCycleGraph;

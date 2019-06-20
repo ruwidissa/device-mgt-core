@@ -113,9 +113,8 @@ class AppsTable extends React.Component {
         const data = {
         };
 
-        console.log(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications?"+encodedExtraParams);
-        axios.post(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications?"+encodedExtraParams,
+       axios.post(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications?"+encodedExtraParams,
             data,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
@@ -152,7 +151,6 @@ class AppsTable extends React.Component {
     };
 
     render() {
-        console.log("rendered");
         return (
 
             <Table

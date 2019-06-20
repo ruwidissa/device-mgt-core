@@ -21,7 +21,7 @@ class ManageCategories extends React.Component {
 
     componentDidMount() {
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/categories",
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/categories",
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }).then(res => {
@@ -58,7 +58,7 @@ class ManageCategories extends React.Component {
             loading: true
         });
         axios.delete(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/categories/"+id,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories/"+id,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }
@@ -200,7 +200,7 @@ class ManageCategories extends React.Component {
         const data = tempElements.map(category => category.categoryName);
 
         axios.post(
-        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/categories",
+        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories",
             data,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
@@ -241,7 +241,6 @@ class ManageCategories extends React.Component {
     saveInputRef = input => (this.input = input);
 
     closeEditModal = e => {
-        console.log(e);
         this.setState({
             isEditModalVisible: false,
             currentlyEditingId: null
@@ -266,7 +265,7 @@ class ManageCategories extends React.Component {
         });
 
         axios.put(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/admin/applications/categories/rename?from="+currentlyEditingId+"&to="+editingValue,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories/rename?from="+currentlyEditingId+"&to="+editingValue,
             {},
             {
                 headers: { 'X-Platform': config.serverConfig.platform }

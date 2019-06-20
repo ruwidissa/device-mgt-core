@@ -37,9 +37,11 @@ class AppList extends React.Component {
             payload.deviceType= deviceType;
         }
 
+        console.log("b",config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/");
+
         //send request to the invoker
         axios.post(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invokerUri+"/applications/",
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/",
             payload,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
@@ -54,7 +56,7 @@ class AppList extends React.Component {
                 })
             }
 
-        }).catch((error) => {
+        }).catch((error) => { console.log(error.response);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popup with error
                 message.error('You are not logged in');
