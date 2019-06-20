@@ -32,12 +32,6 @@ public class Review {
     @ApiModelProperty(name = "content", value = "Review message.")
     private String content;
 
-    @ApiModelProperty(name = "rootParentId", value = "Root Parent id of the review")
-    private int rootParentId;
-
-    @ApiModelProperty(name = "immediateParentId", value = "Immediate Parent id of the review")
-    private int immediateParentId;
-
     @ApiModelProperty(name = "username", value = "Username odf the Review creator")
     private String username;
 
@@ -49,6 +43,12 @@ public class Review {
 
     @ApiModelProperty(name = "rating", value = "Rating value of the application release")
     private int rating;
+
+    @ApiModelProperty(name = "releaseUuid", value = "UUID of the review associated application")
+    private String releaseUuid;
+
+    @ApiModelProperty(name = "releaseVersion", value = "Version of the review associated application")
+    private String releaseVersion;
 
     @ApiModelProperty(name = "replies", value = "Replying reviews")
     private List<Review> replies;
@@ -67,22 +67,6 @@ public class Review {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public int getRootParentId() {
-        return rootParentId;
-    }
-
-    public void setRootParentId(int rootParentId) {
-        this.rootParentId = rootParentId;
-    }
-
-    public int getImmediateParentId() {
-        return immediateParentId;
-    }
-
-    public void setImmediateParentId(int immediateParentId) {
-        this.immediateParentId = immediateParentId;
     }
 
     public String getUsername() {
@@ -120,4 +104,12 @@ public class Review {
     public List<Review> getReplies() { return replies; }
 
     public void setReplies(List<Review> replies) { this.replies = replies; }
+
+    public String getReleaseUuid() { return releaseUuid; }
+
+    public void setReleaseUuid(String releaseUuid) { this.releaseUuid = releaseUuid; }
+
+    public String getReleaseVersion() { return releaseVersion; }
+
+    public void setReleaseVersion(String releaseVersion) { this.releaseVersion = releaseVersion; }
 }

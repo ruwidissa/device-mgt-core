@@ -238,8 +238,8 @@ public class ReviewManagerImpl implements ReviewManager {
         Review review = new Review();
         review.setId(reviewDTO.getId());
         review.setContent(reviewDTO.getContent());
-        review.setRootParentId(reviewDTO.getRootParentId());
-        review.setImmediateParentId(reviewDTO.getImmediateParentId());
+        review.setReleaseUuid(reviewDTO.getReleaseUuid());
+        review.setReleaseVersion(reviewDTO.getReleaseVersion());
         review.setCreatedAt(reviewDTO.getCreatedAt());
         review.setModifiedAt(reviewDTO.getModifiedAt());
         review.setRating(reviewDTO.getRating());
@@ -284,11 +284,6 @@ public class ReviewManagerImpl implements ReviewManager {
         if (reviewDTO.getRootParentId() == -1 && reviewDTO.getImmediateParentId() == -1) {
             if (!reviewDTO.getReleaseUuid().equals(uuid)) {
                 isActiveReview = false;
-                if (!addReview(updatingReview, uuid, true)) {
-                    String msg = "Review Updating Status: New review adding is failed.";
-                    log.error(msg);
-                    throw new ReviewManagementException(msg);
-                }
             } else if (updatingReview.getRating() > 0 && updatingReview.getRating() != reviewDTO.getRating()) {
                 Runnable task = () -> ReviewManagerImpl.this
                         .calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid, tenantId);
@@ -304,17 +299,35 @@ public class ReviewManagerImpl implements ReviewManager {
             }
             reviewDTO.setContent(updatingReview.getContent());
         }
-        return updateReviewInDB(reviewDTO, uuid, reviewId, isActiveReview, tenantId);
+
+        if (updateReviewInDB(reviewDTO, reviewId, isActiveReview, tenantId)) {
+            if (!isActiveReview) {
+                if (addReview(updatingReview, uuid, true)) {
+                    return true;
+                } else {
+                    if (updateReviewInDB(reviewDTO, reviewId, true, tenantId)) {
+                        return false;
+                    } else {
+                        String msg = "Review Updating Status: Adding new Review for application release which has UUID: "
+                                + "" + uuid + " is failed and the old review restoring is also failed.";
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
+                }
+            }
+            return true;
+        } else {
+            String msg = "Review Updating is failed. Hence please contact the administrator.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        }
     }
 
-    private boolean updateReviewInDB(ReviewDTO reviewDTO, String uuid, int reviewId, boolean isActiveReview,
+    private boolean updateReviewInDB(ReviewDTO reviewDTO, int reviewId, boolean isActiveReview,
             int tenantId) throws ReviewManagementException, ApplicationManagementException {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             if (this.reviewDAO.updateReview(reviewDTO, reviewId, isActiveReview, tenantId) == 1) {
-                if (!isActiveReview) {
-                    updateAppRating(uuid, tenantId);
-                }
                 ConnectionManagerUtil.commitDBTransaction();
                 return true;
             }

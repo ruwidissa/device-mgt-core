@@ -16,7 +16,7 @@
  *   under the License.
  *
  */
-package org.wso2.carbon.device.application.mgt.core.dao.impl.review;
+package org.wso2.carbon.device.application.mgt.core.dao.impl.Review;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -110,7 +110,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         try {
             conn = this.getDBConnection();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT rv.ID FROM AP_APP_REVIEW rv " + "WHERE rv.AP_APP_RELEASE_ID IN (",
+                    "SELECT rv.ID FROM AP_APP_REVIEW rv WHERE rv.AP_APP_RELEASE_ID IN (",
                     ") AND rv.USERNAME = ? AND rv.TENANT_ID = ?");
             appReleaseIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
@@ -118,7 +118,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 for (Integer deviceId : appReleaseIds) {
                     ps.setObject(index++, deviceId);
                 }
-                ps.setInt(index++, tenantId);
+                ps.setString(index++, username);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next();
