@@ -75,7 +75,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         releaseWrapper.setMetaData("Just meta data");
         releaseWrapper.setReleaseType("free");
         releaseWrapper.setPrice(5.7);
-        releaseWrapper.setSupportedOsVersions("5.7, 6.1");
+        releaseWrapper.setSupportedOsVersions("4.0-7.0");
         applicationReleaseWrappers.add(releaseWrapper);
 
         applicationWrapper.setApplicationReleaseWrappers(applicationReleaseWrappers);

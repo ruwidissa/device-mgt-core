@@ -53,7 +53,7 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
     Application createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
-            throws ApplicationManagementException, RequestValidatingException;
+            throws ApplicationManagementException;
 
     Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
