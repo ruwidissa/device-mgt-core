@@ -25,7 +25,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
@@ -91,7 +90,6 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -132,12 +130,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.subscriptionDAO = ApplicationManagementDAOFactory.getSubscriptionDAO();
     }
 
-    /***
-     * The responsbility of this method is the creating an application.
-     * @param applicationWrapper ApplicationDTO that need to be created.
-     * @return {@link ApplicationDTO}
-     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
-     */
     @Override
     public Application createApplication(ApplicationWrapper applicationWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
@@ -145,7 +137,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         if (log.isDebugEnabled()) {
-            log.debug("Application create request is received for the tenant : " + tenantId + " and" + " the user : "
+            log.debug("Application create request is received for the tenant : " + tenantId + " and the user: "
                     + userName);
         }
 
@@ -176,7 +168,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private void deleteApplicationArtifacts(List<String> directoryPaths) throws ApplicationManagementException {
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
-
         try {
             applicationStorageManager.deleteAllApplicationReleaseArtifacts(directoryPaths);
         } catch (ApplicationStorageManagementException e) {
@@ -1114,107 +1105,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return roleList;
     }
 
-    //todo no usage
-    public ApplicationDTO getApplication(String appType, String appName) throws ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO application;
-        boolean isAppAllowed = false;
-        List<ApplicationReleaseDTO> applicationReleases;
-        try {
-            ConnectionManagerUtil.openDBConnection();
-            application = this.applicationDAO.getApplication(appName, appType, tenantId);
-            if (isAdminUser(userName, tenantId, CarbonConstants.UI_ADMIN_PERMISSION_COLLECTION)) {
-                applicationReleases = getReleases(application, null);
-                application.setApplicationReleaseDTOs(applicationReleases);
-                return application;
-            }
-
-            if (!application.getUnrestrictedRoles().isEmpty()) {
-                if (hasUserRole(application.getUnrestrictedRoles(), userName)) {
-                    isAppAllowed = true;
-                }
-            } else {
-                isAppAllowed = true;
-            }
-
-            if (!isAppAllowed) {
-                return null;
-            }
-
-            applicationReleases = getReleases(application, null);
-            application.setApplicationReleaseDTOs(applicationReleases);
-            return application;
-        } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while getting application with the " + "application name " + appName);
-        } catch (ApplicationManagementDAOException e) {
-            //todo
-            throw new ApplicationManagementException("");
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
-        }
-    }
-
-    @Override public ApplicationDTO getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ApplicationDTO application;
-        try {
-            ConnectionManagerUtil.openDBConnection();
-            application = this.applicationDAO.getApplicationByRelease(appReleaseUUID, tenantId);
-
-            if (application.getUnrestrictedRoles().isEmpty() || hasUserRole(application.getUnrestrictedRoles(),
-                    userName)) {
-                return application;
-            }
-            return null;
-        } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while getting application with the application UUID " + appReleaseUUID);
-        } catch (ApplicationManagementDAOException e) {
-            //todo
-            throw new ApplicationManagementException("");
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
-        }
-    }
-
-    //    todo rethink about this method
-    private List<ApplicationReleaseDTO> getReleases(ApplicationDTO application, String releaseState)
-            throws ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        List<ApplicationReleaseDTO> applicationReleases;
-        if (log.isDebugEnabled()) {
-            log.debug("Request is received to retrieve all the releases related with the application " + application
-                    .toString());
-        }
-        //todo
-        applicationReleases = null;
-        try {
-            applicationReleases = this.applicationReleaseDAO.getReleases(application.getId(), tenantId);
-        } catch (ApplicationManagementDAOException e) {
-            //todo
-            throw new ApplicationManagementException("");
-        }
-        for (ApplicationReleaseDTO applicationRelease : applicationReleases) {
-            LifecycleState lifecycleState = null;
-            try {
-                lifecycleState = this.lifecycleStateDAO.getLatestLifeCycleStateByReleaseID(applicationRelease.getId());
-            } catch (LifeCycleManagementDAOException e) {
-                throw new ApplicationManagementException(
-                        "Error occurred while getting the latest lifecycle state for the application release UUID: "
-                                + applicationRelease.getUuid(), e);
-            }
-            if (lifecycleState != null) {
-                log.error("todo");
-//                applicationRelease.setLifecycleState(lifecycleState);
-            }
-        }
-        return applicationReleases;
-//        return filterAppReleaseByCurrentState(applicationReleases, releaseState);
-    }
-
     @Override
     public void deleteApplication(int applicationId) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
@@ -1362,39 +1252,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-    }
-
-    /**
-     * To check whether current user has the permission to do some secured operation.
-     *
-     * @param username   Name of the User.
-     * @param tenantId   ID of the tenant.
-     * @param permission Permission that need to be checked.
-     * @return true if the current user has the permission, otherwise false.
-     * @throws UserStoreException UserStoreException
-     */
-    private boolean isAdminUser(String username, int tenantId, String permission) throws UserStoreException {
-        UserRealm userRealm = DataHolder.getInstance().getRealmService().getTenantUserRealm(tenantId);
-        return userRealm != null && userRealm.getAuthorizationManager() != null && userRealm.getAuthorizationManager()
-                .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
-                        CarbonConstants.UI_PERMISSION_ACTION);
-    }
-
-    /***
-     * To verify whether application type is valid one or not
-     * @param appType application type {@link ApplicationType}
-     * @return true returns if appType is valid on, otherwise returns false
-     */
-    private boolean isValidAppType(String appType) {
-        if (appType == null) {
-            return false;
-        }
-        for (ApplicationType applicationType : ApplicationType.values()) {
-            if (applicationType.toString().equals(appType)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -2295,7 +2152,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             String supportedOSVersions = applicationReleaseWrapper.getSupportedOsVersions();
             if (!StringUtils.isEmpty(supportedOSVersions)) {
-                //todo check OS versions are supported or not
+                if (!isValidOsVersions(supportedOSVersions, deviceType)){
+                    String msg = "You are trying to update application release which has invalid or unsupported OS "
+                            + "versions in the supportedOsVersions section. Hence, please re-evaluate the request payload.";
+                    log.error(msg);
+                    throw new BadRequestException(msg);                }
                 applicationReleaseDTO.setSupportedOsVersions(supportedOSVersions);
             }
             if (!StringUtils.isEmpty(applicationReleaseWrapper.getDescription())) {
@@ -2592,7 +2453,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg);
         }
     }
-
 
     @Override
     public void validateImageArtifacts(Attachment iconFile, Attachment bannerFile,
