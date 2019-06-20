@@ -1,5 +1,5 @@
 import React from "react";
-import {Typography, Tag, Divider, Select, Button, Modal, message, notification} from "antd";
+import {Typography, Tag, Divider, Select, Button, Modal, message, notification, Collapse} from "antd";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
 
@@ -9,6 +9,7 @@ import './LifeCycle.css';
 
 const {Text, Title, Paragraph} = Typography;
 const {Option} = Select;
+const Panel = Collapse.Panel;
 
 const modules = {
     toolbar: [
@@ -192,6 +193,33 @@ class LifeCycle extends React.Component {
                 >
                     Change
                 </Button>
+
+
+                <Divider/>
+                <Text strong={true}>Lorem Ipsum</Text>
+                <Collapse defaultActiveKey={currentStatus}>
+                    {
+                        Object.keys(lifecycle).map(lifecycleState => {
+                            return (
+                                <Panel header={lifecycleState} key={lifecycleState}>
+                                    {
+                                        Object.keys(lifecycle).map(state => {
+                                            // console.log(lifecycle[lifecycleState].proceedingStates);
+                                            const isEnabled = lifecycle[lifecycleState].hasOwnProperty("proceedingStates") && (lifecycle[lifecycleState].proceedingStates.includes(state));
+                                            const color = isEnabled ? "green" : "";
+                                            return (
+                                                <Tag
+                                                    disabled={!isEnabled}
+                                                    key={state} style={{marginBottom: 5}} color={color}>{state}</Tag>
+                                            )
+                                        })
+                                    }
+                                </Panel>
+                            )
+                        })
+                    }
+
+                </Collapse>
 
                 <Modal
                     title="Confirm changing lifecycle state"
