@@ -14,24 +14,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.application.mgt.store.api.services.impl.admin;
+package org.wso2.carbon.device.application.mgt.publisher.api.services.impl.admin;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.application.mgt.common.PaginationResult;
+import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.store.api.services.admin.ReviewManagementAdminAPI;
+import org.wso2.carbon.device.application.mgt.publisher.api.services.admin.ReviewManagementAdminAPI;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 /**
@@ -98,5 +104,74 @@ public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
+    }
+
+    @Override
+    @GET
+    @Path("/release/{uuid}")
+    public Response getAllReleaseReviews(
+            @PathParam("uuid") String uuid,
+            @DefaultValue("0") @QueryParam("offset") int offSet,
+            @DefaultValue("20") @QueryParam("limit") int limit) {
+        ReviewManager reviewManager = APIUtil.getReviewManager();
+        PaginationRequest request = new PaginationRequest(offSet, limit);
+        try {
+            PaginationResult paginationResult = reviewManager.getAllReleaseReviews(request, uuid);
+            return Response.status(Response.Status.OK).entity(paginationResult).build();
+        } catch (NotFoundException e) {
+            String msg = "Couldn't find an application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ReviewManagementException e) {
+            String msg = "Error occurred while retrieving reviews for application UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while retrieving application release details for application UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/{uuid}/release-rating")
+    public Response getAppReleaseRating(
+            @PathParam("uuid") String uuid) {
+        ReviewManager reviewManager = APIUtil.getReviewManager();
+        Rating rating;
+        try {
+            rating = reviewManager.getAppReleaseRating(uuid);
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ReviewManagementException | ApplicationManagementException e) {
+            String msg = "Error occured while getting review data for application release UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.status(Response.Status.OK).entity(rating).build();
+    }
+
+    @Override
+    @GET
+    @Path("/{uuid}/app-rating")
+    public Response getAppRating(
+            @PathParam("uuid") String uuid) {
+        ReviewManager reviewManager = APIUtil.getReviewManager();
+        Rating rating;
+        try {
+            rating = reviewManager.getAppRating(uuid);
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application for application release UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ReviewManagementException | ApplicationManagementException e) {
+            String msg = "Error occured while getting review data for application release UUID: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.status(Response.Status.OK).entity(rating).build();
     }
 }

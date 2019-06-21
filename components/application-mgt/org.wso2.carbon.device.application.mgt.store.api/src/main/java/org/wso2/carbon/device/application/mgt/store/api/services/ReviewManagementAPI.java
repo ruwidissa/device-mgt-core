@@ -49,9 +49,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-        /**
-        * APIs to handle review management related tasks.
-        */
+/**
+* APIs to handle review management related tasks.
+*/
 
 @SwaggerDefinition(
         info = @Info(
@@ -60,7 +60,7 @@ import java.util.List;
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ReviewManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/review"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/store/review"),
                         })
                 }
         ),
@@ -92,13 +92,13 @@ public interface ReviewManagementAPI {
     String SCOPE = "scope";
 
     @GET
-    @Path("/release/{uuid}")
+    @Path("/app/user/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "get app release reviews",
-            notes = "Get all app release reviews",
+            value = "get app reviews",
+            notes = "Get all app reviews",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
@@ -111,19 +111,20 @@ public interface ReviewManagementAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully retrieved app release reviews.",
+                            message = "OK. \n Successfully retrieved app reviews.",
                             response = PaginationResult.class,
                             responseContainer = "PaginationResult"),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. \n Not found an application release for requested UUID."),
+                            message = "Not Found. \n Not found an application release associated with requested "
+                                    + "UUID."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the review list.",
                             response = ErrorResponse.class)
             })
 
-    Response getAllReleaseReviews(
+    Response getUserReviews(
             @ApiParam(
                     name="uuid",
                     value="uuid of the application release.",
@@ -140,105 +141,55 @@ public interface ReviewManagementAPI {
                     defaultValue = "20")
             @QueryParam("limit") int limit);
 
-            @GET
-            @Path("/app/user/{uuid}")
-            @Produces(MediaType.APPLICATION_JSON)
-            @ApiOperation(
-                    produces = MediaType.APPLICATION_JSON,
-                    httpMethod = "GET",
-                    value = "get app reviews",
-                    notes = "Get all app reviews",
-                    tags = "Store Management",
-                    extensions = {
-                            @Extension(properties = {
-                                    @ExtensionProperty(name = SCOPE, value = "perm:app:review:view")
-                            })
-                    }
-            )
-
-            @ApiResponses(
-                    value = {
-                            @ApiResponse(
-                                    code = 200,
-                                    message = "OK. \n Successfully retrieved app reviews.",
-                                    response = PaginationResult.class,
-                                    responseContainer = "PaginationResult"),
-                            @ApiResponse(
-                                    code = 404,
-                                    message = "Not Found. \n Not found an application release associated with requested "
-                                            + "UUID."),
-                            @ApiResponse(
-                                    code = 500,
-                                    message = "Internal Server Error. \n Error occurred while getting the review list.",
-                                    response = ErrorResponse.class)
+    @GET
+    @Path("/app/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get app reviews",
+            notes = "Get all app reviews",
+            tags = "Store Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:review:view")
                     })
+            }
+    )
 
-            Response getUserReviews(
-                    @ApiParam(
-                            name="uuid",
-                            value="uuid of the application release.",
-                            required = true)
-                    @PathParam("uuid") String uuid,
-                    @ApiParam(
-                            name="offset",
-                            value="Starting review number.",
-                            defaultValue = "0")
-                    @QueryParam("offSet") int offSet,
-                    @ApiParam(
-                            name="limit",
-                            value = "Limit of paginated reviews",
-                            defaultValue = "20")
-                    @QueryParam("limit") int limit);
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved app reviews.",
+                            response = PaginationResult.class,
+                            responseContainer = "PaginationResult"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n Not found an application release associated with requested "
+                                    + "UUID."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting the review list.",
+                            response = ErrorResponse.class)
+            })
 
-            @GET
-            @Path("/app/{uuid}")
-            @Produces(MediaType.APPLICATION_JSON)
-            @ApiOperation(
-                    produces = MediaType.APPLICATION_JSON,
-                    httpMethod = "GET",
-                    value = "get app reviews",
-                    notes = "Get all app reviews",
-                    tags = "Store Management",
-                    extensions = {
-                            @Extension(properties = {
-                                    @ExtensionProperty(name = SCOPE, value = "perm:app:review:view")
-                            })
-                    }
-            )
-
-            @ApiResponses(
-                    value = {
-                            @ApiResponse(
-                                    code = 200,
-                                    message = "OK. \n Successfully retrieved app reviews.",
-                                    response = PaginationResult.class,
-                                    responseContainer = "PaginationResult"),
-                            @ApiResponse(
-                                    code = 404,
-                                    message = "Not Found. \n Not found an application release associated with requested "
-                                            + "UUID."),
-                            @ApiResponse(
-                                    code = 500,
-                                    message = "Internal Server Error. \n Error occurred while getting the review list.",
-                                    response = ErrorResponse.class)
-                    })
-
-            Response getAllAppReviews(
-                    @ApiParam(
-                            name="uuid",
-                            value="uuid of the application release.",
-                            required = true)
-                    @PathParam("uuid") String uuid,
-                    @ApiParam(
-                            name="offset",
-                            value="Starting review number.",
-                            defaultValue = "0")
-                    @QueryParam("offSet") int offSet,
-                    @ApiParam(
-                            name="limit",
-                            value = "Limit of paginated reviews",
-                            defaultValue = "20")
-                    @QueryParam("limit") int limit);
+    Response getAllAppReviews(
+            @ApiParam(
+                    name="uuid",
+                    value="uuid of the application release.",
+                    required = true)
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="offset",
+                    value="Starting review number.",
+                    defaultValue = "0")
+            @QueryParam("offSet") int offSet,
+            @ApiParam(
+                    name="limit",
+                    value = "Limit of paginated reviews",
+                    defaultValue = "20")
+            @QueryParam("limit") int limit);
 
     @POST
     @Path("/{uuid}")
@@ -442,13 +393,13 @@ public interface ReviewManagementAPI {
             @PathParam("reviewId") int reviewId);
 
     @GET
-    @Path("/{uuid}/release-rating")
+    @Path("/{uuid}/app-rating")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "get ratings",
-            notes = "Get all ratings",
+            value = "get app ratings",
+            notes = "Get all app ratings",
             tags = "Store Management",
             extensions = {
                     @Extension(properties = {
@@ -466,7 +417,7 @@ public interface ReviewManagementAPI {
                             responseContainer = "List"),
                     @ApiResponse(
                             code = 404,
-                            message = "Not Found. \n No Application release found for application release UUID.",
+                            message = "Not Found. \n No Application found which has application release of UUID.",
                             response = ErrorResponse.class),
                     @ApiResponse(
                             code = 500,
@@ -474,52 +425,11 @@ public interface ReviewManagementAPI {
                             response = ErrorResponse.class)
             })
 
-    Response getAppReleaseRating(
+    Response getAppRating(
             @ApiParam(
                     name = "uuid",
                     value = "uuid of the application release",
                     required = true)
             @PathParam("uuid")
                     String uuid);
-
-            @GET
-            @Path("/{uuid}/app-rating")
-            @Produces(MediaType.APPLICATION_JSON)
-            @ApiOperation(
-                    produces = MediaType.APPLICATION_JSON,
-                    httpMethod = "GET",
-                    value = "get app ratings",
-                    notes = "Get all app ratings",
-                    tags = "Store Management",
-                    extensions = {
-                            @Extension(properties = {
-                                    @ExtensionProperty(name = SCOPE, value = "perm:app:review:view")
-                            })
-                    }
-            )
-
-            @ApiResponses(
-                    value = {
-                            @ApiResponse(
-                                    code = 200,
-                                    message = "OK. \n Successfully retrieved ratings.",
-                                    response = List.class,
-                                    responseContainer = "List"),
-                            @ApiResponse(
-                                    code = 404,
-                                    message = "Not Found. \n No Application found which has application release of UUID.",
-                                    response = ErrorResponse.class),
-                            @ApiResponse(
-                                    code = 500,
-                                    message = "Internal Server Error. \n Error occurred while getting ratings",
-                                    response = ErrorResponse.class)
-                    })
-
-            Response getAppRating(
-                    @ApiParam(
-                            name = "uuid",
-                            value = "uuid of the application release",
-                            required = true)
-                    @PathParam("uuid")
-                            String uuid);
 }
