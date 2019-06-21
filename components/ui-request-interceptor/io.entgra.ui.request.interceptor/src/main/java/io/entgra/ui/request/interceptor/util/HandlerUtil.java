@@ -20,6 +20,7 @@ package io.entgra.ui.request.interceptor.util;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -171,8 +172,7 @@ public class HandlerUtil {
             if (uiConfig == null){
                 proxyResponse.setUrl(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
             } else{
-                proxyResponse.setUrl(serverUrl + uiConfig.get(HandlerConstants.LOGIN_RESPONSE_KEY).getAsJsonObject()
-                        .get(HandlerConstants.FAILURE_CALLBACK_KEY).getAsJsonObject()
+                proxyResponse.setUrl(serverUrl + uiConfig.get(HandlerConstants.ERROR_CALLBACK_KEY).getAsJsonObject()
                         .get(proxyResponse.getExecutorResponse().split(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)[1])
                         .getAsString());
             }

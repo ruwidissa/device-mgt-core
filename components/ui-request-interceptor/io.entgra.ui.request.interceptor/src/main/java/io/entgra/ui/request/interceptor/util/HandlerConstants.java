@@ -32,8 +32,7 @@ public class HandlerConstants {
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String PLATFORM = "platform";
     public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
-    public static final String LOGIN_RESPONSE_KEY = "loginResponse";
-    public static final String FAILURE_CALLBACK_KEY = "failureCallback";
+    public static final String ERROR_CALLBACK_KEY = "errorCallback";
     public static final String API_COMMON_CONTEXT = "/api";
     public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
