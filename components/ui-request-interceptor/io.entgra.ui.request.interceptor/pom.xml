@@ -151,5 +151,10 @@
             <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -23,9 +23,11 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONException;
@@ -79,7 +81,7 @@ public class HandlerUtil {
                         if (jsonString.contains("Access token expired") || jsonString
                                 .contains("Invalid input. Access token validation failed")) {
                             proxyResponse.setCode(statusCode);
-                            proxyResponse.setExecutorResponse("ACCESS_TOKEN_IS_EXPIRED");
+                            proxyResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
                             return proxyResponse;
                         } else {
                             proxyResponse.setCode(statusCode);
@@ -161,8 +163,8 @@ public class HandlerUtil {
         }
 
         resp.setStatus(proxyResponse.getCode());
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        resp.setCharacterEncoding(Consts.UTF_8.name());
 
         if (httpSession != null) {
             JsonObject uiConfig = (JsonObject) httpSession.getAttribute(HandlerConstants.UI_CONFIG_KEY);
@@ -192,13 +194,13 @@ public class HandlerUtil {
     public static void handleSuccess(HttpServletRequest req, HttpServletResponse resp, String serverUrl,
             String platform, ProxyResponse proxyResponse) throws IOException {
         if (proxyResponse == null){
-            handleError(req,resp,serverUrl,platform,proxyResponse);
+            handleError(req, resp, serverUrl, platform, null);
             return;
         }
 
         resp.setStatus(proxyResponse.getCode());
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        resp.setCharacterEncoding(Consts.UTF_8.name());
 
         JSONObject response = new JSONObject();
         String redirectUrl = proxyResponse.getUrl();

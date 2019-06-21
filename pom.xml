@@ -1311,6 +1311,11 @@
                 <version>${apache.http.core.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpmime</artifactId>
+                <version>${apache.http.mime.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${version.commons.lang}</version>
@@ -2137,6 +2142,7 @@
         <apache.http.client.version>4.5.6</apache.http.client.version>
         <!-- apache http components core -->
         <apache.http.core.version>4.4.10</apache.http.core.version>
+        <apache.http.mime.version>4.5.8</apache.http.mime.version>
         <jersey.version>1.9</jersey.version>
 
         <!-- Neethi version-->
