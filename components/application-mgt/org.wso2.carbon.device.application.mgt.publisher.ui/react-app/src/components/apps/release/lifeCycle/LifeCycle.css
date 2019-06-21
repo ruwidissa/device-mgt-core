@@ -1,0 +1,17 @@
+.ql-editor{
+    min-height: 100px !important;
+    max-height: 400px;
+    overflow: hidden;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+.ql-toolbar.ql-snow{
+    border-radius: 10px 10px 0 0;
+}
+.ql-toolbar.ql-snow + .ql-container.ql-snow{
+    border-radius: 0 0 10px 10px;
+}
+.ql-editor.ql-blank::before {
+    font-style: unset;
+}
