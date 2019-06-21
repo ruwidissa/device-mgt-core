@@ -26,7 +26,6 @@
         <jaxrs:serviceBeans>
             <ref bean="applicationMgtServiceBean"/>
             <ref bean="reviewMgtServiceBean"/>
-            <ref bean="reviewMgtAdminServiceBean"/>
             <ref bean="subscriptionMgtServiceBean"/>
             <ref bean="swaggerResource"/>
         </jaxrs:serviceBeans>
@@ -56,7 +55,6 @@
 
     <bean id="applicationMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.ApplicationManagementAPIImpl"/>
     <bean id="reviewMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.ReviewManagementAPIImpl" />
-    <bean id="reviewMgtAdminServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.admin.ReviewManagementAdminAPIImpl" />
     <bean id="subscriptionMgtServiceBean" class="org.wso2.carbon.device.application.mgt.store.api.services.impl.SubscriptionManagementAPIImpl"/>
     <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.addons.JSONMessageHandler"/>
     <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.addons.MultipartCustomProvider"/>

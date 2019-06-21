@@ -22,6 +22,10 @@ import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagem
 import org.wso2.carbon.device.application.mgt.core.dto.ApplicationsDTO;
 import org.wso2.carbon.device.application.mgt.core.impl.ApplicationManagerImpl;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +49,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         ConnectionManagerUtil.closeDBConnection();
     }
 
-    @Test(dependsOnMethods = ("addAplicationCategories"))
+    @Test(dependsOnMethods = ("addApplicationCategories"))
     public void createApplication() throws Exception {
 
         log.debug("Creating the first application ....!");
@@ -75,7 +79,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         releaseWrapper.setMetaData("Just meta data");
         releaseWrapper.setReleaseType("free");
         releaseWrapper.setPrice(5.7);
-        releaseWrapper.setSupportedOsVersions("5.7, 6.1");
+        releaseWrapper.setSupportedOsVersions("4.0-7.0");
         applicationReleaseWrappers.add(releaseWrapper);
 
         applicationWrapper.setApplicationReleaseWrappers(applicationReleaseWrappers);
@@ -196,15 +200,49 @@ public class ApplicationManagementTest extends BaseTestCase {
 
     }
 
-    @Test
-    public void addAplicationCategories() throws ApplicationManagementException {
-
+    @Test(dependsOnMethods = ("addDeviceVersions"))
+    public void addApplicationCategories() throws ApplicationManagementException {
         List<String> categories = new ArrayList<>();
         categories.add("Test Category");
         categories.add("Test Category2");
         ApplicationManager manager = new ApplicationManagerImpl();
         manager.addApplicationCategories(categories);
 
+    }
+
+    @Test
+    public void addDeviceVersions() throws ApplicationManagementException {
+        List<DeviceTypeVersion> deviceTypeVersions = new ArrayList<>();
+        List<String> supportingVersions = new ArrayList<>();
+
+        //add supporting versions
+        supportingVersions.add("4.0");
+        supportingVersions.add("5.0");
+        supportingVersions.add("6.0");
+        supportingVersions.add("7.0");
+        supportingVersions.add("8.0");
+
+        DeviceManagementProviderServiceImpl deviceManagementProviderService = new DeviceManagementProviderServiceImpl();
+        try {
+            List<DeviceType> deviceTypes = deviceManagementProviderService.getDeviceTypes();
+
+            for (DeviceType deviceType: deviceTypes){
+                for (String version : supportingVersions){
+                    DeviceTypeVersion deviceTypeVersion = new DeviceTypeVersion();
+                    deviceTypeVersion.setDeviceTypeId(deviceType.getId());
+                    deviceTypeVersion.setVersionName(version);
+                    deviceTypeVersions.add(deviceTypeVersion);
+                }
+            }
+
+            for (DeviceTypeVersion deviceTypeVersion : deviceTypeVersions){
+                deviceManagementProviderService.addDeviceTypeVersion(deviceTypeVersion);
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error Occured while adding device type versions";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        }
     }
 
     @Test

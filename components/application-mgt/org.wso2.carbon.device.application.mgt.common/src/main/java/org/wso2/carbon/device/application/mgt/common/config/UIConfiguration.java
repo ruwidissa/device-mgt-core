@@ -9,7 +9,7 @@ public class UIConfiguration {
     private AppRegistration appRegistration;
     private List<String> scopes;
     private boolean isSsoEnable;
-    private LoginResponse loginResponse;
+    private ErrorCallback errorCallback;
 
     @XmlElement(name = "AppRegistration", required=true)
     public AppRegistration getAppRegistration() {
@@ -39,12 +39,8 @@ public class UIConfiguration {
         isSsoEnable = ssoEnable;
     }
 
-    public LoginResponse getLoginResponse() {
-        return loginResponse;
-    }
+    @XmlElement(name = "ErrorCallback", required=true)
+    public ErrorCallback getErrorCallback() { return errorCallback; }
 
-    @XmlElement(name = "LoginResponse", required=true)
-    public void setLoginResponse(LoginResponse loginResponse) {
-        this.loginResponse = loginResponse;
-    }
+    public void setErrorCallback(ErrorCallback errorCallback) { this.errorCallback = errorCallback; }
 }

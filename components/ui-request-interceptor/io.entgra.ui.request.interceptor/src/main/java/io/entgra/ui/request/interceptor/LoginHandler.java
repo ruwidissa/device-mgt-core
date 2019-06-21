@@ -131,8 +131,7 @@ public class LoginHandler extends HttpServlet {
                         clientAppResponse.getData(), scopes)) {
                     ProxyResponse proxyResponse = new ProxyResponse();
                     proxyResponse.setCode(HttpStatus.SC_OK);
-                    proxyResponse.setUrl(serverUrl + "/" + platform + uiConfigJsonObject.get(HandlerConstants.LOGIN_RESPONSE_KEY)
-                            .getAsJsonObject().get("successCallback").getAsString());
+                    proxyResponse.setUrl(serverUrl + "/" + platform);
                     HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
                     return;
                 }

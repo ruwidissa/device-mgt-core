@@ -55,33 +55,6 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
 
     @Override
     @GET
-    @Path("/release/{uuid}")
-    public Response getAllReleaseReviews(
-            @PathParam("uuid") String uuid,
-            @DefaultValue("0") @QueryParam("offset") int offSet,
-            @DefaultValue("20") @QueryParam("limit") int limit) {
-        ReviewManager reviewManager = APIUtil.getReviewManager();
-        PaginationRequest request = new PaginationRequest(offSet, limit);
-        try {
-            PaginationResult paginationResult = reviewManager.getAllReleaseReviews(request, uuid);
-            return Response.status(Response.Status.OK).entity(paginationResult).build();
-        } catch (NotFoundException e) {
-            String msg = "Couldn't find an application release for UUID: " + uuid;
-            log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (ReviewManagementException e) {
-            String msg = "Error occurred while retrieving reviews for application UUID: " + uuid;
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while retrieving application release details for application UUID: " + uuid;
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
-
-    @Override
-    @GET
     @Path("/app/user/{uuid}")
     public Response getUserReviews(
             @PathParam("uuid") String uuid,
@@ -279,27 +252,6 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
-    }
-
-    @Override
-    @GET
-    @Path("/{uuid}/release-rating")
-    public Response getAppReleaseRating(
-            @PathParam("uuid") String uuid) {
-        ReviewManager reviewManager = APIUtil.getReviewManager();
-        Rating rating;
-        try {
-            rating = reviewManager.getAppReleaseRating(uuid);
-        } catch (NotFoundException e) {
-            String msg = "Couldn't found an application release for UUID: " + uuid;
-            log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (ReviewManagementException | ApplicationManagementException e) {
-            String msg = "Error occured while getting review data for application release UUID: " + uuid;
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-        return Response.status(Response.Status.OK).entity(rating).build();
     }
 
     @Override
