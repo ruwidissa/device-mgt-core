@@ -196,7 +196,7 @@ public class LoginHandler extends HttpServlet {
                     authData.setAccessToken(jTokenResultAsJsonObject.get("access_token").getAsString());
                     authData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
                     authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
-                    session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
+                    session.setAttribute(platform, authData);
                     return true;
 
                 }
