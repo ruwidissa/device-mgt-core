@@ -50,8 +50,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Base64;
 
-import static io.entgra.ui.request.interceptor.util.HandlerUtil.execute;
-
 @MultipartConfig
 @WebServlet("/login")
 public class LoginHandler extends HttpServlet {
@@ -78,12 +76,12 @@ public class LoginHandler extends HttpServlet {
                 httpSession.invalidate();
             }
             httpSession = req.getSession(true);
-            //setting session to expiry in 5 mins
+            //setting session to expiry in 5 minutes
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
             HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
             JsonParser jsonParser = new JsonParser();
-            ProxyResponse uiConfigResponse = execute(uiConfigEndpoint);
+            ProxyResponse uiConfigResponse = HandlerUtil.execute(uiConfigEndpoint);
             String executorResponse = uiConfigResponse.getExecutorResponse();
             if (!StringUtils.isEmpty(executorResponse) && executorResponse
                     .contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
@@ -126,7 +124,7 @@ public class LoginHandler extends HttpServlet {
                 apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
                 apiRegEndpoint.setEntity(constructAppRegPayload(tags));
 
-                ProxyResponse clientAppResponse = execute(apiRegEndpoint);
+                ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
                 String clientAppResult = clientAppResponse.getData();
 
                 if (!StringUtils.isEmpty(clientAppResult) && getTokenAndPersistInSession(req, resp,
@@ -141,11 +139,11 @@ public class LoginHandler extends HttpServlet {
                 HandlerUtil.handleError(req, resp, serverUrl, platform, null);
             }
         } catch (IOException e) {
-            log.error("Error occured while sending the response into the socket. ", e);
+            log.error("Error occurred while sending the response into the socket. ", e);
         } catch (JsonSyntaxException e) {
-            log.error("Error occured while parsing the response. ", e);
+            log.error("Error occurred while parsing the response. ", e);
         } catch (LoginException e) {
-            log.error("Error occured while getting token data. ", e);
+            log.error("Error occurred while getting token data. ", e);
         }
     }
 
@@ -203,7 +201,7 @@ public class LoginHandler extends HttpServlet {
             }
             return false;
         } catch (IOException e) {
-            throw new LoginException("Error occured while sending the response into the socket", e);
+            throw new LoginException("Error occurred while sending the response into the socket", e);
         }
     }
 
@@ -216,8 +214,8 @@ public class LoginHandler extends HttpServlet {
         if (scopes != null && scopes.size() > 0) {
             StringBuilder builder = new StringBuilder();
             for (JsonElement scope : scopes) {
-                String tmpscope = scope.getAsString() + " ";
-                builder.append(tmpscope);
+                String tmpScope = scope.getAsString() + " ";
+                builder.append(tmpScope);
             }
             return builder.toString();
         } else {
@@ -248,7 +246,7 @@ public class LoginHandler extends HttpServlet {
                         " Invalid login request. Username or Password is not received for login request.");
             }
         } catch (IOException e) {
-            throw new LoginException("Error Occured while redirecting to default error page.", e);
+            throw new LoginException("Error occurred while redirecting to default error page.", e);
         }
     }
 
@@ -271,13 +269,13 @@ public class LoginHandler extends HttpServlet {
      * @param encodedClientApp - Base64 encoded clientId:clientSecret.
      * @param scopes - Scopes which are retrieved by reading application-mgt configuration
      * @return Invoke token endpoint and return the response as string.
-     * @throws IOException IO exception throws if an error occured when invoking token endpoint
+     * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
 
         HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.TOKEN_ENDPOINT);
-        tokenEndpoint.setHeader("Authorization", "Basic " + encodedClientApp);
-        tokenEndpoint.setHeader("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.toString());
+        tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
+        tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
         String scopeString = getScopeString(scopes);
 
         if (scopeString != null) {
@@ -290,6 +288,6 @@ public class LoginHandler extends HttpServlet {
                 "grant_type=password&username=" + username + "&password=" + password + "&scope=" + scopeString,
                 ContentType.APPLICATION_FORM_URLENCODED);
         tokenEndpoint.setEntity(tokenEPPayload);
-        return execute(tokenEndpoint);
+        return HandlerUtil.execute(tokenEndpoint);
     }
 }

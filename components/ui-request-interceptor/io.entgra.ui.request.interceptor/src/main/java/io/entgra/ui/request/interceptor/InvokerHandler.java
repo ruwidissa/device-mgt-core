@@ -58,8 +58,6 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
 
-import static io.entgra.ui.request.interceptor.util.HandlerUtil.execute;
-
 @MultipartConfig
 @WebServlet(
         name = "RequestHandlerServlet",
@@ -84,7 +82,7 @@ public class InvokerHandler extends HttpServlet {
                 HttpPost postRequest = new HttpPost(generateBackendRequestURL(req));
                 generateRequestEntity(req, postRequest);
                 postRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                ProxyResponse proxyResponse = execute(postRequest);
+                ProxyResponse proxyResponse = HandlerUtil.execute(postRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
                     proxyResponse = retryRequestWithRefreshedToken(req, resp, postRequest);
@@ -113,7 +111,7 @@ public class InvokerHandler extends HttpServlet {
                 HttpGet getRequest = new HttpGet(generateBackendRequestURL(req));
                 copyRequestHeaders(req, getRequest, false);
                 getRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                ProxyResponse proxyResponse = execute(getRequest);
+                ProxyResponse proxyResponse = HandlerUtil.execute(getRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
                     proxyResponse = retryRequestWithRefreshedToken(req, resp, getRequest);
                     if (proxyResponse == null) {
@@ -139,7 +137,7 @@ public class InvokerHandler extends HttpServlet {
                 HttpPut putRequest = new HttpPut(generateBackendRequestURL(req));
                 generateRequestEntity(req, putRequest);
                 putRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                ProxyResponse proxyResponse = execute(putRequest);
+                ProxyResponse proxyResponse = HandlerUtil.execute(putRequest);
 
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
                     proxyResponse = retryRequestWithRefreshedToken(req, resp, putRequest);
@@ -168,7 +166,7 @@ public class InvokerHandler extends HttpServlet {
                 HttpDelete deleteRequest = new HttpDelete(generateBackendRequestURL(req));
                 copyRequestHeaders(req, deleteRequest, false);
                 deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-                ProxyResponse proxyResponse = execute(deleteRequest);
+                ProxyResponse proxyResponse = HandlerUtil.execute(deleteRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
                     proxyResponse = retryRequestWithRefreshedToken(req, resp, deleteRequest);
                     if (proxyResponse == null) {
@@ -202,7 +200,7 @@ public class InvokerHandler extends HttpServlet {
             List<FileItem> fileItemList = servletFileUpload.parseRequest(req);
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
             entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-            for (FileItem item : fileItemList) {
+            for (FileItem item: fileItemList) {
                 if (!item.isFormField()) {
                     entityBuilder.addPart(item.getFieldName(), new InputStreamBody(item.getInputStream(),
                             ContentType.create(item.getContentType()), item.getName()));
@@ -321,7 +319,7 @@ public class InvokerHandler extends HttpServlet {
                                                                 HttpRequestBase httpRequest) throws IOException {
         if (refreshToken(req, resp)) {
             httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
-            ProxyResponse proxyResponse = execute(httpRequest);
+            ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
             if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 log.error("Error occurred while invoking the API after refreshing the token.");
                 HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
@@ -363,7 +361,7 @@ public class InvokerHandler extends HttpServlet {
                                              encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
 
-        ProxyResponse tokenResultResponse = execute(tokenEndpoint);
+        ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
         if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
             log.error("Error occurred while refreshing access token.");
             HandlerUtil.handleError(req, resp, serverUrl, platform, tokenResultResponse);
