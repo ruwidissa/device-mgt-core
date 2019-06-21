@@ -273,7 +273,7 @@ public interface ApplicationManagementPublisherAPI {
     @POST
     @Path("/ent-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -342,7 +342,7 @@ public interface ApplicationManagementPublisherAPI {
     @POST
     @Path("/web-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -406,7 +406,7 @@ public interface ApplicationManagementPublisherAPI {
     @POST
     @Path("/public-app")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -467,7 +467,7 @@ public interface ApplicationManagementPublisherAPI {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/ent-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -583,7 +583,7 @@ public interface ApplicationManagementPublisherAPI {
     @PUT
     @Path("/image-artifacts/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,
@@ -653,7 +653,7 @@ public interface ApplicationManagementPublisherAPI {
     @PUT
     @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @ApiOperation(
             consumes = MediaType.MULTIPART_FORM_DATA,
             produces = MediaType.APPLICATION_JSON,

@@ -24,12 +24,17 @@ import com.google.gson.JsonParser;
 import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -38,6 +43,9 @@ import org.apache.http.cookie.SM;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 
 import javax.servlet.annotation.MultipartConfig;
@@ -48,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.List;
 
 import static io.entgra.ui.request.interceptor.util.HandlerUtil.execute;
 
@@ -61,25 +70,19 @@ import static io.entgra.ui.request.interceptor.util.HandlerUtil.execute;
         }
 )
 public class InvokerHandler extends HttpServlet {
-    private static final Log log = LogFactory.getLog(LoginHandler.class);
+    private static final Log log = LogFactory.getLog(InvokerHandler.class);
     private static final long serialVersionUID = -6508020875358160165L;
-    private static AuthData authData;
-    private static String apiEndpoint;
-    private static String serverUrl;
-    private static String platform;
+    private AuthData authData;
+    private String apiEndpoint;
+    private String serverUrl;
+    private String platform;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             if (validateRequest(req, resp)) {
                 HttpPost postRequest = new HttpPost(generateBackendRequestURL(req));
-                if (StringUtils.isNotEmpty(req.getHeader(HttpHeaders.CONTENT_LENGTH)) ||
-                    StringUtils.isNotEmpty(req.getHeader(HttpHeaders.TRANSFER_ENCODING))) {
-                    InputStreamEntity entity = new InputStreamEntity(req.getInputStream(),
-                            Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)));
-                    postRequest.setEntity(entity);
-                }
-                copyRequestHeaders(req, postRequest);
+                generateRequestEntity(req, postRequest);
                 postRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = execute(postRequest);
 
@@ -96,6 +99,8 @@ public class InvokerHandler extends HttpServlet {
                 }
                 HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
             }
+        } catch (FileUploadException e) {
+            log.error("Error occurred when processing Multipart POST request.", e);
         } catch (IOException e) {
             log.error("Error occurred when processing POST request.", e);
         }
@@ -106,7 +111,7 @@ public class InvokerHandler extends HttpServlet {
         try {
             if (validateRequest(req, resp)) {
                 HttpGet getRequest = new HttpGet(generateBackendRequestURL(req));
-                copyRequestHeaders(req, getRequest);
+                copyRequestHeaders(req, getRequest, false);
                 getRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = execute(getRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
@@ -132,14 +137,7 @@ public class InvokerHandler extends HttpServlet {
         try {
             if (validateRequest(req, resp)) {
                 HttpPut putRequest = new HttpPut(generateBackendRequestURL(req));
-                if ((StringUtils.isNotEmpty(req.getHeader(HttpHeaders.CONTENT_LENGTH)) &&
-                     Double.parseDouble(req.getHeader(HttpHeaders.CONTENT_LENGTH)) > 0) ||
-                    StringUtils.isNotEmpty(req.getHeader(HttpHeaders.TRANSFER_ENCODING))) {
-                    InputStreamEntity entity = new InputStreamEntity(req.getInputStream(),
-                            Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)));
-                    putRequest.setEntity(entity);
-                }
-                copyRequestHeaders(req, putRequest);
+                generateRequestEntity(req, putRequest);
                 putRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = execute(putRequest);
 
@@ -156,6 +154,8 @@ public class InvokerHandler extends HttpServlet {
                 }
                 HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
             }
+        } catch (FileUploadException e) {
+            log.error("Error occurred when processing Multipart PUT request.", e);
         } catch (IOException e) {
             log.error("Error occurred when processing PUT request.", e);
         }
@@ -166,7 +166,7 @@ public class InvokerHandler extends HttpServlet {
         try {
             if (validateRequest(req, resp)) {
                 HttpDelete deleteRequest = new HttpDelete(generateBackendRequestURL(req));
-                copyRequestHeaders(req, deleteRequest);
+                copyRequestHeaders(req, deleteRequest, false);
                 deleteRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
                 ProxyResponse proxyResponse = execute(deleteRequest);
                 if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
@@ -187,6 +187,49 @@ public class InvokerHandler extends HttpServlet {
         }
     }
 
+    /**
+     * Generate te request entity for POST and PUT requests from the incoming request.
+     *
+     * @param req incoming {@link HttpServletRequest}.
+     * @param proxyRequest proxy request instance.
+     * @throws FileUploadException If unable to parse the incoming request for multipart content extraction.
+     * @throws IOException If error occurred while generating the request body.
+     */
+    private void generateRequestEntity(HttpServletRequest req, HttpEntityEnclosingRequestBase proxyRequest)
+            throws FileUploadException, IOException {
+        if (ServletFileUpload.isMultipartContent(req)) {
+            ServletFileUpload servletFileUpload = new ServletFileUpload(new DiskFileItemFactory());
+            List<FileItem> fileItemList = servletFileUpload.parseRequest(req);
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+            entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            for (FileItem item : fileItemList) {
+                if (!item.isFormField()) {
+                    entityBuilder.addPart(item.getFieldName(), new InputStreamBody(item.getInputStream(),
+                            ContentType.create(item.getContentType()), item.getName()));
+                } else {
+                    entityBuilder.addTextBody(item.getFieldName(), item.getString(),
+                            ContentType.create(item.getContentType()));
+                }
+            }
+            proxyRequest.setEntity(entityBuilder.build());
+            copyRequestHeaders(req, proxyRequest, false);
+        } else {
+            if (StringUtils.isNotEmpty(req.getHeader(HttpHeaders.CONTENT_LENGTH)) ||
+                StringUtils.isNotEmpty(req.getHeader(HttpHeaders.TRANSFER_ENCODING))) {
+                InputStreamEntity entity = new InputStreamEntity(req.getInputStream(),
+                        Long.parseLong(req.getHeader(HttpHeaders.CONTENT_LENGTH)));
+                proxyRequest.setEntity(entity);
+            }
+            copyRequestHeaders(req, proxyRequest, true);
+        }
+    }
+
+    /**
+     * Generates the target URL for the proxy request.
+     *
+     * @param req incoming {@link HttpServletRequest}
+     * @return Target URL
+     */
     private String generateBackendRequestURL(HttpServletRequest req) {
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(serverUrl).append(HandlerConstants.API_COMMON_CONTEXT).append(apiEndpoint);
@@ -196,12 +239,22 @@ public class InvokerHandler extends HttpServlet {
         return urlBuilder.toString();
     }
 
-    private void copyRequestHeaders(HttpServletRequest req, HttpRequestBase httpRequest) {
+    /**
+     * Copy incoming request headers to the proxy request.
+     *
+     * @param req incoming {@link HttpServletRequest}
+     * @param httpRequest proxy request instance.
+     * @param preserveContentType <code>true</code> if content type header needs to be preserved.
+     *                            This should be set to <code>false</code> when handling multipart requests as Http
+     *                            client will generate the Content-Type header automatically.
+     */
+    private void copyRequestHeaders(HttpServletRequest req, HttpRequestBase httpRequest, boolean preserveContentType) {
         Enumeration<String> headerNames = req.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
             if (headerName.equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH) ||
-                headerName.equalsIgnoreCase(SM.COOKIE)) {
+                headerName.equalsIgnoreCase(SM.COOKIE) ||
+                (!preserveContentType && headerName.equalsIgnoreCase(HttpHeaders.CONTENT_TYPE))) {
                 continue;
             }
             Enumeration<String> headerValues = req.getHeaders(headerName);
@@ -212,33 +265,35 @@ public class InvokerHandler extends HttpServlet {
     }
 
     /***
+     * Validates the incoming request.
      *
      * @param req {@link HttpServletRequest}
      * @param resp {@link HttpServletResponse}
      * @return If request is a valid one, returns TRUE, otherwise return FALSE
      * @throws IOException If and error occurs while witting error response to client side
      */
-    private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
+    private boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
         apiEndpoint = req.getPathInfo();
-        String sessionAuthDataKey = req.getHeader(HandlerConstants.X_PLATFORM_HEADER);
+        platform = req.getHeader(HandlerConstants.X_PLATFORM_HEADER);
         HttpSession session = req.getSession(false);
+
         if (session == null) {
             log.error("Unauthorized, You are not logged in. Please log in to the portal");
             handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
-        if (StringUtils.isEmpty(sessionAuthDataKey)) {
+        if (StringUtils.isEmpty(platform)) {
             log.error("\"X-Platform\" header is empty in the request. Header is required to obtain the auth data from" +
                       " session.");
             handleError(req, resp, HttpStatus.SC_BAD_REQUEST);
             return false;
         }
 
-        authData = (AuthData) session.getAttribute(sessionAuthDataKey);
-        platform = (String) session.getAttribute(HandlerConstants.PLATFORM);
+        authData = (AuthData) session.getAttribute(platform);
+
         if (authData == null) {
             log.error("Unauthorized, Access token not found in the current session");
             handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
@@ -262,7 +317,7 @@ public class InvokerHandler extends HttpServlet {
      * @return {@link ProxyResponse} if successful and <code>null</code> if failed.
      * @throws IOException If an error occurs when try to retry the request.
      */
-    private static ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpServletResponse resp,
+    private ProxyResponse retryRequestWithRefreshedToken(HttpServletRequest req, HttpServletResponse resp,
                                                                 HttpRequestBase httpRequest) throws IOException {
         if (refreshToken(req, resp)) {
             httpRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
@@ -284,7 +339,7 @@ public class InvokerHandler extends HttpServlet {
      * @return If successfully renew tokens, returns TRUE otherwise return FALSE
      * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
      */
-    private static boolean refreshToken(HttpServletRequest req, HttpServletResponse resp)
+    private boolean refreshToken(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
@@ -347,7 +402,7 @@ public class InvokerHandler extends HttpServlet {
      * @param errorCode HTTP error status code
      * @throws IOException If error occurred when trying to send the error response.
      */
-    private static void handleError(HttpServletRequest req, HttpServletResponse resp, int errorCode)
+    private void handleError(HttpServletRequest req, HttpServletResponse resp, int errorCode)
             throws IOException {
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(errorCode);

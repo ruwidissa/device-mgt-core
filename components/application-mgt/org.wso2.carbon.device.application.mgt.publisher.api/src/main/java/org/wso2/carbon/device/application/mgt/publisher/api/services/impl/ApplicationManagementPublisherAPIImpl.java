@@ -164,7 +164,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
     @POST
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/ent-app")
     public Response createEntApp(
             @Multipart("application") ApplicationWrapper applicationWrapper,
@@ -204,7 +204,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
     @POST
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/web-app")
     public Response createWebApp(
             @Multipart("webapp") WebAppWrapper webAppWrapper,
@@ -242,7 +242,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
     @POST
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/public-app")
     public Response createPubApp(
             @Multipart("public-app") PublicAppWrapper publicAppWrapper,
@@ -280,7 +280,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
     @POST
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/ent-app/{appId}")
     public Response createEntAppRelease(
             @PathParam("appId") int appId,
@@ -320,7 +320,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/image-artifacts/{uuid}")
     public Response updateApplicationImageArtifacts(
@@ -357,7 +357,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Consumes("multipart/mixed")
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @Path("/app-artifact/{deviceType}/{appType}/{uuid}")
     public Response updateApplicationArtifact(
             @PathParam("deviceType") String deviceType,
