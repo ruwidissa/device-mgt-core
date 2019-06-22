@@ -36,6 +36,9 @@ public class Constants {
     public static final String PLIST_NAME = "Info.plist";
     public static final String CF_BUNDLE_VERSION = "CFBundleVersion";
     public static final String APP_EXTENSION = ".app";
+    public static final String IOT_HOST_PROPERTY = "iot.core.host";
+    public static final String IOT_PORT_PROPERTY = "iot.core.http.port";
+    public static final String ARTIFACT_DOWNLOAD_PROTOCOL = "http";
 
     public static final String FORWARD_SLASH = "/";
     public static final String ANY = "ANY";

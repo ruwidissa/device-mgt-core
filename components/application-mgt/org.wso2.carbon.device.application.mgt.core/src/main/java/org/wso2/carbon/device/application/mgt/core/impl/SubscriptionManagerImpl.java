@@ -478,11 +478,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
             } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                    String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
+                    String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
                     String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
                             .getArtifactDownloadEndpoint();
-                    String plistDownloadEndpoint = artifactDownloadEndpoint + Constants.FORWARD_SLASH +
-                                                   MDMAppConstants.IOSConstants.PLIST + Constants.FORWARD_SLASH +
-                                                   application.getApplicationReleases().get(0).getUuid();
+                    String plistDownloadEndpoint =
+                            Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
+                                    + Constants.FORWARD_SLASH + MDMAppConstants.IOSConstants.PLIST
+                                    + Constants.FORWARD_SLASH + application.getApplicationReleases().get(0).getUuid();
                     mobileApp.setType(mobileAppType);
                     mobileApp.setLocation(plistDownloadEndpoint);
                     Properties properties = new Properties();

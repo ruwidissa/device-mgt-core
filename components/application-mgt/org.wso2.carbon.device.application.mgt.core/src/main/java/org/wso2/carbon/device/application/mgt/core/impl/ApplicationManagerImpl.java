@@ -1451,7 +1451,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 lifecycleState.setCurrentState(lifecycleChanger.getAction());
                 lifecycleState.setPreviousState(applicationReleaseDTO.getCurrentState());
                 lifecycleState.setUpdatedBy(userName);
-                lifecycleState.setResonForChange(lifecycleChanger.getReason());
+                lifecycleState.setReasonForChange(lifecycleChanger.getReason());
                 applicationReleaseDTO.setCurrentState(lifecycleChanger.getAction());
                 if (this.applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId) == null) {
                     String msg = "Application release updating is failed/.";
@@ -2528,10 +2528,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+            String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
+            String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
             String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
                     .getArtifactDownloadEndpoint();
-            String artifactDownloadURL = artifactDownloadEndpoint + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
-                              + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName();
+            String artifactDownloadURL =
+                    Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
+                            + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid() + Constants.FORWARD_SLASH
+                            + applicationReleaseDTO.getInstallerName();
             String plistContent = "&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTDPLIST1.0//EN&quot; &quot;" +
                                   "http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&lt;plist version=&quot;" +
                                   "1.0&quot;&gt;&lt;dict&gt;&lt;key&gt;items&lt;/key&gt;&lt;array&gt;&lt;dict&gt;&lt;" +

@@ -172,7 +172,7 @@
         </ErrorCallback>
     </UIConfigs>
 
-    <ArtifactDownloadEndpoint>https://localhost:9443/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
+    <ArtifactDownloadEndpoint>/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
     <AppCategories>
         <Category>EMM</Category>
         <Category>IoT</Category>
