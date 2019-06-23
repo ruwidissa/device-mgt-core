@@ -58,12 +58,11 @@ public interface ApplicationStorageManager {
      * To upload release artifacts for an ApplicationDTO.
      *
      * @param applicationRelease ApplicationDTO Release Object.
-     * @param appType ApplicationDTO Type.
      * @param deviceType Compatible device tipe of the application.
      * @param binaryFile      Binary File for the release.
      * @throws ResourceManagementException Resource Management Exception.
      */
-    ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationRelease, String appType, String deviceType,
+    ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationRelease, String deviceType,
             InputStream binaryFile) throws ResourceManagementException;
 
     /**

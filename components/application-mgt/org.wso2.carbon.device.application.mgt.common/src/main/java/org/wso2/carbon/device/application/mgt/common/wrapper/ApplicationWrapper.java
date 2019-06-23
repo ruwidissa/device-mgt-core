@@ -76,11 +76,11 @@ public class ApplicationWrapper {
     @NotNull
     private String deviceType;
 
-    @ApiModelProperty(name = "applicationReleaseWrappers",
+    @ApiModelProperty(name = "entAppReleaseWrappers",
             value = "List of application releases",
             required = true)
     @NotNull
-    private List<ApplicationReleaseWrapper> applicationReleaseWrappers;
+    private List<EntAppReleaseWrapper> entAppReleaseWrappers;
 
 
     public String getName() {
@@ -107,10 +107,10 @@ public class ApplicationWrapper {
 
     public void setPaymentCurrency(String paymentCurrency) { this.paymentCurrency = paymentCurrency; }
 
-    public List<ApplicationReleaseWrapper> getApplicationReleaseWrappers() { return applicationReleaseWrappers; }
+    public List<EntAppReleaseWrapper> getEntAppReleaseWrappers() { return entAppReleaseWrappers; }
 
-    public void setApplicationReleaseWrappers(List<ApplicationReleaseWrapper> applicationReleaseWrappers) {
-        this.applicationReleaseWrappers = applicationReleaseWrappers; }
+    public void setEntAppReleaseWrappers(List<EntAppReleaseWrapper> entAppReleaseWrappers) {
+        this.entAppReleaseWrappers = entAppReleaseWrappers; }
 
     public List<String> getUnrestrictedRoles() { return unrestrictedRoles; }
 

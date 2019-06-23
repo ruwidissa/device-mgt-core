@@ -602,39 +602,39 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
-    public String getPackageName(int appId, int tenantId) throws ApplicationManagementDAOException {
+    public String getPackageName(String releaseUuid, int tenantId) throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Getting package name of the application release by application id:" + appId);
+            log.debug("Getting package name of the application release by application id:" + releaseUuid);
         }
         Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             conn = this.getDBConnection();
-            String sql = "SELECT AR.PACKAGE_NAME AS PACKAGE_NAME FROM AP_APP_RELEASE AS AR WHERE AR.AP_APP_ID = ? "
-                    + "AND AR.TENANT_ID = ? LIMIT 1;";
+            String sql = "SELECT "
+                    + "AR.PACKAGE_NAME AS PACKAGE_NAME "
+                    + "FROM AP_APP_RELEASE AS AR "
+                    + "WHERE AR.UUID = ? "
+                    + "AND AR.TENANT_ID = ?";
 
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, appId);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved package name of the application release with the application ID "
-                        + appId);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setString(1, releaseUuid);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()){
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully retrieved package name of the application release with the UUID: "
+                                + releaseUuid);
+                    }
+                    if (rs.next()){
+                        return rs.getString("PACKAGE_NAME");
+                    }
+                    return null;
+                }
             }
-            if (rs.next()){
-                return rs.getString("PACKAGE_NAME");
-            }
-            return null;
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException(
-                    "Error occurred while getting package name of the application release with app ID: " + appId, e);
+                    "Error occurred while getting package name of the application release with app ID: " + releaseUuid, e);
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException(
                     "Error occurred while obtaining the DB connection to get application release package name.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
         }
     }
 

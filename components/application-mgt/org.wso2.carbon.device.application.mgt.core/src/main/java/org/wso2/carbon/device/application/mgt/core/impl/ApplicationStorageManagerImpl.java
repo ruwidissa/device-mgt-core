@@ -73,7 +73,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFileStream,
+    public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO, InputStream iconFileStream,
                                                    InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
         String artifactDirectoryPath;
@@ -82,15 +82,15 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         String scStoredLocation = null;
 
         try {
-            artifactDirectoryPath = storagePath + applicationRelease.getAppHashValue();
+            artifactDirectoryPath = storagePath + applicationReleaseDTO.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            iconStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getIconName();
-            bannerStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getBannerName();
 
             if (iconFileStream != null) {
+                iconStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getIconName();
                 saveFile(iconFileStream, iconStoredLocation);
             }
             if (bannerFileStream != null) {
+                bannerStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getBannerName();
                 saveFile(bannerFileStream, bannerStoredLocation);
             }
             if (!screenShotStreams.isEmpty()) {
@@ -103,22 +103,22 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 int count = 1;
                 for (InputStream screenshotStream : screenShotStreams) {
                     if (count == 1) {
-                        scStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getScreenshotName1();
+                        scStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getScreenshotName1();
                     }
                     if (count == 2) {
-                        scStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getScreenshotName2();
+                        scStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getScreenshotName2();
                     }
                     if (count == 3) {
-                        scStoredLocation = artifactDirectoryPath + File.separator + applicationRelease.getScreenshotName3();
+                        scStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getScreenshotName3();
                     }
                     saveFile(screenshotStream, scStoredLocation);
                     count++;
                 }
             }
-            return applicationRelease;
+            return applicationReleaseDTO;
         } catch (IOException e) {
             throw new ApplicationStorageManagementException("IO Exception while saving the screens hots for " +
-                    "the application " + applicationRelease.getUuid(), e);
+                    "the application " + applicationReleaseDTO.getUuid(), e);
         }
     }
 
@@ -192,7 +192,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO, String appType,
+    public ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO,
             String deviceType, InputStream binaryFile) throws ResourceManagementException {
         try {
             String artifactDirectoryPath;

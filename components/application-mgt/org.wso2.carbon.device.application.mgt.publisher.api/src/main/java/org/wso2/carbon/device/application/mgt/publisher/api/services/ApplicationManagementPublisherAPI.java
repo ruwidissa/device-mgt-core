@@ -39,7 +39,7 @@ import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
@@ -507,7 +507,7 @@ public interface ApplicationManagementPublisherAPI {
                     name = "applicationRelease",
                     value = "The application release that need to be created.",
                     required = true)
-            @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
+            @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
             @ApiParam(
                     name = "binaryFile",
                     value = "Binary file of uploading application",
@@ -651,7 +651,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/app-artifacts/{deviceType}/{appType}/{appId}/{uuid}")
+    @Path("/ent-app-artifacts/{deviceType}/{appId}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
     @ApiOperation(
@@ -691,11 +691,6 @@ public interface ApplicationManagementPublisherAPI {
                     required = true)
             @PathParam("deviceType") String deviceType,
             @ApiParam(
-                    name = "appType",
-                    value = "Type of the application i.e ENTERPRISE, PUBLIC, WEB, WEB-CLIP etc",
-                    required = true)
-            @PathParam("appType") String appType,
-            @ApiParam(
                     name = "uuid",
                     value = "UUID of the application",
                     required = true)
@@ -704,7 +699,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/app-release/{deviceType}/{appType}/{uuid}")
+    @Path("/app-release/{deviceType}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -735,30 +730,24 @@ public interface ApplicationManagementPublisherAPI {
                             message = "Internal Server Error. \n Error occurred while releasing the application.",
                             response = ErrorResponse.class)
             })
-    Response updateApplicationRelease(
+    Response updateEntAppRelease(
             @ApiParam(
                     name = "deviceType",
                     value = "Supported device type of the application",
                     required = true)
             @PathParam("deviceType") String deviceType,
             @ApiParam(
-                    name = "appType",
-                    value = "Type of the application",
-                    required = true)
-            @PathParam("appType") String appType,
-            @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO Release",
                     required = true)
             @PathParam("uuid") String applicationUUID,
             @ApiParam(
-                    name = "applicationReleaseWrapper",
+                    name = "entAppReleaseWrapper",
                     value = "Application release wrapper which is going to update.",
                     required = true)
             @Multipart(
-                    value = "applicationReleaseWrapper",
-                    type = "application/json")
-                    ApplicationReleaseWrapper applicationReleaseWrapper,
+                    value = "entAppReleaseWrapper",
+                    type = "application/json") EntAppReleaseWrapper entAppReleaseWrapper,
             @ApiParam(
                     name = "binaryFile",
                     value = "Application installer file.",

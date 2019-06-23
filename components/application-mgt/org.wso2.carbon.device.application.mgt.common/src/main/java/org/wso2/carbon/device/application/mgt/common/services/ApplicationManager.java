@@ -21,7 +21,6 @@ package org.wso2.carbon.device.application.mgt.common.services;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.device.application.mgt.common.ApplicationArtifact;
 import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
@@ -32,7 +31,7 @@ import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.response.Category;
 import org.wso2.carbon.device.application.mgt.common.response.Tag;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
@@ -53,7 +52,7 @@ public interface ApplicationManager {
      * @return {@link Application}
      * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
      */
-    Application createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
+    Application createEntApp(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
     Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
@@ -169,36 +168,33 @@ public interface ApplicationManager {
      * To update release images.
      *
      * @param deviceType Application artifact compatible device type name.
-     * @param appType Type of the application.
      * @param uuid    uuid of the ApplicationDTO
      * @param  applicationArtifact Application artifact that contains names and input streams of the application artifacts.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void updateApplicationArtifact(String deviceType, String appType, String uuid,
+    void updateApplicationArtifact(String deviceType, String uuid,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /**
      * To create an application release for an ApplicationDTO.
      *
      * @param applicationId     ID of the ApplicationDTO
-     * @param applicationReleaseWrapper ApplicatonRelease that need to be be created.
+     * @param entAppReleaseWrapper ApplicatonRelease that need to be be created.
      * @return the unique id of the application release, if the application release succeeded else -1
      */
-    ApplicationRelease createEntAppRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper,
+    ApplicationRelease createEntAppRelease(int applicationId, EntAppReleaseWrapper entAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
      *
      * @param deviceType Device type which is supported for the Application.
-     * @param applicationType Application Type
      * @param releaseUuid UUID of the application release.
-     * @param applicationReleaseWrapper {@link ApplicationReleaseDTO}
+     * @param entAppReleaseWrapper {@link ApplicationReleaseDTO}
      * @param applicationArtifact {@link ApplicationArtifact}
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
-    boolean updateRelease(String deviceType, String applicationType, String releaseUuid,
-            ApplicationReleaseWrapper applicationReleaseWrapper, ApplicationArtifact applicationArtifact)
-            throws ApplicationManagementException;
+    boolean updateEntAppRelease(String deviceType, String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
      * To validate the application creating request
