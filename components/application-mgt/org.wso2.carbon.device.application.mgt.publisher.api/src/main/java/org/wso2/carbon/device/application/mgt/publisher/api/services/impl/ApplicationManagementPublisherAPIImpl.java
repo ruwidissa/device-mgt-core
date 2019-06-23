@@ -367,9 +367,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
         try {
             if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
-                String msg = "If ApplicationDTO type is " + appType
-                        + ", therefore you don't have application release artifact to update for application release UUID: "
-                        + applicationReleaseUuid;
+                String msg = "If Application type is " + appType + ", then you don't have application release artifact "
+                        + "to update for application release UUID: " + applicationReleaseUuid;
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }

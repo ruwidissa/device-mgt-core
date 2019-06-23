@@ -188,7 +188,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             stmt.setInt(3, tenantId);
             stmt.setString(4, state.getUpdatedBy());
             stmt.setTimestamp(5, timestamp);
-            stmt.setString(6, state.getResonForChange());
+            stmt.setString(6, state.getReasonForChange());
             stmt.setInt(7, appReleaseId);
             stmt.setInt(8, appReleaseId);
             stmt.executeUpdate();
