@@ -37,7 +37,7 @@ class IconImage extends React.Component {
                 loading: false,
             }));
         }
-    }
+    };
 
     render() {
         const uploadButton = (

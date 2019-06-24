@@ -10,12 +10,12 @@ const {Option} = Select;
 const {Title, Text} = Typography;
 const Search = Input.Search;
 // connecting state.apps with the component
-const mapStateToProps = state => {
-    return {apps: state.apps}
-};
+// const mapStateToProps = state => {
+//     return {apps: state.apps}
+// };
 
 
-class ConnectedListApps extends React.Component {
+class ListApps extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -70,6 +70,6 @@ class ConnectedListApps extends React.Component {
     }
 }
 
-const ListApps = connect(mapStateToProps, {getApps})(ConnectedListApps);
+// const ListApps = connect(mapStateToProps, {getApps})(ConnectedListApps);
 
 export default ListApps;

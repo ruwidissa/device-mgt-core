@@ -33,11 +33,7 @@ class Apps extends React.Component {
     render() {
         return (
             <div>
-                <PageHeader
-                    breadcrumb={{routes}}
-                />
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
-                    <ReleaseModal/>
                     <ListApps/>
                 </div>
 
