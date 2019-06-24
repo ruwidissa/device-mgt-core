@@ -603,10 +603,6 @@ public interface ApplicationManagementPublisherAPI {
                             code = 200,
                             message = "OK. \n Successfully updated artifacts."),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request. \n Requesting to update image artifacts with invalid application "
-                                    + "or application release data."),
-                    @ApiResponse(
                             code = 403,
                             message = "FORBIDDEN. \n Can't Update the application release in PUBLISHED or DEPRECATED "
                                     + "state. Hence please demote the application and update the application release"),
@@ -626,8 +622,7 @@ public interface ApplicationManagementPublisherAPI {
             @PathParam("uuid") String applicationUUID,
             @ApiParam(
                     name = "icon",
-                    value = "Icon of the uploading application",
-                    required = true)
+                    value = "Icon of the uploading application")
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
@@ -635,18 +630,15 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
-                    value = "Screen Shots of the uploading application",
-                    required = true)
+                    value = "Screen Shots of the uploading application")
             @Multipart(value = "screenshot1") Attachment screenshot1,
             @ApiParam(
                     name = "screenshot2",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
+                    value = "Screen Shots of the uploading application")
             @Multipart(value = "screenshot2") Attachment screenshot2,
             @ApiParam(
                     name = "screenshot3",
-                    value = "Screen Shots of the uploading application",
-                    required = false)
+                    value = "Screen Shots of the uploading application")
             @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
@@ -699,7 +691,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/app-release/{deviceType}/{uuid}")
+    @Path("/ent-app-release/{deviceType}/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(

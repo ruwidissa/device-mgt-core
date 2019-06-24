@@ -325,22 +325,18 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/image-artifacts/{uuid}")
     public Response updateApplicationImageArtifacts(
             @PathParam("uuid") String applicationReleaseUuid,
-            @Multipart("icon") Attachment iconFile,
+            @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @Multipart("screenshot1") Attachment screenshot1,
-            @Multipart("screenshot2") Attachment screenshot2,
-            @Multipart("screenshot3") Attachment screenshot3) {
+            @Multipart(value = "screenshot1", required = false) Attachment screenshot1,
+            @Multipart(value = "screenshot2", required = false) Attachment screenshot2,
+            @Multipart(value = "screenshot3", required = false) Attachment screenshot3) {
         try {
             List<Attachment> attachments = constructAttachmentList(screenshot1, screenshot2, screenshot3);
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachments);
             applicationManager.updateApplicationImageArtifact(applicationReleaseUuid,
                     constructApplicationArtifact(null, iconFile, bannerFile, attachments));
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationReleaseUuid).build();
-        } catch (RequestValidatingException e) {
-            log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
@@ -414,7 +410,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Path("/app-release/{deviceType}/{uuid}")
+    @Path("/ent-app-release/{deviceType}/{uuid}")
     public Response updateEntAppRelease(
             @PathParam("deviceType") String deviceType,
             @PathParam("uuid") String applicationUUID,

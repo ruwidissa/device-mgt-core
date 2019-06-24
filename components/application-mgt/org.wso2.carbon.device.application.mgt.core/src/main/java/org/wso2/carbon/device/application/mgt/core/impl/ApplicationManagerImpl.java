@@ -241,6 +241,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return addAppDataIntoDB(applicationDTO, tenantId);
     }
 
+
+
     private void deleteApplicationArtifacts(List<String> directoryPaths) throws ApplicationManagementException {
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         try {
@@ -446,35 +448,47 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationArtifact applicationArtifact) throws ResourceManagementException{
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
-        //todo check again
-        applicationStorageManager.deleteImageArtifacts(applicationReleaseDTO);
-
         if (!StringUtils.isEmpty(applicationArtifact.getIconName())) {
+            applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
+                    applicationReleaseDTO.getIconName());
             applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
         }
         if (!StringUtils.isEmpty(applicationArtifact.getBannerName())){
+            applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
+                    applicationReleaseDTO.getBannerName());
             applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
         }
 
         Map<String, InputStream> screenshots = applicationArtifact.getScreenshots();
-        List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
+        List<InputStream> screenshotStreams = new ArrayList<>();
 
-        int counter = 1;
-        for (String scName : screenshotNames) {
-            if (counter == 1) {
-                applicationReleaseDTO.setScreenshotName1(scName);
-            } else if (counter == 2) {
-                applicationReleaseDTO.setScreenshotName2(scName);
-            } else if (counter == 3) {
-                applicationReleaseDTO.setScreenshotName3(scName);
+        if (screenshots != null){
+            List<String> screenshotNames = new ArrayList<>(screenshots.keySet());
+            screenshotStreams = new ArrayList<>(screenshots.values());
+
+            int counter = 1;
+            for (String scName : screenshotNames) {
+                if (counter == 1) {
+                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
+                            applicationReleaseDTO.getScreenshotName1());
+                    applicationReleaseDTO.setScreenshotName1(scName);
+                } else if (counter == 2) {
+                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
+                            applicationReleaseDTO.getScreenshotName2());
+                    applicationReleaseDTO.setScreenshotName2(scName);
+                } else if (counter == 3) {
+                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
+                            applicationReleaseDTO.getScreenshotName3());
+                    applicationReleaseDTO.setScreenshotName3(scName);
+                }
+                counter++;
             }
-            counter++;
         }
 
         // Upload images
         applicationReleaseDTO = applicationStorageManager
                 .uploadImageArtifacts(applicationReleaseDTO, applicationArtifact.getIconStream(),
-                        applicationArtifact.getBannerStream(), new ArrayList<>(screenshots.values()));
+                        applicationArtifact.getBannerStream(), screenshotStreams);
         return applicationReleaseDTO;
     }
 
@@ -1115,6 +1129,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             List<Integer> deletingAppReleaseIds = new ArrayList<>();
+            List<String> deletingAppHashVals = new ArrayList<>();
             for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
                 List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
                         .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
@@ -1125,9 +1140,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     log.error(msg);
                     throw new ForbiddenException(msg);
                 }
-                applicationStorageManager.deleteApplicationReleaseArtifacts(applicationReleaseDTO.getAppHashValue());
+                deletingAppHashVals.add(applicationReleaseDTO.getAppHashValue());
                 deletingAppReleaseIds.add(applicationReleaseDTO.getId());
             }
+            applicationStorageManager.deleteAllApplicationReleaseArtifacts(deletingAppHashVals);
             this.lifecycleStateDAO.deleteLifecycleStates(deletingAppReleaseIds);
             this.applicationReleaseDAO.deleteReleases(deletingAppReleaseIds);
             this.applicationDAO.deleteApplicationTags(applicationId, tenantId);
@@ -1172,8 +1188,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
             if (!activeApplicationReleaseDTOs.isEmpty()) {
-                String msg = "There are application releases which are not in the state " + lifecycleStateManager
-                        .getEndState() + ". Hence you are not allowed to delete the application";
+                String msg = "There are application releases which are not in the " + lifecycleStateManager
+                        .getEndState() + " state. Hence you are not allowed to delete the application";
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
@@ -1218,7 +1234,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
-            applicationStorageManager.deleteApplicationReleaseArtifacts(applicationReleaseDTO.getAppHashValue());
+            applicationStorageManager.deleteAllApplicationReleaseArtifacts(
+                    Collections.singletonList(applicationReleaseDTO.getAppHashValue()));
             lifecycleStateDAO.deleteLifecycleStateByReleaseId(applicationReleaseDTO.getId());
             applicationReleaseDAO.deleteRelease(applicationReleaseDTO.getId());
             ConnectionManagerUtil.commitDBTransaction();
@@ -1264,10 +1281,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                 + " into updatable state and retry the operation.");
             }
             applicationReleaseDTO = this.applicationReleaseDAO
-                    .updateRelease(addImageArtifacts(applicationReleaseDTO, applicationArtifact), tenantId);
+                    .updateRelease(updateImageArtifacts(applicationReleaseDTO, applicationArtifact), tenantId);
             if (applicationReleaseDTO == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
-                String msg = "ApplicationDTO release updating count is 0.  ApplicationDTO release UUID is " + uuid;
+                String msg = "Application release updating count is 0 for application release UUID: " + uuid;
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
@@ -2119,6 +2136,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 String msg = "Couldn't found an application which has application release for UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
+            }
+            if (!ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
+                String msg = "You trying to perform enterprise app release update on non-enterprise app release.";
+                log.error(msg);
+                throw new ForbiddenException(msg);
             }
 
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);

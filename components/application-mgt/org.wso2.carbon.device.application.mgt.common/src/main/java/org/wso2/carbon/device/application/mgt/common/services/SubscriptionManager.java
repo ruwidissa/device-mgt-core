@@ -27,6 +27,6 @@ import java.util.List;
  * This interface manages all the operations related with ApplicationDTO Subscription.
  */
 public interface SubscriptionManager {
-    <T> ApplicationInstallResponse performBulkAppInstallation(String applicationUUID, List<T> params, String subType,
+    <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params, String subType,
             String action) throws ApplicationManagementException;
 }

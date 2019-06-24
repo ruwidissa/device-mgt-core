@@ -93,7 +93,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public <T> ApplicationInstallResponse performBulkAppInstallation(String applicationUUID, List<T> params,
+    public <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params,
             String subType, String action) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Install application release which has UUID " + applicationUUID + " to " + params.size()
@@ -337,20 +337,20 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             List<String> subscribedEntities = new ArrayList<>();
             if (SubsciptionType.USER.toString().equals(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedUsernames(params, tenantId);
+                subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
                 }
             } else if (SubsciptionType.ROLE.toString().equals(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedRolenames(params, tenantId);
+                subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId);
 
                 }
             } else if (SubsciptionType.GROUP.toString().equals(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedGroupnames(params, tenantId);
+                subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addGroupSubscriptions(tenantId, username, params, applicationReleaseId);

@@ -42,14 +42,6 @@ public interface ApplicationStorageManager {
     ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease,
             InputStream iconFile, InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
 
-    /**
-     * To upload image artifacts related with an ApplicationDTO.
-     *
-     * @param applicationRelease Release of the application
-     * @throws ResourceManagementException Resource Management Exception.
-     */
-    void deleteImageArtifacts(ApplicationReleaseDTO applicationRelease) throws ResourceManagementException;
-
     ApplicationInstaller getAppInstallerData(InputStream binaryFile, String deviceType)
             throws ApplicationStorageManagementException;
 
@@ -78,10 +70,9 @@ public interface ApplicationStorageManager {
     /**
      * To delete the artifacts related with particular ApplicationDTO Release.
      *
-     * @param directoryPath Hash value of the application artifact.
      * @throws ApplicationStorageManagementException Not Found Exception.
      */
-    void deleteApplicationReleaseArtifacts(String directoryPath) throws ApplicationStorageManagementException;
+    void deleteAppReleaseArtifact(String appReleaseHashVal, String fileName) throws ApplicationStorageManagementException;
 
     /**
      * To delete all release artifacts related with particular ApplicationDTO Release.
