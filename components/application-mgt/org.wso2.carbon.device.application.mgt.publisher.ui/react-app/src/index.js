@@ -9,8 +9,6 @@ import Release from "./pages/dashboard/apps/release/Release";
 import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
 import Mange from "./pages/dashboard/manage/Manage";
 import './index.css';
-import store from "./js/store/index";
-import {Provider} from "react-redux";
 
 
 const routes = [
@@ -20,7 +18,7 @@ const routes = [
         component: Login
     },
     {
-        path: '/publisher/apps',
+        path: '/publisher/',
         exact: false,
         component: Dashboard,
         routes: [
@@ -30,21 +28,25 @@ const routes = [
                 exact: true
             },
             {
-                path: '/publisher/apps/new-app',
+                path: '/publisher/apps/releases/:uuid',
+                exact: true,
+                component: Release
+            },
+            {
+                path: '/publisher/add-new-app/enterprise',
                 component: AddNewApp,
                 exact: true
             },
             {
-                path: '/publisher/apps/releases/:uuid',
-                exact: true,
-                component: Release
-            }
-        ]
-    },{
-        path: '/publisher/manage',
-        exact: false,
-        component: Dashboard,
-        routes: [
+                path: '/publisher/add-new-app/public',
+                component: AddNewApp,
+                exact: true
+            },
+            {
+                path: '/publisher/add-new-app/web-clip',
+                component: AddNewApp,
+                exact: true
+            },
             {
                 path: '/publisher/manage',
                 component: Mange,
@@ -56,9 +58,7 @@ const routes = [
 
 
 ReactDOM.render(
-    <Provider store={store}>
-        <App routes={routes}/>
-    </Provider>,
+        <App routes={routes}/>,
     document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
