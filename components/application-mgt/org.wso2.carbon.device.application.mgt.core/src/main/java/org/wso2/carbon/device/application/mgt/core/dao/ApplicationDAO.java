@@ -20,7 +20,6 @@ package org.wso2.carbon.device.application.mgt.core.dao;
 
 import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
@@ -101,18 +100,6 @@ public interface ApplicationDAO {
 
     void updateCategory(CategoryDTO categoryDTO, int tenantId) throws ApplicationManagementDAOException;
 
-
-
-    /**
-     * To check application existence.
-     *
-     * @param appName appName that need to identify application.
-     * @param type type that need to identify application.
-     * @param tenantId tenantId that need to identify application.
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-     boolean isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException;
-
     /**
      * To get the applications that satisfy the given criteria.
      *
@@ -131,27 +118,6 @@ public interface ApplicationDAO {
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
     String getUuidOfLatestRelease(int appId) throws ApplicationManagementDAOException;
-
-    /**
-     * To get the application with the given uuid
-     *
-     * @param appName     name of the application to be retrieved.
-     * @param tenantId ID of the tenant.
-     * @param appType Type of the application.
-     * @return the application
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    ApplicationDTO getApplication(String appName, String appType, int tenantId) throws ApplicationManagementDAOException;
-
-    /**
-     * To get the application with the given id
-     *
-     * @param id ID of the application.
-     * @param tenantId ID of the tenant.
-     * @return the application
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    ApplicationDTO getApplicationById(String id, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To get the application with the given id
@@ -174,16 +140,6 @@ public interface ApplicationDAO {
     ApplicationDTO getApplicationByUUID(String releaseUuid, int tenantId) throws ApplicationManagementDAOException;
 
     /**
-     * To get the application with the given uuid
-     *
-     * @param appId ID of the application
-     * @param tenantId Tenant Id
-     * @return the boolean value
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    boolean verifyApplicationExistenceById(int appId, int tenantId) throws ApplicationManagementDAOException;
-
-    /**
      * Verify whether application exist for given application name and device type. Because a name and device type is
      * unique for an application.
      *
@@ -193,7 +149,7 @@ public interface ApplicationDAO {
      * @return ID of the ApplicationDTO.
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    boolean isValidAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException;
+    boolean isExistingAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To edit the given application.
@@ -235,16 +191,6 @@ public interface ApplicationDAO {
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
     void deleteTags(List<String> tags, int applicationId, int tenantId) throws ApplicationManagementDAOException;
-
-    /**
-     * To get an {@link ApplicationDTO} associated with the given release
-     *
-     * @param appReleaseUUID UUID of the {@link ApplicationReleaseDTO}
-     * @param tenantId ID of the tenant
-     * @return {@link ApplicationDTO} associated with the given release UUID
-     * @throws ApplicationManagementDAOException if unable to fetch the ApplicationDTO from the data store.
-     */
-    ApplicationDTO getApplicationByRelease(String appReleaseUUID, int tenantId) throws ApplicationManagementDAOException;
 
     String getApplicationSubTypeByUUID(String uuid, int tenantId) throws ApplicationManagementDAOException;
 

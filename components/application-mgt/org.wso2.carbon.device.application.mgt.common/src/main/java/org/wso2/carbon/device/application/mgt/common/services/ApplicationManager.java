@@ -45,15 +45,16 @@ import java.util.List;
  */
 public interface ApplicationManager {
 
-    /**
-     * Creates an application.
+    /***
+     * The method is responsible to add new application into entgra App Manager.
      *
      * @param applicationWrapper Application that need to be created.
-     * @return Created application
-     * @throws ApplicationManagementException ApplicationDTO Management Exception
+     * @param applicationArtifact contains artifact data. i.e image name and stream,  icon name and stream etc.
+     * @return {@link Application}
+     * @throws ApplicationManagementException Catch all other throwing exceptions and throw {@link ApplicationManagementException}
      */
     Application createApplication(ApplicationWrapper applicationWrapper, ApplicationArtifact applicationArtifact)
-            throws ApplicationManagementException, RequestValidatingException;
+            throws ApplicationManagementException;
 
     Application createWebClip(WebAppWrapper webAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
@@ -133,15 +134,6 @@ public interface ApplicationManager {
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
     Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException;
-
-    /**
-     * To get an application associated with the release.
-     *
-     * @param appReleaseUUID UUID of the app release
-     * @return {@link ApplicationDTO} associated with the release
-     * @throws ApplicationManagementException If unable to retrieve {@link ApplicationDTO} associated with the given UUID
-     */
-    ApplicationDTO getApplicationByRelease(String appReleaseUUID) throws ApplicationManagementException;
 
     /**
      * To get lifecycle state change flow of a particular Application Release.

@@ -54,7 +54,9 @@ public class ApplicationReleaseWrapper {
     private String metaData;
 
     @ApiModelProperty(name = "supportedOsVersions",
-            value = "ApplicationDTO release supported OS versions")
+            value = "Application release supported OS versions",
+            required = true,
+            example = "4.0-10.0")
     @NotNull
     private String supportedOsVersions;
 

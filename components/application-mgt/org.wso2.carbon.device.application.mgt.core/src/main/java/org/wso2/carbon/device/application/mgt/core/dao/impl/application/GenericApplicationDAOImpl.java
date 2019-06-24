@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.device.application.mgt.common.AppLifecycleState;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.CategoryDTO;
 import org.wso2.carbon.device.application.mgt.common.Filter;
 import org.wso2.carbon.device.application.mgt.common.dto.TagDTO;
@@ -89,36 +88,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     "Error occurred while obtaining the DB connection when application creation", e);
         } catch (SQLException e) {
             throw new ApplicationManagementDAOException("Error occurred while adding the application", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
-        }
-    }
-
-    @Override
-    public boolean isExistApplication(String appName, String type, int tenantId) throws ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to verify whether the registering app is registered or not");
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        String sql = "SELECT * FROM AP_APP WHERE NAME = ? AND TYPE = ? AND TENANT_ID = ?";
-        try {
-            conn = this.getDBConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, appName);
-            stmt.setString(2, type);
-            stmt.setInt(3, tenantId);
-            rs = stmt.executeQuery();
-            return rs.next();
-
-        } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while obtaining the DB connection when verifying application existence", e);
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "DB connection error occured while checking whether application exist or not.", e);
         } finally {
             DAOUtil.cleanupResources(stmt, rs);
         }
@@ -345,96 +314,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationDTO getApplication(String appName, String appType, int tenantId) throws
-                                                                                    ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Getting application with the type(" + appType + " and Name " + appName +
-                              " ) from the database");
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = this.getDBConnection();
-            String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY,"
-                            + " AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
-                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE WHERE AP_APP.NAME=? AND "
-                            + "AP_APP.TYPE= ? AND AP_APP.TENANT_ID=?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, appName);
-            stmt.setString(2, appType);
-            stmt.setInt(3, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved basic details of the application with the type "
-                                  + appType + "and app name " + appName);
-            }
-
-            return DAOUtil.loadApplication(rs);
-
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application details with app name " + appName +
-                            " while executing query.", e);
-        } catch (JSONException e) {
-            throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
-        } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } catch (UnexpectedServerErrorException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
-        }
-    }
-
-    @Override
-    public ApplicationDTO getApplicationById(String id, int tenantId) throws ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Getting application with the id:" + id);
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = this.getDBConnection();
-            String sql =
-                    "SELECT AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, AP_APP.APP_CATEGORY "
-                            + "AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE ,AP_APP.CURRENCY AS CURRENCY,"
-                            + " AP_APP.RESTRICTED AS RESTRICTED, AP_APP_TAG.TAG AS APP_TAG, AP_UNRESTRICTED_ROLE.ROLE "
-                            + "AS ROLE FROM AP_APP, AP_APP_TAG, AP_UNRESTRICTED_ROLE WHERE AP_APP.NAME=? AND "
-                            + "AP_APP.APP_ID= ? AND AP_APP.TENANT_ID=?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, id);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved basic details of the application with the id:" + id);
-            }
-
-            return DAOUtil.loadApplication(rs);
-
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application details with app id " + id +
-                            " while executing query.", e);
-        } catch (JSONException e) {
-            throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
-        } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } catch (UnexpectedServerErrorException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
-        }
-    }
-
-    @Override
     public ApplicationDTO getApplicationByUUID(String releaseUuid, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -575,39 +454,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } catch (UnexpectedServerErrorException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
-        }
-    }
-
-    @Override
-    public boolean verifyApplicationExistenceById(int appId, int tenantId) throws ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Getting application with the application ID(" + appId + " ) from the database");
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = this.getDBConnection();
-            String sql =
-                    "SELECT AP_APP.ID AS APP_ID FROM AP_APP WHERE AP_APP.ID = ? AND AP_APP.TENANT_ID=?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, appId);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved basic details of the application with the application ID " + appId);
-            }
-            return rs.next();
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application details with app ID " + appId + " while executing query.",
-                    e);
-        } catch (DBConnectionException e) {
             throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
         } finally {
             DAOUtil.cleanupResources(stmt, rs);
@@ -1532,76 +1378,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public ApplicationDTO getApplicationByRelease(String appReleaseUUID, int tenantId)
-            throws ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Getting application with the UUID (" + appReleaseUUID + ") from the database");
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = this.getDBConnection();
-            String sql = "SELECT AP_APP_RELEASE.ID AS RELEASE_ID, AP_APP_RELEASE.VERSION, AP_APP_RELEASE.TENANT_ID,"
-                    + "AP_APP_RELEASE.UUID, AP_APP_RELEASE.RELEASE_TYPE, AP_APP_RELEASE.APP_PRICE, "
-                    + "AP_APP_RELEASE.STORED_LOCATION, AP_APP_RELEASE.BANNER_LOCATION, AP_APP_RELEASE.SC_1_LOCATION,"
-                    + "AP_APP_RELEASE.SC_2_LOCATION, AP_APP_RELEASE.SC_3_LOCATION, AP_APP_RELEASE.APP_HASH_VALUE,"
-                    + "AP_APP_RELEASE.SHARED_WITH_ALL_TENANTS, AP_APP_RELEASE.APP_META_INFO, AP_APP_RELEASE.CREATED_BY,"
-                    + "AP_APP_RELEASE.CREATED_AT, AP_APP_RELEASE.PUBLISHED_BY, AP_APP_RELEASE.PUBLISHED_AT, "
-                    + "AP_APP_RELEASE.STARS,"
-                    + "AP_APP.ID AS APP_ID, AP_APP.NAME AS APP_NAME, AP_APP.TYPE AS APP_TYPE, "
-                    + "AP_APP.APP_CATEGORY AS APP_CATEGORY, AP_APP.SUB_TYPE AS SUB_TYPE, AP_APP.CURRENCY AS CURRENCY, "
-                    + "AP_UNRESTRICTED_ROLE.ROLE AS ROLE FROM AP_APP, AP_UNRESTRICTED_ROLE, AP_APP_RELEASE "
-                    + "WHERE AP_APP_RELEASE.UUID=? AND AP_APP.TENANT_ID=?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, appReleaseUUID);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved details of the application with the UUID " + appReleaseUUID);
-            }
-
-            ApplicationDTO application = null;
-            while (rs.next()) {
-                ApplicationReleaseDTO appRelease = DAOUtil.loadApplicationRelease(rs);
-                application = new ApplicationDTO();
-
-                application.setId(rs.getInt("APP_ID"));
-                application.setName(rs.getString("APP_NAME"));
-                application.setType(rs.getString("APP_TYPE"));
-//                application.setAppCategories(rs.getString("APP_CATEGORY"));
-                application.setSubType(rs.getString("SUB_TYPE"));
-                application.setPaymentCurrency(rs.getString("CURRENCY"));
-//                application.setIsRestricted(rs.getBoolean("RESTRICTED"));
-
-                String unrestrictedRole = rs.getString("ROLE").toLowerCase();
-                List<String> unrestrictedRoleList = new ArrayList<>();
-                unrestrictedRoleList.add(unrestrictedRole);
-
-                application.setUnrestrictedRoles(unrestrictedRoleList);
-
-                List<ApplicationReleaseDTO> applicationReleaseList = new ArrayList<>();
-                applicationReleaseList.add(appRelease);
-
-                application.setApplicationReleaseDTOs(applicationReleaseList);
-            }
-            return application;
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while getting application details with UUID "
-                                                                + appReleaseUUID + " while executing query.", e);
-        } catch (JSONException e) {
-            throw new ApplicationManagementDAOException("Error occurred while parsing JSON", e);
-        } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
-        }
-    }
-
-    @Override
-    public boolean isValidAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException {
+    public boolean isExistingAppName(String appName, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;

@@ -2,7 +2,7 @@ package org.wso2.carbon.device.application.mgt.common.config;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class FailureCallback {
+public class ErrorCallback {
 
     private String badRequest;
     private String unauthorized;
