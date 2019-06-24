@@ -152,12 +152,12 @@ class AddNewAppFormComponent extends React.Component {
             if (!err) {
                 const {name, description, appCategories, tags, deviceType, price, isSharedWithAllTenants, binaryFile, icon, screenshots} = values;
                 const payload = {
-                    binaryFile,
-                    icon,
-                    screenshot1: screenshots[0],
-                    screenshot2: screenshots[1],
-                    screenshot3: screenshots[2],
-                    application:{
+                    binaryFile: binaryFile[0].originFileObj,
+                    icon: icon[0].originFileObj,
+                    screenshot1: screenshots[0].originFileObj,
+                    screenshot2: screenshots[1].originFileObj,
+                    screenshot3: screenshots[2].originFileObj,
+                    application: {
                         name,
                         description,
                         appCategories,
@@ -165,51 +165,134 @@ class AddNewAppFormComponent extends React.Component {
                         tags,
                         unrestrictedRoles: [],
                         deviceType,
-                        applicationReleaseWrappers: {
+                        entAppReleaseWrappers: [{
                             description,
                             price: (price === undefined) ? 0 : parseInt(price),
                             isSharedWithAllTenants,
                             metaData: "string",
-                            supportedOsVersions: "4.0"
-                        }
+                            supportedOsVersions: "4.0-10.0"
+                        }]
                     }
-
                 };
 
-                axios.post(
-                    config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app",
-                    payload,
-                    {
-                        headers: {
-                            'X-Platform': config.serverConfig.platform,
-                            'Content-Type': 'multipart/mixed'
-                        }
-                    }).then(res => {
-                    if (res.status === 201) {
-                        this.setState({
-                            loading: false,
-                        });
+                console.log(payload);
 
-                        notification["success"]({
-                            message: "Done!",
-                            description:
-                                "New app was added successfully",
-                        });
+                // let data = new FormData();
+                //
+                // const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app";
+                //
+                // data.append('binaryFile', binaryFile[0].originFileObj);
+                // data.append('icon', icon[0].originFileObj);
+                // data.append('screenshot1', screenshots[0].originFileObj);
+                // data.append('screenshot2', screenshots[1].originFileObj);
+                // data.append('screenshot3', screenshots[2].originFileObj);
+                // data.append('application', JSON.toString(payload.application));
+
+                // let request = new XMLHttpRequest();
+                // request.open('POST', url);
+                // request.send(data);
+
+
+                // var xhr = new XMLHttpRequest();
+                // // xhr.withCredentials = true;
+                //
+                // xhr.addEventListener("readystatechange", function () {
+                //     if (this.readyState === 4) {
+                //         console.log(this.responseText);
+                //     }
+                // });
+                //
+                // xhr.open("POST", "https://localhost:9443/ui-request-handler/invoke/application-mgt-publisher/v1.0/applications/ent-app");
+                // xhr.open("GET", "https://localhost:9443/ui-request-handler/invoke/application-mgt-publisher/v1.0/applications/tags");
+
+                // xhr.setRequestHeader("Content-Type", "multipart/mixed");
+                // xhr.setRequestHeader("X-Platform", "publisher");
+                //
+
+                // // xhr.setRequestHeader("Accept", "*/*");
+                //
+                // xhr.send(data);
+
+                // xhr.send();
+
+                // const options = {method: 'POST', body: data};
+                //
+                // fetch(url, options).then(function (response) {
+                //     console.log(response);
+                // });
+
+
+                // axios.post(
+                //     url,
+                //     data,
+                //     {
+                //         headers:{
+                //             'X-Platform': config.serverConfig.platform,
+                //             'Content-Type': 'multipart/mixed',
+                //             'content-type': 'multipart/form-data'
+                //         },
+                //         'Content-Type': 'multipart/mixed',
+                //         'content-type': 'multipart/form-data'
+                //     }
+                //     ).then(res => {
+                //     if (res.status === 201) {
+                //         this.setState({
+                //             loading: false,
+                //         });
+                //
+                //         notification["success"]({
+                //             message: "Done!",
+                //             description:
+                //                 "New app was added successfully",
+                //         });
+                //     }
+                //
+                // }).catch((error) => {
+                //     if (error.response.status === 401) {
+                //         window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                //     } else {
+                //         message.warning('Something went wrong');
+                //
+                //     }
+                //     this.setState({
+                //         loading: false
+                //     });
+                // });
+
+
+
+                var data = new FormData();
+                // data.append("binaryFile", "/Users/jayasanka/Desktop/gov/viber/a.apk");
+                // data.append("application", "{\n\t\"name\": \"Tub1111\",\n\t\"description\": \"Watch thousands of hit movies and TV series for free. Tubi is 100% legal unlimited streaming, with no credit cards and no subscription required. Choose what you want to watch, when you want to watch it, with fewer ads than regular TV. Tubi is the largest free streaming service featuring award-winning movies and TV series. There is something for everybody; from comedy to drama, kids to classics, and niche favorites such as Korean dramas, anime, and British series. Download now and start streaming entertainment for free, today!\",\n\t\"appCategories\": [\"EMM\"],\n\t\"subType\": \"FREE\",\n\t\"tags\": [\"tv\", \"movies\"],\n\t\"unrestrictedRoles\": [],\n\t\"deviceType\": \"android\",\n\t\"entAppReleaseWrappers\": [{\n\t\t\"description\": \" SEND A MESSAGE -Skip exchanging phone numbers, just send a message. It's seamless across devices. * SHOW YOUR REACTION - Add a silly sticker\",\n\t\t\"releaseType\": \"GA\",\n\t\t\"price\": 0.0,\n\t\t\"isSharedWithAllTenants\": false,\n\t\t\"metaData\": \"{\\\"developer\\\":\\\"Facebook, Inc.\\\",\\\"Copyright\\\":\\\"\\u00A9 Facebook, Inc.\\\",\\\"Location\\\":\\\"This app may use your location even when it isn't open, which can decrease battery life.\\\"}\",\n\t\t\"ratedUsers\": 0,\n\t\t\"rating\": 0,\n\t\t\"supportedOsVersions\": \"4.0-10.0\"\n\t}]\n}");
+                // data.append("icon", "/Users/jayasanka/Desktop/gov/angular/i.png");
+                // data.append("screenshot1", "/Users/jayasanka/Desktop/gov/angular/1.webp");
+                // data.append("screenshot2", "/Users/jayasanka/Desktop/gov/angular/2.webp");
+                // data.append("screenshot3", "/Users/jayasanka/Desktop/gov/angular/3.webp");
+
+
+                data.append('binaryFile', binaryFile[0].originFileObj);
+                data.append('icon', icon[0].originFileObj);
+                data.append('screenshot1', screenshots[0].originFileObj);
+                data.append('screenshot2', screenshots[1].originFileObj);
+                data.append('screenshot3', screenshots[2].originFileObj);
+                data.append('application', JSON.toString(payload.application));
+
+
+                var xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4) {
+                        console.log(this.responseText);
                     }
-
-                }).catch((error) => {
-                    if (error.response.status === 401) {
-                        window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
-                    } else {
-                        message.warning('Something went wrong');
-
-                    }
-                    this.setState({
-                        loading: false
-                    });
                 });
 
-                console.log(payload);
+                xhr.open("POST", "https://localhost:9443/ui-request-handler/invoke/application-mgt-publisher/v1.0/applications/ent-app");
+                xhr.setRequestHeader("Content-Type", "multipart/mixed");
+                xhr.setRequestHeader("X-Platform", "publisher");
+
+                xhr.send(data);
+
             }
         });
     };
@@ -252,7 +335,7 @@ class AddNewAppFormComponent extends React.Component {
                                             <Form.Item {...formItemLayout} label="Device Type">
                                                 {getFieldDecorator('deviceType', {
                                                     rules: [{
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please select device type'
                                                     },
                                                         {
@@ -270,7 +353,7 @@ class AddNewAppFormComponent extends React.Component {
                                             <Form.Item {...formItemLayout} label="App Name">
                                                 {getFieldDecorator('name', {
                                                     rules: [{
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please input a name'
                                                     }],
                                                 })(
@@ -282,7 +365,7 @@ class AddNewAppFormComponent extends React.Component {
                                             <Form.Item {...formItemLayout} label="Description">
                                                 {getFieldDecorator('description', {
                                                     rules: [{
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please enter a description'
                                                     }],
                                                 })(
@@ -292,7 +375,7 @@ class AddNewAppFormComponent extends React.Component {
                                             <Form.Item {...formItemLayout} label="Categories">
                                                 {getFieldDecorator('appCategories', {
                                                     rules: [{
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please select categories'
                                                     }],
                                                 })(
@@ -327,7 +410,7 @@ class AddNewAppFormComponent extends React.Component {
                                             <Form.Item {...formItemLayout} label="Is Shared?">
                                                 {getFieldDecorator('isSharedWithAllTenants', {
                                                     rules: [{
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please select'
                                                     }],
                                                 })(
@@ -340,7 +423,7 @@ class AddNewAppFormComponent extends React.Component {
                                             <Form.Item {...formItemLayout} label="Tags">
                                                 {getFieldDecorator('tags', {
                                                     rules: [{
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please select tags'
                                                     }],
                                                 })(
@@ -390,7 +473,7 @@ class AddNewAppFormComponent extends React.Component {
                                                 {getFieldDecorator('binaryFile', {
                                                     valuePropName: 'fileList',
                                                     getValueFromEvent: this.normFile,
-                                                    required: true,
+                                                    required: false,
                                                     message: 'Please select tags'
                                                 })(
                                                     <Upload.Dragger
@@ -416,7 +499,7 @@ class AddNewAppFormComponent extends React.Component {
                                                     {getFieldDecorator('icon', {
                                                         valuePropName: 'icon',
                                                         getValueFromEvent: this.normFile,
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please select a icon'
                                                     })(
                                                         <Upload
@@ -445,13 +528,14 @@ class AddNewAppFormComponent extends React.Component {
                                                     {getFieldDecorator('screenshots', {
                                                         valuePropName: 'icon',
                                                         getValueFromEvent: this.normFile,
-                                                        required: true,
+                                                        required: false,
                                                         message: 'Please select a icon'
                                                     })(
                                                         <Upload
-                                                            name="logo"
+                                                            name="screenshots"
                                                             onChange={this.handleScreenshotChange}
                                                             beforeUpload={() => false}
+                                                            multiple
                                                         >
 
                                                             {screenshots.length < 3 && (
