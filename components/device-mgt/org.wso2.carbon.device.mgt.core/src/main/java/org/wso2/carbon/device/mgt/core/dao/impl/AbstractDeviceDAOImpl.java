@@ -1409,91 +1409,97 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
     
     public void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException {
+        String deviceIdentifierId = deviceIdentifier.getId();
+        String deviceType = deviceIdentifier.getType();
         Connection conn;
         try {
             conn = this.getConnection();
             int deviceId = getDeviceId(conn, deviceIdentifier, tenantId);
             if (deviceId == -1) {
-                String msg = "Device " + deviceIdentifier.getId() + " of type " + deviceIdentifier.getType() +
-                             " is not found";
+                String msg = "Device " + deviceIdentifierId + " of type " + deviceType + " is not found";
                 log.error(msg);
                 throw new DeviceManagementDAOException(msg);
             } else {
-                int enrollmentId = getEnrollmentId(conn, deviceId, tenantId);
-                if (enrollmentId == -1) {
-                    String msg = "Enrollment not found for the device " + deviceIdentifier.getId() + " of type " +
-                                 deviceIdentifier.getType();
+                List<Integer> enrollmentIds = getEnrollmentIds(conn, deviceId, tenantId);
+                if (enrollmentIds == null || enrollmentIds.isEmpty()) {
+                    String msg = "Enrollments not found for the device " + deviceIdentifierId + " of type "
+                                 + deviceType;
                     log.error(msg);
                     throw new DeviceManagementDAOException(msg);
                 } else {
                     removeDeviceDetail(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device detail data");
+                        log.debug("Successfully removed device detail data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDeviceLocation(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device location data");
+                        log.debug("Successfully removed device location data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDeviceInfo(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device info data");
+                        log.debug("Successfully removed device info data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDeviceNotification(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device notification data");
+                        log.debug("Successfully removed device notification data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDeviceApplicationMapping(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device application mapping data");
+                        log.debug("Successfully removed device application mapping data of device "
+                                  + deviceIdentifierId + " of type " + deviceType);
                     }
                     removeDevicePolicyApplied(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device applied policy data");
+                        log.debug("Successfully removed device applied policy data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDevicePolicy(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device policy data");
+                        log.debug("Successfully removed device policy data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
-                    removeEnrollmentDeviceDetail(conn, enrollmentId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed enrollment device detail data");
+                        log.debug("Starting to remove " + enrollmentIds.size() + " enrollment data of device "
+                                  + deviceIdentifierId + " of type " + deviceType);
                     }
-                    removeEnrollmentDeviceLocation(conn, enrollmentId);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed enrollment device location data");
+                    for (Integer enrollmentId : enrollmentIds) {
+                        removeEnrollmentDeviceDetail(conn, enrollmentId);
+                        removeEnrollmentDeviceLocation(conn, enrollmentId);
+                        removeEnrollmentDeviceInfo(conn, enrollmentId);
+                        removeEnrollmentDeviceApplicationMapping(conn, enrollmentId);
+                        removeDeviceOperationResponse(conn, enrollmentId);
+                        removeEnrollmentOperationMapping(conn, enrollmentId);
                     }
-                    removeEnrollmentDeviceInfo(conn, enrollmentId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed enrollment device info data");
-                    }
-                    removeEnrollmentDeviceApplicationMapping(conn, enrollmentId);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed enrollment device application mapping data");
-                    }
-                    removeDeviceOperationResponse(conn, enrollmentId);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device operation response data");
-                    }
-                    removeEnrollmentOperationMapping(conn, enrollmentId);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed enrollment operation mapping data");
+                        log.debug("Successfully removed enrollment device details, enrollment device location, " +
+                                  "enrollment device info, enrollment device application mapping, " +
+                                  "enrollment device operation response, enrollment operation mapping data of device "
+                                  + deviceIdentifierId + " of type " + deviceType);
                     }
                     removeDeviceEnrollment(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device enrollment data");
+                        log.debug("Successfully removed device enrollment data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDeviceGroupMapping(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully removed device group mapping data");
+                        log.debug("Successfully removed device group mapping data of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                     removeDevice(conn, deviceId);
                     if (log.isDebugEnabled()) {
-                        log.debug("Successfully permanently deleted the device");
+                        log.debug("Successfully permanently deleted the device of device " + deviceIdentifierId
+                                  + " of type " + deviceType);
                     }
                 }
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while deleting the device", e);
+            throw new DeviceManagementDAOException("Error occurred while deleting the device " + deviceIdentifierId
+                                                   + " of type " + deviceType, e);
         }
     }
 
@@ -1519,30 +1525,29 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         return deviceId;
     }
 
-    private int getEnrollmentId(Connection conn, int deviceId, int tenantId) throws DeviceManagementDAOException {
+    private List<Integer> getEnrollmentIds(Connection conn, int deviceId, int tenantId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        int enrollmentId = -1;
+        List<Integer> enrollmentIds = new ArrayList<>();
         try {
             String sql = "SELECT ID FROM DM_ENROLMENT WHERE DEVICE_ID = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
             stmt.setInt(2, tenantId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                enrollmentId = rs.getInt("ID");
+            while (rs.next()) {
+                enrollmentIds.add(rs.getInt("ID"));
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving enrollment id of the device", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
-        return enrollmentId;
+        return enrollmentIds;
     }
 
     private void removeDeviceDetail(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_DETAIL WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1551,13 +1556,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device detail", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceLocation(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_LOCATION WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1566,13 +1570,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device location", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceInfo(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_INFO WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1581,13 +1584,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device info", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceNotification(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_NOTIFICATION WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1596,13 +1598,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device notification", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceApplicationMapping(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1611,13 +1612,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device application mapping", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDevicePolicyApplied(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_POLICY_APPLIED WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1626,13 +1626,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device policy applied", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDevicePolicy(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_POLICY WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1641,13 +1640,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device policy", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeEnrollmentDeviceDetail(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_DETAIL WHERE ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1656,13 +1654,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing enrollment device detail", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeEnrollmentDeviceLocation(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_LOCATION WHERE ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1671,13 +1668,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing enrollment device location", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeEnrollmentDeviceInfo(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_INFO WHERE ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1686,14 +1682,13 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing enrollment device info", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeEnrollmentDeviceApplicationMapping(Connection conn, int enrollmentId)
             throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1703,13 +1698,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throw new DeviceManagementDAOException("Error occurred while removing enrollment device application " +
                                                    "mapping", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceOperationResponse(Connection conn, int enrollmentId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE WHERE ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1718,14 +1712,13 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device operation response", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeEnrollmentOperationMapping(Connection conn, int enrollmentId)
             throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1734,13 +1727,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing enrollment operation mapping", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceEnrollment(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_ENROLMENT WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1749,13 +1741,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device enrollment", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDeviceGroupMapping(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE_GROUP_MAP WHERE DEVICE_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1764,13 +1755,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device group mapping", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     private void removeDevice(Connection conn, int deviceId) throws DeviceManagementDAOException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
             String sql = "DELETE FROM DM_DEVICE WHERE ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -1779,7 +1769,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while removing device", e);
         } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 }
