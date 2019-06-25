@@ -205,8 +205,7 @@ public class InvokerHandler extends HttpServlet {
                     entityBuilder.addPart(item.getFieldName(), new InputStreamBody(item.getInputStream(),
                             ContentType.create(item.getContentType()), item.getName()));
                 } else {
-                    entityBuilder.addTextBody(item.getFieldName(), item.getString(),
-                            ContentType.create(item.getContentType()));
+                    entityBuilder.addTextBody(item.getFieldName(), item.getString());
                 }
             }
             proxyRequest.setEntity(entityBuilder.build());
