@@ -368,7 +368,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<String> getSubscribedUsernames(List<String> users, int tenantId)
+    public List<String> getSubscribedUserNames(List<String> users, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get already subscribed users for given list of user names.");
@@ -406,7 +406,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<String> getSubscribedRolenames(List<String> roles, int tenantId)
+    public List<String> getSubscribedRoleNames(List<String> roles, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug(
@@ -445,7 +445,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<String> getSubscribedGroupnames(List<String> groups, int tenantId)
+    public List<String> getSubscribedGroupNames(List<String> groups, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get already subscribed groups for given list of group names.");
@@ -482,7 +482,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
-    @Override public List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId)
+    @Override
+    public List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received to DAO Layer to get already subscribed dvice Ids for given list of device Ids.");
@@ -560,6 +561,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     stmt.setString(3, username);
                     stmt.setInt(4, releaseId);
                     stmt.setInt(5, tenantId);
+                    stmt.addBatch();
                 }
                 stmt.executeBatch();
             }
@@ -569,6 +571,35 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred when obtaining database connection for updating the user subscriptions of application.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateDeviceSubStatus (int operationId, String status, int tenantId) throws ApplicationManagementDAOException {
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            String sql = "UPDATE AP_DEVICE_SUBSCRIPTION "
+                    + "SET STATUS = ? "
+                    + "WHERE "
+                    + "AP_APP_RELEASE_ID = (SELECT AP_DEVICE_SUBSCRIPTION_ID FROM AP_APP_SUB_OP_MAPPING WHERE OPERATION_ID = ?) "
+                    + "AND TENANT_ID = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, status);
+                stmt.setInt(2, operationId);
+                stmt.setInt(3, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update the subscription status of the "
+                    + "device subscription.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when obtaining database connection for updating the subscription status of the "
+                    + "device subscription.";
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         }

@@ -67,13 +67,13 @@ public interface SubscriptionDAO {
     Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int tenantId) throws
             ApplicationManagementDAOException;
 
-    List<String> getSubscribedUsernames(List<String> users, int tenantId) throws
+    List<String> getSubscribedUserNames(List<String> users, int tenantId) throws
             ApplicationManagementDAOException;
 
-    List<String> getSubscribedRolenames(List<String> roles, int tenantId) throws
+    List<String> getSubscribedRoleNames(List<String> roles, int tenantId) throws
             ApplicationManagementDAOException;
 
-    List<String> getSubscribedGroupnames(List<String> groups, int tenantId) throws
+    List<String> getSubscribedGroupNames(List<String> groups, int tenantId) throws
             ApplicationManagementDAOException;
 
     void updateSubscriptions(int tenantId, String updateBy, List<String> paramList,
@@ -81,5 +81,6 @@ public interface SubscriptionDAO {
 
     List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId) throws ApplicationManagementDAOException;
 
+    void updateDeviceSubStatus (int operationId, String status, int tenantcId) throws ApplicationManagementDAOException;
 
 }

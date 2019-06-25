@@ -29,7 +29,7 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.response.Category;
 import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
@@ -178,12 +178,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
             applicationManager.validateAppCreatingRequest(applicationWrapper);
-            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getApplicationReleaseWrappers().get(0));
+            applicationManager.validateReleaseCreatingRequest(applicationWrapper.getEntAppReleaseWrappers().get(0));
             applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new Ent App
-            Application application = applicationManager.createApplication(applicationWrapper,
+            Application application = applicationManager.createEntApp(applicationWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
@@ -284,7 +284,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/ent-app/{appId}")
     public Response createEntAppRelease(
             @PathParam("appId") int appId,
-            @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
+            @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
             @Multipart("binaryFile") Attachment binaryFile,
             @Multipart("icon") Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
@@ -294,12 +294,12 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> attachmentList = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            applicationManager.validateReleaseCreatingRequest(applicationReleaseWrapper);
+            applicationManager.validateReleaseCreatingRequest(entAppReleaseWrapper);
             applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
             // Created new Ent App release
-            ApplicationRelease release = applicationManager.createEntAppRelease(appId, applicationReleaseWrapper,
+            ApplicationRelease release = applicationManager.createEntAppRelease(appId, entAppReleaseWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
             if (release != null) {
                 return Response.status(Response.Status.CREATED).entity(release).build();
@@ -325,22 +325,18 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Path("/image-artifacts/{uuid}")
     public Response updateApplicationImageArtifacts(
             @PathParam("uuid") String applicationReleaseUuid,
-            @Multipart("icon") Attachment iconFile,
+            @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @Multipart("screenshot1") Attachment screenshot1,
-            @Multipart("screenshot2") Attachment screenshot2,
-            @Multipart("screenshot3") Attachment screenshot3) {
+            @Multipart(value = "screenshot1", required = false) Attachment screenshot1,
+            @Multipart(value = "screenshot2", required = false) Attachment screenshot2,
+            @Multipart(value = "screenshot3", required = false) Attachment screenshot3) {
         try {
             List<Attachment> attachments = constructAttachmentList(screenshot1, screenshot2, screenshot3);
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            applicationManager.validateImageArtifacts(iconFile, bannerFile, attachments);
             applicationManager.updateApplicationImageArtifact(applicationReleaseUuid,
                     constructApplicationArtifact(null, iconFile, bannerFile, attachments));
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationReleaseUuid).build();
-        } catch (RequestValidatingException e) {
-            log.error(e.getMessage(), e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
@@ -358,24 +354,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     @Override
     @PUT
     @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
-    @Path("/app-artifact/{deviceType}/{appType}/{uuid}")
+    @Path("/ent-app-artifact/{deviceType}//{uuid}")
     public Response updateApplicationArtifact(
             @PathParam("deviceType") String deviceType,
-            @PathParam("appType") String appType,
             @PathParam("uuid") String applicationReleaseUuid,
             @Multipart("binaryFile") Attachment binaryFile) {
 
         try {
-            if (!ApplicationType.ENTERPRISE.toString().equals(appType)) {
-                String msg = "If Application type is " + appType + ", then you don't have application release artifact "
-                        + "to update for application release UUID: " + applicationReleaseUuid;
-                log.error(msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-            }
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
-            //todo check again
             applicationManager.validateBinaryArtifact(binaryFile);
-            applicationManager.updateApplicationArtifact(deviceType, appType, applicationReleaseUuid,
+            applicationManager.updateApplicationArtifact(deviceType, applicationReleaseUuid,
                     constructApplicationArtifact(binaryFile, null, null, null));
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application release. UUID is "
@@ -422,25 +410,21 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Path("/app-release/{deviceType}/{appType}/{uuid}")
-    public Response updateApplicationRelease(
+    @Path("/ent-app-release/{deviceType}/{uuid}")
+    public Response updateEntAppRelease(
             @PathParam("deviceType") String deviceType,
-            @PathParam("appType") String appType,
             @PathParam("uuid") String applicationUUID,
-            @Multipart("applicationRelease") ApplicationReleaseWrapper applicationReleaseWrapper,
-            @Multipart("binaryFile") Attachment binaryFile,
-            @Multipart("icon") Attachment iconFile,
+            @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
+            @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
+            @Multipart(value = "icon", required = false) Attachment iconFile,
             @Multipart(value = "banner", required = false) Attachment bannerFile,
-            @Multipart("screenshot1") Attachment screenshot1,
-            @Multipart("screenshot2") Attachment screenshot2,
-            @Multipart("screenshot3") Attachment screenshot3) {
+            @Multipart(value = "screenshot1", required = false) Attachment screenshot1,
+            @Multipart(value = "screenshot2", required = false) Attachment screenshot2,
+            @Multipart(value = "screenshot3", required = false) Attachment screenshot3) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            //todo check again
-            applicationManager.validateBinaryArtifact(binaryFile);
-            applicationManager.validateImageArtifacts(iconFile, bannerFile, screenshots);
-            if (!applicationManager.updateRelease(deviceType, appType, applicationUUID, applicationReleaseWrapper,
+            if (!applicationManager.updateEntAppRelease(deviceType, applicationUUID, entAppReleaseWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots))) {
                 String msg ="Application release updating is failed. Please contact the administrator. "
                         + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType;
@@ -466,10 +450,6 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         } catch (ApplicationManagementException e) {
             String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (RequestValidatingException e) {
-            String msg = "Error occurred while updating the application release in the file system";
-            log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
@@ -818,7 +798,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 applicationArtifact.setBannerStream(bannerStream);
             }
 
-            if (attachmentList != null) {
+            if (attachmentList != null && !attachmentList.isEmpty()) {
                 Map<String, InputStream> scrrenshotData = new TreeMap<>();
                 for (Attachment sc : attachmentList) {
                     dataHandler = sc.getDataHandler();

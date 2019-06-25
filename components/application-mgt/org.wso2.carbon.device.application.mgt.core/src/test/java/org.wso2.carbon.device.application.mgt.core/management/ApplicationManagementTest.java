@@ -13,7 +13,7 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.response.Category;
 import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.core.BaseTestCase;
@@ -72,17 +72,17 @@ public class ApplicationManagementTest extends BaseTestCase {
         applicationWrapper.setTags(tags);
         applicationWrapper.setPaymentCurrency("USD");
 
-        List<ApplicationReleaseWrapper> applicationReleaseWrappers  = new ArrayList<>();
-        ApplicationReleaseWrapper releaseWrapper = new ApplicationReleaseWrapper();
+        List<EntAppReleaseWrapper> entAppReleaseWrappers = new ArrayList<>();
+        EntAppReleaseWrapper releaseWrapper = new EntAppReleaseWrapper();
         releaseWrapper.setDescription("First release");
         releaseWrapper.setIsSharedWithAllTenants(false);
         releaseWrapper.setMetaData("Just meta data");
         releaseWrapper.setReleaseType("free");
         releaseWrapper.setPrice(5.7);
         releaseWrapper.setSupportedOsVersions("4.0-7.0");
-        applicationReleaseWrappers.add(releaseWrapper);
+        entAppReleaseWrappers.add(releaseWrapper);
 
-        applicationWrapper.setApplicationReleaseWrappers(applicationReleaseWrappers);
+        applicationWrapper.setEntAppReleaseWrappers(entAppReleaseWrappers);
 
         ApplicationArtifact applicationArtifact = new ApplicationArtifact();
         applicationArtifact.setBannerName("My First Banner");
@@ -102,7 +102,7 @@ public class ApplicationManagementTest extends BaseTestCase {
         applicationArtifact.setScreenshots(screenshots);
 
         ApplicationManager manager = new ApplicationManagerImpl();
-        manager.createApplication(applicationWrapper, applicationArtifact);
+        manager.createEntApp(applicationWrapper, applicationArtifact);
     }
 
     @Test
@@ -171,12 +171,12 @@ public class ApplicationManagementTest extends BaseTestCase {
     }
 
     @Test
-    public ApplicationRelease createRelease(int applicationId, ApplicationReleaseWrapper applicationReleaseWrapper, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+    public ApplicationRelease createRelease(int applicationId, EntAppReleaseWrapper entAppReleaseWrapper, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         return null;
     }
 
     @Test
-    public boolean updateRelease(String deviceType, String applicationType, String releaseUuid, ApplicationReleaseWrapper applicationReleaseWrapper, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
+    public boolean updateRelease(String deviceType, String applicationType, String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper, ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         return false;
     }
 
@@ -186,7 +186,7 @@ public class ApplicationManagementTest extends BaseTestCase {
     }
 
     @Test
-    public void validateReleaseCreatingRequest(ApplicationReleaseWrapper applicationReleaseWrapper, String applicationType) throws RequestValidatingException {
+    public void validateReleaseCreatingRequest(EntAppReleaseWrapper entAppReleaseWrapper, String applicationType) throws RequestValidatingException {
 
     }
 

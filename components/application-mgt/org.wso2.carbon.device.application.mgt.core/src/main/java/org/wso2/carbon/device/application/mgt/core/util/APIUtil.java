@@ -24,14 +24,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
-import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
@@ -237,7 +236,7 @@ public class APIUtil {
             applicationDTO.setTags(applicationWrapper.getTags());
             applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
             applicationDTO.setDeviceTypeId(deviceType.getId());
-            List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getApplicationReleaseWrappers()
+            List<ApplicationReleaseDTO> applicationReleaseEntities = applicationWrapper.getEntAppReleaseWrappers()
                     .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
             applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
         } else if (param instanceof WebAppWrapper){
@@ -274,14 +273,14 @@ public class APIUtil {
 
     public static <T> ApplicationReleaseDTO releaseWrapperToReleaseDTO(T param){
         ApplicationReleaseDTO applicationReleaseDTO = new ApplicationReleaseDTO();
-        if (param instanceof ApplicationReleaseWrapper){
-            ApplicationReleaseWrapper applicationReleaseWrapper = (ApplicationReleaseWrapper) param;
-            applicationReleaseDTO.setDescription(applicationReleaseWrapper.getDescription());
-            applicationReleaseDTO.setReleaseType(applicationReleaseWrapper.getReleaseType());
-            applicationReleaseDTO.setPrice(applicationReleaseWrapper.getPrice());
-            applicationReleaseDTO.setIsSharedWithAllTenants(applicationReleaseWrapper.getIsSharedWithAllTenants());
-            applicationReleaseDTO.setMetaData(applicationReleaseWrapper.getMetaData());
-            applicationReleaseDTO.setSupportedOsVersions(applicationReleaseWrapper.getSupportedOsVersions());
+        if (param instanceof EntAppReleaseWrapper){
+            EntAppReleaseWrapper entAppReleaseWrapper = (EntAppReleaseWrapper) param;
+            applicationReleaseDTO.setDescription(entAppReleaseWrapper.getDescription());
+            applicationReleaseDTO.setReleaseType(entAppReleaseWrapper.getReleaseType());
+            applicationReleaseDTO.setPrice(entAppReleaseWrapper.getPrice());
+            applicationReleaseDTO.setIsSharedWithAllTenants(entAppReleaseWrapper.getIsSharedWithAllTenants());
+            applicationReleaseDTO.setMetaData(entAppReleaseWrapper.getMetaData());
+            applicationReleaseDTO.setSupportedOsVersions(entAppReleaseWrapper.getSupportedOsVersions());
         } else if (param instanceof WebAppReleaseWrapper){
             WebAppReleaseWrapper webAppReleaseWrapper = (WebAppReleaseWrapper) param;
             applicationReleaseDTO.setDescription(webAppReleaseWrapper.getDescription());

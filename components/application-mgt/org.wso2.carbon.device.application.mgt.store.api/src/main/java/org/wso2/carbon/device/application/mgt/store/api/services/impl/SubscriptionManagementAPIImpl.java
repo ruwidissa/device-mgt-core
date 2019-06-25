@@ -57,7 +57,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             ApplicationInstallResponse response = subscriptionManager
-                    .performBulkAppInstallation(uuid, deviceIdentifiers, SubsciptionType.DEVICE.toString(), action);
+                    .performBulkAppOperation(uuid, deviceIdentifiers, SubsciptionType.DEVICE.toString(), action);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUI: " + uuid;
@@ -92,7 +92,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
             ApplicationInstallResponse response = subscriptionManager
-                    .performBulkAppInstallation(uuid, subscribers, subType, action);
+                    .performBulkAppOperation(uuid, subscribers, subType, action);
             return Response.status(Response.Status.OK).entity(response).build();
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";

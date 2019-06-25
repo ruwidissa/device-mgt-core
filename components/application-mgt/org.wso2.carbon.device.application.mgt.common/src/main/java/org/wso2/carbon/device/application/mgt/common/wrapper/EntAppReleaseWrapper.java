@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.NotNull;
 
 @ApiModel(value = "ApplicationReleaseDTO", description = "This class holds the details when releasing an ApplicationDTO to application store")
-public class ApplicationReleaseWrapper {
+public class EntAppReleaseWrapper {
 
     @ApiModelProperty(name = "description",
             value = "Description of the application release")

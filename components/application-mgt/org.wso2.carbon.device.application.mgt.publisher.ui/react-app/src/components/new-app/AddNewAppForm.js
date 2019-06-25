@@ -261,24 +261,19 @@ class AddNewAppFormComponent extends React.Component {
 
 
 
-                var data = new FormData();
-                // data.append("binaryFile", "/Users/jayasanka/Desktop/gov/viber/a.apk");
-                // data.append("application", "{\n\t\"name\": \"Tub1111\",\n\t\"description\": \"Watch thousands of hit movies and TV series for free. Tubi is 100% legal unlimited streaming, with no credit cards and no subscription required. Choose what you want to watch, when you want to watch it, with fewer ads than regular TV. Tubi is the largest free streaming service featuring award-winning movies and TV series. There is something for everybody; from comedy to drama, kids to classics, and niche favorites such as Korean dramas, anime, and British series. Download now and start streaming entertainment for free, today!\",\n\t\"appCategories\": [\"EMM\"],\n\t\"subType\": \"FREE\",\n\t\"tags\": [\"tv\", \"movies\"],\n\t\"unrestrictedRoles\": [],\n\t\"deviceType\": \"android\",\n\t\"entAppReleaseWrappers\": [{\n\t\t\"description\": \" SEND A MESSAGE -Skip exchanging phone numbers, just send a message. It's seamless across devices. * SHOW YOUR REACTION - Add a silly sticker\",\n\t\t\"releaseType\": \"GA\",\n\t\t\"price\": 0.0,\n\t\t\"isSharedWithAllTenants\": false,\n\t\t\"metaData\": \"{\\\"developer\\\":\\\"Facebook, Inc.\\\",\\\"Copyright\\\":\\\"\\u00A9 Facebook, Inc.\\\",\\\"Location\\\":\\\"This app may use your location even when it isn't open, which can decrease battery life.\\\"}\",\n\t\t\"ratedUsers\": 0,\n\t\t\"rating\": 0,\n\t\t\"supportedOsVersions\": \"4.0-10.0\"\n\t}]\n}");
-                // data.append("icon", "/Users/jayasanka/Desktop/gov/angular/i.png");
-                // data.append("screenshot1", "/Users/jayasanka/Desktop/gov/angular/1.webp");
-                // data.append("screenshot2", "/Users/jayasanka/Desktop/gov/angular/2.webp");
-                // data.append("screenshot3", "/Users/jayasanka/Desktop/gov/angular/3.webp");
-
-
+                let data = new FormData();
                 data.append('binaryFile', binaryFile[0].originFileObj);
                 data.append('icon', icon[0].originFileObj);
                 data.append('screenshot1', screenshots[0].originFileObj);
                 data.append('screenshot2', screenshots[1].originFileObj);
                 data.append('screenshot3', screenshots[2].originFileObj);
-                data.append('application', JSON.toString(payload.application));
+                const json = JSON.stringify(payload.application);
+                const blob = new Blob([json], {
+                    type: 'application/json'
+                });
+                data.append('application', blob);
 
-
-                var xhr = new XMLHttpRequest();
+                let xhr = new XMLHttpRequest();
                 xhr.withCredentials = true;
 
                 xhr.addEventListener("readystatechange", function () {
@@ -287,12 +282,10 @@ class AddNewAppFormComponent extends React.Component {
                     }
                 });
 
-                xhr.open("POST", "https://localhost:9443/ui-request-handler/invoke/application-mgt-publisher/v1.0/applications/ent-app");
-                xhr.setRequestHeader("Content-Type", "multipart/mixed");
+                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app";
+                xhr.open("POST", url);
                 xhr.setRequestHeader("X-Platform", "publisher");
-
                 xhr.send(data);
-
             }
         });
     };
