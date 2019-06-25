@@ -121,30 +121,23 @@ class AddNewAppFormComponent extends React.Component {
                 this.setState({
                     loading: true
                 });
-                const {name, description, appCategories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription} = values;
+                const {name, description, categories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription,releaseType} = values;
                 const application = {
                     name,
                     description,
-                    appCategories,
-                    subType: (price === undefined || parseInt(price) === 0) ? "FREE" : "PAID",
+                    categories,
+                    subMethod: (price === undefined || parseInt(price) === 0) ? "FREE" : "PAID",
                     tags,
                     unrestrictedRoles: [],
-                    // deviceType,
-                    // entAppReleaseWrappers: [{
-                    //     description,
-                    //     price: (price === undefined) ? 0 : parseInt(price),
-                    //     isSharedWithAllTenants,
-                    //     metaData: "string",
-                    //     supportedOsVersions: "4.0-10.0"
-                    // }]
                 };
 
                 const data = new FormData();
 
-                if (formConfig.deviceType === "WEB_CLIP") {
-                    application.deviceType = "ALL";
-                } else {
+                if (formConfig.installationType !== "WEB_CLIP") {
                     application.deviceType = values.deviceType;
+                }else{
+                    application.type = "WEB_CLIP";
+                    application.deviceType ="ALL";
                 }
 
                 if (specificElements.hasOwnProperty("binaryFile")) {
@@ -157,8 +150,12 @@ class AddNewAppFormComponent extends React.Component {
                     price: (price === undefined) ? 0 : parseInt(price),
                     isSharedWithAllTenants,
                     metaData: "string",
-                    supportedOsVersions: "4.0-10.0"
+                    releaseType: releaseType
                 };
+
+                if (formConfig.installationType !== "WEB_CLIP") {
+                    release.supportedOsVersions = "4.0-10.0";
+                }
 
                 if (specificElements.hasOwnProperty("version")) {
                     release.version = values.version;
@@ -182,12 +179,11 @@ class AddNewAppFormComponent extends React.Component {
                 const blob = new Blob([json], {
                     type: 'application/json'
                 });
-                data.append('application', blob);
+                data.append(formConfig.jsonPayloadName, blob);
 
                 console.log(application);
 
-                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications"+formConfig.endpoint;
-
+                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
 
                 axios.post(
                     url,
@@ -319,7 +315,7 @@ class AddNewAppFormComponent extends React.Component {
                                                     )}
                                                 </Form.Item>
                                                 <Form.Item {...formItemLayout} label="Categories">
-                                                    {getFieldDecorator('appCategories', {
+                                                    {getFieldDecorator('categories', {
                                                         rules: [{
                                                             required: true,
                                                             message: 'Please select categories'
@@ -385,11 +381,6 @@ class AddNewAppFormComponent extends React.Component {
                                                         </Row>
                                                     </InputGroup>
                                                 </Form.Item>
-                                                <Form.Item wrapperCol={{span: 12, offset: 5}}>
-                                                    <Button type="primary" htmlType="submit">
-                                                        Submit
-                                                    </Button>
-                                                </Form.Item>
                                             </div>
                                         </Col>
                                         <Col span={12} style={{paddingLeft: 20}}>
@@ -405,7 +396,7 @@ class AddNewAppFormComponent extends React.Component {
                                                     })(
                                                         <Upload
                                                             name="binaryFile"
-                                                            onChange={this.handleIconChange}
+                                                            onChange={this.handleBinaryFileChange}
                                                             beforeUpload={() => false}
                                                         >
                                                             {binaryFiles.length !== 1 && (
@@ -509,6 +500,17 @@ class AddNewAppFormComponent extends React.Component {
                                                 </Form.Item>
                                             )}
 
+                                            <Form.Item {...formItemLayout} label="Release Type">
+                                                {getFieldDecorator('releaseType', {
+                                                    rules: [{
+                                                        required: true,
+                                                        message: 'Please input the Release Type'
+                                                    }],
+                                                })(
+                                                    <Input placeholder="Release Type"/>
+                                                )}
+                                            </Form.Item>
+
                                             <Form.Item {...formItemLayout} label="Description">
                                                 {getFieldDecorator('releaseDescription', {
                                                     rules: [{
@@ -547,7 +549,11 @@ class AddNewAppFormComponent extends React.Component {
                                         </Col>
 
                                     </Row>
-
+                                    <Form.Item style={{float: "right"}}>
+                                        <Button type="primary" htmlType="submit">
+                                            Submit
+                                        </Button>
+                                    </Form.Item>
                                 </Form>
                             </Card>
                         </Col>

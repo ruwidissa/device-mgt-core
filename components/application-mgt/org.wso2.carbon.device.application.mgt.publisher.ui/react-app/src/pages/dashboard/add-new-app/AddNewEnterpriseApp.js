@@ -11,6 +11,7 @@ const Paragraph = Typography;
 const formConfig = {
     installationType: "ENTERPRISE",
     endpoint: "/ent-app",
+    jsonPayloadName:"application",
     releaseWrapperName: "entAppReleaseWrappers",
     specificElements: {
         binaryFile: {

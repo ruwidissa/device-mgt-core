@@ -11,9 +11,13 @@ const Paragraph = Typography;
 const formConfig = {
     installationType: "WEB_CLIP",
     endpoint: "/web-app",
-    releaseWrapperName: "webClipReleaseWrappers",
+    jsonPayloadName:"webapp",
+    releaseWrapperName: "webAppReleaseWrappers",
     specificElements: {
         url : {
+            required: true
+        },
+        version : {
             required: true
         }
     }

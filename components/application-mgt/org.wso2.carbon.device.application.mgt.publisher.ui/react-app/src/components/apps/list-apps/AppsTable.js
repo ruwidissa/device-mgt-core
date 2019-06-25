@@ -28,10 +28,10 @@ const columns = [
     },
     {
         title: 'Categories',
-        dataIndex: 'appCategories',
-        render: appCategories => (
+        dataIndex: 'categories',
+        render: categories => (
             <span>
-                {appCategories.map(category => {
+                {categories.map(category => {
                     return (
                         <Tag color="blue" key={category}>
                             {category}
@@ -104,17 +104,13 @@ class AppsTable extends React.Component {
            params.page = 1;
         }
 
-        const extraParams = {
+        const data = {
             offset: 10 * (params.page - 1),
             limit: 10
         };
-        // note: encode with '%26' not '&'
-        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
-        const data = {
-        };
 
        axios.post(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications?"+encodedExtraParams,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications",
             data,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }

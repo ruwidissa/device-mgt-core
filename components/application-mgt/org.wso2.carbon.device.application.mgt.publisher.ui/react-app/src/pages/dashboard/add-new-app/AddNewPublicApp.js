@@ -11,9 +11,13 @@ const Paragraph = Typography;
 const formConfig = {
     installationType: "PUBLIC",
     endpoint: "/public-app",
+    jsonPayloadName:"public-app",
     releaseWrapperName: "publicAppReleaseWrappers",
     specificElements: {
         packageName : {
+            required: true
+        },
+        version : {
             required: true
         }
     }

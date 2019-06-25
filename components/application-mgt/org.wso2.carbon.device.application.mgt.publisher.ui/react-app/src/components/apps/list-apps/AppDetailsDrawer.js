@@ -41,7 +41,7 @@ class AppDetailsDrawer extends React.Component {
                     <br/>
                     <br/>
                     <span>
-                    {app.appCategories.map(category => {
+                    {app.categories.map(category => {
                         return (
                             <Tag color="blue" key={category} style={{paddingBottom: 5}}>
                                 {category}
