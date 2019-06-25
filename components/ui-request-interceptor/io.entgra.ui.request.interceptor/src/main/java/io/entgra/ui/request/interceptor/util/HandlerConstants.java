@@ -23,9 +23,9 @@ public class HandlerConstants {
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
     public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/config/ui-config";
     public static final String TOKEN_ENDPOINT = "/oauth2/token";
+    public static final String LOGIN_PAGE = "/login";
     public static final String BASIC = "Basic ";
     public static final String BEARER = "Bearer ";
-    public static final String COLON = ":";
     public static final String TAGS_KEY = "tags";
     public static final String APP_NAME_KEY = "applicationName";
     public static final String SESSION_AUTH_DATA_KEY = "application-mgt";
@@ -38,6 +38,9 @@ public class HandlerConstants {
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
 
     public static final String X_PLATFORM_HEADER = "X-Platform";
+    public static final String SCHEME_SEPARATOR = "://";
+    public static final String COLON = ":";
+    public static final String PATH_SEPARATOR = "/";
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;
