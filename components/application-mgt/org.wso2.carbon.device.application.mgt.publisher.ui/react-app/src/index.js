@@ -6,9 +6,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Apps from "./pages/dashboard/apps/Apps";
 import Release from "./pages/dashboard/apps/release/Release";
-import AddNewApp from "./pages/dashboard/add-new-app/AddNewApp";
+import AddNewEnterpriseApp from "./pages/dashboard/add-new-app/AddNewEnterpriseApp";
 import Mange from "./pages/dashboard/manage/Manage";
 import './index.css';
+import AddNewPublicApp from "./pages/dashboard/add-new-app/AddNewPublicApp";
+import AddNewWebClip from "./pages/dashboard/add-new-app/AddNewWebClip";
 
 
 const routes = [
@@ -34,17 +36,17 @@ const routes = [
             },
             {
                 path: '/publisher/add-new-app/enterprise',
-                component: AddNewApp,
+                component: AddNewEnterpriseApp,
                 exact: true
             },
             {
                 path: '/publisher/add-new-app/public',
-                component: AddNewApp,
+                component: AddNewPublicApp,
                 exact: true
             },
             {
                 path: '/publisher/add-new-app/web-clip',
-                component: AddNewApp,
+                component: AddNewWebClip,
                 exact: true
             },
             {
