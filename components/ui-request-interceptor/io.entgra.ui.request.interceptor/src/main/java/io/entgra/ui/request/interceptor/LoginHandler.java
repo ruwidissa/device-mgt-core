@@ -131,7 +131,7 @@ public class LoginHandler extends HttpServlet {
                         clientAppResponse.getData(), scopes)) {
                     ProxyResponse proxyResponse = new ProxyResponse();
                     proxyResponse.setCode(HttpStatus.SC_OK);
-                    proxyResponse.setUrl(serverUrl + "/" + platform);
+                    proxyResponse.setUrl(serverUrl + HandlerConstants.PATH_SEPARATOR + platform);
                     HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
                     return;
                 }
@@ -163,7 +163,7 @@ public class LoginHandler extends HttpServlet {
                 String clientId = jClientAppResultAsJsonObject.get("client_id").getAsString();
                 String clientSecret = jClientAppResultAsJsonObject.get("client_secret").getAsString();
                 String encodedClientApp = Base64.getEncoder()
-                        .encodeToString((clientId + ":" + clientSecret).getBytes());
+                        .encodeToString((clientId + HandlerConstants.COLON + clientSecret).getBytes());
 
                 ProxyResponse tokenResultResponse = getTokenResult(encodedClientApp, scopes);
 
@@ -230,8 +230,9 @@ public class LoginHandler extends HttpServlet {
     private static void validateLoginRequest(HttpServletRequest req, HttpServletResponse resp) throws LoginException {
         username = req.getParameter("username");
         password = req.getParameter("password");
-        platform = req.getParameter("platform");
-        serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
+        platform = req.getParameter(HandlerConstants.PLATFORM);
+        serverUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
+                    + req.getServerPort();
         uiConfigUrl = serverUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
 
         try {
@@ -240,7 +241,8 @@ public class LoginHandler extends HttpServlet {
                 throw new LoginException("Invalid login request. Platform parameter is Null.");
             }
             if (username == null || password == null) {
-                resp.sendRedirect(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
+                resp.sendRedirect(serverUrl + HandlerConstants.PATH_SEPARATOR + platform
+                        + HandlerConstants.DEFAULT_ERROR_CALLBACK);
                 throw new LoginException(
                         " Invalid login request. Username or Password is not received for login request.");
             }
