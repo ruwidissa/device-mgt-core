@@ -42,7 +42,9 @@ import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease
 import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
@@ -747,8 +749,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "binaryFile") Attachment binaryFile,
             @ApiParam(
                     name = "icon",
-                    value = "Icon file of the application release.",
-                    required = true)
+                    value = "Icon file of the application release.")
             @Multipart(value = "icon") Attachment iconFile,
             @ApiParam(
                     name = "banner",
@@ -756,8 +757,149 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "banner") Attachment bannerFile,
             @ApiParam(
                     name = "screenshot1",
-                    value = "First screenshot of the uploading application",
+                    value = "First screenshot of the uploading application")
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Second screenshot 2 of the uploading application")
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Third screenshot of the uploading application")
+            @Multipart(value = "screenshot3") Attachment screenshot3);
+
+    @PUT
+    @Path("/pub-app-release/{deviceType}/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(
+            consumes = MediaType.MULTIPART_FORM_DATA,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update an public app release",
+            notes = "This will update the public app release",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully update an app release.",
+                            response = ApplicationReleaseDTO.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Public app release updating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while releasing the application.",
+                            response = ErrorResponse.class)
+            })
+    Response updatePubAppRelease(
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Supported device type of the application",
                     required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "UUID",
+                    value = "Unique identifier of the ApplicationDTO Release",
+                    required = true)
+            @PathParam("uuid") String applicationUUID,
+            @ApiParam(
+                    name = "pubAppReleaseWrapper",
+                    value = "Application release wrapper which is going to update.",
+                    required = true)
+            @Multipart(
+                    value = "pubAppReleaseWrapper",
+                    type = "application/json") PublicAppReleaseWrapper publicAppReleaseWrapper,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon file of the application release.")
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "banner file of the application release.")
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "First screenshot of the uploading application")
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Second screenshot 2 of the uploading application")
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Third screenshot of the uploading application")
+            @Multipart(value = "screenshot3") Attachment screenshot3);
+
+    @PUT
+    @Path("/web-app-release/{deviceType}/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(
+            consumes = MediaType.MULTIPART_FORM_DATA,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update an public app release",
+            notes = "This will update the public app release",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully update an app release.",
+                            response = ApplicationReleaseDTO.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "Public app release updating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while releasing the application.",
+                            response = ErrorResponse.class)
+            })
+    Response updateWebAppRelease(
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Supported device type of the application",
+                    required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "UUID",
+                    value = "Unique identifier of the ApplicationDTO Release",
+                    required = true)
+            @PathParam("uuid") String applicationUUID,
+            @ApiParam(
+                    name = "pubAppReleaseWrapper",
+                    value = "Application release wrapper which is going to update.",
+                    required = true)
+            @Multipart(
+                    value = "pubAppReleaseWrapper",
+                    type = "application/json") WebAppReleaseWrapper webAppReleaseWrapper,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon file of the application release.")
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "banner file of the application release.")
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "First screenshot of the uploading application")
             @Multipart(value = "screenshot1") Attachment screenshot1,
             @ApiParam(
                     name = "screenshot2",

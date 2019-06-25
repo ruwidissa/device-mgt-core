@@ -58,12 +58,12 @@ public class ApplicationManagementTest extends BaseTestCase {
 
         List<String> categories = new ArrayList<>();
         categories.add("Test Category");
-        applicationWrapper.setAppCategories(categories);
+        applicationWrapper.setCategories(categories);
 
         applicationWrapper.setDescription("Test Description");
         applicationWrapper.setDeviceType("android");
         applicationWrapper.setName("Test Application");
-        applicationWrapper.setSubType("Test Sub type");
+        applicationWrapper.setSubMethod("Test Sub type");
 
         List<String> tags = new ArrayList<>();
         tags.add("abc");

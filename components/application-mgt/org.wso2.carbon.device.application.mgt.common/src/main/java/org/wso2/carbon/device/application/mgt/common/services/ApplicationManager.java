@@ -34,7 +34,9 @@ import org.wso2.carbon.device.application.mgt.common.response.Tag;
 import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 
 import java.util.List;
@@ -194,6 +196,12 @@ public interface ApplicationManager {
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
     boolean updateEntAppRelease(String deviceType, String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+
+    boolean updatePubAppRelease(String deviceType, String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+
+    boolean updateWebAppRelease(String deviceType, String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
