@@ -1,10 +1,12 @@
 import React from "react";
 import {Avatar} from "antd";
-import {List,Typography} from "antd";
+import {List, Typography} from "antd";
 import StarRatings from "react-star-ratings";
+import Twemoji from "react-twemoji";
+import "./Reviews.css";
 
 const {Text, Paragraph} = Typography;
-const colorList = ['#f0932b','#badc58','#6ab04c','#eb4d4b','#0abde3', '#9b59b6','#3498db','#22a6b3'];
+const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3'];
 
 class SingleReview extends React.Component {
 
@@ -17,13 +19,17 @@ class SingleReview extends React.Component {
                 <StarRatings
                     rating={review.rating}
                     starRatedColor="#777"
-                    starDimension = "12px"
-                    starSpacing = "2px"
+                    starDimension="12px"
+                    starSpacing="2px"
                     numberOfStars={5}
                     name='rating'
                 />
                 <Text style={{fontSize: 12, color: "#aaa"}} type="secondary"> {review.createdAt}</Text><br/>
-                <Paragraph ellipsis={{ rows: 3, expandable: true }} style={{color: "#777"}}>{review.content}</Paragraph>
+                <Twemoji options={{className: 'twemoji'}}>
+                    <Paragraph ellipsis={{rows: 3, expandable: true}} style={{color: "#777"}}>
+                        {review.content}
+                    </Paragraph>
+                </Twemoji>
             </div>
         );
 
@@ -31,7 +37,7 @@ class SingleReview extends React.Component {
             <div>
                 <List.Item.Meta
                     avatar={
-                        <Avatar style={{ backgroundColor: randomColor, verticalAlign: 'middle' }} size="large">
+                        <Avatar style={{backgroundColor: randomColor, verticalAlign: 'middle'}} size="large">
                             {avatarLetter}
                         </Avatar>
                     }

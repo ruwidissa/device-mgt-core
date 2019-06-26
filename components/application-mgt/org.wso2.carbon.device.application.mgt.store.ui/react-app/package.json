@@ -30,6 +30,7 @@
     "react-router-dom": "latest",
     "react-scripts": "2.1.8",
     "react-star-ratings": "^2.3.0",
+    "react-twemoji": "^0.2.3",
     "react-virtualized": "^9.21.1",
     "reqwest": "^2.0.5",
     "storm-react-diagrams": "^5.2.1"
