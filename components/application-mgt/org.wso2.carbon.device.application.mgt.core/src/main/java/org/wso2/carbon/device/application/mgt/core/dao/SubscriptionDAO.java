@@ -81,6 +81,6 @@ public interface SubscriptionDAO {
 
     List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId) throws ApplicationManagementDAOException;
 
-    void updateDeviceSubStatus (int operationId, String status, int tenantcId) throws ApplicationManagementDAOException;
+    boolean updateDeviceSubStatus (int operationId, String status, int tenantcId) throws ApplicationManagementDAOException;
 
 }
