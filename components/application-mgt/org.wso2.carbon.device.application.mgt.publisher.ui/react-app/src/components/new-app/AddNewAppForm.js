@@ -239,7 +239,7 @@ class AddNewAppFormComponent extends React.Component {
     };
 
     handleIconChange = ({fileList}) => this.setState({icons: fileList});
-    handleBinaryFileChange = ({fileList}) => this.setState({icons: fileList});
+    handleBinaryFileChange = ({fileList}) => this.setState({binaryFiles: fileList});
 
     handleScreenshotChange = ({fileList}) => this.setState({screenshots: fileList});
 

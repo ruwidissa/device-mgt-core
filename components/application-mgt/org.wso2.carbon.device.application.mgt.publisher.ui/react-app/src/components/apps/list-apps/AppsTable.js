@@ -1,11 +1,7 @@
 import React from "react";
 import {Avatar, Card, Col, Row, Table, Typography, Tag, Icon, message} from "antd";
-import {connect} from "react-redux";
-import {getApps} from "../../../js/actions";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
-
-const {Title} = Typography;
 
 const columns = [
     {
@@ -62,7 +58,7 @@ const columns = [
     },
     {
         title: 'Subscription',
-        dataIndex: 'subType'
+        dataIndex: 'subMethod'
     },
 ];
 

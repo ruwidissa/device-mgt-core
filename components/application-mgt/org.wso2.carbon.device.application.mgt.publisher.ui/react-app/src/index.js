@@ -11,6 +11,7 @@ import Mange from "./pages/dashboard/manage/Manage";
 import './index.css';
 import AddNewPublicApp from "./pages/dashboard/add-new-app/AddNewPublicApp";
 import AddNewWebClip from "./pages/dashboard/add-new-app/AddNewWebClip";
+import AddNewRelease from "./pages/dashboard/add-new-release/AddNewRelease";
 
 
 const routes = [
@@ -33,6 +34,11 @@ const routes = [
                 path: '/publisher/apps/releases/:uuid',
                 exact: true,
                 component: Release
+            },
+            {
+                path: '/publisher/apps/:appId/add-release',
+                component: AddNewRelease,
+                exact: true
             },
             {
                 path: '/publisher/add-new-app/enterprise',
