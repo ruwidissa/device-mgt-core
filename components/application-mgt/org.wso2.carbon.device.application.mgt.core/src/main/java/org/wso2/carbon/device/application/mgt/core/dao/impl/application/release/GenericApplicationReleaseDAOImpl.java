@@ -43,14 +43,6 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
 
     private static final Log log = LogFactory.getLog(GenericApplicationReleaseDAOImpl.class);
 
-    /**
-     * To insert the ApplicationDTO Release Details.
-     *
-     * @param appId              Id of the application
-     * @param applicationReleaseDTO ApplicationDTO Release the properties of which that need to be inserted.
-     * @param tenantId           Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
     @Override public ApplicationReleaseDTO createRelease(ApplicationReleaseDTO applicationReleaseDTO, int appId, int tenantId)
             throws ApplicationManagementDAOException {
         Connection connection;
@@ -109,12 +101,13 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
             }
             return applicationReleaseDTO;
         } catch (SQLException e) {
-            log.error("SQL Exception while trying to release an application by executing the query " + sql, e);
-            throw new ApplicationManagementDAOException(
-                    "SQL Exception while trying to release an application by executing the query " + sql, e);
+            String msg = "SQL Exception while trying to release an application by executing the query " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Database Connection Exception while trying to release a new version", e);
+            String msg = "Database Connection Exception while trying to release a new version";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } finally {
             DAOUtil.cleanupResources(statement, resultSet);
         }
