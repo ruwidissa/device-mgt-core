@@ -35,11 +35,11 @@ public class Application {
             required = true)
     private String description;
 
-    @ApiModelProperty(name = "appCategories",
+    @ApiModelProperty(name = "categories",
             value = "CategoryDTO of the application",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
-    private List<String> appCategories;
+    private List<String> categories;
 
     @ApiModelProperty(name = "type",
             value = "Type of the application",
@@ -47,11 +47,11 @@ public class Application {
             example = "ENTERPRISE, PUBLIC, WEB, WEB_CLIP etc")
     private String type;
 
-    @ApiModelProperty(name = "subType",
+    @ApiModelProperty(name = "subMethod",
             value = "Subscription type of the application",
             required = true,
             example = "PAID, FREE")
-    private String subType;
+    private String subMethod;
 
     @ApiModelProperty(name = "paymentCurrency",
             value = "Payment currency of the application",
@@ -92,12 +92,12 @@ public class Application {
 
     public void setName(String name) { this.name = name; }
 
-    public List<String> getAppCategories() {
-        return appCategories;
+    public List<String> getCategories() {
+        return categories;
     }
 
-    public void setAppCategories(List<String> appCategories) {
-        this.appCategories = appCategories;
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 
     public List<String> getTags() { return tags; }
@@ -108,9 +108,9 @@ public class Application {
 
     public void setType(String type) { this.type = type; }
 
-    public String getSubType() { return subType; }
+    public String getSubMethod() { return subMethod; }
 
-    public void setSubType(String subType) { this.subType = subType; }
+    public void setSubMethod(String subMethod) { this.subMethod = subMethod; }
 
     public String getPaymentCurrency() { return paymentCurrency; }
 
