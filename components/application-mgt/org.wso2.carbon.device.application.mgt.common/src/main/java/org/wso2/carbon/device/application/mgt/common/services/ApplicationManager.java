@@ -254,13 +254,16 @@ public interface ApplicationManager {
 
     String getInstallableLifecycleState() throws ApplicationManagementException;
 
-    /**
-     * Get plist content to download and install the application.
-     *
-     * @param uuid Release UUID of the application.
-     * @return plist string
-     * @throws ApplicationManagementException Application management exception
-     */
+    void updateSubsStatus (int operationId, String status) throws ApplicationManagementException;
+
+
+        /**
+         * Get plist content to download and install the application.
+         *
+         * @param uuid Release UUID of the application.
+         * @return plist string
+         * @throws ApplicationManagementException Application management exception
+         */
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
 }

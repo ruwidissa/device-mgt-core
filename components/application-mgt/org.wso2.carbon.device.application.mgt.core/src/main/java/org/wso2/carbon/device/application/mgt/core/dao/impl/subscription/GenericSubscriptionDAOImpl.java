@@ -577,7 +577,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public void updateDeviceSubStatus (int operationId, String status, int tenantId) throws ApplicationManagementDAOException {
+    public boolean updateDeviceSubStatus (int operationId, String status, int tenantId) throws ApplicationManagementDAOException {
         Connection conn;
         try {
             conn = this.getDBConnection();
@@ -590,7 +590,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setString(1, status);
                 stmt.setInt(2, operationId);
                 stmt.setInt(3, tenantId);
-                stmt.executeUpdate();
+                return stmt.executeUpdate() != 0;
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update the subscription status of the "

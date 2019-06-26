@@ -2660,6 +2660,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
+    public void updateSubsStatus (int operationId, String status) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            if (!subscriptionDAO.updateDeviceSubStatus(operationId, status, tenantId)){
+                String msg = "Didn't update an any app subscription of device for operation Id: " + operationId;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occured while updating app subscription status of the device.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        }
+    }
+
     public String getPlistArtifact(String releaseUuid) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
