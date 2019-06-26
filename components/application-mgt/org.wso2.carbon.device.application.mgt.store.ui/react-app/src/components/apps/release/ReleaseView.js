@@ -22,21 +22,19 @@ class ReleaseView extends React.Component {
     }
 
     installApp = (type, payload) => {
-        const {uuid} = this.props.release;
+        const release = this.props.app.applicationReleases[0];
+        const {uuid} = release;
 
-        const parameters = {
-            method: "post",
-            'content-type': "application/json",
-            payload: JSON.stringify(payload),
-            'api-endpoint': "/application-mgt-store/v1.0/subscription/install/" + uuid + "/" + type + "/install"
-        };
-
-        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
         this.setState({
             loading: true,
         });
-
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store, request
+        const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/install/" + uuid + "/" + type + "/install";
+        axios.post(
+            url,
+            payload,
+            {
+                headers: {'X-Platform': config.serverConfig.platform}
+            }
         ).then(res => {
             if (res.status === 201) {
                 this.setState({

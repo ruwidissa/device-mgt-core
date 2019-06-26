@@ -12,7 +12,8 @@
       "uri": "/ui-request-handler/invoke",
       "publisher": "/application-mgt-publisher/v1.0",
       "store": "/application-mgt-store/v1.0",
-      "admin" : ""
+      "admin" : "",
+      "deviceMgt" : "/device-mgt/v1.0"
     },
     "loginUri": "/ui-request-handler/login",
     "platform": "store"

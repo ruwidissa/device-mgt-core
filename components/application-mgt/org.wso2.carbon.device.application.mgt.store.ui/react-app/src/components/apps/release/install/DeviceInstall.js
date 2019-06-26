@@ -138,7 +138,11 @@ class DeviceInstall extends React.Component {
         const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
 
         //send request to the invoker
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store, request
+        axios.get(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"devices?" + encodedExtraParams,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 const pagination = {...this.state.pagination};
