@@ -229,9 +229,9 @@ public class APIUtil {
             DeviceType deviceType = getDeviceTypeData(applicationWrapper.getDeviceType());
             applicationDTO.setName(applicationWrapper.getName());
             applicationDTO.setDescription(applicationWrapper.getDescription());
-            applicationDTO.setAppCategories(applicationWrapper.getAppCategories());
+            applicationDTO.setAppCategories(applicationWrapper.getCategories());
             applicationDTO.setType(ApplicationType.ENTERPRISE.toString());
-            applicationDTO.setSubType(applicationWrapper.getSubType());
+            applicationDTO.setSubType(applicationWrapper.getSubMethod());
             applicationDTO.setPaymentCurrency(applicationWrapper.getPaymentCurrency());
             applicationDTO.setTags(applicationWrapper.getTags());
             applicationDTO.setUnrestrictedRoles(applicationWrapper.getUnrestrictedRoles());
@@ -319,9 +319,9 @@ public class APIUtil {
         application.setId(applicationDTO.getId());
         application.setName(applicationDTO.getName());
         application.setDescription(applicationDTO.getDescription());
-        application.setAppCategories(applicationDTO.getAppCategories());
+        application.setCategories(applicationDTO.getAppCategories());
         application.setType(applicationDTO.getType());
-        application.setSubType(applicationDTO.getSubType());
+        application.setSubMethod(applicationDTO.getSubType());
         application.setPaymentCurrency(applicationDTO.getPaymentCurrency());
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
