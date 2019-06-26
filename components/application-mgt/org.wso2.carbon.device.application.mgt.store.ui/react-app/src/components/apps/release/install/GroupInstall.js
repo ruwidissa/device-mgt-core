@@ -27,15 +27,11 @@ class GroupInstall extends React.Component {
         const fetchId = this.lastFetchId;
         this.setState({data: [], fetching: true});
 
-
-        const parameters = {
-            method: "get",
-            'content-type': "application/json",
-            payload: "{}",
-            'api-endpoint': "/device-mgt/v1.0/admin/groups?name=" + value
-        };
-
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store, request
+        axios.post(
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
+            {
+                headers: { 'X-Platform': config.serverConfig.platform }
+            }
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {

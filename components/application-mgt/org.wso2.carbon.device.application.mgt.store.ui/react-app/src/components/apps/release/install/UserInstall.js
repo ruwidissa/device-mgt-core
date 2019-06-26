@@ -30,7 +30,7 @@ class UserInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/device-mgt/v1.0/users/search?username=" + value,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/users/search?username=" + value,
             {
                 headers: { 'X-Platform': config.serverConfig.platform }
             }
