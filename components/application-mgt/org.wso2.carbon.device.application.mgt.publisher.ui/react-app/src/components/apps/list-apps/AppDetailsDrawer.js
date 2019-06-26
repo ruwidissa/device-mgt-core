@@ -1,7 +1,8 @@
 import React from 'react';
-import {Drawer, Row, Col, Typography, Divider, Tag, Avatar, List} from 'antd';
+import {Drawer, Row, Col, Typography, Divider, Tag, Avatar, List, Button, Icon} from 'antd';
 import "../../../App.css";
 import DetailedRating from "../detailed-rating/DetailedRating";
+import {Link} from "react-router-dom";
 
 const {Text, Title, Paragraph} = Typography;
 
@@ -64,7 +65,9 @@ class AppDetailsDrawer extends React.Component {
                     })}
                     </span>
                     <Divider dashed={true}/>
-                    <Text strong={true}>Releases</Text>
+                    <Text strong={true}>Releases </Text>
+                    {/*display add new release only if app type is enterprise*/}
+                    {(app.type ==="ENTERPRISE") && (<Link to={`/publisher/apps/${app.id}/add-release`}><Button htmlType="button" size="small">Add new release</Button></Link>)}
                     <br/>
                     <List
                         itemLayout="horizontal"
