@@ -508,7 +508,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         //set default values
         if (!StringUtils.isEmpty(filter.getDeviceType())) {
-            deviceType = getDeviceTypeData(filter.getDeviceType());
+            deviceType = APIUtil.getDeviceTypeData(filter.getDeviceType());
         }
         if (filter.getLimit() == 0) {
             filter.setLimit(20);
@@ -579,6 +579,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
             applicationList.setApplications(applications);
             applicationList.setPagination(pagination);
             return applicationList;
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred when getting database connection to get applications by filtering from "
+                    + "requested filter.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
             throw new ApplicationManagementException(
                     "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
@@ -766,7 +771,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new BadRequestException(msg);
         }
-        DeviceType deviceType = getDeviceTypeData(applicationDTO.getDeviceTypeId());
+        DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
         if (!isValidOsVersions(entAppReleaseWrapper.getSupportedOsVersions(), deviceType.getName())) {
             String msg = "You are trying to add application release which has invalid or unsupported OS versions in "
                     + "the supportedOsVersions section. Hence, please re-evaluate the request payload.";
@@ -823,12 +828,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             return applicationDTO;
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while obtaining the database connection for getting application for the application ID: "
-                            + applicationId, e);
+            String msg = "Error occurred while obtaining the database connection for getting application for the "
+                    + "application ID: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while getting application data for application ID: " + applicationId, e);
+            String msg = "Error occurred while getting application data for application ID: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -916,11 +923,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new ForbiddenException(msg);
             }
             return APIUtil.appDtoToAppResponse(applicationDTO);
-        } catch (LifecycleManagementException e){
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to get application for application ID: "
+                    + appId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (LifecycleManagementException e) {
             String msg = "Error occurred when getting the last state of the application lifecycle flow";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
-        }catch (UserStoreException e) {
+        } catch (UserStoreException e) {
             String msg = "User-store exception while getting application with the application id " + appId;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
@@ -934,17 +946,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public Application getApplicationByUuid(String uuid) throws ApplicationManagementException{
+    public Application getApplicationByUuid(String releaseUuid) throws ApplicationManagementException{
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         boolean isVisibleApp = false;
 
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(uuid, tenantId);
+            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
 
             if (applicationDTO == null) {
-                String msg = "Couldn't found an application for application release UUID: " + uuid;
+                String msg = "Couldn't found an application for application release UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
@@ -970,8 +982,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new ForbiddenException(msg);
             }
             return APIUtil.appDtoToAppResponse(applicationDTO);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to get application for application "
+                    + "release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
-            String msg = "User-store exception occurred while getting application for application release UUID " + uuid;
+            String msg = "User-store exception occurred while getting application for application release UUID " + releaseUuid;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
@@ -985,17 +1002,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
 
     @Override
-    public Application getApplicationByUuid(String uuid, String state) throws ApplicationManagementException {
+    public Application getApplicationByUuid(String releaseUuid, String state) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         boolean isVisibleApp = false;
 
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(uuid, tenantId);
+            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
 
             if (applicationDTO == null) {
-                String msg = "Couldn't found an application for application release UUID: " + uuid;
+                String msg = "Couldn't found an application for application release UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
@@ -1033,12 +1050,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new ForbiddenException(msg);
             }
             return APIUtil.appDtoToAppResponse(applicationDTO);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to get application for application "
+                    + "release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (LifecycleManagementException e) {
             String msg = "Error occurred when getting the last state of the application lifecycle flow";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
-            String msg = "User-store exception while getting application with the application release UUID " + uuid;
+            String msg = "User-store exception while getting application with the application release UUID " + releaseUuid;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
@@ -1153,6 +1175,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             this.applicationDAO.deleteCategoryMapping(applicationId, tenantId);
             this.applicationDAO.deleteApplication(applicationId, tenantId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to delete application which has "
+                    + "application ID: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when deleting application which has application ID: "
+                    + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred when getting application data for application id: " + applicationId;
@@ -1198,6 +1230,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             this.applicationDAO.retireApplication(applicationId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to retire an application which has "
+                    + "application ID:" + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when retiring application which has application ID: "
+                    + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting application data for application id: " + applicationId;
             log.error(msg);
@@ -1242,6 +1284,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             lifecycleStateDAO.deleteLifecycleStateByReleaseId(applicationReleaseDTO.getId());
             applicationReleaseDAO.deleteRelease(applicationReleaseDTO.getId());
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to delete application release which "
+                    + "has UUID:" + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when deleting application release which has UUID: "
+                    + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred when application release data for application release UUID: " + releaseUuid;
@@ -1294,11 +1346,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
             String msg =
-                    "Error occured when getting DB connection to update image artifacts of the application release of haveing  uuid "
-                            + uuid + ".";
+                    "Error occured when getting DB connection to update image artifacts of the application release "
+                            + "which has  uuid " + uuid;
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationManagementDAOException e) {
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when updating application release image artifacts which has "
+                    + "UUID: " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg =
                     "Error occured while getting application release data for updating image artifacts of the application release uuid "
@@ -1316,7 +1373,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void updateApplicationArtifact(String deviceType, String uuid,
+    public void updateApplicationArtifact(String deviceType, String releaseUuid,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         boolean isValidDeviceType = false;
@@ -1332,7 +1389,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             if (!isValidDeviceType) {
                 String msg = "Invalid request to update application release artifact, invalid application type: "
-                        + deviceType + " for application release uuid: " + uuid;
+                        + deviceType + " for application release uuid: " + releaseUuid;
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -1344,15 +1401,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
             if (applicationDTO == null) {
-                String msg = "Couldn't found an application which has application release for UUID: " + uuid;
+                String msg = "Couldn't found an application which has application release for UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
             if (!ApplicationType.ENTERPRISE.toString().equals(applicationDTO.getType())) {
                 String msg = "If Application type is " + applicationDTO.getType() + ", then you don't have application "
-                        + "release artifact to update for application release UUID: " + uuid;
+                        + "release artifact to update for application release UUID: " + releaseUuid;
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
@@ -1373,7 +1430,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             if (applicationReleaseDTO == null) {
                 ConnectionManagerUtil.rollbackDBTransaction();
                 throw new ApplicationManagementException(
-                        "ApplicationDTO release updating count is 0.  ApplicationDTO release UUID: " + uuid);
+                        "ApplicationDTO release updating count is 0.  ApplicationDTO release UUID: " + releaseUuid);
 
             }
             ConnectionManagerUtil.commitDBTransaction();
@@ -1383,15 +1440,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            String msg =
-                    "Error occured while starting the transaction to update application release artifact of the application uuid "
-                            + uuid + ".";
+            String msg = "Error occured while starting the transaction to update application release artifact which has "
+                            + "application uuid " + releaseUuid + ".";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg =
-                    "Error occured when getting DB connection to update application release artifact of the application release uuid "
-                            + uuid + ".";
+            String msg = "Error occured when getting DB connection to update application release artifact of the "
+                    + "application release uuid " + releaseUuid + ".";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationStorageManagementException e) {
@@ -1421,6 +1476,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
             return this.lifecycleStateDAO.getLifecycleStates(applicationReleaseDTO.getId(), tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to get lifecycle state change flow for "
+                            + "application release which has UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             String msg = "Failed to get lifecycle state for application release uuid " + releaseUuid;
             log.error(msg);
@@ -1489,7 +1549,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
-        } catch (LifeCycleManagementDAOException e) {
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to change lifecycle state of the "
+                    + "application release which has UUID:" + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when changing lifecycle state of application release which "
+                    + "has UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        }catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Failed to add lifecycle state for Application release UUID: " + releaseUuid;
             log.error(msg);
@@ -1518,6 +1588,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationDAO.addCategories(newCategories, tenantId);
             }
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to add application categories.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when adding application categories.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured when getting existing categories or when inserting new application categories.";
@@ -1677,26 +1755,30 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while checking whether logged in user is ADMIN or not when updating application of application id: "
-                            + applicationId);
+            String msg = "Error occurred while checking whether logged in user is ADMIN or not when updating "
+                    + "application of application id: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while updating the application, application id: " + applicationId);
+            String msg = "Error occurred while updating the application, application id: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (VisibilityManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while updating the visibility restriction of the application. ApplicationDTO id  is "
-                            + applicationId);
+            String msg = "Error occurred while updating the visibility restriction of the application. Application id: "
+                    + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while starting database transaction for application updating. ApplicationDTO id  is "
-                            + applicationId);
+            String msg = "Error occurred while starting database transaction for application updating. Application id: "
+                    + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while getting database connection for application updating. ApplicationDTO id  is "
-                            + applicationId);
+            String msg = "Error occurred while getting database connection for application updating. Application id: "
+                    + applicationId;
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1719,10 +1801,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 responseTagList.add(responseTag);
             });
             return responseTagList;
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to get registered tags";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting registered tags from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1745,10 +1831,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 responseCategoryList.add(responseCategory);
             });
             return responseCategoryList;
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection to get registered categories.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting registered tags from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1774,10 +1864,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to delete application tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when deleting application tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting tag Id or deleting tag mapping from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1799,10 +1897,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             applicationDAO.deleteTag(tag.getId(), tenantId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to delete registered tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when deleting registered tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting tag Id or deleting the tag from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1828,10 +1934,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             applicationDAO.deleteTag(tag.getId(), tenantId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to delete unused tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when deleting unused tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting tag Ids or deleting the tag from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1865,10 +1979,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
             tag.setTagName(newTagName);
             applicationDAO.updateTag(tag, tenantId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to update application tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when updating application tag.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting tag Ids or deleting the tag from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -1899,6 +2021,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to add tags.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when adding tags.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred either getting registered tags or adding new tags.";
@@ -1943,6 +2073,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to add application tags.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when adding application tags.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while accessing application tags. Application ID: " + appId;
@@ -1978,6 +2116,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to add categories.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when adding categories.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred either getting registered categories or adding new categories.";
@@ -1989,28 +2135,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void deleteCategory(String tagName) throws ApplicationManagementException {
+    public void deleteCategory(String categoryName) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            CategoryDTO category = applicationDAO.getCategoryForCategoryName(tagName, tenantId);
+            CategoryDTO category = applicationDAO.getCategoryForCategoryName(categoryName, tenantId);
             if (category == null){
-                String msg = "Couldn't found a category for category name " + tagName + ".";
+                String msg = "Couldn't found a category for category name " + categoryName + ".";
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
             if (applicationDAO.hasCategoryMapping(category.getId(), tenantId)){
-                String msg = "Category " + category.getCategoryName()
-                        + " is used by some applications. Therefore it is not permitted to delete the application category.";
+                String msg = "Category " + category.getCategoryName() + " is used by some applications. Therefore it "
+                        + "is not permitted to delete the application category.";
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
             applicationDAO.deleteCategory(category.getId(), tenantId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to delete category.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when deleting category.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting category Id or deleting the category from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -2030,10 +2184,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
             category.setCategoryName(newCategoryName);
             applicationDAO.updateCategory(category, tenantId);
             ConnectionManagerUtil.commitDBTransaction();
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to update category.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when updating categiry.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting tag Ids or deleting the category from the system.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -2154,7 +2316,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             if (!StringUtils.isEmpty(applicationArtifact.getInstallerName())&& applicationArtifact.getInstallerStream() !=  null){
-                DeviceType deviceTypeObj = getDeviceTypeData(applicationDTO.getDeviceTypeId());
+                DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                 applicationReleaseDTO
                         .set(updateEntAppReleaseArtifact(deviceTypeObj.getName(), applicationReleaseDTO.get(),
                                 applicationArtifact));
@@ -2167,6 +2329,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             ConnectionManagerUtil.commitDBTransaction();
             return updateStatus;
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to update enterprise app release which "
+                    + "has release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when updating enterprise app release which has release UUID: "
+                    + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured when updating Ent Application release of UUID: " + releaseUuid;
@@ -2225,6 +2397,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             ConnectionManagerUtil.commitDBTransaction();
             return updateStatus;
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to update public app release which "
+                    + "has release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when updating public app release which has release UUID:."
+                    + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured when updating public app release of UUID: " + releaseUuid;
@@ -2279,6 +2461,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             ConnectionManagerUtil.commitDBTransaction();
             return updateStatus;
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting the database connection to update web app release which "
+                    + "has release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Database access error is occurred when updating web app release which has release UUID:."
+                    + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured when updating web app release for web app Release UUID: " + releaseUuid;
@@ -2326,7 +2518,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "price is " + price + " for " + applicationSubType + " application.");
         }
 
-        DeviceType deviceTypeObj = getDeviceTypeData(applicationDTO.getDeviceTypeId());
+        DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
         String supportedOSVersions = applicationReleaseDTO.getSupportedOsVersions();
         if (!ApplicationType.WEB_CLIP.toString().equals(appType) && !ApplicationType.WEB_APP.toString().equals(appType)
                 && !StringUtils.isEmpty(supportedOSVersions) && !isValidOsVersions(
@@ -2372,7 +2564,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            DeviceType deviceType = getDeviceTypeData(applicationWrapper.getDeviceType());
+            DeviceType deviceType = APIUtil.getDeviceTypeData(applicationWrapper.getDeviceType());
             deviceTypeId = deviceType.getId();
 
             List<EntAppReleaseWrapper> entAppReleaseWrappers;
@@ -2447,7 +2639,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-            DeviceType deviceType = getDeviceTypeData(publicAppWrapper.getDeviceType());
+            DeviceType deviceType = APIUtil.getDeviceTypeData(publicAppWrapper.getDeviceType());
             deviceTypeId = deviceType.getId();
 
             List<PublicAppReleaseWrapper> publicAppReleaseWrappers;
@@ -2623,58 +2815,37 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
     }
 
-    private <T> DeviceType getDeviceTypeData( T deviceTypeAttr)
-            throws BadRequestException, UnexpectedServerErrorException {
-        List<DeviceType> deviceTypes;
-        try {
-            deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
-
-            if(deviceTypeAttr instanceof String){
-                for (DeviceType dt : deviceTypes) {
-                    if (dt.getName().equals(deviceTypeAttr)) {
-                        return dt;
-                    }
-                }
-            } else if (deviceTypeAttr instanceof  Integer){
-                for (DeviceType dt : deviceTypes) {
-                    if (dt.getId() == (Integer) deviceTypeAttr) {
-                        return dt;
-                    }
-                }
-            } else {
-                String msg = "Invalid device type class is received. Device type class: " + deviceTypeAttr.getClass()
-                        .getName();
-                log.error(msg);
-                throw new BadRequestException(msg);
-            }
-
-            String msg =
-                    "Invalid device type Attribute is found with the request. Device Type attribute: " + deviceTypeAttr;
-            log.error(msg);
-            throw new BadRequestException(msg);
-
-        } catch (DeviceManagementException e) {
-            String msg = "Error occured when getting device types which are supported by the Entgra IoTS";
-            log.error(msg);
-            throw new UnexpectedServerErrorException(msg);
-        }
-    }
-
+    @Override
     public void updateSubsStatus (int operationId, String status) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
+            ConnectionManagerUtil.beginDBTransaction();
             if (!subscriptionDAO.updateDeviceSubStatus(operationId, status, tenantId)){
+                ConnectionManagerUtil.rollbackDBTransaction();
                 String msg = "Didn't update an any app subscription of device for operation Id: " + operationId;
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
+            ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occured while updating app subscription status of the device.";
             log.error(msg);
-            throw new ApplicationManagementException(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obersving the database connection to update aoo subscription status of "
+                    + "device.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while executing database transaction";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
+    @Override
     public String getPlistArtifact(String releaseUuid) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
@@ -2711,12 +2882,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     .replace("$appName", applicationDTO.getName());
             return StringEscapeUtils.unescapeXml(plistContent);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while obtaining the database connection for getting application for the release UUID: "
-                    + releaseUuid, e);
+            String msg = "Error occurred while obtaining the database connection for getting application for the release UUID: "
+                    + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while getting application data for release UUID: " + releaseUuid, e);
+            String msg = "Error occurred while getting application data for release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
