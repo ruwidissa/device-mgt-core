@@ -77,7 +77,6 @@ import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.LifeCycleManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
@@ -143,7 +142,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         ApplicationDTO applicationDTO = APIUtil.convertToAppDTO(applicationWrapper);
-
         ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
         if (!isValidOsVersions(applicationReleaseDTO.getSupportedOsVersions(), applicationWrapper.getDeviceType())) {
             String msg = "You are trying to create application which has an application release contains invalid or "
@@ -571,7 +569,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             Pagination pagination = new Pagination();
-            pagination.setCount(applications.size());
+            pagination.setCount(applicationDAO.getApplicationCount(filter, deviceType.getId(), tenantId));
             pagination.setSize(applications.size());
             pagination.setOffset(filter.getOffset());
             pagination.setLimit(filter.getLimit());
@@ -820,7 +818,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationById(applicationId, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(applicationId, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't find application for the application Id: " + applicationId;
                 log.error(msg);
@@ -953,7 +951,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = applicationDAO.getApplication(releaseUuid, tenantId);
 
             if (applicationDTO == null) {
                 String msg = "Couldn't found an application for application release UUID: " + releaseUuid;
@@ -1009,7 +1007,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = applicationDAO.getApplication(releaseUuid, tenantId);
 
             if (applicationDTO == null) {
                 String msg = "Couldn't found an application for application release UUID: " + releaseUuid;
@@ -1172,7 +1170,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             this.lifecycleStateDAO.deleteLifecycleStates(deletingAppReleaseIds);
             this.applicationReleaseDAO.deleteReleases(deletingAppReleaseIds);
             this.applicationDAO.deleteApplicationTags(applicationId, tenantId);
-            this.applicationDAO.deleteCategoryMapping(applicationId, tenantId);
+            this.applicationDAO.deleteAppCategories(applicationId, tenantId);
             this.applicationDAO.deleteApplication(applicationId, tenantId);
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
@@ -1401,7 +1399,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't found an application which has application release for UUID: " + releaseUuid;
                 log.error(msg);
@@ -1616,15 +1614,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             if (!StringUtils.isEmpty(applicationUpdateWrapper.getName())){
-                Filter filter = new Filter();
-                filter.setFullMatch(true);
-                filter.setAppName(applicationUpdateWrapper.getName().trim());
-                filter.setOffset(0);
-                filter.setLimit(1);
-
-                List<ApplicationDTO> applicationList = applicationDAO
-                        .getApplications(filter, applicationDTO.getDeviceTypeId(), tenantId);
-                if (!applicationList.isEmpty()) {
+                if (applicationDAO
+                        .isExistingAppName(applicationUpdateWrapper.getName().trim(), applicationDTO.getDeviceTypeId(),
+                                tenantId)) {
                     String msg = "Already an application registered with same name " + applicationUpdateWrapper.getName()
                             + ". Hence you can't update the application name from " + applicationDTO.getName() + " to "
                             + applicationUpdateWrapper.getName();
@@ -1633,29 +1625,29 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
                 applicationDTO.setName(applicationUpdateWrapper.getName());
             }
-            if (!StringUtils.isEmpty(applicationUpdateWrapper.getSubType()) && !applicationDTO.getSubType()
-                    .equals(applicationUpdateWrapper.getSubType())) {
-                if (!ApplicationSubscriptionType.PAID.toString().equals(applicationUpdateWrapper.getSubType())
-                        && !ApplicationSubscriptionType.FREE.toString().equals(applicationUpdateWrapper.getSubType())) {
+            if (!StringUtils.isEmpty(applicationUpdateWrapper.getSubMethod()) && !applicationDTO.getSubType()
+                    .equals(applicationUpdateWrapper.getSubMethod())) {
+                if (!ApplicationSubscriptionType.PAID.toString().equals(applicationUpdateWrapper.getSubMethod())
+                        && !ApplicationSubscriptionType.FREE.toString().equals(applicationUpdateWrapper.getSubMethod())) {
                     String msg = "Invalid application subscription type is found with application updating request "
-                            + applicationUpdateWrapper.getSubType();
+                            + applicationUpdateWrapper.getSubMethod();
                     log.error(msg);
                     throw new BadRequestException(msg);
 
-                } else if (ApplicationSubscriptionType.FREE.toString().equals(applicationUpdateWrapper.getSubType())
+                } else if (ApplicationSubscriptionType.FREE.toString().equals(applicationUpdateWrapper.getSubMethod())
                         && !StringUtils.isEmpty(applicationUpdateWrapper.getPaymentCurrency())) {
-                    String msg = "If you are going to change Non-Free app as Free app, "
+                    String msg = "If you are going to change paid app as Free app, "
                             + "currency attribute in the application updating payload should be null or \"\"";
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
-                } else if (ApplicationSubscriptionType.PAID.toString().equals(applicationUpdateWrapper.getSubType())
+                } else if (ApplicationSubscriptionType.PAID.toString().equals(applicationUpdateWrapper.getSubMethod())
                         && StringUtils.isEmpty(applicationUpdateWrapper.getPaymentCurrency()) ){
-                    String msg = "If you are going to change Free app as Non-Free app, "
-                            + "currency attribute in the application payload should not be null or \"\"";
+                    String msg = "If you are going to change Free app as paid app, currency attribute in the application"
+                            + " payload should not be null or \"\"";
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
-                applicationDTO.setSubType(applicationUpdateWrapper.getSubType());
+                applicationDTO.setSubType(applicationUpdateWrapper.getSubMethod());
                 applicationDTO.setPaymentCurrency(applicationUpdateWrapper.getPaymentCurrency());
             }
 
@@ -1703,33 +1695,37 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
             applicationDTO.setUnrestrictedRoles(applicationUpdateWrapper.getUnrestrictedRoles());
+            List<String> updatingAppCategries = applicationUpdateWrapper.getCategories();
 
-            String updatingAppCategory = applicationUpdateWrapper.getAppCategory();
-            if ( updatingAppCategory != null){
+            if (updatingAppCategries != null){
+                List<CategoryDTO> allCategories = this.applicationDAO.getAllCategories(tenantId);
+                List<String> allCategoryName = allCategories.stream().map(CategoryDTO::getCategoryName)
+                        .collect(Collectors.toList());
+
+                if (!getDifference(updatingAppCategries, allCategoryName).isEmpty()){
+                   String msg = "Application update request contains invalid category names. Hence please verify the request payload";
+                   log.error(msg);
+                   throw new BadRequestException(msg);
+                }
+
                 List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
-                if (!appCategories.contains(updatingAppCategory)){
-                    List<CategoryDTO> allCategories = this.applicationDAO.getAllCategories(tenantId);
-                    List<Integer> categoryIds = allCategories.stream()
-                            .filter(category -> category.getCategoryName().equals(updatingAppCategory))
-                            .map(CategoryDTO::getId).collect(Collectors.toList());
-                    if (categoryIds.isEmpty()){
-                        ConnectionManagerUtil.rollbackDBTransaction();
-                        String msg =
-                                "You are trying to update application category into invalid application category, "
-                                        + "it is not registered in the system. Therefore please register the category "
-                                        + updatingAppCategory + " and perform the action";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
+                List<String> addingAppCategories = getDifference(updatingAppCategries, appCategories);
+                List<String> removingAppCategories = getDifference(appCategories, updatingAppCategries);
+                if (!addingAppCategories.isEmpty()) {
+                    List<Integer> categoryIds = this.applicationDAO.getCategoryIdsForCategoryNames(addingAppCategories, tenantId);
                     this.applicationDAO.addCategoryMapping(categoryIds, applicationId, tenantId);
+                }
+                if (!removingAppCategories.isEmpty()) {
+                    List<Integer> categoryIds = this.applicationDAO.getCategoryIdsForCategoryNames(removingAppCategories, tenantId);
+                    this.applicationDAO.deleteAppCategories(categoryIds, applicationId, tenantId);
                 }
             }
 
             List<String> updatingAppTags = applicationUpdateWrapper.getTags();
-            if ( updatingAppTags!= null){
+            if (updatingAppTags!= null){
                 List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
-                List<String> addingTagList = getDifference(appTags, updatingAppTags);
-                List<String> removingTagList = getDifference(updatingAppTags, appTags);
+                List<String> addingTagList = getDifference(updatingAppTags, appTags);
+                List<String> removingTagList = getDifference(appTags, updatingAppTags);
                 if (!addingTagList.isEmpty()) {
                     List<TagDTO> allTags = this.applicationDAO.getAllTags(tenantId);
                     List<String> newTags = addingTagList.stream().filter(updatingTagName -> allTags.stream()
@@ -1743,7 +1739,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (!removingTagList.isEmpty()) {
                     List<Integer> removingTagIds = this.applicationDAO.getTagIdsForTagNames(removingTagList, tenantId);
                     this.applicationDAO.deleteApplicationTags(removingTagIds, applicationId, tenantId);
-                    applicationDAO.deleteTags(removingTagList, applicationId, tenantId);
                 }
             }
             if (!applicationDAO.updateApplication(applicationDTO, tenantId)){
@@ -1857,7 +1852,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
             if (applicationDAO.hasTagMapping(tag.getId(), applicationDTO.getId(), tenantId)){
-                applicationDAO.deleteApplicationTags(tag.getId(), applicationDTO.getId(), tenantId);
+                applicationDAO.deleteApplicationTag(tag.getId(), applicationDTO.getId(), tenantId);
                 ConnectionManagerUtil.commitDBTransaction();
             } else {
                 String msg = "Tag " + tagName + " is not an application tag. Application ID: " + appId;
@@ -2289,13 +2284,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public boolean updateEntAppRelease(String deviceType, String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
+    public boolean updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
 
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
@@ -2355,14 +2350,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public boolean updatePubAppRelease(String deviceType, String releaseUuid,
-            PublicAppReleaseWrapper publicAppReleaseWrapper, ApplicationArtifact applicationArtifact)
-            throws ApplicationManagementException {
+    public boolean updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
             validateAppReleaseUpdating(applicationDTO, ApplicationType.PUBLIC.toString());
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
@@ -2423,14 +2417,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public boolean updateWebAppRelease(String deviceType, String releaseUuid,
-            WebAppReleaseWrapper webAppReleaseWrapper, ApplicationArtifact applicationArtifact)
-            throws ApplicationManagementException {
+    public boolean updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
             validateAppReleaseUpdating(applicationDTO, ApplicationType.WEB_CLIP.toString());
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
@@ -2816,11 +2809,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void updateSubsStatus (int operationId, String status) throws ApplicationManagementException {
+    public void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            if (!subscriptionDAO.updateDeviceSubStatus(operationId, status, tenantId)){
+            List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, tenantId);
+            if (deviceSubIds.isEmpty()){
+                String msg = "Couldn't find device subscription for operation id " + operationId;
+                log.error(msg);
+                throw new ApplicationManagementException(msg);
+            }
+            if (!subscriptionDAO.updateDeviceSubStatus(deviceId, deviceSubIds, status, tenantId)){
                 ConnectionManagerUtil.rollbackDBTransaction();
                 String msg = "Didn't update an any app subscription of device for operation Id: " + operationId;
                 log.error(msg);
@@ -2850,7 +2849,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't find application for the release UUID: " + releaseUuid;
                 log.error(msg);

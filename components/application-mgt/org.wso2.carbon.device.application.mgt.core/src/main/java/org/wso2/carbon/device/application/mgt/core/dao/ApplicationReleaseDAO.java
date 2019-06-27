@@ -40,44 +40,6 @@ public interface ApplicationReleaseDAO {
             ApplicationManagementDAOException;
 
     /**
-     * To get a release details with the particular version.
-     * @param applicationName name of the application to get the release.
-     * @param versionName Name of the version
-     * @param applicationType Type of the application release
-     * @param releaseType type of the release
-     * @param tenantId tenantId of the application
-
-     * @return ApplicationReleaseDTO for the particular version of the given application
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    ApplicationReleaseDTO getRelease(String applicationName,String applicationType, String versionName,
-            String releaseType, int tenantId) throws
-            ApplicationManagementDAOException;
-
-    /**
-     * To get all the releases of a particular application.
-     *
-     * @param applicationId Id of the application
-     * @param tenantId tenant id of the application
-     * @return list of the application releases
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    List<ApplicationReleaseDTO> getReleases(int applicationId, int tenantId) throws
-            ApplicationManagementDAOException;
-
-    /**
-     * To get the release by state.
-     *
-     * @param appId Id of the ApplicationDTO
-     * @param tenantId tenant id of the application
-     * @param state state of the application
-     * @return list of the application releases
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    List<ApplicationReleaseDTO> getReleaseByState(int appId, int tenantId,  String state)
-            throws ApplicationManagementDAOException;
-
-    /**
      * To update an ApplicationDTO release.
      *
      * @param applicationRelease ApplicationReleaseDTO that need to be updated.
@@ -108,8 +70,6 @@ public interface ApplicationReleaseDAO {
 
     List<Double> getReleaseRatings(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
-
-
     /**
      * To delete a particular release.
      *
@@ -120,29 +80,7 @@ public interface ApplicationReleaseDAO {
 
     void deleteReleases(List<Integer> applicationReleaseIds) throws ApplicationManagementDAOException;
 
-
-    /**
-     * To get release details of a specific application.
-     *
-     * @param applicationId ID of the application.
-     * @param releaseUuid UUID of the application release.
-     * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    ApplicationReleaseDTO getReleaseByIds(int applicationId, String releaseUuid, int tenantId) throws
-            ApplicationManagementDAOException;
-
     ApplicationReleaseDTO getReleaseByUUID(String uuid, int tenantId) throws ApplicationManagementDAOException;
-
-    /**
-     * To verify whether application release exist or not.
-     *
-     * @param appId ID of the application.
-     * @param uuid UUID of the application release.
-     * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    boolean verifyReleaseExistence(int appId, String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     /**
      * To verify whether application release exist or not for the given app release version.
@@ -170,7 +108,7 @@ public interface ApplicationReleaseDAO {
      * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException Application Management DAO Exception.
      */
-    boolean verifyReleaseExistenceByUuid(String uuid, int tenantId) throws ApplicationManagementDAOException;
+    boolean isReleaseExist(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     String getReleaseHashValue(String uuid, int tenantId) throws ApplicationManagementDAOException;
 

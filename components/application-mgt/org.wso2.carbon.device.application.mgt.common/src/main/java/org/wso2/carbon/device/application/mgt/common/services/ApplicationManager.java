@@ -189,19 +189,18 @@ public interface ApplicationManager {
 
     /***
      *
-     * @param deviceType Device type which is supported for the Application.
      * @param releaseUuid UUID of the application release.
      * @param entAppReleaseWrapper {@link ApplicationReleaseDTO}
      * @param applicationArtifact {@link ApplicationArtifact}
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
-    boolean updateEntAppRelease(String deviceType, String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
+    boolean updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    boolean updatePubAppRelease(String deviceType, String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
+    boolean updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    boolean updateWebAppRelease(String deviceType, String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
+    boolean updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
@@ -254,7 +253,7 @@ public interface ApplicationManager {
 
     String getInstallableLifecycleState() throws ApplicationManagementException;
 
-    void updateSubsStatus (int operationId, String status) throws ApplicationManagementException;
+    void updateSubsStatus (int deviceId, int operationId, String status) throws ApplicationManagementException;
 
 
         /**

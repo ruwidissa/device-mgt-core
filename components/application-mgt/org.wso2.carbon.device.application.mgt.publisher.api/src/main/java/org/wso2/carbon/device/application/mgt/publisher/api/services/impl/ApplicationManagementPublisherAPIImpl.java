@@ -412,9 +412,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Path("/ent-app-release/{deviceType}/{uuid}")
+    @Path("/ent-app-release/{uuid}")
     public Response updateEntAppRelease(
-            @PathParam("deviceType") String deviceType,
             @PathParam("uuid") String applicationUUID,
             @Multipart("applicationRelease") EntAppReleaseWrapper entAppReleaseWrapper,
             @Multipart(value = "binaryFile", required = false) Attachment binaryFile,
@@ -426,31 +425,31 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            if (!applicationManager.updateEntAppRelease(deviceType, applicationUUID, entAppReleaseWrapper,
+            if (!applicationManager.updateEntAppRelease(applicationUUID, entAppReleaseWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots))) {
-                String msg ="Application release updating is failed. Please contact the administrator. "
-                        + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType;
+                String msg ="Ent app release updating is failed. Please contact the administrator. Application release "
+                        + "UUID: " + applicationUUID;
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity("Application release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity("Ent app release is successfully updated.").build();
         } catch (BadRequestException e) {
             String msg =
-                    "Invalid request to update application release for application release UUID " + applicationUUID;
+                    "Invalid request to update ent app release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
             String msg =
-                    "Couldn't found application or application release for application release UUID " + applicationUUID;
+                    "Couldn't found an ent app or ent app release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ForbiddenException e) {
-            String msg = "You don't have require permission to update the application release which has UUID "
+            String msg = "You don't have require permission to update the ent app release which has UUID "
                     + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
+            String msg = "Error occurred while updating the ent app release which has UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -458,9 +457,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Path("/public-app-release/{deviceType}/{uuid}")
+    @Path("/public-app-release/{uuid}")
     public Response updatePubAppRelease(
-            @PathParam("deviceType") String deviceType,
             @PathParam("uuid") String applicationUUID,
             @Multipart("applicationRelease") PublicAppReleaseWrapper publicAppReleaseWrapper,
             @Multipart(value = "icon", required = false) Attachment iconFile,
@@ -471,31 +469,30 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            if (!applicationManager.updatePubAppRelease(deviceType, applicationUUID, publicAppReleaseWrapper,
+            if (!applicationManager.updatePubAppRelease(applicationUUID, publicAppReleaseWrapper,
                     constructApplicationArtifact(null, iconFile, bannerFile, screenshots))) {
-                String msg ="Application release updating is failed. Please contact the administrator. "
-                        + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType;
+                String msg ="Public app release updating is failed. Please contact the administrator. "
+                        + "Application release UUID: " + applicationUUID + ", Supported device type:";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity("Application release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity("Public app release is successfully updated.").build();
         } catch (BadRequestException e) {
-            String msg =
-                    "Invalid request to update application release for application release UUID " + applicationUUID;
+            String msg = "Invalid request to update public app release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
-            String msg =
-                    "Couldn't found application or application release for application release UUID " + applicationUUID;
+            String msg = "Couldn't found public app or public app release for application release UUID "
+                    + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ForbiddenException e) {
-            String msg = "You don't have require permission to update the application release which has UUID "
+            String msg = "You don't have require permission to update the public app release which has UUID "
                     + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
+            String msg = "Error occurred while updating the public app release which has UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -503,9 +500,8 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @Override
     @PUT
-    @Path("/web-app-release/{deviceType}/{uuid}")
+    @Path("/web-app-release/{uuid}")
     public Response updateWebAppRelease(
-            @PathParam("deviceType") String deviceType,
             @PathParam("uuid") String applicationUUID,
             @Multipart("applicationRelease") WebAppReleaseWrapper webAppReleaseWrapper,
             @Multipart(value = "icon", required = false) Attachment iconFile,
@@ -516,31 +512,29 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            if (!applicationManager.updateWebAppRelease(deviceType, applicationUUID, webAppReleaseWrapper,
+            if (!applicationManager.updateWebAppRelease(applicationUUID, webAppReleaseWrapper,
                     constructApplicationArtifact(null, iconFile, bannerFile, screenshots))) {
-                String msg ="Application release updating is failed. Please contact the administrator. "
-                        + "ApplicationDTO release UUID: " + applicationUUID + ", Supported device type: " + deviceType;
+                String msg ="web app  release updating is failed. Please contact the administrator. Application "
+                        + "release UUID: " + applicationUUID;
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity("Application release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity("Web app release is successfully updated.").build();
         } catch (BadRequestException e) {
-            String msg =
-                    "Invalid request to update application release for application release UUID " + applicationUUID;
+            String msg = "Invalid request to update web app release for web app release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (NotFoundException e) {
-            String msg =
-                    "Couldn't found application or application release for application release UUID " + applicationUUID;
+            String msg = "Couldn't found web app or web app release for application release UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ForbiddenException e) {
-            String msg = "You don't have require permission to update the application release which has UUID "
+            String msg = "You don't have require permission to update the web app release which has UUID "
                     + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error while updating the application release of the application with UUID " + applicationUUID;
+            String msg = "Error occurred while updating the web app release which has UUID " + applicationUUID;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

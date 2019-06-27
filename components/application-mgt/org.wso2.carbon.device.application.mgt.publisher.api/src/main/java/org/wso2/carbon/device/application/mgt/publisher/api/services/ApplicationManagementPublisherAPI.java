@@ -693,7 +693,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/ent-app-release/{deviceType}/{uuid}")
+    @Path("/ent-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -725,11 +725,6 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response updateEntAppRelease(
-            @ApiParam(
-                    name = "deviceType",
-                    value = "Supported device type of the application",
-                    required = true)
-            @PathParam("deviceType") String deviceType,
             @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO Release",
@@ -769,7 +764,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @PUT
-    @Path("/pub-app-release/{deviceType}/{uuid}")
+    @Path("/pub-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -801,11 +796,6 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response updatePubAppRelease(
-            @ApiParam(
-                    name = "deviceType",
-                    value = "Supported device type of the application",
-                    required = true)
-            @PathParam("deviceType") String deviceType,
             @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO Release",
@@ -840,7 +830,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @PUT
-    @Path("/web-app-release/{deviceType}/{uuid}")
+    @Path("/web-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(
@@ -872,11 +862,6 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response updateWebAppRelease(
-            @ApiParam(
-                    name = "deviceType",
-                    value = "Supported device type of the application",
-                    required = true)
-            @PathParam("deviceType") String deviceType,
             @ApiParam(
                     name = "UUID",
                     value = "Unique identifier of the ApplicationDTO Release",

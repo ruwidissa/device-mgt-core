@@ -48,17 +48,17 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             String subscribedFrom, String installStatus, int releaseId, int tenantId)
             throws ApplicationManagementDAOException {
         Connection conn;
+        String sql = "INSERT INTO "
+                + "AP_DEVICE_SUBSCRIPTION("
+                + "SUBSCRIBED_BY, "
+                + "SUBSCRIBED_TIMESTAMP, "
+                + "ACTION_TRIGGERED_FROM, "
+                + "STATUS, "
+                + "DM_DEVICE_ID, "
+                + "AP_APP_RELEASE_ID,"
+                + "TENANT_ID) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
-            String sql = "INSERT INTO "
-                    + "AP_DEVICE_SUBSCRIPTION("
-                    + "SUBSCRIBED_BY, "
-                    + "SUBSCRIBED_TIMESTAMP, "
-                    + "ACTION_TRIGGERED_FROM, "
-                    + "STATUS, "
-                    + "DM_DEVICE_ID, "
-                    + "AP_APP_RELEASE_ID,"
-                    + "TENANT_ID) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
             conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 Calendar calendar = Calendar.getInstance();
@@ -73,18 +73,30 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     stmt.setInt(7, tenantId);
                     stmt.addBatch();
                     if (log.isDebugEnabled()) {
-                        log.debug("Adding a mapping to device[" + deviceId + "] to the application release[" + releaseId
-                                + "]");
+                        log.debug("Adding a device subscription for device id " + deviceId + " and application "
+                                + "release which has release id" + releaseId);
                     }
                 }
                 stmt.executeBatch();
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    List<Integer> deviceSubIds = new ArrayList<>();
+                    while (rs.next()) {
+                        deviceSubIds.add(rs.getInt(1));
+                    }
+                    return deviceSubIds;
+                }
             }
-        } catch (SQLException | DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while adding device application mapping to DB",
-                    e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occured while obtaining database connection to add device subscription for application "
+                    + "release which has release Id" + releaseId;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occured when processing SQL to add device subscription for application release which"
+                    + " has release Id " + releaseId;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
-
-        return deviceIds;
     }
 
     @Override
@@ -95,12 +107,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         Connection conn;
         try {
             conn = this.getDBConnection();
-            String sql = "UPDATE AP_USER_SUBSCRIPTION " + "SET ";
+            String sql = "UPDATE AP_DEVICE_SUBSCRIPTION SET ";
 
             if (isUnsubscribed) {
-                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
+                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ?, ";
             } else {
-                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
+                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ?, ";
             }
             sql += "ACTION_TRIGGERED_FROM = ?, " +
                     "STATUS = ? " +
@@ -120,8 +132,16 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     stmt.setInt(5, deviceId);
                     stmt.setInt(6, releaseId);
                     stmt.setInt(7, tenantId);
+                    stmt.addBatch();
                 }
                 stmt.executeBatch();
+                try (ResultSet rs = stmt.getGeneratedKeys()){
+                    List<Integer> updatedDeviceSubIds = new ArrayList<>();
+                    while (rs.next()) {
+                        updatedDeviceSubIds.add(rs.getInt(1));
+                    }
+                    return updatedDeviceSubIds;
+                }
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update the device subscriptions of application.";
@@ -132,7 +152,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         }
-        return deviceIds;
     }
 
     @Override public void addOperationMapping(int operationId, List<Integer> deviceSubscriptionIds, int tenantId)
@@ -505,7 +524,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedDevices.add(rs.getInt("DM_DEVICE_I"));
+                        subscribedDevices.add(rs.getInt("DM_DEVICE_ID"));
                     }
                 }
             }
@@ -527,27 +546,25 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             conn = this.getDBConnection();
             String sql = "UPDATE ";
             if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
-                sql += "AP_USER_SUBSCRIPTION ";
+                sql += "AP_USER_SUBSCRIPTION SET ";
             } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                sql += "AP_ROLE_SUBSCRIPTION ";
+                sql += "AP_ROLE_SUBSCRIPTION SET ";
             } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                sql += "AP_GROUP_SUBSCRIPTION ";
+                sql += "AP_GROUP_SUBSCRIPTION SET ";
             }
 
             if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                sql += "SET UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
+                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
             } else {
-                sql += "SET SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
+                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
             }
 
-            sql += "WHERE ";
-
             if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
-                sql += "USER_NAME = ? ";
+                sql += "WHERE USER_NAME = ? ";
             } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                sql += "ROLE_NAME = ? ";
+                sql += "WHERE ROLE_NAME = ? ";
             } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                sql += "GROUP_NAME = ? ";
+                sql += "WHERE GROUP_NAME = ? ";
             }
 
             sql += "AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?";
@@ -577,20 +594,61 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public boolean updateDeviceSubStatus (int operationId, String status, int tenantId) throws ApplicationManagementDAOException {
+    public List<Integer> getDeviceSubIdsForOperation(int operationId, int tenantId)
+            throws ApplicationManagementDAOException {
         Connection conn;
         try {
             conn = this.getDBConnection();
-            String sql = "UPDATE AP_DEVICE_SUBSCRIPTION "
-                    + "SET STATUS = ? "
+            List<Integer> deviceSubIds = new ArrayList<>();
+            String sql = "SELECT "
+                    + "ID "
+                    + "FROM AP_APP_SUB_OP_MAPPING "
                     + "WHERE "
-                    + "AP_APP_RELEASE_ID = (SELECT AP_DEVICE_SUBSCRIPTION_ID FROM AP_APP_SUB_OP_MAPPING WHERE OPERATION_ID = ?) "
-                    + "AND TENANT_ID = ?";
+                    + "OPERATION_ID = ? AND "
+                    + "TENANT_ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, status);
-                stmt.setInt(2, operationId);
-                stmt.setInt(3, tenantId);
-                return stmt.executeUpdate() != 0;
+                stmt.setInt(1, operationId);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        deviceSubIds.add(rs.getInt("ID"));
+                    }
+                }
+                return deviceSubIds;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get app device subscription ids for given "
+                    + "operation.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when processing SQL to get app device subscription ids for given operation.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean updateDeviceSubStatus(int deviceId, List<Integer> deviceSubIds, String status, int tenantId)
+            throws ApplicationManagementDAOException {
+        Connection conn;
+        try {
+            conn = this.getDBConnection();
+            int index = 1;
+            StringJoiner joiner = new StringJoiner(",",
+                    "UPDATE AP_DEVICE_SUBSCRIPTION SET STATUS = ? "
+                            + "WHERE ID IN (",
+                    ") AND DM_DEVICE_ID = ? AND TENANT_ID = ?");
+            deviceSubIds.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setString(index++, status);
+                for (Integer deviceSubId : deviceSubIds) {
+                    ps.setObject(index++, deviceSubId);
+                }
+                ps.setInt(index++, deviceId);
+                ps.setInt(index, tenantId);
+                return ps.executeUpdate() != 0;
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update the subscription status of the "

@@ -296,7 +296,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            applicationDTO = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
+            applicationDTO = this.applicationDAO.getApplication(uuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't fond an application for application release UUID: " + uuid;
                 log.error(msg);
@@ -333,23 +333,23 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            List<Integer> deviceIds = new ArrayList<>();
+            List<Integer> deviceSubIds = new ArrayList<>();
 
             List<String> subscribedEntities = new ArrayList<>();
-            if (SubsciptionType.USER.toString().equals(subType)) {
+            if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
                 subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
                 }
-            } else if (SubsciptionType.ROLE.toString().equals(subType)) {
+            } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
                 subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId);
 
                 }
-            } else if (SubsciptionType.GROUP.toString().equals(subType)) {
+            } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
                 subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
@@ -371,19 +371,19 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 .updateDeviceSubscription(username, alreadySubscribedDevices, false, subType,
                                         Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
                         operationAddedDeviceIds.removeAll(alreadySubscribedDevices);
-                        deviceIds.addAll(deviceResubscribingIds);
+                        deviceSubIds.addAll(deviceResubscribingIds);
                     }
                     List<Integer> subscribingDevices = subscriptionDAO
                             .addDeviceSubscription(username, operationAddedDeviceIds, subType,
                                     Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-                    deviceIds.addAll(subscribingDevices);
+                    deviceSubIds.addAll(subscribingDevices);
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action) && !alreadySubscribedDevices.isEmpty()) {
                     List<Integer> deviceResubscribingIds = subscriptionDAO
                             .updateDeviceSubscription(username, alreadySubscribedDevices, false, subType,
                                     Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-                    deviceIds.addAll(deviceResubscribingIds);
+                    deviceSubIds.addAll(deviceResubscribingIds);
                 }
-                subscriptionDAO.addOperationMapping(operationId, deviceIds, tenantId);
+                subscriptionDAO.addOperationMapping(operationId, deviceSubIds, tenantId);
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
