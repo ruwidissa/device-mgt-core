@@ -22,6 +22,7 @@
     "react-d3-graph": "^2.0.2",
     "react-dom": "^16.8.4",
     "react-highlight-words": "^0.16.0",
+    "react-html-parser": "^2.0.2",
     "react-infinite-scroller": "^1.2.4",
     "react-quill": "^1.3.3",
     "react-router": "latest",
