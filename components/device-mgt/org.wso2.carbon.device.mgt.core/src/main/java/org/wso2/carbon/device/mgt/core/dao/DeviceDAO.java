@@ -47,6 +47,7 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the key operations associated with persisting device related information.
@@ -179,6 +180,15 @@ public interface DeviceDAO {
      */
     Device getDevice(DeviceIdentifier deviceIdentifier, Date ifModifiedSince, int tenantId) throws
                                                                                             DeviceManagementDAOException;
+
+    /**
+     * Retrieves a list of devices based on a given criteria of properties
+     * @param deviceProps properties by which devices need to be filtered
+     * @param tenantId tenant id
+     * @return list of devices
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> getDeviceBasedOnDeviceProperties(Map<String, String> deviceProps, int tenantId) throws DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve a device of a given device-identifier and tenant-id which modified

@@ -63,6 +63,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
+import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
@@ -104,6 +105,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Path("/devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -643,6 +645,30 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             devices = searchManagerService.search(searchContext);
         } catch (SearchMgtException e) {
             String msg = "Error occurred while searching for devices that matches the provided selection criteria";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+        deviceList.setList(devices);
+        deviceList.setCount(devices.size());
+        return Response.status(Response.Status.OK).entity(deviceList).build();
+    }
+
+    @POST
+    @Path("/query-devices")
+    @Override
+    public Response queryDevicesByProperties(@QueryParam("offset") int offset,
+                                             @QueryParam("limit") int limit, PropertyMap map) {
+        List<Device> devices;
+        DeviceList deviceList = new DeviceList();
+        try {
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            devices = dms.getDevicesBasedOnProperties(map.getProperties());
+            if(devices == null || devices.isEmpty()){
+                return Response.status(Response.Status.OK).entity("No device found matching query criteria.").build();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while searching for devices that matches the provided device properties";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

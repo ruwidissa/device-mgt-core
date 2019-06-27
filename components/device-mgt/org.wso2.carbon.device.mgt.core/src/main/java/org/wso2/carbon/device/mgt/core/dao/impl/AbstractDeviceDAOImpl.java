@@ -39,6 +39,7 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -56,14 +57,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     private static final org.apache.commons.logging.Log log = LogFactory.getLog(AbstractDeviceDAOImpl.class);
+
+    private static final String PROPERTY_KEY_COLUMN_NAME = "PROPERTY_NAME";
+    private static final String PROPERTY_VALUE_COLUMN_NAME = "PROPERTY_VALUE";
+    private static final String PROPERTY_DEVICE_TYPE_NAME = "DEVICE_TYPE_NAME";
+    private static final String PROPERTY_DEVICE_IDENTIFICATION = "DEVICE_IDENTIFICATION";
 
     @Override
     public int addDevice(int typeId, Device device, int tenantId) throws DeviceManagementDAOException {
@@ -281,6 +289,61 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
         return device;
     }
+
+    public List<Device> getDeviceBasedOnDeviceProperties(Map<String,String> deviceProps, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        List<Device> devices = null;
+        try {
+            List<List<String>> outputLists = new ArrayList<>();
+            List<String> deviceList = null;
+            conn = this.getConnection();
+            for (Map.Entry<String, String> entry : deviceProps.entrySet()) {
+
+                stmt = conn.prepareStatement("SELECT DEVICE_IDENTIFICATION FROM DM_DEVICE_PROPERTIES " +
+                                             "WHERE (PROPERTY_NAME , PROPERTY_VALUE) IN " +
+                                             "((? , ?))  AND TENANT_ID = ?");
+                stmt.setString(1, entry.getKey());
+                stmt.setString(2, entry.getValue());
+                stmt.setInt(3, tenantId);
+                resultSet = stmt.executeQuery();
+
+                deviceList = new ArrayList<>();
+                while (resultSet.next()) {
+                    deviceList.add(resultSet.getString(PROPERTY_DEVICE_IDENTIFICATION));
+                }
+                outputLists.add(deviceList);
+            }
+            List<String> deviceIds = findIntersection(outputLists);
+            for(String deviceId : deviceIds){
+                devices.add(getDevice(deviceId, tenantId));
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching devices against criteria : '" + deviceProps;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, resultSet);
+        }
+        return devices;
+    }
+
+    private List<String> findIntersection(List<List<String>> collections) {
+        boolean first = true;
+        List<String> intersectedResult = new ArrayList<>();
+        for (Collection<String> collection : collections) {
+            if (first) {
+                intersectedResult.addAll(collection);
+                first = false;
+            } else {
+                intersectedResult.retainAll(collection);
+            }
+        }
+        return intersectedResult;
+    }
+
 
     @Override
     public Device getDevice(String deviceIdentifier, Date since, int tenantId)

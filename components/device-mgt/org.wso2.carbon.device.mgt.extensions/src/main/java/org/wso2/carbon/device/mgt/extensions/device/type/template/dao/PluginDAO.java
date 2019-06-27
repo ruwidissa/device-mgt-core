@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.extensions.device.type.template.dao;
 
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
+
 import java.util.List;
 
 public interface PluginDAO {
