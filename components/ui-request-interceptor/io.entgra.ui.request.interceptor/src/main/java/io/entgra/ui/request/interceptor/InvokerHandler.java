@@ -273,7 +273,6 @@ public class InvokerHandler extends HttpServlet {
             throws IOException {
         serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
         apiEndpoint = req.getPathInfo();
-        platform = req.getHeader(HandlerConstants.X_PLATFORM_HEADER);
         HttpSession session = req.getSession(false);
 
         if (session == null) {
@@ -282,15 +281,8 @@ public class InvokerHandler extends HttpServlet {
             return false;
         }
 
-        if (StringUtils.isEmpty(platform)) {
-            log.error("\"X-Platform\" header is empty in the request. Header is required to obtain the auth data from" +
-                      " session.");
-            handleError(req, resp, HttpStatus.SC_BAD_REQUEST);
-            return false;
-        }
-
-        authData = (AuthData) session.getAttribute(platform);
-
+        authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+        platform = (String) session.getAttribute(HandlerConstants.PLATFORM);
         if (authData == null) {
             log.error("Unauthorized, Access token not found in the current session");
             handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);

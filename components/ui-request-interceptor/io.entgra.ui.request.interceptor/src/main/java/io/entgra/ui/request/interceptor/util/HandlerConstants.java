@@ -28,7 +28,7 @@ public class HandlerConstants {
     public static final String BEARER = "Bearer ";
     public static final String TAGS_KEY = "tags";
     public static final String APP_NAME_KEY = "applicationName";
-    public static final String SESSION_AUTH_DATA_KEY = "application-mgt";
+    public static final String SESSION_AUTH_DATA_KEY = "authInfo";
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String PLATFORM = "platform";
     public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
@@ -37,7 +37,6 @@ public class HandlerConstants {
     public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
 
-    public static final String X_PLATFORM_HEADER = "X-Platform";
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
     public static final String PATH_SEPARATOR = "/";
