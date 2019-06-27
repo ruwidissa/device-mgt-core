@@ -1,5 +1,4 @@
 import React from "react";
-import "antd/dist/antd.css";
 import {
     Card,
     Button,
@@ -155,7 +154,6 @@ class AddNewReleaseFormComponent extends React.Component {
     render() {
         const {categories, tags, icons, screenshots, loading, binaryFiles} = this.state;
         const {getFieldDecorator} = this.props.form;
-        const {formConfig} = this.props;
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
@@ -305,5 +303,5 @@ class AddNewReleaseFormComponent extends React.Component {
     }
 }
 
-const AddReleaseForm = withRouter(Form.create({name: 'add-new-app'})(AddNewReleaseFormComponent));
+const AddReleaseForm = withRouter(Form.create({name: 'add-new-release'})(AddNewReleaseFormComponent));
 export default AddReleaseForm;

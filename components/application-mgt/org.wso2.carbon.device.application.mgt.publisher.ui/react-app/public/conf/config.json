@@ -13,7 +13,7 @@
       "store": "/application-mgt-store/v1.0",
       "admin" : ""
     },
-    "loginUri": "/ui-request-handler/login",
+    "loginUri": "/publisher-ui-request-handler/login",
     "platform": "publisher"
   },
   "defaultPlatformIcons": {

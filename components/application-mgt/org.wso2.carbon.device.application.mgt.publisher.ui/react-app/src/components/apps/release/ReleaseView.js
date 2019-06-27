@@ -5,6 +5,7 @@ import Reviews from "./review/Reviews";
 import "../../../App.css";
 import config from "../../../../public/conf/config.json";
 import DetailedRating from "../detailed-rating/DetailedRating";
+import EditRelease from "./edit-release/EditRelease";
 
 const {Title, Text, Paragraph} = Typography;
 
@@ -12,7 +13,7 @@ class ReleaseView extends React.Component {
     render() {
         const app = this.props.app;
         const release = (app !== null) ? app.applicationReleases[0] : null;
-        if(release == null){
+        if (release == null) {
             return null;
         }
         return (
@@ -24,7 +25,7 @@ class ReleaseView extends React.Component {
                         </Col>
                         <Col xl={10} sm={11} className="release-title">
                             <Title level={2}>{app.name}</Title>
-                            <Text>Version : {release.version}</Text><br/><br/>
+                            <Text>Version : {release.version}</Text><br/>
                             <StarRatings
                                 rating={release.rating}
                                 starRatedColor="#777"
@@ -33,21 +34,21 @@ class ReleaseView extends React.Component {
                                 numberOfStars={5}
                                 name='rating'
                             />
+                            <EditRelease/>
                         </Col>
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
                             <div>
-                                <Button.Group style={{float: "right"}}>
-                                    <Button htmlType="button" icon="edit">edit</Button>
-                                    <Button htmlType="button"
-                                            type="primary"
-                                            icon="shop"
-                                            disabled={this.props.currentLifecycleStatus !== "PUBLISHED"}
-                                            onClick={() => {
-                                                window.open("https://"+ config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+"/store/"+app.deviceType+"/apps/"+release.uuid)
-                                            }}>
-                                        Open in store
-                                    </Button>
-                                </Button.Group>
+                                <Button
+                                    style={{float: "right"}}
+                                    htmlType="button"
+                                    type="primary"
+                                    icon="shop"
+                                    disabled={this.props.currentLifecycleStatus !== "PUBLISHED"}
+                                    onClick={() => {
+                                        window.open("https://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + "/store/" + app.deviceType + "/apps/" + release.uuid)
+                                    }}>
+                                    Open in store
+                                </Button>
                             </div>
                         </Col>
                     </Row>
