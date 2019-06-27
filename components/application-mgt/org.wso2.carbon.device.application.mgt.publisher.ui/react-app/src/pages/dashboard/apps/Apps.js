@@ -2,7 +2,6 @@ import React from "react";
 import "antd/dist/antd.css";
 import {PageHeader, Typography,Input, Button, Row, Col} from "antd";
 import ListApps from "../../../components/apps/list-apps/ListApps";
-import ReleaseModal from "../../../components/apps/ReleaseModal";
 
 const Search = Input.Search;
 

@@ -31,7 +31,7 @@ class Reviews extends React.Component {
         const {uuid, type} = this.props;
 
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/reviews/"+type+"/"+uuid,
             {
                 headers: {'X-Platform': config.serverConfig.platform}
             }).then(res => {

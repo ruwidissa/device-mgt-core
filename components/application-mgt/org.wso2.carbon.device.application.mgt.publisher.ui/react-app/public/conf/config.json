@@ -8,12 +8,12 @@
     "hostname": "localhost",
     "httpsPort": "9443",
     "invoker": {
-      "uri": "/ui-request-handler/invoke",
+      "uri": "/publisher-ui-request-handler/invoke",
       "publisher": "/application-mgt-publisher/v1.0",
       "store": "/application-mgt-store/v1.0",
       "admin" : ""
     },
-    "loginUri": "/ui-request-handler/login",
+    "loginUri": "/publisher-ui-request-handler/login",
     "platform": "publisher"
   },
   "defaultPlatformIcons": {

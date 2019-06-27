@@ -22,9 +22,7 @@ class ManageCategories extends React.Component {
     componentDidMount() {
         axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/categories",
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }).then(res => {
+            ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
                 this.setState({
@@ -59,9 +57,7 @@ class ManageCategories extends React.Component {
         });
         axios.delete(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories/"+id,
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -202,9 +198,7 @@ class ManageCategories extends React.Component {
         axios.post(
         config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories",
             data,
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -267,9 +261,7 @@ class ManageCategories extends React.Component {
         axios.put(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories/rename?from="+currentlyEditingId+"&to="+editingValue,
             {},
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({

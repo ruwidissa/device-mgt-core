@@ -29,9 +29,7 @@ class GroupInstall extends React.Component {
 
         axios.post(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {

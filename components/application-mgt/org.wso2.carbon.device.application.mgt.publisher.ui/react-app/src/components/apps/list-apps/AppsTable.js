@@ -108,9 +108,7 @@ class AppsTable extends React.Component {
        axios.post(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications",
             data,
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 let apps = [];
