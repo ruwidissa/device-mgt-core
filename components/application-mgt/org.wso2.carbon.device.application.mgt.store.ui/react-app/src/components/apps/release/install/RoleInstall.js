@@ -29,9 +29,7 @@ class RoleInstall extends React.Component {
 
         axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/roles?filter=" + value,
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {

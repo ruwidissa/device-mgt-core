@@ -22,9 +22,7 @@ class ManageTags extends React.Component {
     componentDidMount() {
         axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags",
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }).then(res => {
+            ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
                 this.setState({
@@ -202,9 +200,7 @@ class ManageTags extends React.Component {
 
         axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags",
             data,
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }).then(res => {
+            ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
                     message: "Done!",
@@ -266,9 +262,7 @@ class ManageTags extends React.Component {
         axios.put(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags/rename?from="+currentlyEditingId+"&to="+editingValue,
             {},
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }
+
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({

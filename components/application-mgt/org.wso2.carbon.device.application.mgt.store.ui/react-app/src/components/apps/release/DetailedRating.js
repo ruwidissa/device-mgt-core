@@ -33,9 +33,7 @@ class DetailedRating extends React.Component{
 
         return axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
-            {
-                headers: { 'X-Platform': config.serverConfig.platform }
-            }).then(res => {
+            ).then(res => {
             if (res.status === 200) {
                 let detailedRating = res.data.data;
                 this.setState({
