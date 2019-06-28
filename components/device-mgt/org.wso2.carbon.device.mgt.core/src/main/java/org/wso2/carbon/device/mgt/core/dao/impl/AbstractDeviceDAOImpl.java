@@ -295,7 +295,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
-        List<Device> devices = null;
+        List<Device> devices = new ArrayList<>();
         try {
             List<List<String>> outputLists = new ArrayList<>();
             List<String> deviceList = null;
