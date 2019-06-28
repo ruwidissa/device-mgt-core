@@ -185,10 +185,21 @@ public interface DeviceDAO {
      * Retrieves a list of devices based on a given criteria of properties
      * @param deviceProps properties by which devices need to be filtered
      * @param tenantId tenant id
-     * @return list of devices
+     * @return list of devices with properties
      * @throws DeviceManagementDAOException
      */
     List<Device> getDeviceBasedOnDeviceProperties(Map<String, String> deviceProps, int tenantId) throws DeviceManagementDAOException;
+
+
+    /**
+     * Retrieves properties of given device identifier
+     *
+     * @param deviceId identifier of device that need to be retrieved
+     * @param tenantId tenant ID
+     * @return list of devices with properties
+     * @throws DeviceManagementDAOException
+     */
+    Device getDeviceProps(String deviceId, int tenantId) throws DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve a device of a given device-identifier and tenant-id which modified

@@ -39,7 +39,6 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -290,6 +289,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         return device;
     }
 
+    @Override
     public List<Device> getDeviceBasedOnDeviceProperties(Map<String,String> deviceProps, int tenantId)
             throws DeviceManagementDAOException {
         Connection conn = null;
@@ -318,7 +318,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             List<String> deviceIds = findIntersection(outputLists);
             for(String deviceId : deviceIds){
-                devices.add(getDevice(deviceId, tenantId));
+                devices.add(getDeviceProps(deviceId, tenantId));
             }
         } catch (SQLException e) {
             String msg = "Error occurred while fetching devices against criteria : '" + deviceProps;
@@ -328,6 +328,47 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             DeviceManagementDAOUtil.cleanupResources(stmt, resultSet);
         }
         return devices;
+    }
+
+    @Override
+    public Device getDeviceProps(String deviceId, int tenantId) throws DeviceManagementDAOException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        Device device = null;
+        ResultSet resultSet = null;
+        String deviceType = null;
+        try {
+            conn = this.getConnection();
+            stmt = conn.prepareStatement(
+                    "SELECT * FROM DM_DEVICE_PROPERTIES WHERE DEVICE_IDENTIFICATION = ? AND TENANT_ID = ?");
+            stmt.setString(1, deviceId);
+            stmt.setInt(2, tenantId);
+            resultSet = stmt.executeQuery();
+            List<Device.Property> properties = new ArrayList<>();
+            while (resultSet.next()) {
+                Device.Property property = new Device.Property();
+                property.setName(resultSet.getString(PROPERTY_KEY_COLUMN_NAME));
+                property.setValue(resultSet.getString(PROPERTY_VALUE_COLUMN_NAME));
+                properties.add(property);
+                //We are repeatedly assigning device type here. Yes. This was done intentionally, as there would be
+                //No other efficient/simple/inexpensive way of retrieving device type of a particular device from the database
+                //Note that device-identification will be unique across device types
+                deviceType = resultSet.getString(PROPERTY_DEVICE_TYPE_NAME);
+            }
+            device = new Device();
+            device.setDeviceIdentifier(deviceId);
+            device.setType(deviceType);
+            device.setProperties(properties);
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching properties for device : '" + deviceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, resultSet);
+        }
+
+        return device;
     }
 
     private List<String> findIntersection(List<List<String>> collections) {
