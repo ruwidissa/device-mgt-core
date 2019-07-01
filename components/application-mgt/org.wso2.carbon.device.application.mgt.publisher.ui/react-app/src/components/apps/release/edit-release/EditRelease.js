@@ -104,7 +104,7 @@ class EditReleaseModal extends React.Component {
 
                 const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app/" + appId;
 
-                axios.put(
+                axios.post(
                     url,
                     data,
                     {
