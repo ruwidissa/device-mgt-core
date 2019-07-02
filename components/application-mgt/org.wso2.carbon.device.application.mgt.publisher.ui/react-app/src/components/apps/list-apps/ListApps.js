@@ -20,11 +20,12 @@ class ListApps extends React.Component {
         super(props);
         this.state = {
             isDrawerVisible: false,
-            selectedApp: null
+            selectedApp: null,
+            filters: {}
         }
     }
 
-   //handler to show app drawer
+    //handler to show app drawer
     showDrawer = (app) => {
         this.setState({
             isDrawerVisible: true,
@@ -39,12 +40,18 @@ class ListApps extends React.Component {
         })
     };
 
+    setFilters = (filters) => {
+        this.setState({
+            filters
+        });
+    };
+
     render() {
-        const {isDrawerVisible} = this.state;
+        const {isDrawerVisible, filters} = this.state;
         return (
             <Row gutter={28}>
                 <Col md={6}>
-                    <Filters/>
+                    <Filters setFilters={this.setFilters}/>
                 </Col>
                 <Col md={18}>
                     <Card>
@@ -61,8 +68,9 @@ class ListApps extends React.Component {
                             </Col>
                         </Row>
                         <Divider dashed={true}/>
-                        <AppsTable showDrawer={this.showDrawer} />
-                        <AppDetailsDrawer visible={isDrawerVisible} onClose={this.closeDrawer} app={this.state.selectedApp}/>
+                        <AppsTable filters={filters} showDrawer={this.showDrawer}/>
+                        <AppDetailsDrawer visible={isDrawerVisible} onClose={this.closeDrawer}
+                                          app={this.state.selectedApp}/>
                     </Card>
                 </Col>
             </Row>
