@@ -524,7 +524,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             for (ApplicationDTO applicationDTO : appDTOs) {
                 boolean isSearchingApp = true;
                 List<String> filteringTags = filter.getTags();
-                List<String> filteringCategories = filter.getAppCategories();
+                List<String> filteringCategories = filter.getCategories();
                 List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
 
                 if (!lifecycleStateManager.getEndState().equals(applicationDTO.getStatus())) {
@@ -2511,15 +2511,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "price is " + price + " for " + applicationSubType + " application.");
         }
 
-        DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
-        String supportedOSVersions = applicationReleaseDTO.getSupportedOsVersions();
-        if (!ApplicationType.WEB_CLIP.toString().equals(appType) && !ApplicationType.WEB_APP.toString().equals(appType)
-                && !StringUtils.isEmpty(supportedOSVersions) && !isValidOsVersions(
-                supportedOSVersions, deviceTypeObj.getName())) {
-            String msg = "You are trying to update application release which has invalid or unsupported OS "
-                    + "versions in the supportedOsVersions section. Hence, please re-evaluate the request payload.";
-            log.error(msg);
-            throw new BadRequestException(msg);
+        if (!ApplicationType.WEB_CLIP.toString().equals(appType) && !ApplicationType.WEB_APP.toString()
+                .equals(appType)) {
+            DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+            String supportedOSVersions = applicationReleaseDTO.getSupportedOsVersions();
+            if (!StringUtils.isEmpty(supportedOSVersions) && !isValidOsVersions(supportedOSVersions,
+                    deviceTypeObj.getName())) {
+                String msg = "You are trying to update application release which has invalid or unsupported OS "
+                        + "versions in the supportedOsVersions section. Hence, please re-evaluate the request payload.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
         }
     }
 

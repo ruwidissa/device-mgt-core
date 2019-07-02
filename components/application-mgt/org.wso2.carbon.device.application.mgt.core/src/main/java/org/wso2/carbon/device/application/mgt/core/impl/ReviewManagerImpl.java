@@ -626,7 +626,7 @@ public class ReviewManagerImpl implements ReviewManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            Rating rating = this.applicationReleaseDAO.getRating(appReleaseUuid, tenantId);
+            Rating rating = this.applicationReleaseDAO.getReleaseRating(appReleaseUuid, tenantId);
             if (rating == null) {
                 throw new NotFoundException(
                         "Couldn't find rating for application release UUID: " + appReleaseUuid
@@ -710,7 +710,7 @@ public class ReviewManagerImpl implements ReviewManager {
     private void calculateRating(int newRatingVal, int oldRatingVal, String uuid, int tenantId) {
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            Rating rating = this.applicationReleaseDAO.getRating(uuid, tenantId);
+            Rating rating = this.applicationReleaseDAO.getReleaseRating(uuid, tenantId);
             if (rating == null) {
                 log.error("Couldn't find rating for application release uuid: " + uuid);
             } else {
