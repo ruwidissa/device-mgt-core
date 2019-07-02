@@ -61,7 +61,6 @@ class LifeCycle extends React.Component {
             }).then(res => {
             if (res.status === 200) {
                 const lifecycle = res.data.data;
-                console.log(lifecycle);
                 this.setState({
                     lifecycle: lifecycle
                 })

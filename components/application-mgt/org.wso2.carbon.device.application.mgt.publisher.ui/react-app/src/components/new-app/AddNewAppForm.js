@@ -108,7 +108,7 @@ class AddNewAppFormComponent extends React.Component {
     };
 
     handleCategoryChange = (value) => {
-        console.log(`selected ${value}`);
+        // console.log(`selected ${value}`);
     };
 
     handleSubmit = e => {
@@ -181,8 +181,6 @@ class AddNewAppFormComponent extends React.Component {
                 });
                 data.append(formConfig.jsonPayloadName, blob);
 
-                console.log(application);
-
                 const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
 
                 axios.post(
@@ -231,7 +229,6 @@ class AddNewAppFormComponent extends React.Component {
     };
 
     normFile = e => {
-        console.log('Upload event:', e);
         if (Array.isArray(e)) {
             return e;
         }

@@ -110,15 +110,12 @@ class AddNewReleaseFormComponent extends React.Component {
                                 "New release was added successfully",
                         });
 
-                        console.log(res);
-
                         const uuid = res.data.data.uuid;
 
                         this.props.history.push('/publisher/apps/releases/'+uuid);
                     }
 
                 }).catch((error) => {
-                    console.log(error);
                     if (error.hasOwnProperty("response") && error.response.status === 401) {
                         window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                     } else {
@@ -132,14 +129,12 @@ class AddNewReleaseFormComponent extends React.Component {
                     this.setState({
                         loading: false
                     });
-                    console.log(error);
                 });
             }
         });
     };
 
     normFile = e => {
-        console.log('Upload event:', e);
         if (Array.isArray(e)) {
             return e;
         }

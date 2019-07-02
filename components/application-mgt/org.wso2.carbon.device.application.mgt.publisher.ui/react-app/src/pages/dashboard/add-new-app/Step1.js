@@ -24,7 +24,6 @@ class EditableTagGroup extends React.Component {
 
     handleClose = (removedTag) => {
         const tags = this.state.tags.filter(tag => tag !== removedTag);
-        console.log(tags);
         this.setState({ tags });
     }
 
@@ -42,7 +41,6 @@ class EditableTagGroup extends React.Component {
         if (inputValue && tags.indexOf(inputValue) === -1) {
             tags = [...tags, inputValue];
         }
-        console.log(tags);
         this.setState({
             tags,
             inputVisible: false,
@@ -92,7 +90,6 @@ class EditableTagGroup extends React.Component {
 
 class Step1 extends React.Component {
     render() {
-        console.log("hhhoohh");
         return (
             <div>
                 <Form layout="horizontal" className={styles.stepForm} hideRequiredMark>

@@ -218,8 +218,6 @@ class AppDetailsDrawer extends React.Component {
         const {id} = this.props.app;
         const {temporaryCategories, categories} = this.state;
 
-        console.log(temporaryCategories);
-
         const difference = temporaryCategories
             .filter(x => !categories.includes(x))
             .concat(categories.filter(x => !temporaryCategories.includes(x)));
@@ -280,7 +278,6 @@ class AppDetailsDrawer extends React.Component {
         const {id} = this.props.app;
         const {temporaryTags, tags} = this.state;
 
-        console.log(temporaryTags);
 
         const difference = temporaryTags
             .filter(x => !tags.includes(x))
