@@ -14,7 +14,7 @@ class Dashboard extends React.Component {
         super(props);
         this.state = {
             routes: props.routes
-        }
+        };
     }
 
     render() {

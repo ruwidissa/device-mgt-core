@@ -14,7 +14,6 @@ const formItemLayout = {
     },
 };
 
-
 class EditReleaseModal extends React.Component {
 
     constructor(props) {
@@ -27,9 +26,61 @@ class EditReleaseModal extends React.Component {
             icons: [],
             screenshots: [],
             loading: false,
-            binaryFiles: []
+            binaryFiles: [],
+            formConfig: {
+                specificElements: {}
+            }
         };
     }
+
+    componentDidMount = () => {
+        this.generateConfig();
+    };
+
+    generateConfig = () => {
+        const {type} = this.props;
+        const formConfig = {
+            type
+        };
+
+        switch (type) {
+            case "ENTERPRISE":
+                formConfig.endpoint = "/ent-app-release";
+                formConfig.specificElements = {
+                    binaryFile: {
+                        required: true
+                    }
+                };
+                break;
+            case "PUBLIC":
+                formConfig.endpoint = "/public-app-release";
+                formConfig.specificElements = {
+                    packageName: {
+                        required: true
+                    },
+                    version: {
+                        required: true
+                    }
+                };
+                break;
+            case "WEB_CLIP":
+                formConfig.endpoint = "/web-app-release";
+                formConfig.specificElements = {
+                    version: {
+                        required: true
+                    },
+                    url: {
+                        required: true
+                    }
+                };
+                break;
+        }
+
+        this.setState({
+            formConfig
+        });
+    };
+
 
     showModal = () => {
         this.setState({
@@ -38,21 +89,18 @@ class EditReleaseModal extends React.Component {
     };
 
     handleOk = e => {
-        console.log(e);
         this.setState({
             visible: false,
         });
     };
 
     handleCancel = e => {
-        console.log(e);
         this.setState({
             visible: false,
         });
     };
 
     normFile = e => {
-        console.log('Upload event:', e);
         if (Array.isArray(e)) {
             return e;
         }
@@ -67,15 +115,19 @@ class EditReleaseModal extends React.Component {
 
     handleSubmit = e => {
         e.preventDefault();
-        const {appId} = this.props;
+        const {uuid} = this.props;
+
+        const {formConfig} = this.state;
+        const {specificElements} = formConfig;
 
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 this.setState({
                     loading: true
                 });
-                const {price, isSharedWithAllTenants, icon, screenshots, releaseDescription, releaseType, binaryFile} = values;
+                const {price, isSharedWithAllTenants, releaseDescription, releaseType} = values;
 
+                const {icons, screenshots, binaryFiles} = this.state;
 
                 const data = new FormData();
 
@@ -89,11 +141,37 @@ class EditReleaseModal extends React.Component {
                     supportedOsVersions: "4.0-10.0"
                 };
 
-                data.append('binaryFile', binaryFile[0].originFileObj);
-                data.append('icon', icon[0].originFileObj);
-                data.append('screenshot1', screenshots[0].originFileObj);
-                data.append('screenshot2', screenshots[1].originFileObj);
-                data.append('screenshot3', screenshots[2].originFileObj);
+                if (specificElements.hasOwnProperty("binaryFile") && binaryFiles.length === 1) {
+                    data.append('binaryFile', binaryFiles[0].originFileObj);
+                }
+
+                if (specificElements.hasOwnProperty("version")) {
+                    release.version = values.version;
+                }
+
+                if (specificElements.hasOwnProperty("url")) {
+                    release.url = values.url;
+                }
+
+                if (specificElements.hasOwnProperty("packageName")) {
+                    release.packageName = values.packageName;
+                }
+
+                if (icons.length === 1) {
+                    data.append('icon', icons[0].originFileObj);
+                }
+
+                if(screenshots.length>0){
+                    data.append('screenshot1', screenshots[0].originFileObj);
+                }
+
+                if(screenshots.length>1){
+                    data.append('screenshot2', screenshots[1].originFileObj);
+                }
+
+                if(screenshots.length>2){
+                    data.append('screenshot3', screenshots[2].originFileObj);
+                }
 
                 const json = JSON.stringify(release);
                 const blob = new Blob([json], {
@@ -102,20 +180,16 @@ class EditReleaseModal extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app/" + appId;
+                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint + "/" + uuid;
 
-                axios.post(
+                axios.put(
                     url,
-                    data,
-                    {
-                        headers: {
-                            'X-Platform': config.serverConfig.platform
-                        },
-                    }
+                    data
                 ).then(res => {
-                    if (res.status === 201) {
+                    if (res.status === 200) {
                         this.setState({
                             loading: false,
+                            visible: false,
                         });
 
                         notification["success"]({
@@ -124,15 +198,12 @@ class EditReleaseModal extends React.Component {
                                 "Saved!",
                         });
 
-                        console.log(res);
-
                         const uuid = res.data.data.uuid;
 
-                        this.props.history.push('/publisher/apps/releases/' + uuid);
+                        // this.props.history.push('/publisher/apps/releases/' + uuid);
                     }
 
                 }).catch((error) => {
-                    console.log(error);
                     if (error.hasOwnProperty("response") && error.response.status === 401) {
                         window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                     } else {
@@ -146,7 +217,6 @@ class EditReleaseModal extends React.Component {
                     this.setState({
                         loading: false
                     });
-                    console.log(error);
                 });
             }
         });
@@ -154,7 +224,7 @@ class EditReleaseModal extends React.Component {
 
 
     render() {
-        const {categories, tags, icons, screenshots, loading, binaryFiles} = this.state;
+        const {formConfig, icons, screenshots, loading, binaryFiles} = this.state;
         const {getFieldDecorator} = this.props.form;
         return (
             <div>
@@ -172,26 +242,67 @@ class EditReleaseModal extends React.Component {
                             <Form labelAlign="left" layout="horizontal"
                                   hideRequiredMark
                                   onSubmit={this.handleSubmit}>
-                                <Form.Item {...formItemLayout} label="Application">
-                                    {getFieldDecorator('binaryFile', {
-                                        valuePropName: 'binaryFile',
-                                        getValueFromEvent: this.normFile,
-                                        required: true,
-                                        message: 'Please select application'
-                                    })(
-                                        <Upload
-                                            name="binaryFile"
-                                            onChange={this.handleBinaryFileChange}
-                                            beforeUpload={() => false}
-                                        >
-                                            {binaryFiles.length !== 1 && (
-                                                <Button>
-                                                    <Icon type="upload"/> Click to upload
-                                                </Button>
-                                            )}
-                                        </Upload>,
-                                    )}
-                                </Form.Item>
+                                {formConfig.specificElements.hasOwnProperty("binaryFile") && (
+                                    <Form.Item {...formItemLayout} label="Application">
+                                        {getFieldDecorator('binaryFile', {
+                                            valuePropName: 'binaryFile',
+                                            getValueFromEvent: this.normFile,
+                                            required: true,
+                                            message: 'Please select application'
+                                        })(
+                                            <Upload
+                                                name="binaryFile"
+                                                onChange={this.handleBinaryFileChange}
+                                                beforeUpload={() => false}
+                                            >
+                                                {binaryFiles.length !== 1 && (
+                                                    <Button>
+                                                        <Icon type="upload"/> Change
+                                                    </Button>
+                                                )}
+                                            </Upload>,
+                                        )}
+                                    </Form.Item>
+                                )}
+
+                                {formConfig.specificElements.hasOwnProperty("packageName") && (
+                                    <Form.Item {...formItemLayout} label="Package Name">
+                                        {getFieldDecorator('packageName', {
+                                            rules: [{
+                                                required: true,
+                                                message: 'Please input the package name'
+                                            }],
+                                        })(
+                                            <Input placeholder="Package Name"/>
+                                        )}
+                                    </Form.Item>
+                                )}
+
+                                {formConfig.specificElements.hasOwnProperty("url") && (
+                                    <Form.Item {...formItemLayout} label="URL">
+                                        {getFieldDecorator('url', {
+                                            rules: [{
+                                                required: true,
+                                                message: 'Please input the url'
+                                            }],
+                                        })(
+                                            <Input placeholder="url"/>
+                                        )}
+                                    </Form.Item>
+                                )}
+
+                                {formConfig.specificElements.hasOwnProperty("version") && (
+                                    <Form.Item {...formItemLayout} label="Version">
+                                        {getFieldDecorator('version', {
+                                            rules: [{
+                                                required: true,
+                                                message: 'Please input the version'
+                                            }],
+                                        })(
+                                            <Input placeholder="Version"/>
+                                        )}
+                                    </Form.Item>
+                                )}
 
                                 <Form.Item {...formItemLayout} label="Icon">
                                     {getFieldDecorator('icon', {
@@ -207,18 +318,13 @@ class EditReleaseModal extends React.Component {
                                         >
                                             {icons.length !== 1 && (
                                                 <Button>
-                                                    <Icon type="upload"/> Click to upload
+                                                    <Icon type="upload"/> Change
                                                 </Button>
                                             )}
                                         </Upload>,
                                     )}
                                 </Form.Item>
 
-                                <Row style={{marginTop: 40}}>
-                                    <Col span={24}>
-
-                                    </Col>
-                                </Row>
 
                                 <Form.Item {...formItemLayout} label="Screenshots">
                                     {getFieldDecorator('screenshots', {
@@ -304,7 +410,6 @@ class EditReleaseModal extends React.Component {
             </div>
         );
     }
-
 }
 
 const EditRelease = Form.create({name: 'add-new-release'})(EditReleaseModal);
