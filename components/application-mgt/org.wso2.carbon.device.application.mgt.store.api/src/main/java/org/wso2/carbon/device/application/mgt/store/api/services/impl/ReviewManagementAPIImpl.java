@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.Rating;
+import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
@@ -118,8 +119,8 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("uuid") String uuid) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            boolean isReviewCreated = reviewManager.addReview(reviewWrapper, uuid, false);
-            if (isReviewCreated) {
+            Review review = reviewManager.addReview(reviewWrapper, uuid, false);
+            if (review != null) {
                 return Response.status(Response.Status.CREATED).entity(reviewWrapper).build();
             } else {
                 String msg = "Review adding is failed. Please contact the administrator.";

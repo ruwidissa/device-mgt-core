@@ -18,11 +18,9 @@
  */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
-import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
-import org.wso2.carbon.device.mgt.common.Device;
 
 import java.util.List;
 import java.util.Map;
@@ -81,6 +79,9 @@ public interface SubscriptionDAO {
 
     List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId) throws ApplicationManagementDAOException;
 
-    boolean updateDeviceSubStatus (int operationId, String status, int tenantcId) throws ApplicationManagementDAOException;
+    List<Integer> getDeviceSubIdsForOperation (int operationId, int tenantId) throws ApplicationManagementDAOException;
+
+    boolean updateDeviceSubStatus(int deviceId, List<Integer> deviceSubIds, String status, int tenantcId)
+            throws ApplicationManagementDAOException;
 
 }

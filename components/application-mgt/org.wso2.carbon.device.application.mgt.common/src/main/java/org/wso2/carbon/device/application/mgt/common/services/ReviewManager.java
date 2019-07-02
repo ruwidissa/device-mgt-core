@@ -39,7 +39,7 @@ public interface ReviewManager {
      * @return {@link Review} Added review
      * @throws ReviewManagementException Exceptions of the reviewTmp management.
      */
-    boolean addReview(ReviewWrapper reviewWrapper, String uuid, boolean allowMultipleReviews)
+    Review addReview(ReviewWrapper reviewWrapper, String uuid, boolean allowMultipleReviews)
             throws ReviewManagementException, ApplicationManagementException;
 
     boolean addReplyComment(ReviewWrapper reviewWrapper, String uuid, int parentReviewId)

@@ -48,6 +48,7 @@ public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
 
     private static Log log = LogFactory.getLog(ReviewManagementAdminAPIImpl.class);
 
+    //todo remove this API
     @Override
     @PUT
     @Consumes("application/json")

@@ -35,17 +35,17 @@ public class ApplicationUpdateWrapper {
             required = true)
     private String description;
 
-    @ApiModelProperty(name = "appCategory",
-            value = "CategoryDTO of the application",
+    @ApiModelProperty(name = "categories",
+            value = "List of app categories.",
             required = true,
             example = "Educational, Gaming, Travel, Entertainment etc")
-    private String appCategory;
+    private List<String> categories;
 
-    @ApiModelProperty(name = "subType",
+    @ApiModelProperty(name = "subMethod",
             value = "Subscription type of the application",
             required = true,
             example = "PAID, FREE")
-    private String subType;
+    private String subMethod;
 
     @ApiModelProperty(name = "paymentCurrency",
             value = "Payment currency of the application",
@@ -67,21 +67,19 @@ public class ApplicationUpdateWrapper {
 
     public void setName(String name) { this.name = name; }
 
-    public String getAppCategory() {
-        return appCategory;
-    }
+    public List<String> getCategories() { return categories; }
 
-    public void setAppCategory(String appCategory) {
-        this.appCategory = appCategory;
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 
     public List<String> getTags() { return tags; }
 
     public void setTags(List<String> tags) { this.tags = tags; }
 
-    public String getSubType() { return subType; }
+    public String getSubMethod() { return subMethod; }
 
-    public void setSubType(String subType) { this.subType = subType; }
+    public void setSubMethod(String subMethod) { this.subMethod = subMethod; }
 
     public String getPaymentCurrency() { return paymentCurrency; }
 

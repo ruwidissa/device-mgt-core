@@ -74,7 +74,7 @@ public class ReviewManagerImpl implements ReviewManager {
     }
 
     @Override
-    public boolean addReview(ReviewWrapper reviewWrapper, String uuid,boolean allowMultipleReviews)
+    public Review addReview(ReviewWrapper reviewWrapper, String uuid, boolean allowMultipleReviews)
             throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -92,7 +92,7 @@ public class ReviewManagerImpl implements ReviewManager {
         }
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(uuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't find an application which has the application release of UUID: " + uuid;
                 log.error(msg);
@@ -100,9 +100,13 @@ public class ReviewManagerImpl implements ReviewManager {
             }
             List<Integer> applicationReleaseIds = new ArrayList<>();
             int associatedAppReleaseId = -1;
+            String associatedVersion = null;
+            String associatedReleaseUuid = null;
             for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
-                if (applicationReleaseDTO.getUuid().equals(uuid)){
+                if (applicationReleaseDTO.getUuid().equals(uuid)) {
                     associatedAppReleaseId = applicationReleaseDTO.getId();
+                    associatedVersion = applicationReleaseDTO.getVersion();
+                    associatedReleaseUuid = applicationReleaseDTO.getUuid();
                 }
                 Integer id = applicationReleaseDTO.getId();
                 applicationReleaseIds.add(id);
@@ -121,14 +125,19 @@ public class ReviewManagerImpl implements ReviewManager {
             reviewDTO.setUsername(username);
             reviewDTO.setRootParentId(-1);
             reviewDTO.setImmediateParentId(-1);
-            if (this.reviewDAO.addReview(reviewDTO, associatedAppReleaseId, tenantId)) {
+            reviewDTO.setReleaseVersion(associatedVersion);
+            reviewDTO.setReleaseUuid(associatedReleaseUuid);
+
+            int reviewId = this.reviewDAO.addReview(reviewDTO, associatedAppReleaseId, tenantId);
+            reviewDTO.setId(reviewId);
+            if (reviewId != -1) {
                 ConnectionManagerUtil.commitDBTransaction();
                 Runnable task = () -> calculateRating(reviewWrapper.getRating(), -12345, uuid, tenantId);
                 new Thread(task).start();
-                return true;
+                return reviewDTOToReview(reviewDTO);
             }
             ConnectionManagerUtil.rollbackDBTransaction();
-            return false;
+            return null;
         } catch (DBConnectionException e) {
             String msg = "DB Connection error occurs when adding Review for application release with UUID: " + uuid
                     + " is failed";
@@ -155,6 +164,7 @@ public class ReviewManagerImpl implements ReviewManager {
     }
 
     @Override
+    //todo return object
     public boolean addReplyComment(ReviewWrapper reviewWrapper, String uuid, int parentReviewId)
             throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -166,7 +176,7 @@ public class ReviewManagerImpl implements ReviewManager {
             throw new BadRequestException(msg);
         }
 
-        ReviewDTO parentReview = getReview(parentReviewId);
+        ReviewDTO parentReview = getReview(parentReviewId, tenantId);
         if (parentReview == null) {
             String msg = "Couldn't find an review which has review ID: " + parentReviewId
                     + " for application release which has UUID: " + uuid;
@@ -195,7 +205,7 @@ public class ReviewManagerImpl implements ReviewManager {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO.getReleaseByUUID(uuid, tenantId);
-            if (this.reviewDAO.addReview(replyComment, applicationReleaseDTO.getId(), tenantId)) {
+            if (this.reviewDAO.addReview(replyComment, applicationReleaseDTO.getId(), tenantId) != -1) {
                 ConnectionManagerUtil.commitDBTransaction();
                 return true;
             }
@@ -248,10 +258,10 @@ public class ReviewManagerImpl implements ReviewManager {
         return review;
     }
 
-    private ReviewDTO getReview(int reviewId) throws ReviewManagementException {
+    private ReviewDTO getReview(int reviewId, int tenantId) throws ReviewManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
-            return this.reviewDAO.getReview(reviewId);
+            return this.reviewDAO.getReview(reviewId, tenantId);
         } catch (DBConnectionException e) {
             String msg = "DB Connection error occurs updating reviewTmp with reviewTmp id " + reviewId + ".";
             log.error(msg);
@@ -266,7 +276,7 @@ public class ReviewManagerImpl implements ReviewManager {
             boolean isPrivilegedUser) throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-        ReviewDTO reviewDTO = getReview(reviewId);
+        ReviewDTO reviewDTO = getReview(reviewId, tenantId);
         if (reviewDTO == null) {
             String msg = "Couldn't found a review for review ID: " + reviewId;
             log.error(msg);
@@ -302,7 +312,7 @@ public class ReviewManagerImpl implements ReviewManager {
 
         if (updateReviewInDB(reviewDTO, reviewId, isActiveReview, tenantId)) {
             if (!isActiveReview) {
-                if (addReview(updatingReview, uuid, true)) {
+                if (addReview(updatingReview, uuid, true) != null) {
                     return true;
                 } else {
                     if (updateReviewInDB(reviewDTO, reviewId, true, tenantId)) {
@@ -441,7 +451,7 @@ public class ReviewManagerImpl implements ReviewManager {
             throws ReviewManagementException, ApplicationManagementException {
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(uuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't find an application which has the application release of UUID: " + uuid;
                 log.error(msg);
@@ -553,7 +563,7 @@ public class ReviewManagerImpl implements ReviewManager {
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ReviewDTO existingReview = this.reviewDAO.getReview(reviewId);
+            ReviewDTO existingReview = this.reviewDAO.getReview(reviewId, tenantId);
             if (existingReview == null) {
                 String msg = "Cannot delete a non-existing review for the application with review id" + reviewId;
                 log.error(msg);
@@ -648,7 +658,7 @@ public class ReviewManagerImpl implements ReviewManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(appReleaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(appReleaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't found an application for application release UUID: " + appReleaseUuid;
                 log.error(msg);
@@ -752,7 +762,7 @@ public class ReviewManagerImpl implements ReviewManager {
 
     private void updateAppRating(String uuid, int tenantId) throws ApplicationManagementException {
         try {
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplicationByUUID(uuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(uuid, tenantId);
             List<String> uuids = applicationDTO.getApplicationReleaseDTOs().stream().map(ApplicationReleaseDTO::getUuid)
                     .collect(Collectors.toList());
             List<Integer> appRatings = this.reviewDAO.getAllAppRatingValues(uuids, tenantId);
