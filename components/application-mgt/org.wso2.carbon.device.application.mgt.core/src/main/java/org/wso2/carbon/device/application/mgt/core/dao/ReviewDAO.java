@@ -21,11 +21,8 @@ package org.wso2.carbon.device.application.mgt.core.dao;
 import org.wso2.carbon.device.application.mgt.common.response.Review;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
-import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
 import org.wso2.carbon.device.application.mgt.core.exception.ReviewManagementDAOException;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -43,7 +40,7 @@ import java.util.List;
      * @return If reviewTmp is added successfully, it return true otherwise false
      * @throws ReviewManagementDAOException Exceptions of the reviewTmp management DAO.
      */
-    boolean addReview(ReviewDTO reviewDTO, int appReleaseId, int tenantId) throws ReviewManagementDAOException;
+    int addReview(ReviewDTO reviewDTO, int appReleaseId, int tenantId) throws ReviewManagementDAOException;
 
    /**
     * To verify whether user has already commented for the application release or not.
@@ -76,9 +73,7 @@ import java.util.List;
      * @return {@link Review}
      * @throws ReviewManagementDAOException Exceptions of the review management DAO.
      */
-    ReviewDTO getReview(int reviewId) throws ReviewManagementDAOException;
-
-    ReviewDTO getReview(int appReleaseId, int reviewId) throws ReviewManagementDAOException;
+    ReviewDTO getReview(int reviewId, int tenantId) throws ReviewManagementDAOException;
 
 
     /**
@@ -113,51 +108,16 @@ import java.util.List;
 
     List<Integer> getAllAppRatingValues(List<String> uuids, int tenantId) throws ReviewManagementDAOException;
 
-
-    /**
-     * To get count of comments by application details.
-     *
-     * @param appType type of the commented application.
-     * @param appName name of the commented application.
-     * @param version version of the commented application.
-     * @return Count of the comments
-     * @throws ReviewManagementException Exceptions of the comment management.
-     * @throws DBConnectionException      db connection exception.
-     * @throws SQLException               sql exception
-     */
-    int getReviewCountByApp(String appType, String appName, String version)
-            throws ReviewManagementException, DBConnectionException, SQLException;
-
     /**
      * To delete review using review id and uuid of the application release.
      *
      * @param reviewId id of the review
-     * @return If review is successfully deleted return 1, otherwise returns 0.
      * @throws ReviewManagementDAOException Review management DAO exception.
      */
     void deleteReview(int reviewId, int tenantId) throws ReviewManagementDAOException;
 
- void deleteReviews(List<Integer> reviewIds, int tenantId) throws ReviewManagementDAOException;
+    void deleteReviews(List<Integer> reviewIds, int tenantId) throws ReviewManagementDAOException;
 
+    void deleteAllChildCommentsOfReview(int rootParentId, int tenantId) throws ReviewManagementDAOException;
 
- void deleteAllChildCommentsOfReview(int rootParentId, int tenantId) throws ReviewManagementDAOException;
-
-    /**
-     * To delete comments using application details.
-     *
-     * @param appType type of the commented application.
-     * @param appName name of the commented application.
-     * @param version version of the commented application.
-     * @throws ReviewManagementException Exceptions of the comment management.
-     */
-    void deleteReviews(String appType, String appName, String version) throws ReviewManagementException;
-
-    /**
-     * To get review count for a specific application release
-     *
-     * @param uuid uuid of the application release
-     * @return Review count
-     * @throws ReviewManagementDAOException Review management DAO exception
-     */
-    int getReviewCount(String uuid) throws ReviewManagementDAOException;
 }
