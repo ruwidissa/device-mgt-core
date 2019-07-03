@@ -66,15 +66,30 @@ class AppsTable extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            pagination: {
-                total: 100
-            },
-            apps: []
+            pagination: {},
+            apps: [],
+            filters: {}
         };
     }
 
     componentDidMount() {
-        this.fetch();
+        const {filters} =this.props;
+        this.setState({
+            filters
+        });
+        this.fetch(filters);
+
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {filters} =this.props;
+        if (prevProps.filters !== this.props.filters) {
+            console.log("d",this.props.filters);
+            this.setState({
+                filters
+            });
+            this.fetch(filters);
+        }
     }
 
     handleTableChange = (pagination, filters, sorter) => {
@@ -84,7 +99,7 @@ class AppsTable extends React.Component {
         this.setState({
             pagination: pager,
         });
-        this.fetch({
+        this.fetch(this.state.filters,{
             results: pagination.pageSize,
             page: pagination.current,
             sortField: sorter.field,
@@ -93,7 +108,7 @@ class AppsTable extends React.Component {
         });
     };
 
-    fetch = (params = {}) => {
+    fetch = (filters,params = {}) => {
         this.setState({loading: true});
 
         if(!params.hasOwnProperty("page")){
@@ -102,8 +117,10 @@ class AppsTable extends React.Component {
 
         const data = {
             offset: 10 * (params.page - 1),
-            limit: 10
+            limit: 10,
+            ...filters
         };
+        console.log("f", data);
 
        axios.post(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications",
@@ -111,15 +128,16 @@ class AppsTable extends React.Component {
 
         ).then(res => {
             if (res.status === 200) {
+                const data = res.data.data;
                 let apps = [];
 
                 if (res.data.data.hasOwnProperty("applications")) {
-                    apps = res.data.data.applications;
+                    apps = data.applications;
                 }
                 const pagination = {...this.state.pagination};
                 // Read total count from server
                 // pagination.total = data.totalCount;
-                pagination.total = 200;
+                pagination.total = data.pagination.count;
                 this.setState({
                     loading: false,
                     apps: apps,
