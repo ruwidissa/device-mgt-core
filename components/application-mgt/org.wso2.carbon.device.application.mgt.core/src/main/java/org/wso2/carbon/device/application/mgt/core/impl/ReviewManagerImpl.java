@@ -272,7 +272,7 @@ public class ReviewManagerImpl implements ReviewManager {
     }
 
     @Override
-    public boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid,
+    public Review updateReview(ReviewWrapper updatingReview, int reviewId, String uuid,
             boolean isPrivilegedUser) throws ReviewManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -299,6 +299,8 @@ public class ReviewManagerImpl implements ReviewManager {
                         .calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid, tenantId);
                 new Thread(task).start();
                 reviewDTO.setRating(updatingReview.getRating());
+            }
+            if (!reviewDTO.getContent().equals(updatingReview.getContent())) {
                 reviewDTO.setContent(updatingReview.getContent());
             }
         } else {
@@ -310,22 +312,28 @@ public class ReviewManagerImpl implements ReviewManager {
             reviewDTO.setContent(updatingReview.getContent());
         }
 
-        if (updateReviewInDB(reviewDTO, reviewId, isActiveReview, tenantId)) {
+        ReviewDTO updatedReviewDTO = updateReviewInDB(reviewDTO, reviewId, isActiveReview, tenantId);
+        if (updatedReviewDTO != null) {
             if (!isActiveReview) {
-                if (addReview(updatingReview, uuid, true) != null) {
-                    return true;
+                Review newReview = addReview(updatingReview, uuid, true);
+                if (newReview != null) {
+                    return newReview;
                 } else {
-                    if (updateReviewInDB(reviewDTO, reviewId, true, tenantId)) {
-                        return false;
+                    ReviewDTO restoringReviewDTO = updateReviewInDB(reviewDTO, reviewId, true, tenantId);
+                    if (restoringReviewDTO != null) {
+                        String msg = "Review Updating Status: Adding new Review for application release which has"
+                                + " UUID: " + uuid + " is failed and the old review is restored.";
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
                     } else {
-                        String msg = "Review Updating Status: Adding new Review for application release which has UUID: "
-                                + "" + uuid + " is failed and the old review restoring is also failed.";
+                        String msg = "Review Updating Status: Adding new Review for application release which has "
+                                + "UUID: " + uuid + " is failed and the old review restoring is also failed.";
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
                 }
             }
-            return true;
+            return reviewDTOToReview(updatedReviewDTO);
         } else {
             String msg = "Review Updating is failed. Hence please contact the administrator.";
             log.error(msg);
@@ -333,16 +341,17 @@ public class ReviewManagerImpl implements ReviewManager {
         }
     }
 
-    private boolean updateReviewInDB(ReviewDTO reviewDTO, int reviewId, boolean isActiveReview,
+    private ReviewDTO updateReviewInDB(ReviewDTO reviewDTO, int reviewId, boolean isActiveReview,
             int tenantId) throws ReviewManagementException, ApplicationManagementException {
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            if (this.reviewDAO.updateReview(reviewDTO, reviewId, isActiveReview, tenantId) == 1) {
+            ReviewDTO updatedReviewDTO = this.reviewDAO.updateReview(reviewDTO, reviewId, isActiveReview, tenantId);
+            if (updatedReviewDTO != null) {
                 ConnectionManagerUtil.commitDBTransaction();
-                return true;
+                return updatedReviewDTO;
             }
             ConnectionManagerUtil.rollbackDBTransaction();
-            return false;
+            return null;
         } catch (ReviewManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured while  getting reviewTmp with reviewTmp id " + reviewId + ".";

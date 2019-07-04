@@ -199,8 +199,9 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
             @PathParam("reviewId") int reviewId) {
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
-            if (reviewManager.updateReview(updatingReview, reviewId, uuid, false)) {
-                return Response.status(Response.Status.OK).entity(updatingReview).build();
+            Review updatedReview = reviewManager.updateReview(updatingReview, reviewId, uuid, false);
+            if (updatedReview != null) {
+                return Response.status(Response.Status.OK).entity(updatedReview).build();
             } else {
                 String msg = "Review updating failed. Please contact the administrator";
                 log.error(msg);
@@ -230,7 +231,6 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
     public Response deleteReview(
             @PathParam("uuid") String uuid,
             @PathParam("reviewId") int reviewId) {
-
         ReviewManager reviewManager = APIUtil.getReviewManager();
         try {
             reviewManager.deleteReview(uuid, reviewId, false);
