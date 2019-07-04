@@ -53,7 +53,7 @@ import javax.ws.rs.core.Response;
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationStorageManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/store-applications"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/store-applications"),
                         })
                 }
         ),

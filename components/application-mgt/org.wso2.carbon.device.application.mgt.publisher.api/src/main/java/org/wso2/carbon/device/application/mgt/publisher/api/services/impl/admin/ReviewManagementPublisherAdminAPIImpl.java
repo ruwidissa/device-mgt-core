@@ -16,7 +16,6 @@
  */
 package org.wso2.carbon.device.application.mgt.publisher.api.services.impl.admin;
 
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
@@ -25,16 +24,12 @@ import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.publisher.api.services.admin.ReviewManagementAdminAPI;
+import org.wso2.carbon.device.application.mgt.publisher.api.services.admin.ReviewManagementPublisherAdminAPI;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -44,35 +39,9 @@ import javax.ws.rs.core.Response;
  * Review Management related jax-rs APIs.
  */
 @Path("/admin/reviews")
-public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
+public class ReviewManagementPublisherAdminAPIImpl implements ReviewManagementPublisherAdminAPI {
 
-    private static Log log = LogFactory.getLog(ReviewManagementAdminAPIImpl.class);
-
-    @Override
-    @DELETE
-    @Path("/{uuid}/{reviewId}")
-    public Response deleteReview(
-            @PathParam("uuid") String uuid,
-            @PathParam("reviewId") int reviewId) {
-
-        ReviewManager reviewManager = APIUtil.getReviewManager();
-        try {
-            reviewManager.deleteReview(uuid, reviewId, true);
-            return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
-        } catch (NotFoundException e) {
-            String msg = "Couldn't found an application review to delete which match with the request.";
-            log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (ReviewManagementException e) {
-            String msg = "Error occurred while deleting the comment.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting application release data.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
+    private static Log log = LogFactory.getLog(ReviewManagementPublisherAdminAPIImpl.class);
 
     @Override
     @GET

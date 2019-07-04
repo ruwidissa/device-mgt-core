@@ -155,6 +155,7 @@
             <Scope>perm:admin:app:review:update</Scope>
             <Scope>perm:admin:app:review:view</Scope>
             <Scope>perm:admin:app:publisher:update</Scope>
+            <Scope>perm:admin:app:review:update</Scope>
         </Scopes>
         <SSOConfiguration>
             <Issuer>app-mgt</Issuer>

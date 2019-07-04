@@ -60,7 +60,7 @@ import java.util.List;
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ReviewManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/store/review"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/store/review"),
                         })
                 }
         ),
