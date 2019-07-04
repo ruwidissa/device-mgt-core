@@ -296,7 +296,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            applicationDTO = this.applicationDAO.getApplication(uuid, tenantId);
+            applicationDTO = this.applicationDAO.getAppWithRelatedRelease(uuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't fond an application for application release UUID: " + uuid;
                 log.error(msg);

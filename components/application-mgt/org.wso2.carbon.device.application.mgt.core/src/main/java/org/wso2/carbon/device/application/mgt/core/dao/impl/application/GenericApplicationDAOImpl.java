@@ -408,6 +408,79 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
+    public ApplicationDTO getAppWithRelatedRelease(String releaseUuid, int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting application and releated application release for the release UUID: " + releaseUuid +
+                    " from the database");
+        }
+        String sql = "SELECT "
+                + "AP_APP.ID AS APP_ID, "
+                + "AP_APP.NAME AS APP_NAME, "
+                + "AP_APP.DESCRIPTION AS APP_DESCRIPTION, "
+                + "AP_APP.TYPE AS APP_TYPE, "
+                + "AP_APP.STATUS AS APP_STATUS, "
+                + "AP_APP.SUB_TYPE AS APP_SUB_TYPE, "
+                + "AP_APP.CURRENCY AS APP_CURRENCY, "
+                + "AP_APP.RATING AS APP_RATING, "
+                + "AP_APP.DEVICE_TYPE_ID AS APP_DEVICE_TYPE_ID, "
+                + "AP_APP_RELEASE.ID AS RELEASE_ID, "
+                + "AP_APP_RELEASE.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                + "AP_APP_RELEASE.VERSION AS RELEASE_VERSION, "
+                + "AP_APP_RELEASE.UUID AS RELEASE_UUID, "
+                + "AP_APP_RELEASE.RELEASE_TYPE AS RELEASE_TYPE, "
+                + "AP_APP_RELEASE.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                + "AP_APP_RELEASE.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
+                + "AP_APP_RELEASE.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                + "AP_APP_RELEASE.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                + "AP_APP_RELEASE.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                + "AP_APP_RELEASE.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                + "AP_APP_RELEASE.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
+                + "AP_APP_RELEASE.APP_PRICE AS RELEASE_PRICE, "
+                + "AP_APP_RELEASE.APP_META_INFO AS RELEASE_META_INFO, "
+                + "AP_APP_RELEASE.PACKAGE_NAME AS PACKAGE_NAME, "
+                + "AP_APP_RELEASE.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                + "AP_APP_RELEASE.RATING AS RELEASE_RATING, "
+                + "AP_APP_RELEASE.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
+                + "FROM AP_APP "
+                + "INNER JOIN AP_APP_RELEASE ON "
+                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
+                + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                + "WHERE "
+                + "AP_APP_RELEASE.UUID = ? "
+                + "AND AP_APP.TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setString(1, releaseUuid);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully retrieved basic details of the application and related application "
+                                + "release for the application release which has UUID:  " + releaseUuid);
+                    }
+                    return DAOUtil.loadApplication(rs);
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get application and related application "
+                    + "release for release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting application and related app release details for app release "
+                    + "uuid " + releaseUuid + " while executing query. Executed query: " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (UnexpectedServerErrorException e) {
+            String msg = "Found more than one application for application release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
     public ApplicationDTO getApplication(int applicationId, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {

@@ -951,8 +951,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = applicationDAO.getApplication(releaseUuid, tenantId);
-
+            ApplicationDTO applicationDTO = applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't found an application for application release UUID: " + releaseUuid;
                 log.error(msg);
@@ -1399,7 +1398,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't found an application which has application release for UUID: " + releaseUuid;
                 log.error(msg);
@@ -2290,7 +2289,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
 
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
@@ -2356,7 +2355,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             validateAppReleaseUpdating(applicationDTO, ApplicationType.PUBLIC.toString());
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
@@ -2423,7 +2422,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             validateAppReleaseUpdating(applicationDTO, ApplicationType.WEB_CLIP.toString());
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
@@ -2851,7 +2850,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.openDBConnection();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't find application for the release UUID: " + releaseUuid;
                 log.error(msg);
