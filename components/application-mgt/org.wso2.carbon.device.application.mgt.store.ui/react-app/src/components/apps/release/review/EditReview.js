@@ -7,13 +7,17 @@ import config from "../../../../../public/conf/config.json";
 const {Title} = Typography;
 const {TextArea} = Input;
 
-class AddReview extends React.Component {
-    state = {
-        visible: false,
-        content: '',
-        rating: 0,
-        loading: false
-    };
+class EditReview extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            visible: false,
+            content: '',
+            rating: 0,
+            loading: false
+        };
+    }
 
     showDrawer = () => {
         this.setState({
@@ -157,4 +161,4 @@ class AddReview extends React.Component {
     }
 }
 
-export default AddReview;
+export default EditReview;

@@ -9,6 +9,7 @@ import AddReview from "./review/AddReview";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 import AppInstallModal from "./install/AppInstallModal";
+import CurrentUsersReview from "./review/CurrentUsersReview";
 
 const {Title, Text, Paragraph} = Typography;
 
@@ -129,13 +130,12 @@ class ReleaseView extends React.Component {
                         {release.description}
                     </Paragraph>
                     <Divider/>
+                    <CurrentUsersReview uuid={release.uuid}/>
+                    <Divider dashed={true}/>
                     <Text>REVIEWS</Text>
                     <Row>
-                        <Col lg={18}>
+                        <Col lg={18} md={24}>
                             <DetailedRating type="app" uuid={release.uuid}/>
-                        </Col>
-                        <Col lg={6}>
-                            <AddReview uuid={release.uuid}/>
                         </Col>
                     </Row>
                     <Reviews type="app" uuid={release.uuid}/>

@@ -6,14 +6,15 @@ import Twemoji from "react-twemoji";
 import "./Reviews.css";
 
 const {Text, Paragraph} = Typography;
-const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3'];
+const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3','#e84393','#f9ca24'];
 
 class SingleReview extends React.Component {
 
     render() {
-        const review = this.props.review;
-        const randomColor = colorList[Math.floor(Math.random() * (colorList.length))];
-        const avatarLetter = review.username.charAt(0).toUpperCase();
+        const {review} = this.props;
+        const {username} = review;
+        const randomColor = colorList[username.length%10];
+        const avatarLetter = username.charAt(0).toUpperCase();
         const content = (
             <div style={{marginTop: -5}}>
                 <StarRatings
@@ -25,11 +26,11 @@ class SingleReview extends React.Component {
                     name='rating'
                 />
                 <Text style={{fontSize: 12, color: "#aaa"}} type="secondary"> {review.createdAt}</Text><br/>
-                <Twemoji options={{className: 'twemoji'}}>
-                    <Paragraph ellipsis={{rows: 3, expandable: true}} style={{color: "#777"}}>
-                        {review.content}
+                    <Paragraph style={{color: "#777"}}>
+                        <Twemoji options={{className: 'twemoji'}}>
+                            {review.content}
+                        </Twemoji>
                     </Paragraph>
-                </Twemoji>
             </div>
         );
 

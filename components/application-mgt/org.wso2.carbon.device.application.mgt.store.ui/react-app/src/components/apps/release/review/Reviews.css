@@ -1,15 +1,15 @@
-.demo-infinite-container {
+.infinite-container {
     overflow: auto;
     padding: 8px 24px;
 }
-.demo-loading-container {
+.loading-container {
     position: absolute;
     bottom: 40px;
     width: 100%;
     text-align: center;
 }
 
-.demo-loading {
+.loading {
     position: absolute;
     bottom: -40px;
     left: 50%;
