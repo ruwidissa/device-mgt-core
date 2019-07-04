@@ -48,7 +48,6 @@ class Dashboard extends React.Component {
                 <Layout>
                     <Content style={{padding: '0 0'}}>
                         <Switch>
-                            <Redirect exact from="/store" to="/store/android"/>
                             {this.state.routes.map((route) => (
                                 <RouteWithSubRoutes changeSelectedMenuItem={this.changeSelectedMenuItem} key={route.path} {...route} />
                             ))}

@@ -2,24 +2,36 @@ import React from "react";
 import {Drawer, Button, Icon, Row, Col, Typography, Divider, Input, Spin, notification} from 'antd';
 import StarRatings from "react-star-ratings";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import config from "../../../../../../../public/conf/config.json";
+import "./EditReview.css";
 
 const {Title} = Typography;
 const {TextArea} = Input;
 
-class AddReview extends React.Component {
-    state = {
-        visible: false,
-        content: '',
-        rating: 0,
-        loading: false
-    };
+class EditReview extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            visible: false,
+            content: '',
+            rating: 0,
+            loading: false
+        };
+    }
+
+    componentDidMount() {
+        const {content,rating,id} = this.props.review;
+        console.log(this.props.review);
+        this.setState({
+            content,
+            rating
+        });
+    }
 
     showDrawer = () => {
         this.setState({
             visible: true,
-            content: '',
-            rating: 0,
             loading: false
         });
     };
@@ -30,6 +42,7 @@ class AddReview extends React.Component {
 
         });
     };
+
     changeRating = (newRating, name) => {
         this.setState({
             rating: newRating
@@ -42,6 +55,7 @@ class AddReview extends React.Component {
 
     onSubmit = () => {
         const {content, rating} = this.state;
+        const {id} = this.props.review;
         const {uuid} = this.props;
         this.setState({
             loading: true
@@ -52,11 +66,11 @@ class AddReview extends React.Component {
             rating: rating
         };
 
-        axios.post(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid,
+        axios.put(
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid+"/"+id,
             payload,
         ).then(res => {
-            if (res.status === 201) {
+            if (res.status === 200) {
                 this.setState({
                     loading: false,
                     visible: false
@@ -64,12 +78,10 @@ class AddReview extends React.Component {
                 notification["success"]({
                     message: 'Done!',
                     description:
-                        'Your review has been posted successfully.',
+                        'Your review has been update successfully.',
                 });
 
-                setTimeout(() => {
-                    window.location.href = uuid;
-                }, 2000)
+                this.props.updateCallback(res.data.data);
             } else {
                 this.setState({
                     loading: false,
@@ -78,12 +90,13 @@ class AddReview extends React.Component {
                 notification["error"]({
                     message: 'Something went wrong',
                     description:
-                        "We are unable to add your review right now.",
+                        "We are unable to update your review right now.",
                 });
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            console.log(error);
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
                 this.setState({
@@ -103,11 +116,8 @@ class AddReview extends React.Component {
 
     render() {
         return (
-            <div>
-                <Button type="primary" onClick={this.showDrawer}>
-                    <Icon type="star"/> Add a review
-                </Button>
-
+            <span>
+                <span className="edit-button" onClick={this.showDrawer}>edit</span>
                 <Drawer
                     // title="Basic Drawer"
                     placement="bottom"
@@ -120,12 +130,12 @@ class AddReview extends React.Component {
                         <Row>
                             <Col lg={8}/>
                             <Col lg={8}>
-                                <Title level={4}>Add review</Title>
+                                <Title level={4}>Edit review</Title>
                                 <Divider/>
                                 <TextArea
                                     placeholder="Tell others what you think about this app. Would you recommend it, and why?"
                                     onChange={this.onChange}
-                                    rows={4}
+                                    rows={6}
                                     value={this.state.content || ''}
                                     style={{marginBottom: 20}}
                                 />
@@ -152,9 +162,9 @@ class AddReview extends React.Component {
                 </Drawer>
 
 
-            </div>
+            </span>
         );
     }
 }
 
-export default AddReview;
+export default EditReview;

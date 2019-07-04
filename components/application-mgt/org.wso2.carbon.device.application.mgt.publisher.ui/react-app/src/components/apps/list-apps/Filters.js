@@ -118,7 +118,6 @@ class FiltersForm extends React.Component {
         });
     };
 
-
     render() {
         const {categories, tags, deviceTypes} = this.state;
         const {getFieldDecorator} = this.props.form;
@@ -148,10 +147,7 @@ class FiltersForm extends React.Component {
                             </Form.Item>
                         </Col>
                     </Row>
-                    <Divider/>
 
-                    {/*<Text strong={true}>Category</Text>*/}
-                    {/*<br/><br/>*/}
                     <Form.Item label="Categories">
                         {getFieldDecorator('categories', {
                             rules: [{
@@ -178,15 +174,7 @@ class FiltersForm extends React.Component {
                             </Select>
                         )}
                     </Form.Item>
-                    {/*<Select*/}
-                    {/*mode="multiple"*/}
-                    {/*style={{width: '100%'}}*/}
-                    {/*placeholder="All Categories"*/}
-                    {/*>*/}
-                    {/*<Option key={1}>IoT</Option>*/}
-                    {/*<Option key={2}>EMM</Option>*/}
-                    {/*</Select>*/}
-                    <Divider/>
+
 
                     <Form.Item label="Device Types">
                         {getFieldDecorator('deviceTypes', {
@@ -213,7 +201,6 @@ class FiltersForm extends React.Component {
                         )}
                     </Form.Item>
 
-                    {/*<Text strong={true}>Tags</Text>*/}
                     <Form.Item label="Tags">
                         {getFieldDecorator('tags', {
                             rules: [{
@@ -240,7 +227,6 @@ class FiltersForm extends React.Component {
                         )}
                     </Form.Item>
 
-                    <Divider/>
                     <Form.Item label="App Type">
                         {getFieldDecorator('appType', {})(
                             <Select
