@@ -80,6 +80,8 @@ class EditReview extends React.Component {
                     description:
                         'Your review has been update successfully.',
                 });
+
+                this.props.updateCallback(res.data.data);
             } else {
                 this.setState({
                     loading: false,
@@ -93,7 +95,8 @@ class EditReview extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            console.log(error);
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
                 this.setState({

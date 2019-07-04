@@ -42,13 +42,6 @@ class CurrentUsersReview extends React.Component {
         });
     };
 
-    updateCallback = (response) =>{
-        const {rating, content} = response;
-        this.setState({
-            rating,
-            content
-        });
-    };
 
     render() {
         const {data} = this.state;
@@ -67,7 +60,7 @@ class CurrentUsersReview extends React.Component {
                                 dataSource={data}
                                 renderItem={item => (
                                     <List.Item key={item.id}>
-                                        <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={true} updateCallback={this.updateCallback}/>
+                                        <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={true}/>
                                     </List.Item>
                                 )}
                             >
