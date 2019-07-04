@@ -1206,6 +1206,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return device;
     }
 
+
+    @Override
+    public List<Device> getDevicesBasedOnProperties(Map deviceProps) throws DeviceManagementException {
+        if (deviceProps == null || deviceProps.isEmpty()) {
+            String msg = "Devices retrieval criteria cannot be null or empty.";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Attempting to get devices based on criteria : " + deviceProps);
+        }
+        List<Device> devices;
+        try {
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            DeviceManagementDAOFactory.openConnection();
+            devices = deviceDAO.getDeviceBasedOnDeviceProperties(deviceProps, tenantId);
+            if (devices == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No device is found against criteria : " + deviceProps + " and tenantId "+ tenantId);
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while obtaining devices based on criteria : " + deviceProps;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred while obtaining devices based on criteria : " + deviceProps;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
     @Override
     public Device getDevice(String deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException {
         if (deviceId == null || since == null) {
