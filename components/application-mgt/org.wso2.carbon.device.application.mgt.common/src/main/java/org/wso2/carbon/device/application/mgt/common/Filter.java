@@ -68,7 +68,7 @@ public class Filter {
     /**
      * Category list of the application
      */
-    private List<String> appCategories;
+    private List<String> categories;
 
     /**
      * Tag list of the application
@@ -155,12 +155,12 @@ public class Filter {
         this.appType = appType;
     }
 
-    public List<String> getAppCategories() {
-        return appCategories;
+    public List<String> getCategories() {
+        return categories;
     }
 
-    public void setAppCategories(List<String> appCategories) {
-        this.appCategories = appCategories;
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 
     public List<String> getTags() { return tags; }

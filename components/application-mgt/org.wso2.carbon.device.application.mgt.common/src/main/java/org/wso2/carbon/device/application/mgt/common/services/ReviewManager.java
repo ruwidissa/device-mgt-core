@@ -78,7 +78,7 @@ public interface ReviewManager {
      * @return {@link Review}updated review
      * @throws ReviewManagementException Exceptions of the reviewTmp management
      */
-    boolean updateReview(ReviewWrapper updatingReview, int reviewId, String uuid, boolean isPrivilegedUser)
+    Review updateReview(ReviewWrapper updatingReview, int reviewId, String uuid, boolean isPrivilegedUser)
             throws ReviewManagementException, ApplicationManagementException;
 
     /**
