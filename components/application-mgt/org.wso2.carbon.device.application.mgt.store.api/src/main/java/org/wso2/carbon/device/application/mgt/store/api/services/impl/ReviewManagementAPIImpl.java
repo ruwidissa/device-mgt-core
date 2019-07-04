@@ -235,7 +235,6 @@ public class ReviewManagementAPIImpl implements ReviewManagementAPI {
         try {
             reviewManager.deleteReview(uuid, reviewId, false);
             return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
-
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application review to delete which match with the request.";
             log.error(msg, e);
