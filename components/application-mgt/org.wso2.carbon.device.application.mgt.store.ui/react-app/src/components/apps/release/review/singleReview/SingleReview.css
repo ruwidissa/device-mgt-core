@@ -1,0 +1,26 @@
+img.twemoji {
+    height: 1em;
+    width: 1em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
+}
+
+.edit-button {
+    color: #1890ff;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 0.8em;
+    padding-left: 5px;
+}
+
+.delete-button {
+    color: #e74c3c;
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+    font-weight: normal;
+    font-size: 0.8em;
+    padding-left: 5px;
+}

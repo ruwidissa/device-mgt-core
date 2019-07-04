@@ -3,7 +3,7 @@ import {List, message, Avatar, Spin, Button} from 'antd';
 import "./Reviews.css";
 
 import InfiniteScroll from 'react-infinite-scroller';
-import SingleReview from "./SingleReview";
+import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
 
@@ -87,31 +87,33 @@ class Reviews extends React.Component {
     };
 
     render() {
+        const {loading, hasMore, data, loadMore} = this.state;
+        const {uuid} = this.props;
         return (
             <div className="infinite-container">
                 <InfiniteScroll
                     initialLoad={false}
                     pageStart={0}
                     loadMore={this.handleInfiniteOnLoad}
-                    hasMore={!this.state.loading && this.state.hasMore}
+                    hasMore={!loading && hasMore}
                     useWindow={true}
                 >
                     <List
-                        dataSource={this.state.data}
+                        dataSource={data}
                         renderItem={item => (
                             <List.Item key={item.id}>
-                                <SingleReview review={item}/>
+                                <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={false}/>
                             </List.Item>
                         )}
                     >
-                        {this.state.loading && this.state.hasMore && (
+                        {loading && hasMore && (
                             <div className="loading-container">
                                 <Spin/>
                             </div>
                         )}
                     </List>
                 </InfiniteScroll>
-                {!this.state.loadMore && (this.state.data.length >= limit) && (<div style={{textAlign: "center"}}>
+                {!loadMore && (data.length >= limit) && (<div style={{textAlign: "center"}}>
                     <Button type="dashed" htmlType="button" onClick={this.enableLoading}>Read All Reviews</Button>
                 </div>)}
             </div>

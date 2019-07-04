@@ -1,6 +1,6 @@
 import React from "react";
 import {List, message, Typography, Empty, Button, Row, Col} from "antd";
-import SingleReview from "./SingleReview";
+import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
 import AddReview from "./AddReview";
@@ -42,6 +42,14 @@ class CurrentUsersReview extends React.Component {
         });
     };
 
+    updateCallback = (response) =>{
+        const {rating, content} = response;
+        this.setState({
+            rating,
+            content
+        });
+    };
+
     render() {
         const {data} = this.state;
         const {uuid} = this.props;
@@ -55,22 +63,15 @@ class CurrentUsersReview extends React.Component {
                 }}>
                     {data.length > 0 && (
                         <div>
-                            <Row>
-                                <Col span={18}>
-                                    <List
-                                        dataSource={data}
-                                        renderItem={item => (
-                                            <List.Item key={item.id}>
-                                                <SingleReview review={item}/>
-                                            </List.Item>
-                                        )}
-                                    >
-                                    </List>
-                                </Col>
-                                <Col span={6}>
-                                    <Button type="primary" shape="circle" icon="search" />
-                                </Col>
-                            </Row>
+                            <List
+                                dataSource={data}
+                                renderItem={item => (
+                                    <List.Item key={item.id}>
+                                        <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={true} updateCallback={this.updateCallback}/>
+                                    </List.Item>
+                                )}
+                            >
+                            </List>
                         </div>
                     )}
 

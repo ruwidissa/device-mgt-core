@@ -125,7 +125,7 @@ class AddReview extends React.Component {
                                 <TextArea
                                     placeholder="Tell others what you think about this app. Would you recommend it, and why?"
                                     onChange={this.onChange}
-                                    autosize={{minRows: 6, maxRows: 12}}
+                                    rows={4}
                                     value={this.state.content || ''}
                                     style={{marginBottom: 20}}
                                 />

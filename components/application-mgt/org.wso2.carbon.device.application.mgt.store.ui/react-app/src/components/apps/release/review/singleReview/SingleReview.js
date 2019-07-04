@@ -3,7 +3,8 @@ import {Avatar} from "antd";
 import {List, Typography} from "antd";
 import StarRatings from "react-star-ratings";
 import Twemoji from "react-twemoji";
-import "./Reviews.css";
+import "./SingleReview.css";
+import EditReview from "./editReview/EditReview";
 
 const {Text, Paragraph} = Typography;
 const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3','#e84393','#f9ca24'];
@@ -11,7 +12,7 @@ const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59
 class SingleReview extends React.Component {
 
     render() {
-        const {review} = this.props;
+        const {review, isEditable, isDeletable, uuid} = this.props;
         const {username} = review;
         const randomColor = colorList[username.length%10];
         const avatarLetter = username.charAt(0).toUpperCase();
@@ -34,6 +35,14 @@ class SingleReview extends React.Component {
             </div>
         );
 
+        const title = (
+            <div>
+            {review.username}
+                {isEditable && (<EditReview uuid={uuid} review={review}/>)}
+                {isDeletable && (<span className="delete-button">delete</span>)}
+            </div>
+        );
+
         return (
             <div>
                 <List.Item.Meta
@@ -42,7 +51,7 @@ class SingleReview extends React.Component {
                             {avatarLetter}
                         </Avatar>
                     }
-                    title={review.username}
+                    title={title}
                     description={content}
                 />
             </div>
