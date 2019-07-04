@@ -66,7 +66,7 @@ public interface ApplicationReleaseDAO {
      * @param tenantId Tenant Id
      * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
      */
-    Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException;
+    Rating getReleaseRating(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     List<Double> getReleaseRatings(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
@@ -101,14 +101,6 @@ public interface ApplicationReleaseDAO {
      */
     String getPackageName(String releaseUuid, int tenantId) throws ApplicationManagementDAOException;
 
-    /**
-     * To verify whether application release exist or not for given application release uuid.
-     *
-     * @param uuid UUID of the application release.
-     * @param tenantId Tenant Id
-     * @throws ApplicationManagementDAOException Application Management DAO Exception.
-     */
-    boolean isReleaseExist(String uuid, int tenantId) throws ApplicationManagementDAOException;
 
     String getReleaseHashValue(String uuid, int tenantId) throws ApplicationManagementDAOException;
 

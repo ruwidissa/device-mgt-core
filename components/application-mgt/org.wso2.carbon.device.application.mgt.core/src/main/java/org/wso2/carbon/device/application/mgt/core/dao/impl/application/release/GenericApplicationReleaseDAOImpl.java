@@ -191,52 +191,51 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
     }
 
     @Override
-    public Rating getRating(String uuid, int tenantId) throws ApplicationManagementDAOException {
-        Connection connection;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        Rating rating = null;
+    public Rating getReleaseRating(String uuid, int tenantId) throws ApplicationManagementDAOException {
         String sql = "SELECT "
                 + "RATING, "
                 + "RATED_USERS "
                 + "FROM AP_APP_RELEASE "
                 + "WHERE UUID = ? AND TENANT_ID = ?";
         try {
-            connection = this.getDBConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, uuid);
-            statement.setInt(2, tenantId);
-            resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                rating = new Rating();
-                rating.setRatingValue(resultSet.getDouble("RATING"));
-                rating.setNoOfUsers(resultSet.getInt("RATED_USERS"));
+            Connection connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, uuid);
+                statement.setInt(2, tenantId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        Rating rating = new Rating();
+                        rating.setRatingValue(resultSet.getDouble("RATING"));
+                        rating.setNoOfUsers(resultSet.getInt("RATED_USERS"));
+                        return rating;
+                    }
+                }
             }
-            return rating;
+            return null;
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Database connection exception while trying to update the application release", e);
+            String msg = "Database connection error occured when try to get application release rating which has "
+                    + "application release UUID: " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "SQL exception while updating the release ,while executing the query " + sql, e);
-        } finally {
-            DAOUtil.cleanupResources(statement, resultSet);
+            String msg = "SQL exception occured whn processing query: " + sql + " to get application release rating "
+                    + "which has application release uuid: " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
     @Override
     public List<Double> getReleaseRatings(String uuid, int tenantId) throws ApplicationManagementDAOException {
-        Connection connection;
         List<Double> ratingValues = new ArrayList<>();
         String sql = "SELECT "
                 + "RATING "
                 + "FROM AP_APP_RELEASE "
                 + "WHERE "
-                + "AP_APP_ID = (SELECT  AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND "
+                + "AP_APP_ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND "
                 + "TENANT_ID = ?";
         try {
-            connection = this.getDBConnection();
+            Connection connection = this.getDBConnection();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, uuid);
                 statement.setInt(2, tenantId);
@@ -247,26 +246,21 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 }
             }
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Database connection exception while trying to update the application release", e);
+            String msg = "Database connection exception occurred when getting all release rating values for a "
+                    + "particular application.";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "SQL exception while updating the release ,while executing the query " + sql, e);
+            String msg = "SQL exception occurred while getting all release rating values for a particular application. "
+                    + "Executed query is" + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
-
-    /**
-     * To insert the application release properties.
-     *
-     * @param applicationReleaseDTO ApplicationDTO Release the properties of which that need to be inserted.
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
     @Override
     public ApplicationReleaseDTO updateRelease(ApplicationReleaseDTO applicationReleaseDTO, int tenantId)
             throws ApplicationManagementDAOException {
-        Connection connection;
-        PreparedStatement statement = null;
         String sql = "UPDATE AP_APP_RELEASE "
                 + "SET "
                     + "DESCRIPTION = ?, "
@@ -286,89 +280,95 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     + "APP_META_INFO = ?, "
                     + "SUPPORTED_OS_VERSIONS = ?, "
                     + "CURRENT_STATE =  ? "
-                + "WHERE  ID = ? AND TENANT_ID = ? ";
+                + "WHERE ID = ? AND TENANT_ID = ? ";
         try {
-            connection = this.getDBConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, applicationReleaseDTO.getDescription());
-            statement.setString(2, applicationReleaseDTO.getVersion());
-            statement.setString(3, applicationReleaseDTO.getUuid());
-            statement.setString(4, applicationReleaseDTO.getReleaseType());
-            statement.setString(5, applicationReleaseDTO.getPackageName());
-            statement.setDouble(6, applicationReleaseDTO.getPrice());
-            statement.setString(7, applicationReleaseDTO.getInstallerName());
-            statement.setString(8, applicationReleaseDTO.getBannerName());
-            statement.setString(9, applicationReleaseDTO.getIconName());
-            statement.setString(10, applicationReleaseDTO.getScreenshotName1());
-            statement.setString(11, applicationReleaseDTO.getScreenshotName2());
-            statement.setString(12, applicationReleaseDTO.getScreenshotName3());
-            statement.setString(13, applicationReleaseDTO.getAppHashValue());
-            statement.setBoolean(14, applicationReleaseDTO.getIsSharedWithAllTenants());
-            statement.setString(15, applicationReleaseDTO.getMetaData());
-            statement.setString(16, applicationReleaseDTO.getSupportedOsVersions());
-            statement.setString(17, applicationReleaseDTO.getCurrentState().toUpperCase());
-            statement.setInt(18, applicationReleaseDTO.getId());
-            statement.setInt(19, tenantId);
-            if (statement.executeUpdate() == 0) {
-                return null;
+            Connection connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, applicationReleaseDTO.getDescription());
+                statement.setString(2, applicationReleaseDTO.getVersion());
+                statement.setString(3, applicationReleaseDTO.getUuid());
+                statement.setString(4, applicationReleaseDTO.getReleaseType());
+                statement.setString(5, applicationReleaseDTO.getPackageName());
+                statement.setDouble(6, applicationReleaseDTO.getPrice());
+                statement.setString(7, applicationReleaseDTO.getInstallerName());
+                statement.setString(8, applicationReleaseDTO.getBannerName());
+                statement.setString(9, applicationReleaseDTO.getIconName());
+                statement.setString(10, applicationReleaseDTO.getScreenshotName1());
+                statement.setString(11, applicationReleaseDTO.getScreenshotName2());
+                statement.setString(12, applicationReleaseDTO.getScreenshotName3());
+                statement.setString(13, applicationReleaseDTO.getAppHashValue());
+                statement.setBoolean(14, applicationReleaseDTO.getIsSharedWithAllTenants());
+                statement.setString(15, applicationReleaseDTO.getMetaData());
+                statement.setString(16, applicationReleaseDTO.getSupportedOsVersions());
+                statement.setString(17, applicationReleaseDTO.getCurrentState().toUpperCase());
+                statement.setInt(18, applicationReleaseDTO.getId());
+                statement.setInt(19, tenantId);
+                if (statement.executeUpdate() == 0) {
+                    return null;
+                }
             }
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Database connection exception while trying to update the application release", e);
+            String msg = "Database connection exception occured while trying to update the application release which "
+                    + "has application release ID: " + applicationReleaseDTO.getId();
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "SQL exception while updating the release ,while executing the query " + sql, e);
-        } finally {
-            DAOUtil.cleanupResources(statement, null);
+            String msg = "SQL exception occured while updating the application release which has release ID: "
+                    + applicationReleaseDTO.getId() + ". Executed query is " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
         return applicationReleaseDTO;
     }
 
     @Override
     public void deleteRelease(int id) throws ApplicationManagementDAOException {
-        Connection connection;
-        PreparedStatement statement = null;
         String sql = "DELETE "
                 + "FROM AP_APP_RELEASE "
                 + "WHERE ID = ?";
         try {
-            connection = this.getDBConnection();
-            statement = connection.prepareStatement(sql);
-            statement.setInt(1, id);
-            statement.executeUpdate();
+            Connection connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setInt(1, id);
+                statement.executeUpdate();
+            }
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Database connection exception while trying to delete the release fore release ID: " + id, e);
+            String msg = "Database connection exception occurred while trying to delete the application release which "
+                    + "has  ID: " + id;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "SQL exception while deleting the release for release ID: " + id  + ",while executing the query sql"
-                    , e);
-        } finally {
-            DAOUtil.cleanupResources(statement, null);
+            String msg = "SQL exception occurred while deleting the release for release ID: " + id + ",while executing"
+                    + " the query sql " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
     @Override
     public void deleteReleases(List<Integer> applicationReleaseIds) throws ApplicationManagementDAOException{
-        Connection connection;
         String sql = "DELETE "
                 + "FROM AP_APP_RELEASE "
                 + "WHERE ID = ?";
         try {
-            connection = this.getDBConnection();
-            try (PreparedStatement statement = connection.prepareStatement(sql)){
-                for (Integer releaseId : applicationReleaseIds){
+            Connection connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                for (Integer releaseId : applicationReleaseIds) {
                     statement.setInt(1, releaseId);
                     statement.addBatch();
                 }
                 statement.executeBatch();
             }
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Database connection exception occurred while trying to delete given application release", e);
+            String msg = "Database connection exception occurred while trying to delete application releases for given "
+                    + "application release ids";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "SQL exception occurred while execute delete query for deleting given application releases.", e);
+            String msg = "SQL exception occurred while execute delete query for deleting given application releases. "
+                    + "Executed query: " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
@@ -378,27 +378,30 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence by application hash value: " + hashVal);
         }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        String sql = "SELECT "
+                + "AR.ID AS RELEASE_ID "
+                + "FROM AP_APP_RELEASE AS AR "
+                + "WHERE AR.APP_HASH_VALUE = ? AND "
+                + "AR.TENANT_ID = ?";
         try {
-            conn = this.getDBConnection();
-            String sql = "SELECT AR.ID AS RELEASE_ID FROM AP_APP_RELEASE AS AR WHERE AR.APP_HASH_VALUE = ? AND "
-                    + "AR.TENANT_ID = ?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, hashVal);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application release details for application release hash value: "
-                            + hashVal + " While executing query ", e);
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, hashVal);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
+            String msg = "Database connection error occurred while verifying release existence for app release hash "
+                    + "value. Hash value: " + hashVal;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting application release details for application release hash value: "
+                    + hashVal + " While executing query ";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
@@ -407,69 +410,37 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         if (log.isDebugEnabled()) {
             log.debug("Getting package name of the application release by application id:" + releaseUuid);
         }
-        Connection conn;
+        String sql = "SELECT "
+                + "AR.PACKAGE_NAME AS PACKAGE_NAME "
+                + "FROM AP_APP_RELEASE AS AR "
+                + "WHERE AR.UUID = ? "
+                + "AND AR.TENANT_ID = ?";
         try {
-            conn = this.getDBConnection();
-            String sql = "SELECT "
-                    + "AR.PACKAGE_NAME AS PACKAGE_NAME "
-                    + "FROM AP_APP_RELEASE AS AR "
-                    + "WHERE AR.UUID = ? "
-                    + "AND AR.TENANT_ID = ?";
-
-            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, releaseUuid);
                 stmt.setInt(2, tenantId);
-                try (ResultSet rs = stmt.executeQuery()){
+                try (ResultSet rs = stmt.executeQuery()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully retrieved package name of the application release with the UUID: "
                                 + releaseUuid);
                     }
-                    if (rs.next()){
+                    if (rs.next()) {
                         return rs.getString("PACKAGE_NAME");
                     }
                     return null;
                 }
             }
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting package name of the application release with app ID: " + releaseUuid, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while obtaining the DB connection to get application release package name.", e);
-        }
-    }
-
-    @Override
-    public boolean isReleaseExist(String uuid, int tenantId) throws ApplicationManagementDAOException {
-        if (log.isDebugEnabled()) {
-            log.debug("Verifying application release existence by application release uuid: " + uuid);
-        }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = this.getDBConnection();
-            String sql =
-                    "SELECT AR.ID AS RELEASE_ID FROM AP_APP_RELEASE AS AR WHERE AR.UUID = ? AND AR.TENANT_ID = ?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, uuid);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully retrieved basic details of the application release with the application UUID: "
-                        + uuid);
-            }
-            return rs.next();
+            String msg = "Error occurred while obtaining the DB connection to get application release package name "
+                    + "which has application release UUID: " + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred when executing query to get application release details for App release uuid: "
-                            + uuid, e);
-        } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
+            String msg = "Error occurred while getting package name of the application release with app UUID: "
+                    + releaseUuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
@@ -478,45 +449,36 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         if (log.isDebugEnabled()) {
             log.debug("Getting application release artifact stored location paths for: " + uuid);
         }
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        String releaseHashValue = null;
+        String sql = "SELECT "
+                + "AR.APP_HASH_VALUE AS HASH_VALUE "
+                + "FROM AP_APP_RELEASE AR "
+                + "WHERE AR.UUID = ? AND AR.TENANT_ID = ?";
         try {
-            conn = this.getDBConnection();
-            String sql = "SELECT "
-                    + "AR.APP_HASH_VALUE AS HASH_VALUE "
-                    + "FROM AP_APP_RELEASE AR "
-                    + "WHERE AR.UUID = ? AND AR.TENANT_ID = ?;";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, uuid);
-            stmt.setInt(2, tenantId);
-            rs = stmt.executeQuery();
-
-            if (log.isDebugEnabled()) {
-                log.debug(
-                        "Successfully retrieved application release artifact details of the application release with the application UUID: "
-                                + uuid);
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                stmt.setString(1, uuid);
+                stmt.setInt(2, tenantId);
+                try (ResultSet rs = stmt.executeQuery()){
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully retrieved application release hash value for application release "
+                                + "which has release UUID: " + uuid);
+                    }
+                    if(rs.next()){
+                        return rs.getString("HASH_VALUE");
+                    }
+                    return null;
+                }
             }
-
-            if (rs.getFetchSize() >1){
-                String msg = "Found more than one application release for UUID: " + uuid;
-                log.error(msg);
-                throw new ApplicationManagementDAOException(msg);
-            }
-            while(rs.next()){
-                releaseHashValue = rs.getString("HASH_VALUE");
-            }
-            return releaseHashValue;
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred when executing query to get application release artifact paths for App release uuid: "
-                            + uuid, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
-        } finally {
-            DAOUtil.cleanupResources(stmt, rs);
+            String msg = "Error occurred while obtaining the DB connection to get hash value for application release "
+                    + "which has application release UUID: " + uuid;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when executing query to get application release hash value which has "
+                    + "application release uuid: " + uuid + ". Executed query: " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
@@ -526,13 +488,13 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence for package name:" + packageName);
         }
-        Connection conn;
+        String sql = "SELECT AR.ID AS RELEASE_ID "
+                + "FROM AP_APP_RELEASE AS AR "
+                + "WHERE AR.PACKAGE_NAME = ? AND "
+                + "AR.CURRENT_STATE != ? AND "
+                + "AR.TENANT_ID = ? LIMIT 1";
         try {
-            conn = this.getDBConnection();
-            String sql = "SELECT AR.ID AS RELEASE_ID "
-                    + "FROM AP_APP_RELEASE AS AR "
-                    + "WHERE AR.PACKAGE_NAME = ? AND AR.CURRENT_STATE != ? AND AR.TENANT_ID = ? LIMIT 1";
-
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, packageName);
                 stmt.setString(2, inactiveState);
@@ -541,11 +503,16 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     return rs.next();
                 }
             }
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application release details for package name: " + packageName, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection.", e);
+            String msg = "Error occurred while obtaining the DB connection to verify the existence of package name for "
+                    + "active application release. Package name: " + packageName;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while verifying the existence of package name for active application "
+                    + "release. package name: " + packageName;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
@@ -555,15 +522,13 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         if (log.isDebugEnabled()) {
             log.debug("Verifying application release existence in the installable state: :" + installableStateName);
         }
-        Connection conn;
+        String sql = "SELECT AR.ID AS RELEASE_ID "
+                + "FROM AP_APP_RELEASE AS AR "
+                + "WHERE AR.CURRENT_STATE = ? AND "
+                + "AR.AP_APP_ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND "
+                + "AR.TENANT_ID = ?";
         try {
-            conn = this.getDBConnection();
-            String sql = "SELECT AR.ID AS RELEASE_ID "
-                    + "FROM AP_APP_RELEASE AS AR "
-                    + "WHERE AR.CURRENT_STATE = ? AND "
-                    + "AR.AP_APP_ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND "
-                    + "AR.TENANT_ID = ?";
-
+            Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, installableStateName);
                 stmt.setString(2, releaseUuid);
@@ -572,15 +537,17 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     return rs.next();
                 }
             }
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while getting application release details in installable state: "
-                            + installableStateName, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while obtaining the DB connection to get application release data in installable "
-                            + "state.", e);
+            String msg = "Error occurred while obtaining the DB connection to verify the existence of app release for "
+                    + "application release uuid ;" + releaseUuid + " and application release state "
+                    + installableStateName;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to verify the existence of app release for application "
+                    + "release uuid ;" + releaseUuid + " and application release state " + installableStateName;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
-
 }

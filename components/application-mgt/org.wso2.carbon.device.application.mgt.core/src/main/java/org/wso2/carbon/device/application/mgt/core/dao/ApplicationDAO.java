@@ -135,14 +135,6 @@ public interface ApplicationDAO {
     ApplicationDTO getApplication(String releaseUuid, int tenantId) throws ApplicationManagementDAOException;
 
     /**
-     * To get the UUID of latest app release that satisfy the given criteria.
-     *
-     * @param appId   application id
-     * @throws ApplicationManagementDAOException ApplicationDTO Management DAO Exception.
-     */
-    String getUuidOfLatestRelease(int appId) throws ApplicationManagementDAOException;
-
-    /**
      * Verify whether application exist for given application name and device type. Because a name and device type is
      * unique for an application.
      *

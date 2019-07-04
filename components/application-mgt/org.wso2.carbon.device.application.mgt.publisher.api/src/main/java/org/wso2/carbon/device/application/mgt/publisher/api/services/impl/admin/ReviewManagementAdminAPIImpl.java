@@ -48,38 +48,6 @@ public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
 
     private static Log log = LogFactory.getLog(ReviewManagementAdminAPIImpl.class);
 
-    //todo remove this API
-    @Override
-    @PUT
-    @Consumes("application/json")
-    @Path("/{uuid}/{reviewId}")
-    public Response updateReview(
-            @ApiParam ReviewWrapper updatingReview,
-            @PathParam("uuid") String uuid,
-            @PathParam("reviewId") int reviewId) {
-        ReviewManager reviewManager = APIUtil.getReviewManager();
-        try {
-            if (reviewManager.updateReview(updatingReview, reviewId, uuid, true)) {
-                return Response.status(Response.Status.OK).entity(updatingReview).build();
-            } else {
-                String msg = "Review updating failed. Please contact the administrator";
-                log.error(msg);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-            }
-        } catch (ReviewManagementException e) {
-            String msg = "Error occurred while retrieving comments.";
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (NotFoundException e) {
-            String msg = "Couldn't found application release data for UUID " + uuid + " or Review for review ID: " + reviewId;
-            log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred when getting application release data for application release UUID:." + uuid;
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();        }
-    }
-
     @Override
     @DELETE
     @Path("/{uuid}/{reviewId}")
@@ -91,7 +59,6 @@ public class ReviewManagementAdminAPIImpl implements ReviewManagementAdminAPI {
         try {
             reviewManager.deleteReview(uuid, reviewId, true);
             return Response.status(Response.Status.OK).entity("Review is deleted successfully.").build();
-
         } catch (NotFoundException e) {
             String msg = "Couldn't found an application review to delete which match with the request.";
             log.error(msg, e);

@@ -142,7 +142,7 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
     }
 
     @Override
-    public int updateReview(ReviewDTO reviewDTO, int reviewId, boolean isActiveReview, int tenantId)
+    public ReviewDTO updateReview(ReviewDTO reviewDTO, int reviewId, boolean isActiveReview, int tenantId)
             throws ReviewManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received to DAO Layer to update the Review which has ID " + reviewId);
@@ -167,7 +167,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
                 statement.setBoolean(4, isActiveReview);
                 statement.setInt(5, reviewId);
                 statement.setInt(6, tenantId);
-                return statement.executeUpdate();
+                if (statement.executeUpdate() == 1) {
+                    reviewDTO.setModifiedAt(timestamp);
+                    return reviewDTO;
+                }
+                return null;
             }
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting the db connection to update review for review ID: " + reviewId;
