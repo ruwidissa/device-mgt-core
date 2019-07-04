@@ -32,6 +32,10 @@ public class BasicUserInfo {
     private String lastname;
     @ApiModelProperty(name = "emailAddress", value = "The email address of the user.", required = true )
     private String emailAddress;
+    @ApiModelProperty(name = "createdDate", value = "User creation date." )
+    private String createdDate;
+    @ApiModelProperty(name = "modifiedDate", value = "User modifiedDate date." )
+    private String modifiedDate;
 
     public String getUsername() {
         return username;
@@ -63,6 +67,22 @@ public class BasicUserInfo {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 
 }
