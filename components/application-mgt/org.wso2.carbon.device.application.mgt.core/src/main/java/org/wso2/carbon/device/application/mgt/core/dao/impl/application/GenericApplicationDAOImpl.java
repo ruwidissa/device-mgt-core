@@ -1003,12 +1003,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get tag for given tag name.");
         }
+        String sql = "SELECT AP_APP_TAG.ID AS ID"
+                + " FROM AP_APP_TAG "
+                + "WHERE AP_APP_TAG.TAG = ? AND "
+                + "AP_APP_TAG.TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
-            String sql = "SELECT AP_APP_TAG.ID AS ID"
-                    + " FROM AP_APP_TAG "
-                    + "WHERE AP_APP_TAG.TAG = ? AND "
-                    + "AP_APP_TAG.TENANT_ID = ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, tagName);
                 ps.setInt(2, tenantId);
@@ -1023,11 +1023,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
             return null;
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection when getting tag for given tag name";
+            String msg = "Error occurred while obtaining the DB connection when getting tag for given tag name: "
+                    + tagName;
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "SQL Error occurred while getting tag for tag name.";
+            String msg = "SQL Error occurred while getting tag for tag name: " + tagName + ". Executed query: " + sql;
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1037,10 +1038,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get distinct tag ids in tag mapping.");
         }
+        String sql = "SELECT DISTINCT tm.AP_APP_TAG_ID AS ID FROM AP_APP_TAG_MAPPING tm";
         try {
             Connection conn = this.getDBConnection();
             List<Integer> distinctTagIds = new ArrayList<>();
-            String sql = "SELECT DISTINCT tm.AP_APP_TAG_ID AS ID FROM AP_APP_TAG_MAPPING tm";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -1050,16 +1051,23 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
             return distinctTagIds;
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error occurred while obtaining the DB connection when getting distinct tag ids in tag mapping", e);
+            String msg = "Error occurred while obtaining the DB connection when getting distinct tag ids in tag "
+                    + "mapping";
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while getting distinct tag ids in tag mapping", e);
+            String msg = "SQL Error occurred while getting distinct tag ids in tag mapping. Executed query: " + sql;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg, e);
         }
     }
 
-    public void addTagMapping (List<Integer>  tagIds, int applicationId, int tenantId) throws ApplicationManagementDAOException {
+    @Override
+    public void addTagMapping(List<Integer> tagIds, int applicationId, int tenantId)
+            throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
-            log.debug("Request received in DAO Layer to add tags");
+            log.debug("Request received in DAO Layer to add application tags which has application ID: "
+                    + applicationId);
         }
         Connection conn;
         PreparedStatement stmt = null;

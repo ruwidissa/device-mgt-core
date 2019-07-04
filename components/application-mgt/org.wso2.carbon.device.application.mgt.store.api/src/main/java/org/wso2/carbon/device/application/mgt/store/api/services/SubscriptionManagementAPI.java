@@ -49,7 +49,7 @@ import java.util.List;
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "SubscriptionManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/subscription"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/subscription"),
                         })
                 }
         ),

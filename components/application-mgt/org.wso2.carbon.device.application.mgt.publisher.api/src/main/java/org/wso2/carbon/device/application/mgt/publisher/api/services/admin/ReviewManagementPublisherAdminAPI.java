@@ -57,7 +57,7 @@ info = @Info(
         extensions = {
                 @Extension(properties = {
                         @ExtensionProperty(name = "name", value = "PublisherReviewManagementAdminService"),
-                        @ExtensionProperty(name = "context", value = "/api/application-mgt/v1.0/admin/review"),
+                        @ExtensionProperty(name = "context", value = "/api/application-mgt-publisher/v1.0/admin/review"),
                 })
         }
 ),
@@ -85,53 +85,8 @@ scopes = {
 @Path("/admin/reviews")
 @Api(value = "Publisher Review Management Admin API")
 @Produces(MediaType.APPLICATION_JSON)
-public interface ReviewManagementAdminAPI {
+public interface ReviewManagementPublisherAdminAPI {
 String SCOPE = "scope";
-
-    @DELETE
-    @Path("/{uuid}/{reviewId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(
-        consumes = MediaType.APPLICATION_JSON,
-        produces = MediaType.APPLICATION_JSON,
-        httpMethod = "DELETE",
-        value = "Remove review",
-        notes = "Remove review",
-        tags = "Review Management",
-        extensions = {
-                @Extension(properties = {
-                        @ExtensionProperty(name = SCOPE, value = "perm:admin:app:review:update")
-                })
-        }
-    )
-
-    @ApiResponses(
-        value = {
-                @ApiResponse(
-                        code = 200,
-                        message = "OK. \n Successfully deleted the review"),
-                @ApiResponse(
-                        code = 404,
-                        message = "Not Found. \n No activity found with the given ID.",
-                        response = ErrorResponse.class),
-                @ApiResponse(
-                        code = 500,
-                        message = "Internal Server Error. \n Error occurred while deleting the review.",
-                        response = ErrorResponse.class)
-        })
-
-    Response deleteReview(
-            @ApiParam(
-                    name = "uuid",
-                    value = "UUID of the application release.",
-                    required = true)
-            @PathParam("uuid") String uuid,
-            @ApiParam(
-                    name = "reviewId",
-                    value = "Id of the review.",
-                    required = true)
-            @PathParam("reviewId") int reviewId);
 
     @GET
     @Path("/release/{uuid}")
