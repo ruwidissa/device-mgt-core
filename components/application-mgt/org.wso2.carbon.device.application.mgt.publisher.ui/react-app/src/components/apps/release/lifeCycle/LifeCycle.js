@@ -148,6 +148,11 @@ class LifeCycle extends React.Component {
     render() {
         const {currentStatus, lifecycle, selectedStatus} = this.state;
         const selectedValue = selectedStatus == null ? [] : selectedStatus;
+        let proceedingStates = [];
+        if((lifecycle.hasOwnProperty(currentStatus)) && lifecycle[currentStatus].hasOwnProperty("proceedingStates")){
+            proceedingStates = lifecycle[currentStatus].proceedingStates;
+        }
+        console.log(lifecycle);
         return (
             <div>
                 <Title level={4}>Manage Lifecycle</Title>
@@ -169,11 +174,9 @@ class LifeCycle extends React.Component {
                     value={selectedValue}
                     showSearch={true}
                 >
-                    {
-                        Object.keys(lifecycle).map(lifecycleState => {
+                    {proceedingStates.map(lifecycleState => {
                             return (
                                 <Option
-                                    disabled={!(lifecycle[currentStatus].proceedingStates.includes(lifecycleState))}
                                     key={lifecycleState}
                                     value={lifecycleState}>
                                     {lifecycleState}
