@@ -42,6 +42,15 @@ class CurrentUsersReview extends React.Component {
         });
     };
 
+    deleteCallback = () =>{
+        this.setState({
+            data: []
+        });
+    };
+
+    addCallBack =(review) =>{
+
+    };
 
     render() {
         const {data} = this.state;
@@ -60,7 +69,7 @@ class CurrentUsersReview extends React.Component {
                                 dataSource={data}
                                 renderItem={item => (
                                     <List.Item key={item.id}>
-                                        <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={true}/>
+                                        <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={true} deleteCallback={this.deleteCallback} isPersonalReview={true}/>
                                     </List.Item>
                                 )}
                             >

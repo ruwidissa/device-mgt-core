@@ -86,6 +86,14 @@ class Reviews extends React.Component {
         });
     };
 
+    deleteCallback = () =>{
+        this.fetchData(0, limit, res => {
+            this.setState({
+                data: res,
+            });
+        });
+    };
+
     render() {
         const {loading, hasMore, data, loadMore} = this.state;
         const {uuid} = this.props;
@@ -102,7 +110,7 @@ class Reviews extends React.Component {
                         dataSource={data}
                         renderItem={item => (
                             <List.Item key={item.id}>
-                                <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={false}/>
+                                <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={false} deleteCallback={this.deleteCallback}/>
                             </List.Item>
                         )}
                     >
