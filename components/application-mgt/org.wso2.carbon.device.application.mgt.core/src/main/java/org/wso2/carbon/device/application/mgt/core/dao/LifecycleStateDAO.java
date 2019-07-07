@@ -29,23 +29,13 @@ import java.util.List;
 public interface LifecycleStateDAO {
 
     /**
-     * To get the latest lifecycle state for the given application release id.
-     * @param applicationReleaseId id of the application release.
-     *
-     * @return Latest Lifecycle State for the given application release
-     * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
-     */
-    LifecycleState getLatestLifeCycleStateByReleaseID(int applicationReleaseId) throws LifeCycleManagementDAOException;
-
-    /**
      * To get the latest lifecycle state for the given application id and the application release UUID.
-     * @param appId id of the application.
      * @param uuid UUID of the application release
      *
      * @return Latest Lifecycle State for the given application release
      * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
      */
-    LifecycleState getLatestLifeCycleState(int appId, String uuid) throws LifeCycleManagementDAOException;
+    LifecycleState getLatestLifeCycleState(String uuid) throws LifeCycleManagementDAOException;
 
     /**
      * To get all changed lifecycle states for the given application release id.

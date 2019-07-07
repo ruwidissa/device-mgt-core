@@ -23,26 +23,42 @@ import org.wso2.carbon.device.application.mgt.core.exception.VisibilityManagemen
 import java.util.List;
 
 /**
- * This interface provides the list of operations that are performed in the database
- * layer with respect to the visibility.
+ * This interface provides the list of operations that are performed in the database layer with respect to the
+ * visibility.
  * 
  */
 public interface VisibilityDAO {
 
-    /**
-     * To add unrestricted roles for a particular application.
+    /***
+     * This method is used to add unrestricted roles for a particular application.
      *
-     * @param unrestrictedRoles unrestrictedRoles that could available the application.
-     * @throws VisibilityManagementDAOException Visiblity Management DAO Exception.
+     * @param unrestrictedRoles List of roles. User should have assigned at least one role from unrestricted role list
+     *                         to view the application.
+     * @param applicationId Id of the application.
+     * @param tenantId Tenant Id.
+     * @throws VisibilityManagementDAOException if an error occured while executing the query.
      */
-    void addUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws
-            VisibilityManagementDAOException;
+    void addUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId)
+            throws VisibilityManagementDAOException;
 
+    /***
+     * This method is used to get unrestricted roles of an particular application.
+     *
+     * @param applicationId Id of the application.
+     * @param tenantId Tenant Id.
+     * @return List of unrestricted roles of the application.
+     * @throws VisibilityManagementDAOException if an error occured while executing the query.
+     */
     List<String> getUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException;
 
-    List<String> getUnrestrictedRolesByUUID(String uuid, int tenantId) throws VisibilityManagementDAOException;
-
-    void deleteUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId) throws
-            VisibilityManagementDAOException;
-
+    /***
+     * This method is used to delete unrestricted roles of an particular application.
+     *
+     * @param unrestrictedRoles List of unrestricted roles which are going to remove from the application.
+     * @param applicationId Id of the application.
+     * @param tenantId Tenant Id.
+     * @throws VisibilityManagementDAOException if an error occured while executing the query.
+     */
+    void deleteUnrestrictedRoles(List<String> unrestrictedRoles, int applicationId, int tenantId)
+            throws VisibilityManagementDAOException;
 }

@@ -294,14 +294,16 @@ public class ReviewManagerImpl implements ReviewManager {
         if (reviewDTO.getRootParentId() == -1 && reviewDTO.getImmediateParentId() == -1) {
             if (!reviewDTO.getReleaseUuid().equals(uuid)) {
                 isActiveReview = false;
-            } else if (updatingReview.getRating() > 0 && updatingReview.getRating() != reviewDTO.getRating()) {
-                Runnable task = () -> ReviewManagerImpl.this
-                        .calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid, tenantId);
-                new Thread(task).start();
-                reviewDTO.setRating(updatingReview.getRating());
-            }
-            if (!reviewDTO.getContent().equals(updatingReview.getContent())) {
-                reviewDTO.setContent(updatingReview.getContent());
+            } else {
+                if (updatingReview.getRating() > 0 && updatingReview.getRating() != reviewDTO.getRating()) {
+                    Runnable task = () -> ReviewManagerImpl.this
+                            .calculateRating(updatingReview.getRating(), reviewDTO.getRating(), uuid, tenantId);
+                    new Thread(task).start();
+                    reviewDTO.setRating(updatingReview.getRating());
+                }
+                if (!reviewDTO.getContent().equals(updatingReview.getContent())) {
+                    reviewDTO.setContent(updatingReview.getContent());
+                }
             }
         } else {
             if (!reviewDTO.getReleaseUuid().equals(uuid)) {
@@ -775,7 +777,7 @@ public class ReviewManagerImpl implements ReviewManager {
             List<String> uuids = applicationDTO.getApplicationReleaseDTOs().stream().map(ApplicationReleaseDTO::getUuid)
                     .collect(Collectors.toList());
             List<Integer> appRatings = this.reviewDAO.getAllAppRatingValues(uuids, tenantId);
-            double appAverageRatingValue = appRatings.stream().mapToDouble(x -> x).average().orElse(Double.NaN);
+            double appAverageRatingValue = appRatings.stream().mapToDouble(x -> x).average().orElse(0.0);
             this.applicationDAO.updateApplicationRating(uuid, appAverageRatingValue, tenantId);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred when getting application data or updating application rating value.";
