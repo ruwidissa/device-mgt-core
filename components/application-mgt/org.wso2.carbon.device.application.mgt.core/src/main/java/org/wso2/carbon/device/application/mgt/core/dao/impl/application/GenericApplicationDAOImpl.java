@@ -132,8 +132,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "AP_APP_RELEASE.RATED_USERS AS RATED_USER_COUNT "
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
-                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
-                + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
+                + "INNER JOIN (SELECT ID FROM AP_APP LIMIT ? OFFSET ? ) AS app_data ON app_data.ID = AP_APP.ID "
                 + "WHERE AP_APP.TENANT_ID = ?";
 
         if (filter == null) {
@@ -176,12 +176,18 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         if (!StringUtils.isEmpty(filter.getSortBy() )) {
             sortingOrder = filter.getSortBy();
         }
-        sql += " ORDER BY APP_ID " + sortingOrder +" LIMIT ? OFFSET ? ";
+        sql += " ORDER BY APP_ID " + sortingOrder;
 
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql);
             ){
+                if (filter.getLimit() == 0) {
+                    stmt.setInt(paramIndex++, 100);
+                } else {
+                    stmt.setInt(paramIndex++, filter.getLimit());
+                }
+                stmt.setInt(paramIndex++, filter.getOffset());
                 stmt.setInt(paramIndex++, tenantId);
 
                 if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
@@ -210,14 +216,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                     stmt.setString(paramIndex++, filter.getAppReleaseState());
                 }
                 if (deviceTypeId > 0 ) {
-                    stmt.setInt(paramIndex++, deviceTypeId);
+                    stmt.setInt(paramIndex, deviceTypeId);
                 }
-                if (filter.getLimit() == 0) {
-                    stmt.setInt(paramIndex++, 100);
-                } else {
-                    stmt.setInt(paramIndex++, filter.getLimit());
-                }
-                stmt.setInt(paramIndex, filter.getOffset());
                 try (ResultSet rs = stmt.executeQuery() ) {
                     return DAOUtil.loadApplications(rs);
                 }
@@ -247,8 +247,8 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         String sql = "SELECT count(AP_APP.ID) AS APP_COUNT "
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
-                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID AND "
-                + "AP_APP.TENANT_ID = AP_APP_RELEASE.TENANT_ID "
+                + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
+                + "INNER JOIN (SELECT ID FROM AP_APP) AS app_data ON app_data.ID = AP_APP.ID "
                 + "WHERE AP_APP.TENANT_ID = ?";
 
         if (filter == null) {
