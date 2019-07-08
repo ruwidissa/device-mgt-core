@@ -26,6 +26,10 @@ class FiltersForm extends React.Component {
                 }
             }
 
+            if(values.hasOwnProperty("deviceType") && values.deviceType==="all"){
+                delete values["deviceType"];
+            }
+
             this.props.setFilters(values);
         });
     };
@@ -176,8 +180,8 @@ class FiltersForm extends React.Component {
                     </Form.Item>
 
 
-                    <Form.Item label="Device Types">
-                        {getFieldDecorator('deviceTypes', {
+                    <Form.Item label="Device Type">
+                        {getFieldDecorator('deviceType', {
                             rules: [{
                                 required: false,
                                 message: 'Please select device types'
@@ -197,6 +201,10 @@ class FiltersForm extends React.Component {
                                         )
                                     })
                                 }
+                                <Option
+                                    key="all">
+                                    all
+                                </Option>
                             </Select>
                         )}
                     </Form.Item>

@@ -2,9 +2,9 @@ import React from "react";
 import {Avatar, Card, Col, Row, Table, Typography, Input, Divider, Checkbox, Select, Button} from "antd";
 import {connect} from "react-redux";
 import {getApps} from "../../../js/actions";
-import AppsTable from "./AppsTable";
+import AppsTable from "./appsTable/AppsTable";
 import Filters from "./Filters";
-import AppDetailsDrawer from "./AppDetailsDrawer";
+import AppDetailsDrawer from "./AppDetailsDrawer/AppDetailsDrawer";
 
 const {Option} = Select;
 const {Title, Text} = Typography;
