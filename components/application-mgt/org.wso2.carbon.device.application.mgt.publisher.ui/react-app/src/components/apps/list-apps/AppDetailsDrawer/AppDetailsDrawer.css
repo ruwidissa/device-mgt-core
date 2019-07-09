@@ -1,0 +1,7 @@
+.release-card{
+    margin-top: 16px;
+}
+
+.release-card:hover {
+    background-color: rgba(15, 188, 249,0.1);
+}

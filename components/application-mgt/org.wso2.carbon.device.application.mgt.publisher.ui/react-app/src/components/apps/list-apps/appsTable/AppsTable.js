@@ -1,7 +1,8 @@
 import React from "react";
 import {Avatar, Card, Col, Row, Table, Typography, Tag, Icon, message} from "antd";
 import axios from "axios";
-import config from "../../../../public/conf/config.json";
+import config from "../../../../../public/conf/config.json";
+import "./AppsTable.css";
 
 const columns = [
     {
@@ -167,6 +168,7 @@ class AppsTable extends React.Component {
                 columns={columns}
                 pagination={this.state.pagination}
                 onChange={this.handleTableChange}
+                rowClassName="app-row"
                 onRow={(record, rowIndex) => {
                     return {
                         onClick: event => {
