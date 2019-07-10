@@ -1,5 +1,5 @@
 import React from "react";
-import "antd/dist/antd.css";
+import "antd/dist/antd.less";
 import RouteWithSubRoutes from "./components/RouteWithSubRoutes";
 import {
     BrowserRouter as Router,

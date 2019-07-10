@@ -21,14 +21,14 @@
   padding: 5px;
 }
 
-.logo {
+.logo-image {
   width: 120px;
   height: 31px;
   margin: 0 0 16px 20px;
   float: left;
 }
 
-.logo img{
+.logo-image img{
   height: 35px;
 }
 

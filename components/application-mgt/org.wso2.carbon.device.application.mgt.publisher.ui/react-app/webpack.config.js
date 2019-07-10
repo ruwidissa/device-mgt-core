@@ -48,7 +48,7 @@ const config = {
                 use: [
                     {
                         loader: "html-loader",
-                        options: { minimize: true }
+                        options: {minimize: true}
                     }
                 ]
             },
@@ -59,7 +59,7 @@ const config = {
             {
                 test: /\.scss$/,
                 use: [
-                MiniCssExtractPlugin.loader,
+                    MiniCssExtractPlugin.loader,
                     "css-loader",
                     "postcss-loader",
                     "sass-loader"
@@ -67,7 +67,7 @@ const config = {
             },
             {
                 test: /\.scss$/,
-                use: [ 'style-loader', 'scss-loader' ]
+                use: ['style-loader', 'scss-loader']
             },
             {
                 test: /\.less$/,
@@ -77,14 +77,21 @@ const config = {
                     },
                     {
                         loader: "css-loader",
-                        options: {
-                            sourceMap: true,
-                            modules: true,
-                            localIdentName: "[local]___[hash:base64:5]"
-                        }
+                        // options: {
+                        //     sourceMap: true,
+                        //     modules: true,
+                        //     localIdentName: "[local]___[hash:base64:5]"
+                        // }
                     },
                     {
-                        loader: "less-loader"
+                        loader: "less-loader",
+                        options: {
+                            modifyVars: {
+                                'primary-color': '#1890ff',
+                                'link-color': '#1890ff',
+                            },
+                            javascriptEnabled: true,
+                        },
                     }
                 ]
             },
@@ -95,16 +102,16 @@ const config = {
             {
                 test: /\.(png|jpe?g)/i,
                 use: [
-                  {
-                    loader: "url-loader",
+                    {
+                        loader: "url-loader",
                         options: {
-                        name: "./img/[name].[ext]",
-                          limit: 10000
+                            name: "./img/[name].[ext]",
+                            limit: 10000
                         }
-                  },
-                  {
-                    loader: "img-loader"
-                  }
+                    },
+                    {
+                        loader: "img-loader"
+                    }
                 ]
             }
         ]

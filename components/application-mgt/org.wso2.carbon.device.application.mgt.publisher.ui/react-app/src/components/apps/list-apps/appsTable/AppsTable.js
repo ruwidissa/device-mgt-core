@@ -45,12 +45,14 @@ const columns = [
             const defaultPlatformIcons = config.defaultPlatformIcons;
             let icon = defaultPlatformIcons.default.icon;
             let color = defaultPlatformIcons.default.color;
+            let theme = defaultPlatformIcons.default.theme;
             if (defaultPlatformIcons.hasOwnProperty(platform)) {
                 icon = defaultPlatformIcons[platform].icon;
                 color = defaultPlatformIcons[platform].color;
+                theme = defaultPlatformIcons[platform].theme;
             }
             return (<span style={{fontSize: 20, color: color, textAlign: "center"}}><Icon type={icon}
-                                                                                          theme="filled"/></span>)
+                                                                                          theme={theme}/></span>)
         }
     },
     {

@@ -1,5 +1,5 @@
 import React from "react";
-import {Avatar, Card, Col, Row, Table, Typography, Input, Divider, Checkbox, Select, Button, Form, message} from "antd";
+import {Avatar, Card, Col, Row, Table, Typography, Input, Divider, Icon, Select, Button, Form, message, Radio} from "antd";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 
@@ -26,8 +26,15 @@ class FiltersForm extends React.Component {
                 }
             }
 
-            if(values.hasOwnProperty("deviceType") && values.deviceType==="all"){
+            if(values.hasOwnProperty("deviceType") && values.deviceType==="ALL"){
                 delete values["deviceType"];
+            }
+
+            if(values.hasOwnProperty("subscriptionType") && values.subscriptionType==="ALL"){
+                delete values["subscriptionType"];
+            }
+            if(values.hasOwnProperty("appType") && values.appType==="ALL"){
+                delete values["appType"];
             }
 
             this.props.setFilters(values);
@@ -152,6 +159,15 @@ class FiltersForm extends React.Component {
                         </Col>
                     </Row>
 
+                    <Form.Item>
+                        {getFieldDecorator('serach', {})(
+                            <Input
+                                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                placeholder="Username"
+                            />,
+                        )}
+                    </Form.Item>
+
                     <Form.Item label="Categories">
                         {getFieldDecorator('categories', {
                             rules: [{
@@ -202,8 +218,7 @@ class FiltersForm extends React.Component {
                                     })
                                 }
                                 <Option
-                                    key="all">
-                                    all
+                                    key="ALL">All
                                 </Option>
                             </Select>
                         )}
@@ -244,6 +259,7 @@ class FiltersForm extends React.Component {
                                 <Option value="ENTERPRISE">Enterprise</Option>
                                 <Option value="PUBLIC">Public</Option>
                                 <Option value="WEB_CLIP">Web APP</Option>
+                                <Option value="ALL">All</Option>
                             </Select>
                         )}
                     </Form.Item>
@@ -251,10 +267,11 @@ class FiltersForm extends React.Component {
 
                     <Form.Item label="Subscription Type">
                         {getFieldDecorator('subscriptionType', {})(
-                            <Checkbox.Group style={{width: '100%'}}>
-                                <Checkbox value="FREE">Free</Checkbox><br/>
-                                <Checkbox value="PAID">Paid</Checkbox><br/>
-                            </Checkbox.Group>,
+                            <Radio.Group style={{width: '100%'}}>
+                                <Radio value="FREE">Free</Radio>
+                                <Radio value="PAID">Paid</Radio>
+                                <Radio value="ALL">All</Radio>
+                            </Radio.Group>,
                         )}
                     </Form.Item>
                     <Divider/>
