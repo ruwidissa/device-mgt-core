@@ -98,14 +98,14 @@ class ManageTags extends React.Component {
         const tagName = tag.tagName;
         const tagElem = (
             <Tag
-                color="gold"
+                color="#34495e"
             >
                 {tagName}
                 <Divider type="vertical"/>
                 <Tooltip title="edit">
                     <Icon onClick={() => {
                         this.openEditModal(tagName)
-                    }} style={{color: 'rgba(0,0,0,0.45)'}} type="edit"/>
+                    }} type="edit"/>
                 </Tooltip>
                 <Divider type="vertical"/>
                 <Tooltip title="delete">
@@ -125,7 +125,7 @@ class ManageTags extends React.Component {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Icon style={{color: 'rgba(0,0,0,0.45)'}} type="delete"/>
+                        <Icon type="delete"/>
                     </Popconfirm>
                 </Tooltip>
             </Tag>
@@ -307,7 +307,7 @@ class ManageTags extends React.Component {
         const tagsElements = tags.map(this.renderElement);
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
-            <div>
+            <div style={{marginBottom: 16}}>
                 <Card title="Tags">
                     <Spin tip="Working on it..." spinning={this.state.loading}>
                         {!isAddNewVisible &&

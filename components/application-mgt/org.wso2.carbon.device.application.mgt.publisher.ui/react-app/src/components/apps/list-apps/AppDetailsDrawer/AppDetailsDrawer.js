@@ -24,6 +24,7 @@ import config from "../../../../../public/conf/config.json";
 import ReactQuill from "react-quill";
 import ReactHtmlParser, {processNodes, convertNodeToElement, htmlparser2} from 'react-html-parser';
 import "./AppDetailsDrawer.css";
+import pSBC from "shade-blend-color";
 
 const {Text, Title} = Typography;
 const {Option} = Select;
@@ -456,7 +457,7 @@ class AppDetailsDrawer extends React.Component {
                         {!isDescriptionEditEnabled && (
                             <Text
                                 style={{
-                                    color: "#1890ff",
+                                    color: config.theme.primaryColor,
                                     cursor: "pointer"
                                 }}
                                 onClick={this.enableDescriptionEdit}>
@@ -492,7 +493,7 @@ class AppDetailsDrawer extends React.Component {
                         <Divider dashed={true}/>
                         <Text strong={true}>Categories </Text>
                         {!isCategoriesEditEnabled && (<Text
-                                style={{color: "#1890ff", cursor: "pointer"}}
+                                style={{color: config.theme.primaryColor, cursor: "pointer"}}
                                 onClick={this.enableCategoriesEdit}>
                                 <Icon type="edit"/>
                             </Text>
@@ -525,7 +526,7 @@ class AppDetailsDrawer extends React.Component {
                             <span>{
                                 categories.map(category => {
                                     return (
-                                        <Tag color="#108ee9" key={category} style={{marginBottom: 5}}>
+                                        <Tag color={pSBC ( 0.30, config.theme.primaryColor )} key={category} style={{marginBottom: 5}}>
                                             {category}
                                         </Tag>
                                     );
@@ -537,7 +538,7 @@ class AppDetailsDrawer extends React.Component {
                         <Divider dashed={true}/>
                         <Text strong={true}>Tags </Text>
                         {!isTagsEditEnabled && (<Text
-                                style={{color: "#1890ff", cursor: "pointer"}}
+                                style={{color: config.theme.primaryColor, cursor: "pointer"}}
                                 onClick={this.enableTagsEdit}>
                                 <Icon type="edit"/>
                             </Text>

@@ -36,21 +36,23 @@ class Manage extends React.Component {
             <div>
                 <PageHeader
                     // breadcrumb={{routes}}
-                    title = "Manage"
+                    title="Manage"
                 >
                     <div className="wrap">
-                        <div className="content">
-                            <Paragraph>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
-                            </Paragraph>
-                        </div>
+                        <Paragraph>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
+                        </Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
-                    <ManageCategories/>
-                    <br/>
-                    <ManageTags/>
-
+                    <Row gutter={16}>
+                        <Col sm={24} md={12}>
+                            <ManageCategories/>
+                        </Col>
+                        <Col sm={24} md={12}>
+                            <ManageTags/>
+                        </Col>
+                    </Row>
                 </div>
 
             </div>

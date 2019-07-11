@@ -10,7 +10,7 @@ const Paragraph = Typography;
 const formConfig = {
     installationType: "ENTERPRISE",
     endpoint: "/ent-app",
-    jsonPayloadName:"application",
+    jsonPayloadName: "application",
     releaseWrapperName: "entAppReleaseWrappers",
     specificElements: {
         binaryFile: {
@@ -41,11 +41,9 @@ class AddNewEnterpriseApp extends React.Component {
                     title="Add New Enterprise App"
                 >
                     <div className="wrap">
-                        <div className="content">
-                            <Paragraph>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
-                            </Paragraph>
-                        </div>
+                        <Paragraph>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
+                        </Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>

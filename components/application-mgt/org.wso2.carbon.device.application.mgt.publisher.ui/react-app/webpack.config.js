@@ -18,6 +18,7 @@
 var path = require('path');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const configurations = require("./public/conf/config.json");
 
 const config = {
     devtool: "source-map",
@@ -87,8 +88,8 @@ const config = {
                         loader: "less-loader",
                         options: {
                             modifyVars: {
-                                'primary-color': '#1890ff',
-                                'link-color': '#1890ff',
+                                'primary-color': configurations.theme.primaryColor,
+                                'link-color': configurations.theme.primaryColor,
                             },
                             javascriptEnabled: true,
                         },

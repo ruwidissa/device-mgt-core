@@ -1,6 +1,7 @@
 import React from "react";
 import {Avatar, Card, Col, Row, Table, Typography, Tag, Icon, message} from "antd";
 import axios from "axios";
+import pSBC from 'shade-blend-color';
 import config from "../../../../../public/conf/config.json";
 import "./AppsTable.css";
 
@@ -30,7 +31,7 @@ const columns = [
             <span>
                 {categories.map(category => {
                     return (
-                        <Tag color="blue" key={category}>
+                        <Tag color={pSBC ( 0.30, config.theme.primaryColor )} key={category}>
                             {category}
                         </Tag>
                     );
