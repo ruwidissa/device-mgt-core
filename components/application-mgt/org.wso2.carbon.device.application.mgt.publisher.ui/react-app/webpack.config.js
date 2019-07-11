@@ -23,7 +23,7 @@ const configurations = require("./public/conf/config.json");
 const config = {
     devtool: "source-map",
     output: {
-        publicPath: '/publisher/' // <---- this
+        publicPath: '/publisher/'
     },
     watch: false,
     resolve: {
@@ -78,11 +78,6 @@ const config = {
                     },
                     {
                         loader: "css-loader",
-                        // options: {
-                        //     sourceMap: true,
-                        //     modules: true,
-                        //     localIdentName: "[local]___[hash:base64:5]"
-                        // }
                     },
                     {
                         loader: "less-loader",

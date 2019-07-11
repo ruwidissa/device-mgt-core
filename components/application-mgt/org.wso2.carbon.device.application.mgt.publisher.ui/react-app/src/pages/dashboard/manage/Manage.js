@@ -1,5 +1,4 @@
 import React from "react";
-//import "antd/dist/antd.css";
 import {PageHeader, Typography, Input, Button, Row, Col} from "antd";
 import ManageCategories from "../../../components/manage/categories/ManageCategories";
 import ManageTags from "../../../components/manage/categories/ManageTags";

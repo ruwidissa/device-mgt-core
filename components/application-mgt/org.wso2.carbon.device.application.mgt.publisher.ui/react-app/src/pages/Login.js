@@ -1,8 +1,9 @@
 import React from "react";
 import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
-import styles from './Login.less';
+import './Login.css';
 import axios from 'axios';
 import config from "../../public/conf/config.json";
+import "./Login.css";
 
 const {Title} = Typography;
 const {Text} = Typography;
@@ -10,14 +11,12 @@ const {Text} = Typography;
 class Login extends React.Component {
     render() {
         return (
-            <div className={styles.main}>
-                <div style={{
-                    backgroundImage: "url('https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg')",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center 110px",
-                    backgroundSize: "100%",
-                    height: 1500
-                }}>
+            <div>
+                <div
+                    className="background"
+                >
+                </div>
+                <div className="content">
                     <Row>
                         <Col xs={3} sm={3} md={10}>
 
@@ -31,7 +30,7 @@ class Login extends React.Component {
                                             height: 60
                                         }
                                     }
-                                         className={styles.logo} src={config.theme.logo}/>
+                                         src={config.theme.logo}/>
                                 </Col>
                             </Row>
                             <Title level={2}>Login</Title>
@@ -122,7 +121,7 @@ class NormalLoginForm extends React.Component {
                     {getFieldDecorator('password', {
                         rules: [{required: true, message: 'Please input your Password!'}],
                     })(
-                        <Input style={{height: 32}} className={styles.input}
+                        <Input style={{height: 32}}
                                prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>} type="password"
                                placeholder="Password"/>
                     )}

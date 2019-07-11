@@ -1,7 +1,9 @@
 {
   "theme": {
     "type": "default",
-    "value": "lightBaseTheme"
+    "value": "lightBaseTheme",
+    "logo" : "https://entgra.io/assets/images/svg/logo.svg",
+    "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {
     "protocol": "https",

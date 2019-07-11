@@ -2,8 +2,8 @@
   "theme": {
     "type": "default",
     "value": "lightBaseTheme",
-    "logo" : "https://www.brandchannel.com/wp-content/uploads/2016/05/instagram-new-logo-may-2016.jpg",
-    "primaryColor": "#F62459"
+    "logo" : "https://entgra.io/assets/images/svg/logo.svg",
+    "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {
     "protocol": "https",

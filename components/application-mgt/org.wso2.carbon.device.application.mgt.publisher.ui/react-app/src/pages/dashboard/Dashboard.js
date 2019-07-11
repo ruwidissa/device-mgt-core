@@ -1,6 +1,5 @@
 import React from "react";
 import {Layout, Menu, Icon} from 'antd';
-// import Logo from "../../../public/images/logo.svg";
 import {Switch, Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
