@@ -1,6 +1,7 @@
 import React from "react";
-import {Avatar, Card, Col, Row, Table, Typography, Tag, Icon, message} from "antd";
+import {Avatar, Table, Tag, Icon, message} from "antd";
 import axios from "axios";
+import pSBC from 'shade-blend-color';
 import config from "../../../../../public/conf/config.json";
 import "./AppsTable.css";
 
@@ -30,7 +31,7 @@ const columns = [
             <span>
                 {categories.map(category => {
                     return (
-                        <Tag color="blue" key={category}>
+                        <Tag color={pSBC ( 0.30, config.theme.primaryColor )} key={category}>
                             {category}
                         </Tag>
                     );
@@ -45,12 +46,14 @@ const columns = [
             const defaultPlatformIcons = config.defaultPlatformIcons;
             let icon = defaultPlatformIcons.default.icon;
             let color = defaultPlatformIcons.default.color;
+            let theme = defaultPlatformIcons.default.theme;
             if (defaultPlatformIcons.hasOwnProperty(platform)) {
                 icon = defaultPlatformIcons[platform].icon;
                 color = defaultPlatformIcons[platform].color;
+                theme = defaultPlatformIcons[platform].theme;
             }
             return (<span style={{fontSize: 20, color: color, textAlign: "center"}}><Icon type={icon}
-                                                                                          theme="filled"/></span>)
+                                                                                          theme={theme}/></span>)
         }
     },
     {
@@ -152,7 +155,7 @@ class AppsTable extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.error('Something went wrong... :(');
+                message.error('Something went wrong while trying to load apps... :(');
             }
 
             this.setState({loading: false});

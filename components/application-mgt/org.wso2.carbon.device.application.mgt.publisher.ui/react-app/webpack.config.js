@@ -18,11 +18,12 @@
 var path = require('path');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const configurations = require("./public/conf/config.json");
 
 const config = {
     devtool: "source-map",
     output: {
-        publicPath: '/publisher/' // <---- this
+        publicPath: '/publisher/'
     },
     watch: false,
     resolve: {
@@ -48,7 +49,7 @@ const config = {
                 use: [
                     {
                         loader: "html-loader",
-                        options: { minimize: true }
+                        options: {minimize: true}
                     }
                 ]
             },
@@ -59,7 +60,7 @@ const config = {
             {
                 test: /\.scss$/,
                 use: [
-                MiniCssExtractPlugin.loader,
+                    MiniCssExtractPlugin.loader,
                     "css-loader",
                     "postcss-loader",
                     "sass-loader"
@@ -67,7 +68,7 @@ const config = {
             },
             {
                 test: /\.scss$/,
-                use: [ 'style-loader', 'scss-loader' ]
+                use: ['style-loader', 'scss-loader']
             },
             {
                 test: /\.less$/,
@@ -77,14 +78,16 @@ const config = {
                     },
                     {
                         loader: "css-loader",
-                        options: {
-                            sourceMap: true,
-                            modules: true,
-                            localIdentName: "[local]___[hash:base64:5]"
-                        }
                     },
                     {
-                        loader: "less-loader"
+                        loader: "less-loader",
+                        options: {
+                            modifyVars: {
+                                'primary-color': configurations.theme.primaryColor,
+                                'link-color': configurations.theme.primaryColor,
+                            },
+                            javascriptEnabled: true,
+                        },
                     }
                 ]
             },
@@ -95,16 +98,16 @@ const config = {
             {
                 test: /\.(png|jpe?g)/i,
                 use: [
-                  {
-                    loader: "url-loader",
+                    {
+                        loader: "url-loader",
                         options: {
-                        name: "./img/[name].[ext]",
-                          limit: 10000
+                            name: "./img/[name].[ext]",
+                            limit: 10000
                         }
-                  },
-                  {
-                    loader: "img-loader"
-                  }
+                    },
+                    {
+                        loader: "img-loader"
+                    }
                 ]
             }
         ]

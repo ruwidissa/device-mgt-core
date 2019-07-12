@@ -1,5 +1,4 @@
 import React from "react";
-import "antd/dist/antd.css";
 import {
     Card,
     Button,
@@ -55,10 +54,8 @@ class AddNewAppFormComponent extends React.Component {
 
     getCategories = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+        ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
                 this.setState({
@@ -68,10 +65,10 @@ class AddNewAppFormComponent extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load categories');
 
             }
             this.setState({
@@ -82,10 +79,8 @@ class AddNewAppFormComponent extends React.Component {
 
     getTags = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+        ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
                 this.setState({
@@ -95,10 +90,10 @@ class AddNewAppFormComponent extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load tags');
 
             }
             this.setState({
@@ -210,7 +205,7 @@ class AddNewAppFormComponent extends React.Component {
                     }
 
                 }).catch((error) => {
-                    if (error.response.status === 401) {
+                    if (error.hasOwnProperty("response") && error.response.status === 401) {
                         window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                     } else {
                         notification["error"]({

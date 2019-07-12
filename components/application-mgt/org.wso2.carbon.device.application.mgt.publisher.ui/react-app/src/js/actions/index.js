@@ -1,12 +1,15 @@
 import axios from "axios";
 import ActionTypes from "../constants/ActionTypes";
 import config from "../../../public/conf/config.json";
+import {message} from "antd";
 
 export const getApps = () => dispatch => {
 
     const request = "method=post&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications";
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
+    return axios.post(
+        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher,
+        request
     ).then(res => {
         if (res.status === 200) {
             let apps = [];
@@ -18,8 +21,10 @@ export const getApps = () => dispatch => {
         }
 
     }).catch(function (error) {
-        if (error.response.status === 401) {
+        if (error.hasOwnProperty("response") && error.response.status === 401) {
             window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+        } else {
+            message.error('Something went wrong when trying to load applications... :(');
         }
     });
 
@@ -29,7 +34,8 @@ export const getRelease = (uuid) => dispatch => {
 
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/release/" + uuid;
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
+    return axios.post(
+        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 200) {
             let release = res.data.data;
@@ -37,8 +43,10 @@ export const getRelease = (uuid) => dispatch => {
         }
 
     }).catch(function (error) {
-        if (error.response.status === 401) {
+        if (error.hasOwnProperty("response") && error.response.status === 401) {
             window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+        } else {
+            message.error('Something went wrong... :(');
         }
     });
 
@@ -73,7 +81,8 @@ export const closeLifecycleModal = () => dispatch => {
 export const getLifecycle = () => dispatch => {
     const request = "method=get&content-type=application/json&payload={}&api-endpoint=/application-mgt-publisher/v1.0/applications/lifecycle-config";
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
+    return axios.post(
+        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 200) {
             let lifecycle = res.data.data;
@@ -81,8 +90,10 @@ export const getLifecycle = () => dispatch => {
         }
 
     }).catch(function (error) {
-        if (error.response.status === 401) {
+        if (error.hasOwnProperty("response") && error.response.status === 401) {
             window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+        } else {
+            message.error('Something went wrong... :(');
         }
     });
 };
@@ -97,7 +108,8 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
     const request = "method=post&content-type=application/json&payload=" + JSON.stringify(payload) + "&api-endpoint=/application-mgt-publisher/v1.0/applications/life-cycle/" + uuid;
 
 
-    return axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
+    return axios.post(
+        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher, request
     ).then(res => {
         if (res.status === 201) {
             let release = res.data.data;
@@ -110,7 +122,7 @@ export const updateLifecycleState = (uuid, nextState, reason) => dispatch => {
         }
 
     }).catch(function (error) {
-        if (error.response.status === 401) {
+        if (error.hasOwnProperty("response") && error.response.status === 401) {
             window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
         } else if (error.response.status === 500) {
             alert("error");

@@ -18,11 +18,12 @@
 var path = require('path');
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const configurations = require("./public/conf/config.json");
 
 const config = {
     devtool: "source-map",
     output: {
-        publicPath: '/store/' // <---- this
+        publicPath: '/store/'
     },
     watch: false,
     resolve: {
@@ -77,14 +78,16 @@ const config = {
                     },
                     {
                         loader: "css-loader",
-                        options: {
-                            sourceMap: true,
-                            modules: true,
-                            localIdentName: "[local]___[hash:base64:5]"
-                        }
                     },
                     {
-                        loader: "less-loader"
+                        loader: "less-loader",
+                        options: {
+                            modifyVars: {
+                                'primary-color': configurations.theme.primaryColor,
+                                'link-color': configurations.theme.primaryColor,
+                            },
+                            javascriptEnabled: true,
+                        },
                     }
                 ]
             },

@@ -55,10 +55,9 @@ class LifeCycle extends React.Component {
 
 
     fetchData = () => {
-        axios.get(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+        axios.get(
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
+        ).then(res => {
             if (res.status === 200) {
                 const lifecycle = res.data.data;
                 this.setState({
@@ -69,6 +68,8 @@ class LifeCycle extends React.Component {
         }).catch(function (error) {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+            } else {
+                message.error('Something went wrong when trying to load lifecycle configuration');
             }
         });
     };
@@ -105,11 +106,10 @@ class LifeCycle extends React.Component {
             isConfirmButtonLoading: true,
         });
 
-        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/life-cycle/" + uuid,
-            data,
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+        axios.post(
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/life-cycle/" + uuid,
+            data
+        ).then(res => {
             if (res.status === 201) {
                 this.setState({
                     isReasonModalVisible: false,
@@ -133,7 +133,7 @@ class LifeCycle extends React.Component {
                 notification["error"]({
                     message: "Error",
                     description:
-                        "Something went wrong",
+                        "Something went wrong when trying to add lifecycle",
                 });
             }
             this.setState({

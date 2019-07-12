@@ -1,5 +1,4 @@
 import React from "react";
-import "antd/dist/antd.css";
 import {
     PageHeader,
     Typography
@@ -45,11 +44,9 @@ class AddNewEnterpriseApp extends React.Component {
                     title="Add New Web Clip"
                 >
                     <div className="wrap">
-                        <div className="content">
-                            <Paragraph>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
-                            </Paragraph>
-                        </div>
+                        <Paragraph>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
+                        </Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>

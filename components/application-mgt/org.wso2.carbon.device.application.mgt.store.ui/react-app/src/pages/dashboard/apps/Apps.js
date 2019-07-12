@@ -1,5 +1,4 @@
 import React from "react";
-import "antd/dist/antd.css";
 import AppList from "../../../components/apps/AppList";
 
 class Apps extends React.Component {

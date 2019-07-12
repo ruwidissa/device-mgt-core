@@ -3,6 +3,7 @@ import {Card, Tag, message, Icon, Input, notification, Divider, Button, Spin, To
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 import {TweenOneGroup} from 'rc-tween-one';
+import pSBC from "shade-blend-color";
 
 
 class ManageCategories extends React.Component {
@@ -32,7 +33,7 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
@@ -79,11 +80,11 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load categories');
             }
             this.setState({
                 loading: false
@@ -95,14 +96,14 @@ class ManageCategories extends React.Component {
         const categoryName = category.categoryName;
         const tagElem = (
             <Tag
-                color="blue"
+                color={pSBC ( 0.30, config.theme.primaryColor )}
             >
                 {categoryName}
                 <Divider type="vertical"/>
                 <Tooltip title="edit">
                     <Icon onClick={() => {
                         this.openEditModal(categoryName)
-                    }} style={{color: 'rgba(0,0,0,0.45)'}} type="edit"/>
+                    }} type="edit"/>
                 </Tooltip>
                 <Divider type="vertical"/>
                 <Tooltip title="delete">
@@ -122,7 +123,7 @@ class ManageCategories extends React.Component {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Icon style={{color: 'rgba(0,0,0,0.45)'}} type="delete"/>
+                        <Icon type="delete"/>
                     </Popconfirm>
                 </Tooltip>
             </Tag>
@@ -218,11 +219,11 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to add categories');
             }
             this.setState({
                 loading: false
@@ -280,11 +281,11 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to delete the category');
             }
             this.setState({
                 loading: false,
@@ -306,7 +307,7 @@ class ManageCategories extends React.Component {
         const categoriesElements = categories.map(this.renderElement);
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
-            <div>
+            <div style={{marginBottom: 16}}>
                 <Card title="Categories">
                     <Spin tip="Working on it..." spinning={this.state.loading}>
                         {!isAddNewVisible &&

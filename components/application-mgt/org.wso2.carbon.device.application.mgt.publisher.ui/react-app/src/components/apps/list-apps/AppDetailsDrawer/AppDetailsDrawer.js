@@ -24,6 +24,7 @@ import config from "../../../../../public/conf/config.json";
 import ReactQuill from "react-quill";
 import ReactHtmlParser, {processNodes, convertNodeToElement, htmlparser2} from 'react-html-parser';
 import "./AppDetailsDrawer.css";
+import pSBC from "shade-blend-color";
 
 const {Text, Title} = Typography;
 const {Option} = Select;
@@ -91,10 +92,8 @@ class AppDetailsDrawer extends React.Component {
 
     getCategories = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+        ).then(res => {
             if (res.status === 200) {
                 const categories = JSON.parse(res.data.data);
 
@@ -114,10 +113,10 @@ class AppDetailsDrawer extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong while trying to load app details... :(');
 
             }
             this.setState({
@@ -128,10 +127,8 @@ class AppDetailsDrawer extends React.Component {
 
     getTags = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+        ).then(res => {
             if (res.status === 200) {
                 const tags = JSON.parse(res.data.data);
 
@@ -151,10 +148,10 @@ class AppDetailsDrawer extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load tags.');
 
             }
             this.setState({
@@ -171,14 +168,12 @@ class AppDetailsDrawer extends React.Component {
             const data = {name: name};
             axios.put(
                 config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
-                data,
-                {
-                    headers: {'X-Platform': config.serverConfig.platform}
-                }
+                data
             ).then(res => {
                 if (res.status === 200) {
                     notification["success"]({
-                        message: 'Saved!'
+                        message: 'Saved!',
+                        description: 'App name updated successfully!'
                     });
                     this.setState({
                         loading: false,
@@ -191,7 +186,7 @@ class AppDetailsDrawer extends React.Component {
                     message.error('You are not logged in');
                     window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                 } else {
-                    message.error('Something went wrong... :(');
+                    message.error('Something went wrong when trying to save the app name... :(');
                 }
 
                 this.setState({loading: false});
@@ -230,7 +225,6 @@ class AppDetailsDrawer extends React.Component {
         });
     };
 
-
     // handle description change
     handleCategoryChange = (temporaryCategories) => {
         this.setState({temporaryCategories})
@@ -249,14 +243,12 @@ class AppDetailsDrawer extends React.Component {
             const data = {categories: temporaryCategories};
             axios.put(
                 config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
-                data,
-                {
-                    headers: {'X-Platform': config.serverConfig.platform}
-                }
+                data
             ).then(res => {
                 if (res.status === 200) {
                     notification["success"]({
-                        message: 'Saved!'
+                        message: 'Saved!',
+                        description: 'App categories updated successfully!'
                     });
                     this.setState({
                         loading: false,
@@ -270,7 +262,7 @@ class AppDetailsDrawer extends React.Component {
                     message.error('You are not logged in');
                     window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                 } else {
-                    message.error('Something went wrong... :(');
+                    message.error('Something went wrong when trying to updating categories');
                 }
 
                 this.setState({loading: false});
@@ -296,7 +288,7 @@ class AppDetailsDrawer extends React.Component {
         this.setState({temporaryTags})
     };
 
-    // change app categories
+    // change app tags
     handleTagsSave = () => {
         const {id} = this.props.app;
         const {temporaryTags, tags} = this.state;
@@ -310,14 +302,12 @@ class AppDetailsDrawer extends React.Component {
             const data = {tags: temporaryTags};
             axios.put(
                 config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
-                data,
-                {
-                    headers: {'X-Platform': config.serverConfig.platform}
-                }
+                data
             ).then(res => {
                 if (res.status === 200) {
                     notification["success"]({
-                        message: 'Saved!'
+                        message: 'Saved!',
+                        description: 'App tags updated successfully!'
                     });
                     this.setState({
                         loading: false,
@@ -330,7 +320,7 @@ class AppDetailsDrawer extends React.Component {
                     message.error('You are not logged in');
                     window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                 } else {
-                    message.error('Something went wrong... :(');
+                    message.error('Something went wrong when trying to update tags');
                 }
 
                 this.setState({loading: false});
@@ -348,14 +338,12 @@ class AppDetailsDrawer extends React.Component {
             const data = {description: temporaryDescription};
             axios.put(
                 config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
-                data,
-                {
-                    headers: {'X-Platform': config.serverConfig.platform}
-                }
+                data
             ).then(res => {
                 if (res.status === 200) {
                     notification["success"]({
-                        message: 'Saved!'
+                        message: 'Saved!',
+                        description: 'App description updated successfully!'
                     });
                     this.setState({
                         loading: false,
@@ -456,7 +444,7 @@ class AppDetailsDrawer extends React.Component {
                         {!isDescriptionEditEnabled && (
                             <Text
                                 style={{
-                                    color: "#1890ff",
+                                    color: config.theme.primaryColor,
                                     cursor: "pointer"
                                 }}
                                 onClick={this.enableDescriptionEdit}>
@@ -492,7 +480,7 @@ class AppDetailsDrawer extends React.Component {
                         <Divider dashed={true}/>
                         <Text strong={true}>Categories </Text>
                         {!isCategoriesEditEnabled && (<Text
-                                style={{color: "#1890ff", cursor: "pointer"}}
+                                style={{color: config.theme.primaryColor, cursor: "pointer"}}
                                 onClick={this.enableCategoriesEdit}>
                                 <Icon type="edit"/>
                             </Text>
@@ -525,7 +513,8 @@ class AppDetailsDrawer extends React.Component {
                             <span>{
                                 categories.map(category => {
                                     return (
-                                        <Tag color="#108ee9" key={category} style={{marginBottom: 5}}>
+                                        <Tag color={pSBC(0.30, config.theme.primaryColor)} key={category}
+                                             style={{marginBottom: 5}}>
                                             {category}
                                         </Tag>
                                     );
@@ -537,7 +526,7 @@ class AppDetailsDrawer extends React.Component {
                         <Divider dashed={true}/>
                         <Text strong={true}>Tags </Text>
                         {!isTagsEditEnabled && (<Text
-                                style={{color: "#1890ff", cursor: "pointer"}}
+                                style={{color: config.theme.primaryColor, cursor: "pointer"}}
                                 onClick={this.enableTagsEdit}>
                                 <Icon type="edit"/>
                             </Text>

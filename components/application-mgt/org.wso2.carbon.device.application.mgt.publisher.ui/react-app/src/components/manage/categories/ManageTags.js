@@ -32,10 +32,10 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load tags');
 
             }
             this.setState({
@@ -58,10 +58,8 @@ class ManageTags extends React.Component {
         });
 
         axios.delete(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/tags/"+id,
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/tags/"+id
+        ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
                     message: "Done!",
@@ -82,11 +80,11 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to delete the tag');
             }
             this.setState({
                 loading: false
@@ -98,14 +96,14 @@ class ManageTags extends React.Component {
         const tagName = tag.tagName;
         const tagElem = (
             <Tag
-                color="gold"
+                color="#34495e"
             >
                 {tagName}
                 <Divider type="vertical"/>
                 <Tooltip title="edit">
                     <Icon onClick={() => {
                         this.openEditModal(tagName)
-                    }} style={{color: 'rgba(0,0,0,0.45)'}} type="edit"/>
+                    }} type="edit"/>
                 </Tooltip>
                 <Divider type="vertical"/>
                 <Tooltip title="delete">
@@ -125,7 +123,7 @@ class ManageTags extends React.Component {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Icon style={{color: 'rgba(0,0,0,0.45)'}} type="delete"/>
+                        <Icon type="delete"/>
                     </Popconfirm>
                 </Tooltip>
             </Tag>
@@ -219,11 +217,11 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to delete tag');
             }
             this.setState({
                 loading: false
@@ -281,11 +279,11 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to edit tag');
             }
             this.setState({
                 loading: false,
@@ -307,7 +305,7 @@ class ManageTags extends React.Component {
         const tagsElements = tags.map(this.renderElement);
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
-            <div>
+            <div style={{marginBottom: 16}}>
                 <Card title="Tags">
                     <Spin tip="Working on it..." spinning={this.state.loading}>
                         {!isAddNewVisible &&

@@ -1,13 +1,11 @@
 import React from "react";
 import {Layout, Menu, Icon} from 'antd';
-
 const {Header, Content, Footer} = Layout;
-
-import Logo from "../../../public/images/logo.svg";
-import {Link, NavLink} from "react-router-dom";
+import {Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
-import {Switch, Redirect} from 'react-router'
+import {Switch} from 'react-router'
 import "../../App.css";
+import config from "../../../public/conf/config.json";
 
 class Dashboard extends React.Component {
     constructor(props) {
@@ -15,7 +13,8 @@ class Dashboard extends React.Component {
         this.state = {
             routes: props.routes,
             selectedKeys : []
-        }
+        };
+        this.Logo = config.theme.logo;
     }
 
     changeSelectedMenuItem = (key) =>{
@@ -29,14 +28,14 @@ class Dashboard extends React.Component {
         return (
             <div>
                 <Layout className="layout">
-                    <Header>
-                        <div className="logo">
-                            <img src={Logo}/>
+                    <Header style={{paddingLeft: 0, paddingRight: 0}}>
+                        <div className="logo-image">
+                            <img alt="logo" src={this.Logo}/>
                         </div>
                         <Menu
                             theme="light"
                             mode="horizontal"
-                            selectedKeys={selectedKeys}
+                            defaultSelectedKeys={selectedKeys}
                             style={{lineHeight: '64px'}}
                         >
                             <Menu.Item key="android"><Link to="/store/android"><Icon type="android" theme="filled"/>Android</Link></Menu.Item>
