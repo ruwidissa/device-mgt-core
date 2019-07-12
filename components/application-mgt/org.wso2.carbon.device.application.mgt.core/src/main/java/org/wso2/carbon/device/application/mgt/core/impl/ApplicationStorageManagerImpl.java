@@ -212,7 +212,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public InputStream getFileSttream (String path) throws ApplicationStorageManagementException {
+    public InputStream getFileStream(String path) throws ApplicationStorageManagementException {
         String filePath = storagePath + path;
         try {
             return StorageManagementUtil.getInputStream(filePath);

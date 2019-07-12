@@ -583,12 +583,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
-                            + " has the publisher permission", e);
+            String msg = "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
+                    + " has the publisher permission";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            throw new ApplicationManagementException(
-                    "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId, e);
+            String msg = "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -792,23 +794,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
         } catch (TransactionManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while staring application release creating transaction for application Id: "
-                            + applicationId, e);
+            String msg = "Error occurred while staring application release creating transaction for application Id: "
+                    + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while adding application release into IoTS app management ApplicationDTO id of the "
-                            + "application release: " + applicationId, e);
-
+            String msg = "Error occurred while adding application release into IoTS app management ApplicationDTO id of"
+                    + " the application release: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while adding new application release lifecycle state to the application release: "
-                            + applicationId, e);
+            String msg = "Error occurred while adding new application release lifecycle state to the application"
+                    + " release: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while adding new application release for application " + applicationId, e);
+            String msg = "Error occurred while adding new application release for application " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }

@@ -80,7 +80,7 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
                 throw new NotFoundException(msg);
             }
             artifactPath = appReleaseHashValue + Constants.FORWARD_SLASH + artifactName;
-            InputStream inputStream = applicationStorageManager.getFileSttream(artifactPath);
+            InputStream inputStream = applicationStorageManager.getFileStream(artifactPath);
             if (inputStream == null) {
                 String msg = "Couldn't file the file in the file system. File path: " + artifactPath;
                 log.error(msg);

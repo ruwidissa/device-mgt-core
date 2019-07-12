@@ -88,5 +88,5 @@ public interface ApplicationStorageManager {
      * @return {@link InputStream}
      * @throws ApplicationStorageManagementException throws if an error occurs when accessing the file.
      */
-    InputStream getFileSttream(String path) throws ApplicationStorageManagementException;
+    InputStream getFileStream(String path) throws ApplicationStorageManagementException;
 }
