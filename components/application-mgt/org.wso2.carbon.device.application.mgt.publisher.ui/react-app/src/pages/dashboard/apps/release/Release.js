@@ -47,9 +47,6 @@ class Release extends React.Component {
         //send request to the invoker
         axios.get(
             config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/release/"+ uuid,
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }
         ).then(res => {
             if (res.status === 200) {
                 const app = res.data.data;
@@ -70,7 +67,7 @@ class Release extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.error('Something went wrong... :(');
+                message.error('Something went wrong when trying to load the release... :(');
             }
 
             this.setState({loading: false});

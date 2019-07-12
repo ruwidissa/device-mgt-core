@@ -33,7 +33,7 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
                 message.warning('Something went wrong');
@@ -80,11 +80,11 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load categories');
             }
             this.setState({
                 loading: false
@@ -219,11 +219,11 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to add categories');
             }
             this.setState({
                 loading: false
@@ -281,11 +281,11 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to delete the category');
             }
             this.setState({
                 loading: false,

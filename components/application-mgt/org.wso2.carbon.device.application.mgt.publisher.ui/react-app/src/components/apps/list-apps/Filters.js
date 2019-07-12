@@ -1,10 +1,10 @@
 import React from "react";
-import {Avatar, Card, Col, Row, Table, Typography, Input, Divider, Icon, Select, Button, Form, message, Radio} from "antd";
+import {Card, Col, Row,Typography, Input, Divider, Icon, Select, Button, Form, message, Radio} from "antd";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 
 const {Option} = Select;
-const {Title, Text} = Typography;
+const {Title} = Typography;
 
 
 class FiltersForm extends React.Component {
@@ -49,10 +49,8 @@ class FiltersForm extends React.Component {
 
     getCategories = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+        ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
                 this.setState({
@@ -62,10 +60,10 @@ class FiltersForm extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong while trying to load categories... :(');
 
             }
             this.setState({
@@ -76,10 +74,8 @@ class FiltersForm extends React.Component {
 
     getTags = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+        ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
                 this.setState({
@@ -89,10 +85,10 @@ class FiltersForm extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load tags');
 
             }
             this.setState({
@@ -104,10 +100,8 @@ class FiltersForm extends React.Component {
 
     getDeviceTypes = () => {
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types",
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
+        ).then(res => {
             if (res.status === 200) {
                 const deviceTypes = JSON.parse(res.data.data);
                 this.setState({
@@ -117,10 +111,10 @@ class FiltersForm extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load device types');
 
             }
             this.setState({

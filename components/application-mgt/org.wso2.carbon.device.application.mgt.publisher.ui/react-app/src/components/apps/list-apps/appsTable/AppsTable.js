@@ -1,5 +1,5 @@
 import React from "react";
-import {Avatar, Card, Col, Row, Table, Typography, Tag, Icon, message} from "antd";
+import {Avatar, Table, Tag, Icon, message} from "antd";
 import axios from "axios";
 import pSBC from 'shade-blend-color';
 import config from "../../../../../public/conf/config.json";
@@ -155,7 +155,7 @@ class AppsTable extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.error('Something went wrong... :(');
+                message.error('Something went wrong while trying to load apps... :(');
             }
 
             this.setState({loading: false});

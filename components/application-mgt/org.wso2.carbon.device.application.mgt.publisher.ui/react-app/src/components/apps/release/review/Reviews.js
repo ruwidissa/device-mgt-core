@@ -31,20 +31,18 @@ class Reviews extends React.Component {
         const {uuid, type} = this.props;
 
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/reviews/"+type+"/"+uuid,
-            {
-                headers: {'X-Platform': config.serverConfig.platform}
-            }).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/reviews/" + type + "/" + uuid
+        ).then(res => {
             if (res.status === 200) {
                 let reviews = res.data.data.data;
                 callback(reviews);
             }
 
         }).catch(function (error) {
-            if (error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong');
+                message.warning('Something went wrong when trying to load reviews');
 
             }
         });
