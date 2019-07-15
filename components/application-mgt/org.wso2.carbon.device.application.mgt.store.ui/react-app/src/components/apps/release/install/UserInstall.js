@@ -52,7 +52,12 @@ class UserInstall extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
-                message.error('Something went wrong... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load users.",
+                });
             }
 
             this.setState({fetching: false});

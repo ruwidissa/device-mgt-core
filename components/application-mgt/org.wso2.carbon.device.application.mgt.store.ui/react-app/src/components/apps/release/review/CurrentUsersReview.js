@@ -1,5 +1,5 @@
 import React from "react";
-import {List, message, Typography, Empty, Button, Row, Col} from "antd";
+import {List, message, Typography, Empty, Button, Row, Col, notification} from "antd";
 import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
@@ -37,7 +37,12 @@ class CurrentUsersReview extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
-                message.error('Something went wrong when trying to get your review... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to get your review.",
+                });
             }
         });
     };

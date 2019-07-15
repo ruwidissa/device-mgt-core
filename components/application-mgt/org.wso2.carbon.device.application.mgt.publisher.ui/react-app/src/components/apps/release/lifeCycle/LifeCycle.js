@@ -2,10 +2,11 @@ import React from "react";
 import {Typography, Tag, Divider, Select, Button, Modal, message, notification, Collapse} from "antd";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
-
+import pSBC from "shade-blend-color";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './LifeCycle.css';
+import LifeCycleDetailsModal from "./lifeCycleDetailsModal/lifeCycleDetailsModal";
 
 const {Text, Title, Paragraph} = Typography;
 const {Option} = Select;
@@ -26,6 +27,7 @@ const formats = [
     'list', 'bullet',
     'link', 'image'
 ];
+
 
 class LifeCycle extends React.Component {
 
@@ -69,7 +71,12 @@ class LifeCycle extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.error('Something went wrong when trying to load lifecycle configuration');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load lifecycle configuration.",
+                });
             }
         });
     };
@@ -133,7 +140,7 @@ class LifeCycle extends React.Component {
                 notification["error"]({
                     message: "Error",
                     description:
-                        "Something went wrong when trying to add lifecycle",
+                        "Error occurred while trying to add lifecycle",
                 });
             }
             this.setState({
@@ -152,7 +159,6 @@ class LifeCycle extends React.Component {
         if((lifecycle.hasOwnProperty(currentStatus)) && lifecycle[currentStatus].hasOwnProperty("proceedingStates")){
             proceedingStates = lifecycle[currentStatus].proceedingStates;
         }
-        console.log(lifecycle);
         return (
             <div>
                 <Title level={4}>Manage Lifecycle</Title>
@@ -163,6 +169,7 @@ class LifeCycle extends React.Component {
                     state to another. <br/>Note: ‘Change State To’ displays only the next states allowed from the
                     current state
                 </Paragraph>
+                <LifeCycleDetailsModal lifecycle={lifecycle}/>
                 <Divider dashed={true}/>
                 <Text strong={true}>Current State: </Text> <Tag color="blue">{currentStatus}</Tag><br/><br/>
                 <Text>Change State to: </Text>
@@ -198,30 +205,6 @@ class LifeCycle extends React.Component {
 
 
                 <Divider/>
-                <Text strong={true}>Lorem Ipsum</Text>
-                <Collapse defaultActiveKey={currentStatus}>
-                    {
-                        Object.keys(lifecycle).map(lifecycleState => {
-                            return (
-                                <Panel header={lifecycleState} key={lifecycleState}>
-                                    {
-                                        Object.keys(lifecycle).map(state => {
-                                            // console.log(lifecycle[lifecycleState].proceedingStates);
-                                            const isEnabled = lifecycle[lifecycleState].hasOwnProperty("proceedingStates") && (lifecycle[lifecycleState].proceedingStates.includes(state));
-                                            const color = isEnabled ? "green" : "";
-                                            return (
-                                                <Tag
-                                                    disabled={!isEnabled}
-                                                    key={state} style={{marginBottom: 5}} color={color}>{state}</Tag>
-                                            )
-                                        })
-                                    }
-                                </Panel>
-                            )
-                        })
-                    }
-
-                </Collapse>
 
                 <Modal
                     title="Confirm changing lifecycle state"

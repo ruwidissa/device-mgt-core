@@ -17,21 +17,20 @@ class AppInstallModal extends React.Component{
                 <Modal
                     title="Install App"
                     visible={this.props.visible}
-                    // onOk={this.handleOk}
                     onCancel={this.props.onClose}
                     footer={null}
                 >
-                    <Tabs defaultActiveKey="1">
-                        <TabPane tab="User" key="1">
-                            <UserInstall onInstall={this.props.onInstall}/>
-                        </TabPane>
-                        <TabPane tab="Device" key="2">
+                    <Tabs defaultActiveKey="device">
+                        <TabPane tab="Device" key="device">
                             <DeviceInstall onInstall={this.props.onInstall}/>
                         </TabPane>
-                        <TabPane tab="Role" key="3">
+                        <TabPane tab="User" key="user">
+                            <UserInstall onInstall={this.props.onInstall}/>
+                        </TabPane>
+                        <TabPane tab="Role" key="role">
                             <RoleInstall onInstall={this.props.onInstall}/>
                         </TabPane>
-                        <TabPane tab="Group" key="4">
+                        <TabPane tab="Group" key="group">
                             <GroupInstall onInstall={this.props.onInstall}/>
                         </TabPane>
                     </Tabs>

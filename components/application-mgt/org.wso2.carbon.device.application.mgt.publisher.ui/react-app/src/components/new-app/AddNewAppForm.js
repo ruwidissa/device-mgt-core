@@ -68,8 +68,12 @@ class AddNewAppFormComponent extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load categories');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load categories.",
+                });
             }
             this.setState({
                 loading: false
@@ -93,8 +97,12 @@ class AddNewAppFormComponent extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load tags');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load tags.",
+                });
             }
             this.setState({
                 loading: false
@@ -116,7 +124,7 @@ class AddNewAppFormComponent extends React.Component {
                 this.setState({
                     loading: true
                 });
-                const {name, description, categories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription,releaseType} = values;
+                const {name, description, categories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription, releaseType} = values;
                 const application = {
                     name,
                     description,
@@ -130,9 +138,9 @@ class AddNewAppFormComponent extends React.Component {
 
                 if (formConfig.installationType !== "WEB_CLIP") {
                     application.deviceType = values.deviceType;
-                }else{
+                } else {
                     application.type = "WEB_CLIP";
-                    application.deviceType ="ALL";
+                    application.deviceType = "ALL";
                 }
 
                 if (specificElements.hasOwnProperty("binaryFile")) {

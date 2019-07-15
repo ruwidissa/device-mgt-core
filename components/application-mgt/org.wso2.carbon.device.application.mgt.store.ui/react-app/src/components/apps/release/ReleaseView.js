@@ -52,7 +52,8 @@ class ReleaseView extends React.Component {
                     loading: false
                 });
                 notification["error"]({
-                    message: 'Something went wrong',
+                    message: "There was a problem",
+                    duration: 0,
                     description:
                         "We are unable to install the app.",
                 });
@@ -68,7 +69,8 @@ class ReleaseView extends React.Component {
                     visible: false
                 });
                 notification["error"]({
-                    message: 'Something went wrong',
+                    message: "There was a problem",
+                    duration: 0,
                     description:
                         "We are unable to add your review right now.",
                 });

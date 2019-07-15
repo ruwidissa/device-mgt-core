@@ -1,6 +1,6 @@
 import React from "react";
 import AppCard from "./AppCard";
-import {Col, message, Row} from "antd";
+import {Col, message, notification, Row, Result, Skeleton} from "antd";
 import axios from "axios";
 import config from "../../../public/conf/config.json";
 
@@ -9,7 +9,7 @@ class AppList extends React.Component {
         super(props);
         this.state = {
             apps: [],
-            loading: false
+            loading: true
         }
     }
 
@@ -31,19 +31,18 @@ class AppList extends React.Component {
     fetchData = (deviceType) => {
 
         const payload = {};
-        if(deviceType==="web-clip"){
-            payload.appType= "WEB_CLIP";
-        }else{
-            payload.deviceType= deviceType;
+        if (deviceType === "web-clip") {
+            payload.appType = "WEB_CLIP";
+        } else {
+            payload.deviceType = deviceType;
         }
-
-        console.log("b",config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/");
-
+        this.setState({
+            loading: true
+        });
         //send request to the invoker
         axios.post(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/",
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/",
             payload,
-
         ).then(res => {
             if (res.status === 200) {
                 //todo remove this property check after backend improvement
@@ -54,13 +53,19 @@ class AppList extends React.Component {
                 })
             }
 
-        }).catch((error) => { console.log(error.response);
+        }).catch((error) => {
+            console.log(error.response);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popup with error
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
-                message.error('Something went wrong... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load apps.",
+                });
             }
 
             this.setState({loading: false});
@@ -68,18 +73,28 @@ class AppList extends React.Component {
     };
 
     render() {
-        const {apps} = this.state;
+        const {apps,loading} = this.state;
 
         return (
-            <Row gutter={16}>
-                {apps.map(app => (
-                    <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>
-                        <AppCard key={app.id}
-                                 app={app}
+            <Skeleton loading={loading} active>
+                <Row gutter={16}>
+                    {apps.length === 0 && (
+                        <Result
+                            status="404"
+                            title="No apps, yet."
+                            subTitle="No apps available, yet! When the administration uploads, apps will show up here."
+                            // extra={<Button type="primary">Back Home</Button>}
                         />
-                    </Col>
-                ))}
-            </Row>
+                    )}
+                    {apps.map(app => (
+                        <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>
+                            <AppCard key={app.id}
+                                     app={app}
+                            />
+                        </Col>
+                    ))}
+                </Row>
+            </Skeleton>
         );
     }
 }

@@ -1,10 +1,27 @@
 import React from "react";
-import {Card, Tag, message, Icon, Input, notification, Divider, Button, Spin, Tooltip, Popconfirm, Modal} from "antd";
+import {
+    Card,
+    Tag,
+    message,
+    Icon,
+    Input,
+    notification,
+    Divider,
+    Button,
+    Spin,
+    Tooltip,
+    Popconfirm,
+    Modal,
+    Row,
+    Col,
+    Typography
+} from "antd";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 import {TweenOneGroup} from 'rc-tween-one';
 import pSBC from "shade-blend-color";
 
+const {Title} = Typography;
 
 class ManageCategories extends React.Component {
     state = {
@@ -22,8 +39,8 @@ class ManageCategories extends React.Component {
 
     componentDidMount() {
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/categories",
-            ).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
+        ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
                 this.setState({
@@ -34,7 +51,7 @@ class ManageCategories extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
                 message.warning('Something went wrong');
 
@@ -57,8 +74,7 @@ class ManageCategories extends React.Component {
             loading: true
         });
         axios.delete(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories/"+id,
-
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/" + id,
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -82,9 +98,14 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load categories');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load categories.",
+                });
             }
             this.setState({
                 loading: false
@@ -96,7 +117,7 @@ class ManageCategories extends React.Component {
         const categoryName = category.categoryName;
         const tagElem = (
             <Tag
-                color={pSBC ( 0.30, config.theme.primaryColor )}
+                color={pSBC(0.30, config.theme.primaryColor)}
             >
                 {categoryName}
                 <Divider type="vertical"/>
@@ -139,7 +160,7 @@ class ManageCategories extends React.Component {
         const tagElem = (
             <Tag
                 closable
-                onClose={e=>{
+                onClose={e => {
                     e.preventDefault();
                     const {tempElements} = this.state;
                     const remainingElements = tempElements.filter(function (value) {
@@ -197,9 +218,8 @@ class ManageCategories extends React.Component {
         const data = tempElements.map(category => category.categoryName);
 
         axios.post(
-        config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories",
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories",
             data,
-
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -221,9 +241,14 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to add categories');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to add categories.",
+                });
             }
             this.setState({
                 loading: false
@@ -260,9 +285,8 @@ class ManageCategories extends React.Component {
         });
 
         axios.put(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/categories/rename?from="+currentlyEditingId+"&to="+editingValue,
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/rename?from=" + currentlyEditingId + "&to=" + editingValue,
             {},
-
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -283,9 +307,14 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to delete the category');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to delete the category.",
+                });
             }
             this.setState({
                 loading: false,
@@ -308,21 +337,33 @@ class ManageCategories extends React.Component {
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
             <div style={{marginBottom: 16}}>
-                <Card title="Categories">
+                <Card>
                     <Spin tip="Working on it..." spinning={this.state.loading}>
-                        {!isAddNewVisible &&
-                        <Button
-                            size="small"
-                            onClick={() => {
-                                this.setState({
-                                    isAddNewVisible: true,
-                                    inputVisible: true
-                                }, () => this.input.focus())
-                            }} htmlType="button">Add Categories
-                        </Button>
-                        }
+                        <Row>
+                            <Col span={16}>
+                                <Title level={4}>Categories</Title>
+                            </Col>
+                            <Col span={8}>
+                                {!isAddNewVisible &&
+                                <div style={{float: "right"}}>
+                                    <Button
+                                        icon="plus"
+                                        // type="primary"
+                                        size="small"
+                                        onClick={() => {
+                                            this.setState({
+                                                isAddNewVisible: true,
+                                                inputVisible: true
+                                            }, () => this.input.focus())
+                                        }} htmlType="button">Add
+                                    </Button>
+                                </div>
+                                }
+                            </Col>
+                        </Row>
                         {isAddNewVisible &&
                         <div>
+                            <Divider/>
                             <div style={{marginBottom: 16}}>
                                 <TweenOneGroup
                                     enter={{
@@ -360,14 +401,18 @@ class ManageCategories extends React.Component {
                                 </TweenOneGroup>
                             </div>
                             <div>
-                                <Button
-                                    onClick={this.handleSave}
-                                    htmlType="button" type="primary"
-                                    size="small"
-                                    disabled={tempElements.length === 0}>
+                                {tempElements.length > 0 && (
+                                    <span>
+                                    <Button
+                                        onClick={this.handleSave}
+                                        htmlType="button" type="primary"
+                                        size="small"
+                                    >
                                     Save
-                                </Button>
-                                <Divider type="vertical"/>
+                                    </Button>
+                                    <Divider type="vertical"/>
+                                    </span>
+                                )}
                                 <Button
                                     onClick={this.handleCloseButton}
                                     size="small">
@@ -402,7 +447,8 @@ class ManageCategories extends React.Component {
                     onCancel={this.closeEditModal}
                     onOk={this.editItem}
                 >
-                    <Input value={this.state.editingValue} ref={(input) => this.editingInput = input} onChange={this.handleEditInputChange}/>
+                    <Input value={this.state.editingValue} ref={(input) => this.editingInput = input}
+                           onChange={this.handleEditInputChange}/>
                 </Modal>
             </div>
         );

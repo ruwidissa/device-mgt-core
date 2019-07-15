@@ -1,5 +1,5 @@
 import React from "react";
-import {List, message, Avatar, Spin, Button} from 'antd';
+import {List, message, Avatar, Spin, Button, notification} from 'antd';
 import "./Reviews.css";
 
 import InfiniteScroll from 'react-infinite-scroller';
@@ -42,8 +42,12 @@ class Reviews extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load reviews');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load reviews.",
+                });
             }
         });
     };

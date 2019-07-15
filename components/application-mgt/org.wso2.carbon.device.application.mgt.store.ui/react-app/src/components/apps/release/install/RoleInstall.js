@@ -50,7 +50,12 @@ class RoleInstall extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
             } else {
-                message.error('Something went wrong... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load roles.",
+                });
             }
 
             this.setState({fetching: false});

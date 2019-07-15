@@ -14,7 +14,7 @@ class Apps extends React.Component {
         const {deviceType} = this.props.match.params;
         return (
             <div>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
+                <div style={{background: '#f0f2f5', padding: 24, minHeight: 760}}>
                     {deviceType!==null && <AppList changeSelectedMenuItem={this.props.changeSelectedMenuItem} deviceType={deviceType}/>}
                 </div>
 

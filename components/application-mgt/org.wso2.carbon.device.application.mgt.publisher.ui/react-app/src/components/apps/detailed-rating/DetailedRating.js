@@ -1,5 +1,5 @@
 import React from "react";
-import {Row, Typography, Icon, message} from "antd";
+import {Row, Typography, Icon, message, notification} from "antd";
 import StarRatings from "react-star-ratings";
 import "./DetailedRating.css";
 import config from "../../../../public/conf/config.json";
@@ -44,7 +44,12 @@ class DetailedRating extends React.Component{
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
             } else {
-                message.error('Something went wrong while trying to load rating for the release... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load rating for the release.",
+                });
             }
         });
     };
