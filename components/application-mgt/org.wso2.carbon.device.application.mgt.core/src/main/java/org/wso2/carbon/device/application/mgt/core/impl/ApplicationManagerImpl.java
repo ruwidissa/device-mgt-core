@@ -451,13 +451,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         if (!StringUtils.isEmpty(applicationArtifact.getIconName())) {
-            applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                    applicationReleaseDTO.getIconName());
+            applicationStorageManager
+                    .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), Constants.ICON_ARTIFACT,
+                            applicationReleaseDTO.getIconName());
             applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
         }
         if (!StringUtils.isEmpty(applicationArtifact.getBannerName())){
-            applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                    applicationReleaseDTO.getBannerName());
+            applicationStorageManager
+                    .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), Constants.BANNER_ARTIFACT,
+                            applicationReleaseDTO.getBannerName());
             applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
         }
 
@@ -470,17 +472,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             int counter = 1;
             for (String scName : screenshotNames) {
+                String folderPath = Constants.SCREENSHOT_ARTIFACT + counter;
                 if (counter == 1) {
-                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                            applicationReleaseDTO.getScreenshotName1());
+                    applicationStorageManager
+                            .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
+                                    applicationReleaseDTO.getScreenshotName1());
                     applicationReleaseDTO.setScreenshotName1(scName);
                 } else if (counter == 2) {
-                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                            applicationReleaseDTO.getScreenshotName2());
+                    applicationStorageManager
+                            .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
+                                    applicationReleaseDTO.getScreenshotName2());
                     applicationReleaseDTO.setScreenshotName2(scName);
                 } else if (counter == 3) {
-                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                            applicationReleaseDTO.getScreenshotName3());
+                    applicationStorageManager
+                            .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
+                                    applicationReleaseDTO.getScreenshotName3());
                     applicationReleaseDTO.setScreenshotName3(scName);
                 }
                 counter++;

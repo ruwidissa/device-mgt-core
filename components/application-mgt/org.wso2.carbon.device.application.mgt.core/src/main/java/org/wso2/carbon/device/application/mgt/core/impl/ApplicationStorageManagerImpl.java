@@ -30,6 +30,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagemen
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.core.exception.ParsingException;
 import org.wso2.carbon.device.application.mgt.core.util.ArtifactsParser;
+import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.StorageManagementUtil;
 
 import java.io.*;
@@ -60,21 +61,24 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
             InputStream iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
             throws ResourceManagementException {
-        String artifactDirectoryPath;
         String iconStoredLocation;
         String bannerStoredLocation;
         String scStoredLocation = null;
 
         try {
-            artifactDirectoryPath = storagePath + applicationReleaseDTO.getAppHashValue();
-            StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
+            String artifactStoringBaseDirPath = storagePath + applicationReleaseDTO.getAppHashValue();
+            StorageManagementUtil.createArtifactDirectory(artifactStoringBaseDirPath);
 
             if (iconFileStream != null) {
-                iconStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getIconName();
+                String iconStoringDir = artifactStoringBaseDirPath + File.separator + Constants.ICON_ARTIFACT;
+                StorageManagementUtil.createArtifactDirectory(iconStoringDir);
+                iconStoredLocation = iconStoringDir + File.separator + applicationReleaseDTO.getIconName();
                 saveFile(iconFileStream, iconStoredLocation);
             }
             if (bannerFileStream != null) {
-                bannerStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getBannerName();
+                String bannerStoringDir = artifactStoringBaseDirPath + File.separator + Constants.BANNER_ARTIFACT;
+                StorageManagementUtil.createArtifactDirectory(bannerStoringDir);
+                bannerStoredLocation = bannerStoringDir + File.separator + applicationReleaseDTO.getBannerName();
                 saveFile(bannerFileStream, bannerStoredLocation);
             }
             if (!screenShotStreams.isEmpty()) {
@@ -86,14 +90,16 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
                 }
                 int count = 1;
                 for (InputStream screenshotStream : screenShotStreams) {
+                    String scStoringDir = artifactStoringBaseDirPath + File.separator + Constants.SCREENSHOT_ARTIFACT + count;
+                    StorageManagementUtil.createArtifactDirectory(scStoringDir);
                     if (count == 1) {
-                        scStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getScreenshotName1();
+                        scStoredLocation = scStoringDir + File.separator + applicationReleaseDTO.getScreenshotName1();
                     }
                     if (count == 2) {
-                        scStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getScreenshotName2();
+                        scStoredLocation = scStoringDir + File.separator + applicationReleaseDTO.getScreenshotName2();
                     }
                     if (count == 3) {
-                        scStoredLocation = artifactDirectoryPath + File.separator + applicationReleaseDTO.getScreenshotName3();
+                        scStoredLocation = scStoringDir + File.separator + applicationReleaseDTO.getScreenshotName3();
                     }
                     saveFile(screenshotStream, scStoredLocation);
                     count++;
@@ -101,8 +107,10 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             }
             return applicationReleaseDTO;
         } catch (IOException e) {
-            throw new ApplicationStorageManagementException("IO Exception while saving the screens hots for " +
-                    "the application " + applicationReleaseDTO.getUuid(), e);
+            String msg = "IO Exception occurred while saving application artifacts for the application which has UUID "
+                    + applicationReleaseDTO.getUuid();
+            log.error(msg);
+            throw new ApplicationStorageManagementException(msg, e);
         }
     }
 
@@ -142,7 +150,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String artifactPath;
             byte [] content = IOUtils.toByteArray(binaryFile);
 
-            artifactDirectoryPath = storagePath + applicationReleaseDTO.getAppHashValue();
+            artifactDirectoryPath =
+                    storagePath + applicationReleaseDTO.getAppHashValue() + File.separator + Constants.APP_ARTIFACT;
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
@@ -168,24 +177,38 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String screenshot3 = applicationReleaseDTO.getScreenshotName3();
 
             if (bannerName != null) {
-                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + bannerName,
-                        storagePath + appHashValue + File.separator + bannerName);
+                StorageManagementUtil
+                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.BANNER_ARTIFACT
+                                        + File.separator + bannerName,
+                                storagePath + appHashValue + File.separator + Constants.BANNER_ARTIFACT + File.separator
+                                        + bannerName);
             }
             if (iconName != null) {
-                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + iconName,
-                        storagePath + appHashValue + File.separator + iconName);
+                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + Constants.ICON_ARTIFACT
+                                + File.separator + iconName,
+                        storagePath + appHashValue + File.separator + Constants.ICON_ARTIFACT + File.separator
+                                + iconName);
             }
             if (screenshot1 != null) {
-                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + screenshot1,
-                        storagePath + appHashValue + File.separator + screenshot1);
+                StorageManagementUtil
+                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 1
+                                        + File.separator + screenshot1,
+                                storagePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 1
+                                        + File.separator + screenshot1);
             }
             if (screenshot2 != null) {
-                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + screenshot2,
-                        storagePath + appHashValue + File.separator + screenshot2);
+                StorageManagementUtil
+                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 2
+                                        + File.separator + screenshot2,
+                                storagePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 2
+                                        + File.separator + screenshot2);
             }
             if (screenshot3 != null) {
-                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + screenshot3,
-                        storagePath + appHashValue + File.separator + screenshot3);
+                StorageManagementUtil
+                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 3
+                                        + File.separator + screenshot3,
+                                storagePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 3
+                                        + File.separator + screenshot3);
             }
             deleteAppReleaseArtifact( storagePath + deletingAppHashValue);
         } catch (IOException e) {
@@ -198,8 +221,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
 
     @Override
-    public void deleteAppReleaseArtifact(String appReleaseHashVal, String fileName) throws ApplicationStorageManagementException {
-        String artifactPath = storagePath + appReleaseHashVal + File.separator + fileName;
+    public void deleteAppReleaseArtifact(String appReleaseHashVal, String folderName, String fileName)
+            throws ApplicationStorageManagementException {
+        String artifactPath = storagePath + appReleaseHashVal + File.separator + folderName + File.separator + fileName;
         deleteAppReleaseArtifact(artifactPath);
     }
 
@@ -212,8 +236,9 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public InputStream getFileStream(String path) throws ApplicationStorageManagementException {
-        String filePath = storagePath + path;
+    public InputStream getFileStream(String hashVal, String folderName, String fileName)
+            throws ApplicationStorageManagementException {
+        String filePath = storagePath + hashVal + File.separator + folderName + File.separator + fileName;
         try {
             return StorageManagementUtil.getInputStream(filePath);
         } catch (IOException e) {

@@ -72,7 +72,7 @@ public interface ApplicationStorageManager {
      *
      * @throws ApplicationStorageManagementException Not Found Exception.
      */
-    void deleteAppReleaseArtifact(String appReleaseHashVal, String fileName) throws ApplicationStorageManagementException;
+    void deleteAppReleaseArtifact(String appReleaseHashVal, String folderName, String fileName) throws ApplicationStorageManagementException;
 
     /**
      * To delete all release artifacts related with particular ApplicationDTO Release.
@@ -84,9 +84,9 @@ public interface ApplicationStorageManager {
 
     /***
      * Get the InputStream of the file which is located in filePath
-     * @param path file path
+     * @param hashVal Hash Value of the application release.
      * @return {@link InputStream}
      * @throws ApplicationStorageManagementException throws if an error occurs when accessing the file.
      */
-    InputStream getFileStream(String path) throws ApplicationStorageManagementException;
+    InputStream getFileStream(String hashVal, String folderName, String fileName) throws ApplicationStorageManagementException;
 }

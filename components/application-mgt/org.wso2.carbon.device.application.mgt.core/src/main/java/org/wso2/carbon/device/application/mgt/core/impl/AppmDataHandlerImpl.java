@@ -64,12 +64,11 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
         return lifecycleStateManager.getLifecycleConfig();
     }
 
-    @Override
-    public InputStream getArtifactStream(String uuid, String artifactName) throws ApplicationManagementException {
+    @Override public InputStream getArtifactStream(String uuid, String folderName, String artifactName)
+            throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         ApplicationReleaseDAO applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
-        String artifactPath;
         String appReleaseHashValue;
         try {
             ConnectionManagerUtil.openDBConnection();
@@ -79,10 +78,10 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
-            artifactPath = appReleaseHashValue + Constants.FORWARD_SLASH + artifactName;
-            InputStream inputStream = applicationStorageManager.getFileStream(artifactPath);
+            InputStream inputStream = applicationStorageManager
+                    .getFileStream(appReleaseHashValue, folderName, artifactName);
             if (inputStream == null) {
-                String msg = "Couldn't file the file in the file system. File path: " + artifactPath;
+                String msg = "Couldn't file the file in the file system.";
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }

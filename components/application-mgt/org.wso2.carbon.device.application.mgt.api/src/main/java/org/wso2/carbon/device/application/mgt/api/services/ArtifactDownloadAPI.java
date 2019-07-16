@@ -57,7 +57,7 @@ import javax.ws.rs.core.Response;
 public interface ArtifactDownloadAPI {
 
     @GET
-    @Path("/{uuid}/{fileName}")
+    @Path("/{uuid}/{folderName}/{fileName}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(
             produces = MediaType.APPLICATION_OCTET_STREAM,
@@ -86,6 +86,11 @@ public interface ArtifactDownloadAPI {
             value = "UUID of the application release.",
             required = true)
             @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "folderName",
+                    value = "Name of the folder where the artifact store.",
+                    required = true)
+            @PathParam("folderName") String folderName,
             @ApiParam(
                     name = "fileName",
                     value = "Name of the artifact",
