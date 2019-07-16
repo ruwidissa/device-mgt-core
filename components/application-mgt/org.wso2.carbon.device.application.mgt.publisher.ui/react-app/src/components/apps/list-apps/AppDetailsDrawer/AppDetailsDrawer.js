@@ -116,8 +116,12 @@ class AppDetailsDrawer extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong while trying to load app details... :(');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load app details.",
+                });
             }
             this.setState({
                 loading: false
@@ -151,8 +155,12 @@ class AppDetailsDrawer extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load tags.');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load tags.",
+                });
             }
             this.setState({
                 loading: false
@@ -186,7 +194,12 @@ class AppDetailsDrawer extends React.Component {
                     message.error('You are not logged in');
                     window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                 } else {
-                    message.error('Something went wrong when trying to save the app name... :(');
+                    notification["error"]({
+                        message: "There was a problem",
+                        duration: 0,
+                        description:
+                            "Error occurred while trying to save the app name.",
+                    });
                 }
 
                 this.setState({loading: false});
@@ -262,7 +275,12 @@ class AppDetailsDrawer extends React.Component {
                     message.error('You are not logged in');
                     window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                 } else {
-                    message.error('Something went wrong when trying to updating categories');
+                    notification["error"]({
+                        message: "There was a problem",
+                        duration: 0,
+                        description:
+                            "Error occurred while trying to updating categories.",
+                    });
                 }
 
                 this.setState({loading: false});
@@ -320,7 +338,12 @@ class AppDetailsDrawer extends React.Component {
                     message.error('You are not logged in');
                     window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
                 } else {
-                    message.error('Something went wrong when trying to update tags');
+                    notification["error"]({
+                        message: "There was a problem",
+                        duration: 0,
+                        description:
+                            "Error occurred while trying to update tags",
+                    });
                 }
 
                 this.setState({loading: false});

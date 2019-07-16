@@ -65,7 +65,8 @@ class SingleReview extends React.Component {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
                 notification["error"]({
-                    message: 'Something went wrong',
+                    message: "There was a problem",
+                    duration: 0,
                     description:
                         "We were unable to delete the review..",
                 });

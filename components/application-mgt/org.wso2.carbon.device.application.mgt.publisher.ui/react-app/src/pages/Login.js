@@ -1,5 +1,5 @@
 import React from "react";
-import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox, message} from 'antd';
+import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox, message, notification} from 'antd';
 import './Login.css';
 import axios from 'axios';
 import config from "../../public/conf/config.json";
@@ -86,7 +86,12 @@ class NormalLoginForm extends React.Component {
                             inValid: true
                         });
                     } else {
-                        message.error('Something went wrong when trying to login... :(');
+                        notification["error"]({
+                            message: "There was a problem",
+                            duration: 0,
+                            description:
+                                "Error occurred while trying to login.",
+                        });
                     }
                     thisForm.setState({
                         loading: false

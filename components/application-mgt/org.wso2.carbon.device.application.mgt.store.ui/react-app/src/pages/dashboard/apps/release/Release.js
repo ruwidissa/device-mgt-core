@@ -1,6 +1,6 @@
 import React from "react";
 import '../../../../App.css';
-import {Skeleton, Typography, Row, Col, Card, message} from "antd";
+import {Skeleton, Typography, Row, Col, Card, message, notification} from "antd";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
@@ -57,7 +57,12 @@ class Release extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
-                message.error('Something went wrong... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load releases.",
+                });
             }
 
             this.setState({loading: false});

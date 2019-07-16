@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import config from "../../../../../public/conf/config.json";
-import {Button, message, Table, Typography} from "antd";
+import {Button, message, notification, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -120,7 +120,7 @@ class DeviceInstall extends React.Component {
         const extraParams = {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
-            status: "INACTIVE",
+            status: "ACTIVE",
             requireDeviceInfo: true
         };
 
@@ -158,7 +158,12 @@ class DeviceInstall extends React.Component {
                 message.error('You are not logged in');
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
-                message.error('Something went wrong... :(');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load devices.",
+                });
             }
 
             this.setState({loading: false});

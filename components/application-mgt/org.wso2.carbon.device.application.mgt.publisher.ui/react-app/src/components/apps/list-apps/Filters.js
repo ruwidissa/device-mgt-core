@@ -1,5 +1,19 @@
 import React from "react";
-import {Card, Col, Row,Typography, Input, Divider, Icon, Select, Button, Form, message, Radio} from "antd";
+import {
+    Card,
+    Col,
+    Row,
+    Typography,
+    Input,
+    Divider,
+    Icon,
+    Select,
+    Button,
+    Form,
+    message,
+    Radio,
+    notification
+} from "antd";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 
@@ -63,8 +77,12 @@ class FiltersForm extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong while trying to load categories... :(');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load categories.",
+                });
             }
             this.setState({
                 loading: false
@@ -88,8 +106,12 @@ class FiltersForm extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load tags');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load tags.",
+                });
             }
             this.setState({
                 loading: false
@@ -114,8 +136,12 @@ class FiltersForm extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load device types');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load device types.",
+                });
             }
             this.setState({
                 loading: false

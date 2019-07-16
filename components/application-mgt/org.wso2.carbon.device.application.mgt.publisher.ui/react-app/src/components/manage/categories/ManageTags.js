@@ -1,9 +1,25 @@
 import React from "react";
-import {Card, Tag, message, Icon, Input, notification, Divider, Button, Spin, Tooltip, Popconfirm, Modal} from "antd";
+import {
+    Card,
+    Tag,
+    message,
+    Icon,
+    Input,
+    notification,
+    Divider,
+    Button,
+    Spin,
+    Tooltip,
+    Popconfirm,
+    Modal,
+    Row, Col,
+    Typography
+} from "antd";
 import axios from "axios";
 import config from "../../../../public/conf/config.json";
 import {TweenOneGroup} from 'rc-tween-one';
 
+const {Title} = Typography;
 
 class ManageTags extends React.Component {
     state = {
@@ -21,8 +37,8 @@ class ManageTags extends React.Component {
 
     componentDidMount() {
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags",
-            ).then(res => {
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags",
+        ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
                 this.setState({
@@ -33,10 +49,14 @@ class ManageTags extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to load tags');
-
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load tags.",
+                });
             }
             this.setState({
                 loading: false
@@ -58,7 +78,7 @@ class ManageTags extends React.Component {
         });
 
         axios.delete(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/admin/applications/tags/"+id
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/tags/" + id
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -82,9 +102,14 @@ class ManageTags extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to delete the tag');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to delete the tag.",
+                });
             }
             this.setState({
                 loading: false
@@ -196,9 +221,9 @@ class ManageTags extends React.Component {
 
         const data = tempElements.map(tag => tag.tagName);
 
-        axios.post(config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags",
+        axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags",
             data,
-            ).then(res => {
+        ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
                     message: "Done!",
@@ -219,9 +244,14 @@ class ManageTags extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to delete tag');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to delete tag.",
+                });
             }
             this.setState({
                 loading: false
@@ -258,9 +288,8 @@ class ManageTags extends React.Component {
         });
 
         axios.put(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications/tags/rename?from="+currentlyEditingId+"&to="+editingValue,
+            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags/rename?from=" + currentlyEditingId + "&to=" + editingValue,
             {},
-
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -281,9 +310,14 @@ class ManageTags extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
             } else {
-                message.warning('Something went wrong when trying to edit tag');
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to edit tag.",
+                });
             }
             this.setState({
                 loading: false,
@@ -306,21 +340,33 @@ class ManageTags extends React.Component {
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
             <div style={{marginBottom: 16}}>
-                <Card title="Tags">
+                <Card>
                     <Spin tip="Working on it..." spinning={this.state.loading}>
-                        {!isAddNewVisible &&
-                        <Button
-                            size="small"
-                            onClick={() => {
-                                this.setState({
-                                    isAddNewVisible: true,
-                                    inputVisible: true
-                                }, () => this.input.focus())
-                            }} htmlType="button">Add Tags
-                        </Button>
-                        }
+                        <Row>
+                            <Col span={16}>
+                                <Title level={4}>Tags</Title>
+                            </Col>
+                            <Col span={8}>
+                                {!isAddNewVisible &&
+                                <div style={{float: "right"}}>
+                                    <Button
+                                        icon="plus"
+                                        // type="primary"
+                                        size="small"
+                                        onClick={() => {
+                                            this.setState({
+                                                isAddNewVisible: true,
+                                                inputVisible: true
+                                            }, () => this.input.focus())
+                                        }} htmlType="button">Add
+                                    </Button>
+                                </div>
+                                }
+                            </Col>
+                        </Row>
                         {isAddNewVisible &&
                         <div>
+                            <Divider/>
                             <div style={{marginBottom: 16}}>
                                 <TweenOneGroup
                                     enter={{
@@ -358,53 +404,57 @@ class ManageTags extends React.Component {
                                 </TweenOneGroup>
                             </div>
                             <div>
-                                <Button
-                                    onClick={this.handleSave}
-                                    htmlType="button" type="primary"
-                                    size="small"
-                                    disabled={tempElements.length === 0}>
-                                    Save
-                                </Button>
-                                <Divider type="vertical"/>
-                                <Button
+                                {tempElements.length > 0 && (
+                                    <span>
+                                        <Button
+                                            onClick={this.handleSave}
+                                            htmlType="button" type="primary"
+                                            size="small"
+                                            disabled={tempElements.length === 0}>
+                                            Save
+                                        </Button>
+                                        <Divider type="vertical"/>
+                                    </span>
+                                )}
+                                    < Button
                                     onClick={this.handleCloseButton}
                                     size="small">
                                     Cancel
-                                </Button>
-                            </div>
-                        </div>
-                        }
-                        <Divider dashed="true"/>
-                        <div style={{marginTop: 16}}>
-                            <TweenOneGroup
-                                enter={{
-                                    scale: 0.8,
-                                    opacity: 0,
-                                    type: 'from',
-                                    duration: 100,
-                                    onComplete: e => {
-                                        e.target.style = '';
-                                    },
-                                }}
-                                leave={{opacity: 0, width: 0, scale: 0, duration: 200}}
-                                appear={false}
+                                    </Button>
+                                    </div>
+                                    </div>
+                                }
+                                <Divider dashed="true"/>
+                                <div style={{marginTop: 16}}>
+                                    <TweenOneGroup
+                                        enter={{
+                                            scale: 0.8,
+                                            opacity: 0,
+                                            type: 'from',
+                                            duration: 100,
+                                            onComplete: e => {
+                                                e.target.style = '';
+                                            },
+                                        }}
+                                        leave={{opacity: 0, width: 0, scale: 0, duration: 200}}
+                                        appear={false}
+                                    >
+                                        {tagsElements}
+                                    </TweenOneGroup>
+                                </div>
+                            </Spin>
+                        </Card>
+                        < Modal
+                            title="Edit"
+                            visible={this.state.isEditModalVisible}
+                            onCancel={this.closeEditModal}
+                            onOk={this.editItem}
                             >
-                                {tagsElements}
-                            </TweenOneGroup>
-                        </div>
-                    </Spin>
-                </Card>
-                <Modal
-                    title="Edit"
-                    visible={this.state.isEditModalVisible}
-                    onCancel={this.closeEditModal}
-                    onOk={this.editItem}
-                >
-                    <Input value={this.state.editingValue} ref={(input) => this.editingInput = input} onChange={this.handleEditInputChange}/>
-                </Modal>
-            </div>
-        );
-    }
-}
+                            <Input value={this.state.editingValue} ref={(input) => this.editingInput = input} onChange={this.handleEditInputChange}/>
+                            </Modal>
+                            </div>
+                            );
+                        }
+                        }
 
-export default ManageTags;
+                        export default ManageTags;
