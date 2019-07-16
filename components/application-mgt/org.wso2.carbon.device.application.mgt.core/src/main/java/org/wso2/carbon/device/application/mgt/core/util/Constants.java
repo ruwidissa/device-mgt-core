@@ -61,16 +61,25 @@ public class Constants {
         public static final String DB_TYPE_POSTGRESQL = "PostgreSQL";
     }
 
+    /**
+     * Directory name of the icon artifact that are saved in the file system.
+     */
+    public static final String ICON_ARTIFACT = "icon";
 
     /**
-     * Name of the image artifacts that are saved in the file system.
+     * Directory name of the banner artifact that are saved in the file system.
      */
-    public static final String[] IMAGE_ARTIFACTS = {"icon", "banner", "screenshot"};
+    public static final String BANNER_ARTIFACT = "banner";
 
     /**
-     * Directory name of the release artifacts that are saved in the file system.
+     * Common directory name of the screenshot artifact that are saved in the file system.
      */
-    public static final String RELEASE_ARTIFACT = "artifact";
+    public static final String SCREENSHOT_ARTIFACT = "screenshot";
+
+    /**
+     * Naming directory name of the application artifact that are saved in the file system.
+     */
+    public static final String APP_ARTIFACT = "app";
 
     public static final int REVIEW_PARENT_ID = -1;
 

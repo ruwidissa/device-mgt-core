@@ -338,8 +338,7 @@ public class APIUtil {
         String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
                 .getArtifactDownloadEndpoint();
         String basePath = Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
-                + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
-                + Constants.FORWARD_SLASH;
+                + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid() + Constants.FORWARD_SLASH;
 
         List<String> screenshotPaths = new ArrayList<>();
         ApplicationRelease applicationRelease = new ApplicationRelease();
@@ -356,28 +355,37 @@ public class APIUtil {
         applicationRelease.setIsSharedWithAllTenants(applicationReleaseDTO.getIsSharedWithAllTenants());
         applicationRelease.setSupportedOsVersions(applicationReleaseDTO.getSupportedOsVersions());
         applicationRelease.setRating(applicationReleaseDTO.getRating());
-        applicationRelease.setIconPath(basePath + applicationReleaseDTO.getIconName());
+        applicationRelease.setIconPath(
+                basePath + Constants.ICON_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO.getIconName());
 
         if (!StringUtils.isEmpty(applicationReleaseDTO.getBannerName())){
-            applicationRelease.setBannerPath(basePath + applicationReleaseDTO.getBannerName());
+            applicationRelease.setBannerPath(
+                    basePath + Constants.BANNER_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO
+                            .getBannerName());
         }
 
-        if (urlValidator.isValid(applicationReleaseDTO.getInstallerName())){
-            applicationRelease
-                    .setInstallerPath(applicationReleaseDTO.getInstallerName());
+        if (urlValidator.isValid(applicationReleaseDTO.getInstallerName())) {
+            applicationRelease.setInstallerPath(applicationReleaseDTO.getInstallerName());
         } else {
-            applicationRelease
-                    .setInstallerPath(basePath + applicationReleaseDTO.getInstallerName());
+            applicationRelease.setInstallerPath(
+                    basePath + Constants.APP_ARTIFACT + Constants.FORWARD_SLASH + applicationReleaseDTO
+                            .getInstallerName());
         }
 
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName1())) {
-            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName1());
+            screenshotPaths
+                    .add(basePath + Constants.SCREENSHOT_ARTIFACT + 1 + Constants.FORWARD_SLASH + applicationReleaseDTO
+                            .getScreenshotName1());
         }
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName2())) {
-            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName2());
+            screenshotPaths
+                    .add(basePath + Constants.SCREENSHOT_ARTIFACT + 2 + Constants.FORWARD_SLASH + applicationReleaseDTO
+                            .getScreenshotName2());
         }
         if (!StringUtils.isEmpty(applicationReleaseDTO.getScreenshotName3())) {
-            screenshotPaths.add(basePath + applicationReleaseDTO.getScreenshotName3());
+            screenshotPaths
+                    .add(basePath + Constants.SCREENSHOT_ARTIFACT + 3 + Constants.FORWARD_SLASH + applicationReleaseDTO
+                            .getScreenshotName3());
         }
         applicationRelease.setScreenshots(screenshotPaths);
         return applicationRelease;
