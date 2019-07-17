@@ -29,7 +29,7 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/install/" + uuid + "/" + type + "/install";
+        const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
         axios.post(
             url,
             payload,
@@ -55,12 +55,11 @@ class ReleaseView extends React.Component {
                     message: "There was a problem",
                     duration: 0,
                     description:
-                        "We are unable to install the app.",
+                        "Error occurred while installing app",
                 });
             }
 
         }).catch((error) => {
-            console.log(error);
             if (error.response.status === 401) {
                 window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
             } else {
@@ -72,7 +71,7 @@ class ReleaseView extends React.Component {
                     message: "There was a problem",
                     duration: 0,
                     description:
-                        "We are unable to add your review right now.",
+                        "Error occurred while installing the app.",
                 });
             }
         });

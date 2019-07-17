@@ -181,7 +181,7 @@ class DeviceInstall extends React.Component {
         const payload = [];
         selectedRows.map(device => {
             payload.push({
-                deviceIdentifier: device.deviceIdentifier,
+                id: device.deviceIdentifier,
                 type: device.type
             });
         });
