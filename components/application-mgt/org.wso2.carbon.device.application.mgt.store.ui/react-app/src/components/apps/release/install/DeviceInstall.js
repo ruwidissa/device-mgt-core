@@ -113,7 +113,7 @@ class DeviceInstall extends React.Component {
     //fetch data from api
     fetch = (params = {}) => {
         this.setState({loading: true});
-
+        const {deviceType} = this.props;
         // get current page
         const currentPage = (params.hasOwnProperty("page")) ? params.page : 1;
 
@@ -121,25 +121,16 @@ class DeviceInstall extends React.Component {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
             status: "ACTIVE",
-            requireDeviceInfo: true
+            requireDeviceInfo: true,
+            type: deviceType
         };
 
         // note: encode with '%26' not '&'
-        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('%26');
-
-        const parameters = {
-            method: "get",
-            'content-type': "application/json",
-            payload: "{}",
-            'api-endpoint': "/device-mgt/v1.0/devices?" + encodedExtraParams
-        };
-
-        //url-encode parameters
-        const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
+        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"devices?" + encodedExtraParams,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/devices?" + encodedExtraParams,
 
         ).then(res => {
             if (res.status === 200) {
