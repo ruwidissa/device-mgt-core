@@ -82,7 +82,7 @@ public interface SubscriptionManagementAPI {
     String SCOPE = "scope";
 
     @POST
-    @Path("/install/{uuid}/devices/{action}")
+    @Path("/{uuid}/devices/{action}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -124,7 +124,7 @@ public interface SubscriptionManagementAPI {
     );
 
     @POST
-    @Path("/install/{uuid}/{subType}/{action}")
+    @Path("/{uuid}/{subType}/{action}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(

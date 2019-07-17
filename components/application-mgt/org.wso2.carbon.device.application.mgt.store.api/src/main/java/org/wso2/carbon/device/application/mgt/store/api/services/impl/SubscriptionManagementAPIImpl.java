@@ -49,7 +49,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
     @Override
     @POST
-    @Path("/install/{uuid}/devices/{action}")
+    @Path("/{uuid}/devices/{action}")
     public Response performAppOperationForDevices(
             @PathParam("uuid") String uuid,
             @PathParam("action") String action,
@@ -83,7 +83,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
     @Override
     @POST
-    @Path("/install/{uuid}/{subType}/{action}")
+    @Path("/{uuid}/{subType}/{action}")
     public Response performBulkAppOperation(
             @PathParam("uuid") String uuid,
             @PathParam("subType") String subType,
