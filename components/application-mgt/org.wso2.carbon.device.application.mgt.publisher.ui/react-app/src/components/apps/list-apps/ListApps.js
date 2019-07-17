@@ -44,15 +44,29 @@ class ListApps extends React.Component {
         });
     };
 
+    setSearchText = (appName) => {
+        const filters = {...this.state.filters};
+        if (appName === '' && filters.hasOwnProperty("appName")) {
+            delete filters["appName"];
+        } else {
+            filters.appName = appName;
+        }
+        this.setState({
+            filters
+        });
+        console.log(filters);
+    };
+
     render() {
         const {isDrawerVisible, filters} = this.state;
         return (
-            <Row gutter={28}>
-                <Col md={6}>
-                    <Filters setFilters={this.setFilters}/>
-                </Col>
-                <Col md={18}>
-                    <Card>
+
+            <Card>
+                <Row gutter={28}>
+                    <Col md={6}>
+                        <Filters setFilters={this.setFilters}/>
+                    </Col>
+                    <Col md={18}>
                         <Row>
                             <Col span={6}>
                                 <Title level={4}>Apps</Title>
@@ -60,7 +74,7 @@ class ListApps extends React.Component {
                             <Col span={18} style={{textAlign: "right"}}>
                                 <Search
                                     placeholder="input search text"
-                                    // onSearch={value => console.log(value)}
+                                    onSearch={this.setSearchText}
                                     style={{width: 200}}
                                 />
                             </Col>
@@ -69,13 +83,11 @@ class ListApps extends React.Component {
                         <AppsTable filters={filters} showDrawer={this.showDrawer}/>
                         <AppDetailsDrawer visible={isDrawerVisible} onClose={this.closeDrawer}
                                           app={this.state.selectedApp}/>
-                    </Card>
-                </Col>
-            </Row>
+                    </Col>
+                </Row>
+            </Card>
         );
     }
 }
-
-// const ListApps = connect(mapStateToProps, {getApps})(ConnectedListApps);
 
 export default ListApps;

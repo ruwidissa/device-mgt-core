@@ -277,7 +277,7 @@ class AddNewAppFormComponent extends React.Component {
                                                                         message: 'Please select device type'
                                                                     },
                                                                     {
-                                                                        validator: this.validateIcon
+                                                                        // validator: this.validateIcon
                                                                     }
                                                                 ],
 

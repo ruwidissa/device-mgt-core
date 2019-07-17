@@ -179,15 +179,6 @@ class FiltersForm extends React.Component {
                         </Col>
                     </Row>
 
-                    <Form.Item>
-                        {getFieldDecorator('serach', {})(
-                            <Input
-                                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                placeholder="Username"
-                            />,
-                        )}
-                    </Form.Item>
-
                     <Form.Item label="Categories">
                         {getFieldDecorator('categories', {
                             rules: [{
