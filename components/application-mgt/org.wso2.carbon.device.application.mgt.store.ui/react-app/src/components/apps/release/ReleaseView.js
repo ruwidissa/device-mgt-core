@@ -91,12 +91,16 @@ class ReleaseView extends React.Component {
     };
 
     render() {
-        const app = this.props.app;
+        const {app,deviceType} = this.props;
         const release = app.applicationReleases[0];
         return (
             <div>
-                <AppInstallModal uuid={release.uuid} visible={this.state.appInstallModalVisible}
-                                 onClose={this.closeAppInstallModal} onInstall={this.installApp}/>
+                <AppInstallModal
+                    uuid={release.uuid}
+                    visible={this.state.appInstallModalVisible}
+                    deviceType = {deviceType}
+                    onClose={this.closeAppInstallModal}
+                    onInstall={this.installApp}/>
                 <div className="release">
                     <Row>
                         <Col xl={4} sm={6} xs={8} className="release-icon">

@@ -12,6 +12,7 @@ class AppInstallModal extends React.Component{
         data:[]
     };
     render() {
+        const {deviceType} = this.props;
         return (
             <div>
                 <Modal
@@ -22,7 +23,7 @@ class AppInstallModal extends React.Component{
                 >
                     <Tabs defaultActiveKey="device">
                         <TabPane tab="Device" key="device">
-                            <DeviceInstall onInstall={this.props.onInstall}/>
+                            <DeviceInstall deviceType={deviceType} onInstall={this.props.onInstall}/>
                         </TabPane>
                         <TabPane tab="User" key="user">
                             <UserInstall onInstall={this.props.onInstall}/>

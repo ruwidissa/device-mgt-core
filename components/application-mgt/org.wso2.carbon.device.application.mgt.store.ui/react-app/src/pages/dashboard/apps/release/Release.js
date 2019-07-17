@@ -71,10 +71,12 @@ class Release extends React.Component {
 
     render() {
         const {app, loading} = this.state;
+        const {deviceType} = this.props.match.params;
+
         let content = <Title level={3}>No Releases Found</Title>;
 
         if (app != null && app.applicationReleases.length!==0) {
-            content = <ReleaseView app={app}/>;
+            content = <ReleaseView app={app} deviceType={deviceType}/>;
         }
 
 
