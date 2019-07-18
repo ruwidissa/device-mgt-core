@@ -183,4 +183,8 @@
         <MinRatingValue>1</MinRatingValue>
         <MaxRatingValue>10</MaxRatingValue>
     </RatingConfig>
+
+    <MDMConfig>
+        <Config name="AppDownloadURLHost">https</Config>
+    </MDMConfig>
 </ApplicationManagementConfiguration>

@@ -335,29 +335,31 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.beginDBTransaction();
             List<Integer> deviceSubIds = new ArrayList<>();
 
-            List<String> subscribedEntities = new ArrayList<>();
             if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
                 }
+                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
+                        action);
             } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId);
-
                 }
+                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
+                        action);
             } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addGroupSubscriptions(tenantId, username, params, applicationReleaseId);
                 }
+                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
+                        action);
             }
-            subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                    action);
 
             for (Activity activity : activities) {
                 int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);

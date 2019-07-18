@@ -130,7 +130,8 @@ class DeviceInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/devices?" + encodedExtraParams,
+            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort
+          + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/devices?" + encodedExtraParams,
 
         ).then(res => {
             if (res.status === 200) {
@@ -147,7 +148,8 @@ class DeviceInstall extends React.Component {
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':'
+                  + config.serverConfig.httpsPort + '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -185,7 +187,7 @@ class DeviceInstall extends React.Component {
                 type: device.type
             });
         });
-        this.props.onInstall("device", payload);
+        this.props.onInstall("devices", payload);
     };
 
 
@@ -193,7 +195,10 @@ class DeviceInstall extends React.Component {
         const {data,pagination,loading,selectedRows} = this.state;
         return (
             <div>
-                <Text>Start installing the application for one or more users by entering the corresponding user name. Select install to automatically start downloading the application for the respective user/users. </Text>
+                <Text>
+                    Start installing the application for one or more users by entering the corresponding user name.
+                    Select install to automatically start downloading the application for the respective user/users.
+                </Text>
                 <Table
                     style={{paddingTop:20}}
                     columns={columns}
@@ -212,7 +217,9 @@ class DeviceInstall extends React.Component {
                     scroll={{x: 1000}}
                 />
                 <div style={{paddingTop: 10, textAlign: "right"}}>
-                    <Button disabled={selectedRows.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                    <Button disabled={selectedRows.length===0} htmlType="button" type="primary" onClick={this.install}>
+                        Install
+                    </Button>
                 </div>
             </div>
         );
