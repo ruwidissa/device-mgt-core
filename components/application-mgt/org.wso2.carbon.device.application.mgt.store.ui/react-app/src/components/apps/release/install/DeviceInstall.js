@@ -190,7 +190,6 @@ class DeviceInstall extends React.Component {
         this.props.onInstall("devices", payload);
     };
 
-
     render() {
         const {data,pagination,loading,selectedRows} = this.state;
         return (

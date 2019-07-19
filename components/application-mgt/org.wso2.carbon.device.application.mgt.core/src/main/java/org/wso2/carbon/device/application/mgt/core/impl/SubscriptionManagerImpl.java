@@ -366,7 +366,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 List<Integer> operationAddedDeviceIds = getOperationAddedDeviceIds(activity,
                         subscribingDeviceIdHolder.getSubscribableDevices());
                 List<Integer> alreadySubscribedDevices = subscriptionDAO
-                        .getSubscribedDeviceIds(operationAddedDeviceIds, tenantId);
+                        .getSubscribedDeviceIds(operationAddedDeviceIds, applicationReleaseId, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     if (!alreadySubscribedDevices.isEmpty()) {
                         List<Integer> deviceResubscribingIds = subscriptionDAO
