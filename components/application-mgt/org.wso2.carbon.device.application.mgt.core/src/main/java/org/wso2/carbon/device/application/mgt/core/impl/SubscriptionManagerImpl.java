@@ -27,6 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.SubAction;
 import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
 import org.wso2.carbon.device.application.mgt.common.SubscribingDeviceIdHolder;
+import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -480,14 +481,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
             } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
-                    String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
-                    String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
-                            .getArtifactDownloadEndpoint();
-                    String plistDownloadEndpoint =
-                            Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
-                                    + Constants.FORWARD_SLASH + MDMAppConstants.IOSConstants.PLIST
-                                    + Constants.FORWARD_SLASH + application.getApplicationReleases().get(0).getUuid();
+                    String plistDownloadEndpoint = APIUtil.getArtifactDownloadBaseURL()
+                            + MDMAppConstants.IOSConstants.PLIST + Constants.FORWARD_SLASH
+                            + application.getApplicationReleases().get(0).getUuid();
                     mobileApp.setType(mobileAppType);
                     mobileApp.setLocation(plistDownloadEndpoint);
                     Properties properties = new Properties();

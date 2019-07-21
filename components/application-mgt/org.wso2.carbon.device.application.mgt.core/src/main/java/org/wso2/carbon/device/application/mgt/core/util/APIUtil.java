@@ -24,8 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
+import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.services.*;
@@ -306,8 +308,7 @@ public class APIUtil {
         return applicationReleaseDTO;
     }
 
-    public static Application appDtoToAppResponse(ApplicationDTO applicationDTO)
-            throws BadRequestException, UnexpectedServerErrorException {
+    public static Application appDtoToAppResponse(ApplicationDTO applicationDTO) throws ApplicationManagementException {
 
         Application application = new Application();
         if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
@@ -326,19 +327,19 @@ public class APIUtil {
         application.setTags(applicationDTO.getTags());
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setRating(applicationDTO.getAppRating());
-        List<ApplicationRelease> applicationReleases = applicationDTO.getApplicationReleaseDTOs()
-                .stream().map(APIUtil::releaseDtoToRelease).collect(Collectors.toList());
+        List<ApplicationRelease> applicationReleases = new ArrayList<>();
+        for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
+            ApplicationRelease applicationRelease = releaseDtoToRelease(applicationReleaseDTO);
+            applicationReleases.add(applicationRelease);
+        }
         application.setApplicationReleases(applicationReleases);
         return application;
     }
 
-    public static ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO){
-        String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
-        String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
-        String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
-                .getArtifactDownloadEndpoint();
-        String basePath = Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
-                + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid() + Constants.FORWARD_SLASH;
+    public static ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO)
+            throws ApplicationManagementException {
+        String basePath = getArtifactDownloadBaseURL() + applicationReleaseDTO.getUuid()
+                + Constants.FORWARD_SLASH;
 
         List<String> screenshotPaths = new ArrayList<>();
         ApplicationRelease applicationRelease = new ApplicationRelease();
@@ -389,6 +390,24 @@ public class APIUtil {
         }
         applicationRelease.setScreenshots(screenshotPaths);
         return applicationRelease;
+    }
+
+    public static String getArtifactDownloadBaseURL() throws ApplicationManagementException {
+        String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
+        MDMConfig mdmConfig = ConfigurationManager.getInstance().getConfiguration().getMdmConfig();
+        String port;
+        if (Constants.HTTP_PROTOCOL.equals(mdmConfig.getArtifactDownloadProtocol())){
+            port = System.getProperty(Constants.IOT_HTTP_PORT_PROPERTY);
+        } else if( Constants.HTTPS_PROTOCOL.equals(mdmConfig.getArtifactDownloadProtocol())){
+            port = System.getProperty(Constants.IOT_HTTPS_PORT_PROPERTY);
+        } else {
+            String msg = "In order to download application artifacts invalid protocols are defined.";
+            log.error(msg);
+            throw new ApplicationManagementException(msg);
+        }
+        String artifactDownloadEndpoint = mdmConfig.getArtifactDownloadEndpoint();
+        return mdmConfig.getArtifactDownloadProtocol() + "://" + host + ":" + port
+                + artifactDownloadEndpoint + Constants.FORWARD_SLASH;
     }
 
 }

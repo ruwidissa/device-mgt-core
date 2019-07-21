@@ -37,7 +37,7 @@
         <Extension name="ApplicationStorageManager">
             <ClassName>org.wso2.carbon.device.application.mgt.core.impl.ApplicationStorageManagerImpl</ClassName>
             <Parameters>
-                <Parameter name="StoragePath">/tmp/apps/</Parameter>
+                <Parameter name="StoragePath">repository/resources/apps/</Parameter>
                 <Parameter name="MaxScreenShotCount">6</Parameter>
             </Parameters>
         </Extension>
@@ -135,7 +135,6 @@
     <UIConfigs>
         <EnableOAuth>true</EnableOAuth>
         <EnableSSO>false</EnableSSO>
-        <EnableSSO>false</EnableSSO>
         <AppRegistration>
             <Tags>
                 <Tag>application_management</Tag>
@@ -151,27 +150,29 @@
             <Scope>perm:app:publisher:view</Scope>
             <Scope>perm:app:publisher:update</Scope>
             <Scope>perm:app:store:view</Scope>
+            <Scope>perm:app:subscription:install</Scope>
+            <Scope>perm:app:subscription:uninstall</Scope>
+            <Scope>perm:admin:app:review:update</Scope>
+            <Scope>perm:admin:app:review:view</Scope>
+            <Scope>perm:admin:app:publisher:update</Scope>
+            <Scope>perm:admin:app:review:update</Scope>
         </Scopes>
         <SSOConfiguration>
             <Issuer>app-mgt</Issuer>
         </SSOConfiguration>
-        <LoginResponse>
-            <SuccessCallback>/apps</SuccessCallback>
-            <FailureCallback>
-                <BadRequest>/pages/error/client-errors/400</BadRequest>
-                <Unauthorized>/pages/error/client-errors/401</Unauthorized>
-                <Forbidden>/pages/error/client-errors/403</Forbidden>
-                <NotFound>/pages/error/client-errors/404</NotFound>
-                <MethodNotAllowed>/pages/error/client-errors/405</MethodNotAllowed>
-                <NotAcceptable>/pages/error/client-errors/406</NotAcceptable>
-                <UnsupportedMediaType>/pages/error/client-errors/415</UnsupportedMediaType>
-                <InternalServerError>/pages/error/server-errors/500</InternalServerError>
-                <DefaultPage>/pages/error/default</DefaultPage>
-            </FailureCallback>
-        </LoginResponse>
+        <ErrorCallback>
+            <BadRequest>/pages/error/client-errors/400</BadRequest>
+            <Unauthorized>/pages/error/client-errors/401</Unauthorized>
+            <Forbidden>/pages/error/client-errors/403</Forbidden>
+            <NotFound>/pages/error/client-errors/404</NotFound>
+            <MethodNotAllowed>/pages/error/client-errors/405</MethodNotAllowed>
+            <NotAcceptable>/pages/error/client-errors/406</NotAcceptable>
+            <UnsupportedMediaType>/pages/error/client-errors/415</UnsupportedMediaType>
+            <InternalServerError>/pages/error/server-errors/500</InternalServerError>
+            <DefaultPage>/pages/error/default</DefaultPage>
+        </ErrorCallback>
     </UIConfigs>
 
-    <ArtifactDownloadEndpoint>https://localhost:9443/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
     <AppCategories>
         <Category>EMM</Category>
         <Category>IoT</Category>
@@ -181,4 +182,9 @@
         <MinRatingValue>1</MinRatingValue>
         <MaxRatingValue>10</MaxRatingValue>
     </RatingConfig>
+
+    <MDMConfig>
+        <ArtifactDownloadProtocol>https</ArtifactDownloadProtocol>
+        <ArtifactDownloadEndpoint>/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
+    </MDMConfig>
 </ApplicationManagementConfiguration>
