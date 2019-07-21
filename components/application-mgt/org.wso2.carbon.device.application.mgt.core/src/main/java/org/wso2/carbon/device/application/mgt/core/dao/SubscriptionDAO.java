@@ -77,7 +77,8 @@ public interface SubscriptionDAO {
     void updateSubscriptions(int tenantId, String updateBy, List<String> paramList,
             int releaseId, String subType, String action) throws ApplicationManagementDAOException;
 
-    List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId) throws ApplicationManagementDAOException;
+    List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int applicationReleaseId, int tenantId)
+            throws ApplicationManagementDAOException;
 
     List<Integer> getDeviceSubIdsForOperation (int operationId, int tenantId) throws ApplicationManagementDAOException;
 

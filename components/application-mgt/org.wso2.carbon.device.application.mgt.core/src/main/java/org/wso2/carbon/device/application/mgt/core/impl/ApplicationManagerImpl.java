@@ -32,6 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
+import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
@@ -2868,14 +2869,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
-            String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
-            String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
-            String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
-                    .getArtifactDownloadEndpoint();
-            String artifactDownloadURL =
-                    Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
-                            + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid() + Constants.FORWARD_SLASH
-                            + applicationReleaseDTO.getInstallerName();
+            String artifactDownloadURL = APIUtil.getArtifactDownloadBaseURL() + applicationReleaseDTO.getUuid()
+                    + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName();
             String plistContent = "&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTDPLIST1.0//EN&quot; &quot;" +
                                   "http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&lt;plist version=&quot;" +
                                   "1.0&quot;&gt;&lt;dict&gt;&lt;key&gt;items&lt;/key&gt;&lt;array&gt;&lt;dict&gt;&lt;" +

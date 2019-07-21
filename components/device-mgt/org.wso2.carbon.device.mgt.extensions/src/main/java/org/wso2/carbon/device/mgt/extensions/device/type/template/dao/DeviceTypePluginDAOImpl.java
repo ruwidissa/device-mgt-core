@@ -14,6 +14,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.extensions.device.type.template.dao;
@@ -45,6 +62,7 @@ public class DeviceTypePluginDAOImpl implements PluginDAO {
     private String createDBqueryForAddDevice;
     private String updateDBQueryForUpdateDevice;
     private String selectDBQueryToGetAllDevice;
+    private String deleteDBQueryForDeleteDevice;
 
     public DeviceTypePluginDAOImpl(DeviceDAODefinition deviceDAODefinition,
                                    DeviceTypeDAOHandler deviceTypeDAOHandler) {
@@ -196,6 +214,33 @@ public class DeviceTypePluginDAOImpl implements PluginDAO {
         }
     }
 
+    @Override
+    public boolean deleteDevice(Device device) throws DeviceTypeMgtPluginException {
+        boolean status = false;
+        Connection conn;
+        PreparedStatement stmt = null;
+        try {
+            conn = deviceTypeDAOHandler.getConnection();
+            stmt = conn.prepareStatement(deleteDBQueryForDeleteDevice);
+            stmt.setString(1, device.getDeviceIdentifier());
+            int rows = stmt.executeUpdate();
+            if (rows > 0) {
+                status = true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Device " + device.getDeviceIdentifier() + " data has been deleted.");
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting the device '" + device.getDeviceIdentifier() + "' data in "
+                         + deviceDAODefinition.getDeviceTableName();
+            log.error(msg, e);
+            throw new DeviceTypeMgtPluginException(msg, e);
+        } finally {
+            DeviceTypeUtils.cleanupResources(stmt, null);
+        }
+        return status;
+    }
+
     private String getDeviceTableColumnNames() {
         return StringUtils.join(deviceDAODefinition.getColumnNames(), ", ");
     }
@@ -239,5 +284,8 @@ public class DeviceTypePluginDAOImpl implements PluginDAO {
         selectDBQueryToGetAllDevice =
                 "SELECT " + getDeviceTableColumnNames() + "," + deviceDAODefinition.getPrimaryKey() + " FROM "
                         + deviceDAODefinition.getDeviceTableName();
+
+        deleteDBQueryForDeleteDevice = "DELETE FROM " + deviceDAODefinition.getDeviceTableName() + " WHERE "
+                                       + deviceDAODefinition.getPrimaryKey() + " = ?";
     }
 }

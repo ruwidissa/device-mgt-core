@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Modal, Tabs} from "antd";
+import {Modal, Tabs} from "antd";
 import UserInstall from "./UserInstall";
 import GroupInstall from "./GroupInstall";
 import RoleInstall from "./RoleInstall";

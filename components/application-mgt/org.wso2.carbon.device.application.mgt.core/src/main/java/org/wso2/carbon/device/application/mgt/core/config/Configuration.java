@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.application.mgt.core.config;
 
+import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
@@ -37,19 +38,15 @@ public class Configuration {
 
     private List<Extension> extensions;
 
-    private Artifacts artifacts;
-
-    private PaginationConfiguration paginationConfiguration;
-
     private List<LifecycleState> lifecycleStates;
 
     private UIConfiguration uiConfiguration;
 
     private List<String> appCategories;
 
-    private String artifactDownloadEndpoint;
-
     private RatingConfiguration ratingConfiguration;
+
+    private MDMConfig mdmConfig;
 
     @XmlElement(name = "DatasourceName", required = true)
     public String getDatasourceName() {
@@ -68,11 +65,6 @@ public class Configuration {
 
     public void setExtensions(List<Extension> extensions) {
         this.extensions = extensions;
-    }
-
-    @XmlElement(name = "PaginationConfiguration", required = true)
-    public PaginationConfiguration getPaginationConfiguration() {
-        return paginationConfiguration;
     }
 
     @XmlElementWrapper(name = "LifecycleStates")
@@ -100,15 +92,6 @@ public class Configuration {
     public void setRatingConfiguration(
             RatingConfiguration ratingConfiguration) { this.ratingConfiguration = ratingConfiguration; }
 
-    @XmlElement(name = "ArtifactDownloadEndpoint", required = true)
-    public String getArtifactDownloadEndpoint() {
-        return artifactDownloadEndpoint;
-    }
-
-    public void setArtifactDownloadEndpoint(String artifactDownloadEndpoint) {
-        this.artifactDownloadEndpoint = artifactDownloadEndpoint;
-    }
-
     @XmlElementWrapper(name = "AppCategories")
     @XmlElement(name = "Category")
     public List<String> getAppCategories() {
@@ -117,6 +100,13 @@ public class Configuration {
 
     public void setAppCategories(List<String> appCategories) {
         this.appCategories = appCategories;
+    }
+
+    @XmlElement(name = "MDMConfig", required = true)
+    public MDMConfig getMdmConfig() { return mdmConfig; }
+
+    public void setMdmConfig(MDMConfig mdmConfig) {
+        this.mdmConfig = mdmConfig;
     }
 }
 
