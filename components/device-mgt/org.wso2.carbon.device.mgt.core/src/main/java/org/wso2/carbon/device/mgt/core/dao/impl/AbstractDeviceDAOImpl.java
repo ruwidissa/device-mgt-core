@@ -56,14 +56,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     private static final org.apache.commons.logging.Log log = LogFactory.getLog(AbstractDeviceDAOImpl.class);
+
+    private static final String PROPERTY_KEY_COLUMN_NAME = "PROPERTY_NAME";
+    private static final String PROPERTY_VALUE_COLUMN_NAME = "PROPERTY_VALUE";
+    private static final String PROPERTY_DEVICE_TYPE_NAME = "DEVICE_TYPE_NAME";
+    private static final String PROPERTY_DEVICE_IDENTIFICATION = "DEVICE_IDENTIFICATION";
 
     @Override
     public int addDevice(int typeId, Device device, int tenantId) throws DeviceManagementDAOException {
@@ -281,6 +288,103 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
         return device;
     }
+
+    @Override
+    public List<Device> getDeviceBasedOnDeviceProperties(Map<String,String> deviceProps, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        List<Device> devices = new ArrayList<>();
+        try {
+            List<List<String>> outputLists = new ArrayList<>();
+            List<String> deviceList = null;
+            conn = this.getConnection();
+            for (Map.Entry<String, String> entry : deviceProps.entrySet()) {
+
+                stmt = conn.prepareStatement("SELECT DEVICE_IDENTIFICATION FROM DM_DEVICE_PROPERTIES " +
+                                             "WHERE (PROPERTY_NAME , PROPERTY_VALUE) IN " +
+                                             "((? , ?))  AND TENANT_ID = ?");
+                stmt.setString(1, entry.getKey());
+                stmt.setString(2, entry.getValue());
+                stmt.setInt(3, tenantId);
+                resultSet = stmt.executeQuery();
+
+                deviceList = new ArrayList<>();
+                while (resultSet.next()) {
+                    deviceList.add(resultSet.getString(PROPERTY_DEVICE_IDENTIFICATION));
+                }
+                outputLists.add(deviceList);
+            }
+            List<String> deviceIds = findIntersection(outputLists);
+            for(String deviceId : deviceIds){
+                devices.add(getDeviceProps(deviceId, tenantId));
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching devices against criteria : '" + deviceProps;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, resultSet);
+        }
+        return devices;
+    }
+
+    @Override
+    public Device getDeviceProps(String deviceId, int tenantId) throws DeviceManagementDAOException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        Device device = null;
+        ResultSet resultSet = null;
+        String deviceType = null;
+        try {
+            conn = this.getConnection();
+            stmt = conn.prepareStatement(
+                    "SELECT * FROM DM_DEVICE_PROPERTIES WHERE DEVICE_IDENTIFICATION = ? AND TENANT_ID = ?");
+            stmt.setString(1, deviceId);
+            stmt.setInt(2, tenantId);
+            resultSet = stmt.executeQuery();
+            List<Device.Property> properties = new ArrayList<>();
+            while (resultSet.next()) {
+                Device.Property property = new Device.Property();
+                property.setName(resultSet.getString(PROPERTY_KEY_COLUMN_NAME));
+                property.setValue(resultSet.getString(PROPERTY_VALUE_COLUMN_NAME));
+                properties.add(property);
+                //We are repeatedly assigning device type here. Yes. This was done intentionally, as there would be
+                //No other efficient/simple/inexpensive way of retrieving device type of a particular device from the database
+                //Note that device-identification will be unique across device types
+                deviceType = resultSet.getString(PROPERTY_DEVICE_TYPE_NAME);
+            }
+            device = new Device();
+            device.setDeviceIdentifier(deviceId);
+            device.setType(deviceType);
+            device.setProperties(properties);
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching properties for device : '" + deviceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, resultSet);
+        }
+
+        return device;
+    }
+
+    private List<String> findIntersection(List<List<String>> collections) {
+        boolean first = true;
+        List<String> intersectedResult = new ArrayList<>();
+        for (Collection<String> collection : collections) {
+            if (first) {
+                intersectedResult.addAll(collection);
+                first = false;
+            } else {
+                intersectedResult.retainAll(collection);
+            }
+        }
+        return intersectedResult;
+    }
+
 
     @Override
     public Device getDevice(String deviceIdentifier, Date since, int tenantId)

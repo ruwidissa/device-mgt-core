@@ -65,6 +65,7 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Proxy class for all Device Management related operations that take the corresponding plugin type in
@@ -253,6 +254,15 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException
      */
     Device getDevice(DeviceIdentifier deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /**
+     * Retrieves a list of devices based on a given criteria of properties
+     *
+     * @param deviceProps properties by which devices need to be drawn
+     * @return list of devices
+     * @throws DeviceManagementException
+     */
+    List<Device> getDevicesBasedOnProperties(Map deviceProps) throws DeviceManagementException;
 
     /**
      * Returns the device of specified id.
