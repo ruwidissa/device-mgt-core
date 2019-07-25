@@ -29,7 +29,7 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
         axios.post(
             url,
             payload,
@@ -61,7 +61,7 @@ class ReleaseView extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 this.setState({
                     loading: false,

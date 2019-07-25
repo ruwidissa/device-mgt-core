@@ -32,7 +32,7 @@ class Reviews extends React.Component {
         const config = this.props.context;
 
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
+            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
             {
                 headers: {'X-Platform': config.serverConfig.platform}
             }).then(res => {
@@ -43,7 +43,7 @@ class Reviews extends React.Component {
 
         }).catch(function (error) {
             if (error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

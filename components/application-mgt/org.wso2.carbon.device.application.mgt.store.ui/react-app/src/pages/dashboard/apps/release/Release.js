@@ -40,7 +40,7 @@ class Release extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/"+uuid,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/"+uuid,
 
         ).then(res => {
             if (res.status === 200) {
@@ -57,7 +57,7 @@ class Release extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

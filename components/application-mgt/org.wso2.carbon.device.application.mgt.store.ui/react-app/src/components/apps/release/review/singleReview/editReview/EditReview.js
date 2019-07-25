@@ -68,7 +68,7 @@ class EditReview extends React.Component {
         };
 
         axios.put(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid+"/"+id,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid+"/"+id,
             payload,
         ).then(res => {
             if (res.status === 200) {
@@ -99,7 +99,7 @@ class EditReview extends React.Component {
         }).catch((error) => {
             console.log(error);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 this.setState({
                     loading: false,

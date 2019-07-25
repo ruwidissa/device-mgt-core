@@ -9,6 +9,7 @@ const {Text} = Typography;
 
 class Login extends React.Component {
     render() {
+        const config = this.props.context;
         return (
             <div>
                 <div className="background">
@@ -60,6 +61,7 @@ class NormalLoginForm extends React.Component {
     handleSubmit = (e) => {
         const thisForm = this;
         const config = this.props.context;
+        console.log(config);
 
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
@@ -78,10 +80,10 @@ class NormalLoginForm extends React.Component {
 
                 const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
 
-                axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.loginUri, request
+                axios.post(window.location.origin+ config.serverConfig.loginUri, request
                 ).then(res => {
                     if (res.status === 200) {
-                        window.location = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + "/store";
+                        window.location = window.location.origin+ "/store";
                     }
                 }).catch(function (error) {
                     if (error.response.status === 400) {
@@ -146,6 +148,6 @@ class NormalLoginForm extends React.Component {
     }
 }
 
-const WrappedNormalLoginForm = Form.create({name: 'normal_login'})(NormalLoginForm);
+const WrappedNormalLoginForm = withConfigContext(Form.create({name: 'normal_login'})(NormalLoginForm));
 
 export default withConfigContext(Login);

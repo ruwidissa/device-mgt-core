@@ -31,7 +31,7 @@ class UserInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/users/search?username=" + value,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/users/search?username=" + value,
 
         ).then(res => {
             if (res.status === 200) {
@@ -51,7 +51,7 @@ class UserInstall extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty(status) && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

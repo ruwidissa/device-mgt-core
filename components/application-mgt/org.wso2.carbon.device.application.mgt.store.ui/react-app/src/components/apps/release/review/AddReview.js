@@ -54,7 +54,7 @@ class AddReview extends React.Component {
         };
 
         axios.post(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid,
             payload,
         ).then(res => {
             if (res.status === 201) {
@@ -86,7 +86,7 @@ class AddReview extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 this.setState({
                     loading: false,
