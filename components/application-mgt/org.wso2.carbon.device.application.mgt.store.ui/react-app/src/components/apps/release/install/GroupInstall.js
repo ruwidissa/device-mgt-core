@@ -2,7 +2,7 @@ import React from "react";
 import {Typography, Select, Spin, message, notification, Button} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -25,6 +25,7 @@ class GroupInstall extends React.Component {
     fetchUser = value => {
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
+        const config = this.props.context;
         this.setState({data: [], fetching: true});
 
         axios.post(
@@ -111,4 +112,4 @@ class GroupInstall extends React.Component {
     }
 }
 
-export default GroupInstall;
+export default withConfigContext(GroupInstall);

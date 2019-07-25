@@ -2,7 +2,7 @@ import React from "react";
 import AppCard from "./AppCard";
 import {Col, message, notification, Row, Result, Skeleton} from "antd";
 import axios from "axios";
-import config from "../../../public/conf/config.json";
+import {withConfigContext} from "../../context/ConfigContext";
 
 class AppList extends React.Component {
     constructor(props) {
@@ -29,7 +29,7 @@ class AppList extends React.Component {
     }
 
     fetchData = (deviceType) => {
-
+        const config = this.props.context;
         const payload = {};
         if (deviceType === "web-clip") {
             payload.appType = "WEB_CLIP";
@@ -99,4 +99,4 @@ class AppList extends React.Component {
     }
 }
 
-export default AppList;
+export default withConfigContext(AppList);

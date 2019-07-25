@@ -2,8 +2,8 @@ import React from "react";
 import {Row, Typography, Icon} from "antd";
 import StarRatings from "react-star-ratings";
 import "./DetailedRating.css";
-import config from "../../../../public/conf/config.json";
 import axios from "axios";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const { Text } = Typography;
 
@@ -30,6 +30,7 @@ class DetailedRating extends React.Component{
     }
 
     getData = (type, uuid)=>{
+        const config = this.props.context;
 
         return axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
@@ -117,4 +118,4 @@ class DetailedRating extends React.Component{
 }
 
 
-export default DetailedRating;
+export default withConfigContext(DetailedRating);

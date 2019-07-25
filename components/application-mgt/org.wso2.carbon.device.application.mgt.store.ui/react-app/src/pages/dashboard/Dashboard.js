@@ -5,16 +5,16 @@ import {Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Switch} from 'react-router'
 import "../../App.css";
-import config from "../../../public/conf/config.json";
+import {withConfigContext} from "../../context/ConfigContext";
 
 class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             routes: props.routes,
-            selectedKeys : []
+            selectedKeys: []
         };
-        this.Logo = config.theme.logo;
+        this.logo = this.props.context.theme.logo;
     }
 
     changeSelectedMenuItem = (key) =>{
@@ -30,7 +30,7 @@ class Dashboard extends React.Component {
                 <Layout className="layout">
                     <Header style={{paddingLeft: 0, paddingRight: 0}}>
                         <div className="logo-image">
-                            <img alt="logo" src={this.Logo}/>
+                            <img alt="logo" src={this.logo}/>
                         </div>
                         <Menu
                             theme="light"
@@ -63,4 +63,4 @@ class Dashboard extends React.Component {
     }
 }
 
-export default Dashboard;
+export default withConfigContext(Dashboard);

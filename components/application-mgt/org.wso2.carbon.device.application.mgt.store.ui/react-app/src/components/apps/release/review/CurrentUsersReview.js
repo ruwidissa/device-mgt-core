@@ -2,8 +2,8 @@ import React from "react";
 import {List, message, Typography, Empty, Button, Row, Col, notification} from "antd";
 import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
 import AddReview from "./AddReview";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Text, Paragraph} = Typography;
 
@@ -23,6 +23,7 @@ class CurrentUsersReview extends React.Component {
 
     fetchData = () => {
         const {uuid} = this.props;
+        const config = this.props.context;
 
         axios.get(
             config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/app/user/" + uuid,
@@ -106,4 +107,4 @@ class CurrentUsersReview extends React.Component {
 
 }
 
-export default CurrentUsersReview;
+export default withConfigContext(CurrentUsersReview);

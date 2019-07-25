@@ -2,7 +2,7 @@ import React from "react";
 import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
 import './Login.css';
 import axios from 'axios';
-import config from "../../public/conf/config.json";
+import {withConfigContext} from "../context/ConfigContext";
 
 const {Title} = Typography;
 const {Text} = Typography;
@@ -59,6 +59,8 @@ class NormalLoginForm extends React.Component {
 
     handleSubmit = (e) => {
         const thisForm = this;
+        const config = this.props.context;
+
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             thisForm.setState({
@@ -146,4 +148,4 @@ class NormalLoginForm extends React.Component {
 
 const WrappedNormalLoginForm = Form.create({name: 'normal_login'})(NormalLoginForm);
 
-export default Login;
+export default withConfigContext(Login);

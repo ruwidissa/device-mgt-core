@@ -2,7 +2,7 @@ import React from "react";
 import {Typography, Select, Spin, message, notification, Button} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -23,6 +23,7 @@ class UserInstall extends React.Component {
     };
 
     fetchUser = value => {
+        const config = this.props.context;
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
         this.setState({data: [], fetching: true});
@@ -111,4 +112,4 @@ class UserInstall extends React.Component {
     }
 }
 
-export default UserInstall;
+export default withConfigContext(UserInstall);

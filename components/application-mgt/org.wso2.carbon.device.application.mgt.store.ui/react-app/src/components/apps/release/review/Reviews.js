@@ -5,7 +5,7 @@ import "./Reviews.css";
 import InfiniteScroll from 'react-infinite-scroller';
 import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const limit = 5;
 
@@ -29,6 +29,7 @@ class Reviews extends React.Component {
     fetchData = (offset, limit, callback) => {
 
         const {uuid, type} = this.props;
+        const config = this.props.context;
 
         axios.get(
             config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
@@ -133,4 +134,4 @@ class Reviews extends React.Component {
     }
 }
 
-export default Reviews;
+export default withConfigContext(Reviews);

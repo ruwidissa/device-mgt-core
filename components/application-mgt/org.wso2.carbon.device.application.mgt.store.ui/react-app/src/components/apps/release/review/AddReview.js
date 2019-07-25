@@ -2,7 +2,7 @@ import React from "react";
 import {Drawer, Button, Icon, Row, Col, Typography, Divider, Input, Spin, notification} from 'antd';
 import StarRatings from "react-star-ratings";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Title} = Typography;
 const {TextArea} = Input;
@@ -41,6 +41,7 @@ class AddReview extends React.Component {
     };
 
     onSubmit = () => {
+        const config = this.props.context;
         const {content, rating} = this.state;
         const {uuid} = this.props;
         this.setState({
@@ -159,4 +160,4 @@ class AddReview extends React.Component {
     }
 }
 
-export default AddReview;
+export default withConfigContext(AddReview);
