@@ -32,6 +32,7 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
+import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
@@ -451,13 +452,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
 
         if (!StringUtils.isEmpty(applicationArtifact.getIconName())) {
-            applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                    applicationReleaseDTO.getIconName());
+            applicationStorageManager
+                    .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), Constants.ICON_ARTIFACT,
+                            applicationReleaseDTO.getIconName());
             applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
         }
         if (!StringUtils.isEmpty(applicationArtifact.getBannerName())){
-            applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                    applicationReleaseDTO.getBannerName());
+            applicationStorageManager
+                    .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), Constants.BANNER_ARTIFACT,
+                            applicationReleaseDTO.getBannerName());
             applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
         }
 
@@ -470,17 +473,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             int counter = 1;
             for (String scName : screenshotNames) {
+                String folderPath = Constants.SCREENSHOT_ARTIFACT + counter;
                 if (counter == 1) {
-                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                            applicationReleaseDTO.getScreenshotName1());
+                    applicationStorageManager
+                            .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
+                                    applicationReleaseDTO.getScreenshotName1());
                     applicationReleaseDTO.setScreenshotName1(scName);
                 } else if (counter == 2) {
-                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                            applicationReleaseDTO.getScreenshotName2());
+                    applicationStorageManager
+                            .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
+                                    applicationReleaseDTO.getScreenshotName2());
                     applicationReleaseDTO.setScreenshotName2(scName);
                 } else if (counter == 3) {
-                    applicationStorageManager.deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(),
-                            applicationReleaseDTO.getScreenshotName3());
+                    applicationStorageManager
+                            .deleteAppReleaseArtifact(applicationReleaseDTO.getAppHashValue(), folderPath,
+                                    applicationReleaseDTO.getScreenshotName3());
                     applicationReleaseDTO.setScreenshotName3(scName);
                 }
                 counter++;
@@ -583,12 +590,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             log.error(msg);
             throw new ApplicationManagementException(msg, e);
         } catch (UserStoreException e) {
-            throw new ApplicationManagementException(
-                    "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
-                            + " has the publisher permission", e);
+            String msg = "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
+                    + " has the publisher permission";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            throw new ApplicationManagementException(
-                    "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId, e);
+            String msg = "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -792,23 +801,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.commitDBTransaction();
             return applicationRelease;
         } catch (TransactionManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while staring application release creating transaction for application Id: "
-                            + applicationId, e);
+            String msg = "Error occurred while staring application release creating transaction for application Id: "
+                    + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while adding application release into IoTS app management ApplicationDTO id of the "
-                            + "application release: " + applicationId, e);
-
+            String msg = "Error occurred while adding application release into IoTS app management ApplicationDTO id of"
+                    + " the application release: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while adding new application release lifecycle state to the application release: "
-                            + applicationId, e);
+            String msg = "Error occurred while adding new application release lifecycle state to the application"
+                    + " release: " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            throw new ApplicationManagementException(
-                    "Error occurred while adding new application release for application " + applicationId, e);
+            String msg = "Error occurred while adding new application release for application " + applicationId;
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -2857,14 +2869,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new NotFoundException(msg);
             }
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
-            String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
-            String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
-            String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
-                    .getArtifactDownloadEndpoint();
-            String artifactDownloadURL =
-                    Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
-                            + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid() + Constants.FORWARD_SLASH
-                            + applicationReleaseDTO.getInstallerName();
+            String artifactDownloadURL = APIUtil.getArtifactDownloadBaseURL() + applicationReleaseDTO.getUuid()
+                    + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName();
             String plistContent = "&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTDPLIST1.0//EN&quot; &quot;" +
                                   "http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&lt;plist version=&quot;" +
                                   "1.0&quot;&gt;&lt;dict&gt;&lt;key&gt;items&lt;/key&gt;&lt;array&gt;&lt;dict&gt;&lt;" +

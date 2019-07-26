@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.device.application.mgt.core.BaseTestCase;
+import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dto.ApplicationsDTO;
 import org.wso2.carbon.device.application.mgt.core.dto.DeviceTypeCreator;
@@ -22,12 +23,12 @@ public class ApplicationManagementDAOTest extends BaseTestCase {
     @BeforeClass
     public void initialize() throws Exception {
         log.info("Initializing ApplicationManagementDAOTest tests");
+        ConfigurationManager configurationManager =  ConfigurationManager.getInstance();
 //        super.initializeServices();
     }
 
     @Test
     public void testAddApplication() throws Exception {
-
         ApplicationDAO applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
         ConnectionManagerUtil.beginDBTransaction();
         applicationDAO.createApplication(ApplicationsDTO.getApp1(), -1234);
@@ -52,6 +53,4 @@ public class ApplicationManagementDAOTest extends BaseTestCase {
             DeviceManagementDAOFactory.closeConnection();
         }
     }
-
-
 }

@@ -173,7 +173,6 @@
         </ErrorCallback>
     </UIConfigs>
 
-    <ArtifactDownloadEndpoint>/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
     <AppCategories>
         <Category>EMM</Category>
         <Category>IoT</Category>
@@ -183,4 +182,9 @@
         <MinRatingValue>1</MinRatingValue>
         <MaxRatingValue>10</MaxRatingValue>
     </RatingConfig>
+
+    <MDMConfig>
+        <ArtifactDownloadProtocol>https</ArtifactDownloadProtocol>
+        <ArtifactDownloadEndpoint>/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
+    </MDMConfig>
 </ApplicationManagementConfiguration>

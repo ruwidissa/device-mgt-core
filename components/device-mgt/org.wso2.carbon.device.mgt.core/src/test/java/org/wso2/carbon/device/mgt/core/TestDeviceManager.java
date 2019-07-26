@@ -61,6 +61,11 @@ public class TestDeviceManager implements DeviceManager {
     }
 
     @Override
+    public boolean deleteDevice(DeviceIdentifier deviceId, Device device) throws DeviceManagementException {
+        return true;
+    }
+
+    @Override
     public boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException {
         return true;
     }

@@ -27,6 +27,7 @@ import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.SubAction;
 import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
 import org.wso2.carbon.device.application.mgt.common.SubscribingDeviceIdHolder;
+import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -335,36 +336,38 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.beginDBTransaction();
             List<Integer> deviceSubIds = new ArrayList<>();
 
-            List<String> subscribedEntities = new ArrayList<>();
             if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
                 }
+                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
+                        action);
             } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId);
-
                 }
+                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
+                        action);
             } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addGroupSubscriptions(tenantId, username, params, applicationReleaseId);
                 }
+                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
+                        action);
             }
-            subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                    action);
 
             for (Activity activity : activities) {
                 int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
                 List<Integer> operationAddedDeviceIds = getOperationAddedDeviceIds(activity,
                         subscribingDeviceIdHolder.getSubscribableDevices());
                 List<Integer> alreadySubscribedDevices = subscriptionDAO
-                        .getSubscribedDeviceIds(operationAddedDeviceIds, tenantId);
+                        .getSubscribedDeviceIds(operationAddedDeviceIds, applicationReleaseId, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     if (!alreadySubscribedDevices.isEmpty()) {
                         List<Integer> deviceResubscribingIds = subscriptionDAO
@@ -478,14 +481,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
             } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    String host = System.getProperty(Constants.IOT_HOST_PROPERTY);
-                    String port = System.getProperty(Constants.IOT_PORT_PROPERTY);
-                    String artifactDownloadEndpoint = ConfigurationManager.getInstance().getConfiguration()
-                            .getArtifactDownloadEndpoint();
-                    String plistDownloadEndpoint =
-                            Constants.ARTIFACT_DOWNLOAD_PROTOCOL + "://" + host + ":" + port + artifactDownloadEndpoint
-                                    + Constants.FORWARD_SLASH + MDMAppConstants.IOSConstants.PLIST
-                                    + Constants.FORWARD_SLASH + application.getApplicationReleases().get(0).getUuid();
+                    String plistDownloadEndpoint = APIUtil.getArtifactDownloadBaseURL()
+                            + MDMAppConstants.IOSConstants.PLIST + Constants.FORWARD_SLASH
+                            + application.getApplicationReleases().get(0).getUuid();
                     mobileApp.setType(mobileAppType);
                     mobileApp.setLocation(plistDownloadEndpoint);
                     Properties properties = new Properties();

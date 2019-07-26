@@ -58,6 +58,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
+import org.wso2.carbon.device.mgt.common.search.PropertyMap;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -79,6 +80,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Device related REST-API. This can be used to manipulated device related details.
@@ -1073,6 +1075,84 @@ public interface DeviceManagementService {
                     value = "The properties to advanced search devices.",
                     required = true)
                     SearchContext searchContext);
+
+    @POST
+    @Path("/query-devices")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            consumes = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Property based Search for Devices",
+            notes = "Search for devices based on properties",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:search")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved the device information.",
+                            response = DeviceList.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                          "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified. \n" +
+                                                          "Used by caches, or in conditional requests.")}),
+                    @ApiResponse(
+                            code = 304,
+                            message = "Not Modified. \n " +
+                                      "Empty body because the client already has the latest version of the requested resource.\n"),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Acceptable.\n The existing device did not match the values specified in the device search.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable.\n The requested media type is not supported"),
+                    @ApiResponse(
+                            code = 415,
+                            message = "Unsupported media type. \n The format of the requested entity was not supported."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                      "Server error occurred while getting the device details.",
+                            response = ErrorResponse.class)
+            })
+    Response queryDevicesByProperties(
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false,
+                    defaultValue = "0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many activity details you require from the starting pagination index/offset.",
+                    required = false,
+                    defaultValue = "5")
+            @QueryParam("limit")
+                    int limit,
+            @ApiParam(
+                    name = "device property map",
+                    value = "properties by which devices need filtered",
+                    required = true)
+            PropertyMap map);
 
     @GET
     @Path("/{type}/{id}/applications")

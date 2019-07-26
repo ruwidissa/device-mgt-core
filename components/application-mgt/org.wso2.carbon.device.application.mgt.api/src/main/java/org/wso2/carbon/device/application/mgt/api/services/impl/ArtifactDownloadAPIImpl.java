@@ -47,12 +47,14 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
     @GET
     @Override
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/{uuid}/{fileName}")
-    public Response getArtifact(@PathParam("uuid") String uuid,
+    @Path("/{uuid}/{folderName}/{fileName}")
+    public Response getArtifact(
+            @PathParam("uuid") String uuid,
+            @PathParam("folderName") String folderName,
             @PathParam("fileName") String fileName) {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
         try {
-            InputStream fileInputStream = dataHandler.getArtifactStream(uuid, fileName);
+            InputStream fileInputStream = dataHandler.getArtifactStream(uuid, folderName, fileName);
             Response.ResponseBuilder response = Response
                     .ok(fileInputStream, MediaType.APPLICATION_OCTET_STREAM);
             response.status(Response.Status.OK);

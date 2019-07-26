@@ -533,7 +533,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int tenantId)
+    public List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int applicationReleaseId,
+            int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received to DAO Layer to get already subscribed dvice Ids for given list of device Ids.");
@@ -545,14 +546,15 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT DS.DM_DEVICE_ID "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
-                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND TENANT_ID = ?");
+                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 for (Integer deviceId : deviceIds) {
                     ps.setObject(index++, deviceId);
                 }
-                ps.setInt(index, tenantId);
+                ps.setInt(index++, tenantId);
+                ps.setInt(index, applicationReleaseId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedDevices.add(rs.getInt("DM_DEVICE_ID"));

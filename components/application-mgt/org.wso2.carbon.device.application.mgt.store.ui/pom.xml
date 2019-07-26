@@ -24,10 +24,10 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>application-mgt</artifactId>
-        <version>3.2.7-SNAPSHOT</version>
+        <version>3.2.9-SNAPSHOT</version>
     </parent>
     <artifactId>org.wso2.carbon.device.application.mgt.store.ui</artifactId>
-    <version>3.2.7-SNAPSHOT</version>
+    <version>3.2.9-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>WSO2 Carbon - Application Management Store UI Component</name>
     <url>http://wso2.org</url>

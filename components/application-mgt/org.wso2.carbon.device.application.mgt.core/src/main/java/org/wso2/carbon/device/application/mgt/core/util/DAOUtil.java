@@ -23,17 +23,13 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
-import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
 
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
-import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.core.config.Configuration;
-import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
@@ -262,21 +258,6 @@ public class DAOUtil {
                 log.warn("Error occurred while closing prepared statement", e);
             }
         }
-    }
-
-    public static PaginationRequest validateCommentListPageSize(PaginationRequest paginationRequest) throws
-            ReviewManagementException {
-        if (paginationRequest.getLimit() == 0) {
-            Configuration commentManagementConfig = ConfigurationManager.getInstance().getConfiguration();
-            if (commentManagementConfig != null) {
-                paginationRequest.setLimit(
-                        commentManagementConfig.getPaginationConfiguration().getCommentListPageSize());
-            } else {
-                throw new ReviewManagementException(
-                        "ApplicationDTO Management configuration has not initialized. Please check the application-mgt.xml file.");
-            }
-        }
-        return paginationRequest;
     }
 
     private static ApplicationManager applicationManager;
