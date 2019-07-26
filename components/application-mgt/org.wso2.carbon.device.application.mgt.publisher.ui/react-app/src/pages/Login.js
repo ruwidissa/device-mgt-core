@@ -80,7 +80,7 @@ class NormalLoginForm extends React.Component {
                 axios.post(window.location.origin+ config.serverConfig.loginUri, request
                 ).then(res=>{
                     if (res.status === 200) {
-                        window.location = window.location.origin+"publisher";
+                        window.location = window.location.origin+"/publisher";
                     }
                 }).catch(function (error) {
                     if (error.hasOwnProperty("response") && error.response.status === 400) {
