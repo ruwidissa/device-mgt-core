@@ -1,10 +1,9 @@
 import React from "react";
-import {Modal, Button, Tag, Collapse, List,Typography} from 'antd';
+import {Modal, Button, Tag, List, Typography} from 'antd';
 import pSBC from "shade-blend-color";
-import config from "../../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../../context/ConfigContext";
 
 const {Text} = Typography;
-const lifeCycleConfig = config.lifecycle;
 
 class LifeCycleDetailsModal extends React.Component {
 
@@ -27,6 +26,8 @@ class LifeCycleDetailsModal extends React.Component {
     };
 
     render() {
+        const config = this.props.context;
+        const lifeCycleConfig = config.lifecycle;
         const {lifecycle} = this.props;
         return (
             <div>
@@ -40,7 +41,7 @@ class LifeCycleDetailsModal extends React.Component {
                 <Modal
                     title="Lifecycle"
                     visible={this.state.visible}
-                    footer = {null}
+                    footer={null}
                     onCancel={this.handleCancel}
                 >
 
@@ -93,4 +94,4 @@ class LifeCycleDetailsModal extends React.Component {
     }
 }
 
-export default LifeCycleDetailsModal;
+export default withConfigContext(LifeCycleDetailsModal);

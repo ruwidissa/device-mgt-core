@@ -5,7 +5,7 @@ import "./Reviews.css";
 import InfiniteScroll from 'react-infinite-scroller';
 import SingleReview from "./SingleReview";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const limit = 5;
 
@@ -27,11 +27,12 @@ class Reviews extends React.Component {
     }
 
     fetchData = (offset, limit, callback) => {
+        const config = this.props.context;
 
         const {uuid, type} = this.props;
 
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/reviews/" + type + "/" + uuid
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/reviews/" + type + "/" + uuid
         ).then(res => {
             if (res.status === 200) {
                 let reviews = res.data.data.data;
@@ -40,7 +41,7 @@ class Reviews extends React.Component {
 
         }).catch(function (error) {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -121,4 +122,4 @@ class Reviews extends React.Component {
     }
 }
 
-export default Reviews;
+export default withConfigContext(Reviews);

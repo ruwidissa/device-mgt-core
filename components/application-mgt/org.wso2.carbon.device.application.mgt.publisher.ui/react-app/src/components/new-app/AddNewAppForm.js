@@ -11,10 +11,10 @@ import {
     Spin
 } from "antd";
 import axios from "axios";
-import {withRouter} from 'react-router-dom'
-import config from "../../../public/conf/config.json";
+import {withRouter} from 'react-router-dom';
 import NewAppDetailsForm from "./subForms/NewAppDetailsForm";
 import NewAppUploadForm from "./subForms/NewAppUploadForm";
+import {withConfigContext} from "../../context/ConfigContext";
 
 const {Step} = Steps;
 
@@ -45,6 +45,7 @@ class AddNewAppFormComponent extends React.Component {
     };
 
     onSuccessReleaseData = (releaseData) => {
+        const config = this.props.context;
         this.setState({
             loading: true,
             isError: false
@@ -62,7 +63,7 @@ class AddNewAppFormComponent extends React.Component {
         });
         data.append(formConfig.jsonPayloadName, blob);
 
-        const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
 
         axios.post(
             url,
@@ -88,7 +89,7 @@ class AddNewAppFormComponent extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "Something went wrong!",
@@ -169,4 +170,4 @@ class AddNewAppFormComponent extends React.Component {
 }
 
 const AddNewAppForm = withRouter(Form.create({name: 'add-new-app'})(AddNewAppFormComponent));
-export default AddNewAppForm;
+export default withConfigContext(AddNewAppForm);

@@ -1,16 +1,14 @@
 import React from "react";
 import {Typography, Tag, Divider, Select, Button, Modal, message, notification, Collapse} from "antd";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
-import pSBC from "shade-blend-color";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './LifeCycle.css';
 import LifeCycleDetailsModal from "./lifeCycleDetailsModal/lifeCycleDetailsModal";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Text, Title, Paragraph} = Typography;
 const {Option} = Select;
-const Panel = Collapse.Panel;
 
 const modules = {
     toolbar: [
@@ -57,8 +55,9 @@ class LifeCycle extends React.Component {
 
 
     fetchData = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
         ).then(res => {
             if (res.status === 200) {
                 const lifecycle = res.data.data;
@@ -69,7 +68,7 @@ class LifeCycle extends React.Component {
 
         }).catch(function (error) {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -102,6 +101,7 @@ class LifeCycle extends React.Component {
     };
 
     addLifeCycle = () => {
+        const config = this.props.context;
         const {selectedStatus, reasonText} = this.state;
         const {uuid} = this.props;
         const data = {
@@ -114,7 +114,7 @@ class LifeCycle extends React.Component {
         });
 
         axios.post(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/life-cycle/" + uuid,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/life-cycle/" + uuid,
             data
         ).then(res => {
             if (res.status === 201) {
@@ -135,7 +135,7 @@ class LifeCycle extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "Error",
@@ -235,4 +235,4 @@ class LifeCycle extends React.Component {
 
 }
 
-export default LifeCycle;
+export default withConfigContext(LifeCycle);

@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Col, Divider, Form, Icon, Input, notification, Row, Select, Switch, Upload} from "antd";
 import axios from "axios";
-import config from "../../../../public/conf/config.json";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const formItemLayout = {
     labelCol: {
@@ -15,7 +15,6 @@ const formItemLayout = {
 };
 const {Option} = Select;
 const {TextArea} = Input;
-const InputGroup = Input.Group;
 
 class NewAppDetailsForm extends React.Component {
 
@@ -66,8 +65,9 @@ class NewAppDetailsForm extends React.Component {
     }
 
     getCategories = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -79,7 +79,7 @@ class NewAppDetailsForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -95,8 +95,9 @@ class NewAppDetailsForm extends React.Component {
     };
 
     getTags = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
         ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
@@ -108,7 +109,7 @@ class NewAppDetailsForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -234,6 +235,7 @@ class NewAppDetailsForm extends React.Component {
                                     </Select>
                                 )}
                             </Form.Item>
+                            //todo implement add meta data
                             {/*<Form.Item {...formItemLayout} label="Meta Data">*/}
                                 {/*<InputGroup>*/}
                                     {/*<Row gutter={8}>*/}
@@ -263,4 +265,4 @@ class NewAppDetailsForm extends React.Component {
 
 }
 
-export default (Form.create({name: 'app-details-form'})(NewAppDetailsForm));
+export default withConfigContext(Form.create({name: 'app-details-form'})(NewAppDetailsForm));

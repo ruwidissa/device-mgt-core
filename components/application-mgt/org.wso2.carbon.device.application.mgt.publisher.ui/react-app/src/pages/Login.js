@@ -2,14 +2,15 @@ import React from "react";
 import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox, message, notification} from 'antd';
 import './Login.css';
 import axios from 'axios';
-import config from "../../public/conf/config.json";
 import "./Login.css";
+import {withConfigContext} from "../context/ConfigContext";
 
 const {Title} = Typography;
 const {Text} = Typography;
 
 class Login extends React.Component {
     render() {
+        const config = this.props.context;
         return (
             <div>
                 <div className="background">
@@ -57,6 +58,7 @@ class NormalLoginForm extends React.Component {
     }
 
     handleSubmit = (e) => {
+        const config = this.props.context;
         const thisForm = this;
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
@@ -75,10 +77,10 @@ class NormalLoginForm extends React.Component {
 
                 const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
 
-                axios.post(config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.loginUri, request
+                axios.post(window.location.origin+ config.serverConfig.loginUri, request
                 ).then(res=>{
                     if (res.status === 200) {
-                        window.location = res.data.url;
+                        window.location = window.location.origin+"publisher";
                     }
                 }).catch(function (error) {
                     if (error.hasOwnProperty("response") && error.response.status === 400) {
@@ -151,6 +153,6 @@ class NormalLoginForm extends React.Component {
     }
 }
 
-const WrappedNormalLoginForm = Form.create({name: 'normal_login'})(NormalLoginForm);
+const WrappedNormalLoginForm = Form.create({name: 'normal_login'})(withConfigContext(NormalLoginForm));
 
-export default Login;
+export default withConfigContext(Login);

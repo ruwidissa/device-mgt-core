@@ -15,7 +15,7 @@ import {
     notification
 } from "antd";
 import axios from "axios";
-import config from "../../../../public/conf/config.json";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const {Option} = Select;
 const {Title} = Typography;
@@ -62,8 +62,9 @@ class FiltersForm extends React.Component {
     }
 
     getCategories = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -75,7 +76,7 @@ class FiltersForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -91,8 +92,9 @@ class FiltersForm extends React.Component {
     };
 
     getTags = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
         ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
@@ -104,7 +106,7 @@ class FiltersForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -121,8 +123,9 @@ class FiltersForm extends React.Component {
 
 
     getDeviceTypes = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
         ).then(res => {
             if (res.status === 200) {
                 const deviceTypes = JSON.parse(res.data.data);
@@ -134,7 +137,7 @@ class FiltersForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -293,7 +296,7 @@ class FiltersForm extends React.Component {
 }
 
 
-const Filters = Form.create({name: 'filter-apps'})(FiltersForm);
+const Filters = withConfigContext(Form.create({name: 'filter-apps'})(FiltersForm));
 
 
-export default Filters;
+export default withConfigContext(Filters);

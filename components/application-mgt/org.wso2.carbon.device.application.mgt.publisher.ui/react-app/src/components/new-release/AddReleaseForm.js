@@ -17,7 +17,7 @@ import {
 } from "antd";
 import axios from "axios";
 import {withRouter} from 'react-router-dom'
-import config from "../../../public/conf/config.json";
+import {withConfigContext} from "../../context/ConfigContext";
 
 const {Option} = Select;
 const {TextArea} = Input;
@@ -47,11 +47,8 @@ class AddNewReleaseFormComponent extends React.Component {
         };
     }
 
-    componentDidMount() {
-
-    }
-
     handleSubmit = e => {
+        const config = this.props.context;
         e.preventDefault();
         const {appId} = this.props;
 
@@ -88,7 +85,7 @@ class AddNewReleaseFormComponent extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app/" + appId;
+                const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app/" + appId;
 
                 axios.post(
                     url,
@@ -117,7 +114,7 @@ class AddNewReleaseFormComponent extends React.Component {
 
                 }).catch((error) => {
                     if (error.hasOwnProperty("response") && error.response.status === 401) {
-                        window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                        window.location.href = window.location.origin+ '/publisher/login';
                     } else {
                         notification["error"]({
                             message: "Something went wrong!",
@@ -299,4 +296,4 @@ class AddNewReleaseFormComponent extends React.Component {
 }
 
 const AddReleaseForm = withRouter(Form.create({name: 'add-new-release'})(AddNewReleaseFormComponent));
-export default AddReleaseForm;
+export default withConfigContext(AddReleaseForm);

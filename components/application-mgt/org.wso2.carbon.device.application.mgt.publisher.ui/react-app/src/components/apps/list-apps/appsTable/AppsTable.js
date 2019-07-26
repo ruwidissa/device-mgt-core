@@ -2,8 +2,10 @@ import React from "react";
 import {Avatar, Table, Tag, Icon, message, notification} from "antd";
 import axios from "axios";
 import pSBC from 'shade-blend-color';
-import config from "../../../../../public/conf/config.json";
 import "./AppsTable.css";
+import {withConfigContext} from "../../../../context/ConfigContext";
+
+let config = null;
 
 const columns = [
     {
@@ -74,6 +76,7 @@ class AppsTable extends React.Component {
             apps: [],
             filters: {}
         };
+        config = this.props.context;
     }
 
     componentDidMount() {
@@ -114,6 +117,7 @@ class AppsTable extends React.Component {
 
     fetch = (filters,params = {}) => {
         this.setState({loading: true});
+        const config = this.props.context;
 
         if(!params.hasOwnProperty("page")){
            params.page = 1;
@@ -124,10 +128,9 @@ class AppsTable extends React.Component {
             limit: 10,
             ...filters
         };
-        console.log("f", data);
 
        axios.post(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications",
+            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications",
             data,
 
         ).then(res => {
@@ -153,7 +156,7 @@ class AppsTable extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/publisher/login';
+                window.location.href = window.location.origin+'/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -190,4 +193,4 @@ class AppsTable extends React.Component {
     }
 }
 
-export default AppsTable;
+export default withConfigContext(AppsTable);
