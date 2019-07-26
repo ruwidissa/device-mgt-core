@@ -2,7 +2,7 @@ import React from "react";
 import {Drawer, Button, Icon, Row, Col, Typography, Divider, Input, Spin, notification} from 'antd';
 import StarRatings from "react-star-ratings";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Title} = Typography;
 const {TextArea} = Input;
@@ -41,6 +41,7 @@ class AddReview extends React.Component {
     };
 
     onSubmit = () => {
+        const config = this.props.context;
         const {content, rating} = this.state;
         const {uuid} = this.props;
         this.setState({
@@ -53,7 +54,7 @@ class AddReview extends React.Component {
         };
 
         axios.post(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + uuid,
             payload,
         ).then(res => {
             if (res.status === 201) {
@@ -85,7 +86,7 @@ class AddReview extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 this.setState({
                     loading: false,
@@ -159,4 +160,4 @@ class AddReview extends React.Component {
     }
 }
 
-export default AddReview;
+export default withConfigContext(AddReview);

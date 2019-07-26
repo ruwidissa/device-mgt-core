@@ -6,7 +6,7 @@ import Twemoji from "react-twemoji";
 import "./SingleReview.css";
 import EditReview from "./editReview/EditReview";
 import axios from "axios";
-import config from "../../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../../context/ConfigContext";
 
 const {Text, Paragraph} = Typography;
 const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3', '#e84393', '#f9ca24'];
@@ -38,9 +38,9 @@ class SingleReview extends React.Component {
     deleteReview = () => {
         const {uuid} = this.props;
         const {id} = this.state.review;
+        const config = this.props.context;
 
-        let url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' +
-            config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store;
+        let url =window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store;
 
         // call as an admin api if the review is not a personal review
         if (!this.props.isPersonalReview) {
@@ -62,7 +62,7 @@ class SingleReview extends React.Component {
         }).catch((error) => {
             console.log(error);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -131,4 +131,4 @@ class SingleReview extends React.Component {
     }
 }
 
-export default SingleReview;
+export default withConfigContext(SingleReview);

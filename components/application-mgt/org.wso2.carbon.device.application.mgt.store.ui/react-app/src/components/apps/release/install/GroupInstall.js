@@ -2,7 +2,7 @@ import React from "react";
 import {Typography, Select, Spin, message, notification, Button} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -25,10 +25,11 @@ class GroupInstall extends React.Component {
     fetchUser = value => {
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
+        const config = this.props.context;
         this.setState({data: [], fetching: true});
 
         axios.post(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
 
         ).then(res => {
             if (res.status === 200) {
@@ -48,7 +49,7 @@ class GroupInstall extends React.Component {
         }).catch((error) => { console.log(error);
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort+'/store/login';
+                window.location.href = window.location.origin+'/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -111,4 +112,4 @@ class GroupInstall extends React.Component {
     }
 }
 
-export default GroupInstall;
+export default withConfigContext(GroupInstall);

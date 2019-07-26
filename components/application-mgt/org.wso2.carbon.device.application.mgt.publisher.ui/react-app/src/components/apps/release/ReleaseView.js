@@ -1,5 +1,5 @@
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Drawer} from "antd";
+import {Divider, Row, Col, Typography, Button, Drawer, Icon} from "antd";
 import StarRatings from "react-star-ratings";
 import Reviews from "./review/Reviews";
 import "../../../App.css";
@@ -16,6 +16,18 @@ class ReleaseView extends React.Component {
         if (release == null) {
             return null;
         }
+
+        const platform = app.deviceType;
+        const defaultPlatformIcons = config.defaultPlatformIcons;
+        let icon = defaultPlatformIcons.default.icon;
+        let color = defaultPlatformIcons.default.color;
+        let theme = defaultPlatformIcons.default.theme;
+        if (defaultPlatformIcons.hasOwnProperty(platform)) {
+            icon = defaultPlatformIcons[platform].icon;
+            color = defaultPlatformIcons[platform].color;
+            theme = defaultPlatformIcons[platform].theme;
+        }
+
         return (
             <div>
                 <div className="release">
@@ -25,7 +37,6 @@ class ReleaseView extends React.Component {
                         </Col>
                         <Col xl={10} sm={11} className="release-title">
                             <Title level={2}>{app.name}</Title>
-                            <Text>Version : {release.version}</Text><br/>
                             <StarRatings
                                 rating={release.rating}
                                 starRatedColor="#777"
@@ -34,6 +45,17 @@ class ReleaseView extends React.Component {
                                 numberOfStars={5}
                                 name='rating'
                             />
+                            <br/>
+                            <Text>Platform : </Text>
+                            <span style={{fontSize: 20, color: color, textAlign: "center"}}>
+                                <Icon
+                                    type={icon}
+                                    theme={theme}
+                                />
+                            </span>
+                            <Divider type="vertical"/>
+                            <Text>Version : {release.version}</Text><br/>
+
                             <EditRelease uuid={release.uuid} type={app.type}/>
                         </Col>
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>

@@ -1,11 +1,11 @@
 import React from "react";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
 import {Button, message, notification, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
+import {withConfigContext} from "../../../../context/ConfigContext";
 const {Text} = Typography;
 const columns = [
     {
@@ -112,6 +112,7 @@ class DeviceInstall extends React.Component {
 
     //fetch data from api
     fetch = (params = {}) => {
+        const config = this.props.context;
         this.setState({loading: true});
         const {deviceType} = this.props;
         // get current page
@@ -130,7 +131,7 @@ class DeviceInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort
+            window.location.origin+
           + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/devices?" + encodedExtraParams,
 
         ).then(res => {
@@ -148,8 +149,7 @@ class DeviceInstall extends React.Component {
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':'
-                  + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -225,4 +225,4 @@ class DeviceInstall extends React.Component {
     }
 }
 
-export default DeviceInstall;
+export default withConfigContext(DeviceInstall);

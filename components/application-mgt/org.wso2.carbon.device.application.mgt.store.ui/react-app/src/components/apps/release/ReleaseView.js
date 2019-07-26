@@ -5,11 +5,10 @@ import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
 import DetailedRating from "./DetailedRating";
 import Reviews from "./review/Reviews";
-import AddReview from "./review/AddReview";
 import axios from "axios";
-import config from "../../../../public/conf/config.json";
 import AppInstallModal from "./install/AppInstallModal";
 import CurrentUsersReview from "./review/CurrentUsersReview";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const {Title, Text, Paragraph} = Typography;
 
@@ -23,13 +22,14 @@ class ReleaseView extends React.Component {
     }
 
     installApp = (type, payload) => {
+        const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
 
         this.setState({
             loading: true,
         });
-        const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
         axios.post(
             url,
             payload,
@@ -61,7 +61,7 @@ class ReleaseView extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 this.setState({
                     loading: false,
@@ -150,4 +150,4 @@ class ReleaseView extends React.Component {
     }
 }
 
-export default ReleaseView;
+export default withConfigContext(ReleaseView);

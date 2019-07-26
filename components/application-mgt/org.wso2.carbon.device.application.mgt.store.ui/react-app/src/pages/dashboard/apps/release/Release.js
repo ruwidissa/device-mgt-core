@@ -3,7 +3,7 @@ import '../../../../App.css';
 import {Skeleton, Typography, Row, Col, Card, message, notification} from "antd";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Title} = Typography;
 
@@ -36,9 +36,11 @@ class Release extends React.Component {
     }
 
     fetchData = (uuid)=>{
+        const config = this.props.context;
+
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/"+uuid,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/"+uuid,
 
         ).then(res => {
             if (res.status === 200) {
@@ -55,7 +57,7 @@ class Release extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -101,4 +103,4 @@ class Release extends React.Component {
 }
 
 
-export default Release;
+export default withConfigContext(Release);

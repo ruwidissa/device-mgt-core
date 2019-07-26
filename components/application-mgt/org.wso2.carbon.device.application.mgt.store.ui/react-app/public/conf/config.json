@@ -6,9 +6,6 @@
     "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {
-    "protocol": "https",
-    "hostname": "localhost",
-    "httpsPort": "9443",
     "invokerUri": "/ui-request-handler/invoke/application-mgt-store/v1.0",
     "invoker": {
       "uri": "/store-ui-request-handler/invoke",

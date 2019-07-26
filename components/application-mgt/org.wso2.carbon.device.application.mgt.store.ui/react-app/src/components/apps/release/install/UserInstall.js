@@ -2,7 +2,7 @@ import React from "react";
 import {Typography, Select, Spin, message, notification, Button} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -23,6 +23,7 @@ class UserInstall extends React.Component {
     };
 
     fetchUser = value => {
+        const config = this.props.context;
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
         this.setState({data: [], fetching: true});
@@ -30,7 +31,7 @@ class UserInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            config.serverConfig.protocol + "://"+config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/users/search?username=" + value,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/users/search?username=" + value,
 
         ).then(res => {
             if (res.status === 200) {
@@ -50,7 +51,7 @@ class UserInstall extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty(status) && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/store/login';
+                window.location.href = window.location.origin+ '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -111,4 +112,4 @@ class UserInstall extends React.Component {
     }
 }
 
-export default UserInstall;
+export default withConfigContext(UserInstall);
