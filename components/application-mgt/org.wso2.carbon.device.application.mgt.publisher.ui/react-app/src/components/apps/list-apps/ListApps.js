@@ -1,16 +1,11 @@
 import React from "react";
-import {Avatar, Card, Col, Row, Table, Typography, Input, Divider, Checkbox, Select, Button} from "antd";
+import {Card, Col, Row, Typography, Input, Divider} from "antd";
 import AppsTable from "./appsTable/AppsTable";
 import Filters from "./Filters";
 import AppDetailsDrawer from "./AppDetailsDrawer/AppDetailsDrawer";
 
-const {Option} = Select;
-const {Title, Text} = Typography;
+const {Title} = Typography;
 const Search = Input.Search;
-// connecting state.apps with the component
-// const mapStateToProps = state => {
-//     return {apps: state.apps}
-// };
 
 
 class ListApps extends React.Component {

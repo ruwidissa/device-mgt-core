@@ -15,17 +15,17 @@ import {
     Card
 } from 'antd';
 
-const {Meta} = Card;
 import "../../../../App.css";
 import DetailedRating from "../../detailed-rating/DetailedRating";
 import {Link} from "react-router-dom";
 import axios from "axios";
-import config from "../../../../../public/conf/config.json";
 import ReactQuill from "react-quill";
 import ReactHtmlParser, {processNodes, convertNodeToElement, htmlparser2} from 'react-html-parser';
 import "./AppDetailsDrawer.css";
 import pSBC from "shade-blend-color";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
+const {Meta} = Card;
 const {Text, Title} = Typography;
 const {Option} = Select;
 
@@ -91,8 +91,9 @@ class AppDetailsDrawer extends React.Component {
     }
 
     getCategories = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
         ).then(res => {
             if (res.status === 200) {
                 const categories = JSON.parse(res.data.data);
@@ -114,7 +115,7 @@ class AppDetailsDrawer extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -130,8 +131,9 @@ class AppDetailsDrawer extends React.Component {
     };
 
     getTags = () => {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
         ).then(res => {
             if (res.status === 200) {
                 const tags = JSON.parse(res.data.data);
@@ -153,7 +155,7 @@ class AppDetailsDrawer extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -171,11 +173,12 @@ class AppDetailsDrawer extends React.Component {
 
     // change the app name
     handleNameSave = name => {
+        const config = this.props.context;
         const {id} = this.props.app;
         if (name !== this.state.name && name !== "") {
             const data = {name: name};
             axios.put(
-                config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -192,7 +195,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                    window.location.href = window.location.origin+ '/publisher/login';
                 } else {
                     notification["error"]({
                         message: "There was a problem",
@@ -245,6 +248,7 @@ class AppDetailsDrawer extends React.Component {
 
     // change app categories
     handleCategorySave = () => {
+        const config = this.props.context;
         const {id} = this.props.app;
         const {temporaryCategories, categories} = this.state;
 
@@ -255,7 +259,7 @@ class AppDetailsDrawer extends React.Component {
         if (difference.length !== 0 && temporaryCategories.length !== 0) {
             const data = {categories: temporaryCategories};
             axios.put(
-                config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -273,7 +277,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                    window.location.href = window.location.origin+ '/publisher/login';
                 } else {
                     notification["error"]({
                         message: "There was a problem",
@@ -308,6 +312,7 @@ class AppDetailsDrawer extends React.Component {
 
     // change app tags
     handleTagsSave = () => {
+        const config = this.props.context;
         const {id} = this.props.app;
         const {temporaryTags, tags} = this.state;
 
@@ -319,7 +324,7 @@ class AppDetailsDrawer extends React.Component {
         if (difference.length !== 0 && temporaryTags.length !== 0) {
             const data = {tags: temporaryTags};
             axios.put(
-                config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -336,7 +341,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                    window.location.href = window.location.origin+ '/publisher/login';
                 } else {
                     notification["error"]({
                         message: "There was a problem",
@@ -353,14 +358,14 @@ class AppDetailsDrawer extends React.Component {
 
     //handle description save
     handleDescriptionSave = () => {
-
+        const config = this.props.context;
         const {id} = this.props.app;
         const {description, temporaryDescription} = this.state;
 
         if (temporaryDescription !== description && temporaryDescription !== "<p><br></p>") {
             const data = {description: temporaryDescription};
             axios.put(
-                config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -377,7 +382,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                    window.location.href = window.location.origin+ '/publisher/login';
                 } else {
                     message.error('Something went wrong... :(');
                 }
@@ -391,6 +396,7 @@ class AppDetailsDrawer extends React.Component {
 
 
     render() {
+        const config = this.props.context;
         const {app, visible, onClose} = this.props;
         const {
             name, loading, description, isDescriptionEditEnabled, isCategoriesEditEnabled,
@@ -402,7 +408,6 @@ class AppDetailsDrawer extends React.Component {
         }
         return (
             <div>
-
                 <Drawer
                     placement="right"
                     width={640}
@@ -600,4 +605,4 @@ class AppDetailsDrawer extends React.Component {
     }
 }
 
-export default AppDetailsDrawer;
+export default withConfigContext(AppDetailsDrawer);

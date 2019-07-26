@@ -1,24 +1,5 @@
 import React from "react";
-import {PageHeader, Typography,Input, Button, Row, Col} from "antd";
 import ListApps from "../../../components/apps/list-apps/ListApps";
-
-const Search = Input.Search;
-
-const routes = [
-    {
-        path: 'index',
-        breadcrumbName: 'Publisher',
-    },
-    {
-        path: 'first',
-        breadcrumbName: 'Dashboard',
-    },
-    {
-        path: 'second',
-        breadcrumbName: 'Apps',
-    },
-];
-
 
 class Apps extends React.Component {
     routes;

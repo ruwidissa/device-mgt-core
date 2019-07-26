@@ -3,14 +3,15 @@ import {Divider, Row, Col, Typography, Button, Drawer, Icon} from "antd";
 import StarRatings from "react-star-ratings";
 import Reviews from "./review/Reviews";
 import "../../../App.css";
-import config from "../../../../public/conf/config.json";
 import DetailedRating from "../detailed-rating/DetailedRating";
 import EditRelease from "./edit-release/EditRelease";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
     render() {
+        const config = this.props.context;
         const app = this.props.app;
         const release = (app !== null) ? app.applicationReleases[0] : null;
         if (release == null) {
@@ -102,4 +103,4 @@ class ReleaseView extends React.Component {
     }
 }
 
-export default ReleaseView;
+export default withConfigContext(ReleaseView);

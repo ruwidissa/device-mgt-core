@@ -2,35 +2,22 @@ import React from "react";
 import {
     Card,
     Button,
-    message,
+    Steps,
     Row,
     Col,
-    Input,
-    Icon,
-    Select,
-    Switch,
     Form,
-    Upload,
-    Divider,
+    Result,
     notification,
     Spin
 } from "antd";
 import axios from "axios";
-import {withRouter} from 'react-router-dom'
-import config from "../../../public/conf/config.json";
+import {withRouter} from 'react-router-dom';
+import NewAppDetailsForm from "./subForms/NewAppDetailsForm";
+import NewAppUploadForm from "./subForms/NewAppUploadForm";
+import {withConfigContext} from "../../context/ConfigContext";
 
-const {Option} = Select;
-const {TextArea} = Input;
-const InputGroup = Input.Group;
+const {Step} = Steps;
 
-const formItemLayout = {
-    labelCol: {
-        span: 5,
-    },
-    wrapperCol: {
-        span: 19,
-    },
-};
 
 class AddNewAppFormComponent extends React.Component {
 
@@ -43,518 +30,135 @@ class AddNewAppFormComponent extends React.Component {
             icons: [],
             screenshots: [],
             loading: false,
-            binaryFiles: []
+            binaryFiles: [],
+            application: null,
+            release: null,
+            isError: false
         };
     }
 
-    componentDidMount() {
-        this.getCategories();
-        this.getTags();
-    }
-
-    getCategories = () => {
-        axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
-        ).then(res => {
-            if (res.status === 200) {
-                let categories = JSON.parse(res.data.data);
-                this.setState({
-                    categories: categories,
-                    loading: false
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load categories.",
-                });
-            }
-            this.setState({
-                loading: false
-            });
+    onSuccessApplicationData = (application) => {
+        this.setState({
+            application,
+            current: 1
         });
     };
 
-    getTags = () => {
-        axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
-        ).then(res => {
-            if (res.status === 200) {
-                let tags = JSON.parse(res.data.data);
-                this.setState({
-                    tags: tags,
-                    loading: false,
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load tags.",
-                });
-            }
-            this.setState({
-                loading: false
-            });
+    onSuccessReleaseData = (releaseData) => {
+        const config = this.props.context;
+        this.setState({
+            loading: true,
+            isError: false
         });
-    };
-
-    handleCategoryChange = (value) => {
-        // console.log(`selected ${value}`);
-    };
-
-    handleSubmit = e => {
-        e.preventDefault();
+        const {application} = this.state;
+        const {data, release} = releaseData;
         const {formConfig} = this.props;
-        const {specificElements} = formConfig;
 
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
+        //add release wrapper
+        application[formConfig.releaseWrapperName] = [release];
+
+        const json = JSON.stringify(application);
+        const blob = new Blob([json], {
+            type: 'application/json'
+        });
+        data.append(formConfig.jsonPayloadName, blob);
+
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
+
+        axios.post(
+            url,
+            data,
+            {
+                headers: {
+                    'X-Platform': config.serverConfig.platform
+                },
+            }
+        ).then(res => {
+            if (res.status === 201) {
                 this.setState({
-                    loading: true
+                    loading: false,
+                    current: 2
                 });
-                const {name, description, categories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription, releaseType} = values;
-                const application = {
-                    name,
-                    description,
-                    categories,
-                    subMethod: (price === undefined || parseInt(price) === 0) ? "FREE" : "PAID",
-                    tags,
-                    unrestrictedRoles: [],
-                };
-
-                const data = new FormData();
-
-                if (formConfig.installationType !== "WEB_CLIP") {
-                    application.deviceType = values.deviceType;
-                } else {
-                    application.type = "WEB_CLIP";
-                    application.deviceType = "ALL";
-                }
-
-                if (specificElements.hasOwnProperty("binaryFile")) {
-                    data.append('binaryFile', binaryFile[0].originFileObj);
-                }
-
-                //add release data
-                const release = {
-                    description: releaseDescription,
-                    price: (price === undefined) ? 0 : parseInt(price),
-                    isSharedWithAllTenants,
-                    metaData: "string",
-                    releaseType: releaseType
-                };
-
-                if (formConfig.installationType !== "WEB_CLIP") {
-                    release.supportedOsVersions = "4.0-10.0";
-                }
-
-                if (specificElements.hasOwnProperty("version")) {
-                    release.version = values.version;
-                }
-                if (specificElements.hasOwnProperty("url")) {
-                    release.url = values.url;
-                }
-                if (specificElements.hasOwnProperty("packageName")) {
-                    release.packageName = values.packageName;
-                }
-
-                //add release wrapper
-                application[formConfig.releaseWrapperName] = [release];
-
-                data.append('icon', icon[0].originFileObj);
-                data.append('screenshot1', screenshots[0].originFileObj);
-                data.append('screenshot2', screenshots[1].originFileObj);
-                data.append('screenshot3', screenshots[2].originFileObj);
-
-                const json = JSON.stringify(application);
-                const blob = new Blob([json], {
-                    type: 'application/json'
-                });
-                data.append(formConfig.jsonPayloadName, blob);
-
-                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
-
-                axios.post(
-                    url,
-                    data,
-                    {
-                        headers: {
-                            'X-Platform': config.serverConfig.platform
-                        },
-                    }
-                ).then(res => {
-                    if (res.status === 201) {
-                        this.setState({
-                            loading: false,
-                        });
-
-                        notification["success"]({
-                            message: "Done!",
-                            description:
-                                "New app was added successfully",
-                        });
-
-                        this.props.history.push('/publisher/apps');
-
-                        // window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/apps';
-
-                    }
-
-                }).catch((error) => {
-                    if (error.hasOwnProperty("response") && error.response.status === 401) {
-                        window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
-                    } else {
-                        notification["error"]({
-                            message: "Something went wrong!",
-                            description:
-                                "Sorry, we were unable to complete your request.",
-                        });
-
-                    }
-                    this.setState({
-                        loading: false
-                    });
+            } else {
+                this.setState({
+                    loading: false,
+                    isError: true,
+                    current: 2
                 });
             }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                window.location.href = window.location.origin+ '/publisher/login';
+            } else {
+                notification["error"]({
+                    message: "Something went wrong!",
+                    description:
+                        "Sorry, we were unable to complete your request.",
+                });
+
+            }
+            this.setState({
+                loading: false,
+                isError: true,
+                current: 2
+            });
         });
+
     };
 
-    normFile = e => {
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e && e.fileList;
-    };
-
-    handleIconChange = ({fileList}) => this.setState({icons: fileList});
-    handleBinaryFileChange = ({fileList}) => this.setState({binaryFiles: fileList});
-
-    handleScreenshotChange = ({fileList}) => this.setState({screenshots: fileList});
-
-    validateIcon = (rule, value, callback) => {
-        const {icons} = this.state;
-        if (icons.length !== 1) {
-            callback("Please select icon file");
-        }
-        callback();
+    onClickBackButton = () => {
+        const current = this.state.current - 1;
+        this.setState({current});
     };
 
     render() {
-        const {categories, tags, icons, screenshots, loading, binaryFiles} = this.state;
-        const {getFieldDecorator} = this.props.form;
+        const { loading, current, isError} = this.state;
         const {formConfig} = this.props;
+
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
                     <Row>
-                        <Col span={20} offset={2}>
-                            <Card>
-                                <Form labelAlign="left" layout="horizontal"
-                                      hideRequiredMark
-                                      onSubmit={this.handleSubmit}>
-                                    <Row>
-                                        <Col span={12}>
-                                            <div>
+                        <Col span={16} offset={4}>
+                            <Steps style={{minHeight: 32}} current={current}>
+                                <Step key="Application" title="Application"/>
+                                <Step key="Release" title="Release"/>
+                                <Step key="Result" title="Result"/>
+                            </Steps>
+                            <Card style={{marginTop: 24}}>
+                                <div style={{display: (current === 0 ? 'unset' : 'none')}}>
+                                    <NewAppDetailsForm
+                                        formConfig={formConfig}
+                                        onSuccessApplicationData={this.onSuccessApplicationData}/>
+                                </div>
+                                <div style={{display: (current === 1 ? 'unset' : 'none')}}>
+                                    <NewAppUploadForm
+                                        formConfig={formConfig}
+                                        onSuccessReleaseData={this.onSuccessReleaseData}
+                                        onClickBackButton={this.onClickBackButton}/>
+                                </div>
 
-                                                {formConfig.installationType !== "WEB_CLIP" && (
-                                                    <Form.Item {...formItemLayout} label="Device Type">
-                                                        {getFieldDecorator('deviceType', {
-                                                                rules: [
-                                                                    {
-                                                                        required: true,
-                                                                        message: 'Please select device type'
-                                                                    },
-                                                                    {
-                                                                        // validator: this.validateIcon
-                                                                    }
-                                                                ],
+                                <div style={{display: (current === 2 ? 'unset' : 'none')}}>
 
-                                                            }
-                                                        )(
-                                                            <Select placeholder="select device type">
-                                                                <Option key="android">Android</Option>
-                                                                <Option key="ios">iOS</Option>
-                                                            </Select>
-                                                        )}
-                                                    </Form.Item>
-                                                )}
+                                    {!isError && (<Result
+                                        status="success"
+                                        title="Application created successfully!"
+                                        extra={[
+                                            <Button type="primary" key="console"
+                                                    onClick={() => this.props.history.push('/publisher/apps')}>
+                                                Go to applications
+                                            </Button>
+                                        ]}
+                                    />)}
 
-                                                {/*app name*/}
-                                                <Form.Item {...formItemLayout} label="App Name">
-                                                    {getFieldDecorator('name', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please input a name'
-                                                        }],
-                                                    })(
-                                                        <Input placeholder="ex: Lorem App"/>
-                                                    )}
-                                                </Form.Item>
-
-                                                {/*description*/}
-                                                <Form.Item {...formItemLayout} label="Description">
-                                                    {getFieldDecorator('description', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please enter a description'
-                                                        }],
-                                                    })(
-                                                        <TextArea placeholder="Enter the description..." rows={7}/>
-                                                    )}
-                                                </Form.Item>
-                                                <Form.Item {...formItemLayout} label="Categories">
-                                                    {getFieldDecorator('categories', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please select categories'
-                                                        }],
-                                                    })(
-                                                        <Select
-                                                            mode="multiple"
-                                                            style={{width: '100%'}}
-                                                            placeholder="Select a Category"
-                                                            onChange={this.handleCategoryChange}
-                                                        >
-                                                            {
-                                                                categories.map(category => {
-                                                                    return (
-                                                                        <Option
-                                                                            key={category.categoryName}>
-                                                                            {category.categoryName}
-                                                                        </Option>
-                                                                    )
-                                                                })
-                                                            }
-                                                        </Select>
-                                                    )}
-                                                </Form.Item>
-                                                <Divider/>
-                                                <Form.Item {...formItemLayout} label="Tags">
-                                                    {getFieldDecorator('tags', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please select tags'
-                                                        }],
-                                                    })(
-                                                        <Select
-                                                            mode="tags"
-                                                            style={{width: '100%'}}
-                                                            placeholder="Tags"
-                                                        >
-                                                            {
-                                                                tags.map(tag => {
-                                                                    return (
-                                                                        <Option
-                                                                            key={tag.tagName}>
-                                                                            {tag.tagName}
-                                                                        </Option>
-                                                                    )
-                                                                })
-                                                            }
-                                                        </Select>
-                                                    )}
-                                                </Form.Item>
-                                                <Form.Item {...formItemLayout} label="Meta Data">
-                                                    <InputGroup>
-                                                        <Row gutter={8}>
-                                                            <Col span={10}>
-                                                                <Input placeholder="Key"/>
-                                                            </Col>
-                                                            <Col span={12}>
-                                                                <Input placeholder="value"/>
-                                                            </Col>
-                                                            <Col span={2}>
-                                                                <Button type="dashed" shape="circle" icon="plus"/>
-                                                            </Col>
-                                                        </Row>
-                                                    </InputGroup>
-                                                </Form.Item>
-                                            </div>
-                                        </Col>
-                                        <Col span={12} style={{paddingLeft: 20}}>
-                                            <p>Release Data</p>
-
-                                            {formConfig.specificElements.hasOwnProperty("binaryFile") && (
-                                                <Form.Item {...formItemLayout} label="Application">
-                                                    {getFieldDecorator('binaryFile', {
-                                                        valuePropName: 'binaryFile',
-                                                        getValueFromEvent: this.normFile,
-                                                        required: true,
-                                                        message: 'Please select application'
-                                                    })(
-                                                        <Upload
-                                                            name="binaryFile"
-                                                            onChange={this.handleBinaryFileChange}
-                                                            beforeUpload={() => false}
-                                                        >
-                                                            {binaryFiles.length !== 1 && (
-                                                                <Button>
-                                                                    <Icon type="upload"/> Click to upload
-                                                                </Button>
-                                                            )}
-                                                        </Upload>,
-                                                    )}
-                                                </Form.Item>
-                                            )}
-
-                                            <Form.Item {...formItemLayout} label="Icon">
-                                                {getFieldDecorator('icon', {
-                                                    valuePropName: 'icon',
-                                                    getValueFromEvent: this.normFile,
-                                                    required: true,
-                                                    message: 'Please select a icon'
-                                                })(
-                                                    <Upload
-                                                        name="logo"
-                                                        onChange={this.handleIconChange}
-                                                        beforeUpload={() => false}
-                                                    >
-                                                        {icons.length !== 1 && (
-                                                            <Button>
-                                                                <Icon type="upload"/> Click to upload
-                                                            </Button>
-                                                        )}
-                                                    </Upload>,
-                                                )}
-                                            </Form.Item>
-
-                                            <Row style={{marginTop: 40}}>
-                                                <Col span={24}>
-
-                                                </Col>
-                                            </Row>
-
-                                            <Form.Item {...formItemLayout} label="Screenshots">
-                                                {getFieldDecorator('screenshots', {
-                                                    valuePropName: 'icon',
-                                                    getValueFromEvent: this.normFile,
-                                                    required: true,
-                                                    message: 'Please select a icon'
-                                                })(
-                                                    <Upload
-                                                        name="screenshots"
-                                                        onChange={this.handleScreenshotChange}
-                                                        beforeUpload={() => false}
-                                                        multiple
-                                                    >
-
-                                                        {screenshots.length < 3 && (
-                                                            <Button>
-                                                                <Icon type="upload"/> Click to upload
-                                                            </Button>
-                                                        )}
-
-
-                                                    </Upload>,
-                                                )}
-                                            </Form.Item>
-
-                                            {formConfig.specificElements.hasOwnProperty("packageName") && (
-                                                <Form.Item {...formItemLayout} label="Package Name">
-                                                    {getFieldDecorator('packageName', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please input the package name'
-                                                        }],
-                                                    })(
-                                                        <Input placeholder="Package Name"/>
-                                                    )}
-                                                </Form.Item>
-                                            )}
-
-                                            {formConfig.specificElements.hasOwnProperty("url") && (
-                                                <Form.Item {...formItemLayout} label="URL">
-                                                    {getFieldDecorator('url', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please input the url'
-                                                        }],
-                                                    })(
-                                                        <Input placeholder="url"/>
-                                                    )}
-                                                </Form.Item>
-                                            )}
-
-                                            {formConfig.specificElements.hasOwnProperty("version") && (
-                                                <Form.Item {...formItemLayout} label="Version">
-                                                    {getFieldDecorator('version', {
-                                                        rules: [{
-                                                            required: true,
-                                                            message: 'Please input the version'
-                                                        }],
-                                                    })(
-                                                        <Input placeholder="Version"/>
-                                                    )}
-                                                </Form.Item>
-                                            )}
-
-                                            <Form.Item {...formItemLayout} label="Release Type">
-                                                {getFieldDecorator('releaseType', {
-                                                    rules: [{
-                                                        required: true,
-                                                        message: 'Please input the Release Type'
-                                                    }],
-                                                })(
-                                                    <Input placeholder="Release Type"/>
-                                                )}
-                                            </Form.Item>
-
-                                            <Form.Item {...formItemLayout} label="Description">
-                                                {getFieldDecorator('releaseDescription', {
-                                                    rules: [{
-                                                        required: true,
-                                                        message: 'Please enter a description for release'
-                                                    }],
-                                                })(
-                                                    <TextArea placeholder="Enter a description for release" rows={5}/>
-                                                )}
-                                            </Form.Item>
-
-                                            <Form.Item {...formItemLayout} label="Price">
-                                                {getFieldDecorator('price', {
-                                                    rules: [{
-                                                        required: false
-                                                    }],
-                                                })(
-                                                    <Input prefix="$" placeholder="00.00"/>
-                                                )}
-                                            </Form.Item>
-
-                                            <Form.Item {...formItemLayout} label="Is Shared?">
-                                                {getFieldDecorator('isSharedWithAllTenants', {
-                                                    rules: [{
-                                                        required: true,
-                                                        message: 'Please select'
-                                                    }],
-                                                    initialValue: false
-                                                })(
-                                                    <Switch checkedChildren={<Icon type="check"/>}
-                                                            unCheckedChildren={<Icon type="close"/>}
-                                                    />
-                                                )}
-
-                                            </Form.Item>
-                                        </Col>
-
-                                    </Row>
-                                    <Form.Item style={{float: "right"}}>
-                                        <Button type="primary" htmlType="submit">
-                                            Submit
-                                        </Button>
-                                    </Form.Item>
-                                </Form>
+                                    {isError && (<Result
+                                        status="500"
+                                        title="Error occurred while creating the application."
+                                        subTitle="Go back to edit the details and submit again."
+                                        extra={<Button onClick={this.onClickBackButton}>Back</Button>}
+                                    />)}
+                                </div>
                             </Card>
                         </Col>
                     </Row>
@@ -566,4 +170,4 @@ class AddNewAppFormComponent extends React.Component {
 }
 
 const AddNewAppForm = withRouter(Form.create({name: 'add-new-app'})(AddNewAppFormComponent));
-export default AddNewAppForm;
+export default withConfigContext(AddNewAppForm);
