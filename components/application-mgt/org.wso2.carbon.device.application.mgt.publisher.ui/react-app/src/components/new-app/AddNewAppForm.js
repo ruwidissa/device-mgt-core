@@ -142,8 +142,7 @@ class AddNewAppFormComponent extends React.Component {
 
                                     {!isError && (<Result
                                         status="success"
-                                        title="Successfully created the application!"
-                                        subTitle="Order number: 2017182818828182881 Cloud server configuration takes 1-5 minutes, please wait."
+                                        title="Application created successfully!"
                                         extra={[
                                             <Button type="primary" key="console"
                                                     onClick={() => this.props.history.push('/publisher/apps')}>

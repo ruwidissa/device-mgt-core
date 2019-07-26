@@ -234,24 +234,24 @@ class NewAppDetailsForm extends React.Component {
                                     </Select>
                                 )}
                             </Form.Item>
-                            <Form.Item {...formItemLayout} label="Meta Data">
-                                <InputGroup>
-                                    <Row gutter={8}>
-                                        <Col span={10}>
-                                            <Input placeholder="Key"/>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Input placeholder="value"/>
-                                        </Col>
-                                        <Col span={2}>
-                                            <Button type="dashed" shape="circle" icon="plus"/>
-                                        </Col>
-                                    </Row>
-                                </InputGroup>
-                            </Form.Item>
+                            {/*<Form.Item {...formItemLayout} label="Meta Data">*/}
+                                {/*<InputGroup>*/}
+                                    {/*<Row gutter={8}>*/}
+                                        {/*<Col span={10}>*/}
+                                            {/*<Input placeholder="Key"/>*/}
+                                        {/*</Col>*/}
+                                        {/*<Col span={12}>*/}
+                                            {/*<Input placeholder="value"/>*/}
+                                        {/*</Col>*/}
+                                        {/*<Col span={2}>*/}
+                                            {/*<Button type="dashed" shape="circle" icon="plus"/>*/}
+                                        {/*</Col>*/}
+                                    {/*</Row>*/}
+                                {/*</InputGroup>*/}
+                            {/*</Form.Item>*/}
                             <Form.Item style={{float: "right"}}>
                                 <Button type="primary" htmlType="submit">
-                                    Submit
+                                    Next
                                 </Button>
                             </Form.Item>
                         </Form>

@@ -23,7 +23,8 @@ class NewAppUploadForm extends React.Component {
             screenshots: [],
             loading: false,
             binaryFiles: [],
-            application: null
+            application: null,
+            isFree: true
         }
     }
 
@@ -45,7 +46,9 @@ class NewAppUploadForm extends React.Component {
                     loading: true
                 });
 
-                const {name, description, categories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription, releaseType} = values;
+                console.log(values);
+
+                const {price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription, releaseType} = values;
 
                 //add release data
                 const release = {
@@ -91,10 +94,17 @@ class NewAppUploadForm extends React.Component {
 
     handleScreenshotChange = ({fileList}) => this.setState({screenshots: fileList});
 
+    handlePriceTypeChange = (value) => {
+        this.setState({
+            isFree: (value === 'free')
+        })
+
+    };
+
     render() {
         const {formConfig} = this.props;
         const {getFieldDecorator} = this.props.form;
-        const {icons, screenshots, binaryFiles} = this.state;
+        const {icons, screenshots, binaryFiles, isFree} = this.state;
 
 
         return (
@@ -245,14 +255,32 @@ class NewAppUploadForm extends React.Component {
                                 )}
                             </Form.Item>
 
+                            <Form.Item {...formItemLayout} label="Price Type">
+                                {getFieldDecorator('select', {
+                                    rules: [{required: true, message: 'Please select price Type'}],
+                                })(
+                                    <Select
+                                        placeholder="Please select a price type"
+                                        onChange={this.handlePriceTypeChange}>
+                                        <Option value="free">Free</Option>
+                                        <Option value="paid">Paid</Option>
+                                    </Select>,
+                                )}
+                            </Form.Item>
+
                             <Form.Item {...formItemLayout} label="Price">
                                 {getFieldDecorator('price', {
                                     rules: [{
-                                        required: false
+                                        required: !isFree
                                     }],
                                 })(
                                     <InputNumber
-                                        defaultValue={1000}
+                                        disabled={isFree}
+                                        options={{
+                                            initialValue: 1
+                                        }}
+                                        min={0}
+                                        max={10000}
                                         formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                         parser={value => value.replace(/\$\s?|(,*)/g, '')}
                                     />
