@@ -17,9 +17,9 @@ import {
     Typography
 } from "antd";
 import axios from "axios";
-import config from "../../../../public/conf/config.json";
 import {TweenOneGroup} from 'rc-tween-one';
 import pSBC from "shade-blend-color";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const {Title} = Typography;
 
@@ -38,8 +38,9 @@ class ManageCategories extends React.Component {
     };
 
     componentDidMount() {
+        const config = this.props.context;
         axios.get(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -51,7 +52,7 @@ class ManageCategories extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 message.warning('Something went wrong');
 
@@ -70,11 +71,12 @@ class ManageCategories extends React.Component {
     };
 
     deleteCategory = (id) => {
+        const config = this.props.context;
         this.setState({
             loading: true
         });
         axios.delete(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/" + id,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/" + id,
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -98,7 +100,7 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -114,6 +116,7 @@ class ManageCategories extends React.Component {
     };
 
     renderElement = (category) => {
+        const config = this.props.context;
         const categoryName = category.categoryName;
         const tagElem = (
             <Tag
@@ -157,6 +160,7 @@ class ManageCategories extends React.Component {
     };
 
     renderTempElement = (category) => {
+        const config = this.props.context;
         const tagElem = (
             <Tag
                 closable
@@ -210,6 +214,7 @@ class ManageCategories extends React.Component {
     };
 
     handleSave = () => {
+        const config = this.props.context;
         const {tempElements, categories} = this.state;
         this.setState({
             loading: true
@@ -218,7 +223,7 @@ class ManageCategories extends React.Component {
         const data = tempElements.map(category => category.categoryName);
 
         axios.post(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories",
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories",
             data,
         ).then(res => {
             if (res.status === 200) {
@@ -241,7 +246,7 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -276,6 +281,7 @@ class ManageCategories extends React.Component {
     };
 
     editItem = () => {
+        const config = this.props.context;
 
         const {editingValue, currentlyEditingId, categories} = this.state;
 
@@ -285,7 +291,7 @@ class ManageCategories extends React.Component {
         });
 
         axios.put(
-            config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/rename?from=" + currentlyEditingId + "&to=" + editingValue,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/rename?from=" + currentlyEditingId + "&to=" + editingValue,
             {},
         ).then(res => {
             if (res.status === 200) {
@@ -307,7 +313,7 @@ class ManageCategories extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                window.location.href = window.location.origin+ '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -455,4 +461,4 @@ class ManageCategories extends React.Component {
     }
 }
 
-export default ManageCategories;
+export default withConfigContext(ManageCategories);

@@ -4,7 +4,7 @@ import {Switch, Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
 import "../../App.css";
-import config from "../../../public/conf/config.json";
+import {withConfigContext} from "../../context/ConfigContext";
 
 const {Header, Content, Footer} = Layout;
 const {SubMenu} = Menu;
@@ -15,7 +15,7 @@ class Dashboard extends React.Component {
         this.state = {
             routes: props.routes
         };
-
+        const config = this.props.context;
         this.Logo = config.theme.logo;
     }
 
@@ -73,4 +73,4 @@ class Dashboard extends React.Component {
     }
 }
 
-export default Dashboard;
+export default withConfigContext(Dashboard);

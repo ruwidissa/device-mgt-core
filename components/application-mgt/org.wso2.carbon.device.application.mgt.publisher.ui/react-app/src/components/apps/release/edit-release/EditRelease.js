@@ -1,7 +1,7 @@
 import React from "react";
 import {Modal, Button, Icon, notification, Spin, Row, Col, Card, Upload, Input, Switch, Form} from 'antd';
-import config from "../../../../../public/conf/config.json";
 import axios from "axios";
+import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {TextArea} = Input;
 
@@ -116,6 +116,7 @@ class EditReleaseModal extends React.Component {
     handleSubmit = e => {
         e.preventDefault();
         const {uuid} = this.props;
+        const config = this.props.context;
 
         const {formConfig} = this.state;
         const {specificElements} = formConfig;
@@ -180,7 +181,7 @@ class EditReleaseModal extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint + "/" + uuid;
+                const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint + "/" + uuid;
 
                 axios.put(
                     url,
@@ -205,7 +206,7 @@ class EditReleaseModal extends React.Component {
 
                 }).catch((error) => {
                     if (error.hasOwnProperty("response") && error.response.status === 401) {
-                        window.location.href = config.serverConfig.protocol + "://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + '/publisher/login';
+                        window.location.href = window.location.origin+ '/publisher/login';
                     } else {
                         notification["error"]({
                             message: "Something went wrong!",
@@ -412,6 +413,6 @@ class EditReleaseModal extends React.Component {
     }
 }
 
-const EditRelease = Form.create({name: 'add-new-release'})(EditReleaseModal);
+const EditRelease = withConfigContext(Form.create({name: 'add-new-release'})(EditReleaseModal));
 
 export default EditRelease;
