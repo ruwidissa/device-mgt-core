@@ -12,8 +12,22 @@ const columns = [
         title: '',
         dataIndex: 'name',
         render: (name, row) => {
-            return (
-                <div>
+            let avatar = null;
+            if (row.applicationReleases.length === 0) {
+                const avatarLetter = name.charAt(0).toUpperCase();
+                avatar = (
+                    <Avatar shape="square" size="large"
+                            style={{
+                                marginRight: 20,
+                                borderRadius: "28%",
+                                border: "1px solid #ddd",
+                                backgroundColor: pSBC(0.50, config.theme.primaryColor)
+                            }}>
+                        {avatarLetter}
+                    </Avatar>
+                );
+            } else {
+                avatar = (
                     <Avatar shape="square" size="large"
                             style={{
                                 marginRight: 20,
@@ -22,6 +36,12 @@ const columns = [
                             }}
                             src={row.applicationReleases[0].iconPath}
                     />
+                )
+            }
+
+            return (
+                <div>
+                    {avatar}
                     {name}
                 </div>);
         }
@@ -33,7 +53,7 @@ const columns = [
             <span>
                 {categories.map(category => {
                     return (
-                        <Tag color={pSBC ( 0.30, config.theme.primaryColor )} key={category}>
+                        <Tag color={pSBC(0.30, config.theme.primaryColor)} key={category}>
                             {category}
                         </Tag>
                     );
@@ -80,7 +100,7 @@ class AppsTable extends React.Component {
     }
 
     componentDidMount() {
-        const {filters} =this.props;
+        const {filters} = this.props;
         this.setState({
             filters
         });
@@ -89,9 +109,9 @@ class AppsTable extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {filters} =this.props;
+        const {filters} = this.props;
         if (prevProps.filters !== this.props.filters) {
-            console.log("d",this.props.filters);
+            console.log("d", this.props.filters);
             this.setState({
                 filters
             });
@@ -106,7 +126,7 @@ class AppsTable extends React.Component {
         this.setState({
             pagination: pager,
         });
-        this.fetch(this.state.filters,{
+        this.fetch(this.state.filters, {
             results: pagination.pageSize,
             page: pagination.current,
             sortField: sorter.field,
@@ -115,12 +135,12 @@ class AppsTable extends React.Component {
         });
     };
 
-    fetch = (filters,params = {}) => {
+    fetch = (filters, params = {}) => {
         this.setState({loading: true});
         const config = this.props.context;
 
-        if(!params.hasOwnProperty("page")){
-           params.page = 1;
+        if (!params.hasOwnProperty("page")) {
+            params.page = 1;
         }
 
         const data = {
@@ -129,10 +149,9 @@ class AppsTable extends React.Component {
             ...filters
         };
 
-       axios.post(
-            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.publisher+"/applications",
+        axios.post(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications",
             data,
-
         ).then(res => {
             if (res.status === 200) {
                 const data = res.data.data;
@@ -156,7 +175,7 @@ class AppsTable extends React.Component {
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+'/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

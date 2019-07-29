@@ -235,7 +235,7 @@ class NewAppDetailsForm extends React.Component {
                                     </Select>
                                 )}
                             </Form.Item>
-                            //todo implement add meta data
+                            {/* //todo implement add meta data */}
                             {/*<Form.Item {...formItemLayout} label="Meta Data">*/}
                                 {/*<InputGroup>*/}
                                     {/*<Row gutter={8}>*/}

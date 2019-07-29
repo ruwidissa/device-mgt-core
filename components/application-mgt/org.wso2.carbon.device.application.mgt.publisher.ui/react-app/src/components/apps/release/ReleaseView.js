@@ -68,7 +68,7 @@ class ReleaseView extends React.Component {
                                     icon="shop"
                                     disabled={this.props.currentLifecycleStatus !== "PUBLISHED"}
                                     onClick={() => {
-                                        window.open("https://" + config.serverConfig.hostname + ':' + config.serverConfig.httpsPort + "/store/" + app.deviceType + "/apps/" + release.uuid)
+                                        window.open(window.location.origin+ "/store/" + app.deviceType + "/apps/" + release.uuid)
                                     }}>
                                     Open in store
                                 </Button>
