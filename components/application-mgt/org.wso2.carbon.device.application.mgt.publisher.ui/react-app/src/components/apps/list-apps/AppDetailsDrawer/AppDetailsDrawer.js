@@ -55,7 +55,7 @@ class AppDetailsDrawer extends React.Component {
         super(props);
         this.state = {
             loading: false,
-            name: null,
+            name: "",
             description: null,
             globalCategories: [],
             globalTags: [],
@@ -93,7 +93,7 @@ class AppDetailsDrawer extends React.Component {
     getCategories = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
         ).then(res => {
             if (res.status === 200) {
                 const categories = JSON.parse(res.data.data);
@@ -115,7 +115,7 @@ class AppDetailsDrawer extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -133,7 +133,7 @@ class AppDetailsDrawer extends React.Component {
     getTags = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
         ).then(res => {
             if (res.status === 200) {
                 const tags = JSON.parse(res.data.data);
@@ -155,7 +155,7 @@ class AppDetailsDrawer extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -178,7 +178,7 @@ class AppDetailsDrawer extends React.Component {
         if (name !== this.state.name && name !== "") {
             const data = {name: name};
             axios.put(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -195,7 +195,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = window.location.origin+ '/publisher/login';
+                    window.location.href = window.location.origin + '/publisher/login';
                 } else {
                     notification["error"]({
                         message: "There was a problem",
@@ -259,7 +259,7 @@ class AppDetailsDrawer extends React.Component {
         if (difference.length !== 0 && temporaryCategories.length !== 0) {
             const data = {categories: temporaryCategories};
             axios.put(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -277,7 +277,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = window.location.origin+ '/publisher/login';
+                    window.location.href = window.location.origin + '/publisher/login';
                 } else {
                     notification["error"]({
                         message: "There was a problem",
@@ -324,7 +324,7 @@ class AppDetailsDrawer extends React.Component {
         if (difference.length !== 0 && temporaryTags.length !== 0) {
             const data = {tags: temporaryTags};
             axios.put(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -341,7 +341,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = window.location.origin+ '/publisher/login';
+                    window.location.href = window.location.origin + '/publisher/login';
                 } else {
                     notification["error"]({
                         message: "There was a problem",
@@ -365,7 +365,7 @@ class AppDetailsDrawer extends React.Component {
         if (temporaryDescription !== description && temporaryDescription !== "<p><br></p>") {
             const data = {description: temporaryDescription};
             axios.put(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
+                window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
                 if (res.status === 200) {
@@ -382,7 +382,7 @@ class AppDetailsDrawer extends React.Component {
             }).catch((error) => {
                 if (error.hasOwnProperty("response") && error.response.status === 401) {
                     message.error('You are not logged in');
-                    window.location.href = window.location.origin+ '/publisher/login';
+                    window.location.href = window.location.origin + '/publisher/login';
                 } else {
                     message.error('Something went wrong... :(');
                 }
@@ -406,6 +406,36 @@ class AppDetailsDrawer extends React.Component {
         if (app == null) {
             return null;
         }
+
+        let avatar = null;
+
+        if (app.applicationReleases.length === 0) {
+            const avatarLetter = name.charAt(0).toUpperCase();
+            avatar = (
+                <Avatar shape="square"
+                        size={100}
+                        style={{
+                            marginBottom: 10,
+                            borderRadius: "28%",
+                            backgroundColor: pSBC(0.50, config.theme.primaryColor)
+                        }}>
+                    {avatarLetter}
+                </Avatar>
+            );
+        } else {
+            avatar = (
+                <img
+                    style={{
+                        marginBottom: 10,
+                        width: 100,
+                        borderRadius: "28%",
+                        border: "1px solid #ddd"
+                    }}
+                    src={app.applicationReleases[0].iconPath}
+                />
+            )
+        }
+
         return (
             <div>
                 <Drawer
@@ -417,15 +447,7 @@ class AppDetailsDrawer extends React.Component {
                 >
                     <Spin spinning={loading} delay={500}>
                         <div style={{textAlign: "center"}}>
-                            <img
-                                style={{
-                                    marginBottom: 10,
-                                    width: 100,
-                                    borderRadius: "28%",
-                                    border: "1px solid #ddd"
-                                }}
-                                src={app.applicationReleases[0].iconPath}
-                            />
+                            {avatar}
                             <Title editable={{onChange: this.handleNameSave}} level={2}>{name}</Title>
                         </div>
 
@@ -436,8 +458,8 @@ class AppDetailsDrawer extends React.Component {
                         {(app.type === "ENTERPRISE") && (
                             <Link to={`/publisher/apps/${app.id}/add-release`}><Button htmlType="button" size="small">Add
                                 new release</Button></Link>)}
-                        <br/>
                         <List
+                            style={{paddingTop: 16}}
                             grid={{gutter: 16, column: 2}}
                             dataSource={app.applicationReleases}
                             renderItem={release => (
@@ -596,8 +618,8 @@ class AppDetailsDrawer extends React.Component {
                         )}
 
                         <Divider dashed={true}/>
-
-                        <DetailedRating type="app" uuid={app.applicationReleases[0].uuid}/>
+                        {app.applicationReleases.length > 0 && (
+                            <DetailedRating type="app" uuid={app.applicationReleases[0].uuid}/>)}
                     </Spin>
                 </Drawer>
             </div>
