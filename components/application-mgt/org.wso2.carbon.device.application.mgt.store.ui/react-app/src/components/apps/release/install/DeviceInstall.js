@@ -6,6 +6,7 @@ import TimeAgo from 'javascript-time-ago'
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../../../context/ConfigContext";
+
 const {Text} = Typography;
 const columns = [
     {
@@ -17,7 +18,7 @@ const columns = [
     {
         title: 'Modal',
         dataIndex: 'deviceInfo',
-        key:'modal',
+        key: 'modal',
         render: deviceInfo => `${deviceInfo.vendor} ${deviceInfo.deviceModel}`
         // todo add filtering options
     },
@@ -54,18 +55,18 @@ const columns = [
     {
         title: 'OS Version',
         dataIndex: 'deviceInfo',
-        key:'osVersion',
+        key: 'osVersion',
         render: deviceInfo => deviceInfo.osVersion
         // todo add filtering options
     },
     {
         title: 'IMEI',
         dataIndex: 'properties',
-        key:'imei',
+        key: 'imei',
         render: properties => {
             let imei = "not-found";
             for (let i = 0; i < properties.length; i++) {
-                if(properties[i].name==="IMEI"){
+                if (properties[i].name === "IMEI") {
                     imei = properties[i].value;
                 }
             }
@@ -89,7 +90,7 @@ class DeviceInstall extends React.Component {
             data: [],
             pagination: {},
             loading: false,
-            selectedRows:[]
+            selectedRows: []
         };
     }
 
@@ -131,9 +132,8 @@ class DeviceInstall extends React.Component {
 
         //send request to the invoker
         axios.get(
-            window.location.origin+
-          + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/devices?" + encodedExtraParams,
-
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
+            "/devices?" + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
                 const pagination = {...this.state.pagination};
@@ -145,11 +145,12 @@ class DeviceInstall extends React.Component {
 
             }
 
-        }).catch((error) => { console.log(error);
+        }).catch((error) => {
+            console.log(error);
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
+                window.location.href = window.location.origin + '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -191,7 +192,7 @@ class DeviceInstall extends React.Component {
     };
 
     render() {
-        const {data,pagination,loading,selectedRows} = this.state;
+        const {data, pagination, loading, selectedRows} = this.state;
         return (
             <div>
                 <Text>
@@ -199,7 +200,7 @@ class DeviceInstall extends React.Component {
                     Select install to automatically start downloading the application for the respective user/users.
                 </Text>
                 <Table
-                    style={{paddingTop:20}}
+                    style={{paddingTop: 20}}
                     columns={columns}
                     rowKey={record => record.deviceIdentifier}
                     dataSource={data}
@@ -216,7 +217,8 @@ class DeviceInstall extends React.Component {
                     scroll={{x: 1000}}
                 />
                 <div style={{paddingTop: 10, textAlign: "right"}}>
-                    <Button disabled={selectedRows.length===0} htmlType="button" type="primary" onClick={this.install}>
+                    <Button disabled={selectedRows.length === 0} htmlType="button" type="primary"
+                            onClick={this.install}>
                         Install
                     </Button>
                 </div>
