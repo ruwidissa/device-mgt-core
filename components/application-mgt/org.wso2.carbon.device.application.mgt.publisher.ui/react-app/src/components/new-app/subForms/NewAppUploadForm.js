@@ -97,8 +97,7 @@ class NewAppUploadForm extends React.Component {
     handlePriceTypeChange = (value) => {
         this.setState({
             isFree: (value === 'free')
-        })
-
+        });
     };
 
     render() {

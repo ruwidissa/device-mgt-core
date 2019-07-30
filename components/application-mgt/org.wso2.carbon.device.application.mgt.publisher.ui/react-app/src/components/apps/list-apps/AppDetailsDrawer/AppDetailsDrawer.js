@@ -464,7 +464,7 @@ class AppDetailsDrawer extends React.Component {
                             dataSource={app.applicationReleases}
                             renderItem={release => (
                                 <List.Item>
-                                    <a href={"apps/releases/" + release.uuid}>
+                                    <Link to={"apps/releases/" + release.uuid}>
                                         <Card className="release-card">
                                             <Meta
                                                 avatar={
@@ -484,7 +484,7 @@ class AppDetailsDrawer extends React.Component {
                                                 }
                                             />
                                         </Card>
-                                    </a>
+                                    </Link>
                                 </List.Item>
                             )}
                         />

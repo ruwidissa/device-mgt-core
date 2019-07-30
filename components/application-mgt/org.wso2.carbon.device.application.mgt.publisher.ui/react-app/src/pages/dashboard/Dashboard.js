@@ -1,5 +1,5 @@
 import React from "react";
-import {Layout, Menu, Icon} from 'antd';
+import {Layout, Menu, Icon, Breadcrumb} from 'antd';
 import {Switch, Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
@@ -61,7 +61,6 @@ class Dashboard extends React.Component {
                             {this.state.routes.map((route) => (
                                 <RouteWithSubRoutes key={route.path} {...route} />
                             ))}
-
                         </Switch>
                     </Content>
                     <Footer style={{textAlign: 'center'}}>

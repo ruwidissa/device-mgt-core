@@ -53,7 +53,9 @@ const columns = [
             <span>
                 {categories.map(category => {
                     return (
-                        <Tag color={pSBC(0.30, config.theme.primaryColor)} key={category}>
+                        <Tag
+                            style={{marginBottom: 8}}
+                            color={pSBC(0.30, config.theme.primaryColor)} key={category}>
                             {category}
                         </Tag>
                     );

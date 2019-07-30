@@ -34,15 +34,10 @@ class LifeCycle extends React.Component {
         this.state = {
             currentStatus: props.currentStatus,
             selectedStatus: null,
-            lifecycle: [],
             reasonText: '',
             isReasonModalVisible: false,
             isConfirmButtonLoading: false
         }
-    }
-
-    componentDidMount() {
-        this.fetchData();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -52,33 +47,6 @@ class LifeCycle extends React.Component {
             });
         }
     }
-
-
-    fetchData = () => {
-        const config = this.props.context;
-        axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
-        ).then(res => {
-            if (res.status === 200) {
-                const lifecycle = res.data.data;
-                this.setState({
-                    lifecycle: lifecycle
-                })
-            }
-
-        }).catch(function (error) {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load lifecycle configuration.",
-                });
-            }
-        });
-    };
 
     handleChange = (value) => {
         this.setState({reasonText: value})
@@ -114,7 +82,7 @@ class LifeCycle extends React.Component {
         });
 
         axios.post(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/life-cycle/" + uuid,
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/life-cycle/" + uuid,
             data
         ).then(res => {
             if (res.status === 201) {
@@ -135,7 +103,7 @@ class LifeCycle extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "Error",
@@ -153,12 +121,15 @@ class LifeCycle extends React.Component {
 
 
     render() {
-        const {currentStatus, lifecycle, selectedStatus} = this.state;
+        const {currentStatus, selectedStatus} = this.state;
+        const {lifecycle} = this.props;
         const selectedValue = selectedStatus == null ? [] : selectedStatus;
         let proceedingStates = [];
-        if((lifecycle.hasOwnProperty(currentStatus)) && lifecycle[currentStatus].hasOwnProperty("proceedingStates")){
+
+        if (lifecycle !== null && (lifecycle.hasOwnProperty(currentStatus)) && lifecycle[currentStatus].hasOwnProperty("proceedingStates")) {
             proceedingStates = lifecycle[currentStatus].proceedingStates;
         }
+
         return (
             <div>
                 <Title level={4}>Manage Lifecycle</Title>
@@ -169,7 +140,7 @@ class LifeCycle extends React.Component {
                     state to another. <br/>Note: ‘Change State To’ displays only the next states allowed from the
                     current state
                 </Paragraph>
-                <LifeCycleDetailsModal lifecycle={lifecycle}/>
+                {lifecycle !== null && (<LifeCycleDetailsModal lifecycle={lifecycle}/>)}
                 <Divider dashed={true}/>
                 <Text strong={true}>Current State: </Text> <Tag color="blue">{currentStatus}</Tag><br/><br/>
                 <Text>Change State to: </Text>
@@ -182,14 +153,14 @@ class LifeCycle extends React.Component {
                     showSearch={true}
                 >
                     {proceedingStates.map(lifecycleState => {
-                            return (
-                                <Option
-                                    key={lifecycleState}
-                                    value={lifecycleState}>
-                                    {lifecycleState}
-                                </Option>
-                            )
-                        })
+                        return (
+                            <Option
+                                key={lifecycleState}
+                                value={lifecycleState}>
+                                {lifecycleState}
+                            </Option>
+                        )
+                    })
                     }
                 </Select>
                 <Button

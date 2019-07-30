@@ -1,11 +1,14 @@
 import React from "react";
 import {
+    Icon,
     PageHeader,
-    Typography
+    Typography,
+    Breadcrumb
 } from "antd";
 import AddNewAppForm from "../../../components/new-app/AddNewAppForm";
+import {Link} from "react-router-dom";
 
-const Paragraph = Typography;
+const {Paragraph, Title}= Typography;
 
 const formConfig = {
     installationType: "WEB_CLIP",
@@ -32,21 +35,20 @@ class AddNewEnterpriseApp extends React.Component {
         };
     }
 
-    componentDidMount() {
-        // this.getCategories();
-    }
-
 
     render() {
         return (
             <div>
-                <PageHeader
-                    title="Add New Web Clip"
-                >
+                <PageHeader style={{paddingTop:0}}>
+                    <Breadcrumb style={{paddingBottom:16}}>
+                        <Breadcrumb.Item>
+                            <Link to="/publisher/apps"><Icon type="home"/> Home</Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>Add New Web Clip</Breadcrumb.Item>
+                    </Breadcrumb>
                     <div className="wrap">
-                        <Paragraph>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
-                        </Paragraph>
+                        <h3>Add New Web Clip</h3>
+                        <Paragraph>Share a Web Clip to your corporate  app store.</Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
