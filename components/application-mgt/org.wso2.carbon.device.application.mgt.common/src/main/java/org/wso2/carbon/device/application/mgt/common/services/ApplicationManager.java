@@ -66,12 +66,12 @@ public interface ApplicationManager {
     /**
      * Updates an already existing application.
      *
-     * @param applicationUpdateWrapper Application data that need to be updated.
      * @param applicationId ID of the application
+     * @param applicationUpdateWrapper Application data that need to be updated.
      * @return Updated Application
      * @throws ApplicationManagementException ApplicationDTO Management Exception
      */
-    void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper)
+    Application updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper)
             throws ApplicationManagementException;
 
     /**
@@ -194,13 +194,13 @@ public interface ApplicationManager {
      * @param applicationArtifact {@link ApplicationArtifact}
      * @return If the application release is updated correctly True returns, otherwise retuen False
      */
-    boolean updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
+    ApplicationRelease updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    boolean updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
+    ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
-    boolean updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
+    ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
     /***
