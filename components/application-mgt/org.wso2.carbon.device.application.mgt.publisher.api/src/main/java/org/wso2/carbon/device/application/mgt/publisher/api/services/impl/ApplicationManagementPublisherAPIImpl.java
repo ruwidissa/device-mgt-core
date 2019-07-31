@@ -391,19 +391,17 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             @Valid ApplicationUpdateWrapper applicationUpdateWrapper) {
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
-            applicationManager.updateApplication(applicationId, applicationUpdateWrapper);
-            return Response.status(Response.Status.OK)
-                    .entity("Application was updated successfully for ApplicationID: " + applicationId).build();
+            Application application = applicationManager.updateApplication(applicationId, applicationUpdateWrapper);
+            return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage());
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }  catch (BadRequestException e) {
+        } catch (BadRequestException e) {
             String msg = "Error occurred while modifying the application. Found bad request payload for updating the "
                     + "application";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }
-        catch (ApplicationManagementException e) {
+        } catch (ApplicationManagementException e) {
             String msg = "Internal Error occurred while modifying the application.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
@@ -425,14 +423,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            if (!applicationManager.updateEntAppRelease(applicationUUID, entAppReleaseWrapper,
-                    constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots))) {
+            ApplicationRelease applicationRelease = applicationManager
+                    .updateEntAppRelease(applicationUUID, entAppReleaseWrapper,
+                            constructApplicationArtifact(binaryFile, iconFile, bannerFile, screenshots));
+            if (applicationRelease == null) {
                 String msg ="Ent app release updating is failed. Please contact the administrator. Application release "
                         + "UUID: " + applicationUUID;
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity("Ent app release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg =
                     "Invalid request to update ent app release for application release UUID " + applicationUUID;
@@ -469,14 +469,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            if (!applicationManager.updatePubAppRelease(applicationUUID, publicAppReleaseWrapper,
-                    constructApplicationArtifact(null, iconFile, bannerFile, screenshots))) {
+            ApplicationRelease applicationRelease = applicationManager
+                    .updatePubAppRelease(applicationUUID, publicAppReleaseWrapper,
+                            constructApplicationArtifact(null, iconFile, bannerFile, screenshots));
+            if (applicationRelease == null) {
                 String msg ="Public app release updating is failed. Please contact the administrator. "
                         + "Application release UUID: " + applicationUUID + ", Supported device type:";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity("Public app release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = "Invalid request to update public app release for application release UUID " + applicationUUID;
             log.error(msg, e);
@@ -512,14 +514,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         List<Attachment> screenshots = constructAttachmentList(screenshot1, screenshot2, screenshot3);
         try {
-            if (!applicationManager.updateWebAppRelease(applicationUUID, webAppReleaseWrapper,
-                    constructApplicationArtifact(null, iconFile, bannerFile, screenshots))) {
+            ApplicationRelease applicationRelease = applicationManager
+                    .updateWebAppRelease(applicationUUID, webAppReleaseWrapper,
+                            constructApplicationArtifact(null, iconFile, bannerFile, screenshots));
+            if (applicationRelease == null) {
                 String msg ="web app  release updating is failed. Please contact the administrator. Application "
                         + "release UUID: " + applicationUUID;
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
-            return Response.status(Response.Status.OK).entity("Web app release is successfully updated.").build();
+            return Response.status(Response.Status.OK).entity(applicationRelease).build();
         } catch (BadRequestException e) {
             String msg = "Invalid request to update web app release for web app release UUID " + applicationUUID;
             log.error(msg, e);

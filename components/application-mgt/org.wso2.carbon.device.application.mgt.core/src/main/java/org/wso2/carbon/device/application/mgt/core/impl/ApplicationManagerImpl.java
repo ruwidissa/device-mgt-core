@@ -32,7 +32,6 @@ import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.Pagination;
-import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.ApplicationList;
@@ -1616,7 +1615,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper)
+    public Application updateApplication(int applicationId, ApplicationUpdateWrapper applicationUpdateWrapper)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1759,6 +1758,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 throw new ApplicationManagementException(msg);
             }
             ConnectionManagerUtil.commitDBTransaction();
+            return APIUtil.appDtoToAppResponse(applicationDTO);
         } catch (UserStoreException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred while checking whether logged in user is ADMIN or not when updating "
@@ -2295,14 +2295,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public boolean updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
+    public ApplicationRelease updateEntAppRelease(String releaseUuid, EntAppReleaseWrapper entAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);
-
             AtomicReference<ApplicationReleaseDTO> applicationReleaseDTO = new AtomicReference<>(
                     applicationDTO.getApplicationReleaseDTOs().get(0));
             validateAppReleaseUpdating(applicationDTO, ApplicationType.ENTERPRISE.toString());
@@ -2321,20 +2320,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 applicationReleaseDTO.get().setMetaData(entAppReleaseWrapper.getMetaData());
             }
 
-            if (!StringUtils.isEmpty(applicationArtifact.getInstallerName())&& applicationArtifact.getInstallerStream() !=  null){
+            if (!StringUtils.isEmpty(applicationArtifact.getInstallerName())
+                    && applicationArtifact.getInstallerStream() != null) {
                 DeviceType deviceTypeObj = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                 applicationReleaseDTO
                         .set(updateEntAppReleaseArtifact(deviceTypeObj.getName(), applicationReleaseDTO.get(),
                                 applicationArtifact));
             }
             applicationReleaseDTO.set(updateImageArtifacts(applicationReleaseDTO.get(), applicationArtifact));
-
             boolean updateStatus = applicationReleaseDAO.updateRelease(applicationReleaseDTO.get(), tenantId) != null;
             if (!updateStatus) {
                 ConnectionManagerUtil.rollbackDBTransaction();
+                return null;
             }
             ConnectionManagerUtil.commitDBTransaction();
-            return updateStatus;
+            return APIUtil.releaseDtoToRelease(applicationReleaseDTO.get());
         } catch (DBConnectionException e) {
             String msg = "Error occurred while getting the database connection to update enterprise app release which "
                     + "has release UUID: " + releaseUuid;
@@ -2361,7 +2361,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public boolean updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
+    public ApplicationRelease updatePubAppRelease(String releaseUuid, PublicAppReleaseWrapper publicAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -2399,9 +2399,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             boolean updateStatus = applicationReleaseDAO.updateRelease(applicationReleaseDTO.get(), tenantId) != null;
             if (!updateStatus) {
                 ConnectionManagerUtil.rollbackDBTransaction();
+                return null;
             }
             ConnectionManagerUtil.commitDBTransaction();
-            return updateStatus;
+            return APIUtil.releaseDtoToRelease(applicationReleaseDTO.get());
         } catch (DBConnectionException e) {
             String msg = "Error occurred while getting the database connection to update public app release which "
                     + "has release UUID: " + releaseUuid;
@@ -2428,7 +2429,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public boolean updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
+    public ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -2462,9 +2463,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
             boolean updateStatus = applicationReleaseDAO.updateRelease(applicationReleaseDTO.get(), tenantId) != null;
             if (!updateStatus) {
                 ConnectionManagerUtil.rollbackDBTransaction();
+                return null;
             }
             ConnectionManagerUtil.commitDBTransaction();
-            return updateStatus;
+            return APIUtil.releaseDtoToRelease(applicationReleaseDTO.get());
         } catch (DBConnectionException e) {
             String msg = "Error occurred while getting the database connection to update web app release which "
                     + "has release UUID: " + releaseUuid;
