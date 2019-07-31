@@ -182,11 +182,9 @@ class NewAppDetailsForm extends React.Component {
                                                     message: 'Please select device type'
                                                 }
                                             ],
-
                                         }
                                     )(
                                         <Select
-                                            mode="multiple"
                                             style={{width: '100%'}}
                                             placeholder="select device type"
                                             onChange={this.handleCategoryChange}
