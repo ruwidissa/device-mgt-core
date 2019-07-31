@@ -161,6 +161,7 @@ class ManageCategories extends React.Component {
     };
 
     renderTempElement = (category) => {
+        const config = this.props.context;
         const tagElem = (
             <Tag
                 style={{marginTop:8}}

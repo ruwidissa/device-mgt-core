@@ -2870,7 +2870,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
             String artifactDownloadURL = APIUtil.getArtifactDownloadBaseURL() + applicationReleaseDTO.getUuid()
-                    + Constants.FORWARD_SLASH + applicationReleaseDTO.getInstallerName();
+                    + Constants.FORWARD_SLASH + Constants.APP_ARTIFACT + Constants.FORWARD_SLASH +
+                                         applicationReleaseDTO.getInstallerName();
             String plistContent = "&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTDPLIST1.0//EN&quot; &quot;" +
                                   "http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&lt;plist version=&quot;" +
                                   "1.0&quot;&gt;&lt;dict&gt;&lt;key&gt;items&lt;/key&gt;&lt;array&gt;&lt;dict&gt;&lt;" +
