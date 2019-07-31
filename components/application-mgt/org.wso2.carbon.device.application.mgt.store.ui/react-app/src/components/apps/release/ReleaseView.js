@@ -37,7 +37,7 @@ class ReleaseView extends React.Component {
                 headers: {'X-Platform': config.serverConfig.platform}
             }
         ).then(res => {
-            if (res.status === 201) {
+            if (res.status === 200) {
                 this.setState({
                     loading: false,
                     appInstallModalVisible: false
@@ -45,7 +45,7 @@ class ReleaseView extends React.Component {
                 notification["success"]({
                     message: 'Done!',
                     description:
-                        'App installed successfully.',
+                        'App installed triggered.',
                 });
             } else {
                 this.setState({

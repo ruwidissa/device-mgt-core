@@ -121,6 +121,7 @@ class ManageCategories extends React.Component {
         const tagElem = (
             <Tag
                 color={pSBC(0.30, config.theme.primaryColor)}
+                style={{marginTop:8}}
             >
                 {categoryName}
                 <Divider type="vertical"/>
@@ -163,6 +164,7 @@ class ManageCategories extends React.Component {
         const config = this.props.context;
         const tagElem = (
             <Tag
+                style={{marginTop:8}}
                 closable
                 onClose={e => {
                     e.preventDefault();
@@ -428,7 +430,7 @@ class ManageCategories extends React.Component {
                         </div>
                         }
                         <Divider dashed="true"/>
-                        <div style={{marginTop: 16}}>
+                        <div style={{marginTop: 8}}>
                             <TweenOneGroup
                                 enter={{
                                     scale: 0.8,

@@ -124,6 +124,7 @@ class ManageTags extends React.Component {
         const tagElem = (
             <Tag
                 color="#34495e"
+                style={{marginTop:8}}
             >
                 {tagName}
                 <Divider type="vertical"/>
@@ -166,6 +167,7 @@ class ManageTags extends React.Component {
         const {tempElements} = this.state;
         const tagElem = (
             <Tag
+                style={{marginTop:8}}
                 closable
                 onClose={e => {
                     e.preventDefault();
@@ -429,7 +431,7 @@ class ManageTags extends React.Component {
                         </div>
                         }
                         <Divider dashed="true"/>
-                        <div style={{marginTop: 16}}>
+                        <div style={{marginTop: 8}}>
                             <TweenOneGroup
                                 enter={{
                                     scale: 0.8,

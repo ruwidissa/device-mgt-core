@@ -1,11 +1,14 @@
 import React from "react";
 import {
+    Icon,
     PageHeader,
-    Typography
+    Typography,
+    Breadcrumb
 } from "antd";
 import AddNewAppForm from "../../../components/new-app/AddNewAppForm";
+import {Link} from "react-router-dom";
 
-const Paragraph = Typography;
+const {Paragraph, Title} = Typography;
 
 const formConfig = {
     installationType: "PUBLIC",
@@ -40,12 +43,16 @@ class AddNewEnterpriseApp extends React.Component {
     render() {
         return (
             <div>
-                <PageHeader
-                    title="Add New Public App"
-                >
+                <PageHeader style={{paddingTop:0}}>
+                    <Breadcrumb style={{paddingBottom:16}}>
+                        <Breadcrumb.Item>
+                            <Link to="/publisher/apps"><Icon type="home"/> Home</Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>Add New Public App</Breadcrumb.Item>
+                    </Breadcrumb>
                     <div className="wrap">
-                        <Paragraph>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
+                        <h3>Add New Public App</h3>
+                        <Paragraph>Share a public application in google play or apple store to your corporate app store.
                         </Paragraph>
                     </div>
                 </PageHeader>

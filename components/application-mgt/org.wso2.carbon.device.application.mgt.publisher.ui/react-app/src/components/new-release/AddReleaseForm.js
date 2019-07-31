@@ -13,7 +13,7 @@ import {
     Upload,
     Divider,
     notification,
-    Spin
+    Spin, InputNumber
 } from "antd";
 import axios from "axios";
 import {withRouter} from 'react-router-dom'
@@ -43,7 +43,8 @@ class AddNewReleaseFormComponent extends React.Component {
             icons: [],
             screenshots: [],
             loading: false,
-            binaryFiles: []
+            binaryFiles: [],
+            isFree: true
         };
     }
 
@@ -143,8 +144,14 @@ class AddNewReleaseFormComponent extends React.Component {
 
     handleScreenshotChange = ({fileList}) => this.setState({screenshots: fileList});
 
+    handlePriceTypeChange = (value) => {
+        this.setState({
+            isFree: (value === 'free')
+        });
+    };
+
     render() {
-        const {categories, tags, icons, screenshots, loading, binaryFiles} = this.state;
+        const {isFree, icons, screenshots, loading, binaryFiles} = this.state;
         const {getFieldDecorator} = this.props.form;
         return (
             <div>
@@ -252,13 +259,35 @@ class AddNewReleaseFormComponent extends React.Component {
                                                 )}
                                             </Form.Item>
 
+                                            <Form.Item {...formItemLayout} label="Price Type">
+                                                {getFieldDecorator('select', {
+                                                    rules: [{required: true, message: 'Please select price Type'}],
+                                                })(
+                                                    <Select
+                                                        placeholder="Please select a price type"
+                                                        onChange={this.handlePriceTypeChange}>
+                                                        <Option value="free">Free</Option>
+                                                        <Option value="paid">Paid</Option>
+                                                    </Select>,
+                                                )}
+                                            </Form.Item>
+
                                             <Form.Item {...formItemLayout} label="Price">
                                                 {getFieldDecorator('price', {
                                                     rules: [{
-                                                        required: false
+                                                        required: !isFree
                                                     }],
                                                 })(
-                                                    <Input prefix="$" placeholder="00.00"/>
+                                                    <InputNumber
+                                                        disabled={isFree}
+                                                        options={{
+                                                            initialValue: 1
+                                                        }}
+                                                        min={0}
+                                                        max={10000}
+                                                        formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                        parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                                                    />
                                                 )}
                                             </Form.Item>
 

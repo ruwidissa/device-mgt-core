@@ -1,5 +1,5 @@
 import React from "react";
-import {Modal, Button, Icon, notification, Spin, Row, Col, Card, Upload, Input, Switch, Form} from 'antd';
+import {Modal, Button, Icon, notification, Spin, Tooltip, Upload, Input, Switch, Form, Divider} from 'antd';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 
@@ -83,6 +83,49 @@ class EditReleaseModal extends React.Component {
 
 
     showModal = () => {
+        const {release} = this.props;
+        const {formConfig} = this.state;
+        const {specificElements} = formConfig;
+
+        this.props.form.setFields({
+            releaseType: {
+                value: release.releaseType
+            },
+            releaseDescription: {
+                value: release.description
+            },
+            price:{
+                value: release.price
+            },
+            isSharedWithAllTenants:{
+                value: release.isSharedWithAllTenants
+            }
+        });
+
+        if (specificElements.hasOwnProperty("version")) {
+            this.props.form.setFields({
+                version: {
+                    value: release.version
+                }
+            });
+        }
+
+        if (specificElements.hasOwnProperty("url")) {
+            this.props.form.setFields({
+                url: {
+                    value: release.url
+                }
+            });
+        }
+
+        if (specificElements.hasOwnProperty("packageName")) {
+            this.props.form.setFields({
+                packageName: {
+                    value: release.packageName
+                }
+            });
+        }
+
         this.setState({
             visible: true,
         });
@@ -115,7 +158,7 @@ class EditReleaseModal extends React.Component {
 
     handleSubmit = e => {
         e.preventDefault();
-        const {uuid} = this.props;
+        const {uuid} = this.props.release;
         const config = this.props.context;
 
         const {formConfig} = this.state;
@@ -162,15 +205,15 @@ class EditReleaseModal extends React.Component {
                     data.append('icon', icons[0].originFileObj);
                 }
 
-                if(screenshots.length>0){
+                if (screenshots.length > 0) {
                     data.append('screenshot1', screenshots[0].originFileObj);
                 }
 
-                if(screenshots.length>1){
+                if (screenshots.length > 1) {
                     data.append('screenshot2', screenshots[1].originFileObj);
                 }
 
-                if(screenshots.length>2){
+                if (screenshots.length > 2) {
                     data.append('screenshot3', screenshots[2].originFileObj);
                 }
 
@@ -181,7 +224,7 @@ class EditReleaseModal extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint + "/" + uuid;
+                const url = window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint + "/" + uuid;
 
                 axios.put(
                     url,
@@ -199,14 +242,12 @@ class EditReleaseModal extends React.Component {
                                 "Saved!",
                         });
 
-                        const uuid = res.data.data.uuid;
-
-                        // this.props.history.push('/publisher/apps/releases/' + uuid);
+                        window.location.reload();
                     }
 
                 }).catch((error) => {
                     if (error.hasOwnProperty("response") && error.response.status === 401) {
-                        window.location.href = window.location.origin+ '/publisher/login';
+                        window.location.href = window.location.origin + '/publisher/login';
                     } else {
                         notification["error"]({
                             message: "Something went wrong!",
@@ -227,15 +268,21 @@ class EditReleaseModal extends React.Component {
     render() {
         const {formConfig, icons, screenshots, loading, binaryFiles} = this.state;
         const {getFieldDecorator} = this.props.form;
+        const {isAppUpdatable} = this.props;
+
         return (
             <div>
-                <Button size="small" type="primary" onClick={this.showModal}>
-                    <Icon type="edit"/> Edit
-                </Button>
+                <Tooltip title={isAppUpdatable ? "Edit this release" : "This release isn't in an editable state"}>
+                    <Button
+                        disabled={!isAppUpdatable}
+                        size="small" type="primary" onClick={this.showModal}>
+                        <Icon type="edit"/> Edit
+                    </Button>
+                </Tooltip>
                 <Modal
                     title="Edit release"
                     visible={this.state.visible}
-                    onOk={this.handleOk}
+                    footer={null}
                     onCancel={this.handleCancel}
                 >
                     <div>
@@ -340,14 +387,11 @@ class EditReleaseModal extends React.Component {
                                             beforeUpload={() => false}
                                             multiple
                                         >
-
                                             {screenshots.length < 3 && (
                                                 <Button>
                                                     <Icon type="upload"/> Click to upload
                                                 </Button>
                                             )}
-
-
                                         </Upload>,
                                     )}
                                 </Form.Item>
@@ -399,11 +443,18 @@ class EditReleaseModal extends React.Component {
                                     )}
 
                                 </Form.Item>
-                                <Form.Item style={{float: "right"}}>
+                                <Divider/>
+                                <Form.Item style={{float: "right", marginLeft: 8}}>
                                     <Button type="primary" htmlType="submit">
-                                        Submit
+                                        Update
                                     </Button>
                                 </Form.Item>
+                                <Form.Item style={{float: "right"}}>
+                                    <Button htmlType="button" onClick={this.handleCancel}>
+                                        Back
+                                    </Button>
+                                </Form.Item>
+                                <br/>
                             </Form>
                         </Spin>
                     </div>

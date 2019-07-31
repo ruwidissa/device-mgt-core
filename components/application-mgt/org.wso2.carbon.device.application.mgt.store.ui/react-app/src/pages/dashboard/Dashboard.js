@@ -1,9 +1,11 @@
 import React from "react";
 import {Layout, Menu, Icon} from 'antd';
+
 const {Header, Content, Footer} = Layout;
 import {Link} from "react-router-dom";
-import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
-import {Switch} from 'react-router'
+import RouteWithSubRoutes from "../../components/RouteWithSubRoutes";
+import {Switch} from 'react-router';
+import axios from "axios";
 import "../../App.css";
 import {withConfigContext} from "../../context/ConfigContext";
 
@@ -12,19 +14,56 @@ class Dashboard extends React.Component {
         super(props);
         this.state = {
             routes: props.routes,
-            selectedKeys: []
+            selectedKeys: [],
+            deviceTypes: []
         };
         this.logo = this.props.context.theme.logo;
     }
 
-    changeSelectedMenuItem = (key) =>{
+    componentDidMount() {
+        this.getDeviceTypes();
+    }
+
+    getDeviceTypes = () => {
+        const config = this.props.context;
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
+        ).then(res => {
+            if (res.status === 200) {
+                const deviceTypes = JSON.parse(res.data.data);
+                this.setState({
+                    deviceTypes,
+                    loading: false,
+                });
+            }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                window.location.href = window.location.origin + '/publisher/login';
+            } else {
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load device types.",
+                });
+            }
+            this.setState({
+                loading: false
+            });
+        });
+    };
+
+    changeSelectedMenuItem = (key) => {
         this.setState({
             selectedKeys: [key]
         })
     };
 
     render() {
-        const {selectedKeys} = this.state;
+        const config = this.props.context;
+        const {selectedKeys, deviceTypes} = this.state;
+
         return (
             <div>
                 <Layout className="layout">
@@ -38,9 +77,28 @@ class Dashboard extends React.Component {
                             defaultSelectedKeys={selectedKeys}
                             style={{lineHeight: '64px'}}
                         >
-                            <Menu.Item key="android"><Link to="/store/android"><Icon type="android" theme="filled"/>Android</Link></Menu.Item>
-                            <Menu.Item key="ios"><Link to="/store/ios"><Icon type="apple" theme="filled"/>iOS</Link></Menu.Item>
-                            <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web Clips</Link></Menu.Item>
+                            {
+                                deviceTypes.map((deviceType)=>{
+                                    const platform = deviceType.name;
+                                    const defaultPlatformIcons = config.defaultPlatformIcons;
+                                    let icon = defaultPlatformIcons.default.icon;
+                                    let theme = defaultPlatformIcons.default.theme;
+                                    if (defaultPlatformIcons.hasOwnProperty(platform)) {
+                                        icon = defaultPlatformIcons[platform].icon;
+                                        theme = defaultPlatformIcons[platform].theme;
+                                    }
+                                    return (
+                                        <Menu.Item key={platform}>
+                                            <Link to={"/store/"+platform}>
+                                                <Icon type={icon} theme={theme}/>
+                                                {platform}
+                                            </Link>
+                                        </Menu.Item>
+                                    );
+                                })
+                            }
+                            <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web
+                                Clips</Link></Menu.Item>
                         </Menu>
                     </Header>
                 </Layout>
@@ -48,7 +106,8 @@ class Dashboard extends React.Component {
                     <Content style={{padding: '0 0'}}>
                         <Switch>
                             {this.state.routes.map((route) => (
-                                <RouteWithSubRoutes changeSelectedMenuItem={this.changeSelectedMenuItem} key={route.path} {...route} />
+                                <RouteWithSubRoutes changeSelectedMenuItem={this.changeSelectedMenuItem}
+                                                    key={route.path} {...route} />
                             ))}
 
                         </Switch>

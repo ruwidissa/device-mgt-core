@@ -5,12 +5,12 @@ import {withConfigContext} from "../../../context/ConfigContext";
 
 const formItemLayout = {
     labelCol: {
-        xs: { span: 24 },
-        sm: { span: 5 },
+        xs: {span: 24},
+        sm: {span: 5},
     },
     wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 19 },
+        xs: {span: 24},
+        sm: {span: 19},
     },
 };
 const {Option} = Select;
@@ -22,7 +22,8 @@ class NewAppDetailsForm extends React.Component {
         super(props);
         this.state = {
             categories: [],
-            tags: []
+            tags: [],
+            deviceTypes:[]
         }
     }
 
@@ -62,12 +63,13 @@ class NewAppDetailsForm extends React.Component {
     componentDidMount() {
         this.getCategories();
         this.getTags();
+        this.getDeviceTypes();
     }
 
     getCategories = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -79,7 +81,7 @@ class NewAppDetailsForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -97,7 +99,7 @@ class NewAppDetailsForm extends React.Component {
     getTags = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
         ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
@@ -109,7 +111,7 @@ class NewAppDetailsForm extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -124,9 +126,39 @@ class NewAppDetailsForm extends React.Component {
         });
     };
 
+    getDeviceTypes = () => {
+        const config = this.props.context;
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
+        ).then(res => {
+            if (res.status === 200) {
+                const deviceTypes = JSON.parse(res.data.data);
+                this.setState({
+                    deviceTypes,
+                    loading: false,
+                });
+            }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                window.location.href = window.location.origin + '/publisher/login';
+            } else {
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to load device types.",
+                });
+            }
+            this.setState({
+                loading: false
+            });
+        });
+    };
+
     render() {
         const {formConfig} = this.props;
-        const {categories, tags} = this.state;
+        const {categories, tags, deviceTypes} = this.state;
         const {getFieldDecorator} = this.props.form;
 
         return (
@@ -153,9 +185,22 @@ class NewAppDetailsForm extends React.Component {
 
                                         }
                                     )(
-                                        <Select placeholder="select device type">
-                                            <Option key="android">Android</Option>
-                                            <Option key="ios">iOS</Option>
+                                        <Select
+                                            mode="multiple"
+                                            style={{width: '100%'}}
+                                            placeholder="select device type"
+                                            onChange={this.handleCategoryChange}
+                                        >
+                                            {
+                                                deviceTypes.map(deviceType => {
+                                                    return (
+                                                        <Option
+                                                            key={deviceType.name}>
+                                                            {deviceType.name}
+                                                        </Option>
+                                                    )
+                                                })
+                                            }
                                         </Select>
                                     )}
                                 </Form.Item>
@@ -237,19 +282,19 @@ class NewAppDetailsForm extends React.Component {
                             </Form.Item>
                             {/* //todo implement add meta data */}
                             {/*<Form.Item {...formItemLayout} label="Meta Data">*/}
-                                {/*<InputGroup>*/}
-                                    {/*<Row gutter={8}>*/}
-                                        {/*<Col span={10}>*/}
-                                            {/*<Input placeholder="Key"/>*/}
-                                        {/*</Col>*/}
-                                        {/*<Col span={12}>*/}
-                                            {/*<Input placeholder="value"/>*/}
-                                        {/*</Col>*/}
-                                        {/*<Col span={2}>*/}
-                                            {/*<Button type="dashed" shape="circle" icon="plus"/>*/}
-                                        {/*</Col>*/}
-                                    {/*</Row>*/}
-                                {/*</InputGroup>*/}
+                            {/*<InputGroup>*/}
+                            {/*<Row gutter={8}>*/}
+                            {/*<Col span={10}>*/}
+                            {/*<Input placeholder="Key"/>*/}
+                            {/*</Col>*/}
+                            {/*<Col span={12}>*/}
+                            {/*<Input placeholder="value"/>*/}
+                            {/*</Col>*/}
+                            {/*<Col span={2}>*/}
+                            {/*<Button type="dashed" shape="circle" icon="plus"/>*/}
+                            {/*</Col>*/}
+                            {/*</Row>*/}
+                            {/*</InputGroup>*/}
                             {/*</Form.Item>*/}
                             <Form.Item style={{float: "right"}}>
                                 <Button type="primary" htmlType="submit">
