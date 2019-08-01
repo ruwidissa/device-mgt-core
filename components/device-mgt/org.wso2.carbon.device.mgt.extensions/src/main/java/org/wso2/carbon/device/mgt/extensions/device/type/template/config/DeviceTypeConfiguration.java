@@ -105,6 +105,8 @@ public class DeviceTypeConfiguration {
     @XmlElementWrapper(name = "StartupOperationConfig")
     @XmlElement(name = "Operation", required = true)
     protected List<String> startupOperations;
+    @XmlElement(name = "DeviceTypeManagerExtensionConfig")
+    private DeviceTypeManagerExtensionConfig deviceTypeExtensionConfig;
 
     public List<String> getOperations() {
         return operations;
@@ -401,5 +403,26 @@ public class DeviceTypeConfiguration {
      */
     public void setStartupOperations(List<String> startupOperations) {
         this.startupOperations = startupOperations;
+    }
+
+    /**
+     * Gets the value of DeviceTypeManagerExtensionConfig
+     *
+     * @return possible object is
+     * {@link DeviceTypeManagerExtensionConfig}
+     */
+    public DeviceTypeManagerExtensionConfig getDeviceTypeExtensionConfig() {
+        return deviceTypeExtensionConfig;
+    }
+
+    /**
+     * Sets the value for DeviceTypeManagerExtensionConfig
+     *
+     * @param deviceTypeExtensionConfig possible object is
+     *                                  {@link DeviceTypeManagerExtensionConfig}
+     */
+    public void setDeviceTypeExtensionConfig(
+            DeviceTypeManagerExtensionConfig deviceTypeExtensionConfig) {
+        this.deviceTypeExtensionConfig = deviceTypeExtensionConfig;
     }
 }

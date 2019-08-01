@@ -34,6 +34,7 @@
  */
 package org.wso2.carbon.device.mgt.extensions.device.type.template;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -48,9 +49,11 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
+import org.wso2.carbon.device.mgt.extensions.spi.DeviceTypeManagerExtensionService;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DataSource;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeManagerExtensionConfig;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Feature;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Table;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.TableConfig;
@@ -210,6 +213,35 @@ public class DeviceTypeManager implements DeviceManager {
                         && deviceDetails.getProperties().getProperty().size() > 0 ) {
                     deviceTypePluginDAOManager = new DeviceTypePluginDAOManager(deviceType, deviceDetails);
                     propertiesExist = true;
+                }
+            }
+        }
+        setDeviceTypeManagerExtensionServices(deviceTypeConfiguration);
+    }
+
+    private void setDeviceTypeManagerExtensionServices(DeviceTypeConfiguration deviceTypeConfiguration) {
+        DeviceTypeManagerExtensionConfig deviceTypeExtensionConfig = deviceTypeConfiguration.getDeviceTypeExtensionConfig();
+        if (deviceTypeExtensionConfig != null) {
+            String extensionClass = deviceTypeExtensionConfig.getExtensionClass();
+            if (StringUtils.isNotEmpty(extensionClass)) {
+                try {
+                    Class<?> clz = Class.forName(extensionClass);
+                    DeviceTypeManagerExtensionService deviceTypeManagerExtensionService = (DeviceTypeManagerExtensionService) clz.newInstance();
+                    if (deviceTypePluginDAOManager != null) {
+                        deviceTypeManagerExtensionService.setDeviceTypePluginDAOManager(deviceTypePluginDAOManager);
+                    }
+                } catch (ClassNotFoundException e) {
+                    String msg = "Extension class cannot be located";
+                    log.error(msg, e);
+                    throw new DeviceTypeDeployerPayloadException(msg, e);
+                } catch (IllegalAccessException e) {
+                    String msg = "Cannot access  the class or its constructor is not accessible.";
+                    log.error(msg, e);
+                    throw new DeviceTypeDeployerPayloadException(msg, e);
+                } catch (InstantiationException e) {
+                    String msg = "Extension class instantiation is failed";
+                    log.error(msg, e);
+                    throw new DeviceTypeDeployerPayloadException(msg, e);
                 }
             }
         }

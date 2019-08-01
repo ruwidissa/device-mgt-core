@@ -2,6 +2,7 @@ package org.wso2.carbon.device.mgt.extensions.device.type.template.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.IllegalTransactionStateException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
 
@@ -32,6 +33,19 @@ public class DeviceTypeDAOHandler {
             dataSource = (DataSource) ctx.lookup(datasourceName);
         } catch (NamingException e) {
             throw new DeviceTypeDeployerPayloadException("Error while looking up the data source: " + datasourceName, e);
+        }
+    }
+
+    public void openConnection() throws DeviceTypeMgtPluginException {
+        try {
+            Connection conn = currentConnection.get();
+            if (conn != null) {
+                throw new IllegalTransactionStateException("Database connection has already been obtained.");
+            }
+            conn = dataSource.getConnection();
+            currentConnection.set(conn);
+        } catch (SQLException e) {
+            throw new DeviceTypeMgtPluginException("Failed to get a database connection.", e);
         }
     }
 
