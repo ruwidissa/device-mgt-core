@@ -11,23 +11,22 @@ const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
     render() {
+        const {app, release} = this.props;
         const config = this.props.context;
-        const app = this.props.app;
-        const release = (app !== null) ? app.applicationReleases[0] : null;
         const {lifecycle, currentLifecycleStatus} = this.props;
+
         if (release == null || lifecycle == null) {
             return null;
         }
 
         const {isAppUpdatable, isAppInstallable} = lifecycle[currentLifecycleStatus];
 
-        console.log(isAppInstallable, isAppUpdatable);
-
         const platform = app.deviceType;
         const defaultPlatformIcons = config.defaultPlatformIcons;
         let icon = defaultPlatformIcons.default.icon;
         let color = defaultPlatformIcons.default.color;
         let theme = defaultPlatformIcons.default.theme;
+
         if (defaultPlatformIcons.hasOwnProperty(platform)) {
             icon = defaultPlatformIcons[platform].icon;
             color = defaultPlatformIcons[platform].color;

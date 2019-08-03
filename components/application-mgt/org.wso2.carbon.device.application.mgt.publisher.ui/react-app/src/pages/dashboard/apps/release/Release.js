@@ -8,8 +8,6 @@ import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {Title} = Typography;
 
-
-
 class Release extends React.Component {
     routes;
 
@@ -38,16 +36,16 @@ class Release extends React.Component {
         }
     }
 
-    changeCurrentLifecycleStatus = (status) =>{
+    changeCurrentLifecycleStatus = (status) => {
         this.setState({
             currentLifecycleStatus: status
         });
     };
 
-    updateRelease = (release) =>{
-      this.setState({
-         release
-      });
+    updateRelease = (release) => {
+        this.setState({
+            release
+        });
     };
 
     fetchData = (uuid) => {
@@ -55,12 +53,12 @@ class Release extends React.Component {
 
         //send request to the invoker
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/release/"+ uuid,
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/release/" + uuid,
         ).then(res => {
             if (res.status === 200) {
                 const app = res.data.data;
                 const release = (app !== null) ? app.applicationReleases[0] : null;
-                const currentLifecycleStatus = (release!==null) ? release.currentStatus : null;
+                const currentLifecycleStatus = (release !== null) ? release.currentStatus : null;
                 this.setState({
                     app: app,
                     release: release,
@@ -74,7 +72,7 @@ class Release extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -92,7 +90,7 @@ class Release extends React.Component {
     getLifecycle = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
         ).then(res => {
             if (res.status === 200) {
                 const lifecycle = res.data.data;
@@ -103,7 +101,7 @@ class Release extends React.Component {
 
         }).catch(function (error) {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
+                window.location.href = window.location.origin + '/publisher/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -135,8 +133,9 @@ class Release extends React.Component {
                             <Card>
                                 <ReleaseView
                                     app={app}
+                                    release={release}
                                     currentLifecycleStatus={currentLifecycleStatus}
-                                    lifecycle ={lifecycle}
+                                    lifecycle={lifecycle}
                                     updateRelease={this.updateRelease}
                                 />
                             </Card>
@@ -147,7 +146,7 @@ class Release extends React.Component {
                                     uuid={release.uuid}
                                     currentStatus={release.currentStatus.toUpperCase()}
                                     changeCurrentLifecycleStatus={this.changeCurrentLifecycleStatus}
-                                    lifecycle ={lifecycle}
+                                    lifecycle={lifecycle}
                                 />
                             </Card>
                         </Col>

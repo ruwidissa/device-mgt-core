@@ -94,10 +94,10 @@ class EditReleaseModal extends React.Component {
             releaseDescription: {
                 value: release.description
             },
-            price:{
+            price: {
                 value: release.price
             },
-            isSharedWithAllTenants:{
+            isSharedWithAllTenants: {
                 value: release.isSharedWithAllTenants
             }
         });
@@ -231,6 +231,9 @@ class EditReleaseModal extends React.Component {
                     data
                 ).then(res => {
                     if (res.status === 200) {
+
+                        const updatedRelease = res.data.data;
+
                         this.setState({
                             loading: false,
                             visible: false,
@@ -241,10 +244,9 @@ class EditReleaseModal extends React.Component {
                             description:
                                 "Saved!",
                         });
-
-                        window.location.reload();
+                        // console.log(updatedRelease);
+                        this.props.updateRelease(updatedRelease);
                     }
-
                 }).catch((error) => {
                     if (error.hasOwnProperty("response") && error.response.status === 401) {
                         window.location.href = window.location.origin + '/publisher/login';
