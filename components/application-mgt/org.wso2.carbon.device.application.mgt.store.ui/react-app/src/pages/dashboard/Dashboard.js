@@ -57,7 +57,7 @@ class Dashboard extends React.Component {
 
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
+                window.location.href = window.location.origin + '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

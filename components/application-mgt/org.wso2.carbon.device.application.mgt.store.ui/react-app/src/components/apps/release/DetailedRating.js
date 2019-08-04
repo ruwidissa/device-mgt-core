@@ -63,7 +63,7 @@ class DetailedRating extends React.Component{
 
         }).catch(function (error) {
             if (error.response.status === 401) {
-                window.location.href = window.location.origin+'/publisher/login';
+                window.location.href = window.location.origin+'/store/login';
             }
         });
     };
