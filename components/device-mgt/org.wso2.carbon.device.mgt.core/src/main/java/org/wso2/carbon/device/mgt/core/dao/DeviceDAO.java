@@ -498,7 +498,8 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException throws {@link DeviceManagementDAOException} if connections establishment
      * fails.
      */
-    List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId) throws DeviceManagementDAOException;
+    List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId)
+            throws DeviceManagementDAOException;
 
     /**
      * This method is used to permanently delete the device and its related details
@@ -508,4 +509,3 @@ public interface DeviceDAO {
      */
     void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
 }
-

@@ -99,24 +99,24 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             @QueryParam("owner") String owner,
             List<String> deviceIdentifiers){
         try {
-            if (DeviceMgtAPIUtils.getDeviceManagementService().updateEnrollment(owner, deviceIdentifiers)){
+            if (DeviceMgtAPIUtils.getDeviceManagementService().updateEnrollment(owner, deviceIdentifiers)) {
                 String msg = "Device owner is updated successfully.";
                 return Response.status(Response.Status.OK).entity(msg).build();
             }
             String msg = "Device owner updating is failed.";
             log.error(msg);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch(InvalidDeviceException e){
+        } catch (InvalidDeviceException e) {
             String msg = "Invalid device identifiers are found with the request.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-        }catch (DeviceManagementException e) {
+        } catch (DeviceManagementException e) {
             String msg = "Error occurred when updating device owners.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (UserNotFoundException e) {
             String msg = "Couldn't found the owner in user store to update the owner of devices.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }

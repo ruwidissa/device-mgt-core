@@ -369,7 +369,11 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         try {
             Connection conn = this.getConnection();
             boolean updateStatus = true;
-            String sql = "UPDATE DM_ENROLMENT SET OWNER = ? WHERE ID = ? AND TENANT_ID = ?";
+            String sql = "UPDATE "
+                    + "DM_ENROLMENT "
+                    + "SET OWNER = ? "
+                    + "WHERE ID = ? AND "
+                    + "TENANT_ID = ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 if (conn.getMetaData().supportsBatchUpdates()) {
                     for (Device device : devices) {
@@ -381,6 +385,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                     for (int i : ps.executeBatch()) {
                         if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
                             updateStatus = false;
+                            break;
                         }
                     }
                 } else {
@@ -390,14 +395,15 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                         ps.setInt(3, tenantId);
                         if (ps.executeUpdate() == 0) {
                             updateStatus = false;
+                            break;
                         }
                     }
                 }
             }
             return updateStatus;
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection when adding tags",
-                    e);
+            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection to update the "
+                    + "owner of the device enrollment.", e);
         }
     }
 
