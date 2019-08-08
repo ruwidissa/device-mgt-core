@@ -70,25 +70,21 @@ public class DeviceTypeDAOHandler {
         return currentConnection.get();
     }
 
-    public void commitTransaction() throws DeviceTypeMgtPluginException {
+    public void commitTransaction() {
+        Connection conn = currentConnection.get();
+        if (conn == null) {
+            throw new IllegalStateException("No connection is associated with the current transaction. " +
+                                            "This might have ideally been caused by not properly initiating the " +
+                                            "transaction via 'beginTransaction'/'openConnection' methods");
+        }
         try {
-            Connection conn = currentConnection.get();
-            if (conn != null) {
-                conn.commit();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Datasource connection associated with the current thread is null, hence commit "
-                                      + "has not been attempted");
-                }
-            }
+            conn.commit();
         } catch (SQLException e) {
-            throw new DeviceTypeMgtPluginException("Error occurred while committing the transaction", e);
-        } finally {
-            closeConnection();
+            log.error("Error occurred while committing the transaction.", e);
         }
     }
 
-    public void closeConnection() throws DeviceTypeMgtPluginException {
+    public void closeConnection() {
 
         Connection con = currentConnection.get();
         if (con != null) {
@@ -101,21 +97,17 @@ public class DeviceTypeDAOHandler {
         currentConnection.remove();
     }
 
-    public void rollbackTransaction() throws DeviceTypeMgtPluginException {
+    public void rollbackTransaction() {
+        Connection conn = currentConnection.get();
+        if (conn == null) {
+            throw new IllegalStateException("No connection is associated with the current transaction. " +
+                                            "This might have ideally been caused by not properly initiating the " +
+                                            "transaction via 'beginTransaction'/'openConnection' methods");
+        }
         try {
-            Connection conn = currentConnection.get();
-            if (conn != null) {
-                conn.rollback();
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Datasource connection associated with the current thread is null, hence rollback "
-                                      + "has not been attempted");
-                }
-            }
+            conn.rollback();
         } catch (SQLException e) {
-            throw new DeviceTypeMgtPluginException("Error occurred while rollback the transaction", e);
-        } finally {
-            closeConnection();
+            log.error("Error occurred while roll-backing the transaction.", e);
         }
     }
 }
