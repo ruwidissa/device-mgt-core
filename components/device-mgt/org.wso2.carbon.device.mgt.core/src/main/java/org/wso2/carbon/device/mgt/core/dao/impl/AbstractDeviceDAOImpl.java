@@ -1507,8 +1507,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             return devices;
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection when adding tags",
-                    e);
+            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection to get devices for"
+                    + " given device identifiers.", e);
         }
     }
     
