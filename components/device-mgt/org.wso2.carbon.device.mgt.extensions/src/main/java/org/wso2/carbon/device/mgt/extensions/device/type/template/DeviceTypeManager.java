@@ -49,11 +49,9 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
-import org.wso2.carbon.device.mgt.extensions.spi.DeviceTypeManagerExtensionService;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DataSource;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeManagerExtensionConfig;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Feature;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Table;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.TableConfig;
@@ -65,6 +63,7 @@ import org.wso2.carbon.device.mgt.extensions.device.type.template.feature.Config
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypePluginConstants;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
 import org.wso2.carbon.device.mgt.extensions.license.mgt.registry.RegistryBasedLicenseManager;
+import org.wso2.carbon.device.mgt.extensions.spi.DeviceTypePluginExtensionService;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -216,34 +215,18 @@ public class DeviceTypeManager implements DeviceManager {
                 }
             }
         }
-        setDeviceTypeManagerExtensionServices(deviceTypeConfiguration);
+        setDeviceTypePluginManager();
     }
 
-    private void setDeviceTypeManagerExtensionServices(DeviceTypeConfiguration deviceTypeConfiguration) {
-        DeviceTypeManagerExtensionConfig deviceTypeExtensionConfig = deviceTypeConfiguration.getDeviceTypeExtensionConfig();
-        if (deviceTypeExtensionConfig != null) {
-            String extensionClass = deviceTypeExtensionConfig.getExtensionClass();
-            if (StringUtils.isNotEmpty(extensionClass)) {
-                try {
-                    Class<?> clz = Class.forName(extensionClass);
-                    DeviceTypeManagerExtensionService deviceTypeManagerExtensionService = (DeviceTypeManagerExtensionService) clz.newInstance();
-                    if (deviceTypePluginDAOManager != null) {
-                        deviceTypeManagerExtensionService.setDeviceTypePluginDAOManager(deviceTypePluginDAOManager);
-                    }
-                } catch (ClassNotFoundException e) {
-                    String msg = "Extension class cannot be located";
-                    log.error(msg, e);
-                    throw new DeviceTypeDeployerPayloadException(msg, e);
-                } catch (IllegalAccessException e) {
-                    String msg = "Cannot access  the class or its constructor is not accessible.";
-                    log.error(msg, e);
-                    throw new DeviceTypeDeployerPayloadException(msg, e);
-                } catch (InstantiationException e) {
-                    String msg = "Extension class instantiation is failed";
-                    log.error(msg, e);
-                    throw new DeviceTypeDeployerPayloadException(msg, e);
-                }
-            }
+    /**
+     * Set device type plugin DAO manager of each device type in a HashMap which can then be used via individual
+     * device type plugin in working with its DAO components
+     */
+    private void setDeviceTypePluginManager() {
+        if (StringUtils.isNotEmpty(deviceType) && deviceTypePluginDAOManager != null) {
+            DeviceTypePluginExtensionService deviceTypeManagerExtensionService =
+                    new DeviceTypePluginExtensionServiceImpl();
+            deviceTypeManagerExtensionService.addPluginDAOManager(deviceType, deviceTypePluginDAOManager);
         }
     }
 
@@ -339,15 +322,11 @@ public class DeviceTypeManager implements DeviceManager {
                     deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
                 }
             } catch (DeviceTypeMgtPluginException e) {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
-                } catch (DeviceTypeMgtPluginException ex) {
-                    String msg = "Error occurred while roll back the device enrol transaction :" +
-                            device.toString();
-                    log.warn(msg, ex);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
                 String msg = "Error while enrolling the " + deviceType + " device : " + device.getDeviceIdentifier();
                 throw new DeviceManagementException(msg, e);
+            } finally {
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return status;
         }
@@ -366,16 +345,12 @@ public class DeviceTypeManager implements DeviceManager {
                 status = deviceTypePluginDAOManager.getDeviceDAO().updateDevice(device);
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
             } catch (DeviceTypeMgtPluginException e) {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
-                } catch (DeviceTypeMgtPluginException mobileDAOEx) {
-                    String msg = "Error occurred while roll back the update device transaction :" +
-                            device.toString();
-                    log.warn(msg, mobileDAOEx);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
                 String msg = "Error while updating the enrollment of the " + deviceType + " device : " +
                         device.getDeviceIdentifier();
                 throw new DeviceManagementException(msg, e);
+            } finally {
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return status;
         }
@@ -410,13 +385,7 @@ public class DeviceTypeManager implements DeviceManager {
                              deviceId.getId();
                 throw new DeviceManagementException(msg, e);
             } finally {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
-                } catch (DeviceTypeMgtPluginException e) {
-                    String msg = "Error occurred while closing the transaction to check device " +
-                                 deviceId.getId() + " is enrolled.";
-                    log.warn(msg, e);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return isEnrolled;
         }
@@ -451,12 +420,7 @@ public class DeviceTypeManager implements DeviceManager {
                 throw new DeviceManagementException(
                         "Error occurred while fetching the " + deviceType + " device: '" + deviceId.getId() + "'", e);
             } finally {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
-                } catch (DeviceTypeMgtPluginException e) {
-                    String msg = "Error occurred while closing the transaction to get device " + deviceId.getId();
-                    log.warn(msg, e);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return device;
         }
@@ -479,14 +443,11 @@ public class DeviceTypeManager implements DeviceManager {
                 status = deviceTypePluginDAOManager.getDeviceDAO().updateDevice(updatedDevice);
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
             } catch (DeviceTypeMgtPluginException e) {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
-                } catch (DeviceTypeMgtPluginException transactionException) {
-                    String msg = "Error occurred while rolling back transaction for device: " + deviceId.getId();
-                    log.warn(msg, transactionException);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
                 throw new DeviceManagementException(
                         "Error occurred while fetching the " + deviceType + " device: '" + deviceId.getId() + "'", e);
+            } finally {
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
         }
         return status;
@@ -576,15 +537,12 @@ public class DeviceTypeManager implements DeviceManager {
                 status = deviceTypePluginDAOManager.getDeviceDAO().updateDevice(existingDevice);
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
             } catch (DeviceTypeMgtPluginException e) {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
-                } catch (DeviceTypeMgtPluginException e1) {
-                    log.warn("Error occurred while roll back the update device info transaction : '" +
-                            device.toString() + "'", e1);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
                 throw new DeviceManagementException(
                         "Error occurred while updating the " + deviceType + " device: '" +
                                 device.getDeviceIdentifier() + "'", e);
+            } finally {
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return status;
         }
@@ -604,12 +562,7 @@ public class DeviceTypeManager implements DeviceManager {
             } catch (DeviceTypeMgtPluginException e) {
                 throw new DeviceManagementException("Error occurred while fetching all " + deviceType + " devices", e);
             } finally {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
-                } catch (DeviceTypeMgtPluginException e) {
-                    String msg = "Error occurred while closing the transaction to get all devices.";
-                    log.warn(msg, e);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return devices;
         }
@@ -632,15 +585,12 @@ public class DeviceTypeManager implements DeviceManager {
                 status = deviceTypePluginDAOManager.getDeviceDAO().deleteDevice(existingDevice);
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
             } catch (DeviceTypeMgtPluginException e) {
-                try {
-                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
-                } catch (DeviceTypeMgtPluginException e1) {
-                    log.warn("Error occurred while roll back the delete device info transaction : '" +
-                             device.toString() + "'", e1);
-                }
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
                 throw new DeviceManagementException(
                         "Error occurred while deleting the " + deviceType + " device: '" +
                         device.getDeviceIdentifier() + "'", e);
+            } finally {
+                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
             return status;
         }
