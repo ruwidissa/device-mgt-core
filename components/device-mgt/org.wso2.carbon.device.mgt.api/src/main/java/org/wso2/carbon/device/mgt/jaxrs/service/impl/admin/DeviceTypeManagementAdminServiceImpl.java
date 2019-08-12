@@ -137,7 +137,8 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @PUT
-    public Response updateDeviceType(String type, DeviceType deviceType) {
+    @Path("/{type}")
+    public Response updateDeviceType(@PathParam("type") String type, DeviceType deviceType) {
         if (deviceType != null && deviceType.getDeviceTypeMetaDefinition() != null) {
             if (deviceType.getName() == null || !deviceType.getName().equals(type)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Type name mismatch. Expected: '" + type +
@@ -163,7 +164,10 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
     }
 
     @Override
-    public Response addDeviceTypePlatformConfig(String type, PlatformConfiguration platformConfiguration) {
+    @POST
+    @Path("/{type}/configs")
+    public Response addDeviceTypePlatformConfig(@PathParam("type") String type,
+                                                PlatformConfiguration platformConfiguration) {
         boolean isSaved;
         if (platformConfiguration.getType() == null || !platformConfiguration.getType().equals(type)) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Type name mismatch. Expected: '" + type +
