@@ -59,6 +59,7 @@ import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceDAOD
 import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypePluginExtensionException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.feature.ConfigurationBasedFeatureManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypePluginConstants;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
@@ -223,10 +224,19 @@ public class DeviceTypeManager implements DeviceManager {
      * device type plugin in working with its DAO components
      */
     private void setDeviceTypePluginManager() {
-        if (StringUtils.isNotEmpty(deviceType) && deviceTypePluginDAOManager != null) {
-            DeviceTypePluginExtensionService deviceTypeManagerExtensionService =
-                    new DeviceTypePluginExtensionServiceImpl();
-            deviceTypeManagerExtensionService.addPluginDAOManager(deviceType, deviceTypePluginDAOManager);
+        if (StringUtils.isNotEmpty(deviceType)) {
+            if (deviceTypePluginDAOManager != null) {
+                DeviceTypePluginExtensionService deviceTypeManagerExtensionService =
+                        new DeviceTypePluginExtensionServiceImpl();
+                deviceTypeManagerExtensionService.addPluginDAOManager(deviceType, deviceTypePluginDAOManager);
+            } else {
+                log.warn("Could not save DeviceTypePluginDAOManager for device type: " + deviceType +
+                         " since DeviceTypePluginDAOManager is null.");
+            }
+        } else {
+            String msg = "Could not save DeviceTypePluginDAOManager since device type is null or empty.";
+            log.error(msg);
+            throw new DeviceTypePluginExtensionException(msg);
         }
     }
 

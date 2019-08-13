@@ -17,7 +17,11 @@
  */
 package org.wso2.carbon.device.mgt.extensions.device.type.template;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypePluginExtensionException;
 import org.wso2.carbon.device.mgt.extensions.spi.DeviceTypePluginExtensionService;
 
 import java.util.HashMap;
@@ -25,19 +29,38 @@ import java.util.Map;
 
 public class DeviceTypePluginExtensionServiceImpl implements DeviceTypePluginExtensionService {
 
+    private static final Log log = LogFactory.getLog(DeviceTypePluginExtensionServiceImpl.class);
+
     private static volatile Map<String, DeviceTypePluginDAOManager> pluginDAOManagers = new HashMap<>();
 
     @Override
     public void addPluginDAOManager(String deviceType, DeviceTypePluginDAOManager pluginDAOManager) {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         if (pluginDAOManager != null) {
-            if (!pluginDAOManagers.containsKey(deviceType)) {
-                pluginDAOManagers.put(deviceType, pluginDAOManager);
+            if (!pluginDAOManagers.containsKey(tenantId + deviceType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Saving DeviceTypePluginDAOManager against tenant id " + tenantId +
+                              " and device type: " + deviceType);
+                }
+                pluginDAOManagers.put(tenantId + deviceType, pluginDAOManager);
             }
         }
     }
 
     @Override
     public DeviceTypePluginDAOManager getPluginDAOManager(String deviceType) {
-        return pluginDAOManagers.get(deviceType);
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (pluginDAOManagers.containsKey(tenantId + deviceType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving DeviceTypePluginDAOManager against tenant id " + tenantId +
+                          " and device type: " + deviceType);
+            }
+            return pluginDAOManagers.get(tenantId + deviceType);
+        } else {
+            String msg = "DeviceTypePluginDAOManager could not be found against tenant id " + tenantId +
+                         " and device type: " + deviceType;
+            log.error(msg);
+            throw new DeviceTypePluginExtensionException(msg);
+        }
     }
 }
