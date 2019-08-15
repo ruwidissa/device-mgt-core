@@ -55,6 +55,11 @@
   min-height: 780px
 }
 
+.profile{
+  float:right;
+  margin-right: 2%;
+}
+
 @media only screen and (min-width: 768px) {
   .main-container{
     padding: 24px;

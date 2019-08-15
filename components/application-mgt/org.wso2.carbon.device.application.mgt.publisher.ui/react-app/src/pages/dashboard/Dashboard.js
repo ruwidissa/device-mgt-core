@@ -17,12 +17,13 @@
  */
 
 import React from "react";
-import {Layout, Menu, Icon, Breadcrumb} from 'antd';
+import {Layout, Menu, Icon} from 'antd';
 import {Switch, Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
 import "../../App.css";
 import {withConfigContext} from "../../context/ConfigContext";
+import Logout from "./logout/Logout";
 
 const {Header, Content, Footer} = Layout;
 const {SubMenu} = Menu;
@@ -69,7 +70,20 @@ class Dashboard extends React.Component {
                             </SubMenu>
                             <Menu.Item key="2"><Link to="/publisher/manage"><Icon
                                 type="control"/>Manage</Link></Menu.Item>
+
+                            <SubMenu className="profile"
+                                     title={
+                                         <span className="submenu-title-wrapper">
+                                     <Icon type="user"/>
+                                         Profile
+                                     </span>
+                                     }
+                            >
+                                <Logout/>
+                            </SubMenu>
+
                         </Menu>
+
                     </Header>
                 </Layout>
                 <Layout>
