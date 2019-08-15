@@ -135,38 +135,14 @@ public class Utils {
     }
 
     /**
-     * This class get the access token from the key manager.
+     * This method is used to get the base64 encoded token.
      *
      * @param iotServerConfiguration Instance of the IoTsererConfiguration.
      * @return Access token will be returned.
-     * @throws APIMCertificateMGTException
      */
-    public static String getAccessToken(IOTServerConfiguration iotServerConfiguration, RESTInvoker restInvoker)
-            throws APIMCertificateMGTException {
-        try {
-            if (clientId == null || clientSecret == null) {
-                getClientSecretes(iotServerConfiguration, restInvoker);
-            }
-            URI tokenUrl = new URI(iotServerConfiguration.getOauthTokenEndpoint());
-            String tokenContent = "grant_type=password&username=" + iotServerConfiguration.getUsername() + "&password=" +
-                    iotServerConfiguration.getPassword() + "&scope=activity-view";
-            String tokenBasicAuth = "Basic " + Base64.encode((clientId + ":" + clientSecret).getBytes());
-            Map<String, String> tokenHeaders = new HashMap<>();
-            tokenHeaders.put("Authorization", tokenBasicAuth);
-            tokenHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-
-            RESTResponse response = restInvoker.invokePOST(tokenUrl, tokenHeaders, tokenContent);
-            if (log.isDebugEnabled()) {
-                log.debug("Token response:" + response.getContent());
-            }
-            JSONObject jsonResponse = new JSONObject(response.getContent());
-            return jsonResponse.getString("access_token");
-
-        } catch (URISyntaxException | IOException e) {
-            throw new APIMCertificateMGTException("Error occurred while trying to call oauth token endpoint", e);
-        } catch (JSONException e) {
-            throw new APIMCertificateMGTException("Error occurred while converting the json to object", e);
-        }
+    public static String getBase64EncodedToken(IOTServerConfiguration iotServerConfiguration) {
+        return Base64.encode((iotServerConfiguration.getUsername() + ":" + iotServerConfiguration.getPassword()).
+                getBytes());
     }
 
     /**
