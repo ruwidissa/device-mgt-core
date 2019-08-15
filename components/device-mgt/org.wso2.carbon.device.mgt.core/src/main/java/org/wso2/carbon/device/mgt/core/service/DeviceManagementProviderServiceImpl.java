@@ -824,7 +824,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } else {
             try {
                 DeviceManagementDAOFactory.openConnection();
-                allDevices = deviceDAO.getDevices(request, tenantId);
+                if(request.getGroupId()!=0){
+                    allDevices = deviceDAO.searchDevicesInGroup(request, tenantId);
+                } else{
+                    allDevices = deviceDAO.getDevices(request, tenantId);
+                }
                 count = deviceDAO.getDeviceCount(request, tenantId);
             } catch (DeviceManagementDAOException e) {
                 String msg = "Error occurred while retrieving device list pertaining to the current tenant";
