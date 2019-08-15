@@ -41,6 +41,10 @@
         <param-name>isDefault</param-name>
         <param-value>false</param-value>
     </context-param>
+    <context-param>
+        <param-name>basicAuth</param-name>
+        <param-value>true</param-value>
+    </context-param>
 
     <!--publish to apim-->
     <context-param>
