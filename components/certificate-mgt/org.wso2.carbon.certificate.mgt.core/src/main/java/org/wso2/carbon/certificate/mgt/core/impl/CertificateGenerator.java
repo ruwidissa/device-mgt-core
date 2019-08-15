@@ -324,9 +324,14 @@ public class CertificateGenerator {
         KeyStoreReader keyStoreReader = new KeyStoreReader();
         if (distinguishedName != null && !distinguishedName.isEmpty()) {
             if (distinguishedName.contains("/CN=")) {
-                String[] dnSplits = distinguishedName.split("/CN=");
-                String commonNameExtracted = dnSplits[dnSplits.length - 1];
-                lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted);
+                String[] dnSplits = distinguishedName.split("/");
+                for (String dnPart : dnSplits) {
+                    if (dnPart.contains("CN=")) {
+                        String commonNameExtracted = dnPart.replace("CN=", "");
+                        lookUpCertificate = keyStoreReader.getCertificateBySerial(commonNameExtracted);
+                        break;
+                    }
+                }
             } else {
                 LdapName ldapName;
                 try {
