@@ -55,7 +55,7 @@ public class AuthenticationHandler extends AbstractHandler {
     private static final String X_JWT_ASSERTION = "X-JWT-Assertion";
     private static final String JWTTOKEN = "JWTToken";
     private static final String AUTHORIZATION = "Authorization";
-    private static final String BEARER = "Bearer ";
+    private static final String BEARER = "Basic ";
     private static final String CONTENT_TYPE = "Content-Type";
 
     private IOTServerConfiguration iotServerConfiguration;
