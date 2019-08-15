@@ -147,9 +147,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred when obtaining database connection for updating the device subscriptions of "
-                    + "application. Updated by: " + updateBy + " and updating action triggered from "
-                    + actionTriggeredFrom;
+            String msg = "Error occurred while executing SQL to update the device subscriptions of application. "
+                    + "Updated by: " + updateBy + " and updating action triggered from " + actionTriggeredFrom;
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         }
@@ -356,7 +355,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred while getting device subscription data for application ID: " + appReleaseId;
+            String msg = "Error occurred while while running SQL to get device subscription data for application ID: " + appReleaseId;
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         }
@@ -618,12 +617,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.executeBatch();
             }
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection to update the user subscriptions of "
-                    + "application.";
+            String msg = "Error occurred while obtaining the DB connection to update the user/role/group subscriptions "
+                    + "of application.";
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred when obtaining database connection for updating the user subscriptions of "
+            String msg = "Error occurred while processing SQL to update the user/role/group subscriptions of "
                     + "application.";
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
@@ -691,8 +690,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred when obtaining database connection for updating the subscription status of the "
-                    + "device subscription.";
+            String msg = "Error occurred when processing SQL to update the subscription status of the device "
+                    + "subscription.";
             log.error(msg);
             throw new ApplicationManagementDAOException(msg, e);
         }
