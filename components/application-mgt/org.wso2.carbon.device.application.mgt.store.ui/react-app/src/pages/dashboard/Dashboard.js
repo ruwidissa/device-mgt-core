@@ -26,6 +26,9 @@ import {Switch} from 'react-router';
 import axios from "axios";
 import "../../App.css";
 import {withConfigContext} from "../../context/ConfigContext";
+import Logout from "./logout/Logout";
+
+const {SubMenu} = Menu;
 
 class Dashboard extends React.Component {
     constructor(props) {
@@ -96,7 +99,7 @@ class Dashboard extends React.Component {
                             style={{lineHeight: '64px'}}
                         >
                             {
-                                deviceTypes.map((deviceType)=>{
+                                deviceTypes.map((deviceType) => {
                                     const platform = deviceType.name;
                                     const defaultPlatformIcons = config.defaultPlatformIcons;
                                     let icon = defaultPlatformIcons.default.icon;
@@ -107,7 +110,7 @@ class Dashboard extends React.Component {
                                     }
                                     return (
                                         <Menu.Item key={platform}>
-                                            <Link to={"/store/"+platform}>
+                                            <Link to={"/store/" + platform}>
                                                 <Icon type={icon} theme={theme}/>
                                                 {platform}
                                             </Link>
@@ -117,6 +120,17 @@ class Dashboard extends React.Component {
                             }
                             <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web
                                 Clips</Link></Menu.Item>
+
+                            <SubMenu className="profile"
+                                     title={
+                                         <span className="submenu-title-wrapper">
+                                     <Icon type="user"/>
+                                         Profile
+                                     </span>
+                                     }
+                            >
+                                <Logout/>
+                            </SubMenu>
                         </Menu>
                     </Header>
                 </Layout>
