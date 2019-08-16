@@ -147,7 +147,11 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
             Device persistedDevice = deviceManagementProviderService.getDevice(deviceIdentifier, true);
             if (persistedDevice == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                String msg = "No device found with the device type: " + deviceType +
+                             " having the device ID: " + deviceId + " to permanently delete.";
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
             boolean response = deviceManagementProviderService.deleteDevice(deviceIdentifier);
             return Response.status(Response.Status.OK).entity(response).build();
@@ -155,8 +159,8 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             String msg = "Error encountered while permanently deleting device of type : " + deviceType + " and " +
                          "ID : " + deviceId;
             log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
     }
 }
