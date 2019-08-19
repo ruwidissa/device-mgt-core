@@ -49,7 +49,9 @@ public class DeviceTypeDAOHandler {
             Context ctx = new InitialContext();
             dataSource = (DataSource) ctx.lookup(datasourceName);
         } catch (NamingException e) {
-            throw new DeviceTypeDeployerPayloadException("Error while looking up the data source: " + datasourceName, e);
+            String msg = "Error while looking up the data source: " + datasourceName;
+            log.error(msg, e);
+            throw new DeviceTypeDeployerPayloadException(msg, e);
         }
     }
 
@@ -57,12 +59,16 @@ public class DeviceTypeDAOHandler {
         try {
             Connection conn = currentConnection.get();
             if (conn != null) {
-                throw new IllegalTransactionStateException("Database connection has already been obtained.");
+                String msg = "Database connection has already been obtained.";
+                log.error(msg);
+                throw new IllegalTransactionStateException(msg);
             }
             conn = dataSource.getConnection();
             currentConnection.set(conn);
         } catch (SQLException e) {
-            throw new DeviceTypeMgtPluginException("Failed to get a database connection.", e);
+            String msg = "Failed to get a database connection.";
+            log.error(msg, e);
+            throw new DeviceTypeMgtPluginException(msg, e);
         }
     }
 
@@ -72,7 +78,9 @@ public class DeviceTypeDAOHandler {
             conn.setAutoCommit(false);
             currentConnection.set(conn);
         } catch (SQLException e) {
-            throw new DeviceTypeMgtPluginException("Error occurred while retrieving datasource connection", e);
+            String msg = "Error occurred while retrieving datasource connection";
+            log.error(msg, e);
+            throw new DeviceTypeMgtPluginException(msg, e);
         }
     }
 
@@ -81,7 +89,9 @@ public class DeviceTypeDAOHandler {
             try {
                 currentConnection.set(dataSource.getConnection());
             } catch (SQLException e) {
-                throw new DeviceTypeMgtPluginException("Error occurred while retrieving data source connection", e);
+                String msg = "Error occurred while retrieving data source connection";
+                log.error(msg, e);
+                throw new DeviceTypeMgtPluginException(msg, e);
             }
         }
         return currentConnection.get();
@@ -90,25 +100,28 @@ public class DeviceTypeDAOHandler {
     public void commitTransaction() {
         Connection conn = currentConnection.get();
         if (conn == null) {
-            throw new IllegalStateException("No connection is associated with the current transaction. " +
-                                            "This might have ideally been caused by not properly initiating the " +
-                                            "transaction via 'beginTransaction'/'openConnection' methods");
+            String msg = "No connection is associated with the current transaction. This might have ideally been " +
+                         "caused by not properly initiating the transaction via " +
+                         "'beginTransaction'/'openConnection' methods";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
         try {
             conn.commit();
         } catch (SQLException e) {
-            log.error("Error occurred while committing the transaction.", e);
+            String msg = "Error occurred while committing the transaction.";
+            log.error(msg, e);
         }
     }
 
     public void closeConnection() {
-
         Connection con = currentConnection.get();
         if (con != null) {
             try {
                 con.close();
             } catch (SQLException e) {
-                log.error("Error occurred while close the connection");
+                String msg = "Error occurred while close the connection";
+                log.error(msg, e);
             }
         }
         currentConnection.remove();
@@ -117,14 +130,17 @@ public class DeviceTypeDAOHandler {
     public void rollbackTransaction() {
         Connection conn = currentConnection.get();
         if (conn == null) {
-            throw new IllegalStateException("No connection is associated with the current transaction. " +
-                                            "This might have ideally been caused by not properly initiating the " +
-                                            "transaction via 'beginTransaction'/'openConnection' methods");
+            String msg = "No connection is associated with the current transaction. This might have ideally been " +
+                         "caused by not properly initiating the transaction via " +
+                         "'beginTransaction'/'openConnection' methods";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
         try {
             conn.rollback();
         } catch (SQLException e) {
-            log.error("Error occurred while roll-backing the transaction.", e);
+            String msg = "Error occurred while roll-backing the transaction.";
+            log.error(msg, e);
         }
     }
 }

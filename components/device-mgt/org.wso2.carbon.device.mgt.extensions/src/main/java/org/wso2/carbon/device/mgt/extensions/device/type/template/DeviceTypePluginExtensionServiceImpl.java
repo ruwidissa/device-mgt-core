@@ -34,21 +34,26 @@ public class DeviceTypePluginExtensionServiceImpl implements DeviceTypePluginExt
     private static volatile Map<String, DeviceTypePluginDAOManager> pluginDAOManagers = new HashMap<>();
 
     @Override
-    public void addPluginDAOManager(String deviceType, DeviceTypePluginDAOManager pluginDAOManager) {
+    public void addPluginDAOManager(String deviceType, DeviceTypePluginDAOManager pluginDAOManager)
+            throws DeviceTypePluginExtensionException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (pluginDAOManager != null) {
-            if (!pluginDAOManagers.containsKey(tenantId + deviceType)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Saving DeviceTypePluginDAOManager against tenant id " + tenantId +
-                              " and device type: " + deviceType);
-                }
-                pluginDAOManagers.put(tenantId + deviceType, pluginDAOManager);
+        if (pluginDAOManager == null) {
+            String msg = "Cannot save DeviceTypePluginDAOManager against tenant id " + tenantId
+                         + " and device type: " + deviceType + " since DeviceTypePluginDAOManager is null";
+            log.error(msg);
+            throw new DeviceTypePluginExtensionException(msg);
+        }
+        if (!pluginDAOManagers.containsKey(tenantId + deviceType)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Saving DeviceTypePluginDAOManager against tenant id " + tenantId +
+                          " and device type: " + deviceType);
             }
+            pluginDAOManagers.put(tenantId + deviceType, pluginDAOManager);
         }
     }
 
     @Override
-    public DeviceTypePluginDAOManager getPluginDAOManager(String deviceType) {
+    public DeviceTypePluginDAOManager getPluginDAOManager(String deviceType) throws DeviceTypePluginExtensionException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         if (pluginDAOManagers.containsKey(tenantId + deviceType)) {
             if (log.isDebugEnabled()) {

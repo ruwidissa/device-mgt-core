@@ -228,7 +228,14 @@ public class DeviceTypeManager implements DeviceManager {
             if (deviceTypePluginDAOManager != null) {
                 DeviceTypePluginExtensionService deviceTypeManagerExtensionService =
                         new DeviceTypePluginExtensionServiceImpl();
-                deviceTypeManagerExtensionService.addPluginDAOManager(deviceType, deviceTypePluginDAOManager);
+                try {
+                    deviceTypeManagerExtensionService.addPluginDAOManager(deviceType, deviceTypePluginDAOManager);
+                } catch (DeviceTypePluginExtensionException e) {
+                    String msg = "Error occurred while saving DeviceTypePluginDAOManager for device type: "
+                                 +  deviceType;
+                    log.error(msg);
+                    throw new DeviceTypeDeployerPayloadException(msg);
+                }
             } else {
                 log.warn("Could not save DeviceTypePluginDAOManager for device type: " + deviceType +
                          " since DeviceTypePluginDAOManager is null.");
@@ -236,7 +243,7 @@ public class DeviceTypeManager implements DeviceManager {
         } else {
             String msg = "Could not save DeviceTypePluginDAOManager since device type is null or empty.";
             log.error(msg);
-            throw new DeviceTypePluginExtensionException(msg);
+            throw new DeviceTypeDeployerPayloadException(msg);
         }
     }
 
