@@ -172,6 +172,10 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += " AND AP_APP.DEVICE_TYPE_ID = ?";
         }
 
+        if (filter.getLimit() == -1) {
+            sql = sql.replace("LIMIT ? OFFSET ?", "");
+        }
+
         String sortingOrder = "ASC";
         if (!StringUtils.isEmpty(filter.getSortBy() )) {
             sortingOrder = filter.getSortBy();
@@ -182,12 +186,14 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql);
             ){
-                if (filter.getLimit() == 0) {
-                    stmt.setInt(paramIndex++, 100);
-                } else {
-                    stmt.setInt(paramIndex++, filter.getLimit());
+                if (filter.getLimit() != -1) {
+                    if (filter.getLimit() == 0) {
+                        stmt.setInt(paramIndex++, 100);
+                    } else {
+                        stmt.setInt(paramIndex++, filter.getLimit());
+                    }
+                    stmt.setInt(paramIndex++, filter.getOffset());
                 }
-                stmt.setInt(paramIndex++, filter.getOffset());
                 stmt.setInt(paramIndex++, tenantId);
 
                 if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
