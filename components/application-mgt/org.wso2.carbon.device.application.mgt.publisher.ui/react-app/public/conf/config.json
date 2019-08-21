@@ -16,6 +16,7 @@
       "deviceMgt": "/device-mgt/v1.0"
     },
     "loginUri": "/publisher-ui-request-handler/login",
+    "logoutUri": "/publisher-ui-request-handler/logout",
     "platform": "publisher"
   },
   "defaultPlatformIcons": {

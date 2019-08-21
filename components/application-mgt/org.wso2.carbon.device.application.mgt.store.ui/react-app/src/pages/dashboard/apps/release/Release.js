@@ -1,9 +1,28 @@
+/*
+ * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from "react";
 import '../../../../App.css';
-import {Skeleton, Typography, Row, Col, Card, message, notification} from "antd";
+import {Skeleton, Typography, Row, Col, Card, message, notification, Breadcrumb, Icon} from "antd";
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {Link} from "react-router-dom";
 
 const {Title} = Typography;
 
@@ -13,12 +32,11 @@ class Release extends React.Component {
     constructor(props) {
         super(props);
         this.routes = props.routes;
-        this.state={
+        this.state = {
             loading: true,
             app: null,
             uuid: null
-        }
-
+        };
     }
 
     componentDidMount() {
@@ -29,19 +47,18 @@ class Release extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevState.uuid !== this.state.uuid) {
-            const {uuid,deviceType} = this.props.match.params;
+            const {uuid, deviceType} = this.props.match.params;
             this.fetchData(uuid);
             this.props.changeSelectedMenuItem(deviceType);
         }
     }
 
-    fetchData = (uuid)=>{
+    fetchData = (uuid) => {
         const config = this.props.context;
 
         //send request to the invoker
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+"/applications/"+uuid,
-
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/" + uuid,
         ).then(res => {
             if (res.status === 200) {
                 let app = res.data.data;
@@ -53,11 +70,12 @@ class Release extends React.Component {
                 })
             }
 
-        }).catch((error) => { console.log(error);
+        }).catch((error) => {
+            console.log(error);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
+                window.location.href = window.location.origin + '/store/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -76,11 +94,12 @@ class Release extends React.Component {
         const {deviceType} = this.props.match.params;
 
         let content = <Title level={3}>No Releases Found</Title>;
+        let appName = "loading...";
 
-        if (app != null && app.applicationReleases.length!==0) {
+        if (app != null && app.applicationReleases.length !== 0) {
             content = <ReleaseView app={app} deviceType={deviceType}/>;
+            appName = app.name;
         }
-
 
         return (
             <div style={{background: '#f0f2f5', minHeight: 780}}>
@@ -89,6 +108,12 @@ class Release extends React.Component {
 
                     </Col>
                     <Col lg={16} md={24} style={{padding: 3}}>
+                        <Breadcrumb style={{paddingBottom: 16}}>
+                            <Breadcrumb.Item>
+                                <Link to={"/store/"+deviceType}><Icon type="home"/> {deviceType + " apps"} </Link>
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item>{appName}</Breadcrumb.Item>
+                        </Breadcrumb>
                         <Card>
                             <Skeleton loading={loading} avatar={{size: 'large'}} active paragraph={{rows: 8}}>
                                 {content}

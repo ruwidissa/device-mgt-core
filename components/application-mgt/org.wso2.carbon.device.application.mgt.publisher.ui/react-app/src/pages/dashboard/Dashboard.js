@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from "react";
 import {Layout, Menu, Icon} from 'antd';
 import {Switch, Link} from "react-router-dom";
@@ -5,6 +23,7 @@ import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
 import "../../App.css";
 import {withConfigContext} from "../../context/ConfigContext";
+import Logout from "./logout/Logout";
 
 const {Header, Content, Footer} = Layout;
 const {SubMenu} = Menu;
@@ -51,7 +70,20 @@ class Dashboard extends React.Component {
                             </SubMenu>
                             <Menu.Item key="2"><Link to="/publisher/manage"><Icon
                                 type="control"/>Manage</Link></Menu.Item>
+
+                            <SubMenu className="profile"
+                                     title={
+                                         <span className="submenu-title-wrapper">
+                                     <Icon type="user"/>
+                                         Profile
+                                     </span>
+                                     }
+                            >
+                                <Logout/>
+                            </SubMenu>
+
                         </Menu>
+
                     </Header>
                 </Layout>
                 <Layout>
@@ -61,7 +93,6 @@ class Dashboard extends React.Component {
                             {this.state.routes.map((route) => (
                                 <RouteWithSubRoutes key={route.path} {...route} />
                             ))}
-
                         </Switch>
                     </Content>
                     <Footer style={{textAlign: 'center'}}>

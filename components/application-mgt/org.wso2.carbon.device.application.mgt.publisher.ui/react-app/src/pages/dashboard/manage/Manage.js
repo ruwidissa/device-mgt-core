@@ -1,7 +1,26 @@
+/*
+ * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from "react";
-import {PageHeader, Typography, Input, Button, Row, Col} from "antd";
+import {PageHeader, Typography, Breadcrumb, Row, Col, Icon} from "antd";
 import ManageCategories from "../../../components/manage/categories/ManageCategories";
 import ManageTags from "../../../components/manage/categories/ManageTags";
+import {Link} from "react-router-dom";
 
 const {Paragraph} = Typography;
 
@@ -33,14 +52,16 @@ class Manage extends React.Component {
     render() {
         return (
             <div>
-                <PageHeader
-                    // breadcrumb={{routes}}
-                    title="Manage"
-                >
+                <PageHeader style={{paddingTop: 0}}>
+                    <Breadcrumb style={{paddingBottom: 16}}>
+                        <Breadcrumb.Item>
+                            <Link to="/publisher/apps"><Icon type="home"/> Home</Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>Manage</Breadcrumb.Item>
+                    </Breadcrumb>
                     <div className="wrap">
-                        <Paragraph>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo.
-                        </Paragraph>
+                        <h3>Manage</h3>
+                        <Paragraph>Maintain and manage categories and tags here..</Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>

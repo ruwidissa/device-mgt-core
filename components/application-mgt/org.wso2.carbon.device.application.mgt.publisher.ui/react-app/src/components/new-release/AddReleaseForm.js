@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from "react";
 import {
     Card,
@@ -13,7 +31,7 @@ import {
     Upload,
     Divider,
     notification,
-    Spin
+    Spin, InputNumber
 } from "antd";
 import axios from "axios";
 import {withRouter} from 'react-router-dom'
@@ -43,7 +61,8 @@ class AddNewReleaseFormComponent extends React.Component {
             icons: [],
             screenshots: [],
             loading: false,
-            binaryFiles: []
+            binaryFiles: [],
+            isFree: true
         };
     }
 
@@ -143,8 +162,14 @@ class AddNewReleaseFormComponent extends React.Component {
 
     handleScreenshotChange = ({fileList}) => this.setState({screenshots: fileList});
 
+    handlePriceTypeChange = (value) => {
+        this.setState({
+            isFree: (value === 'free')
+        });
+    };
+
     render() {
-        const {categories, tags, icons, screenshots, loading, binaryFiles} = this.state;
+        const {isFree, icons, screenshots, loading, binaryFiles} = this.state;
         const {getFieldDecorator} = this.props.form;
         return (
             <div>
@@ -252,13 +277,35 @@ class AddNewReleaseFormComponent extends React.Component {
                                                 )}
                                             </Form.Item>
 
+                                            <Form.Item {...formItemLayout} label="Price Type">
+                                                {getFieldDecorator('select', {
+                                                    rules: [{required: true, message: 'Please select price Type'}],
+                                                })(
+                                                    <Select
+                                                        placeholder="Please select a price type"
+                                                        onChange={this.handlePriceTypeChange}>
+                                                        <Option value="free">Free</Option>
+                                                        <Option value="paid">Paid</Option>
+                                                    </Select>,
+                                                )}
+                                            </Form.Item>
+
                                             <Form.Item {...formItemLayout} label="Price">
                                                 {getFieldDecorator('price', {
                                                     rules: [{
-                                                        required: false
+                                                        required: !isFree
                                                     }],
                                                 })(
-                                                    <Input prefix="$" placeholder="00.00"/>
+                                                    <InputNumber
+                                                        disabled={isFree}
+                                                        options={{
+                                                            initialValue: 1
+                                                        }}
+                                                        min={0}
+                                                        max={10000}
+                                                        formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                        parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                                                    />
                                                 )}
                                             </Form.Item>
 
