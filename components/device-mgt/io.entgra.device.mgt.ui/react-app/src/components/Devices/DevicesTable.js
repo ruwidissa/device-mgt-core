@@ -18,26 +18,45 @@
 
 import React from "react";
 import axios from "axios";
-import {Button, message, notification, Table, Typography} from "antd";
+import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
-import {withConfigContext} from "../../../../context/ConfigContext";
+import {withConfigContext} from "../../context/ConfigContext";
 
 const {Text} = Typography;
+
+let config = null;
+
 const columns = [
     {
         title: 'Device',
         dataIndex: 'name',
-        fixed: 'left',
         width: 100,
     },
     {
-        title: 'Modal',
-        dataIndex: 'deviceInfo',
-        key: 'modal',
-        render: deviceInfo => `${deviceInfo.vendor} ${deviceInfo.deviceModel}`
+        title: 'Type',
+        dataIndex: 'type',
+        key: 'type',
+        render: type => {
+            const defaultPlatformIcons = config.defaultPlatformIcons;
+            let icon = defaultPlatformIcons.default.icon;
+            let color = defaultPlatformIcons.default.color;
+            let theme = defaultPlatformIcons.default.theme;
+
+            if (defaultPlatformIcons.hasOwnProperty(type)) {
+                icon = defaultPlatformIcons[type].icon;
+                color = defaultPlatformIcons[type].color;
+                theme = defaultPlatformIcons[type].theme;
+            }
+
+            return (
+                <span style={{fontSize: 20, color: color, textAlign: "center"}}>
+                    <Icon type={icon} theme={theme}/>
+                </span>
+            );
+        }
         // todo add filtering options
     },
     {
@@ -48,22 +67,6 @@ const columns = [
         // todo add filtering options
     },
     {
-        title: 'Last Updated',
-        dataIndex: 'enrolmentInfo',
-        key: 'dateOfLastUpdate',
-        render: (data) => {
-            return (getTimeAgo(data.dateOfLastUpdate));
-        }
-        // todo add filtering options
-    },
-    {
-        title: 'Status',
-        dataIndex: 'enrolmentInfo',
-        key: 'status',
-        render: enrolmentInfo => enrolmentInfo.status
-        // todo add filtering options
-    },
-    {
         title: 'Ownership',
         dataIndex: 'enrolmentInfo',
         key: 'ownership',
@@ -71,26 +74,54 @@ const columns = [
         // todo add filtering options
     },
     {
-        title: 'OS Version',
-        dataIndex: 'deviceInfo',
-        key: 'osVersion',
-        render: deviceInfo => deviceInfo.osVersion
+        title: 'Status',
+        dataIndex: 'enrolmentInfo',
+        key: 'status',
+        render: (enrolmentInfo) => {
+            const status = enrolmentInfo.status.toLowerCase();
+            let color = "#f9ca24";
+            switch (status) {
+                case "active":
+                    color = "#badc58";
+                    break;
+                case "created":
+                    color = "#6ab04c";
+                    break;
+                case "removed":
+                    color = "#ff7979";
+                    break;
+                case "inactive":
+                    color = "#f9ca24";
+                    break;
+                case "blocked":
+                    color = "#636e72";
+                    break;
+            }
+            return <Tag color={color}>{status}</Tag>;
+        }
         // todo add filtering options
     },
     {
-        title: 'IMEI',
-        dataIndex: 'properties',
-        key: 'imei',
-        render: properties => {
-            let imei = "not-found";
-            for (let i = 0; i < properties.length; i++) {
-                if (properties[i].name === "IMEI") {
-                    imei = properties[i].value;
-                }
-            }
-            return imei;
+        title: 'Last Updated',
+        dataIndex: 'enrolmentInfo',
+        key: 'dateOfLastUpdate',
+        render: (data) => {
+            const {dateOfLastUpdate} = data;
+            const timeAgoString = getTimeAgo(dateOfLastUpdate);
+            return <Tooltip title={new Date(dateOfLastUpdate).toString()}>{timeAgoString}</Tooltip>;
         }
         // todo add filtering options
+    },
+    {
+        title: 'Action',
+        key: 'action',
+        render: () => (
+            <span>
+                <a><Icon type="edit" /></a>
+                <Divider type="vertical" />
+                <a><Text type="danger"><Icon type="delete" /></Text></a>
+            </span>
+        ),
     },
 ];
 
@@ -100,9 +131,10 @@ const getTimeAgo = (time) => {
 };
 
 
-class DeviceInstall extends React.Component {
+class DeviceTable extends React.Component {
     constructor(props) {
         super(props);
+        config =  this.props.context;
         TimeAgo.addLocale(en);
         this.state = {
             data: [],
@@ -118,11 +150,7 @@ class DeviceInstall extends React.Component {
             this.setState({
                 selectedRows: selectedRows
             })
-        },
-        getCheckboxProps: record => ({
-            disabled: record.name === 'Disabled User', // Column configuration not to be checked
-            name: record.name,
-        }),
+        }
     };
 
     componentDidMount() {
@@ -133,19 +161,15 @@ class DeviceInstall extends React.Component {
     fetch = (params = {}) => {
         const config = this.props.context;
         this.setState({loading: true});
-        const {deviceType} = this.props;
         // get current page
         const currentPage = (params.hasOwnProperty("page")) ? params.page : 1;
 
         const extraParams = {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
-            status: "ACTIVE",
             requireDeviceInfo: true,
-            type: deviceType
         };
 
-        // note: encode with '%26' not '&'
         const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
 
         //send request to the invoker
@@ -160,15 +184,13 @@ class DeviceInstall extends React.Component {
                     data: res.data.data.devices,
                     pagination,
                 });
-
             }
 
         }).catch((error) => {
-            console.log(error);
-            if (error.hasOwnProperty("status") && error.response.status === 401) {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = window.location.origin + '/store/login';
+                window.location.href = window.location.origin + '/entgra/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -197,28 +219,11 @@ class DeviceInstall extends React.Component {
         });
     };
 
-    install = () => {
-        const {selectedRows} = this.state;
-        const payload = [];
-        selectedRows.map(device => {
-            payload.push({
-                id: device.deviceIdentifier,
-                type: device.type
-            });
-        });
-        this.props.onInstall("devices", payload);
-    };
-
     render() {
         const {data, pagination, loading, selectedRows} = this.state;
         return (
             <div>
-                <Text>
-                    Start installing the application for one or more users by entering the corresponding user name.
-                    Select install to automatically start downloading the application for the respective user/users.
-                </Text>
                 <Table
-                    style={{paddingTop: 20}}
                     columns={columns}
                     rowKey={record => record.deviceIdentifier}
                     dataSource={data}
@@ -234,15 +239,9 @@ class DeviceInstall extends React.Component {
                     rowSelection={this.rowSelection}
                     scroll={{x: 1000}}
                 />
-                <div style={{paddingTop: 10, textAlign: "right"}}>
-                    <Button disabled={selectedRows.length === 0} htmlType="button" type="primary"
-                            onClick={this.install}>
-                        Install
-                    </Button>
-                </div>
             </div>
         );
     }
 }
 
-export default withConfigContext(DeviceInstall);
+export default withConfigContext(DeviceTable);

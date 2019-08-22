@@ -21,31 +21,37 @@ import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
 import App from "./App";
 import Login from "./pages/Login";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Apps from "./pages/dashboard/apps/Apps";
-import Release from "./pages/dashboard/apps/release/Release";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import './index.css';
+import Devices from "./pages/Dashboard/Devices/Devices";
+import Reports from "./pages/Dashboard/Reports/Reports";
+import Geo from "./pages/Dashboard/Geo/Geo";
 
 const routes = [
     {
-        path: '/store/login',
+        path: '/entgra/login',
         exact: true,
         component: Login
     },
     {
-        path: '/store',
+        path: '/entgra',
         exact: false,
         component: Dashboard,
         routes: [
             {
-                path: '/store/:deviceType',
-                component: Apps,
+                path: '/entgra/devices',
+                component: Devices,
                 exact: true
             },
             {
-                path: '/store/:deviceType/apps/:uuid',
-                exact: true,
-                component: Release
+                path: '/entgra/geo',
+                component: Geo,
+                exact: true
+            },
+            {
+                path: '/entgra/reports',
+                component: Reports,
+                exact: true
             }
         ]
     }

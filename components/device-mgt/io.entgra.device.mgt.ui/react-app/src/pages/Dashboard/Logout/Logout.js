@@ -49,7 +49,7 @@ class Logout extends React.Component {
         ).then(res => {
             //if the api call status is correct then user will logout and then it goes to login page
             if (res.status === 200) {
-                window.location = window.location.origin + "/store/login";
+                window.location = window.location.origin + "/entgra/login";
             }
         }).catch(function (error) {
 
