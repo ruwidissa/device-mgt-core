@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon} from "antd";
+import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -112,28 +112,17 @@ const columns = [
         }
         // todo add filtering options
     },
-    // {
-    //     title: 'OS Version',
-    //     dataIndex: 'deviceInfo',
-    //     key: 'osVersion',
-    //     render: deviceInfo => deviceInfo.osVersion
-    //     // todo add filtering options
-    // },
-    // {
-    //     title: 'IMEI',
-    //     dataIndex: 'properties',
-    //     key: 'imei',
-    //     render: properties => {
-    //         let imei = "not-found";
-    //         for (let i = 0; i < properties.length; i++) {
-    //             if (properties[i].name === "IMEI") {
-    //                 imei = properties[i].value;
-    //             }
-    //         }
-    //         return imei;
-    //     }
-    //     // todo add filtering options
-    // },
+    {
+        title: 'Action',
+        key: 'action',
+        render: () => (
+            <span>
+                <a><Icon type="edit" /></a>
+                <Divider type="vertical" />
+                <a><Text type="danger"><Icon type="delete" /></Text></a>
+            </span>
+        ),
+    },
 ];
 
 const getTimeAgo = (time) => {
@@ -161,11 +150,7 @@ class DeviceTable extends React.Component {
             this.setState({
                 selectedRows: selectedRows
             })
-        },
-        getCheckboxProps: record => ({
-            disabled: record.name === 'Disabled User', // Column configuration not to be checked
-            name: record.name,
-        }),
+        }
     };
 
     componentDidMount() {

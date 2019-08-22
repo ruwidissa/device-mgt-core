@@ -21,9 +21,11 @@ import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
 import App from "./App";
 import Login from "./pages/Login";
-import Dashboard from "./pages/dashboard/Dashboard";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import './index.css';
-import Devices from "./pages/dashboard/devices/Devices";
+import Devices from "./pages/Dashboard/Devices/Devices";
+import Reports from "./pages/Dashboard/Reports/Reports";
+import Geo from "./pages/Dashboard/Geo/Geo";
 
 const routes = [
     {
@@ -39,6 +41,16 @@ const routes = [
             {
                 path: '/entgra/devices',
                 component: Devices,
+                exact: true
+            },
+            {
+                path: '/entgra/geo',
+                component: Geo,
+                exact: true
+            },
+            {
+                path: '/entgra/reports',
+                component: Reports,
                 exact: true
             }
         ]

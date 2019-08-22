@@ -23,7 +23,7 @@ import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
 import "../../App.css";
 import {withConfigContext} from "../../context/ConfigContext";
-import Logout from "./logout/Logout";
+import Logout from "./Logout/Logout";
 
 const {Header, Content, Footer} = Layout;
 const {SubMenu} = Menu;
@@ -54,7 +54,9 @@ class Dashboard extends React.Component {
                             defaultSelectedKeys={['1']}
                             style={{lineHeight: '64px'}}
                         >
-                            <Menu.Item key="1"><Link to="/entgra/entgra"><Icon type="appstore"/>Devices</Link></Menu.Item>
+                            <Menu.Item key="devices"><Link to="/entgra/devices"><Icon type="appstore"/>Devices</Link></Menu.Item>
+                            <Menu.Item key="geo"><Link to="/entgra/geo"><Icon type="environment"/>Geo</Link></Menu.Item>
+                            <Menu.Item key="reports"><Link to="/entgra/reports"><Icon type="bar-chart"/>Reports</Link></Menu.Item>
 
                             <SubMenu className="profile"
                                      title={
