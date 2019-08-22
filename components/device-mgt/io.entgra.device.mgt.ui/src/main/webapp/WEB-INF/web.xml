@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
-    <display-name>Store-Webapp</display-name>
+    <display-name>Entgra-Webapp</display-name>
     <error-page>
         <error-code>404</error-code>
         <location>/index.html</location>
