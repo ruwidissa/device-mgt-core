@@ -481,8 +481,7 @@ public class DeviceManagementServiceImplTest {
     public void testDeleteDevice() {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString()
-                , false);
+        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString());
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
@@ -492,8 +491,7 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService
                 .getDevice(Mockito.any(DeviceIdentifier.class), Mockito.anyBoolean())).thenReturn(null);
-        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString()
-                , false);
+        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString());
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }
@@ -504,8 +502,7 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.disenrollDevice(Mockito.any(DeviceIdentifier.class)))
                 .thenThrow(new DeviceManagementException());
-        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString()
-                , false);
+        Response response = this.deviceManagementService.deleteDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString());
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }
