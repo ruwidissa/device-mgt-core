@@ -827,7 +827,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } else {
             try {
                 DeviceManagementDAOFactory.openConnection();
-                allDevices = deviceDAO.getDevices(request, tenantId);
+                if(request.getGroupId()!=0){
+                    allDevices = deviceDAO.searchDevicesInGroup(request, tenantId);
+                } else{
+                    allDevices = deviceDAO.getDevices(request, tenantId);
+                }
                 count = deviceDAO.getDeviceCount(request, tenantId);
             } catch (DeviceManagementDAOException e) {
                 String msg = "Error occurred while retrieving device list pertaining to the current tenant";
@@ -3090,12 +3094,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 DeviceManagementDAOFactory.rollbackTransaction();
                 return false;
             } catch (TransactionManagementException e) {
-                String msg = "Error occurred while initiating transaction";
+                String msg = "Error occurred while initiating the transaction.";
                 log.error(msg, e);
                 throw new DeviceManagementException(msg, e);
             } catch (DeviceManagementDAOException e) {
                 String msg = "Error occurred either verifying existence of device ids or updating owner of the device.";
-                log.error(msg);
+                log.error(msg, e);
                 throw new DeviceManagementException(msg, e);
             } finally {
                 DeviceManagementDAOFactory.closeConnection();
@@ -3118,7 +3122,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             return owner;
         } catch (UserStoreException e) {
             String msg = "Error occurred when checking whether owner is exist or not. Owner: " + owner;
-            log.error(msg);
+            log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
     }

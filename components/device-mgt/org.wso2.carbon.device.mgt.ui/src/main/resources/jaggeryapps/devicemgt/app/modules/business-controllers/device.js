@@ -327,15 +327,6 @@ deviceModule = function () {
         return response;
     };
 
-	publicMethods.getDeviceTypesConfig = function () {
-		var url = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"] + "/device-types/config";
-		var response = privateMethods.callBackend(url, constants["HTTP_GET"]);
-		if (response.status == "success") {
-			response.content = parse(response.content);
-		}
-		return response;
-	};
-
     /*
      @Updated
      */

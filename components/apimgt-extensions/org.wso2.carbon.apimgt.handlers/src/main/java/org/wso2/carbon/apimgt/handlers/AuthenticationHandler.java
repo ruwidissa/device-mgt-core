@@ -55,7 +55,7 @@ public class AuthenticationHandler extends AbstractHandler {
     private static final String X_JWT_ASSERTION = "X-JWT-Assertion";
     private static final String JWTTOKEN = "JWTToken";
     private static final String AUTHORIZATION = "Authorization";
-    private static final String BEARER = "Bearer ";
+    private static final String BEARER = "Basic ";
     private static final String CONTENT_TYPE = "Content-Type";
 
     private IOTServerConfiguration iotServerConfiguration;
@@ -95,7 +95,7 @@ public class AuthenticationHandler extends AbstractHandler {
                     log.debug("Verify Cert:\n" + mdmSignature);
                 }
                 URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + "ios");
-                Map<String, String> certVerifyHeaders = this.setHeaders(this.restInvoker);
+                Map<String, String> certVerifyHeaders = this.setHeaders();
 
                 Certificate certificate = new Certificate();
                 certificate.setPem(mdmSignature);
@@ -127,7 +127,7 @@ public class AuthenticationHandler extends AbstractHandler {
 
                 String deviceType = this.getDeviceType(messageContext.getTo().getAddress().trim());
                 URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + deviceType);
-                Map<String, String> certVerifyHeaders = this.setHeaders(this.restInvoker);
+                Map<String, String> certVerifyHeaders = this.setHeaders();
                 Certificate certificate = new Certificate();
                 certificate.setPem(subjectDN);
                 certificate.setTenantId(tenantId);
@@ -157,7 +157,7 @@ public class AuthenticationHandler extends AbstractHandler {
                 }
                 String deviceType = this.getDeviceType(messageContext.getTo().getAddress().trim());
                 URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + deviceType);
-                Map<String, String> certVerifyHeaders = this.setHeaders(this.restInvoker);
+                Map<String, String> certVerifyHeaders = this.setHeaders();
 
                 Certificate certificate = new Certificate();
                 certificate.setPem(encodedPem);
@@ -182,9 +182,6 @@ public class AuthenticationHandler extends AbstractHandler {
             log.error("Error while processing certificate.", e);
             return false;
         } catch (URISyntaxException e) {
-            log.error("Error while processing certificate.", e);
-            return false;
-        } catch (APIMCertificateMGTException e) {
             log.error("Error while processing certificate.", e);
             return false;
         } catch (CertificateException e) {
@@ -212,9 +209,9 @@ public class AuthenticationHandler extends AbstractHandler {
         return null;
     }
 
-    private Map<String, String> setHeaders(RESTInvoker restInvoker) throws APIMCertificateMGTException {
+    private Map<String, String> setHeaders() {
         Map<String, String> map = new HashMap<>();
-        String accessToken = Utils.getAccessToken(iotServerConfiguration, restInvoker);
+        String accessToken = Utils.getBase64EncodedToken(iotServerConfiguration);
         map.put(AUTHORIZATION, BEARER + accessToken);
         map.put(CONTENT_TYPE, "application/json");
         return map;

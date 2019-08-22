@@ -76,6 +76,9 @@ $.fn.datatables_extended_serverside_paging = function (settings, url, dataFilter
                         searchParams[params.columns[i].data] = encodeURIComponent(params.columns[i].search.value);
                     }
                     if (options) {
+                        if (options.groupId){
+                            searchParams["groupId"] = options.groupId;
+                        }
                         searchParams[options.searchKey] = encodeURIComponent(params.search.value);
                     }
                     params.filter = JSON.stringify(searchParams);

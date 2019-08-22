@@ -210,7 +210,7 @@ $(document).ready(function () {
 		});
 		deviceType.deviceTypeMetaDefinition.features = features;
 
-		var addRoleAPI = apiBasePath + "/admin/device-types";
+		var addRoleAPI = apiBasePath + "/admin/device-types/" + deviceType.name;
 
 		invokerUtil.put(
 		        addRoleAPI,
