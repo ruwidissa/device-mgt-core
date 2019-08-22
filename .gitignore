@@ -35,4 +35,8 @@ components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react
 components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/dist/
 components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/package-lock.json
 components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/tmp/
+components/device-mgt/io.entgra.device.mgt.ui/react-app/node_modules/
+components/device-mgt/io.entgra.device.mgt.ui/react-app/dist/
+components/device-mgt/io.entgra.device.mgt.ui/react-app/package-lock.json
+components/device-mgt/io.entgra.device.mgt.ui/react-app/tmp/
 

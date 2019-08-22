@@ -30,14 +30,8 @@ import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.application.mgt.common.PaginationResult;
-import org.wso2.carbon.device.application.mgt.common.response.Review;
-import org.wso2.carbon.device.application.mgt.common.wrapper.ReviewWrapper;
 
-import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -69,13 +63,13 @@ tags = {
 scopes = {
         @Scope(
                 name = "Update a Review",
-                description = "Update a Review of applications.",
+                description = "Update a Review of application.",
                 key = "perm:admin:app:review:update",
                 permissions = {"/app-mgt/publisher/admin/review/update"}
         ),
         @Scope(
                 name = "Get Review Details",
-                description = "Get review details of applications.",
+                description = "Get review details of application.",
                 key = "perm:admin:app:review:view",
                 permissions = {"/app-mgt/publisher/admin/review/view"}
         )

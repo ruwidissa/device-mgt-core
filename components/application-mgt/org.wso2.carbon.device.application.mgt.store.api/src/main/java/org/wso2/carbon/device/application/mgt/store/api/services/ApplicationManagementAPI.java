@@ -49,11 +49,11 @@ import javax.ws.rs.core.Response;
 @SwaggerDefinition(
         info = @Info(
                 version = "1.0.0",
-                title = "ApplicationDTO Storage Management Service",
+                title = "Application Storage Management Service",
                 extensions = {
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "ApplicationStorageManagementService"),
-                                @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/store-applications"),
+                                @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/applications"),
                         })
                 }
         ),
@@ -65,7 +65,7 @@ import javax.ws.rs.core.Response;
 @Scopes(
         scopes = {
                 @Scope(
-                        name = "Get ApplicationDTO Details",
+                        name = "Get Application Details",
                         description = "Get application details",
                         key = "perm:app:store:view",
                         permissions = {"/app-mgt/store/application/view"}
@@ -73,8 +73,8 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/applications")
-@Api(value = "ApplicationDTO Management", description = "This API carries all app store management related operations " +
-        "such as get all the applications etc.")
+@Api(value = "Application Management", description = "This API carries all app store management related operations such"
+        + " as get all the applications etc.")
 @Produces(MediaType.APPLICATION_JSON)
 public interface ApplicationManagementAPI {
 
@@ -89,7 +89,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get all applications",
             notes = "This will get all applications",
-            tags = "ApplicationDTO Management",
+            tags = "Application Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:store:view")
@@ -129,7 +129,7 @@ public interface ApplicationManagementAPI {
             httpMethod = "GET",
             value = "get the application of requesting application type",
             notes = "This will get the application identified by the application type and name, if exists",
-            tags = "ApplicationDTO Management",
+            tags = "Application Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = SCOPE, value = "perm:app:store:view")
@@ -144,7 +144,7 @@ public interface ApplicationManagementAPI {
                             response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 404,
-                            message = "ApplicationDTO not found"),
+                            message = "Application not found"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application.",
