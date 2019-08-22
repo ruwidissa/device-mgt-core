@@ -44,7 +44,7 @@ class CurrentUsersReview extends React.Component {
         const config = this.props.context;
 
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/app/user/" + uuid,
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.entgra + "/reviews/app/user/" + uuid,
         ).then(res => {
             if (res.status === 200) {
                 const data = res.data.data.data;
@@ -54,7 +54,7 @@ class CurrentUsersReview extends React.Component {
         }).catch((error) => {
             if (error.response.hasOwnProperty(status) && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
+                window.location.href = window.location.origin+ '/entgra/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

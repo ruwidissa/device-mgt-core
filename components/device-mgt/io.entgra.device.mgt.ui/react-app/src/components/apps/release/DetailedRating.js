@@ -52,7 +52,7 @@ class DetailedRating extends React.Component{
         const config = this.props.context;
 
         return axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
+            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.entgra+"/reviews/"+uuid+"/"+type+"-rating",
             ).then(res => {
             if (res.status === 200) {
                 let detailedRating = res.data.data;
@@ -63,7 +63,7 @@ class DetailedRating extends React.Component{
 
         }).catch(function (error) {
             if (error.response.status === 401) {
-                window.location.href = window.location.origin+'/store/login';
+                window.location.href = window.location.origin+'/entgra/login';
             }
         });
     };

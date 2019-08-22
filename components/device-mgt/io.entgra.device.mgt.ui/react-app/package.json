@@ -1,17 +1,12 @@
 {
-  "name": "store",
+  "name": "entgra",
   "version": "1.0.0",
-  "description": "WSO2 IoT Server App Store",
+  "description": "Entgra device management",
   "main": "App.js",
-  "proxy": "http://localhost:3001",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/wso2/carbon-devicemgt"
-  },
   "license": "Apache License 2.0",
   "dependencies": {
     "acorn": "^6.2.0",
-    "antd": "^3.20.1",
+    "antd": "^3.22.0",
     "axios": "^0.18.1",
     "d3": "^5.9.7",
     "dagre": "^0.8.4",

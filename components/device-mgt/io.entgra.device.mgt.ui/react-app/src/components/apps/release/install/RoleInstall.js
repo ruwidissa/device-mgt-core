@@ -67,7 +67,7 @@ class RoleInstall extends React.Component {
         }).catch((error) => { console.log(error);
             if (error.hasOwnProperty("status") && error.response.status === 401) {
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+'/store/login';
+                window.location.href = window.location.origin+'/entgra/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

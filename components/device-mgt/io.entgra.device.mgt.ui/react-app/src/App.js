@@ -65,7 +65,7 @@ class App extends React.Component {
 
     componentDidMount() {
         axios.get(
-            window.location.origin + "/store/public/conf/config.json",
+            window.location.origin + "/entgra/public/conf/config.json",
         ).then(res => {
             console.log(res);
             this.setState({
@@ -88,7 +88,7 @@ class App extends React.Component {
                 <ConfigContext.Provider value={this.state.config}>
                     <div>
                         <Switch>
-                            <Redirect exact from="/store" to="/store/android"/>
+                            <Redirect exact from="/entgra" to="/entgra/devices"/>
                             {this.props.routes.map((route) => (
                                 <RouteWithSubRoutes key={route.path} {...route} />
                             ))}

@@ -58,7 +58,7 @@ class SingleReview extends React.Component {
         const {id} = this.state.review;
         const config = this.props.context;
 
-        let url =window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store;
+        let url =window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.entgra;
 
         // call as an admin api if the review is not a personal review
         if (!this.props.isPersonalReview) {
@@ -80,7 +80,7 @@ class SingleReview extends React.Component {
         }).catch((error) => {
             console.log(error);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/store/login';
+                window.location.href = window.location.origin+ '/entgra/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

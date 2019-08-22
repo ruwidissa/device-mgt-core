@@ -58,7 +58,7 @@ class Release extends React.Component {
 
         //send request to the invoker
         axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/" + uuid,
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.entgra + "/applications/" + uuid,
         ).then(res => {
             if (res.status === 200) {
                 let app = res.data.data;
@@ -75,7 +75,7 @@ class Release extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
                 message.error('You are not logged in');
-                window.location.href = window.location.origin + '/store/login';
+                window.location.href = window.location.origin + '/entgra/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",
@@ -110,7 +110,7 @@ class Release extends React.Component {
                     <Col lg={16} md={24} style={{padding: 3}}>
                         <Breadcrumb style={{paddingBottom: 16}}>
                             <Breadcrumb.Item>
-                                <Link to={"/store/"+deviceType}><Icon type="home"/> {deviceType + " apps"} </Link>
+                                <Link to={"/entgra/"+deviceType}><Icon type="home"/> {deviceType + " apps"} </Link>
                             </Breadcrumb.Item>
                             <Breadcrumb.Item>{appName}</Breadcrumb.Item>
                         </Breadcrumb>

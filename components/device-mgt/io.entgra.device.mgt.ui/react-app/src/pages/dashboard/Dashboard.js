@@ -18,17 +18,16 @@
 
 import React from "react";
 import {Layout, Menu, Icon} from 'antd';
-
-const {Header, Content, Footer} = Layout;
-import {Link} from "react-router-dom";
-import RouteWithSubRoutes from "../../components/RouteWithSubRoutes";
-import {Switch} from 'react-router';
-import axios from "axios";
+import {Switch, Link} from "react-router-dom";
+import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
+import {Redirect} from 'react-router'
 import "../../App.css";
 import {withConfigContext} from "../../context/ConfigContext";
 import Logout from "./logout/Logout";
 
+const {Header, Content, Footer} = Layout;
 const {SubMenu} = Menu;
+
 
 class Dashboard extends React.Component {
     constructor(props) {
@@ -41,50 +40,7 @@ class Dashboard extends React.Component {
         this.logo = this.props.context.theme.logo;
     }
 
-    componentDidMount() {
-        this.getDeviceTypes();
-    }
-
-    getDeviceTypes = () => {
-        const config = this.props.context;
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
-        ).then(res => {
-            if (res.status === 200) {
-                const deviceTypes = JSON.parse(res.data.data);
-                this.setState({
-                    deviceTypes,
-                    loading: false,
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load device types.",
-                });
-            }
-            this.setState({
-                loading: false
-            });
-        });
-    };
-
-    changeSelectedMenuItem = (key) => {
-        this.setState({
-            selectedKeys: [key]
-        })
-    };
-
     render() {
-        const config = this.props.context;
-        const {selectedKeys, deviceTypes} = this.state;
-
         return (
             <div>
                 <Layout className="layout">
@@ -95,31 +51,10 @@ class Dashboard extends React.Component {
                         <Menu
                             theme="light"
                             mode="horizontal"
-                            defaultSelectedKeys={selectedKeys}
+                            defaultSelectedKeys={['1']}
                             style={{lineHeight: '64px'}}
                         >
-                            {
-                                deviceTypes.map((deviceType) => {
-                                    const platform = deviceType.name;
-                                    const defaultPlatformIcons = config.defaultPlatformIcons;
-                                    let icon = defaultPlatformIcons.default.icon;
-                                    let theme = defaultPlatformIcons.default.theme;
-                                    if (defaultPlatformIcons.hasOwnProperty(platform)) {
-                                        icon = defaultPlatformIcons[platform].icon;
-                                        theme = defaultPlatformIcons[platform].theme;
-                                    }
-                                    return (
-                                        <Menu.Item key={platform}>
-                                            <Link to={"/store/" + platform}>
-                                                <Icon type={icon} theme={theme}/>
-                                                {platform}
-                                            </Link>
-                                        </Menu.Item>
-                                    );
-                                })
-                            }
-                            <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web
-                                Clips</Link></Menu.Item>
+                            <Menu.Item key="1"><Link to="/entgra/entgra"><Icon type="appstore"/>Devices</Link></Menu.Item>
 
                             <SubMenu className="profile"
                                      title={
@@ -131,19 +66,19 @@ class Dashboard extends React.Component {
                             >
                                 <Logout/>
                             </SubMenu>
+
                         </Menu>
+
                     </Header>
                 </Layout>
                 <Layout>
-                    <Content style={{padding: '0 0'}}>
+                    <Content style={{marginTop: 2}}>
                         <Switch>
+                            <Redirect exact from="/entgra" to="/entgra/devices"/>
                             {this.state.routes.map((route) => (
-                                <RouteWithSubRoutes changeSelectedMenuItem={this.changeSelectedMenuItem}
-                                                    key={route.path} {...route} />
+                                <RouteWithSubRoutes key={route.path} {...route} />
                             ))}
-
                         </Switch>
-
                     </Content>
                     <Footer style={{textAlign: 'center'}}>
                         ©2019 entgra.io

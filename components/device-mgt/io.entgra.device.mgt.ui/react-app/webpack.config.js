@@ -23,7 +23,7 @@ const configurations = require("./public/conf/config.json");
 const config = {
     devtool: "source-map",
     output: {
-        publicPath: '/store/'
+        publicPath: '/entgra/'
     },
     watch: false,
     resolve: {

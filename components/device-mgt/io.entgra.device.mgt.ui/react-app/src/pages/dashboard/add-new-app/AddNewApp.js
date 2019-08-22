@@ -48,7 +48,7 @@ const Dragger = Upload.Dragger;
 const routes = [
     {
         path: 'index',
-        breadcrumbName: 'store',
+        breadcrumbName: 'entgra',
     },
     {
         path: 'first',

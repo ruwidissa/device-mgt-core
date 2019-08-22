@@ -59,7 +59,7 @@ class AppList extends React.Component {
         });
         //send request to the invoker
         axios.post(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/",
+            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.entgra + "/applications/",
             payload,
         ).then(res => {
             if (res.status === 200) {
@@ -76,7 +76,7 @@ class AppList extends React.Component {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popup with error
                 message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
+                window.location.href = window.location.origin+ '/entgra/login';
             } else {
                 notification["error"]({
                     message: "There was a problem",

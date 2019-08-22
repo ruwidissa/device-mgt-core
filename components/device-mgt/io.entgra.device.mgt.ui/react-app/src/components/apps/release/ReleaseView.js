@@ -47,7 +47,7 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.entgra + "/subscription/" + uuid + "/" + type + "/install";
         axios.post(
             url,
             payload,
@@ -79,7 +79,7 @@ class ReleaseView extends React.Component {
 
         }).catch((error) => {
             if (error.response.status === 401) {
-                window.location.href = window.location.origin+ '/store/login';
+                window.location.href = window.location.origin+ '/entgra/login';
             } else {
                 this.setState({
                     loading: false,

@@ -93,7 +93,7 @@ class NormalLoginForm extends React.Component {
                 const parameters = {
                     username: values.username,
                     password: values.password,
-                    platform: "store"
+                    platform: "entgra"
                 };
 
                 const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
@@ -101,7 +101,7 @@ class NormalLoginForm extends React.Component {
                 axios.post(window.location.origin+ config.serverConfig.loginUri, request
                 ).then(res => {
                     if (res.status === 200) {
-                        window.location = window.location.origin+ "/store";
+                        window.location = window.location.origin+ "/entgra";
                     }
                 }).catch(function (error) {
                     if (error.response.status === 400) {
