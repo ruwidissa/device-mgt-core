@@ -1,0 +1,43 @@
+{
+  "theme": {
+    "type": "default",
+    "value": "lightBaseTheme",
+    "logo" : "https://entgra.io/assets/images/svg/logo.svg",
+    "primaryColor": "rgb(24, 144, 255)"
+  },
+  "serverConfig": {
+    "invokerUri": "/ui-request-handler/invoke/application-mgt-entgra/v1.0",
+    "invoker": {
+      "uri": "/entgra-ui-request-handler/invoke",
+      "publisher": "/application-mgt-publisher/v1.0",
+      "entgra": "/application-mgt-entgra/v1.0",
+      "admin" : "",
+      "deviceMgt" : "/device-mgt/v1.0"
+    },
+    "loginUri": "/entgra-ui-request-handler/login",
+    "logoutUri": "/entgra-ui-request-handler/logout",
+    "platform": "entgra"
+  },
+  "defaultPlatformIcons": {
+    "default": {
+      "icon": "hdd",
+      "color": "#535c68",
+      "theme": "outlined"
+    },
+    "android": {
+      "icon": "android",
+      "color": "#7db343",
+      "theme": "filled"
+    },
+    "ios": {
+      "icon": "apple",
+      "color": "#535c68",
+      "theme": "filled"
+    },
+    "windows": {
+      "icon": "windows",
+      "color": "#008cc4",
+      "theme": "filled"
+    }
+  }
+}

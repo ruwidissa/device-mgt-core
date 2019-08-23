@@ -277,6 +277,17 @@ public interface DeviceDAO {
      */
     List<Device> getDevices(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
+
+    /**
+     * This method is used to search for devices within a specific group.
+     *
+     * @param request  PaginationRequest object holding the data for pagination
+     * @param tenantId tenant id.
+     * @return returns paginated list of devices.
+     * @throws DeviceManagementDAOException
+     */
+    List<Device> searchDevicesInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
+
     /**
      * This method is used to retrieve all the devices of a given tenant and device type.
      *
@@ -498,7 +509,8 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException throws {@link DeviceManagementDAOException} if connections establishment
      * fails.
      */
-    List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId) throws DeviceManagementDAOException;
+    List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId)
+            throws DeviceManagementDAOException;
 
     /**
      * This method is used to permanently delete the device and its related details
@@ -508,4 +520,3 @@ public interface DeviceDAO {
      */
     void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
 }
-
