@@ -1,17 +1,11 @@
 {
   "theme": {
-    "type": "default",
-    "value": "lightBaseTheme",
-    "logo" : "https://entgra.io/assets/images/svg/logo.svg",
+    "logo" : "https://localhost:9443/entgra/public/images/logo.svg",
     "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {
-    "invokerUri": "/ui-request-handler/invoke/application-mgt-entgra/v1.0",
     "invoker": {
       "uri": "/entgra-ui-request-handler/invoke",
-      "publisher": "/application-mgt-publisher/v1.0",
-      "entgra": "/application-mgt-entgra/v1.0",
-      "admin" : "",
       "deviceMgt" : "/device-mgt/v1.0"
     },
     "loginUri": "/entgra-ui-request-handler/login",
