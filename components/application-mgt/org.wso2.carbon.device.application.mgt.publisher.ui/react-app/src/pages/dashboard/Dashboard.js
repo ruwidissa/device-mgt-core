@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Layout, Menu, Icon} from 'antd';
+import {Layout, Menu, Icon, Drawer, Button} from 'antd';
 import {Switch, Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
@@ -38,27 +38,107 @@ class Dashboard extends React.Component {
         this.Logo = config.theme.logo;
     }
 
+    //functions for show the drawer
+    state = {
+        visible: false,
+        collapsed: false
+    };
+
+    showDrawer = () => {
+        this.setState({
+            visible: true,
+            collapsed: !this.state.collapsed
+        });
+    };
+
+    onClose = () => {
+        this.setState({
+            visible: false,
+        });
+    };
+
     render() {
         return (
             <div>
-                <Layout className="layout">
-                    <Header style={{paddingLeft: 0, paddingRight: 0}}>
+                <Layout>
+                    <Header style={{paddingLeft: 0, paddingRight: 0, backgroundColor: "white"}}>
                         <div className="logo-image">
-                            <img alt="logo" src={this.Logo}/>
+                            <Link to="/publisher/apps"><img alt="logo" src={this.Logo}/></Link>
                         </div>
+
+                        <div className="web-layout">
+
+                            <Menu
+                                theme="light"
+                                mode="horizontal"
+                                defaultSelectedKeys={['1']}
+                                style={{lineHeight: '64px'}}
+                            >
+                                <Menu.Item key="1"><Link to="/publisher/apps"><Icon
+                                    type="appstore"/>Apps</Link></Menu.Item>
+                                <SubMenu
+                                    title={
+                                        <span className="submenu-title-wrapper">
+                                     <Icon type="plus"/>
+                                         Add New App
+                            </span>
+                                    }
+                                >
+                                    <Menu.Item key="setting:1"><Link to="/publisher/add-new-app/public">Public
+                                        APP</Link></Menu.Item>
+                                    <Menu.Item key="setting:2"><Link to="/publisher/add-new-app/enterprise">Enterprise
+                                        APP</Link></Menu.Item>
+                                    <Menu.Item key="setting:3"><Link to="/publisher/add-new-app/web-clip">Web
+                                        Clip</Link></Menu.Item>
+                                </SubMenu>
+                                <Menu.Item key="2"><Link to="/publisher/manage"><Icon
+                                    type="control"/>Manage</Link></Menu.Item>
+
+                                <SubMenu className="profile"
+                                         title={
+                                             <span className="submenu-title-wrapper">
+                                     <Icon type="user"/>
+                                         Profile
+                                     </span>
+                                         }
+                                >
+                                    <Logout/>
+                                </SubMenu>
+                            </Menu>
+                        </div>
+                    </Header>
+                </Layout>
+
+                <Layout className="mobile-layout">
+                    <div className="mobile-menu-button">
+                        <Button type="link" onClick={this.showDrawer}>
+                            <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="nav-icon"/>
+                        </Button>
+                    </div>
+                    <Drawer
+                        title={<Link to="/publisher/apps"><img alt="logo" src={this.Logo} style={{marginLeft: 30}}
+                                                               width={"60%"}/></Link>}
+                        placement="left"
+                        closable={false}
+                        onClose={this.onClose}
+                        visible={this.state.visible}
+                        getContainer={false}
+                        style={{position: 'absolute'}}
+                    >
                         <Menu
                             theme="light"
-                            mode="horizontal"
+                            mode="inline"
                             defaultSelectedKeys={['1']}
-                            style={{lineHeight: '64px'}}
+                            style={{lineHeight: '64px', width: 231}}
                         >
-                            <Menu.Item key="1"><Link to="/publisher/apps"><Icon type="appstore"/>Apps</Link></Menu.Item>
+                            <Menu.Item key="1"><Link to="/publisher/apps"><Icon
+                                type="appstore"/>Apps</Link></Menu.Item>
                             <SubMenu
                                 title={
                                     <span className="submenu-title-wrapper">
                                      <Icon type="plus"/>
                                          Add New App
-                                     </span>
+                            </span>
                                 }
                             >
                                 <Menu.Item key="setting:1"><Link to="/publisher/add-new-app/public">Public
@@ -70,23 +150,26 @@ class Dashboard extends React.Component {
                             </SubMenu>
                             <Menu.Item key="2"><Link to="/publisher/manage"><Icon
                                 type="control"/>Manage</Link></Menu.Item>
-
-                            <SubMenu className="profile"
-                                     title={
-                                         <span className="submenu-title-wrapper">
-                                     <Icon type="user"/>
-                                         Profile
-                                     </span>
-                                     }
-                            >
-                                <Logout/>
-                            </SubMenu>
-
                         </Menu>
-
-                    </Header>
+                    </Drawer>
+                    <Menu
+                        mode="horizontal"
+                        defaultSelectedKeys={['1']}
+                        style={{lineHeight: '63px', position: 'fixed', marginLeft: '80%'}}
+                    >
+                        <SubMenu
+                            title={
+                                <span className="submenu-title-wrapper">
+                                     <Icon type="user"/>
+                                     </span>
+                            }
+                        >
+                            <Logout/>
+                        </SubMenu>
+                    </Menu>
                 </Layout>
-                <Layout>
+
+                <Layout className="dashboard-body">
                     <Content style={{marginTop: 2}}>
                         <Switch>
                             <Redirect exact from="/publisher" to="/publisher/apps"/>
@@ -95,7 +178,7 @@ class Dashboard extends React.Component {
                             ))}
                         </Switch>
                     </Content>
-                    <Footer style={{textAlign: 'center'}}>
+                    <Footer style={{textAlign: 'center', marginBottom: 5 + "%"}}>
                         ©2019 entgra.io
                     </Footer>
                 </Layout>

@@ -17,8 +17,7 @@
  */
 
 import React from "react";
-import {Layout, Menu, Icon} from 'antd';
-
+import {Layout, Menu, Icon, Drawer, Button} from 'antd';
 const {Header, Content, Footer} = Layout;
 import {Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes";
@@ -81,60 +80,134 @@ class Dashboard extends React.Component {
         })
     };
 
+    //functions for show the drawer
+    state = {
+        visible: false,
+        collapsed: false
+    };
+
+    showDrawer = () => {
+        this.setState({
+            visible: true,
+            collapsed: !this.state.collapsed,
+        });
+    };
+
+    onClose = () => {
+        this.setState({
+            visible: false,
+        });
+    };
+
     render() {
         const config = this.props.context;
         const {selectedKeys, deviceTypes} = this.state;
 
+        const DeviceTypesData = deviceTypes.map((deviceType) => {
+            const platform = deviceType.name;
+            const defaultPlatformIcons = config.defaultPlatformIcons;
+            let icon = defaultPlatformIcons.default.icon;
+            let theme = defaultPlatformIcons.default.theme;
+            if (defaultPlatformIcons.hasOwnProperty(platform)) {
+                icon = defaultPlatformIcons[platform].icon;
+                theme = defaultPlatformIcons[platform].theme;
+            }
+            return (
+                <Menu.Item key={platform}>
+                    <Link to={"/store/" + platform}>
+                        <Icon type={icon} theme={theme}/>
+                        {platform}
+                    </Link>
+                </Menu.Item>
+            );
+        });
+
         return (
             <div>
-                <Layout className="layout">
-                    <Header style={{paddingLeft: 0, paddingRight: 0}}>
+                <Layout>
+                    <Header style={{paddingLeft: 0, paddingRight: 0, backgroundColor: "white"}}>
                         <div className="logo-image">
-                            <img alt="logo" src={this.logo}/>
+                            <Link to="/store/android"><img alt="logo" src={this.logo}/></Link>
                         </div>
-                        <Menu
-                            theme="light"
-                            mode="horizontal"
-                            defaultSelectedKeys={selectedKeys}
-                            style={{lineHeight: '64px'}}
-                        >
-                            {
-                                deviceTypes.map((deviceType) => {
-                                    const platform = deviceType.name;
-                                    const defaultPlatformIcons = config.defaultPlatformIcons;
-                                    let icon = defaultPlatformIcons.default.icon;
-                                    let theme = defaultPlatformIcons.default.theme;
-                                    if (defaultPlatformIcons.hasOwnProperty(platform)) {
-                                        icon = defaultPlatformIcons[platform].icon;
-                                        theme = defaultPlatformIcons[platform].theme;
-                                    }
-                                    return (
-                                        <Menu.Item key={platform}>
-                                            <Link to={"/store/" + platform}>
-                                                <Icon type={icon} theme={theme}/>
-                                                {platform}
-                                            </Link>
-                                        </Menu.Item>
-                                    );
-                                })
-                            }
-                            <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web
-                                Clips</Link></Menu.Item>
 
-                            <SubMenu className="profile"
-                                     title={
-                                         <span className="submenu-title-wrapper">
+                        <div className="web-layout">
+                            <Menu
+                                theme="light"
+                                mode="horizontal"
+                                defaultSelectedKeys={selectedKeys}
+                                style={{lineHeight: '64px'}}
+                            >
+
+                                {DeviceTypesData}
+
+                                <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web
+                                    Clips</Link></Menu.Item>
+
+                                <SubMenu className="profile"
+                                         title={
+                                             <span className="submenu-title-wrapper">
                                      <Icon type="user"/>
                                          Profile
                                      </span>
-                                     }
-                            >
-                                <Logout/>
-                            </SubMenu>
-                        </Menu>
+                                         }
+                                >
+                                    <Logout/>
+                                </SubMenu>
+                            </Menu>
+                        </div>
                     </Header>
                 </Layout>
-                <Layout>
+
+                <Layout className="mobile-layout">
+
+                    <div className="mobile-menu-button">
+                        <Button type="link" onClick={this.showDrawer}>
+                            <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="nav-icon"/>
+                        </Button>
+                    </div>
+                    <Drawer
+                        title={<Link to="/store/android">
+                            <img alt="logo" src={this.logo} style={{marginLeft: 30}} width={"60%"}/>
+                        </Link>}
+                        placement="left"
+                        closable={false}
+                        onClose={this.onClose}
+                        visible={this.state.visible}
+                        getContainer={false}
+                        style={{position: 'absolute'}}
+                    >
+                        <Menu
+                            theme="light"
+                            mode="inline"
+                            defaultSelectedKeys={selectedKeys}
+                            style={{lineHeight: '64px', width: 231}}
+                        >
+
+                            {DeviceTypesData}
+
+                            <Menu.Item key="web-clip"><Link to="/store/web-clip"><Icon type="upload"/>Web
+                                Clips</Link></Menu.Item>
+
+                        </Menu>
+                    </Drawer>
+                    <Menu
+                        mode="horizontal"
+                        defaultSelectedKeys={selectedKeys}
+                        style={{lineHeight: '63px', position: 'fixed', marginLeft: '80%'}}
+                    >
+                        <SubMenu
+                            title={
+                                <span className="submenu-title-wrapper">
+                                     <Icon type="user"/>
+                                     </span>
+                            }
+                        >
+                            <Logout/>
+                        </SubMenu>
+                    </Menu>
+                </Layout>
+
+                <Layout className="dashboard-body">
                     <Content style={{padding: '0 0'}}>
                         <Switch>
                             {this.state.routes.map((route) => (
@@ -145,7 +218,7 @@ class Dashboard extends React.Component {
                         </Switch>
 
                     </Content>
-                    <Footer style={{textAlign: 'center'}}>
+                    <Footer style={{textAlign: 'center', marginBottom: 5 + "%"}}>
                         ©2019 entgra.io
                     </Footer>
                 </Layout>

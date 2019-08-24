@@ -40,7 +40,6 @@
 }
 
 .logo-image {
-  /*width: 120px;*/
   height: 31px;
   margin: 0 5px 16px 24px;
   float: left;
@@ -60,8 +59,63 @@
   margin-right: 2%;
 }
 
+.mobile-layout{
+  visibility: hidden;
+  position: absolute;
+}
+
+.mobile-menu-button{
+  margin-left: 4%;
+  position: fixed;
+}
+
+.nav-icon{
+    margin-top: 10%;
+    font-size: 27px;
+}
+
 @media only screen and (min-width: 768px) {
   .main-container{
     padding: 24px;
   }
+}
+
+@media screen and (max-width: 700px) {
+
+  .web-layout{
+    visibility: hidden;
+  }
+
+  .mobile-layout{
+    visibility: visible;
+    z-index: 1;
+  }
+
+  .mobile-menu-button {
+    margin-top: 4%;
+  }
+
+  Header{
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+  }
+
+  .dashboard-body{
+    margin-top: 15%;
+  }
+
+  .logo-image {
+    margin-left: 20%;
+  }
+
+}
+
+@media only screen and (max-height: 500px) {
+    .mobile-menu-button{
+        margin-top: 2%;
+    }
+    .dashboard-body{
+        margin-top: 10%;
+    }
 }
