@@ -132,7 +132,6 @@ class AppsTable extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {filters} = this.props;
         if (prevProps.filters !== this.props.filters) {
-            // console.log("d", this.props.filters);
             this.setState({
                 filters
             });

@@ -20,11 +20,8 @@
     cursor: pointer;
 }
 
-Table{
-    width: 100%;
-}
-
 .apps-table{
     display: block;
     overflow: auto;
+    width: 100%;
 }

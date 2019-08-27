@@ -23,7 +23,7 @@ import {Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes";
 import {Switch} from 'react-router';
 import axios from "axios";
-import "../../App.css";
+import "./Dashboard.css";
 import {withConfigContext} from "../../context/ConfigContext";
 import Logout from "./logout/Logout";
 
@@ -162,7 +162,7 @@ class Dashboard extends React.Component {
 
                     <div className="mobile-menu-button">
                         <Button type="link" onClick={this.showDrawer}>
-                            <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="nav-icon"/>
+                            <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="bar-icon"/>
                         </Button>
                     </div>
                     <Drawer
