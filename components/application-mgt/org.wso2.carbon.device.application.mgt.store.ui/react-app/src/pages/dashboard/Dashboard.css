@@ -46,13 +46,7 @@
     font-size: 27px;
 }
 
-@media only screen and (min-width: 768px) {
-    .main-container{
-        padding: 24px;
-    }
-}
-
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 660px) {
 
     .web-layout{
         visibility: hidden;
@@ -80,13 +74,34 @@
     .logo-image {
         margin-left: 20%;
     }
+
 }
 
-@media only screen and (max-height: 500px) {
+@media only screen and (max-height: 350px) {
+
     .mobile-menu-button{
         margin-top: 2%;
     }
+
     .dashboard-body{
         margin-top: 10%;
+    }
+
+}
+
+@media only screen and (min-width: 760px) {
+
+    @media screen and (max-width: 1030px) {
+
+        Footer{
+            margin-bottom: 45%;
+        }
+    }
+}
+
+@media only screen and (min-width: 1030px) {
+
+    Footer{
+        margin-bottom: 5%;
     }
 }

@@ -69,7 +69,7 @@ const formats = [
 class AppDetailsDrawer extends React.Component {
     constructor(props) {
         super(props);
-        const drawerWidth = window.innerWidth<=768 ? '80%' : '40%';
+        const drawerWidth = window.innerWidth<=770 ? '80%' : '40%';
 
         this.state = {
             loading: false,
