@@ -33,6 +33,18 @@
     width: 70%;
 }
 
+@media screen and (max-width: 768px) {
+
+    .d-rating .bar-containers{
+        width: 100%;
+    }
+
+    .d-rating .numeric-data{
+        width: 50%;
+    }
+
+}
+
 .d-rating .bar-containers .bar-container{
     color: #737373;
     font-weight: 400;

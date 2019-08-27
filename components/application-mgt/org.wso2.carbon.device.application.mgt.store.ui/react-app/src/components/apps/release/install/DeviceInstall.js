@@ -114,7 +114,6 @@ class DeviceInstall extends React.Component {
 
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-            // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             this.setState({
                 selectedRows: selectedRows
             })
@@ -142,9 +141,12 @@ class DeviceInstall extends React.Component {
             limit: 10,
             status: "ACTIVE",
             requireDeviceInfo: true,
-            type: deviceType
         };
 
+        if (deviceType !== 'ANY') {
+            extraParams.type = deviceType;
+        }
+        
         // note: encode with '%26' not '&'
         const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
 

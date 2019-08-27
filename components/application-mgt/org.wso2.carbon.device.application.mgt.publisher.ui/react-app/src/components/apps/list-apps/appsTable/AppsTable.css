@@ -19,3 +19,9 @@
 .app-row{
     cursor: pointer;
 }
+
+.apps-table{
+    display: block;
+    overflow: auto;
+    width: 100%;
+}

@@ -132,7 +132,6 @@ class AppsTable extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         const {filters} = this.props;
         if (prevProps.filters !== this.props.filters) {
-            console.log("d", this.props.filters);
             this.setState({
                 filters
             });
@@ -212,7 +211,7 @@ class AppsTable extends React.Component {
 
     render() {
         return (
-
+            <div className="apps-table">
             <Table
                 rowKey={record => record.id}
                 dataSource={this.state.apps}
@@ -228,6 +227,7 @@ class AppsTable extends React.Component {
                     };
                 }}
             />
+            </div>
 
         );
     }

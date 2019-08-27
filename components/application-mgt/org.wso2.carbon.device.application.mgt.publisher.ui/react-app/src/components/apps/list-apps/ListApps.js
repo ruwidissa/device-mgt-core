@@ -25,7 +25,6 @@ import AppDetailsDrawer from "./AppDetailsDrawer/AppDetailsDrawer";
 const {Title} = Typography;
 const Search = Input.Search;
 
-
 class ListApps extends React.Component {
     constructor(props) {
         super(props);
@@ -67,7 +66,6 @@ class ListApps extends React.Component {
         this.setState({
             filters
         });
-        console.log(filters);
     };
 
     render() {
@@ -88,7 +86,7 @@ class ListApps extends React.Component {
                                 <Search
                                     placeholder="input search text"
                                     onSearch={this.setSearchText}
-                                    style={{width: 200}}
+                                    style={{width: 170}}
                                 />
                             </Col>
                         </Row>
