@@ -354,10 +354,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                                    "p.DEVICE_TYPE_NAME, " +
                                    "p.TENANT_ID";
 
-            AtomicInteger iterationCount = new AtomicInteger(0);
+            int iterationCount = 0;
             StringBuilder propertyQuery = new StringBuilder(" ");
             for (Map.Entry<String, String> stringStringEntry : deviceProps.entrySet()) {
-                String tempTableId = "t".concat(Integer.toString(iterationCount.getAndIncrement()));
+                String tempTableId = "t".concat(Integer.toString(iterationCount++));
                 propertyQuery.append("JOIN DM_DEVICE_PROPERTIES ")
                         .append(tempTableId).append(" ").append("ON p.DEVICE_IDENTIFICATION = ")
                         .append(tempTableId).append(".DEVICE_IDENTIFICATION ")

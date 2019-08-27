@@ -79,7 +79,7 @@ public interface DeviceManagementConfigService {
     @GET
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
+            httpMethod = "GET",
             value = "Getting General device Configurations",
             notes = "This API is responsible for send device configuration data to an IOT device when the " +
                     "device starts provisioning",
