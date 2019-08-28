@@ -17,13 +17,13 @@
 
 @font-face {
 	font-family:"font-wso2";
-	src:local("font-wso2"), url("../fonts/font-wso2.eot?6563fa91278f239ef8c827d90a165223");
+	src:local("font-wso2"), url("../fonts/font-wso2.eot?cad2cbc31721ac5b0af964f18b9762cf");
 	src:local("font-wso2"),
-        url("../fonts/font-wso2.eot?#iefix") format("embedded-opentype"),
-		url("../fonts/font-wso2.woff2?6563fa91278f239ef8c827d90a165223") format("woff2"),
-		url("../fonts/font-wso2.woff?6563fa91278f239ef8c827d90a165223") format("woff"),
-		url("../fonts/font-wso2.ttf?6563fa91278f239ef8c827d90a165223") format("truetype"),
-		url("../fonts/font-wso2.svg?6563fa91278f239ef8c827d90a165223#font-wso2") format("svg");
+        url("../fonts/font-wso2.eot?cad2cbc31721ac5b0af964f18b9762cf#iefix") format("embedded-opentype"),
+		url("../fonts/font-wso2.woff2?cad2cbc31721ac5b0af964f18b9762cf") format("woff2"),
+		url("../fonts/font-wso2.woff?cad2cbc31721ac5b0af964f18b9762cf") format("woff"),
+		url("../fonts/font-wso2.ttf?cad2cbc31721ac5b0af964f18b9762cf") format("truetype"),
+		url("../fonts/font-wso2.svg?cad2cbc31721ac5b0af964f18b9762cf#font-wso2") format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
@@ -304,8 +304,16 @@
     content:"\e6cf";
 }
 
+.fw-activesync:before {
+    content:"\e745";
+}
+
 .fw-add:before {
     content:"\e615";
+}
+
+.fw-aggregate:before {
+    content:"\e742";
 }
 
 .fw-airplay:before {
@@ -348,7 +356,7 @@
     content:"\e602";
 }
 
-.fw-ios:before {
+.fw-apple:before {
     content:"\e604";
 }
 
@@ -378,6 +386,10 @@
 
 .fw-battery:before {
     content:"\e60a";
+}
+
+.fw-bean:before {
+    content:"\e743";
 }
 
 .fw-blank-document:before {
@@ -414,6 +426,10 @@
 
 .fw-calendar:before {
     content:"\e612";
+}
+
+.fw-call-mediator:before {
+    content:"\e736";
 }
 
 .fw-camera:before {
@@ -480,7 +496,7 @@
     content:"\e653";
 }
 
-.fw-configarations:before {
+.fw-configurations:before {
     content:"\e609";
 }
 
@@ -500,6 +516,10 @@
     content:"\e620";
 }
 
+.fw-continue:before {
+    content:"\e73e";
+}
+
 .fw-contract:before {
     content:"\e614";
 }
@@ -514,6 +534,10 @@
 
 .fw-dashboard:before {
     content:"\e622";
+}
+
+.fw-data-mapper:before {
+    content:"\e735";
 }
 
 .fw-database:before {
@@ -628,6 +652,10 @@
     content:"\e628";
 }
 
+.fw-dollar:before {
+    content:"\e741";
+}
+
 .fw-down-arrow:before {
     content:"\e689";
 }
@@ -672,6 +700,10 @@
     content:"\e6e3";
 }
 
+.fw-event-simulator:before {
+    content:"\e744";
+}
+
 .fw-expand:before {
     content:"\e61c";
 }
@@ -714,6 +746,10 @@
 
 .fw-folder:before {
     content:"\e62e";
+}
+
+.fw-foreach:before {
+    content:"\e73ab";
 }
 
 .fw-fork-join:before {
@@ -764,6 +800,10 @@
     content:"\e6da";
 }
 
+.fw-google-glass:before {
+    content:"\e732";
+}
+
 .fw-google-plus:before {
     content:"\e6d9";
 }
@@ -800,6 +840,10 @@
     content:"\e639";
 }
 
+.fw-header:before {
+    content:"\e734";
+}
+
 .fw-heart:before {
     content:"\e6c3";
 }
@@ -832,6 +876,10 @@
     content:"\e63c";
 }
 
+.fw-in-sequence:before {
+    content:"\e739";
+}
+
 .fw-incoming-call:before {
     content:"\e63d";
 }
@@ -842,6 +890,10 @@
 
 .fw-instagram:before {
     content:"\e6db";
+}
+
+.fw-integration:before {
+    content:"\e73f";
 }
 
 .fw-invitation:before {
@@ -960,6 +1012,10 @@
     content:"\e64e";
 }
 
+.fw-log:before {
+    content:"\e738";
+}
+
 .fw-logical:before {
     content:"\e702";
 }
@@ -974,6 +1030,10 @@
 
 .fw-map-location:before {
     content:"\e650";
+}
+
+.fw-mapping:before {
+    content:"\e73c";
 }
 
 .fw-menu:before {
@@ -1004,6 +1064,10 @@
     content:"\e655";
 }
 
+.fw-namespace:before {
+    content:"\e740";
+}
+
 .fw-nodejs:before {
     content:"\e656";
 }
@@ -1014,6 +1078,10 @@
 
 .fw-organization:before {
     content:"\e6ac";
+}
+
+.fw-out-sequence:before {
+    content:"\e73a";
 }
 
 .fw-own:before {
@@ -1030,6 +1098,10 @@
 
 .fw-paste:before {
     content:"\e658";
+}
+
+.fw-payload-factory:before {
+    content:"\e733";
 }
 
 .fw-pdf:before {
@@ -1060,6 +1132,10 @@
     content:"\e70d";
 }
 
+.fw-property:before {
+    content:"\e737";
+}
+
 .fw-prototype:before {
     content:"\e6cc";
 }
@@ -1086,6 +1162,10 @@
 
 .fw-redo:before {
     content:"\e65d";
+}
+
+.fw-reduce:before {
+    content:"\e73d";
 }
 
 .fw-refresh:before {
