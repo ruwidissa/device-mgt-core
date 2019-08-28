@@ -79,6 +79,10 @@ public class OperationDAOUtil {
             dtoOperation.setControl(Operation.Control.valueOf(operation.getControl().toString()));
         }
 
+        if (operation.getInitiatedBy() != null) {
+            dtoOperation.setInitiatedBy(operation.getInitiatedBy());
+        }
+
         return dtoOperation;
     }
 
