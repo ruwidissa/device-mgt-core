@@ -16,7 +16,7 @@
 
 %icon-base {
   &:before {
-    font-family: "font-wso2";
+    font-family: "font-entgra";
     -webkit-font-smoothing: antialiased;
   }
   b {
@@ -29,7 +29,7 @@
   }
 }
 
-@mixin font-wso2($icon) {
+@mixin font-entgra($icon) {
   @extend %icon-base;
 
   

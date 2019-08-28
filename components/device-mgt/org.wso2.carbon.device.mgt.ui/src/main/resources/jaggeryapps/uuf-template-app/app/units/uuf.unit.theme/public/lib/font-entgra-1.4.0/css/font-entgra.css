@@ -16,20 +16,20 @@
 
 
 @font-face {
-	font-family:"font-wso2";
-	src:local("font-wso2"), url("../fonts/font-wso2.eot?cad2cbc31721ac5b0af964f18b9762cf");
-	src:local("font-wso2"),
-        url("../fonts/font-wso2.eot?cad2cbc31721ac5b0af964f18b9762cf#iefix") format("embedded-opentype"),
-		url("../fonts/font-wso2.woff2?cad2cbc31721ac5b0af964f18b9762cf") format("woff2"),
-		url("../fonts/font-wso2.woff?cad2cbc31721ac5b0af964f18b9762cf") format("woff"),
-		url("../fonts/font-wso2.ttf?cad2cbc31721ac5b0af964f18b9762cf") format("truetype"),
-		url("../fonts/font-wso2.svg?cad2cbc31721ac5b0af964f18b9762cf#font-wso2") format("svg");
+	font-family:"font-entgra";
+	src:local("font-entgra"), url("../fonts/font-entgra.eot?53b0f5f1215d9425db9d2fae9ed21730");
+	src:local("font-entgra"),
+        url("../fonts/font-entgra.eot?53b0f5f1215d9425db9d2fae9ed21730#iefix") format("embedded-opentype"),
+		url("../fonts/font-entgra.woff2?53b0f5f1215d9425db9d2fae9ed21730") format("woff2"),
+		url("../fonts/font-entgra.woff?53b0f5f1215d9425db9d2fae9ed21730") format("woff"),
+		url("../fonts/font-entgra.ttf?53b0f5f1215d9425db9d2fae9ed21730") format("truetype"),
+		url("../fonts/font-entgra.svg?53b0f5f1215d9425db9d2fae9ed21730#font-entgra") format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
 
 .fw, [class^="fw-"], [class*=" fw-"] {
-    font: normal normal normal 14px/1 font-wso2;
+    font: normal normal normal 14px/1 font-entgra;
     display: inline-block;
     font-weight: normal;
     font-style: normal;
