@@ -17,13 +17,13 @@
 
 @font-face {
 	font-family:"font-entgra";
-	src:local("font-entgra"), url("../fonts/font-entgra.eot?53b0f5f1215d9425db9d2fae9ed21730");
+	src:local("font-entgra"), url("../fonts/font-entgra.eot?3990d6a2bf7b820a842f9dc0774c990e");
 	src:local("font-entgra"),
-        url("../fonts/font-entgra.eot?53b0f5f1215d9425db9d2fae9ed21730#iefix") format("embedded-opentype"),
-		url("../fonts/font-entgra.woff2?53b0f5f1215d9425db9d2fae9ed21730") format("woff2"),
-		url("../fonts/font-entgra.woff?53b0f5f1215d9425db9d2fae9ed21730") format("woff"),
-		url("../fonts/font-entgra.ttf?53b0f5f1215d9425db9d2fae9ed21730") format("truetype"),
-		url("../fonts/font-entgra.svg?53b0f5f1215d9425db9d2fae9ed21730#font-entgra") format("svg");
+        url("../fonts/font-entgra.eot?3990d6a2bf7b820a842f9dc0774c990e#iefix") format("embedded-opentype"),
+		url("../fonts/font-entgra.woff2?3990d6a2bf7b820a842f9dc0774c990e") format("woff2"),
+		url("../fonts/font-entgra.woff?3990d6a2bf7b820a842f9dc0774c990e") format("woff"),
+		url("../fonts/font-entgra.ttf?3990d6a2bf7b820a842f9dc0774c990e") format("truetype"),
+		url("../fonts/font-entgra.svg?3990d6a2bf7b820a842f9dc0774c990e#font-entgra") format("svg");
 	font-weight:normal;
 	font-style:normal;
 }
@@ -946,6 +946,10 @@
 
 .fw-key:before {
     content:"\e647";
+}
+
+.fw-kiosk:before {
+    content:"\e746";
 }
 
 .fw-laptop:before {

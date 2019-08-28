@@ -2401,7 +2401,7 @@ a.list-group-item:hover {
 }
 
 .tree-view li > .icon {
-    font-family: "font-wso2";
+    font-family: "font-entgra";
     font-style: normal;
     background: #2c313b;
     color: #ffffff;
@@ -2686,7 +2686,7 @@ a.list-group-item:hover {
     text-align: center;
     background: #2c313b;
     color: #fff;
-    font-family: font-wso2;
+    font-family: font-entgra;
 }
 
 .checkbox > input[type=checkbox]:not(:checked) + .helper:after {
@@ -4433,7 +4433,7 @@ a.wr-side-panel-toggle-btn.selected {
     text-align: center;
     background: #008cc4;
     color: #fff;
-    font-family: font-wso2;
+    font-family: font-entgra;
 }
 
 .wr-input-control.checkbox input[type="checkbox"]:not(:checked) + .helper:after {
@@ -6624,7 +6624,7 @@ ul.tiles .icon {
 }
 
 .tree-view li > .icon {
-    font-family: 'font-wso2';
+    font-family: 'font-entgra';
     font-style: normal;
     background: #2c313b;
     color: #ffffff;
