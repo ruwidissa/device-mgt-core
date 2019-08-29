@@ -32,7 +32,7 @@ import java.util.List;
                                                        "the server")
 public class DeviceConfiguration {
     @ApiModelProperty(name = "deviceId", value = "ID of the device", required = true)
-    private int deviceId;
+    private String deviceId;
 
     @ApiModelProperty(name = "deviceType", value = "Type of the device", required = true)
     private String deviceType;
@@ -52,11 +52,11 @@ public class DeviceConfiguration {
     @ApiModelProperty(name = "deviceOwner", value = "Owner of the selected device", required = true)
     private String deviceOwner;
 
-    public int getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(int deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 

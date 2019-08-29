@@ -3352,7 +3352,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                                                    List<ConfigurationEntry> configurationEntries,
                                                    String deviceOwner) {
         DeviceConfiguration deviceConfiguration = new DeviceConfiguration();
-        deviceConfiguration.setDeviceId(device.getId());
+        deviceConfiguration.setDeviceId(device.getDeviceIdentifier());
         deviceConfiguration.setDeviceType(device.getType());
         deviceConfiguration.setTenantDomain(tenantDomain);
         deviceConfiguration.setConfigurationEntries(configurationEntries);
