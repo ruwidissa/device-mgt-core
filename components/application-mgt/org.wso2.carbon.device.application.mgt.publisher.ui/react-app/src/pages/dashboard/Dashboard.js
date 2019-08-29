@@ -178,7 +178,7 @@ class Dashboard extends React.Component {
                             ))}
                         </Switch>
                     </Content>
-                    <Footer style={{textAlign: 'center', marginBottom: 5 + "%"}}>
+                    <Footer style={{textAlign: 'center'}}>
                         ©2019 entgra.io
                     </Footer>
                 </Layout>

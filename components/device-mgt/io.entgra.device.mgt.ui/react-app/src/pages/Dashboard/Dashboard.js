@@ -17,27 +17,29 @@
  */
 
 import React from "react";
-import {Layout, Menu, Icon, Typography} from 'antd';
+import {Layout, Menu, Icon} from 'antd';
 import {Switch, Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes"
 import {Redirect} from 'react-router'
-import "../../App.css";
+import "./Dashboard.css";
 import {withConfigContext} from "../../context/ConfigContext";
 import Logout from "./Logout/Logout";
 
 const {Header, Content, Footer, Sider} = Layout;
 const {SubMenu} = Menu;
 
-const {Title} = Typography;
-
 class Dashboard extends React.Component {
     constructor(props) {
         super(props);
+
+        const mobileWidth = (window.innerWidth<=768 ? '0' : '80');
+
         this.state = {
             routes: props.routes,
             selectedKeys: [],
             deviceTypes: [],
             isNavBarCollapsed: false,
+            mobileWidth
         };
         this.logo = this.props.context.theme.logo;
     }
@@ -52,13 +54,17 @@ class Dashboard extends React.Component {
         return (
             <div>
                 <Layout className="layout" >
+
                     <Sider
                         trigger={null}
                         collapsible
-                        collapsed={this.state.isNavBarCollapsed}>
+                        collapsed={this.state.isNavBarCollapsed}
+                        collapsedWidth={this.state.mobileWidth}
+                    >
+
                         <div className="logo-image">
-                            <img alt="logo" src={this.logo}/>
-                            <span className="brand">Entgra</span>
+                            <Link to="/entgra/devices"><img alt="logo" src={this.logo}/>
+                            <span className="brand">Entgra</span></Link>
                         </div>
                         <Menu theme="dark" mode="inline" defaultSelectedKeys={['devices']}>
                            <Menu.Item key="devices">
@@ -80,7 +86,9 @@ class Dashboard extends React.Component {
                                 </Link>
                             </Menu.Item>
                         </Menu>
+
                     </Sider>
+
                     <Layout>
                         <Header style={{background: '#fff', padding: 0}}>
                             <div className="trigger">
@@ -89,19 +97,18 @@ class Dashboard extends React.Component {
                                 onClick={this.toggle}
                             />
                             </div>
+
                             <Menu
                                 theme="light"
                                 mode="horizontal"
                                 style={{lineHeight: '64px'}}
                             >
                                 <Menu.Item key="trigger">
-
                                 </Menu.Item>
                                 <SubMenu className="profile"
                                          title={
                                              <span className="submenu-title-wrapper">
                                      <Icon type="user"/>
-                                         Profile
                                      </span>
                                          }
                                 >
@@ -110,6 +117,7 @@ class Dashboard extends React.Component {
 
                             </Menu>
                         </Header>
+
                         <Content style={{marginTop: 2}}>
                             <Switch>
                                 <Redirect exact from="/entgra" to="/entgra/devices"/>
@@ -118,9 +126,11 @@ class Dashboard extends React.Component {
                                 ))}
                             </Switch>
                         </Content>
+
                         <Footer style={{textAlign: 'center'}}>
                             ©2019 entgra.io
                         </Footer>
+
                     </Layout>
                 </Layout>
             </div>

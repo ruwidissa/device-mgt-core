@@ -46,7 +46,7 @@
     font-size: 27px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 660px) {
 
     .web-layout{
         visibility: hidden;
@@ -77,16 +77,31 @@
 
 }
 
-@media screen and (max-height: 500px) {
+@media screen and (max-height: 350px) {
+
     .mobile-menu-button{
         margin-top: 2%;
     }
     .dashboard-body{
         margin-top: 9%;
     }
+
 }
 
+@media only screen and (min-width: 760px) {
 
+    @media screen and (max-width: 1030px) {
 
+        Footer{
+            margin-bottom: 43%;
+        }
 
+    }
+}
 
+@media only screen and (min-width: 1030px) {
+
+        Footer{
+            margin-bottom: 5%;
+        }
+}
