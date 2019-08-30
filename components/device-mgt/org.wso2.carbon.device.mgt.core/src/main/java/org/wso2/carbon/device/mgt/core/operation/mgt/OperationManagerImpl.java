@@ -237,6 +237,7 @@ public class OperationManagerImpl implements OperationManager {
                 }
 
                 int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
+                operation.setId(operationId);
 
                 boolean isScheduled = false;
                 NotificationStrategy notificationStrategy = getNotificationStrategy();
