@@ -30,7 +30,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents implementation of GroupDAO
@@ -62,6 +64,62 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         } finally {
             GroupManagementDAOUtil.cleanupResources(stmt, null);
         }
+    }
+
+    public boolean addGroupProperties(DeviceGroup deviceGroup, int groupId, int tenantId)
+            throws GroupManagementDAOException {
+        boolean status;
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            stmt = conn.prepareStatement(
+                    "INSERT INTO GROUP_PROPERTIES(GROUP_ID, PROPERTY_NAME, " +
+                    "PROPERTY_VALUE, TENANT_ID) VALUES (?, ?, ?, ?)");
+            for (Map.Entry<String, String> entry : deviceGroup.getGroupProperties().entrySet()) {
+                stmt.setInt(1, groupId);
+                stmt.setString(2, entry.getKey());
+                stmt.setString(3, entry.getValue());
+                stmt.setInt(4, tenantId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            status = true;
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding properties for group '" +
+                         deviceGroup.getName() + "' values : " + deviceGroup.getGroupProperties();
+            throw new GroupManagementDAOException(msg, e);
+        } finally {
+            GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return status;
+    }
+
+    public boolean updateGroupProperties(DeviceGroup deviceGroup, int groupId, int tenantId)
+            throws GroupManagementDAOException {
+        boolean status;
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            stmt = conn.prepareStatement(
+                    "UPDATE GROUP_PROPERTIES SET PROPERTY_VALUE = ? WHERE GROUP_ID = ? AND " +
+                    "TENANT_ID = ? AND PROPERTY_NAME = ?");
+            for (Map.Entry<String, String> entry : deviceGroup.getGroupProperties().entrySet()) {
+                stmt.setString(1, entry.getValue());
+                stmt.setInt(2, groupId);
+                stmt.setInt(3, tenantId);
+                stmt.setString(4, entry.getKey());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            status = true;
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding properties for group '" +
+                         deviceGroup.getName() + "' values : " + deviceGroup.getGroupProperties();
+            throw new GroupManagementDAOException(msg, e);
+        } finally {
+            GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return status;
     }
 
     @Override
@@ -126,6 +184,49 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         } finally {
             GroupManagementDAOUtil.cleanupResources(stmt, null);
         }
+    }
+
+    public void deleteAllGroupProperties(int groupId, int tenantId)
+            throws GroupManagementDAOException {
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            stmt = conn.prepareStatement(
+                    "DELETE GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?");
+            stmt.setInt(1, groupId);
+            stmt.setInt(2, tenantId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting group ID : " + groupId;
+            throw new GroupManagementDAOException(msg, e);
+        } finally {
+            GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    public Map<String,String> getAllGroupProperties(int groupId, int tenantId)
+            throws GroupManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        Map<String,String> properties = new HashMap<String, String>();
+        try {
+            Connection conn = GroupManagementDAOFactory.getConnection();
+            stmt = conn.prepareStatement(
+                    "SELECT PROPERTY_NAME, PROPERTY_VALUE FROM GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?");
+            stmt.setInt(1, groupId);
+            stmt.setInt(2, tenantId);
+            resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                properties.put(resultSet.getString("PROPERTY_NAME"),
+                               resultSet.getString("PROPERTY_VALUE"));
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting group ID : " + groupId;
+            throw new GroupManagementDAOException(msg, e);
+        } finally {
+            GroupManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return properties;
     }
 
     @Override
