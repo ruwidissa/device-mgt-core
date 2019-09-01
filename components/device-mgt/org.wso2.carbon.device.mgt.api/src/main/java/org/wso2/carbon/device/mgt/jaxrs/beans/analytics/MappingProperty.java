@@ -18,29 +18,20 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Each attribute definition
- * Attributes : name, type
+ * Mapping property data
+ * Attributes : name, data type and mapping value name
  */
-public class Attribute {
-    @ApiModelProperty(value = "Event attribute name")
-    @JsonProperty("name")
+public class MappingProperty {
+    @ApiModelProperty(value = "Property name")
     private String name;
-    @ApiModelProperty(value = "Event attribute data type")
-    @JsonProperty("type")
-    private AttributeDataType type;
+    @ApiModelProperty(value = "Property data type")
+    private String type;
+    @ApiModelProperty(value = "Property mapping value name")
+    private String valueOf;
 
-    public Attribute() {
-
-    }
-
-    public Attribute(String name, AttributeDataType attributeDataType) {
-        this.name = name;
-        this.type = attributeDataType;
-    }
     public String getName() {
         return name;
     }
@@ -49,12 +40,20 @@ public class Attribute {
         this.name = name;
     }
 
-    public AttributeDataType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(AttributeDataType type) {
+    public void setType(String type) {
         this.type = type;
     }
-}
 
+    public String getValueOf() {
+        return valueOf;
+    }
+
+    public void setValueOf(String valueOf) {
+        this.valueOf = valueOf;
+    }
+
+}

@@ -18,15 +18,31 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
-/**
- * This hold the definition of the attribute type for the attributes.
- */
-public enum AttributeType {
-    STRING, LONG, BOOL, INT, FLOAT, DOUBLE;
+import io.swagger.annotations.ApiModelProperty;
 
-    @Override
-    public String toString() {
-        return super.toString().toLowerCase();
+/**
+ * Execution plan definition including :
+ * Attributes : Name and Plan data.
+ */
+public class SiddhiExecutionPlan {
+    @ApiModelProperty(value = "Execution plan name")
+    private String executionPlanName;
+    @ApiModelProperty(value = "Execution plan")
+    private String executionPlanData;
+
+    public String getExecutionPlanName() {
+        return executionPlanName;
+    }
+
+    public void setExecutionPlanName(String executionPlanName) {
+        this.executionPlanName = executionPlanName;
+    }
+
+    public String getExecutionPlanData() {
+        return executionPlanData;
+    }
+
+    public void setExecutionPlanData(String executionPlanData) {
+        this.executionPlanData = executionPlanData;
     }
 }
-
