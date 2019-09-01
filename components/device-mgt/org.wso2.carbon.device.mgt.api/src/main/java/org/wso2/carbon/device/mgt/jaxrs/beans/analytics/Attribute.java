@@ -31,15 +31,15 @@ public class Attribute {
     private String name;
     @ApiModelProperty(value = "Event attribute data type")
     @JsonProperty("type")
-    private AttributeDataType type;
+    private AttributeType type;
 
     public Attribute() {
 
     }
 
-    public Attribute(String name, AttributeDataType attributeDataType) {
+    public Attribute(String name, AttributeType attributeType) {
         this.name = name;
-        this.type = attributeDataType;
+        this.type = attributeType;
     }
     public String getName() {
         return name;
@@ -49,11 +49,11 @@ public class Attribute {
         this.name = name;
     }
 
-    public AttributeDataType getType() {
+    public AttributeType getType() {
         return type;
     }
 
-    public void setType(AttributeDataType type) {
+    public void setType(AttributeType type) {
         this.type = type;
     }
 }

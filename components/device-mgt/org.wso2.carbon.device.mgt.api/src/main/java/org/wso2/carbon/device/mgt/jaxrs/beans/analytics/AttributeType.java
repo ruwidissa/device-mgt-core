@@ -21,7 +21,7 @@ package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 /**
  * Attribute data types
  */
-public enum AttributeDataType {
+public enum AttributeType {
     STRING, LONG, BOOL, INT, FLOAT, DOUBLE;
 
     @Override
