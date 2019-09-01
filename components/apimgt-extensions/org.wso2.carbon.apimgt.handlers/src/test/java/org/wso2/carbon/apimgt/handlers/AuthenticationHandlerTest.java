@@ -92,8 +92,6 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.MDM_SIGNATURE, "some cert");
         setMockClient();
-        this.mockClient.setResponse(getDCRResponse());
-        this.mockClient.setResponse(getAccessTokenReponse());
         this.mockClient.setResponse(getValidationResponse());
         boolean response = this.handler.handleRequest(createSynapseMessageContext("<empty/>", this.synapseConfiguration,
                 transportHeaders, "https://test.com/testservice/device-mgt/testdevice"));
@@ -107,7 +105,6 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.PROXY_MUTUAL_AUTH_HEADER, "Test Header");
         setMockClient();
-        this.mockClient.setResponse(getAccessTokenReponse());
         this.mockClient.setResponse(getValidationResponse());
         boolean response = this.handler.handleRequest(createSynapseMessageContext("<empty/>", this.synapseConfiguration,
                 transportHeaders, "https://test.com/testservice/device-mgt/testdevice"));
@@ -121,7 +118,6 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.MUTUAL_AUTH_HEADER, "Test Header");
         setMockClient();
-        this.mockClient.setResponse(getAccessTokenReponse());
         this.mockClient.setResponse(getValidationResponse());
         MessageContext messageContext = createSynapseMessageContext("<empty/>", this.synapseConfiguration,
                 transportHeaders, "https://test.com/testservice/device-mgt/testdevice");
@@ -141,7 +137,6 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.ENCODED_PEM, "encoded pem");
         setMockClient();
-        this.mockClient.setResponse(getAccessTokenReponse());
         this.mockClient.setResponse(getValidationResponse());
         MessageContext messageContext = createSynapseMessageContext("<empty/>", this.synapseConfiguration,
                 transportHeaders, "https://test.com/testservice/device-mgt/testdevice");
@@ -156,7 +151,6 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.ENCODED_PEM, "encoded pem");
         setMockClient();
-        this.mockClient.setResponse(getAccessTokenReponse());
         this.mockClient.setResponse(getInvalidResponse());
         MessageContext messageContext = createSynapseMessageContext("<empty/>", this.synapseConfiguration,
                 transportHeaders, "https://test.com/testservice/device-mgt/testdevice");
@@ -185,7 +179,6 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.ENCODED_PEM, "encoded pem");
         setMockClient();
-        this.mockClient.setResponse(getAccessTokenReponse());
         this.mockClient.setResponse(null);
         MessageContext messageContext = createSynapseMessageContext("<empty/>", this.synapseConfiguration,
                 transportHeaders, "https://test.com/testservice/device-mgt/testdevice");

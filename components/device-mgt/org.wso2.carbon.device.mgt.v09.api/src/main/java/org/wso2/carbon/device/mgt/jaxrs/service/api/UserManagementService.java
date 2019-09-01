@@ -147,6 +147,7 @@ import java.util.List;
                         key = "perm:get-activity",
                         permissions = {"/device-mgt/devices/owning-device/view"}
                 )
+
         }
 )
 @Path("/users")

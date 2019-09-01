@@ -8053,7 +8053,7 @@ a.list-group-item:hover {
 }
 
 .tree-view li > .icon {
-  font-family: "font-wso2";
+  font-family: "font-entgra";
   font-style: normal;
   background: #008cc4;
   color: #ffffff;
@@ -8295,7 +8295,7 @@ a.list-group-item:hover {
   text-align: center;
   background: #004675;
   color: #fff;
-  font-family: font-wso2;
+  font-family: font-entgra;
 }
 .checkbox > input[type=checkbox]:not(:checked) + .helper:after {
   display: none;

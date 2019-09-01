@@ -42,7 +42,7 @@ function onRequest(context) {
 	var displayData = {};
 
 	var restAPIEndpoint = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"]
-		+ "/device-types/config/" + deviceType;
+		+ "/device-types/" + deviceType;
 	displayData.deviceType = deviceType;
 	displayData.tenantDomain = tenantDomain;
 	serviceInvokers.XMLHttp.get(
