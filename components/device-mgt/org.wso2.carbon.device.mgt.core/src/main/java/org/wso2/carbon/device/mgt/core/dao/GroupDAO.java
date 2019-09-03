@@ -23,6 +23,7 @@ import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface represents the key operations associated with persisting group related information.
@@ -37,6 +38,49 @@ public interface GroupDAO {
      * @throws GroupManagementDAOException
      */
     int addGroup(DeviceGroup deviceGroup, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Add properties for device group.
+     * Note that groupId parameter is considered seperately due to the groupId parameter passed with
+     * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
+     *
+     * @param deviceGroup to be added.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+    boolean addGroupProperties(DeviceGroup deviceGroup, int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Update properties for device group.
+     * Note that groupId parameter is considered seperately due to the groupId parameter passed with
+     * device group Payload is ignored in the add/update logic instead the internal groupId reference is used.
+     *
+     * @param deviceGroup to be updated.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+    boolean updateGroupProperties(DeviceGroup deviceGroup, int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Remove properties for device group.
+     *
+     * @param groupId to be deleted.
+     * @param tenantId    of the group.
+     * @throws GroupManagementDAOException
+     */
+    void deleteAllGroupProperties(int groupId, int tenantId) throws GroupManagementDAOException;
+
+    /**
+     * Retrives all properties stored against a group.
+     *
+     * @param groupId to be deleted.
+     * @param tenantId    of the group.
+     * @return sql execution result.
+     * @throws GroupManagementDAOException
+     */
+    Map<String,String> getAllGroupProperties(int groupId, int tenantId) throws GroupManagementDAOException;
 
     /**
      * Update an existing Device Group.
