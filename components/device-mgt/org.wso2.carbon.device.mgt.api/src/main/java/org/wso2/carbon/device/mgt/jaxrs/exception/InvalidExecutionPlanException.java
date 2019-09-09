@@ -18,19 +18,31 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.exception;
 
-public class InvalidExecutionPlanException extends Exception{
-    private String errorMessage;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
-    public String getErrorMessage() {
-        return errorMessage;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+public class InvalidExecutionPlanException extends WebApplicationException {
+    private String message;
+    private static final long serialVersionUID = 7583096344745990515L;
+
+    public InvalidExecutionPlanException(ErrorResponse error) {
+        super(Response.status(Response.Status.NOT_FOUND).entity(error).build());
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public InvalidExecutionPlanException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.NOT_FOUND)
+                      .entity(errorDTO)
+                      .header(Constants.DeviceConstants.HEADER_CONTENT_TYPE, Constants.DeviceConstants.APPLICATION_JSON)
+                      .build());
+        message = errorDTO.getDescription();
     }
 
-    public InvalidExecutionPlanException(String msg) {
-        super(msg);
-        setErrorMessage(msg);
+    @Override
+    public String getMessage() {
+        return message;
     }
+
 }

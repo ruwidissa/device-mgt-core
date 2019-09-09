@@ -15,44 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
 import io.swagger.annotations.ApiModelProperty;
 
-/**
- * Mapping property data
- * Attributes : name, data type and mapping value name
- */
-public class MappingProperty {
-    @ApiModelProperty(value = "Property name")
-    private String name;
-    @ApiModelProperty(value = "Property data type")
-    private String type;
-    @ApiModelProperty(value = "Property mapping value name")
-    private String valueOf;
+public class EventReceiver {
+    @ApiModelProperty(value = "Stream definition")
+    private String definition;
 
-    public String getName() {
-        return name;
+    public String getDefinition() {
+        return definition;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDefinition(String definition) {
+        this.definition = definition;
     }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getValueOf() {
-        return valueOf;
-    }
-
-    public void setValueOf(String valueOf) {
-        this.valueOf = valueOf;
-    }
-
 }

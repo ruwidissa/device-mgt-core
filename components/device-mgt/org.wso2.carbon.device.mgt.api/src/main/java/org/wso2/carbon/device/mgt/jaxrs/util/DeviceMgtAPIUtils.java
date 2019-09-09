@@ -639,16 +639,8 @@ public class DeviceMgtAPIUtils {
         return eventStreamPersistenceAdminServiceStub;
     }
 
-    /**
-     *
-     * @return
-     * @throws AxisFault
-     * @throws UserStoreException
-     * @throws JWTClientException
-     */
     public static EventProcessorAdminServiceStub getEventProcessorAdminServiceStub()
             throws AxisFault, UserStoreException, JWTClientException {
-        // Send alert to event-processing
         EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub(
                 Utils.replaceSystemProperty(DAS_ADMIN_SERVICE_EP + EVENT_PROCESSOR_CONTEXT));
         Options eventProcessorOption = eventProcessorAdminServiceStub._getServiceClient().getOptions();

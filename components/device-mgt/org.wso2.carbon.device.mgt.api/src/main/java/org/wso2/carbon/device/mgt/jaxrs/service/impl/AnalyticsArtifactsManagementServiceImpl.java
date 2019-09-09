@@ -1,28 +1,22 @@
 /*
- *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
- *   Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License.
- *   You may obtain a copy of the License at
+ * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing,
- *   software distributed under the License is distributed on an
- *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
- *   specific language governing permissions and limitations
- *   under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.Stub;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterMappingConfiguration;
@@ -31,14 +25,15 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterConfiguration;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterProperty;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MessageFormat;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.SiddhiExecutionPlan;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventPublisher;
+import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventReceiver;
+import org.wso2.carbon.device.mgt.jaxrs.exception.ErrorDTO;
 import org.wso2.carbon.device.mgt.jaxrs.exception.InvalidExecutionPlanException;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.AnalyticsManagementService;
+import org.wso2.carbon.device.mgt.jaxrs.service.api.AnalyticsArtifactsManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Adapter;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeLists;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventStream;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
-import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.types.BasicOutputAdapterPropertyDto;
 import org.wso2.carbon.event.publisher.stub.types.EventPublisherConfigurationDto;
@@ -52,70 +47,97 @@ import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Stub;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.validation.Valid;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.List;
 
 /**
- * This class is used to create endpoints to serve the deployment of streams, adapters, siddhi
- * execution plans to the DAS
+ * This class is used to create endpoints to serve the deployment of streams, publishers, receivers,
+ * siddhi scripts to the Analytics server as Artifacts
  */
-@Path("/analytics")
-public class AnalyticsManagementServiceImpl implements AnalyticsManagementService {
-    private static final Log log = LogFactory.getLog(AnalyticsManagementServiceImpl.class);
+@Path("/analytics/artifacts")
+public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifactsManagementService {
+    private static final Log log = LogFactory.getLog(AnalyticsArtifactsManagementServiceImpl.class);
 
     /**
-     * @param eventStream EventStream object with the properties of the stream
+     * @param stream EventStream object with the properties of the stream
      * @return A status code depending on the code result
-     * Function - Deploy a event stream
+     * Function - Used to deploy stream as an artifact using a String
      */
     @Override
     @POST
-    @Path("/event")
-    public Response deployEventDefinition(@Valid EventStream eventStream) {
+    @Path("/stream/{id}")
+    public Response deployEventDefinitionAsString(@PathParam("id") String id,
+                                                  @QueryParam("isEdited") boolean isEdited,
+                                                  @Valid EventStream stream) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        EventAttributeLists eventAttributes = eventStream.getEventAttributeLists();
+        EventStreamAdminServiceStub eventStreamAdminServiceStub = null;
+        try {
+            String streamDefinition = new String(stream.getDefinition().getBytes(), StandardCharsets.UTF_8);
+            eventStreamAdminServiceStub = DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
+            if (!isEdited) {
+                eventStreamAdminServiceStub.addEventStreamDefinitionAsString(streamDefinition);
+            } else {
+                // Find and edit stream
+                if (eventStreamAdminServiceStub.getStreamDetailsForStreamId(id) != null) {
+                    eventStreamAdminServiceStub.editEventStreamDefinitionAsString(streamDefinition, id);
+                }
+            }
+            return Response.ok().build();
+        } catch (AxisFault e) {
+            log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (RemoteException e) {
+            log.error("Failed to connect with the remote services for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (JWTClientException e) {
+            log.error("Failed to generate jwt token for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserStoreException e) {
+            log.error("Failed to connect with the user store for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } finally {
+            cleanup(eventStreamAdminServiceStub);
+        }
+    }
+
+    /**
+     * @param stream EventStream object with the properties of the stream
+     * @return A status code depending on the code result
+     * Function - Used to deploy stream as an artifact using a DTO
+     */
+    @Override
+    @POST
+    @Path("/stream")
+    public Response deployEventDefinitionAsDto(@Valid EventStream stream) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         // Categorize attributes to three lists depending on their type
-        List<Attribute> eventMetaAttributes = eventAttributes.getMetaAttributes();
-        List<Attribute> eventPayloadAttributes = eventAttributes.getPayloadAttributes();
-        List<Attribute> eventCorrelationAttributes = eventAttributes.getCorrelationAttributes();
+        List<Attribute> metaData = stream.getMetaData();
+        List<Attribute> payloadData = stream.getPayloadData();
+        List<Attribute> correlationData = stream.getCorrelationData();
 
         try {
             /* Conditions
              * - At least one list should always be not null
              */
-            if (eventStream.getEventAttributeLists() == null ||
-                (eventMetaAttributes == null && eventCorrelationAttributes == null &&
-                 eventPayloadAttributes == null)) {
-                log.error("Invalid payload: eventAttributeLists");
+            if (metaData == null && correlationData == null && payloadData == null) {
+                log.error("Invalid payload: event attributes");
                 return Response.status(Response.Status.BAD_REQUEST).build();
 
             } else {
-                String streamName = eventStream.getStreamName();
-                String streamVersion = eventStream.getStreamVersion();
-                String streamDefinition = eventStream.getStreamDefinition();
                 // Publish the event stream
-                publishStream(streamName, streamVersion, streamDefinition, eventMetaAttributes,
-                              eventPayloadAttributes, eventCorrelationAttributes);
-                try {
-                    /*
-                     * Create a new tenant and if that tenant is not the super tenant execute the publish
-                     * function for the new tenant
-                     */
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                    if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        publishStream(streamName, streamVersion, streamDefinition, eventMetaAttributes,
-                                      eventPayloadAttributes, eventCorrelationAttributes);
-                    }
-                } finally {
-                    // End the new tenant flow
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
+                publishStream(stream, metaData, correlationData, payloadData);
                 return Response.ok().build();
             }
         } catch (AxisFault e) {
@@ -134,14 +156,53 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
     }
 
     /**
-     * @param receiver Receiver definition data
-     * @return a status code depending on the code execution
-     * * Function - Deploy a event receiver
+     * @param name     Receiver name
+     * @param isEdited If receiver is created or edited
+     * @param receiver Receiver object with the properties of the receiver
+     * @return A status code depending on the code result
+     * Function - Used to deploy receiver as an artifact using a String
+     */
+    @Override
+    @POST
+    @Path("/receiver/{name}")
+    public Response deployEventReceiverAsString(@PathParam("name") String name,
+                                                @QueryParam("isEdited") boolean isEdited,
+                                                @Valid EventReceiver receiver) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        EventReceiverAdminServiceStub eventReceiverAdminServiceStub;
+        try {
+            String receiverDefinition = receiver.getDefinition();
+            eventReceiverAdminServiceStub = DeviceMgtAPIUtils.getEventReceiverAdminServiceStub();
+            if (!isEdited) {
+                eventReceiverAdminServiceStub.deployEventReceiverConfiguration(receiverDefinition);
+            } else {
+                eventReceiverAdminServiceStub.editActiveEventReceiverConfiguration(receiverDefinition, name);
+            }
+        } catch (AxisFault e) {
+            log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (RemoteException e) {
+            log.error("Failed to connect with the remote services for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (JWTClientException e) {
+            log.error("Failed to generate jwt token for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserStoreException e) {
+            log.error("Failed to connect with the user store for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.ok().entity(name).build();
+    }
+
+    /**
+     * @param receiver Receiver object with the properties of the receiver
+     * @return A status code depending on the code result
+     * Function - Used to deploy receiver as an artifact using a DTO
      */
     @Override
     @POST
     @Path("/receiver")
-    public Response deployEventReceiver(Adapter receiver) {
+    public Response deployEventReceiverAsDto(@Valid Adapter receiver) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String receiverName = receiver.getAdapterName();
         String adapterType = receiver.getAdapterType().toStringFormatted();
@@ -173,33 +234,16 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
             if ((customMapping &&
                  (inputMappingProperties == null && namespaceMappingProperties == null) &&
                  (correlationMappingProperties == null && payloadMappingProperties == null &&
-                  metaMappingProperties == null)) ||
-                messageFormat == null) {
-                log.error("Invalid mapping payload");
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                  metaMappingProperties == null)) || messageFormat == null) {
+                String errMsg = "Invalid mapping payload";
+                log.error(errMsg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
             }
             String eventStreamWithVersion = receiver.getEventStreamWithVersion();
 
             publishReceiver(receiverName, adapterType, adapterProperties, customMapping, inputMappingProperties,
                             namespaceMappingProperties, correlationMappingProperties, payloadMappingProperties,
                             metaMappingProperties, messageFormat, eventStreamWithVersion);
-            try {
-                /*
-                 * Create a new tenant and if that tenant is not the super tenant execute the publish
-                 * function for the new tenant
-                 */
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    publishReceiver(receiverName, adapterType, adapterProperties, customMapping, inputMappingProperties,
-                                    namespaceMappingProperties, correlationMappingProperties, payloadMappingProperties,
-                                    metaMappingProperties, messageFormat, eventStreamWithVersion);
-                }
-            } finally {
-                // End the new tenant flow
-                PrivilegedCarbonContext.endTenantFlow();
-            }
             return Response.ok().build();
         } catch (AxisFault e) {
             log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
@@ -217,13 +261,55 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
     }
 
     /**
-     * @param publisher Publisher definition
-     * @return a status code depending on the code execution
+     * @param name      Publisher name
+     * @param isEdited  If receiver is created or edited
+     * @param publisher Publisher object with the properties of the publisher
+     * @return A status code depending on the code result
+     * Function - Used to deploy publisher as an artifact using a String
+     */
+    @Override
+    @POST
+    @Path("/publisher/{name}")
+    public Response deployEventPublisherAsString(@PathParam("name") String name,
+                                                 @QueryParam("isEdited") boolean isEdited,
+                                                 @Valid EventPublisher publisher) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        EventPublisherAdminServiceStub eventPublisherAdminServiceStub;
+
+        try {
+            String publisherDefinition = publisher.getDefinition();
+
+            eventPublisherAdminServiceStub = DeviceMgtAPIUtils.getEventPublisherAdminServiceStub();
+            if (!isEdited) {
+                eventPublisherAdminServiceStub.deployEventPublisherConfiguration(publisherDefinition);
+            } else {
+                eventPublisherAdminServiceStub.editActiveEventPublisherConfiguration(publisherDefinition, name);
+            }
+        } catch (AxisFault e) {
+            log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (RemoteException e) {
+            log.error("Failed to connect with the remote services for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (JWTClientException e) {
+            log.error("Failed to generate jwt token for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserStoreException e) {
+            log.error("Failed to connect with the user store for tenantDomain: " + tenantDomain, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.ok().entity(publisher).build();
+    }
+
+    /**
+     * @param publisher Publisher object with the properties of the publisher
+     * @return A status code depending on the code result
+     * Function - Used to deploy publisher as an artifact using a DTO
      */
     @Override
     @POST
     @Path("/publisher")
-    public Response deployEventPublisher(@Valid Adapter publisher) {
+    public Response deployEventPublisherAsDto(@Valid Adapter publisher) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String publisherName = publisher.getAdapterName();
         String adapterType = publisher.getAdapterType().toStringFormatted();
@@ -254,10 +340,10 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
             if ((customMapping &&
                  (inputMappingProperties == null && inputMappingString == null) &&
                  (correlationMappingProperties == null && payloadMappingProperties == null &&
-                  metaMappingProperties == null)) ||
-                messageFormat == null) {
-                log.error("Invalid mapping payload");
-                return Response.status(Response.Status.BAD_REQUEST).build();
+                  metaMappingProperties == null)) || messageFormat == null) {
+                String errMsg = "Invalid mapping payload";
+                log.error(errMsg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
             }
             String eventStreamWithVersion = publisher.getEventStreamWithVersion();
 
@@ -265,24 +351,6 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
                     , inputMappingString, inputMappingProperties, correlationMappingProperties
                     , payloadMappingProperties, metaMappingProperties, messageFormat
                     , eventStreamWithVersion);
-            try {
-                /*
-                 * Create a new tenant and if that tenant is not the super tenant execute the publish
-                 * function for the new tenant
-                 */
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    publishPublisher(publisherName, adapterType, adapterProperties, customMapping
-                            , inputMappingString, inputMappingProperties, correlationMappingProperties
-                            , payloadMappingProperties, metaMappingProperties, messageFormat
-                            , eventStreamWithVersion);
-                }
-            } finally {
-                // End the new tenant flow
-                PrivilegedCarbonContext.endTenantFlow();
-            }
             return Response.ok().build();
         } catch (AxisFault e) {
             log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
@@ -300,33 +368,21 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
     }
 
     /**
-     * @param executionPlan Siddhi execution plan definition
+     * @param name     Siddhi plan name
+     * @param isEdited If receiver is created or edited
+     * @param plan     Siddhi plan definition
      * @return a status code depending on the code execution
+     * Function - Used to deploy Siddhi script as an artifact using a String
      */
     @Override
     @POST
-    @Path("/executable")
-    public Response deploySiddhiExecutableScript(@Valid SiddhiExecutionPlan executionPlan) {
+    @Path("/siddhi-script/{name}")
+    public Response deploySiddhiExecutableScript(@PathParam("name") String name,
+                                                 @QueryParam("isEdited") boolean isEdited,
+                                                 @Valid SiddhiExecutionPlan plan) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
-            publishSiddhiExecutionPlan(executionPlan.getExecutionPlanName(),
-                                       executionPlan.getExecutionPlanData());
-            try {
-                /*
-                 * Create a new tenant and if that tenant is not the super tenant execute the publish
-                 * function for the new tenant
-                 */
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                        MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    publishSiddhiExecutionPlan(executionPlan.getExecutionPlanName(),
-                                               executionPlan.getExecutionPlanData());
-                }
-            } finally {
-                // End the new tenant flow
-                PrivilegedCarbonContext.endTenantFlow();
-            }
+            publishSiddhiExecutionPlan(name, isEdited, plan.getDefinition());
             return Response.ok().build();
         } catch (AxisFault e) {
             log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
@@ -334,45 +390,42 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
         } catch (RemoteException e) {
             log.error("Failed to connect with the remote services for tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (InvalidExecutionPlanException e) {
+            log.error("Invalid Execution plan: " + tenantDomain, e);
+            return e.getResponse();
         } catch (JWTClientException e) {
             log.error("Failed to generate jwt token for tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (UserStoreException e) {
             log.error("Failed to connect with the user store for tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (InvalidExecutionPlanException e) {
-            log.error("Invalid Execution plan: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     /**
-     * @param streamName                 Name of the stream
-     * @param streamVersion              Version of the stream
-     * @param streamDefinition           Definition of the stream
-     * @param eventMetaAttributes        Meta attributes of the stream
-     * @param eventPayloadAttributes     Payload attributes of the stream
-     * @param eventCorrelationAttributes Correlation attributes of the stream
+     * @param stream          Stream definition
+     * @param metaData        Meta attributes of the stream
+     * @param correlationData Correlation attributes of the stream
+     * @param payloadData     Payload attributes of the stream
      * @throws RemoteException    exception that may occur during a remote method call
      * @throws UserStoreException exception that may occur during JWT token generation
      * @throws JWTClientException exception that may occur during connecting to client store
      */
-    private void publishStream(String streamName, String streamVersion, String streamDefinition,
-                               List<Attribute> eventMetaAttributes,
-                               List<Attribute> eventPayloadAttributes,
-                               List<Attribute> eventCorrelationAttributes)
+    private void publishStream(EventStream stream, List<Attribute> metaData,
+                               List<Attribute> correlationData, List<Attribute> payloadData)
             throws RemoteException, UserStoreException, JWTClientException {
         EventStreamAdminServiceStub eventStreamAdminServiceStub =
                 DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
         try {
             EventStreamDefinitionDto eventStreamDefinitionDto = new EventStreamDefinitionDto();
-            eventStreamDefinitionDto.setName(streamName);
-            eventStreamDefinitionDto.setVersion(streamVersion);
-            eventStreamDefinitionDto.setDescription(streamDefinition);
-            eventStreamDefinitionDto.setMetaData(addEventAttributesToDto(eventMetaAttributes));
-            eventStreamDefinitionDto.setPayloadData(addEventAttributesToDto(eventPayloadAttributes));
-            eventStreamDefinitionDto.setCorrelationData(addEventAttributesToDto(eventCorrelationAttributes));
-            String streamId = streamName + ":" + streamVersion;
+            eventStreamDefinitionDto.setName(stream.getName());
+            eventStreamDefinitionDto.setVersion(stream.getVersion());
+            eventStreamDefinitionDto.setNickName(stream.getNickName());
+            eventStreamDefinitionDto.setDescription(stream.getDescription());
+            eventStreamDefinitionDto.setMetaData(addEventAttributesToDto(metaData));
+            eventStreamDefinitionDto.setPayloadData(addEventAttributesToDto(payloadData));
+            eventStreamDefinitionDto.setCorrelationData(addEventAttributesToDto(correlationData));
+            String streamId = stream.getName() + ":" + stream.getVersion();
             if (eventStreamAdminServiceStub.getStreamDefinitionDto(streamId) != null) {
                 eventStreamAdminServiceStub.editEventStreamDefinitionAsDto(eventStreamDefinitionDto, streamId);
             } else {
@@ -558,48 +611,35 @@ public class AnalyticsManagementServiceImpl implements AnalyticsManagementServic
     }
 
     /**
-     * @param executionPlanName Siddhi execution plan name
-     * @param executionPlanData Siddhi execution plan
+     * @param name     plan name
+     * @param isEdited is plan edited
+     * @param plan     plan data
      * @throws RemoteException               exception that may occur during a remote method call
      * @throws UserStoreException            exception that may occur during JWT token generation
      * @throws JWTClientException            exception that may occur during connecting to client store
      * @throws InvalidExecutionPlanException exception that may occur if execution plan validation fails
      */
-    private void publishSiddhiExecutionPlan(String executionPlanName, String executionPlanData)
+    private void publishSiddhiExecutionPlan(String name, boolean isEdited,
+                                            String plan)
             throws RemoteException, UserStoreException, JWTClientException,
                    InvalidExecutionPlanException {
         EventProcessorAdminServiceStub eventProcessorAdminServiceStub = null;
-        // Flag to check the existence of a plan
-        boolean isAvailable = false;
         try {
             eventProcessorAdminServiceStub = DeviceMgtAPIUtils.getEventProcessorAdminServiceStub();
             // Validate the plan code
-            String validationResponse = eventProcessorAdminServiceStub.validateExecutionPlan(executionPlanData);
+            String validationResponse = eventProcessorAdminServiceStub.validateExecutionPlan(plan);
             if (validationResponse.equals("success")) {
-                String activeExecutionPlanName = null;
-                // Get active plans
-                ExecutionPlanConfigurationDto[] allActiveExecutionPlanConfigs = eventProcessorAdminServiceStub.getAllActiveExecutionPlanConfigurations();
-                if (allActiveExecutionPlanConfigs != null) {
-                    for (ExecutionPlanConfigurationDto activeExecutionPlanConfig : allActiveExecutionPlanConfigs) {
-                        activeExecutionPlanName = activeExecutionPlanConfig.getName();
-                        if (activeExecutionPlanName.equals(executionPlanName)) {
-                            isAvailable = true;
-                        }
-                    }
-                }
-                // Edit existing plan
-                if (isAvailable) {
-                    eventProcessorAdminServiceStub.editActiveExecutionPlan(executionPlanData,
-                                                                           executionPlanName);
-                }
-                // Create a new plan
-                else {
-                    eventProcessorAdminServiceStub.deployExecutionPlan(executionPlanData);
+                if (!isEdited) {
+                    // Create a new plan
+                    eventProcessorAdminServiceStub.deployExecutionPlan(plan);
+                } else {
+                    // Edit plan
+                    eventProcessorAdminServiceStub.editActiveExecutionPlan(plan, name);
                 }
             } else {
-                String errMsg = "Execution plan validation failed: " + validationResponse;
-                log.error(errMsg);
-                throw new InvalidExecutionPlanException(errMsg);
+                ErrorDTO errorDTO = new ErrorDTO();
+                errorDTO.setMessage(validationResponse);
+                throw new InvalidExecutionPlanException(errorDTO);
             }
         } finally {
             cleanup(eventProcessorAdminServiceStub);
