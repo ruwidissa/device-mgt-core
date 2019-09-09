@@ -18,9 +18,13 @@
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
 /**
- * Attribute data types
+ * Message protocol types
  */
-public enum AttributeType {
-    STRING, LONG, BOOL, INT, FLOAT, DOUBLE;
-}
+public enum MessageFormat {
+    JSON, MAP, XML, WSO2EVENT, TEXT;
 
+    @Override
+    public String toString() {
+        return super.toString().toLowerCase();
+    }
+}

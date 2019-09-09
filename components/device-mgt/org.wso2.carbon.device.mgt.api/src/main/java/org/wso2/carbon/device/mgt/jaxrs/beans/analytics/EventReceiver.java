@@ -15,12 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
-/**
- * Attribute data types
- */
-public enum AttributeType {
-    STRING, LONG, BOOL, INT, FLOAT, DOUBLE;
-}
+import io.swagger.annotations.ApiModelProperty;
 
+public class EventReceiver {
+    @ApiModelProperty(value = "Stream definition")
+    private String definition;
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
+    }
+}

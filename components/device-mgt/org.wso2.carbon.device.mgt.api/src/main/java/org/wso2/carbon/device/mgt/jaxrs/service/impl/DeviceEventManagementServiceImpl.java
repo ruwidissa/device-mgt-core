@@ -192,6 +192,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     @Path("/{type}")
     @Override
     public Response deployDeviceTypeEventDefinition(@PathParam("type") String deviceType,
+                                                    @QueryParam("skipPersist") boolean skipPersist,
                                                     @Valid DeviceTypeEvent deviceTypeEvent) {
         TransportType transportType = deviceTypeEvent.getTransportType();
         EventAttributeList eventAttributes = deviceTypeEvent.getEventAttributeList();
@@ -208,7 +209,9 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             String streamNameWithVersion = streamName + ":" + Constants.DEFAULT_STREAM_VERSION;
             publishStreamDefinitons(streamName, Constants.DEFAULT_STREAM_VERSION, deviceType, eventAttributes);
             publishEventReceivers(streamNameWithVersion, transportType, tenantDomain, deviceType);
-            publishEventStore(streamName, Constants.DEFAULT_STREAM_VERSION, eventAttributes);
+            if (!skipPersist) {
+                publishEventStore(streamName, Constants.DEFAULT_STREAM_VERSION, eventAttributes);
+            }
             publishWebsocketPublisherDefinition(streamNameWithVersion, deviceType);
             try {
                 PrivilegedCarbonContext.startTenantFlow();
