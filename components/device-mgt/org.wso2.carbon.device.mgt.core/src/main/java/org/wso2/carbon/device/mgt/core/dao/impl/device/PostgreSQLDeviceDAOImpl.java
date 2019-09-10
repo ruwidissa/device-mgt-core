@@ -542,7 +542,7 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
         return devices;
     }
-    
+
     @Override
     public List<Device> getSubscribedDevices(int offsetValue, int limitValue,
                                              List<Integer> deviceIds, int tenantId, String status)
