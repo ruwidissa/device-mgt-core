@@ -23,7 +23,7 @@
 
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
-        <artifactId>application-mgt</artifactId>
+        <artifactId>device-mgt</artifactId>
         <version>3.2.9-SNAPSHOT</version>
     </parent>
     <artifactId>io.entgra.device.mgt.ui</artifactId>

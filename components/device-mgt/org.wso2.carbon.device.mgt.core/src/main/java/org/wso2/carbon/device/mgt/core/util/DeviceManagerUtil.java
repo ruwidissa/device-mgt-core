@@ -17,13 +17,25 @@
  */
 package org.wso2.carbon.device.mgt.core.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
 import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.impl.CacheImpl;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
+import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
+import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
+import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
@@ -48,6 +60,10 @@ import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.util.DeviceIDHolder;
+import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
+import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
+import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
+import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -62,9 +78,13 @@ import javax.sql.DataSource;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -575,5 +595,103 @@ public final class DeviceManagerUtil {
             }
         }
         return deviceCache;
+    }
+
+    /**
+     * Create an app and get app registration token from the application registration endpoint
+     *
+     * @return AppRegistrationToken object which contains access and refresh tokens
+     * @throws ApplicationRegistrationException when application fails to connect with the app registration
+     *                                          endpoint
+     */
+    @SuppressWarnings("PackageAccessibility")
+    public static AppRegistrationCredentials getApplicationRegistrationCredentials(String host, String port,
+                                                                            String credentials)
+            throws ApplicationRegistrationException {
+        if (host == null || port == null) {
+            String msg = "Required gatewayHost or gatewayPort system property is null";
+            log.error(msg);
+            throw new ApplicationRegistrationException(msg);
+        }
+        String internalServerAddr = "https://".concat(host).concat(":").concat(port);
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost apiEndpoint = new HttpPost(
+                    internalServerAddr + DeviceManagementConstants.ConfigurationManagement
+                            .APPLICATION_REGISTRATION_API_ENDPOINT);
+
+            apiEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            apiEndpoint.setHeader(DeviceManagementConstants.ConfigurationManagement.AUTHORIZATION_HEADER,
+                                  DeviceManagementConstants.ConfigurationManagement.BASIC_AUTH.concat(" ")
+                    .concat(getBase64EncodedCredentials(credentials)));
+            apiEndpoint.setEntity(constructApplicationRegistrationPayload());
+            HttpResponse response = client.execute(apiEndpoint);
+            if (response != null) {
+                log.info("Obtained client credentials: " + response.getStatusLine().getStatusCode());
+                BufferedReader rd = new BufferedReader(
+                        new InputStreamReader(response.getEntity().getContent()));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    result.append(line);
+                }
+                return new ObjectMapper().readValue(result.toString(), AppRegistrationCredentials.class);
+            } else {
+                String msg = "Response is 'NUll' for the Application Registration API call.";
+                log.error(msg);
+                throw new ApplicationRegistrationException(msg);
+            }
+        } catch (IOException e) {
+            throw new ApplicationRegistrationException(
+                    "Error occurred when invoking API. API endpoint: "
+                    + internalServerAddr + DeviceManagementConstants.ConfigurationManagement
+                            .APPLICATION_REGISTRATION_API_ENDPOINT, e);
+        }
+    }
+
+    /**
+     * Use default admin credentials and encode them in Base64
+     *
+     * @return Base64 encoded client credentials
+     */
+    private static String getBase64EncodedCredentials(String credentials) {
+        return Base64.getEncoder().encodeToString(credentials.getBytes());
+    }
+
+    /**
+     * Create a JSON payload for application registration
+     *
+     * @return Generated JSON payload
+     */
+    @SuppressWarnings("PackageAccessibility")
+    private static StringEntity constructApplicationRegistrationPayload() {
+        ApplicationRegistration applicationRegistration = new ApplicationRegistration();
+        applicationRegistration.setApplicationName("MyApp");
+        applicationRegistration.setAllowedToAllDomains(false);
+        List<String> tags = new ArrayList<>();
+        tags.add("device_management");
+        applicationRegistration.setTags(tags);
+        applicationRegistration.setValidityPeriod(3600);
+        Gson gson = new Gson();
+        String payload = gson.toJson(applicationRegistration);
+        return new StringEntity(payload, ContentType.APPLICATION_JSON);
+    }
+
+    /**
+     * Retrieves access token for a given device
+     * @param scopes scopes for token
+     * @param clientId clientId
+     * @param clientSecret clientSecret
+     * @param deviceOwner owner of the device that is going to generate token
+     * @return @{@link AccessTokenInfo} wrapped object of retrieved access token and refresh token
+     * @throws JWTClientException if an error occurs when the jwt client creation or token retrieval
+     */
+    public static AccessTokenInfo getAccessTokenForDeviceOwner(String scopes, String clientId,
+                                                               String clientSecret, String deviceOwner)
+            throws JWTClientException {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        JWTClientManagerService jwtClientManagerService = (JWTClientManagerService) ctx
+                .getOSGiService(JWTClientManagerService.class, null);
+        JWTClient jwtClient = jwtClientManagerService.getJWTClient();
+        return jwtClient.getAccessToken(clientId, clientSecret, deviceOwner, scopes);
     }
 }
