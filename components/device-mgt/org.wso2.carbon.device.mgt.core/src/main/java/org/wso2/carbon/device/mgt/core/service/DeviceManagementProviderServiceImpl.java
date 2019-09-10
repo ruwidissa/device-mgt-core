@@ -66,10 +66,15 @@ import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
@@ -3439,4 +3444,83 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return versions;
     }
 
+    @Override
+    public DeviceConfiguration getDeviceConfiguration(Map<String, String> deviceProps)
+            throws DeviceManagementException, DeviceNotFoundException, UnauthorizedDeviceAccessException,
+                   AmbiguousConfigurationException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Attempting to get device configurations based on properties.");
+        }
+
+        DevicePropertyInfo deviceProperties;
+        List<DevicePropertyInfo> devicePropertyList;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            devicePropertyList = deviceDAO.getDeviceBasedOnDeviceProperties(deviceProps);
+            if (devicePropertyList == null || devicePropertyList.isEmpty()) {
+                String msg = "Cannot find device for specified properties";
+                log.info(msg);
+                throw new DeviceNotFoundException(msg);
+            }
+            //In this service, there should be only one device for the specified property values
+            //If multiple values retrieved, It'll be marked as ambiguous.
+            if (devicePropertyList.size() > 1) {
+                String msg = "Device property list contains more than one element";
+                log.error(msg);
+                throw new AmbiguousConfigurationException(msg);
+            }
+            //Get the only existing value of the list
+            deviceProperties = devicePropertyList.get(0);
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Devices configuration retrieval criteria cannot be null or empty.";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        }  finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+
+        try {
+            Device device = this.getDevice(new DeviceIdentifier(deviceProperties.getDeviceIdentifier(),
+                                                                deviceProperties.getDeviceTypeName()), false);
+            String owner = device.getEnrolmentInfo().getOwner();
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            ctx.setTenantId(Integer.parseInt(deviceProperties.getTenantId()), true);
+            PlatformConfiguration configuration = this.getConfiguration(device.getType());
+            List<ConfigurationEntry> configurationEntries = new ArrayList<>();
+            if (configuration != null) {
+                configurationEntries = configuration.getConfiguration();
+            }
+            return wrapConfigurations(device, ctx.getTenantDomain(), configurationEntries, owner);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    /**
+     * Wrap the device configuration data into DeviceConfiguration bean
+     * @param device Device queried using the properties
+     * @param tenantDomain tenant domain
+     * @param configurationEntries platformConfiguration list
+     * @param deviceOwner name of the device owner
+     * @return Wrapped {@link DeviceConfiguration} object with data
+     */
+    private DeviceConfiguration wrapConfigurations(Device device,
+                                                   String tenantDomain,
+                                                   List<ConfigurationEntry> configurationEntries,
+                                                   String deviceOwner) {
+        DeviceConfiguration deviceConfiguration = new DeviceConfiguration();
+        deviceConfiguration.setDeviceId(device.getDeviceIdentifier());
+        deviceConfiguration.setDeviceType(device.getType());
+        deviceConfiguration.setTenantDomain(tenantDomain);
+        deviceConfiguration.setConfigurationEntries(configurationEntries);
+        deviceConfiguration.setDeviceOwner(deviceOwner);
+        return deviceConfiguration;
+    }
 }

@@ -45,7 +45,14 @@ function drawTable(from, to) {
 			order: [],
 			ajax: {
 				url: "/devicemgt/api/stats/paginate",
-				data: buildAjaxData
+				data: buildAjaxData,
+				dataSrc: function(json) {
+				    return json.data.map(function(event) {
+				        event[0] = new moment(event[0]).
+				        format("YYYY-MM-DD HH:mm:ss.SSS");
+				        return event;
+				    })
+				}
 			}
 		});
 	}

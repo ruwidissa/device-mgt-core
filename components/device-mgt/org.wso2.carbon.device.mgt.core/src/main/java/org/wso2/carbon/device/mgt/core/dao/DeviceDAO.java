@@ -40,6 +40,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
@@ -190,6 +191,15 @@ public interface DeviceDAO {
      */
     List<Device> getDeviceBasedOnDeviceProperties(Map<String, String> deviceProps, int tenantId) throws DeviceManagementDAOException;
 
+    /**
+     * Retrieves a list of devices based on a given criteria of properties
+     * This will ignores the tenant and it will return devices registered under every tenants
+     * @param deviceProps properties by which devices need to be filtered
+     * @return list of devices with properties
+     * @throws DeviceManagementDAOException if the SQL query has failed to be executed
+     */
+    List<DevicePropertyInfo> getDeviceBasedOnDeviceProperties(Map<String, String> deviceProps)
+            throws DeviceManagementDAOException;
 
     /**
      * Retrieves properties of given device identifier

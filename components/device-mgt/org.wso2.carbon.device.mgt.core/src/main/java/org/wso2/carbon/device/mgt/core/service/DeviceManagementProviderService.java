@@ -38,6 +38,7 @@ package org.wso2.carbon.device.mgt.core.service;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
@@ -46,9 +47,12 @@ import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -741,4 +745,19 @@ public interface DeviceManagementProviderService {
 
     DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
             DeviceManagementException;
+
+    /**
+     * Retrieves a list of configurations of a specific device
+     * using the device's properties
+     * @param propertyMap properties by which devices need to be drawn
+     * @return list of device configuration
+     * @throws DeviceManagementException if any service level or DAO level error occurs
+     * @throws DeviceNotFoundException if there is no any device can found for specified properties
+     * @throws UnauthorizedDeviceAccessException if the required token property is not found on
+     * @throws AmbiguousConfigurationException if configuration is ambiguous
+     * the property payload
+     */
+    DeviceConfiguration getDeviceConfiguration(Map<String, String> propertyMap)
+            throws DeviceManagementException, DeviceNotFoundException, UnauthorizedDeviceAccessException,
+                   AmbiguousConfigurationException;
 }

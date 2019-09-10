@@ -42,6 +42,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -62,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
@@ -71,6 +73,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private static final String PROPERTY_VALUE_COLUMN_NAME = "PROPERTY_VALUE";
     private static final String PROPERTY_DEVICE_TYPE_NAME = "DEVICE_TYPE_NAME";
     private static final String PROPERTY_DEVICE_IDENTIFICATION = "DEVICE_IDENTIFICATION";
+    private static final String PROPERTY_TENANT_ID = "TENANT_ID";
 
     @Override
     public int addDevice(int typeId, Device device, int tenantId) throws DeviceManagementDAOException {
@@ -331,6 +334,65 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
+    public List<DevicePropertyInfo> getDeviceBasedOnDeviceProperties(Map<String, String> deviceProps)
+            throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        List<DevicePropertyInfo> deviceProperties = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+            List<List<DevicePropertyInfo>> outputLists = new ArrayList<>();
+            String sql = "SELECT " +
+                              "p.DEVICE_IDENTIFICATION, " +
+                              "p.DEVICE_TYPE_NAME, " +
+                              "p.TENANT_ID FROM " +
+                              "DM_DEVICE_PROPERTIES p ";
+
+            String groupByClause = "GROUP BY " +
+                                   "p.DEVICE_IDENTIFICATION, " +
+                                   "p.DEVICE_TYPE_NAME, " +
+                                   "p.TENANT_ID";
+
+            int iterationCount = 0;
+            StringBuilder propertyQuery = new StringBuilder(" ");
+            for (Map.Entry<String, String> stringStringEntry : deviceProps.entrySet()) {
+                String tempTableId = "t".concat(Integer.toString(iterationCount++));
+                propertyQuery.append("JOIN DM_DEVICE_PROPERTIES ")
+                        .append(tempTableId).append(" ").append("ON p.DEVICE_IDENTIFICATION = ")
+                        .append(tempTableId).append(".DEVICE_IDENTIFICATION ")
+                        .append("AND ")
+                        .append(tempTableId).append(".PROPERTY_NAME = ? ")
+                        .append("AND ")
+                        .append(tempTableId).append(".PROPERTY_VALUE = ? ");
+            }
+            sql = sql.concat(propertyQuery.toString()).concat(groupByClause);
+            stmt = conn.prepareStatement(sql);
+            int index = 1;
+            for (Map.Entry<String, String> entry : deviceProps.entrySet()) {
+                stmt.setString(index++, entry.getKey());
+                stmt.setString(index++, entry.getValue());
+            }
+            resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                DevicePropertyInfo devicePropertyInfo = new DevicePropertyInfo();
+                devicePropertyInfo
+                        .setDeviceIdentifier(resultSet.getString(PROPERTY_DEVICE_IDENTIFICATION));
+                devicePropertyInfo.setTenantId(resultSet.getString(PROPERTY_TENANT_ID));
+                devicePropertyInfo.setDeviceTypeName(resultSet.getString(PROPERTY_DEVICE_TYPE_NAME));
+                deviceProperties.add(devicePropertyInfo);
+            }
+            return deviceProperties;
+        } catch (SQLException e) {
+            String msg = "Error occurred while fetching devices against criteria : '" + deviceProps;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, resultSet);
+        }
+    }
+
+    @Override
     public Device getDeviceProps(String deviceId, int tenantId) throws DeviceManagementDAOException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -384,7 +446,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
         return intersectedResult;
     }
-
 
     @Override
     public Device getDevice(String deviceIdentifier, Date since, int tenantId)

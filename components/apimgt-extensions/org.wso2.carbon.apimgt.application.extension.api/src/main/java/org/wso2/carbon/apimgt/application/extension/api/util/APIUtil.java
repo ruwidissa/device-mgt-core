@@ -46,6 +46,8 @@ public class APIUtil {
     private static final String DEFAULT_APP_MGT_TAG = "application_management";
     private static final String DEFAULT_APP_MGT_REVIEW_MGT_TAG = "review_management";
     private static final String DEFAULT_APP_MGT_SUB_MGT_TAG = "subscription_management";
+    private static final String DEFAULT_ANALYTICS_ARTIFACT_TAG = "analytics_artifacts_management";
+
     public static final String PERMISSION_PROPERTY_NAME = "name";
 
     public static String getAuthenticatedUser() {
@@ -113,6 +115,7 @@ public class APIUtil {
         allowedApisTags.add(DEFAULT_APP_MGT_TAG);
         allowedApisTags.add(DEFAULT_APP_MGT_REVIEW_MGT_TAG);
         allowedApisTags.add(DEFAULT_APP_MGT_SUB_MGT_TAG);
+        allowedApisTags.add(DEFAULT_ANALYTICS_ARTIFACT_TAG);
         return allowedApisTags;
     }
 

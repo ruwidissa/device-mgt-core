@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Holds Device Group details and expose to external access
@@ -42,6 +43,8 @@ public class DeviceGroup implements Serializable {
     private String name;
 
     private String owner;
+
+    private Map<String,String> groupProperties;
 
     public DeviceGroup() {}
 
@@ -79,6 +82,14 @@ public class DeviceGroup implements Serializable {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public Map<String,String> getGroupProperties() {
+        return groupProperties;
+    }
+
+    public void setGroupProperties(Map<String,String> groupProperties) {
+        this.groupProperties = groupProperties;
     }
 
 }
