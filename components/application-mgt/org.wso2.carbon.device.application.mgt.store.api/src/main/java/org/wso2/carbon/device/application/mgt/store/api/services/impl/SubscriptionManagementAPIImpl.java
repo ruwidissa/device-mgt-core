@@ -17,10 +17,15 @@
  */
 package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
+import org.wso2.carbon.device.application.mgt.common.DeviceList;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
+import org.wso2.carbon.device.application.mgt.common.response.Application;
+import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -28,13 +33,12 @@ import org.wso2.carbon.device.application.mgt.store.api.services.SubscriptionMan
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
+
 import javax.validation.Valid;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -81,6 +85,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         }
     }
 
+
     @Override
     @POST
     @Path("/{uuid}/{subType}/{action}")
@@ -112,6 +117,51 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             String msg = "Error occurred while installing the application release which has UUID: " + uuid
                     + " for user devices";
             log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    @Path("/{uuid}/devices")
+    public Response getAppInstalledDevices(@PathParam("uuid") String uuid,
+                                           @DefaultValue("0")
+                                           @QueryParam("offset") int offset,
+                                           @DefaultValue("5")
+                                           @QueryParam("limit") int limit,
+                                           @QueryParam("status") String status) {
+
+        try {
+            SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
+
+            PaginationResult subscribedDeviceDetails = subscriptionManager
+                    .getAppInstalledDevices(offset, limit, uuid, status);
+
+            DeviceList devices = new DeviceList();
+
+            devices.setList((List<Device>) subscribedDeviceDetails.getData());
+            devices.setCount(subscribedDeviceDetails.getRecordsTotal());
+
+            return Response.status(Response.Status.OK).entity(devices).build();
+        } catch (NotFoundException e) {
+            String msg = "Application with application release UUID: " + uuid + " is not found";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Found invalid payload for getting application which has UUID: " + uuid
+                    + ". Hence verify the payload";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "Application release is not in the installable state."
+                    + "Hence you are not permitted to get the devices details.";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting application with the application release uuid: "
+                         + uuid;
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }

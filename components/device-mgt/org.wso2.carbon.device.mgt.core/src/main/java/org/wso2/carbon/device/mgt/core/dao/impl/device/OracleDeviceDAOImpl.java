@@ -568,6 +568,13 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
         return devices;
     }
 
+    @Override
+    public List<Device> getSubscribedDevices(int offsetValue, int limitValue,
+                                             List<Integer> deviceIds, int tenantId, String status)
+            throws DeviceManagementDAOException {
+       return null;
+    }
+
     private Connection getConnection() throws SQLException {
         return DeviceManagementDAOFactory.getConnection();
     }

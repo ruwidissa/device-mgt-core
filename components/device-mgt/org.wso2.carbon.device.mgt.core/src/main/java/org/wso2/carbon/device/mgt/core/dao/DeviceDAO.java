@@ -550,4 +550,20 @@ public interface DeviceDAO {
                                       int tenantId,
                                       String fromDate,
                                       String toDate) throws DeviceManagementDAOException;
+
+    /**
+     * this method is used to get the details of devices
+     * @param deviceIds device ids
+     * @param tenantId tenant id
+     * @param offsetValue offsetValue
+     * @param limitValue limitValue
+     * @param status status
+     * @return subscribed device details list
+     * @throws DeviceManagementDAOException throws {@link DeviceManagementDAOException} if connections
+     * establishment fails.
+     */
+    List<Device> getSubscribedDevices(int offsetValue, int limitValue, List<Integer> deviceIds,
+                                      int tenantId, String status)
+            throws DeviceManagementDAOException;
+
 }

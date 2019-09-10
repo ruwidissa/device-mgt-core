@@ -19,7 +19,11 @@
 package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
+//import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
 
@@ -29,4 +33,17 @@ import java.util.List;
 public interface SubscriptionManager {
     <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params, String subType,
             String action) throws ApplicationManagementException;
+
+    /***
+     * This method used to get the app id ,device ids and pass them to DM service layer method
+     * @param appUUID uuid
+     * @param offsetValue offsetValue
+     * @param limitValue limitValue
+     * @param status status
+     * @return deviceDetails
+     * @throws ApplicationManagementException Exception of the application management
+     */
+    PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
+                                            String status)
+            throws ApplicationManagementException;
 }

@@ -333,6 +333,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 + "DS.UNSUBSCRIBED_BY AS UNSUBSCRIBED_BY, "
                 + "DS.UNSUBSCRIBED_TIMESTAMP AS UNSUBSCRIBED_AT, "
                 + "DS.ACTION_TRIGGERED_FROM AS ACTION_TRIGGERED_FROM, "
+                + "DS.STATUS AS STATUS,"
                 + "DS.DM_DEVICE_ID AS DEVICE_ID "
                 + "FROM AP_DEVICE_SUBSCRIPTION DS "
                 + "WHERE DS.AP_APP_RELEASE_ID = ? AND DS.TENANT_ID=?";
@@ -696,4 +697,5 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
+
 }
