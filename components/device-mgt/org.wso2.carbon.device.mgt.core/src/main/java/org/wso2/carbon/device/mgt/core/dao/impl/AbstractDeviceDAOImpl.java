@@ -2029,4 +2029,5 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
         return true;
     }
+
 }

@@ -21,12 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
-import org.wso2.carbon.device.application.mgt.common.ApplicationType;
-import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
-import org.wso2.carbon.device.application.mgt.common.SubAction;
-import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
-import org.wso2.carbon.device.application.mgt.common.SubscribingDeviceIdHolder;
+import org.wso2.carbon.device.application.mgt.common.*;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -68,13 +63,10 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -557,6 +549,65 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             String msg = "Unknown Application type is found.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
+                                                   String status)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil
+                .getDeviceManagementProviderService();
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(appUUID, tenantId);
+            int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
+
+            List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
+                    .getDeviceSubscriptions(applicationReleaseId, tenantId);
+            if (deviceSubscriptionDTOS.isEmpty()) {
+                String msg = "Couldn't found an subscribed devices for application release id: "
+                             + applicationReleaseId;
+                log.error(msg);
+            }
+
+            List<Integer> deviceIdList = new ArrayList<>();
+            for (DeviceSubscriptionDTO deviceIds : deviceSubscriptionDTOS) {
+                deviceIdList.add(deviceIds.getDeviceId());
+            }
+            //pass the device id list to device manager service layer method
+            try {
+                PaginationResult deviceDetails = deviceManagementProviderService
+                        .getAppSubscribedDevices(offsetValue ,limitValue, deviceIdList, status);
+
+                if (deviceDetails == null) {
+                    String msg = "Couldn't found an subscribed devices details for device ids: "
+                                 + deviceIdList;
+                    log.error(msg);
+                    throw new NotFoundException(msg);
+                }
+                return deviceDetails;
+
+            } catch (DeviceManagementException e) {
+                String msg = "service error occurred while getting data from the service";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when get application release data for application" +
+                         " release UUID: " + appUUID;
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting device details that " +
+                         "given application id";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 }
