@@ -93,12 +93,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to add a review for application release which"
                     + " has ID:  "+ appReleaseId + " and Tenant Id: " + tenantId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL statement to add application review. Application ID: "
                     + appReleaseId + " and tenant " +  tenantId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -131,12 +131,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting the database connection when checking whether user has already "
                     + "commented for the application or not";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occured while executing the SQL statement to check whether user has already commented "
                     + "for the application or not";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -175,11 +175,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             }
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting the db connection to update review for review ID: " + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing review updating query for review ID: " + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -215,15 +215,15 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "DB Connection Exception occurred while retrieving information of the review for review ID: "
                     + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occured while executing SQL statement to get review data for review ID: " + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (UnexpectedServerErrorException e) {
             String msg = "Found more than one review for review ID: " + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -267,12 +267,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get all app release reviews for "
                     + "application release ID: " + releaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing the SQL statement to get all app release reviews for "
                     + "application release ID: " + releaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -320,11 +320,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get all active app reviews.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to get all active app reviews.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -377,11 +377,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get all active app reviews of user "
                     + username;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to get all active app reviews of user " + username;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -419,12 +419,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting reply comments for a review "
                     + "which has reviw ID: " + parentId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to ge reply comments for a review which has reviw ID: "
                     + parentId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -458,12 +458,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting DB connection to retrieve all rating values for the application "
                     + "release which has UUID:" + uuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occured while executing SQL to retrieve all rating values for the application release "
                     + "which has UUID:" + uuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -497,11 +497,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             }
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting DB connection to retrieve all rating values for an application.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occured while executing SQL to get all rating values for the application.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -526,11 +526,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting the database connection to delete review which has review ID: "
                     + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occured while executing SQL to delete review which has review ID: " + reviewId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -557,11 +557,11 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while getting the database connection to delete reviews for given review Ids.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to delete reviews for given review Ids.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }
@@ -586,12 +586,12 @@ public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting the database connection to delete all child comments of a review "
                     + "which has ID: " + rootParentId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occured while executing SQL to delete all child comments of a review which has ID: "
                     + rootParentId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ReviewManagementDAOException(msg, e);
         }
     }

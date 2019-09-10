@@ -35,7 +35,7 @@ public interface LifecycleStateDAO {
      * @return Latest Lifecycle State for the given application release
      * @throws LifeCycleManagementDAOException Lifecycle Management DAO Exception.
      */
-    LifecycleState getLatestLifeCycleState(String uuid) throws LifeCycleManagementDAOException;
+    LifecycleState getLatestLifecycleState(String uuid) throws LifeCycleManagementDAOException;
 
     /**
      * To get all changed lifecycle states for the given application release id.

@@ -84,12 +84,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to create an application which has "
                     + "application name " + applicationDTO.getName();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to create an application which has application name "
                     + applicationDTO.getName();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -231,12 +231,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection while getting application list for the "
                     + "tenant " + tenantId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while getting application list for the tenant " + tenantId + ". While "
                     + "executing " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -330,12 +330,15 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
             return 0;
         } catch (SQLException e) {
-            throw new ApplicationManagementDAOException("Error occurred while getting application list for the tenant"
-                    + " " + tenantId + ". While executing " + sql, e);
+            String msg = "Error occurred while getting application list for the tenant" + " " + tenantId
+                    + ". While executing " + sql;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
         } catch (DBConnectionException e) {
-            throw new ApplicationManagementDAOException("Error occurred while obtaining the DB connection while "
-                    + "getting application list for the tenant " + tenantId,
-                    e);
+            String msg = "Error occurred while obtaining the DB connection while getting application list for the "
+                    + "tenant " + tenantId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
         } finally {
             DAOUtil.cleanupResources(stmt, rs);
         }
@@ -398,16 +401,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get application for application release "
                     + "UUID: " + releaseUuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while getting application details with app release uuid " + releaseUuid
                     + " while executing query. Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (UnexpectedServerErrorException e) {
             String msg = "Found more than one application for application release UUID: " + releaseUuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -471,16 +474,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get application and related application "
                     + "release for release UUID: " + releaseUuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while getting application and related app release details for app release "
                     + "uuid " + releaseUuid + " while executing query. Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (UnexpectedServerErrorException e) {
             String msg = "Found more than one application for application release UUID: " + releaseUuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -543,16 +546,16 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get application for application ID: "
                     + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred to get application details with app id " + applicationId + " while executing "
                     + "query. Query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (UnexpectedServerErrorException e) {
             String msg = "Found more than one application for application ID: " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -580,11 +583,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update the application.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred when executing SQL to update an application. Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -608,11 +611,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update the application rating.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred when obtaining database connection for updating the application rating.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -634,12 +637,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to retire application which has application "
                     + "ID: " + appId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to retire an application which has application ID "
                     + appId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -665,11 +668,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when adding tags";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while adding tags. Executed Query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -701,11 +704,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting all tags";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting all tags";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -737,11 +740,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting all categories.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting all categories. Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -776,11 +779,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting category ids for given "
                     + "category names";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting all categories.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -805,11 +808,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting distinct category ids in "
                     + "category mapping";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting distinct category ids in category mapping.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -841,11 +844,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting category for given category "
                     + "name.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting category for category name. Executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -871,11 +874,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when adding categories.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while adding categories. Executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -904,11 +907,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when adding data into category mapping.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while adding data into category mapping.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -933,12 +936,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when deleting category mapping of "
                     + "application ID: " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when deleting category mapping of application ID: " + applicationId
                     + " Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -967,11 +970,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when deleting category mapping.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when deleting category mapping. Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -996,11 +999,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when deleting category which has ID: "
                     + categoryId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when deleting category which has ID: " + categoryId + ". Query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1027,12 +1030,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when updating category which has ID: "
                     + categoryDTO.getId();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred when updating category which has ID: " + categoryDTO.getId() + ". Executed "
                     + "query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1066,11 +1069,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             return tagIds;
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting tag IDs for given tag names.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting tag IDs for given tag names";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1102,10 +1105,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting tag for given tag name: "
                     + tagName;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting tag for tag name: " + tagName + ". Executed query: " + sql;
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1133,11 +1137,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting distinct tag ids in tag "
                     + "mapping";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting distinct tag ids in tag mapping. Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1168,11 +1172,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to add tags for application which has ID: "
                     + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when adding tags for application which has the ID: " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1203,12 +1207,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get application tags. Application Id: "
                     + appId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL error occured while getting application tags. ApplicationId: " + appId + " Executed "
                     + "query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1237,12 +1241,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when verifying the existence of a tag "
                     + "mapping. Application ID " + applicationId + " tag ID: " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when verifying the existence of a tag mapping. Application ID "
                     + applicationId + " tag ID " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1270,12 +1274,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to verify whether tag is associated with at "
                     + "least one application. Tag ID " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing the query to verify whether tag is associated with at least "
                     + "one application. Tag ID " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1305,12 +1309,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to delete tag mapping. Application ID: "
                     + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while executing the query to delete tag mapping. Application ID: "
                     + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1337,12 +1341,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to delete a tag mapping. Application ID "
                     + applicationId + " tag ID " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while executing the query to delete a tag mapping. Application ID "
                     + applicationId + " tag ID " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1367,12 +1371,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when deleting application tags for "
                     + "application ID: " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when deleting application tags for application ID: " + applicationId + "."
                     + " Executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1397,12 +1401,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when deleting application tag which has tag"
                     + " ID: " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL error occurred when deleting application tag which has tag ID: " + tagId + ". executed "
                     + "query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1426,11 +1430,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when deleting tag which has ID: " + tagId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when deleting tag which has ID: " + tagId + ". Executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1457,12 +1461,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update tag which has ID: "
                     + tagDTO.getId();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when updating tag which has ID: " + tagDTO.getId() + ". Executed query: "
                     + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1493,12 +1497,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get application categories for "
                     + "application which has ID " + appId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL error occurred while executing query to get application categories for "
                     + "application which has ID " + appId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1525,12 +1529,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when verifying the existence of a category "
                     + "mapping for category ID " + categoryId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred when verifying the existence of a category mapping for category ID "
                     + categoryId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1556,12 +1560,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to check whether the existence of "
                     + "application name for device type which has device type ID " + deviceTypeId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing query to check whether the existence of application name for "
                     + "device type which has device type ID " + deviceTypeId + ". executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }
@@ -1582,12 +1586,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to delete application for application id::."
                     + appId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while deleting application for application ID: " + appId + " Executed "
                     + "query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
     }

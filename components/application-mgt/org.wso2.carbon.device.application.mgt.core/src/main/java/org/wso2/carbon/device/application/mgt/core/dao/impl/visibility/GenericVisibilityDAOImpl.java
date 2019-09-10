@@ -65,12 +65,12 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when adding unrestricted roles for "
                     + "application which has Id " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new VisibilityManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing query to add unrestricted roles for application which has Id "
                     + applicationId + ". Executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new VisibilityManagementDAOException(msg, e);
         }
     }
@@ -101,12 +101,12 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get unrestricted roles for application "
                     + "which has application Id " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new VisibilityManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing query to get unrestricted roles for application which has "
                     + "application Id " + applicationId + ". Executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new VisibilityManagementDAOException(msg, e);
         }
     }
@@ -137,12 +137,12 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to delete unrestricted roles of an "
                     + "application which has application Id " + applicationId;
-            log.error(msg);
+            log.error(msg, e);
             throw new VisibilityManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing query to delete unrestricted roles of an application which has"
                     + " application Id " + applicationId + ". executed query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new VisibilityManagementDAOException(msg, e);
         }
     }

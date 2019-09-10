@@ -50,9 +50,8 @@ public class LifecycleStateManager {
             try {
                 PermissionUtils.putPermission(lifecycleState.getPermission());
             } catch (PermissionManagementException e) {
-                String msg =
-                        "Error when adding permission " + lifecycleState.getPermission() + "  related to the state: "
-                                + lifecycleState.getName();
+                String msg = "Error when adding permission " + lifecycleState.getPermission() + "  related to the "
+                        + "state: " + lifecycleState.getName();
                 log.error(msg, e);
                 throw new LifecycleManagementException(msg, e);
             }
@@ -94,12 +93,15 @@ public class LifecycleStateManager {
                 }
                 return false;
             } catch (UserStoreException e) {
-                throw new LifecycleManagementException(
-                        "UserStoreException exception from changing the state from : " + currentState + "  to: "
-                                + nextState + " with username : " + username + " and tenant Id : " + tenantId, e);
+                String msg = "UserStoreException exception from changing the state from : " + currentState + "  to: "
+                        + nextState + " with username : " + username + " and tenant Id : " + tenantId;
+                log.error(msg, e);
+                throw new LifecycleManagementException(msg, e);
             }
         } else {
-            throw new LifecycleManagementException("Required permissions cannot be found for the state : " + nextState);
+            String msg = "Required permissions cannot be found for the state : " + nextState;
+            log.error(msg);
+            throw new LifecycleManagementException(msg);
         }
     }
 
