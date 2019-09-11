@@ -652,10 +652,13 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         List<Device> devices;
         DeviceList deviceList = new DeviceList();
         try {
+            if(map.getProperties().isEmpty()){
+                return Response.status(Response.Status.BAD_REQUEST).entity("No search criteria defined.").build();
+            }
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             devices = dms.getDevicesBasedOnProperties(map.getProperties());
             if(devices == null || devices.isEmpty()){
-                return Response.status(Response.Status.OK).entity("No device found matching query criteria.").build();
+                return Response.status(Response.Status.NOT_FOUND).entity("No device found matching query criteria.").build();
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while searching for devices that matches the provided device properties";
