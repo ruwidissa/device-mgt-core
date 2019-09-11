@@ -123,6 +123,7 @@ public interface DeviceEventManagementService {
     Response deployDeviceTypeEventDefinition(@ApiParam(name = "type", value = "The device type, such as android, ios," +
             " and windows.", required = false)
                                              @PathParam("type")String deviceType,
+                                             @QueryParam("skipPersist")boolean skipPersist,
                                              @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete " +
                                                      "the  DeviceTypeEvent object.", required = true)
                                              @Valid DeviceTypeEvent deviceTypeEvent);
@@ -357,7 +358,7 @@ public interface DeviceEventManagementService {
             @QueryParam("max") double max
     );
 
-  
+
     @GET
     @Path("/{type}")
     @ApiOperation(

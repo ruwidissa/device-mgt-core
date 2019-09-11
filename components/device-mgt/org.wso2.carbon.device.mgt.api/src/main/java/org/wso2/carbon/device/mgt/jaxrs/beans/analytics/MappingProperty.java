@@ -17,30 +17,42 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.jaxrs.beans.BasePaginatedResult;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * This holds event attributes
+ * Mapping property data
+ * Attributes : name, data type and mapping value name
  */
-public class EventAttributeList {
+public class MappingProperty {
+    @ApiModelProperty(value = "Property name")
+    private String name;
+    @ApiModelProperty(value = "Property data type")
+    private String type;
+    @ApiModelProperty(value = "Property mapping value name")
+    private String valueOf;
 
-    private List<Attribute> attributes = new ArrayList<>();
-
-    @ApiModelProperty(value = "List of Event Attributes")
-    @JsonProperty("attributes")
-    public List<Attribute> getList() {
-        return attributes;
+    public String getName() {
+        return name;
     }
 
-    public void setList(List<Attribute> attributes) {
-        this.attributes = attributes;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getValueOf() {
+        return valueOf;
+    }
+
+    public void setValueOf(String valueOf) {
+        this.valueOf = valueOf;
     }
 
 }
-

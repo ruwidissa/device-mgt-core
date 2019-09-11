@@ -15,12 +15,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
 /**
- * Attribute data types
+ * Receiver properties with it's display name(key) and user input(value)
  */
-public enum AttributeType {
-    STRING, LONG, BOOL, INT, FLOAT, DOUBLE;
-}
+public class AdapterProperty {
+    private String key;
+    private String value;
 
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+}

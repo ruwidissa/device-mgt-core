@@ -18,9 +18,13 @@
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
 /**
- * Attribute data types
+ * Available adapter types
  */
-public enum AttributeType {
-    STRING, LONG, BOOL, INT, FLOAT, DOUBLE;
-}
+public enum AdapterType {
+    EMAIL, FILE_TAIL, HTTP, IOT_EVENT, JMS, KAFKA, MQTT, OAUTH_MQTT, SOAP, WEBSOCKET, WEBSOCKET_LOCAL,
+    WSO2_EVENT, XMPP, UI, RDBMS, SECURED_WEBSOCKET, CASSANDRA, LOGGER;
 
+    public String toStringFormatted() {
+        return super.toString().toLowerCase().replace("_", "-");
+    }
+}
