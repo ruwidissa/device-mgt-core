@@ -27,7 +27,6 @@ import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
 import org.wso2.carbon.device.application.mgt.common.SubAction;
 import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
 import org.wso2.carbon.device.application.mgt.common.SubscribingDeviceIdHolder;
-import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -36,7 +35,6 @@ import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManageme
 import org.wso2.carbon.device.application.mgt.common.exception.TransactionManagementException;
 import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
@@ -175,11 +173,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             return applicationInstallResponse;
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while getting devices of given users or given roles.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (GroupManagementException e) {
             String msg = "Error occurred while getting devices of given groups";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
     }
@@ -316,12 +314,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             return applicationDTO;
         } catch (LifecycleManagementException e) {
             String msg = "Error occured when getting life-cycle state from life-cycle state manager.";
-            log.error(msg);
-            throw new ApplicationManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred while getting application data for application release UUID: " + uuid;
-            log.error(msg);
-            throw new ApplicationManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
@@ -393,17 +391,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred when adding subscription data for application release ID: "
                     + applicationReleaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
             String msg = "Error occurred when getting database connection to add new device subscriptions to application.";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
-            String msg =
-                    "SQL Error occurred when adding new device subscription to application release which has ID: "
+            String msg = "SQL Error occurred when adding new device subscription to application release which has ID: "
                             + applicationReleaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
@@ -430,16 +427,15 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             return this.subscriptionDAO.getDeviceSubscriptions(filteredDeviceIds, tenantId);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occured when getting device subscriptions for given device IDs";
-            log.error(msg);
-            throw new ApplicationManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
             String msg = "Error occured while getting database connection for getting device subscriptions.";
-            log.error(msg);
-            throw new ApplicationManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
-
     }
 
     private Activity addAppOperationOnDevices(ApplicationDTO applicationDTO,
@@ -452,8 +448,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             Operation operation = generateOperationPayloadByDeviceType(deviceType, application, action);
             return deviceManagementProviderService.addOperation(deviceType, operation, deviceIdentifierList);
         } catch (OperationManagementException e) {
-            throw new ApplicationManagementException(
-                    "Error occurred while adding the application install " + "operation to devices", e);
+            String msg = "Error occurred while adding the application install operation to devices";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         } catch (InvalidDeviceException e) {
             //This exception should not occur because the validation has already been done.
             throw new ApplicationManagementException("The list of device identifiers are invalid");
@@ -463,7 +460,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private Operation generateOperationPayloadByDeviceType(String deviceType, Application application, String action)
             throws ApplicationManagementException {
         try {
-
             //todo rethink and modify the {@link MobileApp} usage
             MobileApp mobileApp = new MobileApp();
             MobileAppTypes mobileAppType = MobileAppTypes.valueOf(application.getType());
@@ -505,8 +501,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
         } catch (UnknownApplicationTypeException e) {
             String msg = "Unknown Application type is found.";
-            log.error(msg);
-            throw new ApplicationManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 }

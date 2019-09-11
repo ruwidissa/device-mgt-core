@@ -190,7 +190,6 @@ public class APIUtil {
         List<DeviceType> deviceTypes;
         try {
             deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
-
             if (deviceTypeAttr instanceof String) {
                 for (DeviceType dt : deviceTypes) {
                     if (dt.getName().equals(deviceTypeAttr)) {
@@ -209,16 +208,14 @@ public class APIUtil {
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
-
-            String msg =
-                    "Invalid device type Attribute is found with the request. Device Type attribute: " + deviceTypeAttr;
+            String msg = "Invalid device type Attribute is found with the request. Device Type attribute: "
+                    + deviceTypeAttr;
             log.error(msg);
             throw new BadRequestException(msg);
-
         } catch (DeviceManagementException e) {
             String msg = "Error occured when getting device types which are supported by the Entgra IoTS";
-            log.error(msg);
-            throw new UnexpectedServerErrorException(msg);
+            log.error(msg, e);
+            throw new UnexpectedServerErrorException(msg, e);
         }
     }
 
@@ -409,5 +406,4 @@ public class APIUtil {
         return mdmConfig.getArtifactDownloadProtocol() + "://" + host + ":" + port
                 + artifactDownloadEndpoint + Constants.FORWARD_SLASH;
     }
-
 }

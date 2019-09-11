@@ -45,7 +45,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     private static final Log log = LogFactory.getLog(GenericLifecycleStateDAOImpl.class);
 
     @Override
-    public LifecycleState getLatestLifeCycleState(String uuid) throws LifeCycleManagementDAOException{
+    public LifecycleState getLatestLifecycleState(String uuid) throws LifeCycleManagementDAOException{
         String sql = "SELECT "
                 + "CURRENT_STATE, "
                 + "PREVIOUS_STATE, "
@@ -66,12 +66,12 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to get latest lifecycle state for a specific"
                     + " application. Application release UUID: " + uuid;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing query to get latest lifecycle state for a specific "
                     + "application. Application release UUID: " + uuid + ". Executed Query: " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }  
     }
@@ -99,14 +99,18 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getString("UPDATED_BY");
-
             }
             return null;
-        } catch (SQLException e) {
-            throw new LifeCycleManagementDAOException("Error occurred while getting application List", e);
-        }  catch (DBConnectionException e) {
-            throw new LifeCycleManagementDAOException("Error occurred while obtaining the DB connection to get latest"
-                    + " lifecycle state for a specific application", e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get the created user of a release which "
+                    + "has APP ID " + appId + " and release UUID ." + uuid;
+            log.error(msg, e);
+            throw new LifeCycleManagementDAOException(msg, e);
+        }  catch (SQLException e) {
+            String msg = "SQL Error occurred when getting the created user of a release which has APP ID " + appId
+                    + " and release UUID ." + uuid;
+            log.error(msg, e);
+            throw new LifeCycleManagementDAOException(msg, e);
         } finally {
             DAOUtil.cleanupResources(stmt, rs);
         }
@@ -138,12 +142,12 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection when getting lifecycle states for an "
                     + "application which has application ID: " + appReleaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "SQL Error occurred while retrieving lifecycle states for application which has application "
                     + "ID: " + appReleaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }
         return lifecycleStates;
@@ -177,13 +181,13 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to add lifecycle state for application "
                     + "release which has ID " + appReleaseId + ". Lifecycle state " + state.getCurrentState();
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing the query to add lifecycle state for application release which"
                     + " has ID " + appReleaseId + ". Lifecycle state " + state.getCurrentState() + ". Executed query: "
                     + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }
     }
@@ -202,12 +206,12 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to delete lifecycle states for application "
                     + "release ID: " + releaseId;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing the query to delete lifecycle states for application release"
                     + " ID: " + releaseId + ". Executed query " + sql;
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }
     }
@@ -229,20 +233,30 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection for deleting application life-cycle states "
                     + "for given application Ids.";
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while executing query to delete application life-cycle states for given "
                     + "application Ids.";
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }
     }
 
+    /***
+     * This method is capable to construct {@link LifecycleState} object by accessing given {@link ResultSet}
+     * @param rs Result Set of an executed query
+     * @return {@link LifecycleState}
+     * @throws LifeCycleManagementDAOException if {@link SQLException} occurs when creating the {@link LifecycleState}
+     * by accessing given {@link ResultSet}. In this particular method {@link SQLException} could occurs if the
+     * columnLabel is not valid or if a database access error occurs or this method is called on a closed result set
+     *
+     */
     private LifecycleState constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
+        LifecycleState lifecycleState = null;
         try {
             if (rs !=null && rs.next()) {
-                LifecycleState lifecycleState = new LifecycleState();
+                lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
                 lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
@@ -250,9 +264,9 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             }
         } catch (SQLException e) {
             String msg = "Error occurred while construct lifecycle state by data which is retrieved from SQL query";
-            log.error(msg);
+            log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }
-        return null;
+        return lifecycleState;
     }
 }

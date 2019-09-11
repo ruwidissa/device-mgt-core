@@ -87,9 +87,10 @@ public class ApplicationManagementUtil {
                 return constructor.newInstance();
             }
         } catch (Exception e) {
-            throw new InvalidConfigurationException(
-                    "Unable to get instance of extension - " + extension.getName() + " , for class - " + extension
-                            .getClassName(), e);
+            String msg = "Unable to get instance of extension - " + extension.getName() + " , for class - " + extension
+                    .getClassName();
+            log.error(msg, e);
+            throw new InvalidConfigurationException(msg, e);
         }
     }
 }

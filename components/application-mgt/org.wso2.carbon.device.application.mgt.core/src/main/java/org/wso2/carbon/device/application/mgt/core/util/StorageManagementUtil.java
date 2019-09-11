@@ -134,8 +134,8 @@ public class StorageManagementUtil {
             return new FileInputStream(sourceFile);
         } catch (FileNotFoundException e) {
             String msg = "Couldn't file the file in file path: " + filePath;
-            log.error(msg);
-            throw new IOException(msg);
+            log.error(msg, e);
+            throw new IOException(msg, e);
         }
     }
 
@@ -144,8 +144,9 @@ public class StorageManagementUtil {
         try {
             md5 = DigestUtils.md5Hex(binaryFile);
         } catch (IOException e) {
-            throw new ApplicationStorageManagementException
-                    ("IO Exception while trying to get the md5sum value of application");
+            String msg = "IO Exception occurred while trying to get the md5sum value of application";
+            log.error(msg, e);
+            throw new ApplicationStorageManagementException(msg, e);
         }
         return md5;
     }

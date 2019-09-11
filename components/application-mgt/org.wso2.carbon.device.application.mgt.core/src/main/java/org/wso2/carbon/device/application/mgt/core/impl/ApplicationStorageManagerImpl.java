@@ -109,7 +109,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         } catch (IOException e) {
             String msg = "IO Exception occurred while saving application artifacts for the application which has UUID "
                     + applicationReleaseDTO.getUuid();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
         }
     }
@@ -136,8 +136,8 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             }
         } catch (ParsingException e){
             String msg = "Application Type doesn't match with supporting application types " + deviceType;
-            log.error(msg);
-            throw new ApplicationStorageManagementException(msg);
+            log.error(msg, e);
+            throw new ApplicationStorageManagementException(msg, e);
         }
         return applicationInstaller;
     }
@@ -158,7 +158,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
         } catch (IOException e) {
             String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
                     + applicationReleaseDTO.getUuid();
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationStorageManagementException( msg, e);
         }
         return applicationReleaseDTO;
@@ -213,7 +213,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             deleteAppReleaseArtifact( storagePath + deletingAppHashValue);
         } catch (IOException e) {
             String msg = "Application installer updating is failed because of I/O issue";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
         }
     }
@@ -243,6 +243,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             return StorageManagementUtil.getInputStream(filePath);
         } catch (IOException e) {
             String msg = "Error occured when accessing the file in file path: " + filePath;
+            log.error(msg, e);
             throw new ApplicationStorageManagementException(msg, e);
         }
     }
