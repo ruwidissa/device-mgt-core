@@ -13,19 +13,15 @@ import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.DeviceTypeEvent;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventRecords;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.TransportType;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -66,8 +62,7 @@ import javax.ws.rs.core.Response;
         }
 )
 @Path("/events")
-@Api(value = "Device Event Management", description = "This API corresponds to all tasks related to device " +
-        "event management")
+@Api(value = "Device Event Management")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public interface DeviceEventManagementService {
@@ -120,13 +115,14 @@ public interface DeviceEventManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployDeviceTypeEventDefinition(@ApiParam(name = "type", value = "The device type, such as android, ios," +
-            " and windows.", required = false)
-                                             @PathParam("type")String deviceType,
-                                             @QueryParam("skipPersist")boolean skipPersist,
-                                             @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete " +
-                                                     "the  DeviceTypeEvent object.", required = true)
-                                             @Valid DeviceTypeEvent deviceTypeEvent);
+    Response deployDeviceTypeEventDefinition(
+            @ApiParam(name = "type", value = "The device type, such as android, ios, and windows.")
+            @PathParam("type")String deviceType,
+            @ApiParam(name = "skipPersist", value = "Is it required to persist the data or not")
+            @QueryParam("skipPersist") boolean skipPersist,
+            @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete the  DeviceTypeEvent object.",
+                    required = true)
+            @Valid DeviceTypeEvent deviceTypeEvent);
 
     @DELETE
     @Path("/{type}")
@@ -358,7 +354,6 @@ public interface DeviceEventManagementService {
             @QueryParam("max") double max
     );
 
-
     @GET
     @Path("/{type}")
     @ApiOperation(
@@ -408,8 +403,7 @@ public interface DeviceEventManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response getDeviceTypeEventDefinition(@ApiParam(name = "type", value = "The type of the device, such as android," +
-            " ios, or windows.", required = false)
-                                          @PathParam("type")String deviceType) ;
-
+    Response getDeviceTypeEventDefinition(
+            @ApiParam(name = "type", value = "The type of the device, such as android, ios, or windows.")
+            @PathParam("type")String deviceType) ;
 }
