@@ -54,6 +54,7 @@ import javax.ws.rs.core.Response;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,7 +107,13 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
         List<String> recordIds = getRecordIds(resultEntries);
         AnalyticsDataResponse response = analyticsDataAPI.get(tenantId, tableName, 1, null, recordIds);
         eventRecords.setCount(eventCount);
-        eventRecords.setList(AnalyticsDataAPIUtil.listRecords(analyticsDataAPI, response));
+        List<Record> records = AnalyticsDataAPIUtil.listRecords(analyticsDataAPI, response);
+        records.sort(new Comparator<Record>() {
+            @Override public int compare(Record r1, Record r2) {
+                return Long.compare(r2.getTimestamp(), r1.getTimestamp());
+            }
+        });
+        eventRecords.setList(records);
         return eventRecords;
     }
 
