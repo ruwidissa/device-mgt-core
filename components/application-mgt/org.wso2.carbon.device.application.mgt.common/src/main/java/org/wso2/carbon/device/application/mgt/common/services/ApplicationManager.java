@@ -31,6 +31,8 @@ import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.response.Category;
 import org.wso2.carbon.device.application.mgt.common.response.Tag;
+import org.wso2.carbon.device.application.mgt.common.wrapper.CustomAppReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.CustomAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
@@ -61,6 +63,9 @@ public interface ApplicationManager {
             throws ApplicationManagementException;
 
     Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException;
+
+    Application createCustomApp(CustomAppWrapper customAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException;
 
     /**
@@ -203,6 +208,9 @@ public interface ApplicationManager {
     ApplicationRelease updateWebAppRelease(String releaseUuid, WebAppReleaseWrapper webAppReleaseWrapper,
             ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
 
+    ApplicationRelease updateCustomAppRelease(String releaseUuid, CustomAppReleaseWrapper customAppReleaseWrapper,
+            ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+
     /***
      * To validate the application creating request
      *
@@ -211,9 +219,9 @@ public interface ApplicationManager {
 
     /***
      *
-     * @throws RequestValidatingException throws if payload does not satisfy requrements.
+     * @throws ApplicationManagementException throws if payload does not satisfy requirements.
      */
-    <T> void validateReleaseCreatingRequest(T param) throws ApplicationManagementException;
+    <T> void validateReleaseCreatingRequest(T param, String deviceType) throws ApplicationManagementException;
 
     /***
      *

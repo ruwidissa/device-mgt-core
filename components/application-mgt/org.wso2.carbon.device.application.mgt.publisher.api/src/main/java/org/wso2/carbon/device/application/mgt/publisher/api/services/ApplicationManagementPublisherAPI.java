@@ -39,6 +39,8 @@ import org.wso2.carbon.device.application.mgt.common.LifecycleChanger;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
+import org.wso2.carbon.device.application.mgt.common.wrapper.CustomAppReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.CustomAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationUpdateWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
@@ -468,9 +470,78 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @POST
+    @Path("/custom-app")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
-    @Path("/ent-app/{appId}")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Create an custom application",
+            notes = "This will create a new custom application",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully created an application.",
+                            response = ApplicationDTO.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "ApplicationDTO creating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while creating the application.",
+                            response = ErrorResponse.class)
+            })
+    Response createCustomApp(
+            @ApiParam(
+                    name = "application",
+                    value = "The application that need to be created.",
+                    required = true)
+            @Multipart("application") CustomAppWrapper customAppWrapper,
+            @ApiParam(
+                    name = "binaryFile",
+                    value = "Binary file of uploading application",
+                    required = true)
+            @Multipart(value = "binaryFile") Attachment binaryFile,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon of the uploading application",
+                    required = true)
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "Banner of the uploading application")
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "Screen Shots of the uploading application",
+                    required = true)
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Screen Shots of the uploading application",
+                    required = false)
+            @Multipart(value = "screenshot3") Attachment screenshot3
+    );
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({"multipart/mixed", MediaType.MULTIPART_FORM_DATA})
+    @Path("/{deviceType}/ent-app/{appId}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
@@ -500,6 +571,11 @@ public interface ApplicationManagementPublisherAPI {
                             response = ErrorResponse.class)
             })
     Response createEntAppRelease(
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Device type that application is compatible with.",
+                    required = true)
+            @PathParam("deviceType") String deviceType,
             @ApiParam(
                     name = "appId",
                     value = "Id of the application.",
@@ -874,6 +950,77 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(
                     value = "pubAppReleaseWrapper",
                     type = "application/json") WebAppReleaseWrapper webAppReleaseWrapper,
+            @ApiParam(
+                    name = "icon",
+                    value = "Icon file of the application release.")
+            @Multipart(value = "icon") Attachment iconFile,
+            @ApiParam(
+                    name = "banner",
+                    value = "banner file of the application release.")
+            @Multipart(value = "banner") Attachment bannerFile,
+            @ApiParam(
+                    name = "screenshot1",
+                    value = "First screenshot of the uploading application")
+            @Multipart(value = "screenshot1") Attachment screenshot1,
+            @ApiParam(
+                    name = "screenshot2",
+                    value = "Second screenshot 2 of the uploading application")
+            @Multipart(value = "screenshot2") Attachment screenshot2,
+            @ApiParam(
+                    name = "screenshot3",
+                    value = "Third screenshot of the uploading application")
+            @Multipart(value = "screenshot3") Attachment screenshot3);
+
+    @PUT
+    @Path("/custom-app-release/{uuid}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(
+            consumes = MediaType.MULTIPART_FORM_DATA,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update an custom application release",
+            notes = "This will update a custom app release",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "OK. \n Successfully created an application release.",
+                            response = ApplicationReleaseDTO.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n " +
+                                    "ApplicationDTO release updating payload contains unacceptable or vulnerable data"),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while releasing the application.",
+                            response = ErrorResponse.class)
+            })
+    Response updateCustomAppRelease(
+            @ApiParam(
+                    name = "UUID",
+                    value = "Unique identifier of the ApplicationDTO Release",
+                    required = true)
+            @PathParam("uuid") String applicationUUID,
+            @ApiParam(
+                    name = "entAppReleaseWrapper",
+                    value = "Application release wrapper which is going to update.",
+                    required = true)
+            @Multipart(
+                    value = "entAppReleaseWrapper",
+                    type = "application/json") CustomAppReleaseWrapper customAppReleaseWrapper,
+            @ApiParam(
+                    name = "binaryFile",
+                    value = "Application installer file.",
+                    required = true)
+            @Multipart(value = "binaryFile") Attachment binaryFile,
             @ApiParam(
                     name = "icon",
                     value = "Icon file of the application release.")

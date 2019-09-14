@@ -32,6 +32,8 @@ import org.wso2.carbon.device.application.mgt.common.response.Application;
 import org.wso2.carbon.device.application.mgt.common.response.ApplicationRelease;
 import org.wso2.carbon.device.application.mgt.common.services.*;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
+import org.wso2.carbon.device.application.mgt.common.wrapper.CustomAppReleaseWrapper;
+import org.wso2.carbon.device.application.mgt.common.wrapper.CustomAppWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.EntAppReleaseWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.ApplicationWrapper;
 import org.wso2.carbon.device.application.mgt.common.wrapper.PublicAppReleaseWrapper;
@@ -266,6 +268,21 @@ public class APIUtil {
             List<ApplicationReleaseDTO> applicationReleaseEntities = publicAppWrapper.getPublicAppReleaseWrappers()
                     .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
             applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
+        } else if (param instanceof CustomAppWrapper){
+            CustomAppWrapper customAppWrapper = (CustomAppWrapper) param;
+            DeviceType deviceType = getDeviceTypeData(customAppWrapper.getDeviceType());
+            applicationDTO.setName(customAppWrapper.getName());
+            applicationDTO.setDescription(customAppWrapper.getDescription());
+            applicationDTO.setAppCategories(customAppWrapper.getCategories());
+            applicationDTO.setType(ApplicationType.CUSTOM.toString());
+            applicationDTO.setSubType(customAppWrapper.getSubMethod());
+            applicationDTO.setPaymentCurrency(customAppWrapper.getPaymentCurrency());
+            applicationDTO.setTags(customAppWrapper.getTags());
+            applicationDTO.setUnrestrictedRoles(customAppWrapper.getUnrestrictedRoles());
+            applicationDTO.setDeviceTypeId(deviceType.getId());
+            List<ApplicationReleaseDTO> applicationReleaseEntities = customAppWrapper.getCustomAppReleaseWrappers()
+                    .stream().map(APIUtil::releaseWrapperToReleaseDTO).collect(Collectors.toList());
+            applicationDTO.setApplicationReleaseDTOs(applicationReleaseEntities);
         }
         return applicationDTO;
     }
@@ -301,6 +318,15 @@ public class APIUtil {
             applicationReleaseDTO.setIsSharedWithAllTenants(publicAppReleaseWrapper.getIsSharedWithAllTenants());
             applicationReleaseDTO.setMetaData(publicAppReleaseWrapper.getMetaData());
             applicationReleaseDTO.setSupportedOsVersions(publicAppReleaseWrapper.getSupportedOsVersions());
+        } else if (param instanceof CustomAppReleaseWrapper) {
+            CustomAppReleaseWrapper customAppReleaseWrapper = (CustomAppReleaseWrapper) param;
+            applicationReleaseDTO.setDescription(customAppReleaseWrapper.getDescription());
+            applicationReleaseDTO.setReleaseType(customAppReleaseWrapper.getReleaseType());
+            applicationReleaseDTO.setVersion(customAppReleaseWrapper.getVersion());
+            applicationReleaseDTO.setPackageName(customAppReleaseWrapper.getPackageName());
+            applicationReleaseDTO.setPrice(customAppReleaseWrapper.getPrice());
+            applicationReleaseDTO.setIsSharedWithAllTenants(customAppReleaseWrapper.getIsSharedWithAllTenants());
+            applicationReleaseDTO.setMetaData(customAppReleaseWrapper.getMetaData());
         }
         return applicationReleaseDTO;
     }

@@ -24,7 +24,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.android.EnterpriseApplication;
 import org.wso2.carbon.device.mgt.common.app.mgt.android.WebApplication;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
-import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
+import org.wso2.carbon.device.mgt.common.app.mgt.App;
 import org.wso2.carbon.device.mgt.common.exceptions.UnknownApplicationTypeException;
 
 /**
@@ -40,7 +40,7 @@ public class MDMAndroidOperationUtil {
 	 * @return operation
 	 *
 	 */
-	public static Operation createInstallAppOperation(MobileApp application) throws UnknownApplicationTypeException {
+	public static Operation createInstallAppOperation(App application) throws UnknownApplicationTypeException {
 
 		ProfileOperation operation = new ProfileOperation();
 		operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION);
@@ -79,7 +79,7 @@ public class MDMAndroidOperationUtil {
 	 * @param application MobileApp application
 	 * @return operation
 	 */
-	public static Operation createAppUninstallOperation(MobileApp application) throws UnknownApplicationTypeException {
+	public static Operation createAppUninstallOperation(App application) throws UnknownApplicationTypeException {
 
 		ProfileOperation operation = new ProfileOperation();
 		operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION);

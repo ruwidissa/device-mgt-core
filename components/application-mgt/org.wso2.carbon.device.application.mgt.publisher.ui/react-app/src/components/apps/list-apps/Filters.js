@@ -291,6 +291,7 @@ class FiltersForm extends React.Component {
                                 <Option value="ENTERPRISE">Enterprise</Option>
                                 <Option value="PUBLIC">Public</Option>
                                 <Option value="WEB_CLIP">Web APP</Option>
+                                <Option value="CUSTOM">Custom</Option>
                                 <Option value="ALL">All</Option>
                             </Select>
                         )}

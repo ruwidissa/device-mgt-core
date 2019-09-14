@@ -143,25 +143,21 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
     }
 
     @Override
-    public ApplicationReleaseDTO uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO,
+    public void uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO,
             String deviceType, InputStream binaryFile) throws ResourceManagementException {
         try {
-            String artifactDirectoryPath;
-            String artifactPath;
             byte [] content = IOUtils.toByteArray(binaryFile);
-
-            artifactDirectoryPath =
+            String artifactDirectoryPath =
                     storagePath + applicationReleaseDTO.getAppHashValue() + File.separator + Constants.APP_ARTIFACT;
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
-            artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
+            String artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
         } catch (IOException e) {
             String msg = "IO Exception while saving the release artifacts in the server for the application UUID "
                     + applicationReleaseDTO.getUuid();
             log.error(msg, e);
-            throw new ApplicationStorageManagementException( msg, e);
+            throw new ResourceManagementException( msg, e);
         }
-        return applicationReleaseDTO;
     }
 
     @Override
