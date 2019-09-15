@@ -92,6 +92,20 @@ class EditReleaseModal extends React.Component {
                     }
                 };
                 break;
+            case "CUSTOM":
+                formConfig.endpoint = "/custom-app-release";
+                formConfig.specificElements = {
+                    binaryFile: {
+                        required: true
+                    },
+                    packageName: {
+                        required: true
+                    },
+                    version: {
+                        required: true
+                    }
+                };
+                break;
         }
 
         this.setState({

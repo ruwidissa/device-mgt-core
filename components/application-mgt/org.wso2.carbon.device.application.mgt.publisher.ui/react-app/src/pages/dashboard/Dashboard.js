@@ -147,6 +147,8 @@ class Dashboard extends React.Component {
                                     APP</Link></Menu.Item>
                                 <Menu.Item key="setting:3"><Link to="/publisher/add-new-app/web-clip">Web
                                     Clip</Link></Menu.Item>
+                                <Menu.Item key="setting:4"><Link to="/publisher/add-new-app/custom-app">Custom
+                                    App</Link></Menu.Item>
                             </SubMenu>
                             <Menu.Item key="2"><Link to="/publisher/manage"><Icon
                                 type="control"/>Manage</Link></Menu.Item>

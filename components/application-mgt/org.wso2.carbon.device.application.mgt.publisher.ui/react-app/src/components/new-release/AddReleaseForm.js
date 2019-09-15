@@ -69,7 +69,7 @@ class AddNewReleaseFormComponent extends React.Component {
     handleSubmit = e => {
         const config = this.props.context;
         e.preventDefault();
-        const {appId} = this.props;
+        const {appId, deviceType} = this.props;
 
         this.props.form.validateFields((err, values) => {
             if (!err) {
@@ -104,7 +104,7 @@ class AddNewReleaseFormComponent extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/ent-app/" + appId;
+                const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/"+deviceType+"/ent-app/" + appId;
 
                 axios.post(
                     url,

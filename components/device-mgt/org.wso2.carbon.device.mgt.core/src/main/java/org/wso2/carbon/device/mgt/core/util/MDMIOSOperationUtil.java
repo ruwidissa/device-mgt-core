@@ -23,7 +23,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.ios.AppStoreApplication;
 import org.wso2.carbon.device.mgt.common.app.mgt.ios.EnterpriseApplication;
 import org.wso2.carbon.device.mgt.common.app.mgt.ios.RemoveApplication;
 import org.wso2.carbon.device.mgt.common.app.mgt.ios.WebClip;
-import org.wso2.carbon.device.mgt.common.app.mgt.MobileApp;
+import org.wso2.carbon.device.mgt.common.app.mgt.App;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 
@@ -40,7 +40,7 @@ public class MDMIOSOperationUtil {
      * @param application MobileApp application
      * @return operation
      */
-    public static Operation createInstallAppOperation(MobileApp application) {
+    public static Operation createInstallAppOperation(App application) {
 
         ProfileOperation operation = new ProfileOperation();
 
@@ -90,7 +90,7 @@ public class MDMIOSOperationUtil {
         return operation;
     }
 
-    public static Operation createAppUninstallOperation(MobileApp application) {
+    public static Operation createAppUninstallOperation(App application) {
 
         ProfileOperation operation = new ProfileOperation();
         operation.setCode(MDMAppConstants.IOSConstants.OPCODE_REMOVE_APPLICATION);

@@ -190,6 +190,7 @@ class AppDetailsDrawer extends React.Component {
         });
     };
 
+
     // change the app name
     handleNameSave = name => {
         const config = this.props.context;

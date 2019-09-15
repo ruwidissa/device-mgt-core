@@ -18,17 +18,35 @@
 
 import React from "react";
 import {
-    Icon,
     PageHeader,
     Typography,
-    Breadcrumb
+    Breadcrumb,
+    Icon
 } from "antd";
-import AddNewReleaseForm from "../../../components/new-release/AddReleaseForm";
+import AddNewAppForm from "../../../components/new-app/AddNewAppForm";
 import {Link} from "react-router-dom";
 
-const Paragraph = Typography;
+const {Paragraph} = Typography;
 
-class AddNewRelease extends React.Component {
+const formConfig = {
+    installationType: "CUSTOM",
+    endpoint: "/custom-app",
+    jsonPayloadName: "application",
+    releaseWrapperName: "customAppReleaseWrappers",
+    specificElements: {
+        binaryFile: {
+            required: true
+        },
+        packageName : {
+            required: true
+        },
+        version : {
+            required: true
+        }
+    }
+};
+
+class AddNewCustomApp extends React.Component {
 
     constructor(props) {
         super(props);
@@ -39,23 +57,22 @@ class AddNewRelease extends React.Component {
     }
 
     render() {
-        const {appId, deviceType} = this.props.match.params;
         return (
             <div>
-                <PageHeader style={{paddingTop: 0}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
+                <PageHeader style={{paddingTop:0}}>
+                    <Breadcrumb style={{paddingBottom:16}}>
                         <Breadcrumb.Item>
                             <Link to="/publisher/apps"><Icon type="home"/> Home</Link>
                         </Breadcrumb.Item>
-                        <Breadcrumb.Item>Add New Release</Breadcrumb.Item>
+                        <Breadcrumb.Item>Add New Custom App</Breadcrumb.Item>
                     </Breadcrumb>
                     <div className="wrap">
-                        <h3>Add New Release</h3>
-                        <Paragraph>Add new release for the application</Paragraph>
+                        <h3>Add New Custom App</h3>
+                        <Paragraph>Submit and share your own application to the corporate app store.</Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-                    <AddNewReleaseForm deviceType={deviceType} appId={appId}/>
+                    <AddNewAppForm formConfig={formConfig}/>
                 </div>
 
             </div>
@@ -64,4 +81,4 @@ class AddNewRelease extends React.Component {
     }
 }
 
-export default AddNewRelease;
+export default AddNewCustomApp;

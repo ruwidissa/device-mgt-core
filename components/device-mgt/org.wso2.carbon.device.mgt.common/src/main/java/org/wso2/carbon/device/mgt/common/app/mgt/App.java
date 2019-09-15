@@ -20,7 +20,6 @@ package org.wso2.carbon.device.mgt.common.app.mgt;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.mgt.common.app.mgt.MobileAppTypes;
 
 import java.util.Properties;
 
@@ -29,7 +28,7 @@ import java.util.Properties;
  * which is used by AppM.
  */
 @ApiModel(value = "MobileApp", description = "Details of a mobile application.")
-public class MobileApp {
+public class App {
 
     @ApiModelProperty(name = "id", value = "Id of the app used internally.", required = true)
     private String id;
@@ -153,5 +152,4 @@ public class MobileApp {
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
-
 }
