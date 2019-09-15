@@ -39,29 +39,15 @@
   padding: 5px;
 }
 
-.logo-image {
-  /*width: 120px;*/
-  height: 31px;
-  margin: 0 5px 16px 24px;
-  float: left;
-}
-
-.logo-image img{
-  height: 35px;
-}
-
 .main-container{
   background: #f0f2f5;
   min-height: 780px
 }
 
-.profile{
-  float:right;
-  margin-right: 2%;
-}
-
 @media only screen and (min-width: 768px) {
+
   .main-container{
     padding: 24px;
   }
+
 }
