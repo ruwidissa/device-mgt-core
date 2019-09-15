@@ -148,21 +148,31 @@ class NewAppDetailsForm extends React.Component {
     getDeviceTypes = () => {
         const config = this.props.context;
         const {formConfig} = this.props;
-        console.log("test");
-
+        const {installationType} = formConfig;
 
         axios.get(
             window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
         ).then(res => {
             if (res.status === 200) {
                 const allDeviceTypes = JSON.parse(res.data.data);
-                const whitelistedDeviceTypes = config.installationTypes[formConfig.installationType].deviceTypes;
+                const mobileDeviceTypes = config.deviceTypes.mobileTypes;
                 const allowedDeviceTypes = [];
-                allDeviceTypes.forEach(deviceType=>{
-                    if(whitelistedDeviceTypes.includes(deviceType.name)){
-                        allowedDeviceTypes.push(deviceType);
-                    }
-                });
+
+                // exclude mobile device types if installation type is custom
+                if(installationType==="CUSTOM"){
+                    allDeviceTypes.forEach(deviceType=>{
+                        if(!mobileDeviceTypes.includes(deviceType.name)){
+                            allowedDeviceTypes.push(deviceType);
+                        }
+                    });
+                }else{
+                    allDeviceTypes.forEach(deviceType=>{
+                        if(mobileDeviceTypes.includes(deviceType.name)){
+                            allowedDeviceTypes.push(deviceType);
+                        }
+                    });
+                }
+
                 this.setState({
                     deviceTypes: allowedDeviceTypes,
                     loading: false,
