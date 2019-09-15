@@ -474,7 +474,7 @@ class AppDetailsDrawer extends React.Component {
                         <Text strong={true}>Releases </Text>
                         {/*display add new release only if app type is enterprise*/}
                         {(app.type === "ENTERPRISE") && (
-                            <Link to={`/publisher/apps/${app.id}/add-release`}><Button htmlType="button" size="small">Add
+                            <Link to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}><Button htmlType="button" size="small">Add
                                 new release</Button></Link>)}
                         <List
                             style={{paddingTop: 16}}
