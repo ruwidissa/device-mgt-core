@@ -67,28 +67,7 @@
       "text": "The final state of an application, where no transition of states will be allowed after this."
     }
   },
-  "installationTypes": {
-    "ENTERPRISE": {
-      "deviceTypes": [
-        "android",
-        "ios"
-      ]
-    },
-    "PUBLIC": {
-      "deviceTypes": [
-        "android",
-        "ios"
-      ]
-    },
-    "WEB_CLIP": {
-      "deviceTypes": [
-        "android",
-        "ios"
-      ]
-    },
-    "CUSTOM": {
-      "deviceTypes": [
-      ]
-    }
+  "deviceTypes": {
+    "mobileTypes": ["android", "ios"]
   }
 }

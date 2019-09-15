@@ -414,6 +414,7 @@ class AppDetailsDrawer extends React.Component {
         }
     };
 
+
     render() {
         const config = this.props.context;
         const {app, visible, onClose} = this.props;
@@ -459,12 +460,11 @@ class AppDetailsDrawer extends React.Component {
             <div>
                 <Drawer
                     placement="right"
-                    width={this.state.drawerWidth}
+                    width={640}
                     closable={false}
                     onClose={onClose}
                     visible={visible}
                 >
-
                     <Spin spinning={loading} delay={500}>
                         <div style={{textAlign: "center"}}>
                             {avatar}
@@ -555,7 +555,6 @@ class AppDetailsDrawer extends React.Component {
                         )}
 
                         <Divider dashed={true}/>
-
                         <Text strong={true}>Categories </Text>
                         {!isCategoriesEditEnabled && (<Text
                                 style={{color: config.theme.primaryColor, cursor: "pointer"}}
@@ -600,8 +599,8 @@ class AppDetailsDrawer extends React.Component {
                             }</span>
                         )}
 
-                        <Divider dashed={true}/>
 
+                        <Divider dashed={true}/>
                         <Text strong={true}>Tags </Text>
                         {!isTagsEditEnabled && (<Text
                                 style={{color: config.theme.primaryColor, cursor: "pointer"}}
