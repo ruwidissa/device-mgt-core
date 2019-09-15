@@ -48,6 +48,7 @@ import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManage
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 
+import java.beans.Customizer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;

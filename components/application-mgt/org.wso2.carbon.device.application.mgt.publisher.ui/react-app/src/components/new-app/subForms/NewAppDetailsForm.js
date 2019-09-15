@@ -42,7 +42,8 @@ class NewAppDetailsForm extends React.Component {
             categories: [],
             tags: [],
             deviceTypes:[]
-        }
+        };
+
     }
 
 
@@ -146,18 +147,31 @@ class NewAppDetailsForm extends React.Component {
 
     getDeviceTypes = () => {
         const config = this.props.context;
+        const {formConfig} = this.props;
+        console.log("test");
+
+
         axios.get(
             window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
         ).then(res => {
             if (res.status === 200) {
-                const deviceTypes = JSON.parse(res.data.data);
+                const allDeviceTypes = JSON.parse(res.data.data);
+                const whitelistedDeviceTypes = config.installationTypes[formConfig.installationType].deviceTypes;
+                const allowedDeviceTypes = [];
+                allDeviceTypes.forEach(deviceType=>{
+                    if(whitelistedDeviceTypes.includes(deviceType.name)){
+                        allowedDeviceTypes.push(deviceType);
+                    }
+                });
                 this.setState({
-                    deviceTypes,
+                    deviceTypes: allowedDeviceTypes,
                     loading: false,
                 });
             }
 
+
         }).catch((error) => {
+            console.log(error);
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 window.location.href = window.location.origin + '/publisher/login';
             } else {
@@ -178,6 +192,7 @@ class NewAppDetailsForm extends React.Component {
         const {formConfig} = this.props;
         const {categories, tags, deviceTypes} = this.state;
         const {getFieldDecorator} = this.props.form;
+
 
         return (
             <div>

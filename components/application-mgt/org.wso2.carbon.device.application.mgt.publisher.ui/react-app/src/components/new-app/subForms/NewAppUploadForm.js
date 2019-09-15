@@ -77,7 +77,7 @@ class NewAppUploadForm extends React.Component {
                     releaseType: releaseType
                 };
 
-                if (formConfig.installationType !== "WEB_CLIP") {
+                if (formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") {
                     release.supportedOsVersions = "4.0-10.0";
                 }
 

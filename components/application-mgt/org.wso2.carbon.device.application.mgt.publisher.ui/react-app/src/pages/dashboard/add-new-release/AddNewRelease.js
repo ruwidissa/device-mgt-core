@@ -39,7 +39,7 @@ class AddNewRelease extends React.Component {
     }
 
     render() {
-        const {appId} = this.props.match.params;
+        const {appId, deviceType} = this.props.match.params;
         return (
             <div>
                 <PageHeader style={{paddingTop: 0}}>
@@ -51,11 +51,11 @@ class AddNewRelease extends React.Component {
                     </Breadcrumb>
                     <div className="wrap">
                         <h3>Add New Release</h3>
-                        <Paragraph>Maintain and manage categories and tags here..</Paragraph>
+                        <Paragraph>Add new release for the application</Paragraph>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-                    <AddNewReleaseForm appId={appId}/>
+                    <AddNewReleaseForm deviceType={deviceType} appId={appId}/>
                 </div>
 
             </div>

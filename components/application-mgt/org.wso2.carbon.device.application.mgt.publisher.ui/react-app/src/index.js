@@ -55,7 +55,7 @@ const routes = [
                 component: Release
             },
             {
-                path: '/publisher/apps/:appId/add-release',
+                path: '/publisher/apps/:deviceType/:appId/add-release',
                 component: AddNewRelease,
                 exact: true
             },
