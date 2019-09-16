@@ -54,6 +54,11 @@
 			<groupId>org.wso2.carbon.devicemgt</groupId>
 			<artifactId>org.wso2.carbon.policy.mgt.core</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -85,7 +90,9 @@
 							org.wso2.carbon.policy.mgt.core.*,
 							org.wso2.carbon.policy.mgt.core,
 							com.google.gson,
-							org.wso2.carbon.device.mgt.core.service.*
+							org.wso2.carbon.device.mgt.core.service.*,
+                            org.wso2.carbon.device.application.mgt.common.*,
+                            org.wso2.carbon.device.application.mgt.common.services.*
                         </Import-Package>
                     </instructions>
                 </configuration>
