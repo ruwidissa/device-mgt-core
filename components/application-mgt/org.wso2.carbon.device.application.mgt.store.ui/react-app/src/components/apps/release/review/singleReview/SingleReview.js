@@ -25,6 +25,7 @@ import "./SingleReview.css";
 import EditReview from "./editReview/EditReview";
 import axios from "axios";
 import {withConfigContext} from "../../../../../context/ConfigContext";
+import {handleApiError} from "../../../../../js/Utils";
 
 const {Text, Paragraph} = Typography;
 const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3', '#e84393', '#f9ca24'];
@@ -78,17 +79,7 @@ class SingleReview extends React.Component {
                 this.props.deleteCallback(id);
             }
         }).catch((error) => {
-            console.log(error);
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "We were unable to delete the review..",
-                });
-            }
+            handleApiError(error,"We were unable to delete the review..");
         });
 
     };

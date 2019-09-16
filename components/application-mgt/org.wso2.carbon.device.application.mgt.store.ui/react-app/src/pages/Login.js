@@ -21,6 +21,7 @@ import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
 import './Login.css';
 import axios from 'axios';
 import {withConfigContext} from "../context/ConfigContext";
+import {handleApiError} from "../js/Utils";
 
 const {Title} = Typography;
 const {Text} = Typography;
@@ -104,7 +105,8 @@ class NormalLoginForm extends React.Component {
                         window.location = window.location.origin+ "/store";
                     }
                 }).catch(function (error) {
-                    if (error.response.status === 400) {
+                    handleApiError(error,"Error occurred while trying to load groups.");
+                    if (error.hasOwnProperty("response") && error.response.status === 400) {
                         thisForm.setState({
                             inValid: true,
                             loading: false

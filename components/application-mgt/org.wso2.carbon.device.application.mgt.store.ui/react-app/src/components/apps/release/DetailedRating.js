@@ -17,11 +17,12 @@
  */
 
 import React from "react";
-import {Row, Typography, Icon} from "antd";
+import {Row, Typography, Icon, notification} from "antd";
 import StarRatings from "react-star-ratings";
 import "./DetailedRating.css";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const { Text } = Typography;
 
@@ -62,9 +63,7 @@ class DetailedRating extends React.Component{
             }
 
         }).catch(function (error) {
-            if (error.response.status === 401) {
-                window.location.href = window.location.origin+'/store/login';
-            }
+            handleApiError(error,"Error occurred while trying to load ratings.");
         });
     };
 

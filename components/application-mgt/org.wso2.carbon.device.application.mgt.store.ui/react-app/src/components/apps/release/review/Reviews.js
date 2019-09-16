@@ -24,6 +24,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {handleApiError} from "../../../../js/Utils";
 
 const limit = 5;
 
@@ -60,16 +61,7 @@ class Reviews extends React.Component {
             }
 
         }).catch(function (error) {
-            if (error.response.status === 401) {
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load reviews.",
-                });
-            }
+            handleApiError(error,"Error occurred while trying to load reviews.");
         });
     };
 

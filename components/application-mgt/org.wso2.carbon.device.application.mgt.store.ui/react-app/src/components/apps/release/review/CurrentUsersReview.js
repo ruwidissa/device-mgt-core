@@ -22,6 +22,7 @@ import SingleReview from "./singleReview/SingleReview";
 import axios from "axios";
 import AddReview from "./AddReview";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Text, Paragraph} = Typography;
 
@@ -52,17 +53,7 @@ class CurrentUsersReview extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty(status) && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to get your review.",
-                });
-            }
+            handleApiError(error,"Error occurred while trying to get your review.");
         });
     };
 

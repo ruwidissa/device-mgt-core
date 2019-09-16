@@ -26,6 +26,7 @@ import axios from "axios";
 import "./Dashboard.css";
 import {withConfigContext} from "../../context/ConfigContext";
 import Logout from "./logout/Logout";
+import {handleApiError} from "../../js/Utils";
 
 const {SubMenu} = Menu;
 
@@ -58,16 +59,7 @@ class Dashboard extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load device types.",
-                });
-            }
+            handleApiError(error,"Error occurred while trying to load device types.");
             this.setState({
                 loading: false
             });
