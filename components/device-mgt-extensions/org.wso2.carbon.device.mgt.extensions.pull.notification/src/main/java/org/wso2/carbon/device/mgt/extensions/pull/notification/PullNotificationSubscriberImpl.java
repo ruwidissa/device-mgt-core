@@ -24,7 +24,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
@@ -44,6 +48,7 @@ public class PullNotificationSubscriberImpl implements PullNotificationSubscribe
             throw new AssertionError();
         }
         public static final String POLICY_MONITOR = "POLICY_MONITOR";
+        public static final String INSTALL_APPLICATION = "INSTALL_APPLICATION";
     }
 
 
@@ -68,8 +73,12 @@ public class PullNotificationSubscriberImpl implements PullNotificationSubscribe
             } else {
                 PullNotificationDataHolder.getInstance().getDeviceManagementProviderService().updateOperation(
                         deviceIdentifier, operation);
+                if (OperationCodes.INSTALL_APPLICATION.equals(operation.getCode())
+                        && Operation.Status.COMPLETED == operation.getStatus()) {
+                    updateAppSubStatus(deviceIdentifier, operation.getId(), operation.getCode());
+                }
             }
-        } catch (OperationManagementException e) {
+        } catch (OperationManagementException | DeviceManagementException | ApplicationManagementException e) {
             throw new PullNotificationExecutionFailedException(e);
         } catch (PolicyComplianceException e) {
             throw new PullNotificationExecutionFailedException("Invalid payload format compliant feature", e);
@@ -98,5 +107,12 @@ public class PullNotificationSubscriberImpl implements PullNotificationSubscribe
             complianceFeatures.add(complianceFeature);
         }
         return complianceFeatures;
+    }
+
+    private void updateAppSubStatus(DeviceIdentifier deviceIdentifier, int operationId, String status)
+            throws DeviceManagementException, ApplicationManagementException {
+        ApplicationManager applicationManager = PullNotificationDataHolder.getInstance().getApplicationManager();
+        Device device = PullNotificationDataHolder.getInstance().getDeviceManagementProviderService().getDevice(deviceIdentifier);
+        applicationManager.updateSubsStatus(device.getId(), operationId, status);
     }
 }
