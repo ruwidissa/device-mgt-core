@@ -463,68 +463,94 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             throws ApplicationManagementException {
         try {
             //todo rethink and modify the {@link App} usage
-            App app = new App();
-            MobileAppTypes mobileAppType = MobileAppTypes.valueOf(application.getType());
-            if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+            if (ApplicationType.CUSTOM.toString().equalsIgnoreCase(application.getType())) {
+                ProfileOperation operation = new ProfileOperation();
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    app.setType(mobileAppType);
-                    app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
-                    return MDMAndroidOperationUtil.createInstallAppOperation(app);
+                    operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION);
+                    operation.setType(Operation.Type.PROFILE);
+                    CustomApplication customApplication = new CustomApplication();
+                    customApplication.setType(application.getType());
+                    customApplication.setUrl(application.getApplicationReleases().get(0).getInstallerPath());
+                    operation.setPayLoad(customApplication.toJSON());
+                    return operation;
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                    return MDMAndroidOperationUtil.createAppUninstallOperation(app);
-                } else {
-                    String msg = "Invalid Action is found. Action: " + action;
-                    log.error(msg);
-                    throw new ApplicationManagementException(msg);
-                }
-            } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
-                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    String plistDownloadEndpoint = APIUtil.getArtifactDownloadBaseURL()
-                            + MDMAppConstants.IOSConstants.PLIST + Constants.FORWARD_SLASH
-                            + application.getApplicationReleases().get(0).getUuid();
-                    app.setType(mobileAppType);
-                    app.setLocation(plistDownloadEndpoint);
-                    Properties properties = new Properties();
-                    properties.put(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP, true);
-                    properties.put(MDMAppConstants.IOSConstants.IS_REMOVE_APP, true);
-                    app.setProperties(properties);
-                    return MDMIOSOperationUtil.createInstallAppOperation(app);
-                } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                    return MDMIOSOperationUtil.createAppUninstallOperation(app);
+                    operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION);
+                    operation.setType(Operation.Type.PROFILE);
+                    CustomApplication customApplication = new CustomApplication();
+                    customApplication.setType(application.getType());
+                    //todo get application package name and set
+                    operation.setPayLoad(customApplication.toJSON());
+                    return operation;
                 } else {
                     String msg = "Invalid Action is found. Action: " + action;
                     log.error(msg);
                     throw new ApplicationManagementException(msg);
                 }
             } else {
-                if (ApplicationType.CUSTOM.toString().equalsIgnoreCase(application.getType())) {
+                App app = new App();
+                MobileAppTypes mobileAppType = MobileAppTypes.valueOf(application.getType());
+                if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
                     if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                        ProfileOperation operation = new ProfileOperation();
-                        operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION);
-                        operation.setType(Operation.Type.PROFILE);
-                        CustomApplication customApplication = new CustomApplication();
-                        customApplication.setType(application.getType());
-                        customApplication.setUrl(application.getApplicationReleases().get(0).getInstallerPath());
-                        operation.setPayLoad(customApplication.toJSON());
-                        return operation;
+                        app.setType(mobileAppType);
+                        app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
+                        return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                        ProfileOperation operation = new ProfileOperation();
-                        operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION);
-                        operation.setType(Operation.Type.PROFILE);
-                        CustomApplication customApplication = new CustomApplication();
-                        customApplication.setType(application.getType());
-                        //todo get application package name and set
-                        operation.setPayLoad(customApplication.toJSON());
                         return MDMAndroidOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
                         log.error(msg);
                         throw new ApplicationManagementException(msg);
                     }
+                } else if (DeviceTypes.IOS.toString().equalsIgnoreCase(deviceType)) {
+                    if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                        String plistDownloadEndpoint =
+                                APIUtil.getArtifactDownloadBaseURL() + MDMAppConstants.IOSConstants.PLIST
+                                        + Constants.FORWARD_SLASH + application.getApplicationReleases().get(0)
+                                        .getUuid();
+                        app.setType(mobileAppType);
+                        app.setLocation(plistDownloadEndpoint);
+                        Properties properties = new Properties();
+                        properties.put(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP, true);
+                        properties.put(MDMAppConstants.IOSConstants.IS_REMOVE_APP, true);
+                        app.setProperties(properties);
+                        return MDMIOSOperationUtil.createInstallAppOperation(app);
+                    } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                        return MDMIOSOperationUtil.createAppUninstallOperation(app);
+                    } else {
+                        String msg = "Invalid Action is found. Action: " + action;
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
                 } else {
-                    String msg = "Invalid device type is found. Device Type: " + deviceType;
-                    log.error(msg);
-                    throw new ApplicationManagementException(msg);
+                    if (ApplicationType.CUSTOM.toString().equalsIgnoreCase(application.getType())) {
+                        if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                            ProfileOperation operation = new ProfileOperation();
+                            operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION);
+                            operation.setType(Operation.Type.PROFILE);
+                            CustomApplication customApplication = new CustomApplication();
+                            customApplication.setType(application.getType());
+                            customApplication.setUrl(application.getApplicationReleases().get(0).getInstallerPath());
+                            operation.setPayLoad(customApplication.toJSON());
+                            return operation;
+                        } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                            ProfileOperation operation = new ProfileOperation();
+                            operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION);
+                            operation.setType(Operation.Type.PROFILE);
+                            CustomApplication customApplication = new CustomApplication();
+                            customApplication.setType(application.getType());
+                            //todo get application package name and set
+                            operation.setPayLoad(customApplication.toJSON());
+                            return MDMAndroidOperationUtil.createAppUninstallOperation(app);
+                        } else {
+                            String msg = "Invalid Action is found. Action: " + action;
+                            log.error(msg);
+                            throw new ApplicationManagementException(msg);
+                        }
+                    } else {
+                        String msg = "Invalid device type is found. Device Type: " + deviceType;
+                        log.error(msg);
+                        throw new ApplicationManagementException(msg);
+                    }
                 }
             }
         } catch (UnknownApplicationTypeException e) {
