@@ -20,6 +20,7 @@ import React from "react";
 import {notification, Menu, Icon} from 'antd';
 import axios from 'axios';
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 /*
 This class for call the logout api by sending request
@@ -52,19 +53,7 @@ class Logout extends React.Component {
                 window.location = window.location.origin + "/store/login";
             }
         }).catch(function (error) {
-
-            if (error.hasOwnProperty("response") && error.response.status === 400) {
-                thisForm.setState({
-                    inValid: true
-                });
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to logout.",
-                });
-            }
+            handleApiError(error,"Error occurred while trying to get your review.");
         });
     };
 
