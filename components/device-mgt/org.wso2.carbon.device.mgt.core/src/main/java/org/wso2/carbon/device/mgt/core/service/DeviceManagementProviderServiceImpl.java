@@ -51,6 +51,7 @@ import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublish
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
@@ -129,6 +130,8 @@ import org.wso2.carbon.email.sender.core.EmailSendingFailedException;
 import org.wso2.carbon.email.sender.core.EmailTransportNotConfiguredException;
 import org.wso2.carbon.email.sender.core.TypedValue;
 import org.wso2.carbon.email.sender.core.service.EmailSenderService;
+import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.xml.bind.JAXBContext;
@@ -3500,6 +3503,65 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             return wrapConfigurations(device, ctx.getTenantDomain(), configurationEntries, owner);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    @Override
+    public List<String> transferDeviceToTenant(DeviceTransferRequest deviceTransferRequest)
+            throws DeviceManagementException, DeviceNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Attempting to transfer devices to '" +
+                    deviceTransferRequest.getDestinationTenant() + "'");
+        }
+        List<String> enrolledDevices = new ArrayList<>();
+        DeviceIdentifier deviceIdentifier;
+        for (String deviceId : deviceTransferRequest.getDeviceIds()) {
+            deviceIdentifier = new DeviceIdentifier();
+            deviceIdentifier.setId(deviceId);
+            deviceIdentifier.setType(deviceTransferRequest.getDeviceType());
+            if (isEnrolled(deviceIdentifier)) {
+                enrolledDevices.add(deviceId);
+            } else {
+                log.warn("Device '" + deviceId + "' is not enrolled with super tenant. Hence excluding from transferring");
+            }
+        }
+
+        if (enrolledDevices.isEmpty()) {
+            throw new DeviceNotFoundException("No any enrolled device found to transfer");
+        }
+
+        int destinationTenantId;
+        String owner;
+        try {
+            TenantMgtAdminService tenantMgtAdminService = new TenantMgtAdminService();
+            TenantInfoBean tenantInfoBean = tenantMgtAdminService.getTenant(deviceTransferRequest.getDestinationTenant());
+            destinationTenantId = tenantInfoBean.getTenantId();
+            owner = tenantInfoBean.getAdmin();
+        } catch (Exception e) {
+            String msg = "Error getting destination tenant id and admin from domain'" +
+                    deviceTransferRequest.getDestinationTenant() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        }
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            List<String> movedDevices = new ArrayList<>();
+            for (String deviceId : enrolledDevices) {
+                if (deviceDAO.transferDevice(deviceTransferRequest.getDeviceType(), deviceId, owner, destinationTenantId)){
+                    movedDevices.add(deviceId);
+                } else {
+                    log.warn("Device '" + deviceId + "' not transferred to tenant " + destinationTenantId);
+                }
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+            return movedDevices;
+        } catch (SQLException | DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error in transferring devices to tenant '" + deviceTransferRequest.getDestinationTenant() + "'";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        }  finally {
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 

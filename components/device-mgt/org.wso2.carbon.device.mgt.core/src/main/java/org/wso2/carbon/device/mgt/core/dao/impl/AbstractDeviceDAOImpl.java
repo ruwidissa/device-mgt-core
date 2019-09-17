@@ -1937,4 +1937,49 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
+
+    public boolean transferDevice(String deviceType, String deviceIdentifier, String owner, int destinationTenantId)
+            throws DeviceManagementDAOException, SQLException {
+        Connection conn = this.getConnection();
+        int deviceId = getDeviceId(conn, new DeviceIdentifier(deviceIdentifier, deviceType), -1234);
+        PreparedStatement stmt = null;
+        try {
+            String sql = "UPDATE DM_DEVICE SET TENANT_ID = ? WHERE ID = ? AND TENANT_ID = -1234";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, destinationTenantId);
+            stmt.setInt(2, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            conn.rollback();
+            throw new DeviceManagementDAOException("Error occurred while removing device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        try {
+            String sql = "UPDATE DM_DEVICE_PROPERTIES SET TENANT_ID = ? " +
+                    "WHERE DEVICE_TYPE_NAME = ? AND DEVICE_IDENTIFICATION = ? AND TENANT_ID = -1234";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, destinationTenantId);
+            stmt.setString(2, deviceType);
+            stmt.setString(3, deviceIdentifier);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        try {
+            String sql = "UPDATE DM_ENROLMENT SET TENANT_ID = ?, OWNER = ? WHERE DEVICE_ID = ? AND TENANT_ID = -1234";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, destinationTenantId);
+            stmt.setString(2, owner);
+            stmt.setInt(3, deviceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while removing device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return true;
+    }
 }

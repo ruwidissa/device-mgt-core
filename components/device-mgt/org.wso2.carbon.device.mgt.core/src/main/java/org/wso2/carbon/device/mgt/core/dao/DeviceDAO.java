@@ -45,6 +45,7 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -529,4 +530,7 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException
      */
     void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
+
+    boolean transferDevice(String deviceType, String deviceId, String owner, int destinationTenantId)
+            throws DeviceManagementDAOException, SQLException;
 }
