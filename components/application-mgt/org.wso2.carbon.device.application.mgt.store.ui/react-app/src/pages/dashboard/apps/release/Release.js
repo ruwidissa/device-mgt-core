@@ -23,6 +23,7 @@ import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {Link} from "react-router-dom";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Title} = Typography;
 
@@ -71,20 +72,7 @@ class Release extends React.Component {
             }
 
         }).catch((error) => {
-            console.log(error);
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load releases.",
-                });
-            }
-
+            handleApiError(error,"Error occurred while trying to load releases.");
             this.setState({loading: false});
         });
     };

@@ -21,6 +21,7 @@ import AppCard from "./AppCard";
 import {Col, message, notification, Row, Result, Skeleton} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../context/ConfigContext";
+import {handleApiError} from "../../js/Utils";
 
 class AppList extends React.Component {
     constructor(props) {
@@ -72,20 +73,7 @@ class AppList extends React.Component {
             }
 
         }).catch((error) => {
-            console.log(error.response);
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popup with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load apps.",
-                });
-            }
-
+            handleApiError(error,"Error occurred while trying to load apps.");
             this.setState({loading: false});
         });
     };

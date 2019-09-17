@@ -21,6 +21,7 @@ import {Typography, Select, Spin, message, notification, Button} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -67,18 +68,7 @@ class UserInstall extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.hasOwnProperty(status) && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load users.",
-                });
-            }
-
+            handleApiError(error,"Error occurred while trying to load users.");
             this.setState({fetching: false});
         });
     };

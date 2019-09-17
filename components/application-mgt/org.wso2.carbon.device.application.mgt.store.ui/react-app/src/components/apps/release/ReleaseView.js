@@ -27,6 +27,7 @@ import axios from "axios";
 import AppInstallModal from "./install/AppInstallModal";
 import CurrentUsersReview from "./review/CurrentUsersReview";
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const {Title, Text, Paragraph} = Typography;
 
@@ -78,20 +79,7 @@ class ReleaseView extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.response.status === 401) {
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                this.setState({
-                    loading: false,
-                    visible: false
-                });
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while installing the app.",
-                });
-            }
+            handleApiError(error,"Error occurred while installing the app.");
         });
     };
 

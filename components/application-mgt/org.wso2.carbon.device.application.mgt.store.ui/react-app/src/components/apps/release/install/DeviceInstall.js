@@ -24,6 +24,7 @@ import TimeAgo from 'javascript-time-ago'
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Text} = Typography;
 const columns = [
@@ -166,20 +167,7 @@ class DeviceInstall extends React.Component {
             }
 
         }).catch((error) => {
-            console.log(error);
-            if (error.hasOwnProperty("status") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/store/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load devices.",
-                });
-            }
-
+            handleApiError(error,"Error occurred while trying to load devices.");
             this.setState({loading: false});
         });
     };

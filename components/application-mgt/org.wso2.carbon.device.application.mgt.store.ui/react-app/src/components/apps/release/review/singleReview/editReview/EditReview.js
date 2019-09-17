@@ -22,6 +22,7 @@ import StarRatings from "react-star-ratings";
 import axios from "axios";
 import "./EditReview.css";
 import {withConfigContext} from "../../../../../../context/ConfigContext";
+import {handleApiError} from "../../../../../../js/Utils";
 
 const {Title} = Typography;
 const {TextArea} = Input;
@@ -115,21 +116,11 @@ class EditReview extends React.Component {
             }
 
         }).catch((error) => {
-            console.log(error);
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/store/login';
-            } else {
-                this.setState({
-                    loading: false,
-                    visible: false
-                });
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "We are unable to add your review right now.",
-                });
-            }
+            handleApiError(error,"We are unable to add your review right now.");
+            this.setState({
+                loading: false,
+                visible: false
+            });
         });
 
 
