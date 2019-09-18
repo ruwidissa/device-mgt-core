@@ -60,9 +60,8 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
         return lifecycleStateManager.getLifecycleConfig();
     }
 
-    @Override public InputStream getArtifactStream(String uuid, String folderName, String artifactName)
+    @Override public InputStream getArtifactStream(int tenantId, String uuid, String folderName, String artifactName)
             throws ApplicationManagementException {
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
         ApplicationReleaseDAO applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
         String appReleaseHashValue;
@@ -83,9 +82,8 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
             }
             return inputStream;
         } catch (ApplicationManagementDAOException e) {
-            String msg =
-                    "Error occurred when retrieving application release hash value for given application release UUID: "
-                            + uuid;
+            String msg = "Error occurred when retrieving application release hash value for given application release "
+                    + "UUID: " + uuid;
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationStorageManagementException e) {

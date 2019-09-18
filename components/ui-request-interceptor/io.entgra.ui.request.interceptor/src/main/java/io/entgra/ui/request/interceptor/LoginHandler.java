@@ -38,8 +38,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -66,11 +64,6 @@ public class LoginHandler extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             validateLoginRequest(req, resp);
-            DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance()
-                    .getDeviceManagementConfig();
-            String adminUsername = deviceManagementConfig.getIdentityConfigurations().getAdminUsername();
-            String adminPwd = deviceManagementConfig.getIdentityConfigurations().getAdminPassword();
-
             HttpSession httpSession = req.getSession(false);
             if (httpSession != null) {
                 httpSession.invalidate();
@@ -120,7 +113,7 @@ public class LoginHandler extends HttpServlet {
                 // default login
                 HttpPost apiRegEndpoint = new HttpPost(serverUrl + HandlerConstants.APP_REG_ENDPOINT);
                 apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
-                        .encodeToString((adminUsername + HandlerConstants.COLON + adminPwd).getBytes()));
+                        .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
                 apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
                 apiRegEndpoint.setEntity(constructAppRegPayload(tags));
 
