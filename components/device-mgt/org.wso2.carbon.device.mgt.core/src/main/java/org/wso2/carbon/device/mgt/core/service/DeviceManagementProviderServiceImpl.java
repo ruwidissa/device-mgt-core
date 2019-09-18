@@ -1410,29 +1410,26 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             publicSharedDeviceTypesInDB = deviceTypeDAO.getSharedDeviceTypes();
             Map<DeviceTypeServiceIdentifier, DeviceManagementService> registeredTypes =
                     pluginRepository.getAllDeviceManagementServices(tenantId);
-            Set<String> deviceTypeSetForTenant = new HashSet<>();
-
+            // Get the device from the public space, however if there is another device with same name then give
+            // priority to that
+            if (deviceTypesProvidedByTenant != null) {
+                for (DeviceType deviceType : deviceTypesProvidedByTenant) {
+                    deviceTypesResponse.add(deviceType.getName());
+                }
+            }
+            if (publicSharedDeviceTypesInDB != null) {
+                for (String deviceType: publicSharedDeviceTypesInDB) {
+                    if (!deviceTypesResponse.contains(deviceType)) {
+                        deviceTypesResponse.add(deviceType);
+                    }
+                }
+            }
             if (registeredTypes != null) {
-                if (deviceTypesProvidedByTenant != null) {
-                    for (DeviceType deviceType : deviceTypesProvidedByTenant) {
-                        DeviceTypeServiceIdentifier providerKey = new DeviceTypeServiceIdentifier(deviceType.getName(), tenantId);
-                        if (registeredTypes.get(providerKey) != null || deviceType.getDeviceTypeMetaDefinition() != null) {
-                            deviceTypesResponse.add(deviceType.getName());
-                            deviceTypeSetForTenant.add(deviceType.getName());
-                        }
+                for (DeviceTypeServiceIdentifier deviceType: registeredTypes.keySet()) {
+                    if (!deviceTypesResponse.contains(deviceType.getDeviceType())) {
+                        deviceTypesResponse.add(deviceType.getDeviceType());
                     }
                 }
-                // Get the device from the public space, however if there is another device with same name then give
-                // priority to that
-                if (publicSharedDeviceTypesInDB != null) {
-                    for (String deviceType : publicSharedDeviceTypesInDB) {
-                        DeviceTypeServiceIdentifier providerKey = new DeviceTypeServiceIdentifier(deviceType);
-                        if (registeredTypes.get(providerKey) != null && !deviceTypeSetForTenant.contains(deviceType)) {
-                            deviceTypesResponse.add(deviceType);
-                        }
-                    }
-                }
-
             }
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while obtaining the device types.";
@@ -3489,12 +3486,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
 
         try {
-            Device device = this.getDevice(new DeviceIdentifier(deviceProperties.getDeviceIdentifier(),
-                                                                deviceProperties.getDeviceTypeName()), false);
-            String owner = device.getEnrolmentInfo().getOwner();
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             ctx.setTenantId(Integer.parseInt(deviceProperties.getTenantId()), true);
+            Device device = this.getDevice(new DeviceIdentifier(deviceProperties.getDeviceIdentifier(),
+                                                                deviceProperties.getDeviceTypeName()), false);
+            String owner = device.getEnrolmentInfo().getOwner();
             PlatformConfiguration configuration = this.getConfiguration(device.getType());
             List<ConfigurationEntry> configurationEntries = new ArrayList<>();
             if (configuration != null) {
