@@ -225,7 +225,7 @@ public class GroupManagementProviderServiceTest extends BaseDeviceManagementTest
 
     @Test(dependsOnMethods = ("createGroup"))
     public void getDevices() throws GroupManagementException {
-        List<Device> devices = groupManagementProviderService.getDevices(1, 1, 50);
+        List<Device> devices = groupManagementProviderService.getDevices(1, 1, 50, false);
         Assert.assertNotNull(devices);
     }
 

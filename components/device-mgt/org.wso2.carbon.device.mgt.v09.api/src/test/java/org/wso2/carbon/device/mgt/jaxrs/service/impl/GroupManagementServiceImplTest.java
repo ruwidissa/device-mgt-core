@@ -266,9 +266,9 @@ public class GroupManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
         Mockito.doReturn(1).when(groupManagementProviderService).getDeviceCount(Mockito.anyInt());
-        Mockito.doReturn(new ArrayList<Device>()).when(groupManagementProviderService).getDevices(1, 0, 10);
-        Mockito.doReturn(null).when(groupManagementProviderService).getDevices(2, 0, 10);
-        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getDevices(3, 0, 10);
+        Mockito.doReturn(new ArrayList<Device>()).when(groupManagementProviderService).getDevices(1, 0, 10, false);
+        Mockito.doReturn(null).when(groupManagementProviderService).getDevices(2, 0, 10, false);
+        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getDevices(3, 0, 10, false);
         Response response = groupManagementService.getDevicesOfGroup(1, 0, 10);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "getDevicesOfGroup request failed for a request with valid parameters");

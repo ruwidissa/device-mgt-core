@@ -138,7 +138,7 @@ public class GroupManagementProviderServiceNegativeTest extends BaseDeviceManage
     @Test(description = "This method tests the getDevices method under negative circumstances", expectedExceptions =
             {GroupManagementException.class})
     public void testGetDevicesWithPagination() throws GroupManagementException {
-        groupManagementProviderService.getDevices(1, 0, 10);
+        groupManagementProviderService.getDevices(1, 0, 10, false);
     }
 
     @Test(description = "This method tests the getGroupCount with username when the user name is given as null",
