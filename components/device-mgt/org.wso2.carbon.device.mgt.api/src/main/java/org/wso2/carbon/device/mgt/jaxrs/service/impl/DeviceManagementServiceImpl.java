@@ -653,11 +653,17 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         DeviceList deviceList = new DeviceList();
         try {
             if(map.getProperties().isEmpty()){
+                if (log.isDebugEnabled()) {
+                    log.debug("No search criteria defined when querying devices.");
+                }
                 return Response.status(Response.Status.BAD_REQUEST).entity("No search criteria defined.").build();
             }
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             devices = dms.getDevicesBasedOnProperties(map.getProperties());
             if(devices == null || devices.isEmpty()){
+                if (log.isDebugEnabled()) {
+                    log.debug("No Devices Found for criteria : " + map);
+                }
                 return Response.status(Response.Status.NOT_FOUND).entity("No device found matching query criteria.").build();
             }
         } catch (DeviceManagementException e) {
