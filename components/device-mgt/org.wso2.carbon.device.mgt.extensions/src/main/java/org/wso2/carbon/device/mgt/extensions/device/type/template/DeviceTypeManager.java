@@ -587,31 +587,36 @@ public class DeviceTypeManager implements DeviceManager {
     }
 
     @Override
-    public boolean deleteDevice(DeviceIdentifier deviceIdentifier, Device device) throws DeviceManagementException {
+    public void deleteDevices(List<String> deviceIdentifierList) throws DeviceManagementException {
         if (propertiesExist) {
-            boolean status;
-            Device existingDevice = this.getDevice(deviceIdentifier);
-            if (existingDevice == null) {
-                return false;
-            }
             try {
                 if (log.isDebugEnabled()) {
-                    log.debug("Deleting the details of " + deviceType + " device : " + device.getDeviceIdentifier());
+                    log.debug("Deleting the details of " + deviceType + " devices : " + deviceIdentifierList);
                 }
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().beginTransaction();
-                status = deviceTypePluginDAOManager.getDeviceDAO().deleteDevice(existingDevice);
-                deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
+                if (deviceTypePluginDAOManager.getDeviceDAO().deleteDevices(deviceIdentifierList)) {
+                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().commitTransaction();
+                } else {
+                    deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
+                    String msg = "Error occurred while deleting the " + deviceType + " devices: '" +
+                            deviceIdentifierList;
+                    log.error(msg);
+                    throw new DeviceManagementException(msg);
+                }
             } catch (DeviceTypeMgtPluginException e) {
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().rollbackTransaction();
-                throw new DeviceManagementException(
-                        "Error occurred while deleting the " + deviceType + " device: '" +
-                        device.getDeviceIdentifier() + "'", e);
+                if (log.isDebugEnabled()) {
+                    log.debug("Error occurred while deleting the " + deviceType + " devices: '" +
+                            deviceIdentifierList + "'. Transaction rolled back");
+                }
+                String msg= "Error occurred while deleting the " + deviceType + " devices: '" +
+                        deviceIdentifierList;
+                log.error(msg,e);
+                throw new DeviceManagementException(msg, e);
             } finally {
                 deviceTypePluginDAOManager.getDeviceTypeDAOHandler().closeConnection();
             }
-            return status;
         }
-        return true;
     }
 
 }
