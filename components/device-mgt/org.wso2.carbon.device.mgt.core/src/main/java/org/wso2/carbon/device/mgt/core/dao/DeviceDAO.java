@@ -522,11 +522,12 @@ public interface DeviceDAO {
     List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId)
             throws DeviceManagementDAOException;
 
-    /**
-     * This method is used to permanently delete the device and its related details
-     * @param deviceIdentifier device id
-     * @param tenantId tenant id
-     * @throws DeviceManagementDAOException
+    /***
+     * This method is used to permanently delete devices and their related details
+     * @param deviceIdentifiers List of device identifiers.
+     * @param deviceIds list of device ids (primary keys).
+     * @param enrollmentIds list of enrollment ids.
+     * @throws DeviceManagementDAOException when no enrolments are found for the given device.
      */
-    void deleteDevice(DeviceIdentifier deviceIdentifier, int tenantId) throws DeviceManagementDAOException;
+    void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds) throws DeviceManagementDAOException;
 }
