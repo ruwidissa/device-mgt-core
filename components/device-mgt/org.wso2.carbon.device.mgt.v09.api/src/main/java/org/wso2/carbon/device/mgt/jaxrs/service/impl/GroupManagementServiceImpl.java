@@ -208,7 +208,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     public Response getDevicesOfGroup(int groupId, int offset, int limit) {
         try {
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
-            List<Device> deviceList = service.getDevices(groupId, offset, limit);
+            List<Device> deviceList = service.getDevices(groupId, offset, limit, false);
             int deviceCount = service.getDeviceCount(groupId);
             DeviceList deviceListWrapper = new DeviceList();
             if (deviceList != null) {
