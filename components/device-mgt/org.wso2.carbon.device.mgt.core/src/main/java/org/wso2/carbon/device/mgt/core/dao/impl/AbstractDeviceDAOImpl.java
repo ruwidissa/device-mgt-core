@@ -1963,6 +1963,28 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
+    private int getDeviceId(Connection conn, DeviceIdentifier deviceIdentifier, int tenantId)
+            throws DeviceManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int deviceId = -1;
+        try {
+            String sql = "SELECT ID FROM DM_DEVICE WHERE DEVICE_IDENTIFICATION = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, deviceIdentifier.getId());
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                deviceId = rs.getInt("ID");
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving device id of the device", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return deviceId;
+    }
+
     public boolean transferDevice(String deviceType, String deviceIdentifier, String owner, int destinationTenantId)
             throws DeviceManagementDAOException, SQLException {
         Connection conn = this.getConnection();
