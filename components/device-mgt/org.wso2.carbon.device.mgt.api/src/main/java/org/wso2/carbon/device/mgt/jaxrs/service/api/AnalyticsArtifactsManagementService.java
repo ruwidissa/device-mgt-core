@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
+import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -91,17 +92,17 @@ import javax.ws.rs.core.Response;
         }
 )
 
-@Path("/analytics/artifacts")
 @Api(value = "Analytics Artifacts Management", description = "This API corresponds to services" +
                                                              " related to Analytics Artifacts management")
+@Path("/analytics/artifacts")
+@Consumes(MediaType.APPLICATION_JSON)
 public interface AnalyticsArtifactsManagementService {
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/stream/{id}")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Event Stream Artifact as String",
+            value = "Create Event Stream Artifact through a String argument.",
             notes = "Deploy a Json Stream Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
@@ -143,16 +144,20 @@ public interface AnalyticsArtifactsManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployEventDefinitionAsString(@PathParam("id") String id,
-                                           @QueryParam("isEdited") boolean isEdited,
-                                           @Valid EventStream stream);
+    Response deployEventDefinitionAsString(
+            @ApiParam(name = "id", value = "Stream id(name:version).")
+            @PathParam("id") String id,
+            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @QueryParam("isEdited") boolean isEdited,
+            @ApiParam(name = "stream", value = "Add the data to complete the EventStream object.",
+                    required = true)
+            @Valid EventStream stream);
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/stream")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Event Stream Artifact as DTO",
+            value = "Create Event Stream Artifact through a DTO class.",
             notes = "Deploy a Json Stream Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
@@ -194,14 +199,16 @@ public interface AnalyticsArtifactsManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployEventDefinitionAsDto(@Valid EventStream stream);
+    Response deployEventDefinitionAsDto(
+            @ApiParam(name = "stream", value = "Add the data to complete the EventStream object.",
+                    required = true)
+            @Valid EventStream stream);
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receiver/{name}")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Event Receiver Artifact as String",
+            value = "Create Event Receiver Artifact through a String argument.",
             notes = "Deploy a XML Event Receiver Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
@@ -244,16 +251,20 @@ public interface AnalyticsArtifactsManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployEventReceiverAsString(@PathParam("name") String name,
-                                         @QueryParam("isEdited") boolean isEdited,
-                                         @Valid EventReceiver receiver);
+    Response deployEventReceiverAsString(
+            @ApiParam(name = "name", value = "Receiver name.")
+            @PathParam("name") String name,
+            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @QueryParam("isEdited") boolean isEdited,
+            @ApiParam(name = "receiver", value = "Add the data to complete the EventReceiver object.",
+                    required = true)
+            @Valid EventReceiver receiver);
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receiver")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Event Receiver Artifact as DTO",
+            value = "Create Event Receiver Artifact through a DTO class.",
             notes = "Deploy a JSON Event Receiver Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
@@ -296,14 +307,16 @@ public interface AnalyticsArtifactsManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployEventReceiverAsDto(@Valid Adapter receiver);
+    Response deployEventReceiverAsDto(
+            @ApiParam(name = "receiver", value = "Add the data to complete the Adapter object.",
+                    required = true)
+            @Valid Adapter receiver);
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/publisher/{name}")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Event Publisher Artifact as String",
+            value = "Create Event Publisher Artifact through a String argument.",
             notes = "Deploy a XML Event Publisher Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
@@ -346,16 +359,20 @@ public interface AnalyticsArtifactsManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployEventPublisherAsString(@PathParam("name") String name,
-                                          @QueryParam("isEdited") boolean isEdited,
-                                          @Valid EventPublisher publisher);
+    Response deployEventPublisherAsString(
+            @ApiParam(name = "name", value = "Publisher name.")
+            @PathParam("name") String name,
+            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @QueryParam("isEdited") boolean isEdited,
+            @ApiParam(name = "publisher", value = "Add the data to complete the EventPublisher object.",
+                    required = true)
+            @Valid EventPublisher publisher);
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/publisher")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Event Publisher Artifact as DTO",
+            value = "Create Event Publisher Artifact through a DTO class.",
             notes = "Deploy a JSON Event Publisher Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
@@ -398,15 +415,17 @@ public interface AnalyticsArtifactsManagementService {
                             response = ErrorResponse.class)
             }
     )
-    Response deployEventPublisherAsDto(@Valid Adapter publisher);
+    Response deployEventPublisherAsDto(
+            @ApiParam(name = "publisher", value = "Add the data to complete the Adapter object.",
+                    required = true)
+            @Valid Adapter publisher);
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/siddhi-script/{name}")
     @ApiOperation(
             httpMethod = "POST",
-            value = "Create Siddhi Script Artifact as String",
-            notes = "Deploy a SiddhiQL Siddhi script Artifact in Analytics server.",
+            value = "Create Siddhi Script Artifact through a String argument.",
+            notes = "Deploy a SiddhiQL script Artifact in Analytics server.",
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
@@ -449,6 +468,11 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deploySiddhiExecutableScript(
-            @PathParam("name") String name, @QueryParam("isEdited") boolean isEdited,
+            @ApiParam(name = "name", value = "Siddhi Executable Script name.")
+            @PathParam("name") String name,
+            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @QueryParam("isEdited") boolean isEdited,
+            @ApiParam(name = "plan", value = "Add the data to complete the SiddhiExecutionPlan object.",
+                    required = true)
             @Valid SiddhiExecutionPlan plan);
 }
