@@ -164,7 +164,7 @@ public interface GroupManagementProviderService {
      * @return list of devices in group.
      * @throws GroupManagementException
      */
-    List<Device> getDevices(int groupId, int startIndex, int rowCount) throws GroupManagementException;
+    List<Device> getDevices(int groupId, int startIndex, int rowCount, boolean requireDeviceProps) throws GroupManagementException;
 
     List<Device> getAllDevicesOfGroup(String groupName) throws GroupManagementException;
 

@@ -353,8 +353,7 @@ public class APIUtil {
         application.setRating(applicationDTO.getAppRating());
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
         for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
-            ApplicationRelease applicationRelease = releaseDtoToRelease(applicationReleaseDTO);
-            applicationReleases.add(applicationRelease);
+            applicationReleases.add(releaseDtoToRelease(applicationReleaseDTO));
         }
         application.setApplicationReleases(applicationReleases);
         return application;
@@ -362,8 +361,10 @@ public class APIUtil {
 
     public static ApplicationRelease releaseDtoToRelease(ApplicationReleaseDTO applicationReleaseDTO)
             throws ApplicationManagementException {
-        String basePath = getArtifactDownloadBaseURL() + applicationReleaseDTO.getUuid()
-                + Constants.FORWARD_SLASH;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        String basePath =
+                getArtifactDownloadBaseURL() + tenantId + Constants.FORWARD_SLASH + applicationReleaseDTO.getUuid()
+                        + Constants.FORWARD_SLASH;
 
         List<String> screenshotPaths = new ArrayList<>();
         ApplicationRelease applicationRelease = new ApplicationRelease();

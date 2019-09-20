@@ -75,8 +75,6 @@ class FiltersForm extends React.Component {
 
     componentDidMount() {
         this.getCategories();
-        this.getTags();
-        this.getDeviceTypes();
     }
 
     getCategories = () => {
@@ -86,6 +84,7 @@ class FiltersForm extends React.Component {
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
+                this.getTags();
                 this.setState({
                     categories: categories,
                     loading: false
@@ -116,6 +115,7 @@ class FiltersForm extends React.Component {
         ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
+                this.getDeviceTypes();
                 this.setState({
                     tags: tags,
                     loading: false,

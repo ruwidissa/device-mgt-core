@@ -101,6 +101,7 @@ import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformVersion;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.DeviceManagementPluginRepository;
+import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
@@ -147,6 +148,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -524,72 +526,90 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean deleteDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
-        if (deviceId == null) {
-            String msg = "Required values are not set to permanently delete device";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Permanently deleting device: " + deviceId.getId() + " of type '" + deviceId.getType() + "'");
-        }
-        DeviceManager deviceManager = this.getDeviceManager(deviceId.getType());
-        if (deviceManager == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Device Manager associated with the device type '" + deviceId.getType() + "' is null. " +
-                          "Therefore, not attempting method 'deleteDevice'");
-            }
-            return false;
-        }
-
+    public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException {
+        List<Integer> deviceIds = new ArrayList<>();
+        List<Integer> enrollmentIds = new ArrayList<>();
+        Map<String, List<String>> deviceIdentifierMap = new HashMap<>();
+        Map<String, DeviceManager> deviceManagerMap = new HashMap<>();
+        List<DeviceCacheKey> deviceCacheKeyList = new ArrayList<>();
         int tenantId = this.getTenantId();
-
-        Device device = this.getDevice(deviceId, false);
-        if (device == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Device not found for id '" + deviceId.getId() + "'");
+        List<Device> existingDevices;
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+            if (existingDevices.size() != deviceIdentifiers.size()) {
+                for (Device device : existingDevices) {
+                    deviceIdentifiers.remove(device.getDeviceIdentifier());
+                }
+                String msg =
+                        "Couldn't find device ids for all the requested device identifiers. " +
+                                "Therefore payload should contain device identifiers which are not in the system. " +
+                                "Invalid device identifiers are " + deviceIdentifiers.toString();
+                log.error(msg);
+                DeviceManagementDAOFactory.rollbackTransaction();
+                throw new InvalidDeviceException(msg);
             }
-            return false;
-        }
-
-        if (!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
-            String msg = "Device " + deviceId.getId() + " of type " + deviceId.getType() + " is not dis-enrolled to " +
-                         "permanently delete the device";
-            log.error(msg);
-            throw new DeviceManagementException(msg);
-        } else {
-            try {
-                DeviceManagementDAOFactory.beginTransaction();
-                deviceDAO.deleteDevice(deviceId, tenantId);
+            for (Device device : existingDevices) {
+                if (!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
+                    String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
+                            + " is not dis-enrolled to permanently delete the device";
+                    log.error(msg);
+                    DeviceManagementDAOFactory.rollbackTransaction();
+                    throw new InvalidDeviceException(msg);
+                }
+                DeviceCacheKey deviceCacheKey = new DeviceCacheKey();
+                deviceCacheKey.setDeviceId(device.getDeviceIdentifier());
+                deviceCacheKey.setDeviceType(device.getType());
+                deviceCacheKey.setTenantId(tenantId);
+                deviceCacheKeyList.add(deviceCacheKey);
+                deviceIds.add(device.getId());
+                enrollmentIds.add(device.getEnrolmentInfo().getId());
+                if (deviceIdentifierMap.containsKey(device.getType())) {
+                    deviceIdentifierMap.get(device.getType()).add(device.getDeviceIdentifier());
+                } else {
+                    deviceIdentifierMap.put(device.getType(),
+                            new ArrayList<>(Arrays.asList(device.getDeviceIdentifier())));
+                    DeviceManager deviceManager = this.getDeviceManager(device.getType());
+                    if (deviceManager == null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Device Manager associated with the device type '"
+                                    + device.getType() + "' is null. Therefore, not attempting method 'deleteDevice'");
+                        }
+                        return false;
+                    }
+                    deviceManagerMap.put(device.getType(), deviceManager);
+                }
+            }
+            //deleting device from the core
+            deviceDAO.deleteDevices(deviceIdentifiers, deviceIds, enrollmentIds);
+            for (Map.Entry<String, DeviceManager> entry : deviceManagerMap.entrySet()) {
                 try {
-                    deviceManager.deleteDevice(deviceId, device);
+                    // deleting device from the plugin level
+                    entry.getValue().deleteDevices(deviceIdentifierMap.get(entry.getKey()));
                 } catch (DeviceManagementException e) {
-                    String msg = "Error occurred while permanently deleting '" + deviceId.getType() +
-                                 "' device with the identifier '" + deviceId.getId() + "' in plugin.";
+                    String msg = "Error occurred while permanently deleting '" + entry.getKey() +
+                            "' devices with the identifiers: '" + deviceIdentifierMap.get(entry.getKey())
+                            + "' in plugin.";
                     log.error(msg, e);
+                    // a DeviceManagementException is thrown when the device deletion fails from the plugin level.
+                    // Here, that exception is caught and a DeviceManagementDAOException is thrown
                     throw new DeviceManagementDAOException(msg, e);
                 }
-                DeviceManagementDAOFactory.commitTransaction();
-                this.removeDeviceFromCache(deviceId);
-            } catch (DeviceManagementDAOException e) {
-                DeviceManagementDAOFactory.rollbackTransaction();
-                String msg = "Error occurred while permanently deleting '" + deviceId.getType() +
-                             "' device with the identifier '" + deviceId.getId() + "'";
-                log.error(msg, e);
-                throw new DeviceManagementException(msg, e);
-            } catch (TransactionManagementException e) {
-                String msg = "Error occurred while initiating transaction";
-                log.error(msg, e);
-                throw new DeviceManagementException(msg, e);
-            } catch (Exception e) {
-                String msg = "Error occurred while permanently deleting device: " + deviceId.getId();
-                log.error(msg, e);
-                throw new DeviceManagementException(msg, e);
-            } finally {
-                DeviceManagementDAOFactory.closeConnection();
             }
+            DeviceManagementDAOFactory.commitTransaction();
+            this.removeDevicesFromCache(deviceCacheKeyList);
+            return true;
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while permanently deleting '" + deviceIdentifiers +
+                    "' devices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         }
-        return true;
     }
 
     @Override
@@ -2977,6 +2997,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     private void removeDeviceFromCache(DeviceIdentifier deviceIdentifier) {
         DeviceCacheManagerImpl.getInstance().removeDeviceFromCache(deviceIdentifier, this.getTenantId());
+    }
+
+    /***
+     * This method removes a given list of devices from the cache
+     * @param deviceList list of DeviceCacheKey objects
+     */
+    private void removeDevicesFromCache(List<DeviceCacheKey> deviceList) {
+        DeviceCacheManagerImpl.getInstance().removeDevicesFromCache(deviceList);
     }
 
     @Override

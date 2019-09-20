@@ -38,7 +38,6 @@ import java.util.List;
  * This class represents implementation of GroupDAO
  */
 public class GenericGroupDAOImpl extends AbstractGroupDAOImpl {
-
     @Override
     public List<DeviceGroup> getGroups(GroupPaginationRequest request, int tenantId)
             throws GroupManagementDAOException {

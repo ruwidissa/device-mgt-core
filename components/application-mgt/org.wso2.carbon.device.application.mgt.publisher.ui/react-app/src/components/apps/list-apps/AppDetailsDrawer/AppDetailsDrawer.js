@@ -92,7 +92,6 @@ class AppDetailsDrawer extends React.Component {
 
     componentDidMount() {
         this.getCategories();
-        this.getTags();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -117,7 +116,7 @@ class AppDetailsDrawer extends React.Component {
         ).then(res => {
             if (res.status === 200) {
                 const categories = JSON.parse(res.data.data);
-
+                this.getTags();
                 const globalCategories = categories.map(category => {
                     return (
                         <Option

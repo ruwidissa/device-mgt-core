@@ -46,6 +46,7 @@ import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTyp
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -218,22 +219,38 @@ public class PropertyBasedPluginDAOImpl implements PluginDAO {
     }
 
     @Override
-    public boolean deleteDevice(Device device) throws DeviceTypeMgtPluginException {
-        Connection conn;
-        PreparedStatement stmt = null;
+    public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceTypeMgtPluginException {
         try {
-            conn = deviceTypeDAOHandler.getConnection();
-            stmt = conn.prepareStatement("DELETE FROM DM_DEVICE_PROPERTIES WHERE DEVICE_IDENTIFICATION = ?");
-            stmt.setString(1, device.getDeviceIdentifier());
-            stmt.executeUpdate();
-            return true;
+            Connection conn = deviceTypeDAOHandler.getConnection();
+            boolean status = true;
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM DM_DEVICE_PROPERTIES WHERE DEVICE_IDENTIFICATION = ?")) {
+                if (conn.getMetaData().supportsBatchUpdates()) {
+                    for (String deviceId : deviceIdentifiers) {
+                        ps.setString(1, deviceId);
+                        ps.addBatch();
+                    }
+                    for (int i : ps.executeBatch()) {
+                        if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
+                            status = false;
+                            break;
+                        }
+                    }
+                } else {
+                    for (String deviceId : deviceIdentifiers) {
+                        ps.setString(1, deviceId);
+                        if (ps.executeUpdate() == 0) {
+                            status = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            return status;
         } catch (SQLException e) {
-            String msg = "Error occurred while deleting the device '" + device.getDeviceIdentifier() + "' data on"
-                         + deviceType;
+            String msg = "Error occurred while deleting the data of the devices: '" + deviceIdentifiers + "'of type:  "
+                    + deviceType;
             log.error(msg, e);
             throw new DeviceTypeMgtPluginException(msg, e);
-        } finally {
-            DeviceTypeUtils.cleanupResources(stmt, null);
         }
     }
 
