@@ -681,7 +681,15 @@ public interface GroupManagementService {
                                                "pagination index/offset.",
                                        defaultValue = "5")
                                @QueryParam("limit")
-                                       int limit);
+                                       int limit,
+
+                               @ApiParam(
+                                       name = "requireDeviceProps",
+                                       value = "Boolean flag indicating whether to include device properties \n" +
+                                               " to the device object.",
+                                       required = false)
+                               @QueryParam("requireDeviceProps")
+                                       boolean requireDeviceProps);
 
     @Path("/id/{groupId}/devices/count")
     @GET

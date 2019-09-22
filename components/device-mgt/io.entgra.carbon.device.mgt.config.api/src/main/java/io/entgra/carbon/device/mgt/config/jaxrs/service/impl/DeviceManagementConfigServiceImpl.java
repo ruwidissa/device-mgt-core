@@ -26,8 +26,10 @@ import io.entgra.carbon.device.mgt.config.jaxrs.service.DeviceManagementConfigSe
 import io.entgra.carbon.device.mgt.config.jaxrs.util.DeviceMgtAPIUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
+import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
@@ -41,16 +43,17 @@ import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientExceptio
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Path("/configurations")
-@Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceManagementConfigServiceImpl implements DeviceManagementConfigService {
 
@@ -58,6 +61,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
 
     @Override
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getConfiguration(@HeaderParam("token") String token,
                                      @QueryParam("properties") String properties) {
         DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
@@ -112,6 +116,41 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             log.error(msg.concat(" ").concat(properties), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @PUT
+    @Path("/transfer")
+    @Override
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response transferDevices(DeviceTransferRequest deviceTransferRequest) {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        int tenantId = ctx.getTenantId(false);
+        if (tenantId != -1234) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Tenant '" + ctx.getTenantDomain(true) +
+                    "' does not have privilege to transfer device").build();
+        }
+        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        try {
+            List<String> devicesTransferred = dms.transferDeviceToTenant(deviceTransferRequest);
+            if (devicesTransferred.isEmpty()) {
+                String msg = "Devices are not enrolled to super tenant";
+                log.warn(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            } else {
+                return Response.status(Response.Status.OK).entity(devicesTransferred).build();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while transferring device to tenant " +
+                    deviceTransferRequest.getDestinationTenant();
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (DeviceNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         }
     }
 

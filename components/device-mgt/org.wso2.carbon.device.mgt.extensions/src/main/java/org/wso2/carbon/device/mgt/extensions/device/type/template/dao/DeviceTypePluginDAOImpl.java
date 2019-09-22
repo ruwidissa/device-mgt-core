@@ -39,6 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
 
@@ -46,6 +47,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -215,30 +217,39 @@ public class DeviceTypePluginDAOImpl implements PluginDAO {
     }
 
     @Override
-    public boolean deleteDevice(Device device) throws DeviceTypeMgtPluginException {
-        boolean status = false;
-        Connection conn;
-        PreparedStatement stmt = null;
+    public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceTypeMgtPluginException {
         try {
-            conn = deviceTypeDAOHandler.getConnection();
-            stmt = conn.prepareStatement(deleteDBQueryForDeleteDevice);
-            stmt.setString(1, device.getDeviceIdentifier());
-            int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                status = true;
-                if (log.isDebugEnabled()) {
-                    log.debug("Device " + device.getDeviceIdentifier() + " data has been deleted.");
+            Connection conn = deviceTypeDAOHandler.getConnection();
+            boolean status = true;
+            try (PreparedStatement ps = conn.prepareStatement(deleteDBQueryForDeleteDevice)) {
+                if (conn.getMetaData().supportsBatchUpdates()) {
+                    for (String deviceId : deviceIdentifiers) {
+                        ps.setString(1, deviceId);
+                        ps.addBatch();
+                    }
+                    for (int i : ps.executeBatch()) {
+                        if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
+                            status = false;
+                            break;
+                        }
+                    }
+                } else {
+                    for (String deviceId : deviceIdentifiers) {
+                        ps.setString(1, deviceId);
+                        if (ps.executeUpdate() == 0) {
+                            status = false;
+                            break;
+                        }
+                    }
                 }
             }
+            return status;
         } catch (SQLException e) {
-            String msg = "Error occurred while deleting the device '" + device.getDeviceIdentifier() + "' data in "
-                         + deviceDAODefinition.getDeviceTableName();
+            String msg = "Error occurred while deleting the data in "
+                    + deviceDAODefinition.getDeviceTableName();
             log.error(msg, e);
             throw new DeviceTypeMgtPluginException(msg, e);
-        } finally {
-            DeviceTypeUtils.cleanupResources(stmt, null);
         }
-        return status;
     }
 
     private String getDeviceTableColumnNames() {

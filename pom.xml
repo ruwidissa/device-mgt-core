@@ -1761,6 +1761,12 @@
                 <version>${tomcat.websocket.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.multitenancy</groupId>
+                <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
+                <version>${carbon.multitenancy.version}</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

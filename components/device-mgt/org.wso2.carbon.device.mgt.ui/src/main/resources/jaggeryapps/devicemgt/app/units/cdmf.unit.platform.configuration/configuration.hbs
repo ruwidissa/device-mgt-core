@@ -193,4 +193,13 @@
 {{/zone}}
 {{#zone "bottomJs"}}
     {{js "js/platform-configuration.js"}}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {{#each deviceTypes}}
+                {{#unless unitName}}
+                    loadDynamicDeviceTypeConfig('{{name}}');
+                {{/unless}}
+            {{/each}}
+        });
+    </script>
 {{/zone}}

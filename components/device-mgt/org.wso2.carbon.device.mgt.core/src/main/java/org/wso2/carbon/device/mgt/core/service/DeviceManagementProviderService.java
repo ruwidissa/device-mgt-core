@@ -37,6 +37,7 @@ package org.wso2.carbon.device.mgt.core.service;
 
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -597,7 +598,7 @@ public interface DeviceManagementProviderService {
 
     boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
 
-    boolean deleteDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
+    boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException;
 
     boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException;
 
@@ -760,4 +761,12 @@ public interface DeviceManagementProviderService {
     DeviceConfiguration getDeviceConfiguration(Map<String, String> propertyMap)
             throws DeviceManagementException, DeviceNotFoundException, UnauthorizedDeviceAccessException,
                    AmbiguousConfigurationException;
+
+    /**
+     * Transfer device from super tenant to another tenant
+     *
+     * @param deviceTransferRequest DTO of the transfer request
+     * @return tru if device transferee, otherwise false
+     */
+    List<String> transferDeviceToTenant(DeviceTransferRequest deviceTransferRequest) throws DeviceManagementException, DeviceNotFoundException;
 }
