@@ -726,11 +726,11 @@ public interface DeviceManagementProviderService {
     List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
                                             int geohashLength) throws DeviceManagementException;
 
-    int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
+    int getDeviceCountOfTypeByStatus(int tenantId, String deviceType, String deviceStatus) throws DeviceManagementException;
 
-    List<String> getDeviceIdentifiersByStatus(String deviceType, String deviceStatus) throws DeviceManagementException;
+    List<String> getDeviceIdentifiersByStatus(int tenantId, String deviceType, String deviceStatus) throws DeviceManagementException;
 
-    boolean bulkUpdateDeviceStatus(String deviceType, List<String> deviceList, String status) throws DeviceManagementException;
+    boolean bulkUpdateDeviceStatus(int tenantId, String deviceType, List<String> deviceList, String status) throws DeviceManagementException;
 
     boolean updateEnrollment(String owner, List<String> deviceIdentifiers)
             throws DeviceManagementException, UserNotFoundException, InvalidDeviceException;

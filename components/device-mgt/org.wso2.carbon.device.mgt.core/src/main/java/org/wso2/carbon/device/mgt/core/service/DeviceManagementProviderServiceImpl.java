@@ -3035,8 +3035,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException {
-        int tenantId = this.getTenantId();
+    public int getDeviceCountOfTypeByStatus(int tenantId, String deviceType, String deviceStatus) throws DeviceManagementException {
         try {
             DeviceManagementDAOFactory.openConnection();
             return deviceDAO.getDeviceCount(deviceType, deviceStatus, tenantId);
@@ -3054,8 +3053,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<String> getDeviceIdentifiersByStatus(String deviceType, String deviceStatus) throws DeviceManagementException {
-        int tenantId = this.getTenantId();
+    public List<String> getDeviceIdentifiersByStatus(int tenantId, String deviceType, String deviceStatus) throws DeviceManagementException {
         List<String> deviceIds;
         try {
             DeviceManagementDAOFactory.openConnection();
@@ -3075,8 +3073,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean bulkUpdateDeviceStatus(String deviceType, List<String> deviceList, String status) throws DeviceManagementException {
-        int tenantId = this.getTenantId();
+    public boolean bulkUpdateDeviceStatus(int tenantId, String deviceType,
+                                          List<String> deviceList, String status)
+            throws DeviceManagementException {
         boolean success;
         try {
             DeviceManagementDAOFactory.openConnection();
