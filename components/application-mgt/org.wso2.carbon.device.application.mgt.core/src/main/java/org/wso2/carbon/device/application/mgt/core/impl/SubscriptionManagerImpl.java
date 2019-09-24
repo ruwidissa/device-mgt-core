@@ -63,7 +63,6 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.*;
@@ -603,6 +602,55 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
             String msg = "DB Connection error occurred while getting device details that " +
+                         "given application id";
+            log.error(msg);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public PaginationResult getAppInstalledCategories(int offsetValue, int limitValue,
+                                                      String appUUID, String subType)
+            throws ApplicationManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        PaginationResult paginationResult = new PaginationResult();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+
+            ApplicationDTO applicationDTO = this.applicationDAO
+                        .getAppWithRelatedRelease(appUUID, tenantId);
+            int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
+
+            int count=0;
+            List<String> SubscriptionList = new ArrayList<>();
+
+            if(SubsciptionType.USER.toString().equalsIgnoreCase(subType)){
+                SubscriptionList = subscriptionDAO
+                     .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
+            }else if(SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)){
+                SubscriptionList = subscriptionDAO
+                     .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
+            }else if(SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                SubscriptionList = subscriptionDAO
+                     .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
+            }
+            count = SubscriptionList.size();
+            paginationResult.setData(SubscriptionList);
+            paginationResult.setRecordsFiltered(count);
+            paginationResult.setRecordsTotal(count);
+
+            return paginationResult;
+
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when get application release data for application" +
+                         " release UUID: " + appUUID;
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting category details that " +
                          "given application id";
             log.error(msg);
             throw new ApplicationManagementException(msg, e);

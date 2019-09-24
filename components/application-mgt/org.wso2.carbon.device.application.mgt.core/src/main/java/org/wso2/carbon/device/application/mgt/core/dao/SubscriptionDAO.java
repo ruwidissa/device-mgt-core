@@ -85,4 +85,45 @@ public interface SubscriptionDAO {
     boolean updateDeviceSubStatus(int deviceId, List<Integer> deviceSubIds, String status, int tenantcId)
             throws ApplicationManagementDAOException;
 
+    /**
+     * this method is used to get the details of users
+     * @param tenantId tenant id
+     * @param offsetValue offsetValue
+     * @param limitValue limitValue
+     * @param appReleaseId appReleaseId
+     * @return subscribedUsers
+     * @throws ApplicationManagementDAOException throws {@link ApplicationManagementDAOException} if
+     * connections establishment fails.
+     */
+    List<String> getAppSubscribedUsers(int offsetValue, int limitValue, int appReleaseId,
+                                       int tenantId)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * this method is used to get the details of roles
+     * @param tenantId tenant id
+     * @param offsetValue offsetValue
+     * @param limitValue limitValue
+     * @param appReleaseId appReleaseId
+     * @return subscribedRoles
+     * @throws ApplicationManagementDAOException throws {@link ApplicationManagementDAOException} if
+     * connections establishment fails.
+     */
+    List<String> getAppSubscribedRoles(int offsetValue, int limitValue, int appReleaseId,
+                                       int tenantId)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * this method is used to get the details of groups
+     * @param tenantId tenant id
+     * @param offsetValue offsetValue
+     * @param limitValue limitValue
+     * @param appReleaseId appReleaseId
+     * @return subscribedUsers
+     * @throws ApplicationManagementDAOException throws {@link ApplicationManagementDAOException} if
+     * connections establishment fails.
+     */
+    List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId,
+                                        int tenantId)
+            throws ApplicationManagementDAOException;
 }
