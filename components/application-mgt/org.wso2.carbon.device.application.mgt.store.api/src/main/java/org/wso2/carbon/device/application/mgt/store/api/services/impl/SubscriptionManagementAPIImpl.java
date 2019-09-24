@@ -17,15 +17,16 @@
  */
 package org.wso2.carbon.device.application.mgt.store.api.services.impl;
 
-import io.swagger.annotations.ApiOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.DeviceList;
+import org.wso2.carbon.device.application.mgt.common.BasicUserInfo;
+import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
+import org.wso2.carbon.device.application.mgt.common.RoleList;
+import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
-import org.wso2.carbon.device.application.mgt.common.response.Application;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -165,4 +166,70 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
+
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    @Path("/{uuid}/{subType}")
+    public Response getAppInstalledCategories(@PathParam("uuid") String uuid,
+                                              @PathParam("subType") String subType,
+                                              @DefaultValue("0")
+                                              @QueryParam("offset") int offset,
+                                              @DefaultValue("5")
+                                              @QueryParam("limit") int limit) {
+
+        try {
+            SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
+
+            PaginationResult subscribedCategoryDetails = subscriptionManager
+                    .getAppInstalledCategories(offset, limit, uuid, subType);
+
+            if(SubsciptionType.USER.toString().equalsIgnoreCase(subType)){
+                BasicUserInfoList users = new BasicUserInfoList();
+
+                users.setList((List<BasicUserInfo>) subscribedCategoryDetails.getData());
+                users.setCount(subscribedCategoryDetails.getRecordsTotal());
+
+                return Response.status(Response.Status.OK).entity(users).build();
+            }else if(SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)){
+                RoleList roles = new RoleList();
+
+                roles.setList(subscribedCategoryDetails.getData());
+                roles.setCount(subscribedCategoryDetails.getRecordsTotal());
+
+                return Response.status(Response.Status.OK).entity(roles).build();
+            }else if(SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)){
+                DeviceGroupList groups = new DeviceGroupList();
+
+                groups.setList(subscribedCategoryDetails.getData());
+                groups.setCount(subscribedCategoryDetails.getRecordsTotal());
+
+                return Response.status(Response.Status.OK).entity(groups).build();
+            }else{
+                String msg = "Found invalid sub type ";
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+        } catch (NotFoundException e) {
+            String msg = "Application with application release UUID: " + uuid + " is not found";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Found invalid payload for getting application which has UUID: " + uuid
+                         + ". Hence verify the payload";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "Application release is not in the installable state."
+                         + "Hence you are not permitted to get the devices details.";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting application with the application " +
+                         "release uuid: " + uuid;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
 }

@@ -19,10 +19,7 @@
 package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
-//import org.wso2.carbon.device.application.mgt.common.PaginationResult;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
@@ -45,5 +42,18 @@ public interface SubscriptionManager {
      */
     PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
                                             String status)
+            throws ApplicationManagementException;
+
+    /***
+     * This method for get category details
+     * @param appUUID uuid
+     * @param subType subType
+     * @param offsetValue offsetValue
+     * @param limitValue limitValue
+     * @return paginationResult
+     * @throws ApplicationManagementException Exception of the application management
+     */
+    PaginationResult getAppInstalledCategories(int offsetValue, int limitValue, String appUUID,
+                                               String subType)
             throws ApplicationManagementException;
 }
