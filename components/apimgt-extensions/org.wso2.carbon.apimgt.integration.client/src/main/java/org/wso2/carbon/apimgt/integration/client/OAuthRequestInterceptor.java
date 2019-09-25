@@ -56,7 +56,7 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
     private static final String APIM_SUBSCRIBE_SCOPE = "apim:subscribe";
     private static final long DEFAULT_REFRESH_TIME_OFFSET_IN_MILLIS = 100000;
     private DCRClient dcrClient;
-    private static OAuthApplication oAuthApplication;
+    private OAuthApplication oAuthApplication;
     private static Map<String, AccessTokenInfo> tenantUserTokenMap = new ConcurrentHashMap<>();
     private static final Log log = LogFactory.getLog(OAuthRequestInterceptor.class);
 
@@ -67,8 +67,15 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
         String username = APIMConfigReader.getInstance().getConfig().getUsername();
         String password = APIMConfigReader.getInstance().getConfig().getPassword();
         dcrClient = Feign.builder().client(new OkHttpClient(Utils.getSSLClient())).logger(new Slf4jLogger())
-                .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username,
-                        password))
+                .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
+                .contract(new JAXRSContract()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
+                .target(DCRClient.class, Utils.replaceProperties(
+                        APIMConfigReader.getInstance().getConfig().getDcrEndpoint()));
+    }
+
+    public OAuthRequestInterceptor(String username, String password) {
+        dcrClient = Feign.builder().client(new OkHttpClient(Utils.getSSLClient())).logger(new Slf4jLogger())
+                .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .contract(new JAXRSContract()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
                 .target(DCRClient.class, Utils.replaceProperties(
                         APIMConfigReader.getInstance().getConfig().getDcrEndpoint()));
@@ -82,7 +89,11 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
             clientProfile.setClientName(APPLICATION_NAME);
             clientProfile.setCallbackUrl("");
             clientProfile.setGrantType(GRANT_TYPES);
-            clientProfile.setOwner(APIMConfigReader.getInstance().getConfig().getUsername());
+            String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (username == null || username.isEmpty()) {
+                username = APIMConfigReader.getInstance().getConfig().getUsername();
+            }
+            clientProfile.setOwner(username);
             clientProfile.setSaasApp(true);
             oAuthApplication = dcrClient.register(clientProfile);
         }
@@ -100,8 +111,7 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
                 JWTClient jwtClient = APIIntegrationClientDataHolder.getInstance().getJwtClientManagerService()
                         .getJWTClient();
                 tenantBasedAccessTokenInfo = jwtClient.getAccessToken(oAuthApplication.getClientId(),
-                        oAuthApplication.getClientSecret(), username,
-                        REQUIRED_SCOPE);
+                        oAuthApplication.getClientSecret(), username, REQUIRED_SCOPE);
                 tenantBasedAccessTokenInfo.setExpiresIn(
                         System.currentTimeMillis() + (tenantBasedAccessTokenInfo.getExpiresIn() * 1000));
                 if (tenantBasedAccessTokenInfo.getScopes() == null) {

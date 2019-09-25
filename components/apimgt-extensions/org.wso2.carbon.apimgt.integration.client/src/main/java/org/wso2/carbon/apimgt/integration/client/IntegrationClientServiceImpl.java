@@ -36,6 +36,12 @@ public class IntegrationClientServiceImpl implements IntegrationClientService {
         publisherClient = new PublisherClient(oAuthRequestInterceptor);
     }
 
+    public IntegrationClientServiceImpl(OAuthRequestInterceptor oAuthRequestInterceptor) {
+        this.oAuthRequestInterceptor = oAuthRequestInterceptor;
+        storeClient = new StoreClient(oAuthRequestInterceptor);
+        publisherClient = new PublisherClient(oAuthRequestInterceptor);
+    }
+
     public static IntegrationClientServiceImpl getInstance() {
         if (instance == null) {
             synchronized (IntegrationClientService.class) {
