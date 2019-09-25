@@ -25,6 +25,7 @@ import DetailedRating from "./DetailedRating";
 import Reviews from "./review/Reviews";
 import axios from "axios";
 import AppInstallModal from "./install/AppInstallModal";
+import AppUninstallModal from "./install/AppUninstallModal";
 import CurrentUsersReview from "./review/CurrentUsersReview";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
@@ -36,7 +37,8 @@ class ReleaseView extends React.Component {
         super(props);
         this.state = {
             loading: false,
-            appInstallModalVisible: false
+            appInstallModalVisible: false,
+            appUninstallModalVisible: false
         }
     }
 
@@ -77,21 +79,27 @@ class ReleaseView extends React.Component {
                         "Error occurred while installing app",
                 });
             }
-
         }).catch((error) => {
             handleApiError(error,"Error occurred while installing the app.");
         });
     };
+
 
     showAppInstallModal = () => {
         this.setState({
             appInstallModalVisible: true
         });
     };
-
     closeAppInstallModal = () => {
         this.setState({
-            appInstallModalVisible: false
+            appInstallModalVisible: false,
+            appUninstallModalVisible: false
+        });
+    };
+
+    showAppUninstallModal = () => {
+        this.setState({
+             appUninstallModalVisible: true
         });
     };
 
@@ -106,6 +114,12 @@ class ReleaseView extends React.Component {
                     deviceType = {deviceType}
                     onClose={this.closeAppInstallModal}
                     onInstall={this.installApp}/>
+                <AppUninstallModal
+                        uuid={release.uuid}
+                        visible={this.state.appUninstallModalVisible}
+                        deviceType = {deviceType}
+                        onClose={this.closeAppInstallModal}
+                        onInstall={this.installApp}/>
                 <div className="release">
                     <Row>
                         <Col xl={4} sm={6} xs={8} className="release-icon">
@@ -128,6 +142,12 @@ class ReleaseView extends React.Component {
                                 <Button.Group style={{float: "right"}}>
                                     <Button onClick={this.showAppInstallModal} loading={this.state.loading}
                                             htmlType="button" type="primary" icon="download">Install</Button>
+                                </Button.Group>
+                            </div>
+                            <div>
+                                <Button.Group style={{float: "right",marginRight:'3%'}}>
+                                    <Button onClick={this.showAppUninstallModal} loading={this.state.loading}
+                                            htmlType="button" type="primary" icon="delete">UnInstall</Button>
                                 </Button.Group>
                             </div>
                         </Col>

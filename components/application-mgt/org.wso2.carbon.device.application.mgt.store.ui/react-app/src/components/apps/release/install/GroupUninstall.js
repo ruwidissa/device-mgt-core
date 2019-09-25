@@ -26,8 +26,7 @@ import {handleApiError} from "../../../../js/Utils";
 const {Text} = Typography;
 const {Option} = Select;
 
-
-class GroupInstall extends React.Component {
+class GroupUninstall extends React.Component {
 
     constructor(props) {
         super(props);
@@ -47,8 +46,11 @@ class GroupInstall extends React.Component {
         const config = this.props.context;
         this.setState({data: [], fetching: true});
 
+        const uuid = this.props.uuid;
+
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+ "/subscription/" + uuid + "/"+
+                "/GROUP?",
 
         ).then(res => {
             if (res.status === 200) {
@@ -58,8 +60,8 @@ class GroupInstall extends React.Component {
                 }
 
                 const data = res.data.data.deviceGroups.map(group => ({
-                    text: group.name,
-                    value: group.name,
+                    text: group,
+                    value: group,
                 }));
 
                 this.setState({data, fetching: false});
@@ -73,10 +75,10 @@ class GroupInstall extends React.Component {
 
     handleChange = value => {
         this.setState({
-            value,
-            data: [],
-            fetching: false,
-        });
+                          value,
+                          data: [],
+                          fetching: false,
+                      });
     };
 
     install = () =>{
@@ -93,31 +95,31 @@ class GroupInstall extends React.Component {
         const {fetching, data, value} = this.state;
 
         return (
-            <div>
-                <Text>Start installing the application for one or more groups by entering the corresponding group name. Select install to automatically start downloading the application for the respective device group/ groups.</Text>
-                <br/>
-                <br/>
-                <Select
-                    mode="multiple"
-                    labelInValue
-                    value={value}
-                    placeholder="Search groups"
-                    notFoundContent={fetching ? <Spin size="small"/> : null}
-                    filterOption={false}
-                    onSearch={this.fetchUser}
-                    onChange={this.handleChange}
-                    style={{width: '100%'}}
-                >
-                    {data.map(d => (
-                        <Option key={d.value}>{d.text}</Option>
-                    ))}
-                </Select>
-                <div style={{paddingTop:10, textAlign:"right"}}>
-                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                <div>
+                    <Text>Start uninstalling the application for one or more groups by entering the corresponding group name. Select uninstall to automatically start uninstalling the application for the respective device group/ groups.</Text>
+                    <br/>
+                    <br/>
+                    <Select
+                            mode="multiple"
+                            labelInValue
+                            value={value}
+                            placeholder="Search groups"
+                            notFoundContent={fetching ? <Spin size="small"/> : null}
+                            filterOption={false}
+                            onSearch={this.fetchUser}
+                            onChange={this.handleChange}
+                            style={{width: '100%'}}
+                    >
+                        {data.map(d => (
+                                <Option key={d.value}>{d.text}</Option>
+                        ))}
+                    </Select>
+                    <div style={{paddingTop:10, textAlign:"right"}}>
+                        <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                    </div>
                 </div>
-            </div>
         );
     }
 }
 
-export default withConfigContext(GroupInstall);
+export default withConfigContext(GroupUninstall);
