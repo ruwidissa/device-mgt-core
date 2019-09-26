@@ -405,8 +405,10 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices that matches to status " +
-                                                   "'" + request.getStatus() + "'", e);
+            String msg = "Error occurred while fetching the list of devices that matches to status " +
+                         "'" + request.getStatus() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -534,8 +536,10 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices corresponding" +
-                    "to the mentioned filtering criteria", e);
+            String msg = "Error occurred while fetching the list of devices corresponding" +
+                         "to the mentioned filtering criteria";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }

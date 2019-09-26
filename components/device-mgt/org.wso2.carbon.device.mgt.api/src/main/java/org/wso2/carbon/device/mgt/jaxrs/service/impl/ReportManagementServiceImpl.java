@@ -81,7 +81,6 @@ public class ReportManagementServiceImpl implements ReportManagementService {
                 String msg = "No devices have enrolled between " + fromDate + " to " + toDate +
                              " or doesn't match with" +
                              " given parameters";
-                log.error(msg);
                 return Response.status(Response.Status.OK).entity(msg).build();
             } else {
                 devices.setList((List<Device>) result.getData());
