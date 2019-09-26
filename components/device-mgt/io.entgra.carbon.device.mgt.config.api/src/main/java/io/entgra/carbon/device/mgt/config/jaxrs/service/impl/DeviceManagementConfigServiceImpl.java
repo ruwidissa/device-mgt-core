@@ -35,6 +35,9 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
+import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
@@ -163,13 +166,13 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
     private void setAccessTokenToDeviceConfigurations(DeviceConfiguration devicesConfiguration)
             throws DeviceManagementException {
         try {
-            AppRegistrationCredentials credentials =
-                    DeviceManagerUtil.getApplicationRegistrationCredentials(
-                            System.getProperty(DeviceManagementConstants
-                                                       .ConfigurationManagement.IOT_GATEWAY_HOST),
-                            System.getProperty(DeviceManagementConstants
-                                                       .ConfigurationManagement.IOT_GATEWAY_HTTPS_PORT),
-                            DeviceManagementConstants.ConfigurationManagement.ADMIN_CREDENTIALS);
+            DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+            KeyManagerConfigurations kmConfig = deviceManagementConfig.getKeyManagerConfigurations();
+            AppRegistrationCredentials credentials = DeviceManagerUtil.getApplicationRegistrationCredentials(
+                    System.getProperty(DeviceManagementConstants.ConfigurationManagement.IOT_GATEWAY_HOST),
+                    System.getProperty(DeviceManagementConstants.ConfigurationManagement.IOT_GATEWAY_HTTPS_PORT),
+                    kmConfig.getAdminUsername(),
+                    kmConfig.getAdminPassword());
             AccessTokenInfo accessTokenForAdmin = DeviceManagerUtil.getAccessTokenForDeviceOwner(
                     DeviceManagementConstants.ConfigurationManagement.SCOPES_FOR_TOKEN,
                     credentials.getClient_id(), credentials.getClient_secret(),

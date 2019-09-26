@@ -606,7 +606,7 @@ public final class DeviceManagerUtil {
      */
     @SuppressWarnings("PackageAccessibility")
     public static AppRegistrationCredentials getApplicationRegistrationCredentials(String host, String port,
-                                                                            String credentials)
+                                                                            String username, String password)
             throws ApplicationRegistrationException {
         if (host == null || port == null) {
             String msg = "Required gatewayHost or gatewayPort system property is null";
@@ -621,8 +621,8 @@ public final class DeviceManagerUtil {
 
             apiEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
             apiEndpoint.setHeader(DeviceManagementConstants.ConfigurationManagement.AUTHORIZATION_HEADER,
-                                  DeviceManagementConstants.ConfigurationManagement.BASIC_AUTH.concat(" ")
-                    .concat(getBase64EncodedCredentials(credentials)));
+                    DeviceManagementConstants.ConfigurationManagement.BASIC_AUTH.concat(" ")
+                            .concat(getBase64EncodedCredentials(username + ":" + password)));
             apiEndpoint.setEntity(constructApplicationRegistrationPayload());
             HttpResponse response = client.execute(apiEndpoint);
             if (response != null) {
