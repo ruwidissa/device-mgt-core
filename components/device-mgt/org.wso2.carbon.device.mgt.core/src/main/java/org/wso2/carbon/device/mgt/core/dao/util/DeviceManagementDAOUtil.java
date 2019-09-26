@@ -245,5 +245,4 @@ public final class DeviceManagementDAOUtil {
         deviceInfo.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
         return deviceInfo;
     }
-
 }
