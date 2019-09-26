@@ -94,11 +94,18 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
                                                                 String keyType, String username,
-                                                                boolean isAllowedAllDomains, String validityTime)
-            throws APIManagerException {
-        StoreClient storeClient =
-                APIApplicationManagerExtensionDataHolder.getInstance().getIntegrationClientService()
-                        .getStoreClient();
+                                                                boolean isAllowedAllDomains, String validityTime,
+                                                                StoreClient sClient) throws APIManagerException {
+
+        StoreClient storeClient;
+
+        if (sClient == null) {
+            storeClient = APIApplicationManagerExtensionDataHolder.getInstance().getIntegrationClientService()
+                    .getStoreClient();
+        } else {
+            storeClient = sClient;
+        }
+
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getTenantDomain();
         try {
@@ -211,4 +218,16 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
+                                                                             String keyType, String username,
+                                                                             boolean isAllowedAllDomains,
+                                                                             String validityTime)
+            throws APIManagerException {
+            return this.generateAndRetrieveApplicationKeys(applicationName, tags, keyType, username,
+                                                           isAllowedAllDomains, validityTime, null);
+    }
 }

@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.application.extension.api.util.RegistrationProfile
 import org.wso2.carbon.apimgt.application.extension.constants.ApiApplicationConstants;
 import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
 import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
+import org.wso2.carbon.apimgt.integration.client.OAuthRequestInterceptor;
+import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceManagementException;
@@ -96,9 +98,8 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
                 return Response.status(Response.Status.NOT_ACCEPTABLE).entity("APIs(Tags) are not allowed to this user."
                 ).build();
             }
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(PrivilegedCarbonContext.
-                    getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName());
             String username = APIUtil.getAuthenticatedUser();
+
             APIManagementProviderService apiManagementProviderService = APIUtil.getAPIManagementProviderService();
             String validityPeriod;
             if (registrationProfile.getValidityPeriod() == null) {
@@ -108,6 +109,22 @@ public class ApiApplicationRegistrationServiceImpl implements ApiApplicationRegi
             }
 
             String applicationName = registrationProfile.getApplicationName();
+
+            if (username.equals(registrationProfile.getUsername())) {
+                synchronized (ApiApplicationRegistrationServiceImpl.class) {
+                    StoreClient storeClient = new StoreClient(new OAuthRequestInterceptor(registrationProfile.getUsername(),
+                                                                                          registrationProfile.getPassword()));
+                    ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
+                            applicationName, registrationProfile.getTags(),
+                            ApiApplicationConstants.DEFAULT_TOKEN_TYPE, username,
+                            registrationProfile.isAllowedToAllDomains(), validityPeriod, storeClient);
+                    return Response.status(Response.Status.CREATED).entity(apiApplicationKey.toString()).build();
+                }
+            }
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(PrivilegedCarbonContext.
+                    getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName());
+
             synchronized (ApiApplicationRegistrationServiceImpl.class) {
                 ApiApplicationKey apiApplicationKey = apiManagementProviderService.generateAndRetrieveApplicationKeys(
                         applicationName, registrationProfile.getTags(),

@@ -32,6 +32,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RegistrationProfile {
     @XmlElement(required = true)
     private String applicationName;
+    @XmlElement
+    private String username;
+    @XmlElement
+    private String password;
     @XmlElement(required = true)
     private String tags[];
     @XmlElement(required = true)
@@ -69,5 +73,21 @@ public class RegistrationProfile {
 
     public void setValidityPeriod(String validityPeriod) {
         this.validityPeriod = validityPeriod;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
