@@ -54,7 +54,7 @@ public class APIPublisherServiceTest extends BaseAPIPublisherTest {
 
     @BeforeTest
     public void initialConfigs() throws Exception {
-        initializeOAuthApplication();
+        //initializeOAuthApplication();
         WebappPublisherConfig.init();
     }
 
