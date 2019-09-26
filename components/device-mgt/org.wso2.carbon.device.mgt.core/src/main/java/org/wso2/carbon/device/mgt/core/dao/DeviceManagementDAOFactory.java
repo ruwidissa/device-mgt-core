@@ -288,5 +288,4 @@ public class DeviceManagementDAOFactory {
         }
         return dataSource;
     }
-
 }

@@ -534,4 +534,20 @@ public interface DeviceDAO {
 
     boolean transferDevice(String deviceType, String deviceId, String owner, int destinationTenantId)
             throws DeviceManagementDAOException, SQLException;
+
+    /**
+     * This method is used to get a device list which enrolled within a specific time period
+     *
+     * @param request  Pagination request to get paginated result
+     * @param tenantId ID of the current tenant
+     * @param fromDate Start date to filter devices(YYYY-MM-DD)
+     * @param toDate   End date to filter devices(YYYY-MM-DD)
+     * @return returns a list of Device objects
+     * @throws {@Link DeviceManagementDAOException} If failed to retrieve devices
+     *
+     */
+    List<Device> getDevicesByDuration(PaginationRequest request,
+                                      int tenantId,
+                                      String fromDate,
+                                      String toDate) throws DeviceManagementDAOException;
 }

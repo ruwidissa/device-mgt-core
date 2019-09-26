@@ -46,6 +46,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
+import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
@@ -429,6 +430,23 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException("Notification Management service not initialized.");
         }
         return notificationManagementService;
+    }
+
+    /**
+     * Method for initializing ReportManagementService
+     * @return ReportManagementServie Instance
+     */
+    public static ReportManagementService getReportManagementService() {
+        ReportManagementService reportManagementService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        reportManagementService = (ReportManagementService) ctx.getOSGiService(
+                ReportManagementService.class, null);
+        if (reportManagementService == null) {
+            String msg = "Report Management service not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return reportManagementService;
     }
 
     public static DeviceInformationManager getDeviceInformationManagerService() {
