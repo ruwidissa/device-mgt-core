@@ -21,7 +21,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.application.mgt.common.*;
+import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
+import org.wso2.carbon.device.application.mgt.common.ApplicationType;
+import org.wso2.carbon.device.application.mgt.common.DeviceTypes;
+import org.wso2.carbon.device.application.mgt.common.SubAction;
+import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
+import org.wso2.carbon.device.application.mgt.common.SubscribingDeviceIdHolder;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -65,7 +70,12 @@ import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -592,18 +602,19 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             } catch (DeviceManagementException e) {
                 String msg = "service error occurred while getting data from the service";
-                log.error(msg);
+                log.error(msg, e);
                 throw new ApplicationManagementException(msg, e);
             }
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred when get application release data for application" +
                          " release UUID: " + appUUID;
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
             String msg = "DB Connection error occurred while getting device details that " +
                          "given application id";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
@@ -621,21 +632,21 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.openDBConnection();
 
             ApplicationDTO applicationDTO = this.applicationDAO
-                        .getAppWithRelatedRelease(appUUID, tenantId);
+                    .getAppWithRelatedRelease(appUUID, tenantId);
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
-            int count=0;
+            int count = 0;
             List<String> SubscriptionList = new ArrayList<>();
 
-            if(SubsciptionType.USER.toString().equalsIgnoreCase(subType)){
+            if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
                 SubscriptionList = subscriptionDAO
-                     .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
-            }else if(SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)){
+                        .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
+            } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
                 SubscriptionList = subscriptionDAO
-                     .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
-            }else if(SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                        .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
+            } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
                 SubscriptionList = subscriptionDAO
-                     .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
+                        .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
             }
             count = SubscriptionList.size();
             paginationResult.setData(SubscriptionList);
@@ -648,11 +659,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occurred when get application release data for application" +
                          " release UUID: " + appUUID;
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (DBConnectionException e) {
             String msg = "DB Connection error occurred while getting category details that " +
                          "given application id";
-            log.error(msg);
+            log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();

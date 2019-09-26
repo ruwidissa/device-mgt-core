@@ -37,9 +37,15 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
-
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.Path;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -184,28 +190,28 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             PaginationResult subscribedCategoryDetails = subscriptionManager
                     .getAppInstalledCategories(offset, limit, uuid, subType);
 
-            if(SubsciptionType.USER.toString().equalsIgnoreCase(subType)){
+            if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
                 BasicUserInfoList users = new BasicUserInfoList();
 
                 users.setList((List<BasicUserInfo>) subscribedCategoryDetails.getData());
                 users.setCount(subscribedCategoryDetails.getRecordsTotal());
 
                 return Response.status(Response.Status.OK).entity(users).build();
-            }else if(SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)){
+            } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
                 RoleList roles = new RoleList();
 
                 roles.setList(subscribedCategoryDetails.getData());
                 roles.setCount(subscribedCategoryDetails.getRecordsTotal());
 
                 return Response.status(Response.Status.OK).entity(roles).build();
-            }else if(SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)){
+            } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
                 DeviceGroupList groups = new DeviceGroupList();
 
                 groups.setList(subscribedCategoryDetails.getData());
                 groups.setCount(subscribedCategoryDetails.getRecordsTotal());
 
                 return Response.status(Response.Status.OK).entity(groups).build();
-            }else{
+            } else {
                 String msg = "Found invalid sub type ";
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
@@ -231,5 +237,4 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
-
 }

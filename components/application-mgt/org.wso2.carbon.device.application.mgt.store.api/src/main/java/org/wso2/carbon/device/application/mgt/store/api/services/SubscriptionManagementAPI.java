@@ -17,7 +17,16 @@
  */
 package org.wso2.carbon.device.application.mgt.store.api.services;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
@@ -237,8 +246,8 @@ public interface SubscriptionManagementAPI {
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Get device details that have a given application install",
-            notes = "This will get the device details that have a given application install, if exists",
+            value = "Get category details that have a given application install",
+            notes = "This will get the category details that have a given application install, if exists",
             tags = "Subscription Management",
             extensions = {
                     @Extension(properties = {
@@ -250,7 +259,7 @@ public interface SubscriptionManagementAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully retrieved device details.",
+                            message = "OK. \n Successfully retrieved categories details.",
                             response = List.class,
                             responseContainer = "List"),
                     @ApiResponse(

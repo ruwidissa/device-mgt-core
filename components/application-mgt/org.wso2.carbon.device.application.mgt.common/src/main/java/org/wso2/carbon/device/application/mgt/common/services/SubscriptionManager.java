@@ -32,7 +32,7 @@ public interface SubscriptionManager {
             String action) throws ApplicationManagementException;
 
     /***
-     * This method used to get the app id ,device ids and pass them to DM service layer method
+     * This method used to get the app id ,device ids and pass them to DM service method
      * @param appUUID uuid
      * @param offsetValue offsetValue
      * @param limitValue limitValue
@@ -45,7 +45,7 @@ public interface SubscriptionManager {
             throws ApplicationManagementException;
 
     /***
-     * This method for get category details
+     * This method used to get category details
      * @param appUUID uuid
      * @param subType subType
      * @param offsetValue offsetValue
