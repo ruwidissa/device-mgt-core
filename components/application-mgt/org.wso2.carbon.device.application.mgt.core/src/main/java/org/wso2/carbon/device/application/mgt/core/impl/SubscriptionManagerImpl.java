@@ -628,7 +628,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         PaginationResult paginationResult = new PaginationResult();
         try {
             ConnectionManagerUtil.openDBConnection();
-
             ApplicationDTO applicationDTO = this.applicationDAO
                     .getAppWithRelatedRelease(appUUID, tenantId);
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
