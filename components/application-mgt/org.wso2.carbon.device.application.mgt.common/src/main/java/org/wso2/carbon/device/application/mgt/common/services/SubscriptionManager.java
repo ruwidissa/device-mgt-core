@@ -33,12 +33,13 @@ public interface SubscriptionManager {
 
     /***
      * This method used to get the app id ,device ids and pass them to DM service method
-     * @param appUUID uuid
-     * @param offsetValue offsetValue
-     * @param limitValue limitValue
-     * @param status status
-     * @return deviceDetails
-     * @throws ApplicationManagementException Exception of the application management
+     * @param appUUID UUID of the application release
+     * @param offsetValue offset value for get paginated result
+     * @param limitValue limit value for get paginated result
+     * @param status status of the devices
+     * @return deviceDetails - device details for given application release.
+     * @throws ApplicationManagementException throws {@link ApplicationManagementException} Exception
+     * of the application management
      */
     PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
                                             String status)
@@ -46,12 +47,13 @@ public interface SubscriptionManager {
 
     /***
      * This method used to get category details
-     * @param appUUID uuid
-     * @param subType subType
-     * @param offsetValue offsetValue
-     * @param limitValue limitValue
-     * @return paginationResult
-     * @throws ApplicationManagementException Exception of the application management
+     * @param appUUID UUID of the application release
+     * @param subType subscription type of the application
+     * @param offsetValue offset value for get paginated result
+     * @param limitValue limit value for get paginated result
+     * @return {@link PaginationResult} pagination result of the category details.
+     * @throws ApplicationManagementException throws {@link ApplicationManagementException} Exception
+     * of the application management
      */
     PaginationResult getAppInstalledCategories(int offsetValue, int limitValue, String appUUID,
                                                String subType)

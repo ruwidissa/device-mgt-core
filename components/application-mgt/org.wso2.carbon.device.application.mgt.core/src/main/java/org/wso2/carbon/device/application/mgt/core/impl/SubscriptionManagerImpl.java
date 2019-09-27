@@ -571,7 +571,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
         try {
             ConnectionManagerUtil.openDBConnection();
-
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(appUUID, tenantId);
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
@@ -580,14 +579,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             if (deviceSubscriptionDTOS.isEmpty()) {
                 String msg = "Couldn't found an subscribed devices for application release id: "
                              + applicationReleaseId;
-                log.error(msg);
+                log.info(msg);
             }
-
             List<Integer> deviceIdList = new ArrayList<>();
             for (DeviceSubscriptionDTO deviceIds : deviceSubscriptionDTOS) {
                 deviceIdList.add(deviceIds.getDeviceId());
             }
-            //pass the device id list to device manager service layer method
+            //pass the device id list to device manager service method
             try {
                 PaginationResult deviceDetails = deviceManagementProviderService
                         .getAppSubscribedDevices(offsetValue ,limitValue, deviceIdList, status);
@@ -630,7 +628,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         PaginationResult paginationResult = new PaginationResult();
         try {
             ConnectionManagerUtil.openDBConnection();
-
             ApplicationDTO applicationDTO = this.applicationDAO
                     .getAppWithRelatedRelease(appUUID, tenantId);
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();

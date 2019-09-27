@@ -708,7 +708,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         try {
             Connection conn = this.getDBConnection();
-            int index = 1;
             List<String> subscribedUsers = new ArrayList<>();
             String sql = "SELECT "
                          + "US.USER_NAME AS USER "
@@ -716,10 +715,10 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(index++, appReleaseId);
-                stmt.setInt(index++, tenantId);
-                stmt.setInt(index++, offsetValue);
-                stmt.setInt(index, limitValue);
+                stmt.setInt(1, appReleaseId);
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, offsetValue);
+                stmt.setInt(4, limitValue);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         subscribedUsers.add(rs.getString("USER"));
@@ -749,7 +748,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         try {
             Connection conn = this.getDBConnection();
-            int index = 1;
             List<String> subscribedRoles = new ArrayList<>();
             String sql = "SELECT "
                          + "US.ROLE_NAME AS ROLE "
@@ -757,10 +755,10 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(index++, appReleaseId);
-                ps.setInt(index++, tenantId);
-                ps.setInt(index++, offsetValue);
-                ps.setInt(index, limitValue);
+                ps.setInt(1, appReleaseId);
+                ps.setInt(2, tenantId);
+                ps.setInt(3, offsetValue);
+                ps.setInt(4, limitValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedRoles.add(rs.getString("ROLE"));
@@ -790,7 +788,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
         try {
             Connection conn = this.getDBConnection();
-            int index = 1;
             List<String> subscribedGroups = new ArrayList<>();
             String sql = "SELECT "
                          + "GS.GROUP_NAME AS GROUPS "
@@ -798,10 +795,10 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(index++, appReleaseId);
-                ps.setInt(index++, tenantId);
-                ps.setInt(index++, offsetValue);
-                ps.setInt(index, limitValue);
+                ps.setInt(1, appReleaseId);
+                ps.setInt(2, tenantId);
+                ps.setInt(3, offsetValue);
+                ps.setInt(4, limitValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedGroups.add(rs.getString("GROUPS"));
