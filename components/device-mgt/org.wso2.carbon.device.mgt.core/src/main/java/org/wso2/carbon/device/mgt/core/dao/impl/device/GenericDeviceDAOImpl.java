@@ -618,8 +618,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while retrieving information " +
-                    "of all registered devices according to device ids and the limit area", e);
+            String msg = "Error occurred while retrieving information of all registered devices " +
+                         "according to device ids and the limit area.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         }
     }
 

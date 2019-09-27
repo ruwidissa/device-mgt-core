@@ -87,11 +87,11 @@ public interface SubscriptionDAO {
 
     /**
      * this method is used to get the details of users
-     * @param tenantId tenant id
-     * @param offsetValue offsetValue
-     * @param limitValue limitValue
-     * @param appReleaseId appReleaseId
-     * @return subscribedUsers
+     * @param tenantId id of the current tenant
+     * @param offsetValue offset value for get paginated result
+     * @param limitValue limit value for get paginated result
+     * @param appReleaseId id of the application release.
+     * @return subscribedUsers - list of app subscribed users.
      * @throws ApplicationManagementDAOException throws {@link ApplicationManagementDAOException} if
      * connections establishment fails.
      */
@@ -101,11 +101,11 @@ public interface SubscriptionDAO {
 
     /**
      * this method is used to get the details of roles
-     * @param tenantId tenant id
-     * @param offsetValue offsetValue
-     * @param limitValue limitValue
-     * @param appReleaseId appReleaseId
-     * @return subscribedRoles
+     * @param tenantId id of the current tenant
+     * @param offsetValue offset value for get paginated result
+     * @param limitValue limit value for get paginated result
+     * @param appReleaseId id of the application release.
+     * @return subscribedRoles - list of app subscribed roles.
      * @throws ApplicationManagementDAOException throws {@link ApplicationManagementDAOException} if
      * connections establishment fails.
      */
@@ -114,12 +114,12 @@ public interface SubscriptionDAO {
             throws ApplicationManagementDAOException;
 
     /**
-     * this method is used to get the details of groups
-     * @param tenantId tenant id
-     * @param offsetValue offsetValue
-     * @param limitValue limitValue
-     * @param appReleaseId appReleaseId
-     * @return subscribedUsers
+     * this method is used to get the details of subscribed groups
+     * @param tenantId id of the current tenant
+     * @param offsetValue offset value for get paginated result
+     * @param limitValue limit value for get paginated result
+     * @param appReleaseId id of the application release.
+     * @return subscribedGroups - list of app subscribed groups.
      * @throws ApplicationManagementDAOException throws {@link ApplicationManagementDAOException} if
      * connections establishment fails.
      */

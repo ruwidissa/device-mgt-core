@@ -22,9 +22,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class BasePaginatedResult {
 
-    /**
-     * Number of Resources returned.
-     */
     @ApiModelProperty(
             value = "Number of total resources.",
             example = "1")
