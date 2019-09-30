@@ -115,6 +115,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static final Log log = LogFactory.getLog(UserManagementServiceImpl.class);
 
     private static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
+    private static final String DEFAULT_SUBSCRIBER = "Internal/subscriber";
 
     // Permissions that are given for a normal device user.
     private static final Permission[] PERMISSIONS_FOR_DEVICE_USER = {
@@ -158,9 +159,31 @@ public class UserManagementServiceImpl implements UserManagementService {
             List<String> tmpRoles = new ArrayList<>();
             String[] userInfoRoles = userInfo.getRoles();
             tmpRoles.add(DEFAULT_DEVICE_USER);
+
+            boolean subscriberFound = false;
+
             if (userInfoRoles != null) {
+
+                //check if subscriber role is coming in the payload
+                for (String r : userInfoRoles) {
+                    if (DEFAULT_SUBSCRIBER.equals(r)) {
+                        subscriberFound = true;
+                        break;
+                    }
+                }
                 tmpRoles.addAll(Arrays.asList(userInfoRoles));
             }
+
+            if (!subscriberFound) {
+                // Add Internal/subscriber role to new users
+                if (userStoreManager.isExistingRole(DEFAULT_SUBSCRIBER)) {
+                    tmpRoles.add(DEFAULT_SUBSCRIBER);
+                } else {
+                    log.warn("User: " + userInfo.getUsername() + " will not be able to enroll devices as '" +
+                             DEFAULT_SUBSCRIBER + "' is missing in the system");
+                }
+            }
+            
             String[] roles = new String[tmpRoles.size()];
             tmpRoles.toArray(roles);
 
