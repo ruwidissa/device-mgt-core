@@ -62,7 +62,6 @@ class NewAppDetailsForm extends React.Component {
                     name,
                     description,
                     categories,
-                    subMethod: (price === undefined || parseInt(price) === 0) ? "FREE" : "PAID",
                     tags,
                     unrestrictedRoles: [],
                 };
