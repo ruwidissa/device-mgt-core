@@ -159,26 +159,31 @@ public class UserManagementServiceImpl implements UserManagementService {
             List<String> tmpRoles = new ArrayList<>();
             String[] userInfoRoles = userInfo.getRoles();
             tmpRoles.add(DEFAULT_DEVICE_USER);
+
+            boolean subscriberFound = false;
+
             if (userInfoRoles != null) {
+
                 //check if subscriber role is coming in the payload
-                boolean subscriberFound = false;
                 for (String r : userInfoRoles) {
                     if (DEFAULT_SUBSCRIBER.equals(r)) {
                         subscriberFound = true;
                         break;
                     }
                 }
-                if (!subscriberFound) {
-                    // Add Internal/subscriber role to new users
-                    if (userStoreManager.isExistingRole(DEFAULT_SUBSCRIBER)) {
-                        tmpRoles.add(DEFAULT_SUBSCRIBER);
-                    } else {
-                        log.warn("User: " + userInfo.getUsername() + " will not be able to enroll devices as '" +
-                                 DEFAULT_SUBSCRIBER + "' is missing in the system");
-                    }
-                }
                 tmpRoles.addAll(Arrays.asList(userInfoRoles));
             }
+
+            if (!subscriberFound) {
+                // Add Internal/subscriber role to new users
+                if (userStoreManager.isExistingRole(DEFAULT_SUBSCRIBER)) {
+                    tmpRoles.add(DEFAULT_SUBSCRIBER);
+                } else {
+                    log.warn("User: " + userInfo.getUsername() + " will not be able to enroll devices as '" +
+                             DEFAULT_SUBSCRIBER + "' is missing in the system");
+                }
+            }
+            
             String[] roles = new String[tmpRoles.size()];
             tmpRoles.toArray(roles);
 
