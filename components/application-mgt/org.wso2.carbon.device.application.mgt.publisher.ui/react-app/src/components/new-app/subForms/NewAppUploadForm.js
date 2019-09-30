@@ -17,7 +17,8 @@
  */
 
 import React from "react";
-import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, InputNumber} from "antd";
+import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, InputNumber, Modal} from "antd";
+import "@babel/polyfill";
 
 const formItemLayout = {
     labelCol: {
@@ -32,6 +33,15 @@ const formItemLayout = {
 const {Option} = Select;
 const {TextArea} = Input;
 
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
 class NewAppUploadForm extends React.Component {
 
     constructor(props) {
@@ -42,7 +52,12 @@ class NewAppUploadForm extends React.Component {
             loading: false,
             binaryFiles: [],
             application: null,
-            isFree: true
+            isFree: true,
+            previewVisible: false,
+            previewImage: '',
+            binaryFileHelperText: '',
+            iconHelperText: '',
+            screenshotHelperText: ''
         }
     }
 
@@ -93,24 +108,61 @@ class NewAppUploadForm extends React.Component {
 
                 const data = new FormData();
 
-                if (specificElements.hasOwnProperty("binaryFile")) {
-                    data.append('binaryFile', binaryFile[0].originFileObj);
+                if (specificElements.hasOwnProperty("binaryFile") && this.state.binaryFiles.length !== 1) {
+                    this.setState({
+                        binaryFileHelperText: 'Please select the application'
+                    });
+                } else if (this.state.icons.length !== 1) {
+                    this.setState({
+                        iconHelperText: 'Please select an icon'
+                    });
+                } else if (this.state.screenshots.length !== 3) {
+                    this.setState({
+                        screenshotHelperText: 'Please select 3 screenshots'
+                    });
+                } else {
+                    data.append('icon', icon[0].originFileObj);
+                    data.append('screenshot1', screenshots[0].originFileObj);
+                    data.append('screenshot2', screenshots[1].originFileObj);
+                    data.append('screenshot3', screenshots[2].originFileObj);
+                    if (specificElements.hasOwnProperty("binaryFile")) {
+                        data.append('binaryFile', binaryFile[0].originFileObj);
+                    }
+                    this.props.onSuccessReleaseData({data, release});
                 }
-
-                data.append('icon', icon[0].originFileObj);
-                data.append('screenshot1', screenshots[0].originFileObj);
-                data.append('screenshot2', screenshots[1].originFileObj);
-                data.append('screenshot3', screenshots[2].originFileObj);
-
-                this.props.onSuccessReleaseData({data, release});
             }
         });
     };
 
-    handleIconChange = ({fileList}) => this.setState({icons: fileList});
-    handleBinaryFileChange = ({fileList}) => this.setState({binaryFiles: fileList});
+    handleIconChange = ({fileList}) => {
+        if (fileList.length === 1) {
+            this.setState({
+                iconHelperText: ''
+            });
+        }
+        this.setState({
+            icons: fileList
+        });
+    };
+    handleBinaryFileChange = ({fileList}) => {
+        if (fileList.length === 1) {
+            this.setState({
+                binaryFileHelperText: ''
+            });
+        }
+        this.setState({binaryFiles: fileList});
+    };
 
-    handleScreenshotChange = ({fileList}) => this.setState({screenshots: fileList});
+    handleScreenshotChange = ({fileList}) => {
+        if (fileList.length === 3) {
+            this.setState({
+                screenshotHelperText: ''
+            });
+        }
+        this.setState({
+            screenshots: fileList
+        });
+    };
 
     handlePriceTypeChange = (value) => {
         this.setState({
@@ -118,11 +170,38 @@ class NewAppUploadForm extends React.Component {
         });
     };
 
+    handlePreviewCancel = () => this.setState({previewVisible: false});
+    handlePreview = async file => {
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+
+        this.setState({
+            previewImage: file.url || file.preview,
+            previewVisible: true,
+        });
+    };
+
     render() {
         const {formConfig} = this.props;
         const {getFieldDecorator} = this.props.form;
-        const {icons, screenshots, binaryFiles, isFree} = this.state;
-
+        const {
+            icons,
+            screenshots,
+            binaryFiles,
+            isFree,
+            previewImage,
+            previewVisible,
+            binaryFileHelperText,
+            iconHelperText,
+            screenshotHelperText
+        } = this.state;
+        const uploadButton = (
+            <div>
+                <Icon type="plus"/>
+                <div className="ant-upload-text">Select</div>
+            </div>
+        );
 
         return (
             <div>
@@ -137,7 +216,10 @@ class NewAppUploadForm extends React.Component {
                             onSubmit={this.handleSubmit}
                         >
                             {formConfig.specificElements.hasOwnProperty("binaryFile") && (
-                                <Form.Item {...formItemLayout} label="Application">
+                                <Form.Item {...formItemLayout}
+                                           label="Application"
+                                           validateStatus="error"
+                                           help={binaryFileHelperText}>
                                     {getFieldDecorator('binaryFile', {
                                         valuePropName: 'binaryFile',
                                         getValueFromEvent: this.normFile,
@@ -159,7 +241,10 @@ class NewAppUploadForm extends React.Component {
                                 </Form.Item>
                             )}
 
-                            <Form.Item {...formItemLayout} label="Icon">
+                            <Form.Item {...formItemLayout}
+                                       label="Icon"
+                                       validateStatus="error"
+                                       help={iconHelperText}>
                                 {getFieldDecorator('icon', {
                                     valuePropName: 'icon',
                                     getValueFromEvent: this.normFile,
@@ -168,25 +253,20 @@ class NewAppUploadForm extends React.Component {
                                 })(
                                     <Upload
                                         name="logo"
+                                        listType="picture-card"
                                         onChange={this.handleIconChange}
                                         beforeUpload={() => false}
+                                        onPreview={this.handlePreview}
                                     >
-                                        {icons.length !== 1 && (
-                                            <Button>
-                                                <Icon type="upload"/> Click to upload
-                                            </Button>
-                                        )}
+                                        {icons.length === 1 ? null : uploadButton}
                                     </Upload>,
                                 )}
                             </Form.Item>
 
-                            <Row style={{marginTop: 40}}>
-                                <Col span={24}>
-
-                                </Col>
-                            </Row>
-
-                            <Form.Item {...formItemLayout} label="Screenshots">
+                            <Form.Item {...formItemLayout}
+                                       label="Screenshots"
+                                       validateStatus="error"
+                                       help={screenshotHelperText}>
                                 {getFieldDecorator('screenshots', {
                                     valuePropName: 'icon',
                                     getValueFromEvent: this.normFile,
@@ -195,18 +275,11 @@ class NewAppUploadForm extends React.Component {
                                 })(
                                     <Upload
                                         name="screenshots"
+                                        listType="picture-card"
                                         onChange={this.handleScreenshotChange}
                                         beforeUpload={() => false}
-                                        multiple
-                                    >
-
-                                        {screenshots.length < 3 && (
-                                            <Button>
-                                                <Icon type="upload"/> Click to upload
-                                            </Button>
-                                        )}
-
-
+                                        onPreview={this.handlePreview}>
+                                        {screenshots.length >= 3 ? null : uploadButton}
                                     </Upload>,
                                 )}
                             </Form.Item>
@@ -331,6 +404,9 @@ class NewAppUploadForm extends React.Component {
                         </Form>
                     </Col>
                 </Row>
+                <Modal visible={previewVisible} footer={null} onCancel={this.handlePreviewCancel}>
+                    <img alt="Preview Image" style={{width: '100%'}} src={previewImage}/>
+                </Modal>
             </div>
         );
     }
