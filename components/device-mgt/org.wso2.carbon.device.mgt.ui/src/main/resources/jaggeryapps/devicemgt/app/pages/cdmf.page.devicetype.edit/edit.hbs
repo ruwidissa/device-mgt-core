@@ -98,14 +98,15 @@
                                     <div class="row">
                                         <div class="dontfloat feature-wrapper" name ="deviceFeature">
                                             <div class="col-xs-3">
-                                                <input type="text" class="form-control" id="feature-name" placeholder="name" value="{{this.name}}"/>
+                                                <input type="text" class="form-control feature-name" placeholder="name" value="{{this.name}}"/>
                                             </div>
                                             <div class="col-xs-4">
-                                                <input type="text" class="form-control" id="feature-code" placeholder="code" value="{{this.code}}"/>
+                                                <input type="text" class="form-control feature-code" placeholder="code" value="{{this.code}}"/>
                                             </div>
                                             <div class="col-xs-4">
-                                            <textarea aria-describedby="basic-addon1" type="text" id="feature-description"
-                                                      placeholder="description" data-error-msg="invalid feature description" class="form-control" rows="1" cols="30">{{this.description}}</textarea>
+                                            <textarea aria-describedby="basic-addon1" type="text" 
+                                            		placeholder="description" data-error-msg="invalid feature description" 
+                                            		class="form-control feature-description" rows="1" cols="30">{{this.description}}</textarea>
                                             </div>
                                             <button type="button" class="wr-btn wr-btn-horizontal remove_feature_button"><i class="fa fa-minus"></i></button>
                                         </div>
@@ -115,16 +116,16 @@
                                 <div class="row">
                                     <div class="dontfloat feature-wrapper" name="deviceFeature">
                                         <div class="col-xs-3">
-                                            <input type="text" class="form-control" id="feature-name" placeholder="name"/>
+                                            <input type="text" class="form-control feature-name" placeholder="name"/>
                                         </div>
                                         <div class="col-xs-4">
-                                            <input type="text" class="form-control" id="feature-code" placeholder="code"/>
+                                            <input type="text" class="form-control feature-code"  placeholder="code"/>
                                         </div>
                                         <div class="col-xs-4">
-                                            <textarea aria-describedby="basic-addon1" type="text" id="feature-description"
+                                            <textarea aria-describedby="basic-addon1" type="text"
                                                       placeholder="description"
                                                       data-error-msg="invalid feature description"
-                                                      class="form-control" rows="1" cols="30"></textarea>
+                                                      class="form-control feature-description" rows="1" cols="30"></textarea>
                                         </div>
                                         <button type="button" class="wr-btn wr-btn-horizontal add_feature_button"><i class="fa fa-plus"></i></button>
                                     </div>
@@ -221,7 +222,7 @@
 
                         </div>
                         <br>
-                        <button id="add-devicetype-btn" class="wr-btn">Update</button>
+                        <button id="edit-devicetype-btn" class="wr-btn">Update</button>
                         <div id="devicetype-create-success-msg" class="alert hidden" role="alert">
                             <i class="icon fw fw-success"></i><span></span>
                         </div>
