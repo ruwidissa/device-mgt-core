@@ -32,30 +32,28 @@ public interface SubscriptionManager {
             String action) throws ApplicationManagementException;
 
     /***
-     * This method used to get the app id ,device ids and pass them to DM service method
-     * @param appUUID UUID of the application release
-     * @param offsetValue offset value for get paginated result
-     * @param limitValue limit value for get paginated result
-     * @param status status of the devices
+     * This method used to get the app id ,device ids and pass them to DM service method.
+     *
+     * @param appUUID UUID of the application release.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param status status of the devices.
      * @return deviceDetails - device details for given application release.
-     * @throws ApplicationManagementException throws {@link ApplicationManagementException} Exception
-     * of the application management
+     * @throws {@link ApplicationManagementException} Exception of the application management
      */
     PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
-                                            String status)
-            throws ApplicationManagementException;
+                                            String status) throws ApplicationManagementException;
 
     /***
-     * This method used to get category details
-     * @param appUUID UUID of the application release
-     * @param subType subscription type of the application
-     * @param offsetValue offset value for get paginated result
-     * @param limitValue limit value for get paginated result
+     * This method used to get category details.
+     *
+     * @param appUUID UUID of the application release.
+     * @param subType subscription type of the application.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
      * @return {@link PaginationResult} pagination result of the category details.
-     * @throws ApplicationManagementException throws {@link ApplicationManagementException} Exception
-     * of the application management
+     * @throws {@link ApplicationManagementException} Exception of the application management
      */
     PaginationResult getAppInstalledCategories(int offsetValue, int limitValue, String appUUID,
-                                               String subType)
-            throws ApplicationManagementException;
+                                               String subType) throws ApplicationManagementException;
 }
