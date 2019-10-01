@@ -31,11 +31,9 @@ public final class DeviceManagementConstants {
         private ConfigurationManagement(){
             throw new AssertionError();
         }
-        public static final String ADMIN_CREDENTIALS = "admin:admin";
         public static final String SCOPES_FOR_TOKEN = "perm:device:operations perm:device:publish-event";
         public static final String IOT_GATEWAY_HOST = "iot.gateway.host";
         public static final String IOT_GATEWAY_HTTPS_PORT = "iot.gateway.https.port";
-        public static final String MQTT_ENDPOINTS = "mqttEndpoints";
         public static final String APPLICATION_REGISTRATION_API_ENDPOINT =
                 "/api-application-registration/register";
         public static final String AUTHORIZATION_HEADER = "authorization";
