@@ -192,7 +192,7 @@ class DeviceUninstall extends React.Component {
                              type: device.type
                          });
         });
-        this.props.onUninstall("devices", payload);
+        this.props.onUninstall("devices", payload, "uninstall");
     };
 
     render() {

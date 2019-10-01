@@ -196,7 +196,7 @@ class DeviceInstall extends React.Component {
                 type: device.type
             });
         });
-        this.props.onInstall("devices", payload);
+        this.props.onInstall("devices", payload, "install");
     };
 
     render() {
