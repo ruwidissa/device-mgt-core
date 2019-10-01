@@ -40,8 +40,12 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
-            request.setGroupName(name.toUpperCase());
-            request.setOwner(owner.toUpperCase());
+            if (name != null){
+                request.setGroupName(name.toUpperCase());
+            }
+            if (owner != null) {
+                request.setOwner(owner.toUpperCase());
+            }
             PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
                     .getGroups(request);
             DeviceGroupList deviceGroupList = new DeviceGroupList();

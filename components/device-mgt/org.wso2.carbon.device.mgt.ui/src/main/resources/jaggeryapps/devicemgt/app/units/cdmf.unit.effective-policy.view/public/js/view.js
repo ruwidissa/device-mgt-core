@@ -76,25 +76,26 @@ var displayPolicy = function (policyPayloadObj) {
     var policyOperationsStylesSrc = context + '/public/cdmf.unit.device.type.' + deviceType +
         '.policy-view/css/' + deviceType + '-policy-view.css';
     var policyOperationsTemplateCacheKey = deviceType + '-policy-operations';
-    
-    $.isResourceExists(policyOperationsTemplateSrc, function (status) {
+
+    if (policyOperationsTemplateSrc) {
+        if (policyOperationsScriptSrc) {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = policyOperationsScriptSrc;
+            $(".wr-advance-operations").prepend(script);
+        }
         $.template(policyOperationsTemplateCacheKey, policyOperationsTemplateSrc, function (template) {
             var content = template();
             $("#device-type-policy-operations").html(content).removeClass("hidden");
             $(".policy-platform").addClass("hidden");
-            $.isResourceExists(policyOperationsScriptSrc, function (status) {
-                var script = document.createElement('script');
-                script.type = 'text/javascript';
-                script.src = policyOperationsScriptSrc;
-                $(".wr-advance-operations").prepend(script);
+            if (policyOperationsScriptSrc) {
                 /*
                  This method should be implemented in the relevant plugin side and should include the logic to
                  populate the policy profile in the plugin specific UI.
                  */
                 polulateProfileOperations(policyPayloadObj["profile"]["profileFeaturesList"]);
-            });
+            }
         });
-
         $.isResourceExists(policyOperationsStylesSrc, function (status) {
             var style = document.createElement('link');
             style.type = 'text/css';
@@ -104,7 +105,7 @@ var displayPolicy = function (policyPayloadObj) {
         });
 
         $(".wr-advance-operations-init").addClass("hidden");
-    });
+    }
 };
 
 /**

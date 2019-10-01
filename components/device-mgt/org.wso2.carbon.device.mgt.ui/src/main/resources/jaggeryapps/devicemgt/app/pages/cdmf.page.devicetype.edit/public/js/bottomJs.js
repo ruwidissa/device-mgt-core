@@ -123,27 +123,28 @@ $(document).ready(function () {
 	var addFeatureButton = $('.add_feature_button'); //Add button selector
 	var featureWrapper = $('.feature_field_wrapper'); //Input field wrapper
 	$(addFeatureButton).click(function(){ //Once add button is clicked
-		var featureFieldHtml = '<div class="row"><div class="dontfloat feature-wrapper" name ="deviceFeature"> <div class="col-xs-3"> <input type="text"' +
-				' class="form-control" id="feature-name" placeholder="name"/> </div> <div class="col-xs-4"> ' +
-				'<input type="text" class="form-control" id="feature-code" placeholder="code"/> </div> ' +
-				'<div class="col-xs-4"> <textarea aria-describedby="basic-addon1" type="text" ' +
-				'id="feature-description" placeholder="description"data-error-msg="invalid ' +
-				'feature description"class="form-control" rows="1" cols="30"></textarea> </div> ' +
-				'<button type="button" class="wr-btn wr-btn-horizontal wr-btn-secondary remove_feature_button"><i class="fa fa-minus"></i></button> </div></div>'
+		var featureFieldHtml = '<div class="row"><div class="dontfloat feature-wrapper" name ="deviceFeature"> ' +
+			'<div class="col-xs-3"> <input type="text"' +
+            ' class="form-control feature-name" placeholder="name"/> </div> <div class="col-xs-4"> ' +
+            '<input type="text" class="form-control feature-code" placeholder="code"/> </div> ' +
+            '<div class="col-xs-4"> <textarea aria-describedby="basic-addon1" type="text" ' +
+            'class="feature-description" placeholder="description"data-error-msg="invalid ' +
+            'feature description" class="form-control" rows="1" cols="30"></textarea> </div> ' +
+            '<button type="button" class="wr-btn wr-btn-horizontal wr-btn-secondary remove_feature_button">' +
+			'<i class="fa fa-minus"></i></button> </div></div>';
 		$(featureWrapper).append(featureFieldHtml); // Add field html
 
 	});
 	$(featureWrapper).on('click', '.remove_feature_button', function(e){ //Once remove button is clicked
 		e.preventDefault();
 		$(this).parent('div').remove(); //Remove field html
-		op--; //Decrement field counter
 	});
 
     /**
      * Following click function would execute
      * when a user clicks on "Add Device type" button.
      */
-    $("button#add-devicetype-btn").click(function () {
+    $("button#edit-devicetype-btn").click(function () {
 
 		var errorMsgWrapper = "#devicetype-create-error-msg";
 		var errorMsg = "#devicetype-create-error-msg span";
@@ -155,13 +156,19 @@ $(document).ready(function () {
 		if (!deviceTypeName || deviceTypeName.trim() == "" ) {
 			$(errorMsg).text("Device Type Name Cannot be empty.");
 			$(errorMsgWrapper).removeClass("hidden");
+			$([document.documentElement, document.body]).animate({
+				scrollTop: $(".page-sub-title").offset().top
+				}, 500);
 			return;
 		}
 
-		if (!deviceTypeDescription || deviceTypeDescription.trim() == "" ) {
+		if (!deviceTypeDescription || deviceTypeDescription.trim() == "") {
 			$(errorMsg).text("Device Type Description Cannot be empty.");
 			$(errorMsgWrapper).removeClass("hidden");
-			return
+			$([document.documentElement, document.body]).animate({
+				scrollTop: $(".page-sub-title").offset().top
+				}, 500);
+			return;
 		}
 
 		deviceType.name = deviceTypeName.trim();
@@ -197,17 +204,29 @@ $(document).ready(function () {
 		}
 
 		var features = [];
+		var featureCodesValidation = true;
+		var regexp = /^[a-zA-Z0-9-_]+$/;
 		$('div[name^="deviceFeature"]').each(function() {
-			var featureName = $(this).find("#feature-name").val();
-			var featureCode = $(this).find("#feature-code").val();
-			if (featureName && featureName.trim() != "" && featureCode && featureCode.trim() != "") {
-				var feature = {};
-				feature.name = featureName.trim();
-				feature.code = featureCode.trim();
-				feature.description = $("#feature-description").val();
-				features.push(feature);
-			}
+		    var featureName = $(this).find(".feature-name").val();
+		    var featureCode = $(this).find(".feature-code").val();
+		    var featureDescription = $(this).find(".feature-description").val();
+		    if (featureName && featureName.trim() != "" && featureCode && featureCode.trim() != "") {
+		        featureCodesValidation = featureCodesValidation && (featureCode.search(regexp) != -1);
+		        var feature = {};
+		        feature.name = featureName.trim();
+		        feature.code = featureCode.trim();
+		        feature.description = featureDescription;
+		        features.push(feature);
+		    }
 		});
+		if (!featureCodesValidation) {
+		    $(errorMsg).text("Device Type feature code can only contain alphanumeric, underscore and dash characters.");
+		    $(errorMsgWrapper).removeClass("hidden");
+		    $([document.documentElement, document.body]).animate({
+		        scrollTop: $(".page-sub-title").offset().top
+		    }, 500);
+		    return;
+		}
 		deviceType.deviceTypeMetaDefinition.features = features;
 
 		var addRoleAPI = apiBasePath + "/admin/device-types/" + deviceType.name;
@@ -217,6 +236,7 @@ $(document).ready(function () {
 			    deviceType,
 		        function (data, textStatus, jqXHR) {
 		            if (jqXHR.status == 200) {
+		            	$(errorMsgIdentifier).addClass(" hidden");
 						$("#modalDevice").modal('show');
 		            }
 		        },
