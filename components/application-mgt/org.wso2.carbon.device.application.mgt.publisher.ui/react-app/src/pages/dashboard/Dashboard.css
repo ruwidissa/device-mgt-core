@@ -58,7 +58,7 @@
     }
 
     .mobile-menu-button{
-        margin-top: 4%;
+        margin-top: 15px;
     }
 
     Header{
@@ -68,7 +68,7 @@
     }
 
     .dashboard-body{
-        margin-top: 14%;
+        margin-top: 50px;
     }
 
     .logo-image {
@@ -80,7 +80,7 @@
 @media screen and (max-height: 350px) {
 
     .mobile-menu-button{
-        margin-top: 2%;
+        margin-top: 15px;
     }
     .dashboard-body{
         margin-top: 9%;

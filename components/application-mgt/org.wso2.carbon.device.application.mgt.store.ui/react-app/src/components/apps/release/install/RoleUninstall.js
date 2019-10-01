@@ -86,7 +86,7 @@ class RoleUninstall extends React.Component {
         value.map(val=>{
             data.push(val.key);
         });
-        this.props.onInstall("role",data);
+        this.props.onInstall("role", data, "uninstall");
     };
 
     render() {

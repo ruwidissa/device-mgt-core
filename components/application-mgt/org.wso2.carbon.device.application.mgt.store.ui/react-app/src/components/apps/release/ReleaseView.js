@@ -42,7 +42,7 @@ class ReleaseView extends React.Component {
         }
     }
 
-    installApp = (type, payload) => {
+    appOperation = (type, payload, operation) => {
         const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
@@ -50,7 +50,7 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/" + operation;
         axios.post(
             url,
             payload,
@@ -66,7 +66,7 @@ class ReleaseView extends React.Component {
                 notification["success"]({
                     message: 'Done!',
                     description:
-                        'App installed triggered.',
+                        'App '+operation+'ed triggered.',
                 });
             } else {
                 this.setState({
@@ -76,11 +76,11 @@ class ReleaseView extends React.Component {
                     message: "There was a problem",
                     duration: 0,
                     description:
-                        "Error occurred while installing app",
+                        "Error occurred while "+operation+"ing app",
                 });
             }
         }).catch((error) => {
-            handleApiError(error,"Error occurred while installing the app.");
+            handleApiError(error,"Error occurred while "+operation+"ing the app.");
         });
     };
 
@@ -90,7 +90,8 @@ class ReleaseView extends React.Component {
             appInstallModalVisible: true
         });
     };
-    closeAppInstallModal = () => {
+
+    closeAppOperationModal = () => {
         this.setState({
             appInstallModalVisible: false,
             appUninstallModalVisible: false
@@ -112,14 +113,14 @@ class ReleaseView extends React.Component {
                     uuid={release.uuid}
                     visible={this.state.appInstallModalVisible}
                     deviceType = {deviceType}
-                    onClose={this.closeAppInstallModal}
-                    onInstall={this.installApp}/>
+                    onClose={this.closeAppOperationModal}
+                    onInstall={this.appOperation}/>
                 <AppUninstallModal
                         uuid={release.uuid}
                         visible={this.state.appUninstallModalVisible}
                         deviceType = {deviceType}
-                        onClose={this.closeAppInstallModal}
-                        onInstall={this.installApp}/>
+                        onClose={this.closeAppOperationModal}
+                        onUninstall={this.appOperation}/>
                 <div className="release">
                     <Row>
                         <Col xl={4} sm={6} xs={8} className="release-icon">
