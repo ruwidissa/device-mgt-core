@@ -32,6 +32,7 @@ const formItemLayout = {
 };
 const {Option} = Select;
 const {TextArea} = Input;
+const InputGroup = Input.Group;
 
 function getBase64(file) {
     return new Promise((resolve, reject) => {
@@ -57,7 +58,8 @@ class NewAppUploadForm extends React.Component {
             previewImage: '',
             binaryFileHelperText: '',
             iconHelperText: '',
-            screenshotHelperText: ''
+            screenshotHelperText: '',
+            metaData: []
         }
     }
 
@@ -88,7 +90,7 @@ class NewAppUploadForm extends React.Component {
                     description: releaseDescription,
                     price: (price === undefined) ? 0 : parseInt(price),
                     isSharedWithAllTenants,
-                    metaData: "string",
+                    metaData: JSON.stringify(this.state.metaData),
                     releaseType: releaseType
                 };
 
@@ -182,6 +184,12 @@ class NewAppUploadForm extends React.Component {
         });
     };
 
+    addNewMetaData = () => {
+        this.setState({
+            metaData: this.state.metaData.concat({'key': '', 'value': ''})
+        })
+    };
+
     render() {
         const {formConfig} = this.props;
         const {getFieldDecorator} = this.props.form;
@@ -194,7 +202,8 @@ class NewAppUploadForm extends React.Component {
             previewVisible,
             binaryFileHelperText,
             iconHelperText,
-            screenshotHelperText
+            screenshotHelperText,
+            metaData
         } = this.state;
         const uploadButton = (
             <div>
@@ -388,6 +397,66 @@ class NewAppUploadForm extends React.Component {
                                     <Switch checkedChildren={<Icon type="check"/>}
                                             unCheckedChildren={<Icon type="close"/>}
                                     />
+                                )}
+
+                            </Form.Item>
+                            <Form.Item {...formItemLayout} label="Meta Data">
+                                {getFieldDecorator('meta', {
+                                    rules: [{
+                                        required: true,
+                                        message: 'Please fill empty fields'
+                                    }],
+                                    initialValue: false
+                                })(
+                                    <div>
+                                        {
+                                            metaData.map((data, index) => {
+                                                    return (
+                                                        <InputGroup key={index}>
+                                                            <Row gutter={8}>
+                                                                <Col span={5}>
+                                                                    <Input
+                                                                        placeholder="key"
+                                                                        value={data.key}
+                                                                        onChange={(e) => {
+                                                                        metaData[index]['key'] = e.currentTarget.value;
+                                                                        this.setState({
+                                                                            metaData
+                                                                        })
+                                                                    }}/>
+                                                                </Col>
+                                                                <Col span={8}>
+                                                                    <Input
+                                                                        placeholder="value"
+                                                                        value={data.value}
+                                                                        onChange={(e) => {
+                                                                        metaData[index].value = e.currentTarget.value;
+                                                                        this.setState({
+                                                                            metaData
+                                                                        });
+                                                                    }}/>
+                                                                </Col>
+                                                                <Col span={3}>
+                                                                    <Button type="dashed"
+                                                                            shape="circle"
+                                                                            icon="minus"
+                                                                            onClick={() => {
+                                                                                metaData.splice(index, 1);
+                                                                                this.setState({
+                                                                                    metaData
+                                                                                });
+                                                                            }}/>
+                                                                </Col>
+                                                            </Row>
+                                                        </InputGroup>
+                                                    )
+                                                }
+                                            )
+                                        }
+                                        <Button type="dashed" icon="plus" onClick={this.addNewMetaData}>
+                                            Add
+                                        </Button>
+                                    </div>
                                 )}
 
                             </Form.Item>

@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Drawer, Icon, Tooltip} from "antd";
+import {Divider, Row, Col, Typography, Button, Drawer, Icon, Tooltip, Empty} from "antd";
 import StarRatings from "react-star-ratings";
 import Reviews from "./review/Reviews";
 import "../../../App.css";
@@ -49,6 +49,12 @@ class ReleaseView extends React.Component {
             icon = defaultPlatformIcons[platform].icon;
             color = defaultPlatformIcons[platform].color;
             theme = defaultPlatformIcons[platform].theme;
+        }
+        let metaData = [];
+        try{
+            metaData = JSON.parse(release.metaData);
+        }catch (e) {
+
         }
 
         return (
@@ -120,6 +126,21 @@ class ReleaseView extends React.Component {
                     <Paragraph type="secondary" ellipsis={{rows: 3, expandable: true}}>
                         {release.description}
                     </Paragraph>
+                    <Divider/>
+                    <Text>META DATA</Text>
+                        <Row>
+                            {
+                                metaData.map((data, index)=>{
+                                    return (
+                                        <Col key={index} lg={8} md={6} xs={24} style={{marginTop:15}}>
+                                            <Text>{data.key}</Text><br/>
+                                            <Text type="secondary">{data.value}</Text>
+                                        </Col>
+                                    )
+                                })
+                            }
+                            {(metaData.length===0) && (<Text type="secondary">No meta data available.</Text>)}
+                        </Row>
                     <Divider/>
                     <Text>REVIEWS</Text>
                     <Row>

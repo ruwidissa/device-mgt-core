@@ -200,7 +200,7 @@ class LifeCycle extends React.Component {
                     visible={this.state.isReasonModalVisible}
                     onOk={this.addLifeCycle}
                     onCancel={this.closeReasonModal}
-                    okText="confirm"
+                    okText="Confirm"
                 >
                     <Text>
                         You are going to change the lifecycle state from,<br/>

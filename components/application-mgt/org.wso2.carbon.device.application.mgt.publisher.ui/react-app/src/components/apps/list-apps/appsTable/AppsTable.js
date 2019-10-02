@@ -17,11 +17,12 @@
  */
 
 import React from "react";
-import {Avatar, Table, Tag, Icon, message, notification} from "antd";
+import {Avatar, Table, Tag, Icon, message, notification, Col} from "antd";
 import axios from "axios";
 import pSBC from 'shade-blend-color';
 import "./AppsTable.css";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import AppDetailsDrawer from "../AppDetailsDrawer/AppDetailsDrawer";
 
 let config = null;
 
@@ -95,8 +96,11 @@ const columns = [
                 color = defaultPlatformIcons[platform].color;
                 theme = defaultPlatformIcons[platform].theme;
             }
-            return (<span style={{fontSize: 20, color: color, textAlign: "center"}}><Icon type={icon}
-                                                                                          theme={theme}/></span>)
+            return (
+                <span style={{fontSize: 20, color: color, textAlign: "center"}}>
+                    <Icon type={icon} theme={theme}/>
+                </span>
+            );
         }
     },
     {
@@ -115,7 +119,10 @@ class AppsTable extends React.Component {
         this.state = {
             pagination: {},
             apps: [],
-            filters: {}
+            filters: {},
+            isDrawerVisible: false,
+            selectedApp: null,
+            selectedAppIndex: -1
         };
         config = this.props.context;
     }
@@ -138,6 +145,22 @@ class AppsTable extends React.Component {
             this.fetch(filters);
         }
     }
+
+    //handler to show app drawer
+    showDrawer = (app, appIndex) => {
+        this.setState({
+            isDrawerVisible: true,
+            selectedApp: app,
+            selectedAppIndex: appIndex
+        });
+    };
+
+    // handler to close the app drawer
+    closeDrawer = () => {
+        this.setState({
+            isDrawerVisible: false
+        })
+    };
 
     handleTableChange = (pagination, filters, sorter) => {
         const pager = {...this.state.pagination};
@@ -189,9 +212,7 @@ class AppsTable extends React.Component {
                     apps: apps,
                     pagination,
                 });
-
             }
-
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 message.error('You are not logged in');
@@ -209,24 +230,37 @@ class AppsTable extends React.Component {
         });
     };
 
+    onUpdateApp = (key, value) => {
+        const apps = [...this.state.apps];
+        apps[this.state.selectedAppIndex][key]= value;
+        this.setState({
+            apps
+        });
+    };
+
     render() {
+        const {isDrawerVisible} = this.state;
         return (
             <div className="apps-table">
-            <Table
-                rowKey={record => record.id}
-                dataSource={this.state.apps}
-                columns={columns}
-                pagination={this.state.pagination}
-                onChange={this.handleTableChange}
-                rowClassName="app-row"
-                onRow={(record, rowIndex) => {
-                    return {
-                        onClick: event => {
-                            this.props.showDrawer(record);
-                        },
-                    };
-                }}
-            />
+                <Table
+                    rowKey={record => record.id}
+                    dataSource={this.state.apps}
+                    columns={columns}
+                    pagination={this.state.pagination}
+                    onChange={this.handleTableChange}
+                    rowClassName="app-row"
+                    onRow={(record, rowIndex) => {
+                        return {
+                            onClick: event => {
+                                this.showDrawer(record, rowIndex);
+                            },
+                        };
+                    }}/>
+                <AppDetailsDrawer
+                    visible={isDrawerVisible}
+                    onClose={this.closeDrawer}
+                    app={this.state.selectedApp}
+                    onUpdateApp={this.onUpdateApp}/>
             </div>
 
         );

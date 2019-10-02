@@ -18,7 +18,7 @@
 
 import React from "react";
 import '../../../../App.css';
-import {Typography, Row, Col, message, Card, notification} from "antd";
+import {Typography, Row, Col, message, Card, notification, Skeleton} from "antd";
 import axios from 'axios';
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import LifeCycle from "../../../../components/apps/release/lifeCycle/LifeCycle";
@@ -132,9 +132,9 @@ class Release extends React.Component {
     };
 
     render() {
-        const {app, release, currentLifecycleStatus, lifecycle} = this.state;
+        const {app, release, currentLifecycleStatus, lifecycle, loading} = this.state;
 
-        if (release == null) {
+        if (release == null && loading === false) {
             return (
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
                     <Title level={3}>No Apps Found</Title>
@@ -149,23 +149,31 @@ class Release extends React.Component {
                     <Row style={{padding: 10}}>
                         <Col lg={16} md={24} style={{padding: 3}}>
                             <Card>
-                                <ReleaseView
-                                    app={app}
-                                    release={release}
-                                    currentLifecycleStatus={currentLifecycleStatus}
-                                    lifecycle={lifecycle}
-                                    updateRelease={this.updateRelease}
-                                />
+                                <Skeleton loading={loading} avatar={{size: 'large'}} active paragraph={{rows: 18}}>
+                                    {(release !== null) && (
+                                        <ReleaseView
+                                            app={app}
+                                            release={release}
+                                            currentLifecycleStatus={currentLifecycleStatus}
+                                            lifecycle={lifecycle}
+                                            updateRelease={this.updateRelease}
+                                        />)
+                                    }
+                                </Skeleton>
                             </Card>
                         </Col>
                         <Col lg={8} md={24} style={{padding: 3}}>
                             <Card lg={8} md={24}>
-                                <LifeCycle
-                                    uuid={release.uuid}
-                                    currentStatus={release.currentStatus.toUpperCase()}
-                                    changeCurrentLifecycleStatus={this.changeCurrentLifecycleStatus}
-                                    lifecycle={lifecycle}
-                                />
+                                <Skeleton loading={loading} active paragraph={{rows: 8}}>
+                                    {(release !== null) && (
+                                        <LifeCycle
+                                            uuid={release.uuid}
+                                            currentStatus={release.currentStatus.toUpperCase()}
+                                            changeCurrentLifecycleStatus={this.changeCurrentLifecycleStatus}
+                                            lifecycle={lifecycle}
+                                        />)
+                                    }
+                                </Skeleton>
                             </Card>
                         </Col>
                     </Row>

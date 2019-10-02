@@ -32,17 +32,13 @@ class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            routes: props.routes
+            routes: props.routes,
+            visible: false,
+            collapsed: false
         };
-        const config = this.props.context;
-        this.Logo = config.theme.logo;
+        this.config = this.props.context;
+        this.Logo = this.config.theme.logo;
     }
-
-    //functions for show the drawer
-    state = {
-        visible: false,
-        collapsed: false
-    };
 
     showDrawer = () => {
         this.setState({
@@ -67,43 +63,61 @@ class Dashboard extends React.Component {
                         </div>
 
                         <div className="web-layout">
-
                             <Menu
                                 theme="light"
                                 mode="horizontal"
                                 defaultSelectedKeys={['1']}
-                                style={{lineHeight: '64px'}}
-                            >
+                                style={{lineHeight: '64px'}}>
                                 <Menu.Item key="1"><Link to="/publisher/apps"><Icon
                                     type="appstore"/>Apps</Link></Menu.Item>
+
                                 <SubMenu
                                     title={
                                         <span className="submenu-title-wrapper">
-                                     <Icon type="plus"/>
-                                         Add New App
-                            </span>
-                                    }
-                                >
-                                    <Menu.Item key="setting:1"><Link to="/publisher/add-new-app/public">Public
-                                        APP</Link></Menu.Item>
-                                    <Menu.Item key="setting:2"><Link to="/publisher/add-new-app/enterprise">Enterprise
-                                        APP</Link></Menu.Item>
-                                    <Menu.Item key="setting:3"><Link to="/publisher/add-new-app/web-clip">Web
-                                        Clip</Link></Menu.Item>
-                                    <Menu.Item key="setting:3"><Link to="/publisher/add-new-app/custom-app">Custom
-                                        App</Link></Menu.Item>
+                                            <Icon type="plus"/>
+                                            Add New App
+                                        </span>
+                                    }>
+                                    <Menu.Item key="setting:1">
+                                        <Link to="/publisher/add-new-app/public">Public APP</Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="setting:2">
+                                        <Link to="/publisher/add-new-app/enterprise">Enterprise APP</Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="setting:3">
+                                        <Link to="/publisher/add-new-app/web-clip">Web Clip</Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="setting:4">
+                                        <Link to="/publisher/add-new-app/custom-app">Custom App</Link>
+                                    </Menu.Item>
                                 </SubMenu>
-                                <Menu.Item key="2"><Link to="/publisher/manage"><Icon
-                                    type="control"/>Manage</Link></Menu.Item>
+
+                                <SubMenu
+                                    title={
+                                        <span className="submenu-title-wrapper">
+                                            <Icon type="control"/>Manage
+                                        </span>
+                                    }>
+                                    <Menu.Item key="manage">
+                                        <Link to="/publisher/manage">
+                                            <Icon type="setting"/> General
+                                        </Link>
+                                    </Menu.Item>
+                                    {this.config.androidEnterpriseToken != null && (
+                                        <Menu.Item key="manage-android-enterprise">
+                                            <Link to="/publisher/manage/android-enterprise">
+                                                <Icon type="android" theme="filled"/> Android Enterprise
+                                            </Link>
+                                        </Menu.Item>
+                                    )}
+                                </SubMenu>
 
                                 <SubMenu className="profile"
                                          title={
                                              <span className="submenu-title-wrapper">
-                                     <Icon type="user"/>
-                                         Profile
-                                     </span>
-                                         }
-                                >
+                                               <Icon type="user"/>Profile
+                                             </span>
+                                         }>
                                     <Logout/>
                                 </SubMenu>
                             </Menu>
@@ -118,56 +132,63 @@ class Dashboard extends React.Component {
                         </Button>
                     </div>
                     <Drawer
-                        title={<Link to="/publisher/apps"><img alt="logo" src={this.Logo} style={{marginLeft: 30}}
-                                                               width={"60%"}/></Link>}
+                        title={
+                            <Link to="/publisher/apps">
+                                <img alt="logo"
+                                     src={this.Logo}
+                                     style={{marginLeft: 30}}
+                                     width={"60%"}/>
+                            </Link>
+                        }
                         placement="left"
                         closable={false}
                         onClose={this.onClose}
                         visible={this.state.visible}
                         getContainer={false}
-                        style={{position: 'absolute'}}
-                    >
+                        style={{position: 'absolute'}}>
                         <Menu
                             theme="light"
                             mode="inline"
                             defaultSelectedKeys={['1']}
-                            style={{lineHeight: '64px', width: 231}}
-                        >
+                            style={{lineHeight: '64px', width: 231}}>
                             <Menu.Item key="1"><Link to="/publisher/apps"><Icon
                                 type="appstore"/>Apps</Link></Menu.Item>
                             <SubMenu
                                 title={
                                     <span className="submenu-title-wrapper">
-                                     <Icon type="plus"/>
-                                         Add New App
-                            </span>
-                                }
-                            >
-                                <Menu.Item key="setting:1"><Link to="/publisher/add-new-app/public">Public
-                                    APP</Link></Menu.Item>
-                                <Menu.Item key="setting:2"><Link to="/publisher/add-new-app/enterprise">Enterprise
-                                    APP</Link></Menu.Item>
-                                <Menu.Item key="setting:3"><Link to="/publisher/add-new-app/web-clip">Web
-                                    Clip</Link></Menu.Item>
-                                <Menu.Item key="setting:4"><Link to="/publisher/add-new-app/custom-app">Custom
-                                    App</Link></Menu.Item>
+                                        <Icon type="plus"/>Add New App
+                                    </span>
+                                }>
+                                <Menu.Item key="setting:1">
+                                    <Link to="/publisher/add-new-app/public">Public APP</Link>
+                                </Menu.Item>
+                                <Menu.Item key="setting:2">
+                                    <Link to="/publisher/add-new-app/enterprise">Enterprise APP</Link>
+                                </Menu.Item>
+                                <Menu.Item key="setting:3">
+                                    <Link to="/publisher/add-new-app/web-clip">Web Clip</Link>
+                                </Menu.Item>
+                                <Menu.Item key="setting:4">
+                                    <Link to="/publisher/add-new-app/custom-app">Custom App</Link>
+                                </Menu.Item>
                             </SubMenu>
-                            <Menu.Item key="2"><Link to="/publisher/manage"><Icon
-                                type="control"/>Manage</Link></Menu.Item>
+                            <Menu.Item key="2">
+                                <Link to="/publisher/manage">
+                                    <Icon type="control"/>Manage
+                                </Link>
+                            </Menu.Item>
                         </Menu>
                     </Drawer>
                     <Menu
                         mode="horizontal"
                         defaultSelectedKeys={['1']}
-                        style={{lineHeight: '63px', position: 'fixed', marginLeft: '80%'}}
-                    >
+                        style={{lineHeight: '63px', position: 'fixed', marginLeft: '80%'}}>
                         <SubMenu
                             title={
                                 <span className="submenu-title-wrapper">
-                                     <Icon type="user"/>
-                                     </span>
-                            }
-                        >
+                                    <Icon type="user"/>
+                                </span>
+                            }>
                             <Logout/>
                         </SubMenu>
                     </Menu>
