@@ -36,6 +36,7 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +56,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -103,6 +105,7 @@ import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -375,8 +378,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @PathParam("type") @Size(max = 45) String type,
             @PathParam("id") @Size(max = 45) String id,
             @QueryParam("owner") @Size(max = 100) String owner,
+            @QueryParam("ownership") @Size(max = 100) String ownership,
             @HeaderParam("If-Modified-Since") String ifModifiedSince) {
-        Device device = null;
+        Device device;
+        Date sinceDate = null;
         try {
             RequestValidationUtil.validateDeviceIdentifier(type, id);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
@@ -391,61 +396,32 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" + id + "'";
                 log.error(msg);
                 return Response.status(Response.Status.UNAUTHORIZED).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(msg).build()).build();
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_UNAUTHORIZED).setMessage(msg).build()).build();
             }
 
-            Date sinceDate = null;
-            if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+            DeviceData deviceData = new DeviceData();
+            deviceData.setDeviceIdentifier(deviceIdentifier);
+
+            if (!StringUtils.isBlank(ifModifiedSince)){
                 SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
                 try {
                     sinceDate = format.parse(ifModifiedSince);
+                    deviceData.setLastModifiedDate(sinceDate);
                 } catch (ParseException e) {
+                    String msg = "Invalid date string is provided in 'If-Modified-Since' header";
+                    log.error(msg, e);
                     return Response.status(Response.Status.BAD_REQUEST).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setMessage("Invalid date " +
-                                    "string is provided in 'If-Modified-Since' header").build()).build();
+                            new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
                 }
             }
 
-            if (!StringUtils.isEmpty(owner)) {
-                if (authorizedUser.equalsIgnoreCase(owner) || deviceAccessAuthorizationService.isDeviceAdminUser()) {
-                    if (sinceDate != null) {
-                        device = dms.getDevice(new DeviceIdentifier(id, type), owner, sinceDate, true);
-                        if (device == null) {
-                            return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
-                                    "after the timestamp provided in 'If-Modified-Since' header").build();
-                        }
-                    } else {
-                        device = dms.getDevice(new DeviceIdentifier(id, type), owner, true);
-                    }
-                } else {
-                    String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" + id +
-                            "' which belongs to user '" + owner + "'";
-                    log.error(msg);
-                    return Response.status(Response.Status.UNAUTHORIZED).entity(
-                            new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(msg).build()).build();
-                }
-            } else if (deviceAccessAuthorizationService.isDeviceAdminUser()) {
-                if (sinceDate != null) {
-                    device = dms.getDevice(new DeviceIdentifier(id, type), sinceDate);
-                    if (device == null) {
-                        return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
-                                "after the timestamp provided in 'If-Modified-Since' header").build();
-                    }
-                } else {
-                    device = dms.getDevice(new DeviceIdentifier(id, type));
-                }
-            } else {
-                owner = authorizedUser;
-                if (sinceDate != null) {
-                    device = dms.getDevice(new DeviceIdentifier(id, type), owner, sinceDate, true);
-                    if (device == null) {
-                        return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
-                                "after the timestamp provided in 'If-Modified-Since' header").build();
-                    }
-                } else {
-                    device = dms.getDevice(new DeviceIdentifier(id, type), owner, true);
-                }
+            if (!StringUtils.isBlank(owner)){
+                deviceData.setDeviceOwner(owner);
             }
+            if (!StringUtils.isBlank(ownership)){
+                deviceData.setDeviceOwnership(ownership);
+            }
+            device = dms.getDevice(deviceData, true);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while fetching the device information.";
             log.error(msg, e);
@@ -458,8 +434,12 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
         if (device == null) {
+            if (sinceDate != null) {
+                return Response.status(Response.Status.NOT_MODIFIED).entity("No device is modified " +
+                        "after the timestamp provided in 'If-Modified-Since' header").build();
+            }
             return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(404l).setMessage("Requested device of type '" +
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_NOT_FOUND).setMessage("Requested device of type '" +
                             type + "', which carries id '" + id + "' does not exist").build()).build();
         }
         return Response.status(Response.Status.OK).entity(device).build();
@@ -703,7 +683,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
             @QueryParam("offset") int offset,
             @QueryParam("limit") int limit,
-            @QueryParam("owner") String owner) {
+            @QueryParam("owner") String owner,
+            @QueryParam("ownership") String ownership) {
         OperationList operationsList = new OperationList();
         RequestValidationUtil.validateOwnerParameter(owner);
         RequestValidationUtil.validatePaginationParameters(offset, limit);
@@ -714,6 +695,9 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         try {
             RequestValidationUtil.validateDeviceIdentifier(type, id);
             dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            if (!StringUtils.isBlank(ownership)) {
+                request.setOwnership(ownership);
+            }
             result = dms.getOperations(new DeviceIdentifier(id, type), request);
             operationsList.setList((List<? extends Operation>) result.getData());
             operationsList.setCount(result.getRecordsTotal());

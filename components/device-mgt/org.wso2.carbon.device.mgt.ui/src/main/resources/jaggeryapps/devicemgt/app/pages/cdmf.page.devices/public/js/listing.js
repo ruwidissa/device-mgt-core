@@ -342,7 +342,8 @@ function loadDevices(searchType, searchParam) {
             data: 'ownership',
             class: 'remove-padding-top viewEnabledIcon',
             render: function (status, type, row, meta) {
-                if (getDeviceTypeCategory(row.deviceType) == 'mobile') {
+                if (getDeviceTypeCategory(row.deviceType) === 'mobile'
+                  || getDeviceTypeCategory(row.deviceType) === 'hybrid') {
                     return row.ownership;
                 } else {
                     return null;
@@ -422,17 +423,6 @@ function loadDevices(searchType, searchParam) {
     ];
 
     var fnCreatedRow = function (row, data, dataIndex) {
-
-        if(data.status != "REMOVED"){
-            $(row).attr('data-type', 'selectable');
-        }else{
-            $(row).attr('data-type', 'non-selectable');
-        }
-        
-        $(row).attr('data-deviceid', htmlspecialchars(data.deviceIdentifier));
-        $(row).attr('data-devicetype', htmlspecialchars(data.deviceType));
-        $(row).attr('data-url', context + '/device/' + htmlspecialchars(data.deviceType) + '?id='
-                + htmlspecialchars(data.deviceIdentifier) + '&owner=' + htmlspecialchars(data.userPattern)) ;
         var model = htmlspecialchars(getPropertyValue(data.properties, 'DEVICE_MODEL'));
         var vendor = htmlspecialchars(getPropertyValue(data.properties, 'VENDOR'));
         var owner = htmlspecialchars(data.userPattern);
@@ -440,6 +430,10 @@ function loadDevices(searchType, searchParam) {
         var ownership = htmlspecialchars(data.ownership);
         var deviceType = htmlspecialchars(data.deviceType);
         var category = getDeviceTypeCategory(deviceType);
+        $(row).attr('data-deviceid', htmlspecialchars(data.deviceIdentifier));
+        $(row).attr('data-devicetype', deviceType);
+        $(row).attr('data-url', context + '/device/' + htmlspecialchars(data.deviceType) + '?id='
+          + htmlspecialchars(data.deviceIdentifier) + '&owner=' + owner + '&ownership=' + ownership) ;
         $.each($('td', row), function (colIndex) {
             switch (colIndex) {
                 case 1:
@@ -462,7 +456,7 @@ function loadDevices(searchType, searchParam) {
                     $(this).attr('data-display', getDeviceTypeLabel(deviceType));
                     break;
                 case 5:
-                    if (category == 'mobile') {
+                    if (category === 'mobile' || category === 'hybrid') {
                         $(this).attr('data-grid-label', "Ownership");
                         $(this).attr('data-search', ownership);
                         $(this).attr('data-display', ownership);

@@ -55,6 +55,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfiguratio
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -259,6 +260,17 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException
      */
     Device getDevice(DeviceIdentifier deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /***
+     *
+     * @param deviceData Device data,
+     * @param requireDeviceInfo A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return {@link Device}, null when device is not available.
+     * @throws {@link DeviceManagementException}
+     */
+    Device getDevice(DeviceData deviceData, boolean requireDeviceInfo) throws DeviceManagementException;
+
 
     /**
      * Retrieves a list of devices based on a given criteria of properties

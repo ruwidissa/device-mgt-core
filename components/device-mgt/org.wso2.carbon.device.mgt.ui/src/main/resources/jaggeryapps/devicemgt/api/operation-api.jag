@@ -29,12 +29,14 @@ if (uriMatcher.match("/{context}/api/operation/paginate")) {
     var deviceType = request.getParameter("deviceType");
     var deviceId = request.getParameter("deviceId");
     var owner = request.getParameter("owner");
+    var ownership = request.getParameter("ownership");
     var index = request.getParameter("start");
     var length = request.getParameter("length");
     var search = request.getParameter("search[value]");
 
     var restAPIEndpoint = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"] +
-        "/devices/" + deviceType + "/" + deviceId + "/operations?owner=" + owner + "&offset=" + index + "&limit=" + length;
+        "/devices/" + deviceType + "/" + deviceId + "/operations?owner=" + owner + "&ownership=" + ownership +
+      "&offset=" + index + "&limit=" + length;
 
     serviceInvokers.XMLHttp.get(
         restAPIEndpoint,

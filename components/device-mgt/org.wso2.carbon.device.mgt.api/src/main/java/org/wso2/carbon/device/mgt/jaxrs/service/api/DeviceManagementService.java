@@ -462,17 +462,21 @@ public interface DeviceManagementService {
                     String id,
             @ApiParam(
                     name = "owner",
-                    value = "The owner of the device you want ot get details.",
-                    required = false)
+                    value = "The owner of the device you want ot get details.")
             @QueryParam("owner")
             @Size(max = 100)
                     String owner,
             @ApiParam(
+                    name = "ownership",
+                    value = "Device ownership.")
+            @QueryParam("ownership")
+            @Size(max = 100)
+                    String ownership,
+            @ApiParam(
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time. \n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z. \n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200")
             @HeaderParam("If-Modified-Since")
                     String ifModifiedSince);
 
@@ -1333,21 +1337,18 @@ public interface DeviceManagementService {
                     name = "If-Modified-Since",
                     value = "Checks if the requested variant was modified, since the specified date-time. \n" +
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z.\n" +
-                            "Example: Mon, 05 Jan 2014 15:10:00 +0200",
-                    required = false)
+                            "Example: Mon, 05 Jan 2014 15:10:00 +0200")
             @HeaderParam("If-Modified-Since")
                     String ifModifiedSince,
             @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the complete list of qualified items.",
-                    required = false,
                     defaultValue = "0")
             @QueryParam("offset")
                     int offset,
             @ApiParam(
                     name = "limit",
                     value = "Provide how many activity details you require from the starting pagination index/offset.",
-                    required = false,
                     defaultValue = "5")
             @QueryParam("limit")
                     int limit,
@@ -1357,7 +1358,12 @@ public interface DeviceManagementService {
                     required = true,
                     defaultValue = "")
             @QueryParam("owner")
-                    String owner);
+                    String owner,
+            @ApiParam(
+                    name = "ownership",
+                    value = "Provides the ownership of the required device.")
+            @QueryParam("owner")
+                    String ownership);
 
     @GET
     @Path("/{type}/{id}/effective-policy")
