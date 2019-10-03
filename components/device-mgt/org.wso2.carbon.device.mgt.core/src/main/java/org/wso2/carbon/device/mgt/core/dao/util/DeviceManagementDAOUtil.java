@@ -23,6 +23,8 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -245,4 +247,23 @@ public final class DeviceManagementDAOUtil {
         deviceInfo.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
         return deviceInfo;
     }
+
+    public static DeviceLocationHistory loadDeviceLocation(ResultSet rs) throws SQLException {
+        DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
+        deviceLocationHistory.setDeviceId(rs.getInt("DEVICE_ID"));
+        deviceLocationHistory.setDeviceIdentifier(rs.getString("DEVICE_ID_NAME"));
+        deviceLocationHistory.setTenantId(rs.getInt("TENANT_ID"));
+        deviceLocationHistory.setDeviceType(rs.getString("DEVICE_TYPE_NAME"));
+        deviceLocationHistory.setLatitude(rs.getDouble("LATITUDE"));
+        deviceLocationHistory.setLongitude(rs.getDouble("LONGITUDE"));
+        deviceLocationHistory.setSpeed(rs.getFloat("SPEED"));
+        deviceLocationHistory.setBearing(rs.getFloat("HEADING"));
+        deviceLocationHistory.setAltitude(rs.getDouble("DEVICE_ALTITUDE"));
+        deviceLocationHistory.setDistance(rs.getDouble("DISTANCE"));
+        deviceLocationHistory.setOwner(rs.getString("DEVICE_OWNER"));
+        deviceLocationHistory.setTimestamp(rs.getLong("TIMESTAMP"));
+        deviceLocationHistory.setGeoHash(rs.getString("GEO_HASH"));
+        return deviceLocationHistory;
+    }
+
 }
