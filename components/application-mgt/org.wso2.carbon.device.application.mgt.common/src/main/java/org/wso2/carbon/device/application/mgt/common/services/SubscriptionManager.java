@@ -19,7 +19,10 @@
 package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
+import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
+import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
 
 import java.util.List;
 
@@ -27,6 +30,57 @@ import java.util.List;
  * This interface manages all the operations related with ApplicationDTO Subscription.
  */
 public interface SubscriptionManager {
+    /**
+     * Performs bulk subscription operation for a given application and a subscriber list.
+     *
+     * @param applicationUUID UUID of the application to subscribe/unsubscribe
+     * @param params          list of subscribers. This list can be of either
+     *                        {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is equal
+     *                        to DEVICE or
+     *                        {@link String} if {@param subType} is USER, ROLE or GROUP
+     * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code> {@see {
+     * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code> {@see {
+     * @param <T>             generic type of the method.
+     * @return {@link ApplicationInstallResponse}
+     * @throws ApplicationManagementException if error occurs when subscribing to the given application
+     * @link org.wso2.carbon.device.application.mgt.common.SubscriptionType}}
+     * @link org.wso2.carbon.device.application.mgt.common.SubAction}}
+     */
     <T> ApplicationInstallResponse performBulkAppOperation(String applicationUUID, List<T> params, String subType,
             String action) throws ApplicationManagementException;
+
+    /**
+     * Create an entry related to the scheduled task in the database.
+     *
+     * @param subscriptionDTO {@link ScheduledSubscriptionDTO} with details of the subscription
+     * @throws SubscriptionManagementException if unable to create/update entry for the scheduled task
+     */
+    void createScheduledSubscription(ScheduledSubscriptionDTO subscriptionDTO) throws SubscriptionManagementException;
+
+    /**
+     * Mark already executed, misfired and failed tasks as deleted.
+     *
+     * @return deleted list of subscriptions
+     * @throws SubscriptionManagementException if error occurred while cleaning up subscriptions.
+     */
+    List<ScheduledSubscriptionDTO> cleanScheduledSubscriptions() throws SubscriptionManagementException;
+
+    /**
+     * Retrieves the subscription entry which is pending by task name. At a given time, there should be only a single
+     * entry in the status {@code PENDING} and not marked as deleted.
+     *
+     * @param taskName name of the task to retrieve
+     * @return {@link ScheduledSubscriptionDTO}
+     * @throws SubscriptionManagementException if error occurred while retrieving the subscription details
+     */
+    ScheduledSubscriptionDTO getPendingScheduledSubscription(String taskName) throws SubscriptionManagementException;
+
+    /**
+     * Updates the status of a subscription.
+     *
+     * @param id     id of the subscription
+     * @param status new status of the subscription. {@see {@link ExecutionStatus}}
+     * @throws SubscriptionManagementException if error occurred while updating the status of the subscription
+     */
+    void updateScheduledSubscriptionStatus(int id, ExecutionStatus status) throws SubscriptionManagementException;
 }

@@ -25,6 +25,7 @@ import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 /**
@@ -47,6 +48,8 @@ public class DataHolder {
     private LifecycleStateManager lifecycleStateManager;
 
     private AppmDataHandler configManager;
+
+    private TaskService taskService;
 
     private static final DataHolder applicationMgtDataHolder = new DataHolder();
 
@@ -120,5 +123,13 @@ public class DataHolder {
 
     public void setConfigManager(AppmDataHandler configManager) {
         this.configManager = configManager;
+    }
+
+    public TaskService getTaskService() {
+        return taskService;
+    }
+
+    public void setTaskService(TaskService taskService) {
+        this.taskService = taskService;
     }
 }

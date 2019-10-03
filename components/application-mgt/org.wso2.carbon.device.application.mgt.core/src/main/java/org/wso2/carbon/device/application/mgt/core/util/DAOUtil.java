@@ -16,21 +16,45 @@
  *   under the License.
  *
  */
+
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.device.application.mgt.core.util;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
+import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
 
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
@@ -39,6 +63,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for handling the utils of the Application Management DAO.
@@ -235,6 +261,49 @@ public class DAOUtil {
             reviewDTOs.add(reviewDTO);
         }
         return reviewDTOs;
+    }
+
+    public  static ScheduledSubscriptionDTO loadScheduledSubscription(ResultSet rs)
+            throws SQLException, UnexpectedServerErrorException {
+        List<ScheduledSubscriptionDTO> subscriptionDTOs = loadScheduledSubscriptions(rs);
+
+        if (subscriptionDTOs.isEmpty()) {
+            return null;
+        }
+        if (subscriptionDTOs.size() > 1) {
+            String msg = "Internal server error. Found more than one subscription for requested pending subscription";
+            log.error(msg);
+            throw new UnexpectedServerErrorException(msg);
+        }
+        return subscriptionDTOs.get(0);
+    }
+
+    public static List<ScheduledSubscriptionDTO> loadScheduledSubscriptions(ResultSet rs) throws SQLException {
+        List<ScheduledSubscriptionDTO> subscriptionDTOS = new ArrayList<>();
+        while (rs.next()) {
+            ScheduledSubscriptionDTO subscription = new ScheduledSubscriptionDTO();
+            subscription.setId(rs.getInt("ID"));
+            subscription.setTaskName(rs.getString("TASK_NAME"));
+            subscription.setApplicationUUID(rs.getString("APPLICATION_UUID"));
+
+            if (subscription.getTaskName().startsWith(SubscriptionType.DEVICE.toString())) {
+                List<DeviceIdentifier> deviceIdentifiers = new Gson().fromJson(rs.getString("SUBSCRIBER_LIST"),
+                        new TypeToken<List<DeviceIdentifier>>() {
+                        }.getType());
+                subscription.setSubscriberList(deviceIdentifiers);
+            } else {
+                List<String> subscriberList = Pattern.compile(",").splitAsStream(rs.getString("SUBSCRIBER_LIST"))
+                        .collect(Collectors.toList());
+                subscription.setSubscriberList(subscriberList);
+            }
+
+            subscription.setStatus(ExecutionStatus.valueOf(rs.getString("STATUS")));
+            subscription.setScheduledAt(rs.getTimestamp("SCHEDULED_AT").toLocalDateTime());
+            subscription.setScheduledBy(rs.getString("SCHEDULED_BY"));
+            subscription.setDeleted(rs.getBoolean("DELETED"));
+            subscriptionDTOS.add(subscription);
+        }
+        return subscriptionDTOS;
     }
 
     /**
