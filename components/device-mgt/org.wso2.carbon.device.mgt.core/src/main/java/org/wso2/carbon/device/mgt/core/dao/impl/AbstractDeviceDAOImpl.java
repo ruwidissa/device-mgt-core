@@ -42,6 +42,7 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -939,6 +940,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isOwnershipProvided = false;
         String status = request.getStatus();
         boolean isStatusProvided = false;
+        String excludeStatus = request.getExcludeStatus();
+        boolean isExcludeStatusProvided = false;
         Date since = request.getSince();
         boolean isSinceProvided = false;
         try {
@@ -987,6 +990,11 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 isStatusProvided = true;
             }
 
+            if (excludeStatus != null && !excludeStatus.isEmpty()) {
+                sql = sql + " AND e.STATUS != ?";
+                isExcludeStatusProvided = true;
+            }
+
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             int paramIdx = 2;
@@ -1011,6 +1019,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             if (isStatusProvided) {
                 stmt.setString(paramIdx++, request.getStatus());
+            }
+            if (isExcludeStatusProvided) {
+                stmt.setString(paramIdx++, excludeStatus);
             }
             rs = stmt.executeQuery();
             if (rs.next()) {
@@ -1574,6 +1585,44 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
+    public List<DeviceLocationHistory> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
+            throws DeviceManagementDAOException {
+
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<DeviceLocationHistory> deviceLocationHistories = new ArrayList<>();
+        try {
+            conn = this.getConnection();
+
+            String sql =
+                    "SELECT DEVICE_ID, TENANT_ID, DEVICE_ID_NAME, DEVICE_TYPE_NAME, LATITUDE, LONGITUDE, SPEED, " +
+                            "HEADING, TIMESTAMP, GEO_HASH, DEVICE_OWNER, DEVICE_ALTITUDE, DISTANCE " +
+                    "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS " +
+                    "WHERE DEVICE_ID_NAME = ? " +
+                    "AND DEVICE_TYPE_NAME = ? " +
+                    "AND TIMESTAMP >= ? " +
+                    "AND TIMESTAMP <= ?";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, deviceIdentifier.getId());
+            stmt.setString(2, deviceIdentifier.getType());
+            stmt.setLong(3, from);
+            stmt.setLong(4, to);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+            }
+        } catch (SQLException e) {
+            String errMessage = "Error occurred while obtaining the DB connection to get device location information";
+            log.error(errMessage, e);
+            throw new DeviceManagementDAOException(errMessage, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+        return deviceLocationHistories;
+    }
+
     public void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds)
             throws DeviceManagementDAOException {
         Connection conn;

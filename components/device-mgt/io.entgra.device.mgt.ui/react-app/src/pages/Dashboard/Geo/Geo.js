@@ -25,7 +25,7 @@ import {
     Card
 } from "antd";
 import {Link} from "react-router-dom";
-import DeviceTable from "../../../components/Devices/DevicesTable";
+import GeoDashboard from "../../../components/Geo/geo-dashboard/GeoDashboard";
 
 const {Paragraph} = Typography;
 
@@ -50,12 +50,11 @@ class Geo extends React.Component {
                     </Breadcrumb>
                     <div className="wrap">
                         <h3>Geo</h3>
-                        <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
-                            illud incorrupte nam.</Paragraph>
+                        <Paragraph>Geo Location Service</Paragraph>
                     </div>
                 </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
+                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720, alignItems: "center"}}>
+                    <GeoDashboard/>
                 </div>
             </div>
         );
