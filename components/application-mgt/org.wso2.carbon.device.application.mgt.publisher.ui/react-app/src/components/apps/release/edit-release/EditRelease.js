@@ -17,11 +17,12 @@
  */
 
 import React from "react";
-import {Modal, Button, Icon, notification, Spin, Tooltip, Upload, Input, Switch, Form, Divider} from 'antd';
+import {Modal, Button, Icon, notification, Spin, Tooltip, Upload, Input, Switch, Form, Divider, Row, Col} from 'antd';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {TextArea} = Input;
+const InputGroup = Input.Group;
 
 const formItemLayout = {
     labelCol: {
@@ -45,6 +46,7 @@ class EditReleaseModal extends React.Component {
             screenshots: [],
             loading: false,
             binaryFiles: [],
+            metaData: [],
             formConfig: {
                 specificElements: {}
             }
@@ -118,6 +120,13 @@ class EditReleaseModal extends React.Component {
         const {release} = this.props;
         const {formConfig} = this.state;
         const {specificElements} = formConfig;
+        let metaData = [];
+        
+        try{
+            metaData =JSON.parse(release.metaData);
+        }catch (e) {
+            
+        }
 
         this.props.form.setFields({
             releaseType: {
@@ -160,6 +169,7 @@ class EditReleaseModal extends React.Component {
 
         this.setState({
             visible: true,
+            metaData
         });
     };
 
@@ -212,7 +222,7 @@ class EditReleaseModal extends React.Component {
                     description: releaseDescription,
                     price: (price === undefined) ? 0 : parseInt(price),
                     isSharedWithAllTenants,
-                    metaData: "string",
+                    metaData: JSON.stringify(this.state.metaData),
                     releaseType: releaseType,
                     supportedOsVersions: "4.0-10.0"
                 };
@@ -298,9 +308,14 @@ class EditReleaseModal extends React.Component {
         });
     };
 
+    addNewMetaData = () => {
+        this.setState({
+            metaData: this.state.metaData.concat({'key': '', 'value': ''})
+        })
+    };
 
     render() {
-        const {formConfig, icons, screenshots, loading, binaryFiles} = this.state;
+        const {formConfig, icons, screenshots, loading, binaryFiles, metaData} = this.state;
         const {getFieldDecorator} = this.props.form;
         const {isAppUpdatable} = this.props;
 
@@ -474,6 +489,66 @@ class EditReleaseModal extends React.Component {
                                         <Switch checkedChildren={<Icon type="check"/>}
                                                 unCheckedChildren={<Icon type="close"/>}
                                         />
+                                    )}
+
+                                </Form.Item>
+                                <Form.Item {...formItemLayout} label="Meta Data">
+                                    {getFieldDecorator('meta', {
+                                        rules: [{
+                                            required: true,
+                                            message: 'Please fill empty fields'
+                                        }],
+                                        initialValue: false
+                                    })(
+                                        <div>
+                                            {
+                                                metaData.map((data, index) => {
+                                                        return (
+                                                            <InputGroup key={index}>
+                                                                <Row gutter={8}>
+                                                                    <Col span={10}>
+                                                                        <Input
+                                                                            placeholder="key"
+                                                                            value={data.key}
+                                                                            onChange={(e) => {
+                                                                                metaData[index]['key'] = e.currentTarget.value;
+                                                                                this.setState({
+                                                                                    metaData
+                                                                                })
+                                                                            }}/>
+                                                                    </Col>
+                                                                    <Col span={10}>
+                                                                        <Input
+                                                                            placeholder="value"
+                                                                            value={data.value}
+                                                                            onChange={(e) => {
+                                                                                metaData[index].value = e.currentTarget.value;
+                                                                                this.setState({
+                                                                                    metaData
+                                                                                });
+                                                                            }}/>
+                                                                    </Col>
+                                                                    <Col span={3}>
+                                                                        <Button type="dashed"
+                                                                                shape="circle"
+                                                                                icon="minus"
+                                                                                onClick={() => {
+                                                                                    metaData.splice(index, 1);
+                                                                                    this.setState({
+                                                                                        metaData
+                                                                                    });
+                                                                                }}/>
+                                                                    </Col>
+                                                                </Row>
+                                                            </InputGroup>
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                            <Button type="dashed" icon="plus" onClick={this.addNewMetaData}>
+                                                Add
+                                            </Button>
+                                        </div>
                                     )}
 
                                 </Form.Item>

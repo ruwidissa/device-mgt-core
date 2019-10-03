@@ -98,6 +98,14 @@ class ReleaseView extends React.Component {
     render() {
         const {app,deviceType} = this.props;
         const release = app.applicationReleases[0];
+
+        let metaData = [];
+        try{
+            metaData = JSON.parse(release.metaData);
+        }catch (e) {
+
+        }
+
         return (
             <div>
                 <AppInstallModal
@@ -140,6 +148,21 @@ class ReleaseView extends React.Component {
                     <Paragraph type="secondary" ellipsis={{rows: 3, expandable: true}}>
                         {release.description}
                     </Paragraph>
+                    <Divider/>
+                    <Text>META DATA</Text>
+                    <Row>
+                        {
+                            metaData.map((data, index)=>{
+                                return (
+                                    <Col key={index} lg={8} md={6} xs={24} style={{marginTop:15}}>
+                                        <Text>{data.key}</Text><br/>
+                                        <Text type="secondary">{data.value}</Text>
+                                    </Col>
+                                )
+                            })
+                        }
+                        {(metaData.length===0) && (<Text type="secondary">No meta data available.</Text>)}
+                    </Row>
                     <Divider/>
                     <CurrentUsersReview uuid={release.uuid}/>
                     <Divider dashed={true}/>
