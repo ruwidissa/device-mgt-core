@@ -458,6 +458,8 @@ var savePolicy = function (policy, isActive, serviceURL) {
         payload["deviceGroups"] = policy["selectedGroups"];
     }
 
+    payload["policyType"] = "GENERAL";
+
     invokerUtil.post(
         serviceURL,
         payload,

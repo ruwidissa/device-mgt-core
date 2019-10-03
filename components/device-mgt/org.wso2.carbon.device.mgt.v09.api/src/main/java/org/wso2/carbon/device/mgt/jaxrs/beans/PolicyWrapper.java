@@ -102,6 +102,18 @@ public class PolicyWrapper {
             required = true)
     private List<DeviceGroupWrapper> deviceGroups;
 
+    @ApiModelProperty(name = "policyType", value = "Type of the corresponding policy",
+            required = true)
+    private String policyType;
+
+    public String getPolicyType() {
+        return policyType;
+    }
+
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
+    }
+
     public Profile getProfile() {
         return profile;
     }

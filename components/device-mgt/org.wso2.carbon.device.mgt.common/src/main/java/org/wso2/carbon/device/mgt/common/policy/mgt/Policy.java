@@ -177,6 +177,12 @@ public class Policy implements Comparable<Policy>, Serializable {
             example = "[]")
     private List<DeviceGroupWrapper> deviceGroups;
 
+    @ApiModelProperty(
+            name = "policyType",
+            value = "Type of the corresponding policy",
+            required = true,
+            example = "GENERAL")
+    private String policyType;
 
     @XmlElement
     public int getId() {
@@ -339,6 +345,14 @@ public class Policy implements Comparable<Policy>, Serializable {
 
     public void setDeviceGroups(List<DeviceGroupWrapper> deviceGroups) {
         this.deviceGroups = deviceGroups;
+    }
+
+    public String getPolicyType() {
+        return policyType;
+    }
+
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
     }
 
     @Override

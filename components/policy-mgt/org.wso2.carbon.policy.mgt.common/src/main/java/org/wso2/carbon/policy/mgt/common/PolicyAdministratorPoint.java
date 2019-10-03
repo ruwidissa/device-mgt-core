@@ -155,4 +155,11 @@ public interface PolicyAdministratorPoint {
     List<Profile> getProfiles() throws PolicyManagementException;
 
     int getPolicyCount() throws PolicyManagementException;
+
+    /**
+     * @param policyType type of the policy
+     * @return policy list of the specific type
+     * @throws PolicyManagementException
+     */
+    List<Policy> getPolicies(String policyType) throws PolicyManagementException;
 }

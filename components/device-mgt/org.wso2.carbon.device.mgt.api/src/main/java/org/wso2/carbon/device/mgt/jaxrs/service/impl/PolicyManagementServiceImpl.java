@@ -123,6 +123,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         policy.setUsers(policyWrapper.getUsers());
         policy.setCompliance(policyWrapper.getCompliance());
         policy.setDeviceGroups(policyWrapper.getDeviceGroups());
+        policy.setPolicyType(policyWrapper.getPolicyType());
         //TODO iterates the device identifiers to create the object. need to implement a proper DAO layer here.
         List<Device> devices = new ArrayList<Device>();
         List<DeviceIdentifier> deviceIdentifiers = policyWrapper.getDeviceIdentifiers();
@@ -398,4 +399,33 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         return Response.status(Response.Status.OK).entity(policy).build();
     }
 
+    @GET
+    @Path("/type/{policyType}")
+    @Override
+    public Response getPolicies(
+            @PathParam("policyType") String policyType,
+            @HeaderParam("If-Modified-Since") String ifModifiedSince,
+            @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit) {
+
+        RequestValidationUtil.validatePaginationParameters(offset, limit);
+        PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
+        List<Policy> policies;
+        List<Policy> filteredPolicies;
+        PolicyList targetPolicies = new PolicyList();
+        try {
+            PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
+            policies = policyAdministratorPoint.getPolicies(policyType);
+            targetPolicies.setCount(policies.size());
+            filteredPolicies = FilteringUtil.getFilteredList(policies, offset, limit);
+            targetPolicies.setList(filteredPolicies);
+        } catch (PolicyManagementException e) {
+            String msg = "Error occurred while retrieving all available policies";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+
+        return Response.status(Response.Status.OK).entity(targetPolicies).build();
+    }
 }

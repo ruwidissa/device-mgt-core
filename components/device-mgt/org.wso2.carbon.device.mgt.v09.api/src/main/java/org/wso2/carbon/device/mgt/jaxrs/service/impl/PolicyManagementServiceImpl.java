@@ -124,6 +124,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         policy.setUsers(policyWrapper.getUsers());
         policy.setCompliance(policyWrapper.getCompliance());
         policy.setDeviceGroups(policyWrapper.getDeviceGroups());
+        policy.setPolicyType(policyWrapper.getPolicyType());
         //TODO iterates the device identifiers to create the object. need to implement a proper DAO layer here.
         List<Device> devices = new ArrayList<Device>();
         List<DeviceIdentifier> deviceIdentifiers = policyWrapper.getDeviceIdentifiers();

@@ -626,25 +626,7 @@ public class PolicyManagerImpl implements PolicyManager {
         try {
             PolicyManagementDAOFactory.openConnection();
             policyList = policyDAO.getAllPolicies();
-
-            for (Policy policy : policyList) {
-                for (Profile profile : profileList) {
-                    if (policy.getProfileId() == profile.getProfileId()) {
-                        policy.setProfile(profile);
-                    }
-                }
-                policy.setRoles(policyDAO.getPolicyAppliedRoles(policy.getId()));
-                policy.setUsers(policyDAO.getPolicyAppliedUsers(policy.getId()));
-                policy.setPolicyCriterias(policyDAO.getPolicyCriteria(policy.getId()));
-
-                List<DeviceGroupWrapper> deviceGroupWrappers = policyDAO.getDeviceGroupsOfPolicy(policy.getId());
-                if (!deviceGroupWrappers.isEmpty()) {
-                    deviceGroupWrappers = this.getDeviceGroupNames(deviceGroupWrappers);
-                }
-                policy.setDeviceGroups(deviceGroupWrappers);
-
-            }
-            Collections.sort(policyList);
+            this.buildPolicyList(policyList, profileList);
         } catch (PolicyManagerDAOException e) {
             throw new PolicyManagementException("Error occurred while getting all the policies.", e);
         } catch (SQLException e) {
@@ -1144,4 +1126,60 @@ public class PolicyManagerImpl implements PolicyManager {
         return policyRevokeOperation;
     }
 
+    @Override
+    public List<Policy> getPolicies(String type) throws PolicyManagementException {
+        List<Policy> policyList;
+        List<Profile> profileList;
+        try {
+            profileList = profileManager.getAllProfiles();
+        } catch (ProfileManagementException e) {
+            throw new PolicyManagementException("Error occurred while getting all the profiles.", e);
+        }
+        try {
+            PolicyManagementDAOFactory.openConnection();
+            policyList = policyDAO.getAllPolicies(type);
+            this.buildPolicyList(policyList, profileList);
+        } catch (PolicyManagerDAOException e) {
+            String msg = "Error occurred while getting all the policies. ";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source ";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
+        } catch (GroupManagementException e) {
+            String msg = "Error occurred while getting device groups. ";
+            log.error(msg, e);
+            throw new PolicyManagementException(msg, e);
+        } finally {
+            PolicyManagementDAOFactory.closeConnection();
+        }
+
+        for (Policy policy : policyList) {
+            policy.setDevices(this.getPolicyAppliedDevicesIds(policy.getId()));
+        }
+
+        return policyList;
+    }
+
+    private void buildPolicyList(List<Policy> policyList, List<Profile> profileList)
+            throws PolicyManagerDAOException, GroupManagementException {
+        for (Policy policy : policyList) {
+            for (Profile profile : profileList) {
+                if (policy.getProfileId() == profile.getProfileId()) {
+                    policy.setProfile(profile);
+                }
+            }
+            policy.setRoles(policyDAO.getPolicyAppliedRoles(policy.getId()));
+            policy.setUsers(policyDAO.getPolicyAppliedUsers(policy.getId()));
+            policy.setPolicyCriterias(policyDAO.getPolicyCriteria(policy.getId()));
+
+            List<DeviceGroupWrapper> deviceGroupWrappers = policyDAO.getDeviceGroupsOfPolicy(policy.getId());
+            if (!deviceGroupWrappers.isEmpty()) {
+                deviceGroupWrappers = this.getDeviceGroupNames(deviceGroupWrappers);
+            }
+            policy.setDeviceGroups(deviceGroupWrappers);
+        }
+        Collections.sort(policyList);
+    }
 }

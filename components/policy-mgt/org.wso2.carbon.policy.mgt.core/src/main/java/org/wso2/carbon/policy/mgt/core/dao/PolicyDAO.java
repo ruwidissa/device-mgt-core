@@ -150,4 +150,6 @@ public interface PolicyDAO {
     HashMap<Integer, Integer> getAppliedPolicyIds() throws PolicyManagerDAOException;
 
     HashMap<Integer, Integer> getAppliedPolicyIdsDeviceIds() throws PolicyManagerDAOException;
+
+    List<Policy> getAllPolicies(String policyType) throws PolicyManagerDAOException;
 }

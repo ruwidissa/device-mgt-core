@@ -113,4 +113,13 @@ public interface PolicyCacheManager {
      * @return - Id of the policy.
      */
     int getPolicyIdOfDevice(int deviceId);
+
+    /**
+     * This method will return the all policies belongs to the specific type.
+     *
+     * @param policyType - type of the policy
+     * @return - list of policies
+     * @throws PolicyManagementException
+     */
+    List<Policy> getAllPolicies(String policyType) throws PolicyManagementException;
 }
