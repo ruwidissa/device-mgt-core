@@ -21,11 +21,12 @@ import {
     PageHeader,
     Typography,
     Breadcrumb,
-    Icon,
-    Card
+    Icon
 } from "antd";
 import {Link} from "react-router-dom";
-import DeviceTable from "../../../components/Devices/DevicesTable";
+import ReportDeviceTable from "../../../components/Devices/ReportDevicesTable";
+import Filter from "../../../components/Reports/Filter";
+import DateRangePicker from "../../../components/Reports/DateRangePicker";
 
 const {Paragraph} = Typography;
 
@@ -35,10 +36,43 @@ class Reports extends React.Component {
     constructor(props) {
         super(props);
         this.routes = props.routes;
+        this.state = {
+            paramsObject:{}
+        }
+    }
 
+    //Get modified value from datepicker and set it to paramsObject
+    updateDurationValue = (modifiedFromDate,modifiedToDate) => {
+        let tempParamObj = this.state.paramsObject;
+        tempParamObj.from = modifiedFromDate;
+        tempParamObj.to = modifiedToDate;
+        this.setState({paramsObject:tempParamObj});
+    }
+
+    //Get modified value from filters and set it to paramsObject
+    updateFiltersValue = (modifiedValue,filterType) => {
+            let tempParamObj = this.state.paramsObject;
+            if(filterType=="Device Status"){
+                tempParamObj.status = modifiedValue;
+                if(modifiedValue=="ALL" && tempParamObj.status){
+                    delete tempParamObj.status;
+                }
+            }else{
+                tempParamObj.ownership = modifiedValue;
+                if(modifiedValue=="ALL" && tempParamObj.ownership){
+                    delete tempParamObj.ownership;
+                }
+            }
+            this.setState({paramsObject:tempParamObj});
     }
 
     render() {
+        //Arrays for filters
+        const statusObj = ['ALL','ACTIVE','INACTIVE','REMOVED'];
+        const ownershipObj = ['ALL','BYOD','COPE'];
+        
+        const params = {...this.state.paramsObject};
+
         return (
             <div>
                 <PageHeader style={{paddingTop: 0}}>
@@ -50,8 +84,41 @@ class Reports extends React.Component {
                     </Breadcrumb>
                     <div className="wrap">
                         <h3>Reports</h3>
-                        <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
-                            illud incorrupte nam.</Paragraph>
+                        <Paragraph>
+                            To generate a report, select a duration and apply filters
+                        </Paragraph>
+                        <div style={{paddingBottom:'5px'}}>
+                            <table>
+                                <tbody>
+                                    <tr style={{fontSize:'12px'}}>
+                                        <td>Select Duration</td>
+                                        <td>Device Status</td>
+                                        <td>Device Ownership</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <DateRangePicker
+                                                updateDurationValue={this.updateDurationValue}/>
+                                        </td>
+                                        <td>
+                                            <Filter
+                                                updateFiltersValue={this.updateFiltersValue}
+                                                dropDownItems={statusObj}
+                                                dropDownName={"Device Status"}/>
+                                        </td>
+                                        <td>
+                                            <Filter
+                                                updateFiltersValue={this.updateFiltersValue}
+                                                dropDownItems={ownershipObj}
+                                                dropDownName={"Device Ownership"}/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
+                            <ReportDeviceTable paramsObject={params}/>
+                        </div>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>

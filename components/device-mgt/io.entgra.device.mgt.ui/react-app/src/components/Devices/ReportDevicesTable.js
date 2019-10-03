@@ -28,6 +28,7 @@ import {withConfigContext} from "../../context/ConfigContext";
 const {Text} = Typography;
 
 let config = null;
+let apiUrl;
 
 const columns = [
     {
@@ -52,7 +53,7 @@ const columns = [
             }
 
             return (
-                <span style={{fontSize: 20, color: color, textAlign: "center"}}>
+                    <span style={{fontSize: 20, color: color, textAlign: "center"}}>
                     <Icon type={icon} theme={theme}/>
                 </span>
             );
@@ -116,7 +117,7 @@ const columns = [
         title: 'Action',
         key: 'action',
         render: () => (
-            <span>
+                <span>
                 <a><Icon type="edit" /></a>
                 <Divider type="vertical" />
                 <a><Text type="danger"><Icon type="delete" /></Text></a>
@@ -130,8 +131,7 @@ const getTimeAgo = (time) => {
     return timeAgo.format(time);
 };
 
-
-class DeviceTable extends React.Component {
+class ReportDeviceTable extends React.Component {
     constructor(props) {
         super(props);
         config =  this.props.context;
@@ -140,13 +140,13 @@ class DeviceTable extends React.Component {
             data: [],
             pagination: {},
             loading: false,
-            selectedRows: []
+            selectedRows: [],
+            paramsObj:{}
         };
     }
 
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-            // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             this.setState({
                 selectedRows: selectedRows
             })
@@ -154,8 +154,15 @@ class DeviceTable extends React.Component {
     };
 
     componentDidMount() {
-        this.fetch();
+         this.fetch();
     }
+
+    //Rerender component when parameters change
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.paramsObject !== this.props.paramsObject){
+            this.fetch();
+        }
+   }
 
     //fetch data from api
     fetch = (params = {}) => {
@@ -164,19 +171,25 @@ class DeviceTable extends React.Component {
         // get current page
         const currentPage = (params.hasOwnProperty("page")) ? params.page : 1;
 
-        const extraParams = {
-            offset: 10 * (currentPage - 1), //calculate the offset
-            limit: 10,
-            requireDeviceInfo: true,
-        };
+        this.props.paramsObject.offset = 10 * (currentPage -1); //calculate the offset
+        this.props.paramsObject.limit = 10;
 
-        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
+        const encodedExtraParams = Object.keys(this.props.paramsObject)
+                .map(key => key + '=' + this.props.paramsObject[key]).join('&');
 
-        //send request to the invoker
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
-            "/devices?" + encodedExtraParams,
-        ).then(res => {
+        if(this.props.paramsObject.from==null && this.props.paramsObject.to==null){
+            apiUrl = window.location.origin + config.serverConfig.invoker.uri +
+                     config.serverConfig.invoker.deviceMgt +
+                     "/devices?" + encodedExtraParams;
+            
+        }else{
+            apiUrl = window.location.origin + config.serverConfig.invoker.uri +
+                     config.serverConfig.invoker.deviceMgt +
+                     "/reports/devices?" + encodedExtraParams;
+        }
+
+        //send request to the invokerss
+        axios.get(apiUrl).then(res => {
             if (res.status === 200) {
                 const pagination = {...this.state.pagination};
                 this.setState({
@@ -195,8 +208,7 @@ class DeviceTable extends React.Component {
                 notification["error"]({
                     message: "There was a problem",
                     duration: 0,
-                    description:
-                        "Error occurred while trying to load devices.",
+                    description:"Error occurred while trying to load devices.",
                 });
             }
 
@@ -220,28 +232,29 @@ class DeviceTable extends React.Component {
     };
 
     render() {
+    
         const {data, pagination, loading, selectedRows} = this.state;
         return (
-            <div>
-                <Table
-                    columns={columns}
-                    rowKey={record => (record.deviceIdentifier + record.enrolmentInfo.owner + record.enrolmentInfo.ownership)}
-                    dataSource={data}
-                    pagination={{
-                        ...pagination,
-                        size: "small",
-                        // position: "top",
-                        showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
-                        // showQuickJumper: true
-                    }}
-                    loading={loading}
-                    onChange={this.handleTableChange}
-                    rowSelection={this.rowSelection}
-                    scroll={{x: 1000}}
-                />
-            </div>
+                <div>
+                    <Table
+                            columns={columns}
+                            rowKey={record => (record.deviceIdentifier + record.enrolmentInfo.owner + record.enrolmentInfo.ownership)}
+                            dataSource={data}
+                            pagination={{
+                                ...pagination,
+                                size: "small",
+                                // position: "top",
+                                showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
+                                // showQuickJumper: true
+                            }}
+                            loading={loading}
+                            onChange={this.handleTableChange}
+                            rowSelection={this.rowSelection}
+                            scroll={{x: 1000}}
+                    />
+                </div>
         );
     }
 }
 
-export default withConfigContext(DeviceTable);
+export default withConfigContext(ReportDeviceTable);
