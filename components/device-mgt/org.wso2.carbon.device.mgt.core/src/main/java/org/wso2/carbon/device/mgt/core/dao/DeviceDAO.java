@@ -41,6 +41,7 @@ import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
@@ -136,6 +137,9 @@ public interface DeviceDAO {
      * @throws DeviceManagementDAOException
      */
     boolean updateDevice(Device device, int tenantId) throws DeviceManagementDAOException;
+
+    Device getDevice(DeviceData deviceData, int tenantId) throws DeviceManagementDAOException;
+
 
     /**
      * This method is used to retrieve a device of a given device-identifier and tenant-id.
@@ -444,13 +448,13 @@ public interface DeviceDAO {
      * This method is used to retrieve current enrollment of a given device and user.
      *
      * @param deviceId    device id.
-     * @param currentUser user name.
+     * @param request     {@link PaginationRequest}
      * @param tenantId    tenant id.
      * @return returns EnrolmentInfo object.
-     * @throws DeviceManagementDAOException
+     * @throws DeviceManagementDAOException if SQL error occurred while processing the query.
      */
-    EnrolmentInfo getEnrolment(DeviceIdentifier deviceId, String currentUser,
-                               int tenantId) throws DeviceManagementDAOException;
+    EnrolmentInfo getEnrolment(DeviceIdentifier deviceId, PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException;
 
     /**
      * This method is used to retrieve current active enrollment of a given device and tenant id.

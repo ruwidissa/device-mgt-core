@@ -461,7 +461,12 @@ public class OperationManagerImpl implements OperationManager {
                     deviceId.getType() + "' device, which carries the identifier '" +
                     deviceId.getId() + "' of owner '" + owner + "'");
         }
-        EnrolmentInfo enrolmentInfo = this.getEnrolmentInfo(deviceId, owner);
+        EnrolmentInfo enrolmentInfo = this.getEnrolmentInfo(deviceId, request);
+        if (enrolmentInfo == null){
+            throw new OperationManagementException("Enrollment info not found for given device which has device "
+                    + "Identifier:" + deviceId.getId() + " and device type: " + deviceId.getType() + "Further, device "
+                    + "is own to: " + owner);
+        }
         int enrolmentId = enrolmentInfo.getId();
         try {
             OperationManagementDAOFactory.openConnection();
@@ -1075,33 +1080,34 @@ public class OperationManagerImpl implements OperationManager {
         return isUserAuthorized;
     }
 
-    private EnrolmentInfo getEnrolmentInfo(DeviceIdentifier deviceId, String owner) throws OperationManagementException {
+    private EnrolmentInfo getEnrolmentInfo(DeviceIdentifier deviceId, PaginationRequest request)
+            throws OperationManagementException {
         EnrolmentInfo enrolmentInfo = null;
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             String user = this.getUser();
             DeviceManagementDAOFactory.openConnection();
-            if (this.isSameUser(user, owner)) {
-                enrolmentInfo = deviceDAO.getEnrolment(deviceId, owner, tenantId);
+            if (this.isSameUser(user, request.getOwner())) {
+                enrolmentInfo = deviceDAO.getEnrolment(deviceId, request, tenantId);
             } else {
                 boolean isAdminUser = DeviceManagementDataHolder.getInstance().getDeviceAccessAuthorizationService().
                         isDeviceAdminUser();
                 if (isAdminUser) {
-                    enrolmentInfo = deviceDAO.getEnrolment(deviceId, owner, tenantId);
+                    enrolmentInfo = deviceDAO.getEnrolment(deviceId, request, tenantId);
                 }
                 //TODO : Add a check for group admin if this fails
             }
         } catch (DeviceManagementDAOException e) {
             throw new OperationManagementException("Error occurred while retrieving enrollment data of '" +
                     deviceId.getType() + "' device carrying the identifier '" +
-                    deviceId.getId() + "' of owner '" + owner + "'", e);
+                    deviceId.getId() + "' of owner '" + request.getOwner() + "'", e);
         } catch (SQLException e) {
             throw new OperationManagementException(
                     "Error occurred while opening a connection to the data source", e);
         } catch (DeviceAccessAuthorizationException e) {
             throw new OperationManagementException("Error occurred while checking the device access permissions for '" +
                     deviceId.getType() + "' device carrying the identifier '" +
-                    deviceId.getId() + "' of owner '" + owner + "'", e);
+                    deviceId.getId() + "' of owner '" + request.getOwner() + "'", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }

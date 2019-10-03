@@ -55,6 +55,7 @@ public class OperationManagementNegativeDBOperationTest extends BaseDeviceManage
     private static final String DEVICE_ID_PREFIX = "NEGDB_OP-TEST-DEVICE-ID-";
     private static final int NO_OF_DEVICES = 5;
     private static final String ADMIN_USER = "admin";
+    private static final String OWNSERSHIP = "BYOD";
 
     private List<DeviceIdentifier> deviceIds = new ArrayList<>();
     private OperationManager operationMgtService;
@@ -111,6 +112,7 @@ public class OperationManagementNegativeDBOperationTest extends BaseDeviceManage
         PaginationRequest request = new PaginationRequest(1, 2);
         request.setDeviceType(DEVICE_TYPE);
         request.setOwner(ADMIN_USER);
+        request.setOwnership(OWNSERSHIP);
         this.dataSource.setThrowException(true);
         try {
             this.operationMgtService.getOperations(this.deviceIds.get(0), request);

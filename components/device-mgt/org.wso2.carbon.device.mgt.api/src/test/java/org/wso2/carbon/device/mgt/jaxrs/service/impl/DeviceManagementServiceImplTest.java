@@ -627,7 +627,8 @@ public class DeviceManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Response response = this.deviceManagementService
-                .getDeviceOperations(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), "", 10, 5, DEFAULT_USERNAME);
+                .getDeviceOperations(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), "", 10, 5, DEFAULT_USERNAME,
+                        DEFAULT_OWNERSHIP);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "Expects to return HTTP 200 when the operation is retrieved successfully.");
     }
@@ -639,7 +640,8 @@ public class DeviceManagementServiceImplTest {
         Mockito.when(this.deviceManagementProviderService.getOperations(Mockito.any(DeviceIdentifier.class),
                 Mockito.any(PaginationRequest.class))).thenThrow(new OperationManagementException());
         Response response = this.deviceManagementService
-                .getDeviceOperations(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), "", 10, 5, DEFAULT_USERNAME);
+                .getDeviceOperations(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), "", 10, 5, DEFAULT_USERNAME,
+                        DEFAULT_OWNERSHIP);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Expects to return HTTP 500 when an exception occurred while retrieving operation list of the device");
     }
