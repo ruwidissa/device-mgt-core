@@ -22,20 +22,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
-import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.impl.AppmDataHandlerImpl;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
-import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
+import org.wso2.carbon.device.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import org.wso2.carbon.device.application.mgt.core.util.ApplicationManagementUtil;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
+import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.user.core.service.RealmService;
 
 import java.util.List;
@@ -61,7 +63,14 @@ import java.util.List;
  * policy="dynamic"
  * bind="setDataSourceService"
  * unbind="unsetDataSourceService"
+ * @scr.reference name="app.mgt.ntask.component"
+ * interface="org.wso2.carbon.ntask.core.service.TaskService"
+ * cardinality="1..1"
+ * policy="dynamic"
+ * bind="setTaskService"
+ * unbind="unsetTaskService"
  */
+@SuppressWarnings("unused")
 public class ApplicationManagementServiceComponent {
 
     private static Log log = LogFactory.getLog(ApplicationManagementServiceComponent.class);
@@ -69,8 +78,6 @@ public class ApplicationManagementServiceComponent {
 
     @SuppressWarnings("unused")
     protected void activate(ComponentContext componentContext) {
-
-        log.info("CALLING ACTIVATE   .............");
         BundleContext bundleContext = componentContext.getBundleContext();
         try {
             String dataSourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
@@ -108,16 +115,21 @@ public class ApplicationManagementServiceComponent {
             DataHolder.getInstance().setConfigManager(configManager);
             bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
 
+            ScheduledAppSubscriptionTaskManager taskManager = new ScheduledAppSubscriptionTaskManager();
+            taskManager.scheduleCleanupTask();
+
             log.info("ApplicationManagement core bundle has been successfully initialized");
         } catch (Throwable e) {
             log.error("Error occurred while initializing app management core bundle", e);
         }
     }
 
+    @SuppressWarnings("unused")
     protected void deactivate(ComponentContext componentContext) {
         //do nothing
     }
 
+    @SuppressWarnings("unused")
     protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
             log.debug("Setting ApplicationDTO Management OSGI Manager");
@@ -125,6 +137,7 @@ public class ApplicationManagementServiceComponent {
         DataHolder.getInstance().setDeviceManagementService(deviceManagementProviderService);
     }
 
+    @SuppressWarnings("unused")
     protected void unsetDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
         if (log.isDebugEnabled()) {
             log.debug("Removing ApplicationDTO Management OSGI Manager");
@@ -132,21 +145,41 @@ public class ApplicationManagementServiceComponent {
         DataHolder.getInstance().setDeviceManagementService(null);
     }
 
+    @SuppressWarnings("unused")
     protected void setRealmService(RealmService realmService) {
         DataHolder.getInstance().setRealmService(realmService);
     }
 
+    @SuppressWarnings("unused")
     protected void unsetRealmService(RealmService realmService) {
         DataHolder.getInstance().setRealmService(null);
     }
 
+    @SuppressWarnings("unused")
     protected void setDataSourceService(DataSourceService dataSourceService) {
         /*Not implemented. Not needed but to make sure the datasource service are registered, as it is needed create
          databases. */
     }
 
+    @SuppressWarnings("unused")
     protected void unsetDataSourceService(DataSourceService dataSourceService) {
         /*Not implemented. Not needed but to make sure the datasource service are registered, as it is needed to create
          databases.*/
+    }
+
+    @SuppressWarnings("unused")
+    public void setTaskService(TaskService taskService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting the task service to Application Management SC.");
+        }
+        DataHolder.getInstance().setTaskService(taskService);
+    }
+
+    @SuppressWarnings("unused")
+    protected void unsetTaskService(TaskService taskService) {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing the task service from Application Management SC");
+        }
+        DataHolder.getInstance().setTaskService(null);
     }
 }

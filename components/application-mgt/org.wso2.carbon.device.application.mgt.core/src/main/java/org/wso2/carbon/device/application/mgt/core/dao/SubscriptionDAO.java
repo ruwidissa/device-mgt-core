@@ -16,12 +16,33 @@
  *   under the License.
  *
  */
+
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.device.application.mgt.core.dao;
 
+import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -85,4 +106,68 @@ public interface SubscriptionDAO {
     boolean updateDeviceSubStatus(int deviceId, List<Integer> deviceSubIds, String status, int tenantcId)
             throws ApplicationManagementDAOException;
 
+    /**
+     * Creates a scheduled subscription entry in the data store.
+     *
+     * @param subscriptionDTO {@link ScheduledSubscriptionDTO} which contains the details of the subscription
+     * @throws ApplicationManagementDAOException if error occurred while creating an entry in the data store.
+     */
+    boolean createScheduledSubscription(ScheduledSubscriptionDTO subscriptionDTO) throws ApplicationManagementDAOException;
+
+    /**
+     * Updates the existing entry of a scheduled subscription.
+     *
+     * @param id          id of the existing subscription
+     * @param scheduledAt scheduled time
+     * @param scheduledBy username of the user who scheduled the subscription
+     * @throws ApplicationManagementDAOException if error occurred while updating the entry
+     */
+    boolean updateScheduledSubscription(int id, LocalDateTime scheduledAt, String scheduledBy)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * Marks A list of given scheduled subscription as deleted.
+     *
+     * @param subscriptionIdList list of ids of the subscriptions to delete
+     * @throws ApplicationManagementDAOException if error occurred while deleting the subscription
+     */
+    boolean deleteScheduledSubscription(List<Integer> subscriptionIdList) throws ApplicationManagementDAOException;
+
+    /**
+     * Update the status of an existing subscription.
+     *
+     * @param id     id of the existing subscription
+     * @param status changed status {@see {@link ExecutionStatus}}
+     * @throws ApplicationManagementDAOException if error occurs while changing the status of the subscription
+     */
+    boolean updateScheduledSubscriptionStatus(int id, ExecutionStatus status) throws ApplicationManagementDAOException;
+
+    /**
+     * Retrieve a list of scheduled subscriptions of a given state
+     *
+     * @param status  status of the subscriptions
+     * @param deleted is the subscription marked as deleted
+     * @return list of {@link ScheduledSubscriptionDTO}
+     * @throws ApplicationManagementDAOException if error occurred while retrieving the subscriptions
+     */
+    List<ScheduledSubscriptionDTO> getScheduledSubscriptionByStatus(ExecutionStatus status, boolean deleted)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * Retrieves a list of subscriptions that are not executed on the scheduled time.
+     *
+     * @return list of {@link ScheduledSubscriptionDTO}
+     * @throws ApplicationManagementDAOException if error occurred while retrieving the subscriptions.
+     */
+    List<ScheduledSubscriptionDTO> getNonExecutedSubscriptions() throws ApplicationManagementDAOException;
+
+    /**
+     * Retrieves a subscription by taskName which is in the <code>ExecutionStatus.PENDING</code> state.
+     *
+     * @param taskName name of the task to retrieve.
+     * @return {@link ScheduledSubscriptionDTO}
+     * @throws ApplicationManagementDAOException if error occurred while retrieving the subscription
+     */
+    ScheduledSubscriptionDTO getPendingScheduledSubscriptionByTaskName(String taskName)
+            throws ApplicationManagementDAOException;
 }

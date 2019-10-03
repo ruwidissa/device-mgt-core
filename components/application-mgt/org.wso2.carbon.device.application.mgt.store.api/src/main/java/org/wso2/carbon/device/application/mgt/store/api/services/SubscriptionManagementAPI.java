@@ -35,6 +35,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -120,7 +121,12 @@ public interface SubscriptionManagementAPI {
                     value = "The application ID and list of devices/users/roles",
                     required = true
             )
-            @Valid List<DeviceIdentifier> deviceIdentifiers
+            @Valid List<DeviceIdentifier> deviceIdentifiers,
+            @ApiParam(
+                    name = "timestamp",
+                    value = "Timestamp of scheduled install/uninstall operation"
+            )
+            @QueryParam("timestamp") String timestamp
     );
 
     @POST
@@ -168,6 +174,11 @@ public interface SubscriptionManagementAPI {
                     value = "Subscriber list of the application release.",
                     required = true
             )
-            @Valid List<String> subscribers
+            @Valid List<String> subscribers,
+            @ApiParam(
+                    name = "timestamp",
+                    value = "Timestamp of scheduled install/uninstall operation"
+            )
+            @QueryParam("timestamp") String timestamp
     );
 }

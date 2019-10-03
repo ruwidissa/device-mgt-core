@@ -16,6 +16,25 @@
  *   under the License.
  *
  */
+
+/*
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.device.application.mgt.core.util;
 
 import org.wso2.carbon.utils.CarbonUtils;
@@ -48,6 +67,16 @@ public class Constants {
 
     public static final String GOOGLE_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=";
     public static final String APPLE_STORE_URL = "https://itunes.apple.com/country/app/app-name/id";
+
+    // Subscription task related constants
+    public static final String SUBSCRIBERS = "SUBSCRIBERS";
+    public static final String SUB_TYPE = "SUBSCRIPTION_TYPE";
+    public static final String ACTION = "ACTION";
+    public static final String APP_UUID = "APP_UUID";
+    public static final String SUBSCRIBER = "SUBSCRIBER";
+    public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
+    public static final String TENANT_ID = "__TENANT_ID_PROP__";
+    public static final String TASK_NAME = "TASK_NAME";
 
     /**
      * Database types supported by Application Management.

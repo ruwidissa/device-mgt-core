@@ -21,7 +21,6 @@ package org.wso2.carbon.device.application.mgt.common;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.device.application.mgt.common.ErrorListItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +37,14 @@ public class ErrorResponse {
     private String description = null;
     private String moreInfo = null;
     private List<ErrorListItem> errorItems = new ArrayList<>();
+
+    public ErrorResponse() {
+
+    }
+
+    public ErrorResponse(String message) {
+        this.message = message;
+    }
 
     @JsonProperty(value = "code")
     @ApiModelProperty(required = true, value = "")
