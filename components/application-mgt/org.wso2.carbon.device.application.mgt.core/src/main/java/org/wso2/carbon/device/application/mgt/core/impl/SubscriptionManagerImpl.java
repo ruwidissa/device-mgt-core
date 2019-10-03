@@ -496,6 +496,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                         return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                        app.setType(mobileAppType);
                         return MDMAndroidOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;

@@ -553,8 +553,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 for (Integer deviceId : deviceIds) {
                     ps.setObject(index++, deviceId);
                 }
-                ps.setInt(index++, tenantId);
-                ps.setInt(index, applicationReleaseId);
+                ps.setInt(index++, applicationReleaseId);
+                ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedDevices.add(rs.getInt("DM_DEVICE_ID"));
