@@ -979,21 +979,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             stmt.setInt(1, tenantId);
             resultSet = stmt.executeQuery();
 
-            while (resultSet.next()) {
-                Policy policy = new Policy();
-                policy.setId(resultSet.getInt("ID"));
-                policy.setProfileId(resultSet.getInt("PROFILE_ID"));
-                policy.setPolicyName(resultSet.getString("NAME"));
-                policy.setTenantId(tenantId);
-                policy.setPriorityId(resultSet.getInt("PRIORITY"));
-                policy.setCompliance(resultSet.getString("COMPLIANCE"));
-                policy.setOwnershipType(resultSet.getString("OWNERSHIP_TYPE"));
-                policy.setUpdated(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("UPDATED")));
-                policy.setActive(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("ACTIVE")));
-                policy.setDescription(resultSet.getString("DESCRIPTION"));
-                policies.add(policy);
-            }
-            return policies;
+            return this.extractPolicyListFromDbResult(resultSet, tenantId);
         } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while reading the policies from the database", e);
         } finally {
@@ -1437,7 +1423,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             conn = this.getConnection();
             String query = "INSERT INTO DM_POLICY (NAME, PROFILE_ID, TENANT_ID, PRIORITY, COMPLIANCE, OWNERSHIP_TYPE," +
-                    "UPDATED, ACTIVE, DESCRIPTION) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "UPDATED, ACTIVE, DESCRIPTION, POLICY_TYPE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(query, new String[]{"id"});
 
             stmt.setString(1, policy.getPolicyName());
@@ -1449,6 +1435,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             stmt.setInt(7, 0);
             stmt.setInt(8, 0);
             stmt.setString(9, policy.getDescription());
+            stmt.setString(10, policy.getPolicyType());
 
             int affectedRows = stmt.executeUpdate();
 
@@ -1704,4 +1691,57 @@ public class PolicyDAOImpl implements PolicyDAO {
         return devicePolicyIds;
     }
 
+    @Override
+    public List<Policy> getAllPolicies(String policyType) throws PolicyManagerDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            conn = this.getConnection();
+            String query = "SELECT ID, " +
+                    "PROFILE_ID, " +
+                    "NAME, " +
+                    "PRIORITY, " +
+                    "COMPLIANCE, " +
+                    "OWNERSHIP_TYPE, " +
+                    "UPDATED, " +
+                    "ACTIVE, " +
+                    "DESCRIPTION, " +
+                    "POLICY_TYPE "+
+                    "FROM DM_POLICY WHERE TENANT_ID = ? AND POLICY_TYPE = ?";
+            stmt = conn.prepareStatement(query);
+            stmt.setInt(1, tenantId);
+            stmt.setString(2, policyType);
+            resultSet = stmt.executeQuery();
+            return this.extractPolicyListFromDbResult(resultSet, tenantId);
+        } catch (SQLException e) {
+            String msg = "Error occurred while reading the policies from the database ";
+            log.error(msg, e);
+            throw new PolicyManagerDAOException(msg, e);
+        } finally {
+            PolicyManagementDAOUtil.cleanupResources(stmt, resultSet);
+        }
+    }
+
+    private List<Policy> extractPolicyListFromDbResult(ResultSet resultSet, int tenantId) throws SQLException {
+        List<Policy> policies = new ArrayList<>();
+        while (resultSet.next()) {
+            Policy policy = new Policy();
+            policy.setId(resultSet.getInt("ID"));
+            policy.setProfileId(resultSet.getInt("PROFILE_ID"));
+            policy.setPolicyName(resultSet.getString("NAME"));
+            policy.setTenantId(tenantId);
+            policy.setPriorityId(resultSet.getInt("PRIORITY"));
+            policy.setCompliance(resultSet.getString("COMPLIANCE"));
+            policy.setOwnershipType(resultSet.getString("OWNERSHIP_TYPE"));
+            policy.setUpdated(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("UPDATED")));
+            policy.setActive(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("ACTIVE")));
+            policy.setDescription(resultSet.getString("DESCRIPTION"));
+            policy.setPolicyType(resultSet.getString("POLICY_TYPE"));
+            policies.add(policy);
+        }
+        return policies;
+    }
 }

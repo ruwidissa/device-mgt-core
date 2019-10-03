@@ -83,4 +83,6 @@ public interface PolicyManager {
     Policy getAppliedPolicyToDevice(DeviceIdentifier deviceIdentifier) throws PolicyManagementException;
 
     HashMap<Integer, Integer> getAppliedPolicyIdsDeviceIds() throws PolicyManagementException;
+
+    List<Policy> getPolicies(String type) throws PolicyManagementException;
 }
