@@ -42,7 +42,6 @@ public class DeviceList extends BasePaginatedResult {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
-
         sb.append("  count: ").append(getCount()).append(",\n");
         sb.append("  devices: [").append(devices).append("\n");
         sb.append("]}\n");
