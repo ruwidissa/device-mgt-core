@@ -406,8 +406,10 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices that matches to status " +
-                                                   "'" + request.getStatus() + "'", e);
+            String msg = "Error occurred while fetching the list of devices that matches to status " +
+                         "'" + request.getStatus() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -535,12 +537,75 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices corresponding" +
-                    "to the mentioned filtering criteria", e);
+            String msg = "Error occurred while fetching the list of devices corresponding" +
+                         "to the mentioned filtering criteria";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return devices;
+    }
+    
+    @Override
+    public List<Device> getSubscribedDevices(int offsetValue, int limitValue,
+                                             List<Integer> deviceIds, int tenantId, String status)
+            throws DeviceManagementDAOException {
+        Connection conn;
+
+        try {
+            conn = this.getConnection();
+            int index = 1;
+
+            boolean isStatusProvided = false;
+            StringJoiner joiner = new StringJoiner(",",
+                      "SELECT " +
+                      "f.ID AS DEVICE_ID, f.NAME AS DEVICE_NAME, f.DESCRIPTION AS DESCRIPTION, " +
+                      "f.DEVICE_TYPE_ID, f.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, " +
+                      "e.ID AS ENROLMENT_ID, e.OWNER, e.OWNERSHIP, e.DATE_OF_ENROLMENT, " +
+                      "e.DATE_OF_LAST_UPDATE, e.STATUS, t.NAME AS DEVICE_TYPE " +
+                      "FROM DM_ENROLMENT AS e,DM_DEVICE AS f, DM_DEVICE_TYPE t "+
+                      "WHERE " +
+                      "e.DEVICE_ID=f.ID AND " +
+                      "e.DEVICE_ID IN (", ") AND e.TENANT_ID=?");
+
+            deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+
+            if (status != null && !status.isEmpty()) {
+                query = query + " AND e.STATUS=?";
+                isStatusProvided = true;
+            }
+
+            query = query + " LIMIT ? OFFSET ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+
+                for (Integer deviceId : deviceIds) {
+                    ps.setObject(index++, deviceId);
+                }
+
+                ps.setInt(index++, tenantId);
+                if (isStatusProvided) {
+                    ps.setString(index++, status);
+                }
+                ps.setInt(index++, offsetValue);
+                ps.setInt(index, limitValue);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Device> devices = new ArrayList<>();
+                    while (rs.next()) {
+                        devices.add(DeviceManagementDAOUtil.loadDevice(rs));
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all registered devices " +
+                         "according to device ids and the limit area.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
     }
 
     @Override
