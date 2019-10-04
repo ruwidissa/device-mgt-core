@@ -40,14 +40,14 @@ class Dashboard extends React.Component {
         this.Logo = this.config.theme.logo;
     }
 
-    showDrawer = () => {
+    showMobileNavigationBar = () => {
         this.setState({
             visible: true,
             collapsed: !this.state.collapsed
         });
     };
 
-    onClose = () => {
+    onCloseMobileNavigationBar = () => {
         this.setState({
             visible: false,
         });
@@ -131,7 +131,7 @@ class Dashboard extends React.Component {
 
                 <Layout className="mobile-layout">
                     <div className="mobile-menu-button">
-                        <Button type="link" onClick={this.showDrawer}>
+                        <Button type="link" onClick={this.showMobileNavigationBar}>
                             <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="bar-icon"/>
                         </Button>
                     </div>
@@ -146,7 +146,7 @@ class Dashboard extends React.Component {
                         }
                         placement="left"
                         closable={false}
-                        onClose={this.onClose}
+                        onClose={this.onCloseMobileNavigationBar}
                         visible={this.state.visible}
                         getContainer={false}
                         style={{position: 'absolute'}}>
@@ -214,6 +214,6 @@ class Dashboard extends React.Component {
             </div>
         );
     }
-}
+};
 
 export default withConfigContext(Dashboard);

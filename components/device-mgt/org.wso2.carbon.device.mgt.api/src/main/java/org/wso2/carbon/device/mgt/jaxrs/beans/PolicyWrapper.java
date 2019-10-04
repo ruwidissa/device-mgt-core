@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -101,6 +102,19 @@ public class PolicyWrapper {
     @ApiModelProperty(name = "deviceGroups", value = "Lists out the groups on whose devices the policy is enforced",
             required = true)
     private List<DeviceGroupWrapper> deviceGroups;
+
+    @ApiModelProperty(name = "policyType", value = "Type of the corresponding policy",
+            required = true)
+    @NotNull
+    private String policyType;
+
+    public String getPolicyType() {
+        return policyType;
+    }
+
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
+    }
 
     public Profile getProfile() {
         return profile;

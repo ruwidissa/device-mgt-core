@@ -23,6 +23,7 @@ import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
 import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
 
@@ -83,4 +84,30 @@ public interface SubscriptionManager {
      * @throws SubscriptionManagementException if error occurred while updating the status of the subscription
      */
     void updateScheduledSubscriptionStatus(int id, ExecutionStatus status) throws SubscriptionManagementException;
+
+    /***
+     * This method used to get the app id ,device ids and pass them to DM service method.
+     *
+     * @param appUUID UUID of the application release.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param status status of the devices.
+     * @return deviceDetails - device details for given application release.
+     * @throws {@link ApplicationManagementException} Exception of the application management
+     */
+    PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
+                                            String status) throws ApplicationManagementException;
+
+    /***
+     * This method used to get category details.
+     *
+     * @param appUUID UUID of the application release.
+     * @param subType subscription type of the application.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @return {@link PaginationResult} pagination result of the category details.
+     * @throws {@link ApplicationManagementException} Exception of the application management
+     */
+    PaginationResult getAppInstalledCategories(int offsetValue, int limitValue, String appUUID,
+                                               String subType) throws ApplicationManagementException;
 }

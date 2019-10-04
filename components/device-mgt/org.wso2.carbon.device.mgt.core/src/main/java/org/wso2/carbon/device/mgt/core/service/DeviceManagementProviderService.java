@@ -56,6 +56,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManageme
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -261,6 +262,17 @@ public interface DeviceManagementProviderService {
      * @throws DeviceManagementException
      */
     Device getDevice(DeviceIdentifier deviceId, Date since, boolean requireDeviceInfo) throws DeviceManagementException;
+
+    /***
+     *
+     * @param deviceData Device data,
+     * @param requireDeviceInfo A boolean indicating whether the device-info (location, app-info etc) is also required
+     *                          along with the device data.
+     * @return {@link Device}, null when device is not available.
+     * @throws {@link DeviceManagementException}
+     */
+    Device getDevice(DeviceData deviceData, boolean requireDeviceInfo) throws DeviceManagementException;
+
 
     /**
      * Retrieves a list of devices based on a given criteria of properties
@@ -759,7 +771,6 @@ public interface DeviceManagementProviderService {
 
     DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
             DeviceManagementException;
-
     /**
      * Retrieves a list of configurations of a specific device
      * using the device's properties
@@ -782,4 +793,18 @@ public interface DeviceManagementProviderService {
      * @return tru if device transferee, otherwise false
      */
     List<String> transferDeviceToTenant(DeviceTransferRequest deviceTransferRequest) throws DeviceManagementException, DeviceNotFoundException;
+
+    /**
+     * This method retrieves a list of subscribed devices.
+     *
+     * @param devicesIds devices ids of the subscribed devices.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param status status of the devices.
+     * @return {@link PaginationResult}
+     * @throws {@link DeviceManagementException} if any service level or DAO level error occurs.
+     */
+    PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
+                                             List<Integer> devicesIds, String status)
+            throws DeviceManagementException;
 }

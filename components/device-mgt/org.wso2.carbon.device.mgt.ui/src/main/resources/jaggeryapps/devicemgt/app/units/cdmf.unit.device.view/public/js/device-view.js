@@ -20,6 +20,7 @@ var deviceId = $(".device-id");
 var deviceIdentifier = deviceId.data("deviceid");
 var deviceType = deviceId.data("type");
 var deviceOwner = deviceId.data("owner");
+var deviceOwnership = deviceId.data("ownership");
 
 $(document).ready(function() {
     $(".panel-body").removeClass("hidden");
@@ -86,7 +87,8 @@ function loadOperationsLog(update) {
             data: {
                 deviceId: deviceIdentifier,
                 deviceType: deviceType,
-                owner: deviceOwner
+                owner: deviceOwner,
+                ownership: deviceOwnership
             },
             dataSrc: function(json) {
                 $("#operations-spinner").addClass("hidden");

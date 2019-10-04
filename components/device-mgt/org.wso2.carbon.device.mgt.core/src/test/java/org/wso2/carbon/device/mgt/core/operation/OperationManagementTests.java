@@ -75,6 +75,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     private static final String ADMIN_USER = "admin";
     private static final String NON_ADMIN_USER = "test";
     private static final String INVALID_DEVICE = "ThisIsInvalid";
+    private static final String OWNERSHIP = "BYOD";
 
     private List<DeviceIdentifier> deviceIds = new ArrayList<>();
     private OperationManager operationMgtService;
@@ -286,6 +287,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
         PaginationRequest request = new PaginationRequest(1, 2);
         request.setDeviceType(DEVICE_TYPE);
         request.setOwner(ADMIN_USER);
+        request.setOwnership(OWNERSHIP);
         for (DeviceIdentifier deviceIdentifier : deviceIds) {
             PaginationResult result = this.operationMgtService.getOperations(deviceIdentifier, request);
             Assert.assertEquals(result.getRecordsFiltered(), 4);
@@ -302,6 +304,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
             PaginationRequest request = new PaginationRequest(1, 2);
             request.setDeviceType(DEVICE_TYPE);
             request.setOwner(ADMIN_USER);
+            request.setOwnership(OWNERSHIP);
             for (DeviceIdentifier deviceIdentifier : deviceIds) {
                 try {
                     this.operationMgtService.getOperations(deviceIdentifier, request);
@@ -540,6 +543,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
             PaginationRequest request = new PaginationRequest(1, 2);
             request.setDeviceType(DEVICE_TYPE);
             request.setOwner(ADMIN_USER);
+            request.setOwnership(OWNERSHIP);
             PaginationResult result = this.operationMgtService.getOperations
                     (new DeviceIdentifier(INVALID_DEVICE, DEVICE_TYPE), request);
             Assert.assertEquals(result.getRecordsFiltered(), 4);

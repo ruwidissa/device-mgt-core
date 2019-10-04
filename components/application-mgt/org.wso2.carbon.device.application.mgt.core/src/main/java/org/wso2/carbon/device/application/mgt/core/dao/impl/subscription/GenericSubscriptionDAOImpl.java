@@ -356,6 +356,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 + "DS.UNSUBSCRIBED_BY AS UNSUBSCRIBED_BY, "
                 + "DS.UNSUBSCRIBED_TIMESTAMP AS UNSUBSCRIBED_AT, "
                 + "DS.ACTION_TRIGGERED_FROM AS ACTION_TRIGGERED_FROM, "
+                + "DS.STATUS AS STATUS,"
                 + "DS.DM_DEVICE_ID AS DEVICE_ID "
                 + "FROM AP_DEVICE_SUBSCRIPTION DS "
                 + "WHERE DS.AP_APP_RELEASE_ID = ? AND DS.TENANT_ID=?";
@@ -385,7 +386,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int tenantId)
+    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId,
+            int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get device subscriptions for given device ids.");
@@ -406,13 +408,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                             + "DS.DM_DEVICE_ID AS DEVICE_ID, "
                             + "DS.STATUS AS STATUS "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
-                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND TENANT_ID = ?");
+                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 for (Integer deviceId : deviceIds) {
                     ps.setObject(index++, deviceId);
                 }
+                ps.setInt(index++, appReleaseId);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -575,8 +578,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 for (Integer deviceId : deviceIds) {
                     ps.setObject(index++, deviceId);
                 }
-                ps.setInt(index++, tenantId);
-                ps.setInt(index, applicationReleaseId);
+                ps.setInt(index++, applicationReleaseId);
+                ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedDevices.add(rs.getInt("DM_DEVICE_ID"));
@@ -847,6 +850,45 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
+    public List<String> getAppSubscribedUsers(int offsetValue, int limitValue, int appReleaseId,
+                                              int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get already subscribed users for " +
+                      "given app release id.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            List<String> subscribedUsers = new ArrayList<>();
+            String sql = "SELECT "
+                         + "US.USER_NAME AS USER "
+                         + "FROM AP_USER_SUBSCRIPTION US "
+                         + "WHERE "
+                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, appReleaseId);
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, offsetValue);
+                stmt.setInt(4, limitValue);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        subscribedUsers.add(rs.getString("USER"));
+                    }
+                }
+                return subscribedUsers;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get already " +
+                         "subscribed users for given app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while getting subscribed users for given app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
     @Override
     public List<ScheduledSubscriptionDTO> getScheduledSubscriptionByStatus(ExecutionStatus status, boolean deleted)
             throws ApplicationManagementDAOException {
@@ -916,6 +958,45 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
+    public List<String> getAppSubscribedRoles(int offsetValue, int limitValue, int appReleaseId,
+                                              int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get already subscribed roles for " +
+                      "given app release id.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            List<String> subscribedRoles = new ArrayList<>();
+            String sql = "SELECT "
+                         + "US.ROLE_NAME AS ROLE "
+                         + "FROM AP_ROLE_SUBSCRIPTION US "
+                         + "WHERE "
+                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, appReleaseId);
+                ps.setInt(2, tenantId);
+                ps.setInt(3, offsetValue);
+                ps.setInt(4, limitValue);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        subscribedRoles.add(rs.getString("ROLE"));
+                    }
+                }
+                return subscribedRoles;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get already " +
+                         "subscribed roles for given app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while getting subscribed roles for given app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
     @Override
     public ScheduledSubscriptionDTO getPendingScheduledSubscriptionByTaskName(String taskName)
             throws ApplicationManagementDAOException {
@@ -951,6 +1032,47 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             throw new ApplicationManagementDAOException(msg, e);
         } catch (UnexpectedServerErrorException e) {
             String msg = "More than one pending subscriptions exist for " + taskName;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId,
+                                               int tenantId)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get already subscribed groups for " +
+                      "given app release id.");
+        }
+        try {
+            Connection conn = this.getDBConnection();
+            List<String> subscribedGroups = new ArrayList<>();
+            String sql = "SELECT "
+                         + "GS.GROUP_NAME AS GROUPS "
+                         + "FROM AP_GROUP_SUBSCRIPTION GS "
+                         + "WHERE "
+                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, appReleaseId);
+                ps.setInt(2, tenantId);
+                ps.setInt(3, offsetValue);
+                ps.setInt(4, limitValue);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        subscribedGroups.add(rs.getString("GROUPS"));
+                    }
+                }
+                return subscribedGroups;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get already " +
+                         "subscribed groups for given app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while getting subscribed groups for given " +
+                         "app release id.";
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }

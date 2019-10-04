@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Button, message, notification, Table, Typography} from "antd";
+import {Button,Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -100,8 +100,7 @@ const getTimeAgo = (time) => {
     return timeAgo.format(time);
 };
 
-
-class DeviceInstall extends React.Component {
+class DeviceUninstall extends React.Component {
     constructor(props) {
         super(props);
         TimeAgo.addLocale(en);
@@ -116,8 +115,8 @@ class DeviceInstall extends React.Component {
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
             this.setState({
-                selectedRows: selectedRows
-            })
+                              selectedRows: selectedRows
+                          })
         },
         getCheckboxProps: record => ({
             disabled: record.name === 'Disabled User', // Column configuration not to be checked
@@ -141,19 +140,18 @@ class DeviceInstall extends React.Component {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
             status: "ACTIVE",
-            requireDeviceInfo: true,
         };
 
         if (deviceType !== 'ANY') {
             extraParams.type = deviceType;
         }
-        
+
         // note: encode with '%26' not '&'
         const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
 
-        //send request to the invoker
+        const uuid = this.props.uuid;
         axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/"+
             "/devices?" + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
@@ -163,9 +161,7 @@ class DeviceInstall extends React.Component {
                     data: res.data.data.devices,
                     pagination,
                 });
-
             }
-
         }).catch((error) => {
             handleApiError(error,"Error occurred while trying to load devices.");
             this.setState({loading: false});
@@ -176,63 +172,61 @@ class DeviceInstall extends React.Component {
         const pager = {...this.state.pagination};
         pager.current = pagination.current;
         this.setState({
-            pagination: pager,
-        });
+                          pagination: pager,
+                      });
         this.fetch({
-            results: pagination.pageSize,
-            page: pagination.current,
-            sortField: sorter.field,
-            sortOrder: sorter.order,
-            ...filters,
-        });
+                       results: pagination.pageSize,
+                       page: pagination.current,
+                       sortField: sorter.field,
+                       sortOrder: sorter.order,
+                       ...filters,
+                   });
     };
 
-    install = () => {
+    uninstall = () => {
         const {selectedRows} = this.state;
         const payload = [];
         selectedRows.map(device => {
             payload.push({
-                id: device.deviceIdentifier,
-                type: device.type
-            });
+                             id: device.deviceIdentifier,
+                             type: device.type
+                         });
         });
-        this.props.onInstall("devices", payload, "install");
+        this.props.onUninstall("devices", payload, "uninstall");
     };
 
     render() {
         const {data, pagination, loading, selectedRows} = this.state;
         return (
-            <div>
-                <Text>
-                    Start installing the application for one or more users by entering the corresponding user name.
-                    Select install to automatically start downloading the application for the respective user/users.
-                </Text>
-                <Table
-                    style={{paddingTop: 20}}
-                    columns={columns}
-                    rowKey={record => record.deviceIdentifier}
-                    dataSource={data}
-                    pagination={{
-                        ...pagination,
-                        size: "small",
-                        // position: "top",
-                        showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
-                        // showQuickJumper: true
-                    }}
-                    loading={loading}
-                    onChange={this.handleTableChange}
-                    rowSelection={this.rowSelection}
-                    scroll={{x: 1000}}
-                />
-                <div style={{paddingTop: 10, textAlign: "right"}}>
-                    <Button disabled={selectedRows.length === 0} htmlType="button" type="primary"
-                            onClick={this.install}>
-                        Install
-                    </Button>
+                <div>
+                    <Text>
+                        Start uninstalling the application for devices by selecting the corresponding devices.
+                        Select uninstall to automatically start uninstalling the application for the respective devices.
+                    </Text>
+                    <Table
+                            style={{paddingTop: 20}}
+                            columns={columns}
+                            rowKey={record => record.deviceIdentifier}
+                            dataSource={data}
+                            pagination={{
+                                ...pagination,
+                                size: "small",
+                                showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
+                            }}
+                            loading={loading}
+                            onChange={this.handleTableChange}
+                            rowSelection={this.rowSelection}
+                            scroll={{x: 1000}}
+                    />
+                    <div style={{paddingTop: 10, textAlign: "right"}}>
+                        <Button disabled={selectedRows.length === 0} htmlType="button" type="primary"
+                                onClick={this.uninstall}>
+                            Uninstall
+                        </Button>
+                    </div>
                 </div>
-            </div>
         );
     }
 }
 
-export default withConfigContext(DeviceInstall);
+export default withConfigContext(DeviceUninstall);
