@@ -40,6 +40,7 @@ public class PolicyCreator {
         policy.setCompliance("NOTIFY");
         policy.setOwnershipType("COPE");
         policy.setDescription("This is the first policy.");
+        policy.setPolicyType("GENERAL");
 
         return policy;
     }
@@ -51,6 +52,7 @@ public class PolicyCreator {
         policy.setPolicyName("Test_Policy_02");
         policy.setGeneric(true);
         policy.setProfile(profile);
+        policy.setPolicyType("GENERAL");
         policy.setDevices(DeviceCreator.getDeviceList2(DeviceTypeCreator.getDeviceType()));
 
         policy.setCompliance("ENFORCE");
@@ -110,7 +112,7 @@ public class PolicyCreator {
         policy.setRoles(roles);
         policy.setCompliance("ENFORCE");
         policy.setOwnershipType("BYOD");
-
+        policy.setPolicyType("GENERAL");
 
 
         PolicyCriterion criterion = new PolicyCriterion();
@@ -144,7 +146,7 @@ public class PolicyCreator {
 
         policy.setCompliance("MONITOR");
         policy.setOwnershipType("BYOD");
-
+        policy.setPolicyType("GENERAL");
         List<String> roles = new ArrayList<String>();
         roles.add("Role_04");
         roles.add("Role_05");

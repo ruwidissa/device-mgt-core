@@ -30,6 +30,7 @@ import org.wso2.carbon.policy.mgt.core.util.PolicyManagementConstants;
 import org.wso2.carbon.policy.mgt.core.util.PolicyManagerUtil;
 
 import javax.cache.Cache;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,31 +75,13 @@ public class PolicyCacheManagerImpl implements PolicyCacheManager {
 
     @Override
     public List<Policy> getAllPolicies() throws PolicyManagementException {
-
         Cache<Integer, List<Policy>> lCache = getPolicyListCache();
-        if (!lCache.containsKey(1)) {
-            PolicyManager policyManager = new PolicyManagerImpl();
-            this.addAllPolicies(policyManager.getPolicies());
-        }
+        updateCache(lCache);
         if (log.isDebugEnabled()) {
-            List<Policy> cachedPolicy = lCache.get(1);
-            for (Policy policy : cachedPolicy) {
-                log.debug("Policy id in cache .. : " + policy.getId() + " policy name : " + policy.
-                        getPolicyName() + " Activated : " + policy.isActive());
-
-                List<String> users = policy.getUsers();
-                for (String user : users) {
-                    log.debug("Users in cached policy : " + user);
-                }
-                List<String> roles = policy.getRoles();
-                for (String role : roles) {
-                    log.debug("Roles in cached policy : " + role);
-                }
-            }
-
+            showDebugLog(lCache);
         }
+        lCache = getPolicyListCache();
         return lCache.get(1);
-
     }
 
     @Override
@@ -218,4 +201,47 @@ public class PolicyCacheManagerImpl implements PolicyCacheManager {
         return 0;
     }
 
+    @Override
+    public List<Policy> getAllPolicies(String policyType) throws PolicyManagementException {
+        Cache<Integer, List<Policy>> lCache = getPolicyListCache();
+        updateCache(lCache);
+        if (log.isDebugEnabled()) {
+            showDebugLog(lCache);
+        }
+        lCache = getPolicyListCache();
+        List<Policy> policyListByType = new ArrayList<>();
+        List<Policy> cachedPolicyList = lCache.get(1);
+        Iterator<Policy> iterator = cachedPolicyList.iterator();
+        while (iterator.hasNext()) {
+            Policy policy = iterator.next();
+            if (policy.getPolicyType().equals(policyType)) {
+                policyListByType.add(policy);
+            }
+        }
+        return policyListByType;
+    }
+
+    private void updateCache(Cache<Integer, List<Policy>> lCache) throws PolicyManagementException {
+        if (!lCache.containsKey(1)) {
+            PolicyManager policyManager = new PolicyManagerImpl();
+            this.addAllPolicies(policyManager.getPolicies());
+        }
+    }
+
+    private void showDebugLog(Cache<Integer, List<Policy>> lCache) {
+        List<Policy> cachedPolicy = lCache.get(1);
+        for (Policy policy : cachedPolicy) {
+            log.debug("Policy id in cache .. : " + policy.getId() + " policy name : " + policy.
+                    getPolicyName() + " Activated : " + policy.isActive());
+
+            List<String> users = policy.getUsers();
+            for (String user : users) {
+                log.debug("Users in cached policy : " + user);
+            }
+            List<String> roles = policy.getRoles();
+            for (String role : roles) {
+                log.debug("Roles in cached policy : " + role);
+            }
+        }
+    }
 }

@@ -377,4 +377,12 @@ public class PolicyAdministratorPointImpl implements PolicyAdministratorPoint {
         }
     }
 
+    @Override
+    public List<Policy> getPolicies(String policyType) throws PolicyManagementException {
+        if (policyConfiguration.getCacheEnable()) {
+            return PolicyCacheManagerImpl.getInstance().getAllPolicies(policyType);
+        } else {
+            return policyManager.getPolicies(policyType);
+        }
+    }
 }

@@ -24,6 +24,7 @@ function onRequest(context) {
 	var deviceType = context.uriParams.deviceType;
 	var deviceId = request.getParameter("id");
 	var owner = request.getParameter("owner");
+	var ownership = request.getParameter("ownership");
 	var attributes = [];
 	var featureList = [];
 	var user = userModule.getCarbonUser();
@@ -130,10 +131,10 @@ function onRequest(context) {
 
 	displayData.tenantDomain = tenantDomain;
 
-	if (deviceType != null && deviceType != undefined && deviceId != null && deviceId != undefined) {
+	if (deviceType && deviceId) {
 		var deviceModule = require("/app/modules/business-controllers/device.js")["deviceModule"];
-		var device = deviceModule.viewDevice(deviceType, deviceId, owner);
-		if (device && device.status != "error") {
+		var device = deviceModule.viewDevice(deviceType, deviceId, owner, ownership);
+		if (device && device.status !== "error") {
 			displayData.device = device.content;
 			displayData.autoCompleteParams = autoCompleteParams;
 			displayData.encodedFeaturePayloads = "";

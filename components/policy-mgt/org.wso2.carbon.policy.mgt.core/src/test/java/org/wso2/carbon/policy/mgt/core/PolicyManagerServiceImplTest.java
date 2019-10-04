@@ -132,6 +132,7 @@ public class  PolicyManagerServiceImplTest extends BasePolicyManagementDAOTest {
         policy1.setDeviceGroups(deviceGroupWrappers);
         List<Device> devices = new ArrayList<Device>();
         policy1.setDevices(devices);
+        policy1.setPolicyType("GENERAL");
         policy1.setTenantId(PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
         policy1 = policyManagerService.addPolicy(policy1);
 

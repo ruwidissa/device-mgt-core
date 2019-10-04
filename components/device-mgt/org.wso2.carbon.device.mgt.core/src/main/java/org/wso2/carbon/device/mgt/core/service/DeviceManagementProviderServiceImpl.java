@@ -77,6 +77,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManageme
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
@@ -1242,6 +1243,54 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return device;
     }
 
+    @Override
+    public Device getDevice(DeviceData deviceData, boolean requireDeviceInfo)
+            throws DeviceManagementException {
+        if (deviceData.getDeviceIdentifier() == null) {
+            String msg = "Received null device identifier for method getDevice";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get device by device identifier :" + deviceData.getDeviceIdentifier().getId() + " of type '"
+                    + deviceData.getDeviceIdentifier().getType() + "' and requiredDeviceInfo: " + requireDeviceInfo);
+        }
+        Device device = null;
+        int tenantId = this.getTenantId();
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            device = deviceDAO.getDevice(deviceData, tenantId);
+            if (device == null) {
+                String msg =
+                        "No device is found upon the type '" + deviceData.getDeviceIdentifier().getType() + "' and id '"
+                                + deviceData.getDeviceIdentifier().getId() + "'";
+                if (log.isDebugEnabled()) {
+                    log.debug(msg);
+                }
+                return null;
+            }
+        } catch (DeviceManagementDAOException e) {
+            String msg =
+                    "Error occurred while obtaining the device for '" + deviceData.getDeviceIdentifier().getId() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDevice: " + deviceData.getDeviceIdentifier().getId();
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        if (requireDeviceInfo) {
+            return this.getAllDeviceInfo(device);
+        }
+        return device;
+    }
+
 
     @Override
     public List<Device> getDevicesBasedOnProperties(Map deviceProps) throws DeviceManagementException {
@@ -1718,9 +1767,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     @Override
     public PaginationResult getOperations(DeviceIdentifier deviceId, PaginationRequest request)
             throws OperationManagementException {
-        request = DeviceManagerUtil.validateOperationListPageSize(request);
         return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId())
-                .getOperations(deviceId, request);
+                .getOperations(deviceId, DeviceManagerUtil.validateOperationListPageSize(request));
     }
 
     @Override
