@@ -156,6 +156,12 @@
             <Scope>perm:admin:app:review:view</Scope>
             <Scope>perm:admin:app:publisher:update</Scope>
             <Scope>perm:admin:app:review:update</Scope>
+            <Scope>perm:device-types:types</Scope>
+            <Scope>perm:enterprise:modify</Scope>
+            <Scope>perm:enterprise:view</Scope>
+            <Scope>perm:android-work:customer</Scope>
+            <Scope>perm:android-work:admin</Scope>
+            <Scope>perm:application-command:modify</Scope>
         </Scopes>
         <SSOConfiguration>
             <Issuer>app-mgt</Issuer>
@@ -176,6 +182,39 @@
     <AppCategories>
         <Category>EMM</Category>
         <Category>IoT</Category>
+        <Category>Art &amp; Design</Category>
+        <Category>Auto &amp; Vehicles</Category>
+        <Category>Beauty</Category>
+        <Category>Books &amp; Reference</Category>
+        <Category>Business</Category>
+        <Category>Comics</Category>
+        <Category>Communications</Category>
+        <Category>Dating</Category>
+        <Category>Education</Category>
+        <Category>Entertainment</Category>
+        <Category>Events</Category>
+        <Category>Finance</Category>
+        <Category>Food &amp; Drink</Category>
+        <Category>Health &amp; Fitness</Category>
+        <Category>House &amp; Home</Category>
+        <Category>Libraries &amp; Demo</Category>
+        <Category>Lifestyle</Category>
+        <Category>Maps &amp; Navigation</Category>
+        <Category>Medical</Category>
+        <Category>Music &amp; Audio</Category>
+        <Category>News &amp; Magazines</Category>
+        <Category>Parenting</Category>
+        <Category>Personalization</Category>
+        <Category>Photography</Category>
+        <Category>Productivity</Category>
+        <Category>Shopping</Category>
+        <Category>Social</Category>
+        <Category>Sports</Category>
+        <Category>Tools</Category>
+        <Category>Travel &amp; Local</Category>
+        <Category>Video Players &amp; Editors</Category>
+        <Category>Weather</Category>
+        <Category>GooglePlaySyncedApp</Category>
     </AppCategories>
 
     <RatingConfig>

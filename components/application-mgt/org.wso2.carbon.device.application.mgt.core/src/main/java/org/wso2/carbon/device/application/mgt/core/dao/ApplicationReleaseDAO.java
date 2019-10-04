@@ -117,4 +117,7 @@ public interface ApplicationReleaseDAO {
     boolean hasExistInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
             throws ApplicationManagementDAOException;
 
-    }
+    List<ApplicationReleaseDTO> getReleaseByPackages(List<String> packages, int tenantId)
+            throws ApplicationManagementDAOException;
+
+}

@@ -356,6 +356,7 @@ public class APIUtil {
             applicationReleases.add(releaseDtoToRelease(applicationReleaseDTO));
         }
         application.setApplicationReleases(applicationReleases);
+        application.setPackageName(applicationDTO.getPackageName());
         return application;
     }
 

@@ -225,8 +225,9 @@ public class LoginHandler extends HttpServlet {
         password = req.getParameter("password");
         platform = req.getParameter(HandlerConstants.PLATFORM);
         serverUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
-                    + req.getServerPort();
-        uiConfigUrl = serverUrl + HandlerConstants.UI_CONFIG_ENDPOINT;
+                    + System.getProperty("iot.gateway.https.port");
+        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
+                + System.getProperty("iot.gateway.carbon.https.port") + HandlerConstants.UI_CONFIG_ENDPOINT;
 
         try {
             if (platform == null) {

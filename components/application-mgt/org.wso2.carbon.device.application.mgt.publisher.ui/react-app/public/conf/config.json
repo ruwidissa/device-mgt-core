@@ -1,14 +1,9 @@
 {
   "theme": {
-    "type": "default",
-    "value": "lightBaseTheme",
     "logo": "https://entgra.io/assets/images/svg/logo.svg",
-    "primaryColor": "rgb(24, 144, 255)"
+    "primaryColor": "#badc58"
   },
   "serverConfig": {
-    "protocol": "https",
-    "hostname": "localhost",
-    "httpsPort": "9443",
     "invoker": {
       "uri": "/publisher-ui-request-handler/invoke",
       "publisher": "/application-mgt-publisher/v1.0",

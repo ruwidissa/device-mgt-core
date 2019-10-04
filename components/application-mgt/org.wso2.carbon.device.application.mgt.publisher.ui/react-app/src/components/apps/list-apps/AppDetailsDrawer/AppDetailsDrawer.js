@@ -40,6 +40,8 @@ import ReactHtmlParser from 'react-html-parser';
 import "./AppDetailsDrawer.css";
 import pSBC from "shade-blend-color";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import ManagedConfigurationsIframe
+    from "../../../manage/android-enterprise/ManagedConfigurationsIframe/ManagedConfigurationsIframe";
 
 const {Meta} = Card;
 const {Text, Title} = Typography;
@@ -473,6 +475,31 @@ class AppDetailsDrawer extends React.Component {
                         </div>
 
                         <Divider/>
+
+                        {/*display manage config button only if the app is public android app*/}
+                        {(app.type === "PUBLIC") && (app.deviceType === "android") && (
+                            <div>
+                                <div>
+                                    <Text strong={true}>Set up managed configurations</Text>
+                                </div>
+                                <div style={{paddingTop: 16}}>
+                                    <Text>
+                                        If you are developing apps for the enterprise market, you may need to satisfy
+                                        particular requirements set by a organization's policies. Managed
+                                        configurations,
+                                        previously known as application restrictions, allow the organization's IT admin
+                                        to
+                                        remotely specify settings for apps. This capability is particularly useful for
+                                        organization-approved apps deployed to a work profile.
+                                    </Text>
+                                </div>
+                                <br/>
+                                <ManagedConfigurationsIframe
+                                    style={{paddingTop: 16}}
+                                    packageName={app.packageName}/>
+                                <Divider dashed={true}/>
+                            </div>
+                        )}
 
                         <Text strong={true}>Releases </Text>
                         {/*display add new release only if app type is enterprise*/}

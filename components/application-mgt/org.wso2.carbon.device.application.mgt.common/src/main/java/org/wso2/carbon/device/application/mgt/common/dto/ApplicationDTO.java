@@ -94,6 +94,18 @@ public class ApplicationDTO {
             required = true)
     private List<ApplicationReleaseDTO> applicationReleaseDTOs;
 
+    @ApiModelProperty(name = "packageName",
+            value = "package name of the application")
+    private String packageName;
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
     public int getId() {
         return id;
     }

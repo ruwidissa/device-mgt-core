@@ -273,4 +273,6 @@ public interface ApplicationManager {
          */
     String getPlistArtifact(String uuid) throws ApplicationManagementException;
 
+    List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException;
+
 }

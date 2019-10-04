@@ -88,7 +88,7 @@ class AddNewReleaseFormComponent extends React.Component {
                     isSharedWithAllTenants,
                     metaData: "string",
                     releaseType: releaseType,
-                    supportedOsVersions: "4.0-10.0"
+                    supportedOsVersions: "4-30"
                 };
 
                 data.append('binaryFile', binaryFile[0].originFileObj);
@@ -108,12 +108,7 @@ class AddNewReleaseFormComponent extends React.Component {
 
                 axios.post(
                     url,
-                    data,
-                    {
-                        headers: {
-                            'X-Platform': config.serverConfig.platform
-                        },
-                    }
+                    data
                 ).then(res => {
                     if (res.status === 201) {
                         this.setState({

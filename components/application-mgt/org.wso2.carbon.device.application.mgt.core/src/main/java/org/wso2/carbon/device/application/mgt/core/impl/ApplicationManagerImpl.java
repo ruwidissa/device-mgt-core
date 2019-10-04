@@ -176,13 +176,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public Application createPublicApp(PublicAppWrapper publicAppWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+
         if (log.isDebugEnabled()) {
             log.debug("Public app creating request is received. App name: " + publicAppWrapper.getName()
                     + " Device Type: " + publicAppWrapper.getDeviceType());
         }
 
         String publicAppStorePath = "";
-        if (DeviceTypes.ANDROID.toString().equals(publicAppWrapper.getDeviceType())) {
+        if (DeviceTypes.ANDROID.toString().toLowerCase().equals(publicAppWrapper.getDeviceType())) {
             publicAppStorePath = Constants.GOOGLE_PLAY_STORE_URL;
         } else if (DeviceTypes.IOS.toString().equals(publicAppWrapper.getDeviceType())) {
             publicAppStorePath = Constants.APPLE_STORE_URL;
@@ -194,18 +196,59 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationReleaseDTO.setInstallerName(appInstallerUrl);
         applicationReleaseDTO.setUuid(UUID.randomUUID().toString());
         applicationReleaseDTO.setAppHashValue(DigestUtils.md5Hex(appInstallerUrl));
-        //uploading application artifacts
+
+        ConnectionManagerUtil.openDBConnection();
+        List<ApplicationReleaseDTO> exitingRelease;
         try {
-            applicationDTO.getApplicationReleaseDTOs().clear();
-            applicationDTO.getApplicationReleaseDTOs()
-                    .add(addImageArtifacts(applicationReleaseDTO, applicationArtifact));
-        } catch (ResourceManagementException e) {
-            String msg = "Error Occured when uploading artifacts of the public app: " + publicAppWrapper.getName();
-            log.error(msg, e);
+            exitingRelease = applicationReleaseDAO.getReleaseByPackages(Arrays.asList(applicationReleaseDTO.getPackageName())
+                    , tenantId);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error Occured when fetching release: " + publicAppWrapper.getName();
+            log.error(msg);
             throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
-        //insert application data into database
-        return addAppDataIntoDB(applicationDTO);
+
+        if (exitingRelease != null && exitingRelease.size() > 0) {
+            applicationDTO.getApplicationReleaseDTOs().clear();
+            applicationReleaseDTO.setUuid(exitingRelease.get(0).getUuid());
+            applicationReleaseDTO.setCurrentState(exitingRelease.get(0).getCurrentState());
+
+            try {
+                applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact);
+                applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
+                ConnectionManagerUtil.beginDBTransaction();
+                applicationReleaseDAO.updateRelease(applicationReleaseDTO, tenantId);
+                ConnectionManagerUtil.commitDBTransaction();
+                return APIUtil.appDtoToAppResponse(applicationDTO);
+            } catch (ApplicationManagementDAOException e) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Error occurred when updating public app: " + publicAppWrapper.getName();
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } catch (ResourceManagementException e) {
+                String msg = "Error occurred when adding artifacts of release: " + publicAppWrapper.getName();
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
+        } else {
+            //uploading application artifacts
+            try {
+                applicationReleaseDTO = addImageArtifacts(applicationReleaseDTO, applicationArtifact);
+                applicationDTO.getApplicationReleaseDTOs().clear();
+                applicationDTO.getApplicationReleaseDTOs().add(applicationReleaseDTO);
+            } catch (ResourceManagementException e) {
+                String msg = "Error Occured when uploading artifacts of the public app: " + publicAppWrapper.getName();
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            }
+            //insert application data into database
+            return addAppDataIntoDB(applicationDTO);
+        }
+
     }
 
     @Override
@@ -3109,6 +3152,26 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occurred while getting application data for release UUID: " + releaseUuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public List<ApplicationReleaseDTO> getReleaseByPackageNames(List<String> packageIds) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return this.applicationReleaseDAO.getReleaseByPackages(packageIds, tenantId);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the database connection for getting application for the " +
+                    "packages";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting application data for packages";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {

@@ -271,7 +271,7 @@ public class InvokerHandler extends HttpServlet {
      */
     private boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
+        serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + System.getProperty("iot.gateway.https.port");
         apiEndpoint = req.getPathInfo();
         HttpSession session = req.getSession(false);
 

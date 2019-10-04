@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `APP_MANAGER`.`AP_APP_RELEASE`
 (
   `ID`                      INT(11)       NOT NULL,
   `DESCRIPTION`             TEXT          NOT NULL,
-  `VERSION`                 VARCHAR(20)   NOT NULL,
+  `VERSION`                 VARCHAR(70)   NOT NULL,
   `TENANT_ID`               INT(11)       NOT NULL,
   `UUID`                    VARCHAR(200)  NOT NULL,
   `RELEASE_TYPE`            VARCHAR(45)   NOT NULL,

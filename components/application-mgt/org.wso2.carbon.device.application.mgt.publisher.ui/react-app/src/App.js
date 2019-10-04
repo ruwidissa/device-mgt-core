@@ -67,11 +67,10 @@ class App extends React.Component {
         axios.get(
             window.location.origin + "/publisher/public/conf/config.json",
         ).then(res => {
-            console.log(res);
-            this.setState({
-                loading: false,
-                config: res.data
-            })
+            const config = res.data;
+
+            this.getAndroidEnterpriseToken(config);
+
         }).catch((error) => {
             this.setState({
                 loading: false,
@@ -79,6 +78,26 @@ class App extends React.Component {
             })
         });
     }
+
+    getAndroidEnterpriseToken = (config) => {
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + "/device-mgt/android/v1.0/enterprise/store-url?approveApps=true" +
+            "&searchEnabled=true&isPrivateAppsEnabled=true&isWebAppEnabled=true&isOrganizeAppPageVisible=true&isManagedConfigEnabled=true" +
+            "&host=https://localhost:9443",
+        ).then(res => {
+            config.androidEnterpriseToken = res.data.data.token;
+            this.setState({
+                loading: false,
+                config: config
+            });
+        }).catch((error) => {
+            config.androidEnterpriseToken = null;
+            this.setState({
+                loading: false,
+                config: config
+            })
+        });
+    };
 
     render() {
         const {loading, error} = this.state;

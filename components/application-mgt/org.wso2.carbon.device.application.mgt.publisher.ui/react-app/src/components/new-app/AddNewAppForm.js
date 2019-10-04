@@ -87,12 +87,7 @@ class AddNewAppFormComponent extends React.Component {
 
         axios.post(
             url,
-            data,
-            {
-                headers: {
-                    'X-Platform': config.serverConfig.platform
-                },
-            }
+            data
         ).then(res => {
             if (res.status === 201) {
                 this.setState({

@@ -77,18 +77,22 @@ class Dashboard extends React.Component {
                                             <Icon type="plus"/>
                                             Add New App
                                         </span>
-                                    }>
-                                    <Menu.Item key="setting:1">
-                                        <Link to="/publisher/add-new-app/public">Public APP</Link>
+                                    }
+                                >
+                                    <Menu.Item key="add-new-public-app">
+                                        <Link to="/publisher/add-new-app/public">
+                                            Public APP
+                                        </Link>
                                     </Menu.Item>
-                                    <Menu.Item key="setting:2">
-                                        <Link to="/publisher/add-new-app/enterprise">Enterprise APP</Link>
+                                    <Menu.Item key="add-new-enterprise-app">
+                                        <Link to="/publisher/add-new-app/enterprise">
+                                            Enterprise APP
+                                        </Link>
                                     </Menu.Item>
-                                    <Menu.Item key="setting:3">
-                                        <Link to="/publisher/add-new-app/web-clip">Web Clip</Link>
-                                    </Menu.Item>
-                                    <Menu.Item key="setting:4">
-                                        <Link to="/publisher/add-new-app/custom-app">Custom App</Link>
+                                    <Menu.Item key="add-new-web-clip">
+                                        <Link to="/publisher/add-new-app/web-clip">
+                                            Web Clip
+                                        </Link>
                                     </Menu.Item>
                                 </SubMenu>
 
