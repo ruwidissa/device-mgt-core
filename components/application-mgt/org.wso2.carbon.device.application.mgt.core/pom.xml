@@ -80,6 +80,10 @@
                             org.apache.commons.codec.digest;version="${commons-codec.wso2.osgi.version.range}",
                             org.wso2.carbon.base,
                             com.dd.*,
+                            org.wso2.carbon.identity.jwt.client.extension.*,
+                            org.wso2.carbon.apimgt.application.extension.*,
+                            org.apache.commons.httpclient,
+                            org.apache.commons.httpclient.methods,
                             org.apache.commons.validator.routines
                         </Import-Package>
                         <Embed-Dependency>apk-parser;scope=compile|runtime;inline=false</Embed-Dependency>
@@ -238,6 +242,11 @@
             <artifactId>commons-pool</artifactId>
             <version>1.5.6.wso2v1</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.application.extension</artifactId>
         </dependency>
 
     </dependencies>

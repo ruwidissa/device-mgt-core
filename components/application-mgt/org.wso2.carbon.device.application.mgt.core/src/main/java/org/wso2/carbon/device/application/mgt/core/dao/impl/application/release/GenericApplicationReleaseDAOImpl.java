@@ -1,4 +1,4 @@
-/*
+    /*
  *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
@@ -36,8 +36,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
-/**
+    /**
  * GenericApplicationReleaseDAOImpl holds the implementation of ApplicationRelease related DAO operations.
  */
 public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements ApplicationReleaseDAO {
@@ -278,9 +279,15 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     + "APP_HASH_VALUE = ?, "
                     + "SHARED_WITH_ALL_TENANTS = ?, "
                     + "APP_META_INFO = ?, "
-                    + "SUPPORTED_OS_VERSIONS = ?, "
-                    + "CURRENT_STATE =  ? "
-                + "WHERE ID = ? AND TENANT_ID = ? ";
+                    + "SUPPORTED_OS_VERSIONS = ?";
+
+        if (applicationReleaseDTO.getCurrentState() != null) {
+            sql += ", CURRENT_STATE =  ? ";
+        }
+
+        sql +=  " WHERE ID = ? AND TENANT_ID = ? ";
+
+        int x = 17;
         try {
             Connection connection = this.getDBConnection();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -300,9 +307,12 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 statement.setBoolean(14, applicationReleaseDTO.getIsSharedWithAllTenants());
                 statement.setString(15, applicationReleaseDTO.getMetaData());
                 statement.setString(16, applicationReleaseDTO.getSupportedOsVersions());
-                statement.setString(17, applicationReleaseDTO.getCurrentState().toUpperCase());
-                statement.setInt(18, applicationReleaseDTO.getId());
-                statement.setInt(19, tenantId);
+
+                if (applicationReleaseDTO.getCurrentState() != null) {
+                    statement.setString(x++, applicationReleaseDTO.getCurrentState().toUpperCase());
+                }
+                statement.setInt(x++, applicationReleaseDTO.getId());
+                statement.setInt(x++, tenantId);
                 if (statement.executeUpdate() == 0) {
                     return null;
                 }
@@ -546,6 +556,67 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
         } catch (SQLException e) {
             String msg = "Error occurred while executing SQL to verify the existence of app release for application "
                     + "release uuid ;" + releaseUuid + " and application release state " + installableStateName;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<ApplicationReleaseDTO> getReleaseByPackages(List<String> packages, int tenantId) throws
+            ApplicationManagementDAOException {
+
+        String sql = "SELECT "
+                + "AR.ID AS RELEASE_ID, "
+                + "AR.DESCRIPTION AS RELEASE_DESCRIPTION, "
+                + "AR.VERSION AS RELEASE_VERSION, "
+                + "AR.UUID AS RELEASE_UUID, "
+                + "AR.RELEASE_TYPE AS RELEASE_TYPE, "
+                + "AR.INSTALLER_LOCATION AS AP_RELEASE_STORED_LOC, "
+                + "AR.ICON_LOCATION AS AP_RELEASE_ICON_LOC, "
+                + "AR.BANNER_LOCATION AS AP_RELEASE_BANNER_LOC, "
+                + "AR.SC_1_LOCATION AS AP_RELEASE_SC1, "
+                + "AR.SC_2_LOCATION AS AP_RELEASE_SC2, "
+                + "AR.SC_3_LOCATION AS AP_RELEASE_SC3, "
+                + "AR.APP_HASH_VALUE AS RELEASE_HASH_VALUE, "
+                + "AR.APP_PRICE AS RELEASE_PRICE, "
+                + "AR.APP_META_INFO AS RELEASE_META_INFO, "
+                + "AR.PACKAGE_NAME AS PACKAGE_NAME, "
+                + "AR.SUPPORTED_OS_VERSIONS AS RELEASE_SUP_OS_VERSIONS, "
+                + "AR.RATING AS RELEASE_RATING, "
+                + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
+                + "AR.RATED_USERS AS RATED_USER_COUNT "
+                + "FROM AP_APP_RELEASE AS AR "
+                + "WHERE AR.TENANT_ID = ? AND AR.PACKAGE_NAME IN (";
+
+        StringJoiner joiner = new StringJoiner(",", sql, ")");
+        packages.stream().map(ignored -> "?").forEach(joiner::add);
+        sql = joiner.toString();
+
+        try {
+            Connection connection = this.getDBConnection();
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setInt(1, tenantId);
+                for (int y = 0; y < packages.size(); y++) {
+                    // y +2 because tenantId parameter is 1 and the counter is starting at o for y
+                    statement.setString(y+2, packages.get(y));
+                }
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    List<ApplicationReleaseDTO> releaseDTOs = new ArrayList<>();
+                    while (resultSet.next()) {
+                        releaseDTOs.add(DAOUtil.constructAppReleaseDTO(resultSet));
+                    }
+                    return releaseDTOs;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Database connection error occurred while trying to get application release details which has "
+                    + "packages: " + String.join(", ", packages);
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg =
+                    "Error while getting application release details which has packages: " + String.join(", ", packages)
+                            + " , while executing the query " + sql;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }

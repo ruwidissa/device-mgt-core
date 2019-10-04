@@ -82,6 +82,18 @@ public class Application {
             required = true)
     private List<ApplicationRelease> applicationReleases;
 
+    @ApiModelProperty(name = "packageName",
+            value = "package name of the application")
+    private String packageName;
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
     public int getId() { return id; }
 
     public void setId(int id) { this.id = id; }

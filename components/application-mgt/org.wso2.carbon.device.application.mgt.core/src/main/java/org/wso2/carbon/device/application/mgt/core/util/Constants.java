@@ -115,4 +115,30 @@ public class Constants {
     public static final int REVIEW_PARENT_ID = -1;
 
     public static final int MAX_RATING = 5;
+
+    public final class ApplicationInstall {
+        private ApplicationInstall() {
+            throw new AssertionError();
+        }
+
+        public static final String APPLICATION_NAME = "device_type_android";
+        public static final String ENROLLMENT_APP_INSTALL_FEATURE_CODE = "ENROLLMENT_APP_INSTALL";
+        public static final String DEFAULT_TOKEN_TYPE = "PRODUCTION";
+        public static final String DEFAULT_VALIDITY_PERIOD = "3600";
+        public static final String SUBSCRIPTION_SCOPE = "appm:subscribe";
+        public static final String ENROLLMENT_APP_INSTALL_UUID = "uuid";
+        public static final String GOOGLE_POLICY_PAYLOAD = "installGooglePolicyPayload";
+        public static final String ENROLLMENT_APP_INSTALL_CODE = "enrollmentAppInstall";
+        public static final String ENCODING = "UTF-8";
+        public static final String AT = "@";
+        public static final String DEVICE_TYPE_ANDROID = "android";
+        public static final String COLON = ":";
+        public static final String IOT_CORE_HOST = "iot.core.host";
+        public static final String IOT_CORE_PORT = "iot.core.https.port";
+        public static final String ENROLLMENT_APP_INSTALL_PROTOCOL = "https://";
+        public static final String GOOGLE_APP_INSTALL_URL = "/api/device-mgt/android/v1.0/enterprise/change-app";
+
+        public static final String AUTHORIZATION = "Authorization";
+        public static final String AUTHORIZATION_HEADER_VALUE = "Bearer ";
+    }
 }

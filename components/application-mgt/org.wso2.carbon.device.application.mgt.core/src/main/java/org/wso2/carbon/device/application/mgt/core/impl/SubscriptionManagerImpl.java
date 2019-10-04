@@ -17,9 +17,19 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.application.extension.dto.ApiApplicationKey;
+import org.wso2.carbon.apimgt.application.extension.exception.APIManagerException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
 import org.wso2.carbon.device.application.mgt.common.ApplicationType;
@@ -29,6 +39,7 @@ import org.wso2.carbon.device.application.mgt.common.SubAction;
 import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.SubscribingDeviceIdHolder;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
+import org.wso2.carbon.device.application.mgt.common.dto.ApplicationPolicyDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
@@ -51,6 +62,7 @@ import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
 import org.wso2.carbon.device.application.mgt.core.util.HelperUtil;
+import org.wso2.carbon.device.application.mgt.core.util.OAuthUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.MDMAppConstants;
@@ -65,13 +77,18 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
+import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
+import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -377,8 +394,19 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 activityList.add(activity);
             }
         } else {
-            Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action);
-            activityList.add(activity);
+            if (applicationDTO.getType().equals(ApplicationType.PUBLIC.toString())) {
+                List<String> categories = getApplicationCategories(applicationDTO.getId());
+                if (categories.contains("GooglePlaySyncedApp")) {
+                    ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
+                    applicationPolicyDTO.setApplicationDTO(applicationDTO);
+                    applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
+                    applicationPolicyDTO.setAction(action);
+                    installEnrollmentApplications(applicationPolicyDTO);
+                }
+            } else {
+                Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action);
+                activityList.add(activity);
+            }
         }
         ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
         applicationInstallResponse.setActivities(activityList);
@@ -412,6 +440,22 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         subscribingDeviceIdHolder.setSubscribableDevices(subscribableDevices);
         subscribingDeviceIdHolder.setSubscribedDevices(subscribedDevices);
         return subscribingDeviceIdHolder;
+    }
+
+    private List<String> getApplicationCategories(int id) throws ApplicationManagementException {
+        List<String> categories;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            categories = this.applicationDAO.getAppCategories(id, tenantId);
+            return categories;
+        } catch (ApplicationManagementDAOException e) {
+            String msg = "Error occurred while getting categories for application : " + id;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
     }
 
     private ApplicationDTO getApplicationDTO(String uuid) throws ApplicationManagementException {
@@ -677,6 +721,57 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             }
         } catch (UnknownApplicationTypeException e) {
             String msg = "Unknown Application type is found.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    public int installEnrollmentApplications(ApplicationPolicyDTO applicationPolicyDTO)
+            throws ApplicationManagementException {
+
+        HttpClient httpClient;
+        PostMethod request;
+        try {
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            ApiApplicationKey apiApplicationKey = OAuthUtils.getClientCredentials(tenantDomain);
+            String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                    .getRealmConfiguration().getAdminUserName() + Constants.ApplicationInstall.AT + tenantDomain;
+            AccessTokenInfo tokenInfo = OAuthUtils.getOAuthCredentials(apiApplicationKey, username);
+            String requestUrl = Constants.ApplicationInstall.ENROLLMENT_APP_INSTALL_PROTOCOL +
+                    System.getProperty(Constants.ApplicationInstall.IOT_CORE_HOST) +
+                    Constants.ApplicationInstall.COLON +
+                    System.getProperty(Constants.ApplicationInstall.IOT_CORE_PORT) +
+                    Constants.ApplicationInstall.GOOGLE_APP_INSTALL_URL;
+            Gson gson = new Gson();
+            String payload = gson.toJson(applicationPolicyDTO);
+
+            StringRequestEntity requestEntity = new StringRequestEntity(payload, MediaType.APPLICATION_JSON
+                    , Constants.ApplicationInstall.ENCODING);;
+            httpClient = new HttpClient();
+            request = new PostMethod(requestUrl);
+            request.addRequestHeader(Constants.ApplicationInstall.AUTHORIZATION
+                    , Constants.ApplicationInstall.AUTHORIZATION_HEADER_VALUE + tokenInfo.getAccessToken());
+            request.setRequestEntity(requestEntity);
+            httpClient.executeMethod(request);
+            return request.getStatusCode();
+
+        } catch (UserStoreException e) {
+            String msg = "Error while accessing user store for user with Android device.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (APIManagerException e) {
+            String msg = "Error while retrieving access token for Android device" ;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (HttpException e) {
+            String msg = "Error while calling the app store to install enrollment app with id: " +
+                    applicationPolicyDTO.getApplicationDTO().getId() +
+                    " on device";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (IOException e) {
+            String msg = "Error while installing the enrollment with id: " + applicationPolicyDTO.getApplicationDTO()
+                    .getId() + " on device";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         }
