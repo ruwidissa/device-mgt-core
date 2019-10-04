@@ -562,4 +562,18 @@ public interface DeviceDAO {
      */
     List<DeviceLocationHistory> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
             throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get the details of subscribed devices.
+     *
+     * @param deviceIds   device ids of the subscribed devices.
+     * @param tenantId    Id of the current tenant.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue  limit value for get paginated request.
+     * @param status      status of the devices.
+     * @return devices - subscribed device details list
+     * @throws {@link DeviceManagementDAOException} if connections establishment fails.
+     */
+    List<Device> getSubscribedDevices(int offsetValue, int limitValue, List<Integer> deviceIds,
+                                      int tenantId, String status) throws DeviceManagementDAOException;
 }

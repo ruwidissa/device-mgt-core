@@ -87,7 +87,7 @@ class UserInstall extends React.Component {
         value.map(val => {
             data.push(val.key);
         });
-        this.props.onInstall("user", data);
+        this.props.onInstall("user", data, "install");
     };
 
     render() {

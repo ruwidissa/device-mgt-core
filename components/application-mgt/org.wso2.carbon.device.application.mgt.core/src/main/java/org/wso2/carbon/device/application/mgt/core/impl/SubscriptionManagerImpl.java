@@ -82,6 +82,7 @@ import org.wso2.carbon.device.mgt.core.util.MDMAndroidOperationUtil;
 import org.wso2.carbon.device.mgt.core.util.MDMIOSOperationUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -684,6 +685,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
                         return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                        app.setType(mobileAppType);
                         return MDMAndroidOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
@@ -793,10 +795,117 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (IOException e) {
-            String msg = "Error while installing the enrollment with id: " + applicationPolicyDTO.getApplicationDTO()
-                    .getId() + " on device";
+            String msg = "Error while installing the enrollment with id: " + applicationPolicyDTO.getApplicationDTO().getId()
+                    + " on device";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public PaginationResult getAppInstalledDevices(int offsetValue, int limitValue, String appUUID,
+                                                   String status)
+            throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        DeviceManagementProviderService deviceManagementProviderService = HelperUtil
+                .getDeviceManagementProviderService();
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(appUUID, tenantId);
+            int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
+
+            List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
+                    .getDeviceSubscriptions(applicationReleaseId, tenantId);
+            if (deviceSubscriptionDTOS.isEmpty()) {
+                String msg = "Couldn't found an subscribed devices for application release id: "
+                             + applicationReleaseId;
+                log.info(msg);
+            }
+            List<Integer> deviceIdList = new ArrayList<>();
+            for (DeviceSubscriptionDTO deviceIds : deviceSubscriptionDTOS) {
+                deviceIdList.add(deviceIds.getDeviceId());
+            }
+            //pass the device id list to device manager service method
+            try {
+                PaginationResult deviceDetails = deviceManagementProviderService
+                        .getAppSubscribedDevices(offsetValue ,limitValue, deviceIdList, status);
+
+                if (deviceDetails == null) {
+                    String msg = "Couldn't found an subscribed devices details for device ids: "
+                                 + deviceIdList;
+                    log.error(msg);
+                    throw new NotFoundException(msg);
+                }
+                return deviceDetails;
+
+            } catch (DeviceManagementException e) {
+                String msg = "service error occurred while getting data from the service";
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            }
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when get application release data for application" +
+                         " release UUID: " + appUUID;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting device details that " +
+                         "given application id";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public PaginationResult getAppInstalledCategories(int offsetValue, int limitValue,
+                                                      String appUUID, String subType)
+            throws ApplicationManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        PaginationResult paginationResult = new PaginationResult();
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            ApplicationDTO applicationDTO = this.applicationDAO
+                    .getAppWithRelatedRelease(appUUID, tenantId);
+            int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
+
+            int count = 0;
+            List<String> SubscriptionList = new ArrayList<>();
+
+            if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
+                SubscriptionList = subscriptionDAO
+                        .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
+            } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+                SubscriptionList = subscriptionDAO
+                        .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
+            } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+                SubscriptionList = subscriptionDAO
+                        .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
+            }
+            count = SubscriptionList.size();
+            paginationResult.setData(SubscriptionList);
+            paginationResult.setRecordsFiltered(count);
+            paginationResult.setRecordsTotal(count);
+
+            return paginationResult;
+
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred when get application release data for application" +
+                         " release UUID: " + appUUID;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "DB Connection error occurred while getting category details that " +
+                         "given application id";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 }

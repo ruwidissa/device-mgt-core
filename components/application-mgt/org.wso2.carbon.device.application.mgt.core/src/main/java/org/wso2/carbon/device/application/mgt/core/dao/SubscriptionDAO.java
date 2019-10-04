@@ -168,6 +168,46 @@ public interface SubscriptionDAO {
      * @return {@link ScheduledSubscriptionDTO}
      * @throws ApplicationManagementDAOException if error occurred while retrieving the subscription
      */
-    ScheduledSubscriptionDTO getPendingScheduledSubscriptionByTaskName(String taskName)
+    ScheduledSubscriptionDTO getPendingScheduledSubscriptionByTaskName(String taskName) throws ApplicationManagementDAOException;
+
+    /**
+     * This method is used to get the details of users
+     *
+     * @param tenantId id of the current tenant
+     * @param offsetValue offset value for get paginated result
+     * @param limitValue limit value for get paginated result
+     * @param appReleaseId id of the application release.
+     * @return subscribedUsers - list of app subscribed users.
+     * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
+     */
+    List<String> getAppSubscribedUsers(int offsetValue, int limitValue, int appReleaseId,
+                                       int tenantId)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * This method is used to get the details of roles
+     *
+     * @param tenantId id of the current tenant
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param appReleaseId id of the application release.
+     * @return subscribedRoles - list of app subscribed roles.
+     * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
+     */
+    List<String> getAppSubscribedRoles(int offsetValue, int limitValue, int appReleaseId,
+                                       int tenantId)
+            throws ApplicationManagementDAOException;
+
+    /**
+     * This method is used to get the details of subscribed groups
+     *
+     * @param tenantId id of the current tenant
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param appReleaseId id of the application release.
+     * @return subscribedGroups - list of app subscribed groups.
+     * @throws {@link ApplicationManagementDAOException} if connections establishment fails.
+     */
+    List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId, int tenantId)
             throws ApplicationManagementDAOException;
 }

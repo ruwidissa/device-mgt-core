@@ -759,7 +759,6 @@ public interface DeviceManagementProviderService {
 
     DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
             DeviceManagementException;
-
     /**
      * Retrieves a list of configurations of a specific device
      * using the device's properties
@@ -782,4 +781,18 @@ public interface DeviceManagementProviderService {
      * @return tru if device transferee, otherwise false
      */
     List<String> transferDeviceToTenant(DeviceTransferRequest deviceTransferRequest) throws DeviceManagementException, DeviceNotFoundException;
+
+    /**
+     * This method retrieves a list of subscribed devices.
+     *
+     * @param devicesIds devices ids of the subscribed devices.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param status status of the devices.
+     * @return {@link PaginationResult}
+     * @throws {@link DeviceManagementException} if any service level or DAO level error occurs.
+     */
+    PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
+                                             List<Integer> devicesIds, String status)
+            throws DeviceManagementException;
 }
