@@ -385,7 +385,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int tenantId)
+    public Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId,
+            int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get device subscriptions for given device ids.");
@@ -406,13 +407,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                             + "DS.DM_DEVICE_ID AS DEVICE_ID, "
                             + "DS.STATUS AS STATUS "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
-                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND TENANT_ID = ?");
+                            + "WHERE DS.DM_DEVICE_ID IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 for (Integer deviceId : deviceIds) {
                     ps.setObject(index++, deviceId);
                 }
+                ps.setInt(index++, appReleaseId);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -575,8 +577,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 for (Integer deviceId : deviceIds) {
                     ps.setObject(index++, deviceId);
                 }
-                ps.setInt(index++, tenantId);
-                ps.setInt(index, applicationReleaseId);
+                ps.setInt(index++, applicationReleaseId);
+                ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedDevices.add(rs.getInt("DM_DEVICE_ID"));

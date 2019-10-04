@@ -23,21 +23,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SubscribingDeviceIdHolder {
-    private Map<DeviceIdentifier, Integer> subscribedDevices = new HashMap<>();
-    private Map<DeviceIdentifier, Integer> subscribableDevices = new HashMap<>();
-    public Map<DeviceIdentifier, Integer> getSubscribedDevices() {
-        return subscribedDevices;
+    private Map<DeviceIdentifier, Integer> appInstalledDevices = new HashMap<>();
+    private Map<DeviceIdentifier, Integer> appInstallableDevices = new HashMap<>();
+
+    public Map<DeviceIdentifier, Integer> getAppInstalledDevices() {
+        return appInstalledDevices;
     }
 
-    public void setSubscribedDevices(Map<DeviceIdentifier, Integer> subscribedDevices) {
-        this.subscribedDevices = subscribedDevices;
+    public void setAppInstalledDevices(Map<DeviceIdentifier, Integer> appInstalledDevices) {
+        this.appInstalledDevices = appInstalledDevices;
     }
 
-    public Map<DeviceIdentifier, Integer> getSubscribableDevices() {
-        return subscribableDevices;
+    public Map<DeviceIdentifier, Integer> getAppInstallableDevices() {
+        return appInstallableDevices;
     }
 
-    public void setSubscribableDevices(Map<DeviceIdentifier, Integer> subscribableDevices) {
-        this.subscribableDevices = subscribableDevices;
+    public void setAppInstallableDevices(Map<DeviceIdentifier, Integer> appInstallableDevices) {
+        this.appInstallableDevices = appInstallableDevices;
     }
 }

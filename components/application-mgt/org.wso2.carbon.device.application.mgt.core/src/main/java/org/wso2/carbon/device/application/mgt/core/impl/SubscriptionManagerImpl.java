@@ -18,9 +18,6 @@
 package org.wso2.carbon.device.application.mgt.core.impl;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -77,7 +74,6 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
-import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -346,35 +342,45 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /***
+     * This method perform given action (i.e APP INSTALL or APP UNINSTALL) on given set of devices.
+     *
+     * @param deviceType Application supported device type.
+     * @param devices List of devices that action is triggered.
+     * @param applicationDTO Application data
+     * @param subType Subscription type (i.e USER, ROLE, GROUP or DEVICE)
+     * @param subscribers Subscribers
+     * @param action Performing action. (i.e INSTALL or UNINSTALL)
+     * @return {@link ApplicationInstallResponse}
+     * @throws ApplicationManagementException if error occured when adding operation on device or updating subscription
+     * data.
+     */
     private ApplicationInstallResponse performActionOnDevices(String deviceType, List<Device> devices,
             ApplicationDTO applicationDTO, String subType, List<String> subscribers, String action)
             throws ApplicationManagementException {
 
-        SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(devices);
+        SubscribingDeviceIdHolder subscribingDeviceIdHolder = getSubscribingDeviceIdHolder(devices,
+                applicationDTO.getApplicationReleaseDTOs().get(0).getId());
         List<Activity> activityList = new ArrayList<>();
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         List<DeviceIdentifier> ignoredDeviceIdentifiers = new ArrayList<>();
         Map<String, List<DeviceIdentifier>> deviceIdentifierMap = new HashMap<>();
 
         if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-            deviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getSubscribableDevices().keySet());
-            ignoredDeviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getSubscribedDevices().keySet());
-
-            if (deviceIdentifiers.isEmpty()) {
-                ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
-                applicationInstallResponse.setIgnoredDeviceIdentifiers(ignoredDeviceIdentifiers);
-                return applicationInstallResponse;
-            }
+            deviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet());
+            ignoredDeviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet());
         } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-            deviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getSubscribedDevices().keySet());
-            ignoredDeviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getSubscribableDevices().keySet());
-            if (deviceIdentifiers.isEmpty()) {
-                ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
-                applicationInstallResponse.setIgnoredDeviceIdentifiers(ignoredDeviceIdentifiers);
-                return applicationInstallResponse;
-            }
+            deviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet());
+            ignoredDeviceIdentifiers = new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet());
         }
 
+        if (deviceIdentifiers.isEmpty()) {
+            ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
+            applicationInstallResponse.setIgnoredDeviceIdentifiers(ignoredDeviceIdentifiers);
+            return applicationInstallResponse;
+        }
+
+        //device type is getting null when we try to perform action on Web Clip.
         if (deviceType == null) {
             for (DeviceIdentifier identifier : deviceIdentifiers) {
                 List<DeviceIdentifier> identifiers;
@@ -417,28 +423,37 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return applicationInstallResponse;
     }
 
-    private SubscribingDeviceIdHolder getSubscribingDeviceIdHolder(List<Device> devices)
+    /***
+     * Filter given devices and davide given list of device into two sets, those are already application installed
+     * devices and application installable devices.
+     *
+     * @param devices List of {@link Device}
+     * @param appReleaseId Application release id.
+     * @return {@link SubscribingDeviceIdHolder}
+     * @throws ApplicationManagementException if error occured while getting device subscriptions for applicaion.
+     */
+    private SubscribingDeviceIdHolder getSubscribingDeviceIdHolder(List<Device> devices, int appReleaseId)
             throws ApplicationManagementException {
-        Map<DeviceIdentifier, Integer> subscribedDevices = new HashMap<>();
-        Map<DeviceIdentifier, Integer> subscribableDevices = new HashMap<>();
+        Map<DeviceIdentifier, Integer> appInstalledDevices = new HashMap<>();
+        Map<DeviceIdentifier, Integer> appInstallableDevices = new HashMap<>();
 
-        List<Integer> filteredDeviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
+        List<Integer> deviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
         //get device subscriptions for given device id list.
-        Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = getDeviceSubscriptions(filteredDeviceIds);
+        Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = getDeviceSubscriptions(deviceIds, appReleaseId);
         for (Device device : devices) {
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
             DeviceSubscriptionDTO deviceSubscriptionDTO = deviceSubscriptions.get(device.getId());
             if (deviceSubscriptionDTO != null && !deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED
                     .toString().equals(deviceSubscriptionDTO.getStatus())) {
-                subscribedDevices.put(deviceIdentifier, device.getId());
+                appInstalledDevices.put(deviceIdentifier, device.getId());
             } else {
-                subscribableDevices.put(deviceIdentifier, device.getId());
+                appInstallableDevices.put(deviceIdentifier, device.getId());
             }
         }
 
         SubscribingDeviceIdHolder subscribingDeviceIdHolder = new SubscribingDeviceIdHolder();
-        subscribingDeviceIdHolder.setSubscribableDevices(subscribableDevices);
-        subscribingDeviceIdHolder.setSubscribedDevices(subscribedDevices);
+        subscribingDeviceIdHolder.setAppInstallableDevices(appInstallableDevices);
+        subscribingDeviceIdHolder.setAppInstalledDevices(appInstalledDevices);
         return subscribingDeviceIdHolder;
     }
 
@@ -458,6 +473,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /***
+     * Get Application with application release which has given UUID.
+     *
+     * @param uuid UUID of the application release.
+     * @return {@link ApplicationDTO}
+     * @throws ApplicationManagementException if error occurred while getting application data from database or
+     * verifying whether application is in installable state.
+     */
     private ApplicationDTO getApplicationDTO(String uuid) throws ApplicationManagementException {
         ApplicationDTO applicationDTO;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -531,7 +554,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             for (Activity activity : activities) {
                 int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
                 List<Integer> operationAddedDeviceIds = getOperationAddedDeviceIds(activity,
-                        subscribingDeviceIdHolder.getSubscribableDevices());
+                        subscribingDeviceIdHolder.getAppInstallableDevices());
                 List<Integer> alreadySubscribedDevices = subscriptionDAO
                         .getSubscribedDeviceIds(operationAddedDeviceIds, applicationReleaseId, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
@@ -548,7 +571,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     deviceSubIds.addAll(subscribingDevices);
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action) && !alreadySubscribedDevices.isEmpty()) {
                     List<Integer> deviceResubscribingIds = subscriptionDAO
-                            .updateDeviceSubscription(username, alreadySubscribedDevices, false, subType,
+                            .updateDeviceSubscription(username, alreadySubscribedDevices, true, subType,
                                     Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
                     deviceSubIds.addAll(deviceResubscribingIds);
                 }
@@ -586,13 +609,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return deviceIds;
     }
 
-    private Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> filteredDeviceIds)
+    private Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
 
         try {
             ConnectionManagerUtil.openDBConnection();
-            return this.subscriptionDAO.getDeviceSubscriptions(filteredDeviceIds, tenantId);
+            return this.subscriptionDAO.getDeviceSubscriptions(deviceIds, appReleaseId, tenantId);
         } catch (ApplicationManagementDAOException e) {
             String msg = "Error occured when getting device subscriptions for given device IDs";
             log.error(msg, e);

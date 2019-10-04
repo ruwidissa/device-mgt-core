@@ -83,8 +83,8 @@ public interface SubscriptionDAO {
     List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
             ApplicationManagementDAOException;
 
-    Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int tenantId) throws
-            ApplicationManagementDAOException;
+    Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId, int tenantId)
+            throws ApplicationManagementDAOException;
 
     List<String> getSubscribedUserNames(List<String> users, int tenantId) throws
             ApplicationManagementDAOException;
