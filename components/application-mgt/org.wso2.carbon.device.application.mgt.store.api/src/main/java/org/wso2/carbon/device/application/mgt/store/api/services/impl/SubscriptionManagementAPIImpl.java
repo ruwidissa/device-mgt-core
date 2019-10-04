@@ -34,7 +34,7 @@ import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
 import org.wso2.carbon.device.application.mgt.common.RoleList;
 import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.application.mgt.common.SubsciptionType;
+import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -242,21 +242,21 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             PaginationResult subscribedCategoryDetails = subscriptionManager
                     .getAppInstalledCategories(offset, limit, uuid, subType);
 
-            if (SubsciptionType.USER.toString().equalsIgnoreCase(subType)) {
+            if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 BasicUserInfoList users = new BasicUserInfoList();
 
                 users.setList((List<BasicUserInfo>) subscribedCategoryDetails.getData());
                 users.setCount(subscribedCategoryDetails.getRecordsTotal());
 
                 return Response.status(Response.Status.OK).entity(users).build();
-            } else if (SubsciptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+            } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
                 RoleList roles = new RoleList();
 
                 roles.setList(subscribedCategoryDetails.getData());
                 roles.setCount(subscribedCategoryDetails.getRecordsTotal());
 
                 return Response.status(Response.Status.OK).entity(roles).build();
-            } else if (SubsciptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+            } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
                 DeviceGroupList groups = new DeviceGroupList();
 
                 groups.setList(subscribedCategoryDetails.getData());
