@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider} from "antd";
+import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Button} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -140,21 +140,33 @@ class DeviceTable extends React.Component {
             data: [],
             pagination: {},
             loading: false,
-            selectedRows: []
+            selectedRows: [],
+            deviceIds: []
         };
     }
 
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-            // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             this.setState({
                 selectedRows: selectedRows
-            })
+            });
+            this.state.deviceIds = selectedRows.map(obj => obj.deviceIdentifier);
         }
     };
 
     componentDidMount() {
         this.fetch();
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.deleteRequest !== this.props.deleteRequest){
+            this.deleteDevice();
+        }
+        if(prevProps.deselectRequest !== this.props.deselectRequest){
+            this.rowSelection.getCheckboxProps = record => ({
+                disabled: record.enrolmentInfo.status !== 'REMOVED' // Column configuration not to be checked
+            })
+        }
     }
 
     //fetch data from api
@@ -170,11 +182,13 @@ class DeviceTable extends React.Component {
             requireDeviceInfo: true,
         };
 
-        const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
+        const encodedExtraParams = Object.keys(extraParams)
+                .map(key => key + '=' + extraParams[key]).join('&');
 
         //send request to the invoker
         axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
+            window.location.origin + config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
             "/devices?" + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
@@ -203,6 +217,49 @@ class DeviceTable extends React.Component {
             this.setState({loading: false});
         });
     };
+
+    deleteDevice = () => {
+        const config = this.props.context;
+        this.setState({loading: true});
+
+        const deviceData = JSON.stringify(this.state.deviceIds);
+
+        //send request to the invoker
+        axios.delete(
+                window.location.origin + config.serverConfig.invoker.uri +
+                config.serverConfig.invoker.deviceMgt +
+                "/admin/devices/permanent-delete",
+                {
+                    headers:{'Content-Type': 'application/json; charset=utf-8'} ,
+                    data: deviceData
+                },
+        ).then(res => {
+            if (res.status === 200) {
+                const pagination = {...this.state.pagination};
+                this.setState({
+                                  loading: false,
+                                  data: res.data.data.devices,
+                                  pagination,
+                              });
+            }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = window.location.origin + '/entgra/login';
+            } else {
+                notification["error"]({
+                                          message: "There was a problem",
+                                          duration: 0,
+                                          description:
+                                                  "Error occurred while trying to load devices.",
+                                      });
+            }
+
+            this.setState({loading: false});
+        });
+    }
 
     handleTableChange = (pagination, filters, sorter) => {
         const pager = {...this.state.pagination};
