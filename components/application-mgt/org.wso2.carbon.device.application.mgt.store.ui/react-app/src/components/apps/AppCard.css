@@ -15,31 +15,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import React from "react";
-import ListApps from "../../../components/apps/list-apps/ListApps";
-
-class Apps extends React.Component {
-    routes;
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-
-    }
-
-
-
-    render() {
-        return (
-            <div>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
-                    <ListApps/>
-                </div>
-
-            </div>
-
-        );
-    }
+.app-icon {
+    min-width: 100%;
+    height: auto;
 }
 
-export default Apps;
+.content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.box {
+    position: relative;
+    width: 100%; /* desired width */
+}
+
+.box:before {
+    content: "";
+    display: block;
+    padding-top: 100%; /* initial ratio of 1:1*/
+}
+
+.release .release-icon {
+    margin-right: 15px;
+}
+
+.release .release-icon img {
+    width: 100%;
+    border-radius: 28%;
+}

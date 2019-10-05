@@ -19,7 +19,7 @@
 import {Card, Typography, Col, Row} from 'antd';
 import React from "react";
 import {Link} from "react-router-dom";
-import "../../App.css";
+import "./AppCard.css";
 import StarRatings from 'react-star-ratings';
 
 const {Meta} = Card;
@@ -29,11 +29,6 @@ class AppCard extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleReleasesClick = this.handleReleasesClick.bind(this);
-    }
-
-    handleReleasesClick() {
-        this.props.openReleasesModal(this.props.app);
     }
 
     render() {
@@ -45,12 +40,17 @@ class AppCard extends React.Component {
                 <Link to={"/store/"+app.deviceType+"/apps/" + release.uuid}>
                     <Row className="release">
                         <Col span={24} className="release-icon">
-                            <img src={release.iconPath} alt="icon"/>
+                            <div className='box'>
+                                <div className='content'>
+                                    <img className='app-icon' src={release.iconPath} alt="icon"/>
+                                </div>
+                            </div>
+                            {/*<img src={release.iconPath} alt="icon"/>*/}
                             {/*<Avatar shape="square" size={128} src={release.iconPath} />*/}
                         </Col>
-                        <Col span={24}>
+                        <Col span={24} style={{paddingTop:10}}>
                             <Text strong level={4}>{app.name}</Text><br/>
-                            <Text type="secondary" level={4}>{app.deviceType}</Text><br/>
+                            <Text type="secondary" level={4}>{app.subMethod.toLowerCase()}</Text><br/>
                             <StarRatings
                                 rating={app.rating}
                                 starRatedColor="#777"
