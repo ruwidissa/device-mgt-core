@@ -147,7 +147,6 @@ class DeviceTable extends React.Component {
 
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-           // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             this.setState({
                 selectedRows: selectedRows
             });
