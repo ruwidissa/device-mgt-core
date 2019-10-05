@@ -36,7 +36,9 @@ class Dashboard extends React.Component {
         this.state = {
             routes: props.routes,
             selectedKeys: [],
-            deviceTypes: []
+            deviceTypes: [],
+            visible: false,
+            collapsed: false
         };
         this.logo = this.props.context.theme.logo;
     }
@@ -72,20 +74,14 @@ class Dashboard extends React.Component {
         })
     };
 
-    //functions for show the drawer
-    state = {
-        visible: false,
-        collapsed: false
-    };
-
-    showDrawer = () => {
+    showMobileNavigationBar = () => {
         this.setState({
             visible: true,
             collapsed: !this.state.collapsed,
         });
     };
 
-    onClose = () => {
+    onCloseMobileNavigationBar = () => {
         this.setState({
             visible: false,
         });
@@ -153,7 +149,7 @@ class Dashboard extends React.Component {
                 <Layout className="mobile-layout">
 
                     <div className="mobile-menu-button">
-                        <Button type="link" onClick={this.showDrawer}>
+                        <Button type="link" onClick={this.showMobileNavigationBar}>
                             <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="bar-icon"/>
                         </Button>
                     </div>
@@ -163,7 +159,7 @@ class Dashboard extends React.Component {
                         </Link>}
                         placement="left"
                         closable={false}
-                        onClose={this.onClose}
+                        onClose={this.onCloseMobileNavigationBar}
                         visible={this.state.visible}
                         getContainer={false}
                         style={{position: 'absolute'}}

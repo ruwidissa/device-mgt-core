@@ -25,6 +25,7 @@ import DetailedRating from "./DetailedRating";
 import Reviews from "./review/Reviews";
 import axios from "axios";
 import AppInstallModal from "./install/AppInstallModal";
+import AppUninstallModal from "./install/AppUninstallModal";
 import CurrentUsersReview from "./review/CurrentUsersReview";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
@@ -36,11 +37,12 @@ class ReleaseView extends React.Component {
         super(props);
         this.state = {
             loading: false,
-            appInstallModalVisible: false
+            appInstallModalVisible: false,
+            appUninstallModalVisible: false
         }
     }
 
-    installApp = (type, payload) => {
+    appOperation = (type, payload, operation) => {
         const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
@@ -48,7 +50,7 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/install";
+        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/" + operation;
         axios.post(
             url,
             payload,
@@ -64,7 +66,7 @@ class ReleaseView extends React.Component {
                 notification["success"]({
                     message: 'Done!',
                     description:
-                        'App installed triggered.',
+                        'App '+operation+'ed triggered.',
                 });
             } else {
                 this.setState({
@@ -74,14 +76,14 @@ class ReleaseView extends React.Component {
                     message: "There was a problem",
                     duration: 0,
                     description:
-                        "Error occurred while installing app",
+                        "Error occurred while "+operation+"ing app",
                 });
             }
-
         }).catch((error) => {
-            handleApiError(error,"Error occurred while installing the app.");
+            handleApiError(error,"Error occurred while "+operation+"ing the app.");
         });
     };
+
 
     showAppInstallModal = () => {
         this.setState({
@@ -89,9 +91,16 @@ class ReleaseView extends React.Component {
         });
     };
 
-    closeAppInstallModal = () => {
+    closeAppOperationModal = () => {
         this.setState({
-            appInstallModalVisible: false
+            appInstallModalVisible: false,
+            appUninstallModalVisible: false
+        });
+    };
+
+    showAppUninstallModal = () => {
+        this.setState({
+             appUninstallModalVisible: true
         });
     };
 
@@ -112,8 +121,14 @@ class ReleaseView extends React.Component {
                     uuid={release.uuid}
                     visible={this.state.appInstallModalVisible}
                     deviceType = {deviceType}
-                    onClose={this.closeAppInstallModal}
-                    onInstall={this.installApp}/>
+                    onClose={this.closeAppOperationModal}
+                    onInstall={this.appOperation}/>
+                <AppUninstallModal
+                        uuid={release.uuid}
+                        visible={this.state.appUninstallModalVisible}
+                        deviceType = {deviceType}
+                        onClose={this.closeAppOperationModal}
+                        onUninstall={this.appOperation}/>
                 <div className="release">
                     <Row>
                         <Col xl={4} sm={6} xs={8} className="release-icon">
@@ -136,6 +151,12 @@ class ReleaseView extends React.Component {
                                 <Button.Group style={{float: "right"}}>
                                     <Button onClick={this.showAppInstallModal} loading={this.state.loading}
                                             htmlType="button" type="primary" icon="download">Install</Button>
+                                </Button.Group>
+                            </div>
+                            <div>
+                                <Button.Group style={{float: "right",marginRight:'3%'}}>
+                                    <Button onClick={this.showAppUninstallModal} loading={this.state.loading}
+                                            htmlType="button" type="primary" icon="delete">UnInstall</Button>
                                 </Button.Group>
                             </div>
                         </Col>

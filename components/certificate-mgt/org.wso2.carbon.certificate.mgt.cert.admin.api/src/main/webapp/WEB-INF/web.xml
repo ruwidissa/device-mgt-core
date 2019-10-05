@@ -58,6 +58,10 @@
         <param-name>isSharedWithAllTenants</param-name>
         <param-value>true</param-value>
     </context-param>
+    <context-param>
+        <param-name>basicAuth</param-name>
+        <param-value>true</param-value>
+    </context-param>
 
     <security-constraint>
         <web-resource-collection>

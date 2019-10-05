@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.store.api.services;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Extension;
 import io.swagger.annotations.ExtensionProperty;
@@ -27,15 +28,17 @@ import io.swagger.annotations.Info;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -180,5 +183,134 @@ public interface SubscriptionManagementAPI {
                     value = "Timestamp of scheduled install/uninstall operation"
             )
             @QueryParam("timestamp") String timestamp
+    );
+
+    @GET
+    @Path("/{uuid}/devices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Get device details that have a given application install",
+            notes = "This will get the device details that have a given application install, if exists",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved device details.",
+                            response = List.class,
+                            responseContainer = "List"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n No Application found which has application release of UUID.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Found invalid payload with the request.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Forbidden. \n Don't have permission to get the details.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting data",
+                            response = ErrorResponse.class)
+            })
+    Response getAppInstalledDevices(
+            @ApiParam(
+                    name="uuid",
+                    value="uuid of the application release.",
+                    required = true)
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination index/offset.",
+                    defaultValue = "5")
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "status",
+                    value = "Provide the device status details, such as active or inactive.")
+            @QueryParam("status") String status
+    );
+
+    @GET
+    @Path("/{uuid}/{subType}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Get category details that have a given application install",
+            notes = "This will get the category details that have a given application install, if exists",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:uninstall")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully retrieved categories details.",
+                            response = List.class,
+                            responseContainer = "List"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n No Application found which has application " +
+                                      "release of UUID.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Found invalid payload with the request.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Forbidden. \n Don't have permission to get the details.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting data",
+                            response = ErrorResponse.class)
+            })
+    Response getAppInstalledCategories(
+            @ApiParam(
+                    name="uuid",
+                    value="uuid of the application release.",
+                    required = true)
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name="subType",
+                    value="Subscription type of the application release.",
+                    required = true)
+            @PathParam("subType") String subType,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @QueryParam("offset") int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting " +
+                            "pagination index/offset.",
+                    defaultValue = "5")
+            @QueryParam("limit") int limit
     );
 }

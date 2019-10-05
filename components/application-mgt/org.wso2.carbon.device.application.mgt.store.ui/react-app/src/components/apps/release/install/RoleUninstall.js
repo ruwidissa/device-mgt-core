@@ -26,8 +26,7 @@ import {handleApiError} from "../../../../js/Utils";
 const {Text} = Typography;
 const {Option} = Select;
 
-
-class GroupInstall extends React.Component {
+class RoleUninstall extends React.Component {
 
     constructor(props) {
         super(props);
@@ -42,14 +41,16 @@ class GroupInstall extends React.Component {
     };
 
     fetchUser = value => {
+        const config = this.props.context;
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
-        const config = this.props.context;
         this.setState({data: [], fetching: true});
 
-        axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
+        const uuid = this.props.uuid;
 
+        axios.get(
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+ "/subscription/" + uuid + "/"+
+                "/ROLE?",
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {
@@ -57,26 +58,26 @@ class GroupInstall extends React.Component {
                     return;
                 }
 
-                const data = res.data.data.deviceGroups.map(group => ({
-                    text: group.name,
-                    value: group.name,
+                const data = res.data.data.roles.map(role => ({
+                    text: role,
+                    value: role,
                 }));
 
                 this.setState({data, fetching: false});
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load groups.");
+            handleApiError(error,"Error occurred while trying to load roles.");
             this.setState({fetching: false});
         });
     };
 
     handleChange = value => {
         this.setState({
-            value,
-            data: [],
-            fetching: false,
-        });
+                          value,
+                          data: [],
+                          fetching: false,
+                      });
     };
 
     install = () =>{
@@ -85,7 +86,7 @@ class GroupInstall extends React.Component {
         value.map(val=>{
             data.push(val.key);
         });
-        this.props.onInstall("group", data, "install");
+        this.props.onInstall("role", data, "uninstall");
     };
 
     render() {
@@ -93,31 +94,31 @@ class GroupInstall extends React.Component {
         const {fetching, data, value} = this.state;
 
         return (
-            <div>
-                <Text>Start installing the application for one or more groups by entering the corresponding group name. Select install to automatically start downloading the application for the respective device group/ groups.</Text>
-                <br/>
-                <br/>
-                <Select
-                    mode="multiple"
-                    labelInValue
-                    value={value}
-                    placeholder="Search groups"
-                    notFoundContent={fetching ? <Spin size="small"/> : null}
-                    filterOption={false}
-                    onSearch={this.fetchUser}
-                    onChange={this.handleChange}
-                    style={{width: '100%'}}
-                >
-                    {data.map(d => (
-                        <Option key={d.value}>{d.text}</Option>
-                    ))}
-                </Select>
-                <div style={{paddingTop:10, textAlign:"right"}}>
-                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                <div>
+                    <Text>Start uninstalling the application for one or more roles by entering the corresponding role name. Select uninstall to automatically start uninstalling the application for the respective user role/roles.</Text>
+                    <br/>
+                    <br/>
+                    <Select
+                            mode="multiple"
+                            labelInValue
+                            value={value}
+                            placeholder="Search roles"
+                            notFoundContent={fetching ? <Spin size="small"/> : null}
+                            filterOption={false}
+                            onSearch={this.fetchUser}
+                            onChange={this.handleChange}
+                            style={{width: '100%'}}
+                    >
+                        {data.map(d => (
+                                <Option key={d.value}>{d.text}</Option>
+                        ))}
+                    </Select>
+                    <div style={{paddingTop:10, textAlign:"right"}}>
+                        <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                    </div>
                 </div>
-            </div>
         );
     }
 }
 
-export default withConfigContext(GroupInstall);
+export default withConfigContext(RoleUninstall);

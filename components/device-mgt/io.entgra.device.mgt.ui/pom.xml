@@ -29,8 +29,8 @@
     <artifactId>io.entgra.device.mgt.ui</artifactId>
     <version>3.2.9-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>WSO2 Carbon - Device Management UI Component</name>
-    <url>http://wso2.org</url>
+    <name>Entgra - Device Management UI Component</name>
+    <url>https://entgra.io</url>
     <description>This Component contains Device Management UI</description>
     <dependencies>
     </dependencies>

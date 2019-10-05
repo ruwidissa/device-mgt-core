@@ -26,8 +26,7 @@ import {handleApiError} from "../../../../js/Utils";
 const {Text} = Typography;
 const {Option} = Select;
 
-
-class GroupInstall extends React.Component {
+class UserUninstall extends React.Component {
 
     constructor(props) {
         super(props);
@@ -41,14 +40,17 @@ class GroupInstall extends React.Component {
         fetching: false,
     };
 
-    fetchUser = value => {
+    fetchUser = (value) => {
+        const config = this.props.context;
         this.lastFetchId += 1;
         const fetchId = this.lastFetchId;
-        const config = this.props.context;
         this.setState({data: [], fetching: true});
 
+        const uuid = this.props.uuid;
+
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/groups?name=" + value,
+                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+ "/subscription/" + uuid + "/"+
+                "/USER?",
 
         ).then(res => {
             if (res.status === 200) {
@@ -56,68 +58,65 @@ class GroupInstall extends React.Component {
                     // for fetch callback order
                     return;
                 }
-
-                const data = res.data.data.deviceGroups.map(group => ({
-                    text: group.name,
-                    value: group.name,
+                const data = res.data.data.users.map(user => ({
+                    text: user,
+                    value: user,
                 }));
 
                 this.setState({data, fetching: false});
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load groups.");
+            handleApiError(error,"Error occurred while trying to load users.");
             this.setState({fetching: false});
         });
     };
 
     handleChange = value => {
         this.setState({
-            value,
-            data: [],
-            fetching: false,
-        });
+                          value,
+                          data: [],
+                          fetching: false,
+                      });
     };
 
-    install = () =>{
+    uninstall = () => {
         const {value} = this.state;
         const data = [];
-        value.map(val=>{
+        value.map(val => {
             data.push(val.key);
         });
-        this.props.onInstall("group", data, "install");
+        this.props.onUninstall("user", data, "uninstall");
     };
 
     render() {
-
         const {fetching, data, value} = this.state;
 
         return (
-            <div>
-                <Text>Start installing the application for one or more groups by entering the corresponding group name. Select install to automatically start downloading the application for the respective device group/ groups.</Text>
-                <br/>
-                <br/>
-                <Select
-                    mode="multiple"
-                    labelInValue
-                    value={value}
-                    placeholder="Search groups"
-                    notFoundContent={fetching ? <Spin size="small"/> : null}
-                    filterOption={false}
-                    onSearch={this.fetchUser}
-                    onChange={this.handleChange}
-                    style={{width: '100%'}}
-                >
-                    {data.map(d => (
-                        <Option key={d.value}>{d.text}</Option>
-                    ))}
-                </Select>
-                <div style={{paddingTop:10, textAlign:"right"}}>
-                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
+                <div>
+                    <Text>Start uninstalling the application for one or more users by entering the corresponding user name. Select uninstall to automatically start uninstalling the application for the respective user/users. </Text>
+                    <p>Select users</p>
+                    <Select
+                            mode="multiple"
+                            labelInValue
+                            value={value}
+                            placeholder="Enter the username"
+                            notFoundContent={fetching ? <Spin size="small"/> : null}
+                            filterOption={false}
+                            onSearch={this.fetchUser}
+                            onChange={this.handleChange}
+                            style={{width: '100%'}}
+                    >
+                        {data.map(d => (
+                                <Option key={d.value}>{d.text}</Option>
+                        ))}
+                    </Select>
+                    <div style={{paddingTop: 10, textAlign: "right"}}>
+                        <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.uninstall}>Uninstall</Button>
+                    </div>
                 </div>
-            </div>
         );
     }
 }
 
-export default withConfigContext(GroupInstall);
+export default withConfigContext(UserUninstall);
