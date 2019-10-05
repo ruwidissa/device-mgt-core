@@ -36,6 +36,7 @@ import {
 import axios from "axios";
 import {withRouter} from 'react-router-dom'
 import {withConfigContext} from "../../context/ConfigContext";
+import {handleApiError} from "../../js/Utils";
 
 const {Option} = Select;
 const {TextArea} = Input;
@@ -127,16 +128,7 @@ class AddNewReleaseFormComponent extends React.Component {
                     }
 
                 }).catch((error) => {
-                    if (error.hasOwnProperty("response") && error.response.status === 401) {
-                        window.location.href = window.location.origin+ '/publisher/login';
-                    } else {
-                        notification["error"]({
-                            message: "Something went wrong!",
-                            description:
-                                "Sorry, we were unable to complete your request.",
-                        });
-
-                    }
+                    handleApiError(error, "Sorry, we were unable to complete your request.");
                     this.setState({
                         loading: false
                     });

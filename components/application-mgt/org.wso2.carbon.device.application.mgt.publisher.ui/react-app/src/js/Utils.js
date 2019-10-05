@@ -20,12 +20,11 @@ import {message, notification} from "antd";
 
 export const handleApiError = (error, message) => {
     if (error.hasOwnProperty("response") && error.response.status === 401) {
-        message.error('You are not logged in');
         window.location.href = window.location.origin + '/publisher/login';
     } else {
         notification["error"]({
             message: "There was a problem",
-            duration: 0,
+            duration: 10,
             description: message,
         });
     }

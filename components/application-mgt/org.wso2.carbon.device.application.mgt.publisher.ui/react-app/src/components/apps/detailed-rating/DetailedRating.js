@@ -22,6 +22,7 @@ import StarRatings from "react-star-ratings";
 import "./DetailedRating.css";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const { Text } = Typography;
 
@@ -60,16 +61,7 @@ class DetailedRating extends React.Component{
             }
 
         }).catch(function (error) {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+'/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load rating for the release.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load rating for the release.");
         });
     };
 

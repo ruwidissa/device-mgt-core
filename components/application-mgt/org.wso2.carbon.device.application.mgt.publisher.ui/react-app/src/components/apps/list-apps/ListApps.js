@@ -52,68 +52,6 @@ class ListApps extends React.Component {
         });
     };
 
-    getCategories = () => {
-        const config = this.props.context;
-        axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
-        ).then(res => {
-            if (res.status === 200) {
-                let categories = JSON.parse(res.data.data);
-                this.getTags();
-                this.setState({
-                    categories: categories,
-                    loading: false
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load categories.",
-                });
-            }
-            this.setState({
-                loading: false
-            });
-        });
-    };
-
-    getTags = () => {
-        const config = this.props.context;
-        axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
-        ).then(res => {
-            if (res.status === 200) {
-                let tags = JSON.parse(res.data.data);
-                this.getDeviceTypes();
-                this.setState({
-                    tags: tags,
-                    loading: false,
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load tags.",
-                });
-            }
-            this.setState({
-                loading: false
-            });
-        });
-    };
-
     render() {
         const {isDrawerVisible, filters} = this.state;
         return (

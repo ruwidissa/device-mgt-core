@@ -38,6 +38,7 @@ import axios from "axios";
 import {TweenOneGroup} from 'rc-tween-one';
 import pSBC from "shade-blend-color";
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const {Title} = Typography;
 
@@ -69,12 +70,7 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                message.warning('Something went wrong');
-
-            }
+            handleApiError(error, "Error occured while trying to load categories");
             this.setState({
                 loading: false
             });
@@ -116,17 +112,7 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load categories.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load categories.");
             this.setState({
                 loading: false
             });
@@ -264,17 +250,7 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to add categories.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to add categories.");
             this.setState({
                 loading: false
             });
@@ -331,17 +307,7 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to delete the category.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to delete the category.");
             this.setState({
                 loading: false,
                 editingValue: null

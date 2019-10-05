@@ -27,8 +27,6 @@ class Apps extends React.Component {
 
     }
 
-
-
     render() {
         return (
             <div>

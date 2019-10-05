@@ -36,6 +36,7 @@ import {
 import axios from "axios";
 import {TweenOneGroup} from 'rc-tween-one';
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const {Title} = Typography;
 
@@ -67,16 +68,7 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load tags.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load tags.");
             this.setState({
                 loading: false
             });
@@ -120,17 +112,7 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to delete the tag.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to delete the tag.");
             this.setState({
                 loading: false
             });
@@ -265,17 +247,7 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to delete tag.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to delete tag.");
             this.setState({
                 loading: false
             });
@@ -332,17 +304,7 @@ class ManageTags extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin+ '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to edit tag.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to edit tag.");
             this.setState({
                 loading: false,
                 editingValue: null

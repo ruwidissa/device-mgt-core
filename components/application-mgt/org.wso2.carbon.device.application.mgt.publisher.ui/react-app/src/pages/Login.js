@@ -22,6 +22,7 @@ import './Login.css';
 import axios from 'axios';
 import "./Login.css";
 import {withConfigContext} from "../context/ConfigContext";
+import {handleApiError} from "../js/Utils";
 
 const {Title} = Typography;
 const {Text} = Typography;
@@ -101,18 +102,7 @@ class NormalLoginForm extends React.Component {
                         window.location = window.location.origin+"/publisher";
                     }
                 }).catch(function (error) {
-                    if (error.hasOwnProperty("response") && error.response.status === 400) {
-                        thisForm.setState({
-                            inValid: true
-                        });
-                    } else {
-                        notification["error"]({
-                            message: "There was a problem",
-                            duration: 0,
-                            description:
-                                "Error occurred while trying to login.",
-                        });
-                    }
+                    handleApiError(error, "Error occurred while trying to login.");
                     thisForm.setState({
                         loading: false
                     });

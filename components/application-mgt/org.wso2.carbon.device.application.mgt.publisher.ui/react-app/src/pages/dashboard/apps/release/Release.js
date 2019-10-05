@@ -23,6 +23,7 @@ import axios from 'axios';
 import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import LifeCycle from "../../../../components/apps/release/lifeCycle/LifeCycle";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Title} = Typography;
 
@@ -87,18 +88,7 @@ class Release extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load the release.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load the release.");
             this.setState({loading: false});
         });
 
@@ -118,16 +108,7 @@ class Release extends React.Component {
             }
 
         }).catch(function (error) {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load lifecycle configuration.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load lifecycle configuration.");
         });
     };
 

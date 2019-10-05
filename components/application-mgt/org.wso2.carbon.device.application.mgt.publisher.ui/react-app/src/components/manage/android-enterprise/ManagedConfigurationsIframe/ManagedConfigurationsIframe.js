@@ -75,18 +75,7 @@ class ManagedConfigurationsIframe extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load configurations.",
-                });
-            }
-
+            handleApiError(error, "Error occurred while trying to load configurations.");
             this.setState({loading: false, visible: false});
         });
     };
@@ -154,18 +143,7 @@ class ManagedConfigurationsIframe extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to update configurations.",
-                });
-            }
-
+            handleApiError(error, "Error occurred while trying to update configurations.");
             this.setState({loading: false});
         });
     };
