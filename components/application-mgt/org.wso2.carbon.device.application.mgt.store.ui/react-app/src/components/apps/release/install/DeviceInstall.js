@@ -18,13 +18,14 @@
 
 import React from "react";
 import axios from "axios";
-import {Button, message, notification, Table, Typography} from "antd";
+import {Button, message, DatePicker, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import InstallModalFooter from "./installModalFooter/InstallModalFooter";
 
 const {Text} = Typography;
 const columns = [
@@ -109,7 +110,9 @@ class DeviceInstall extends React.Component {
             data: [],
             pagination: {},
             loading: false,
-            selectedRows: []
+            selectedRows: [],
+            scheduledTime: null,
+            isScheduledInstallVisible: false
         };
     }
 
@@ -147,7 +150,7 @@ class DeviceInstall extends React.Component {
         if (deviceType !== 'ANY') {
             extraParams.type = deviceType;
         }
-        
+
         // note: encode with '%26' not '&'
         const encodedExtraParams = Object.keys(extraParams).map(key => key + '=' + extraParams[key]).join('&');
 
@@ -163,11 +166,10 @@ class DeviceInstall extends React.Component {
                     data: res.data.data.devices,
                     pagination,
                 });
-
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load devices.");
+            handleApiError(error, "Error occurred while trying to load devices.");
             this.setState({loading: false});
         });
     };
@@ -187,7 +189,7 @@ class DeviceInstall extends React.Component {
         });
     };
 
-    install = () => {
+    install = (timestamp=null) => {
         const {selectedRows} = this.state;
         const payload = [];
         selectedRows.map(device => {
@@ -196,11 +198,11 @@ class DeviceInstall extends React.Component {
                 type: device.type
             });
         });
-        this.props.onInstall("devices", payload, "install");
+        this.props.onInstall("devices", payload, "install",timestamp);
     };
 
     render() {
-        const {data, pagination, loading, selectedRows} = this.state;
+        const {data, pagination, loading, selectedRows, scheduledTime,isScheduledInstallVisible} = this.state;
         return (
             <div>
                 <Text>
@@ -224,12 +226,7 @@ class DeviceInstall extends React.Component {
                     rowSelection={this.rowSelection}
                     scroll={{x: 1000}}
                 />
-                <div style={{paddingTop: 10, textAlign: "right"}}>
-                    <Button disabled={selectedRows.length === 0} htmlType="button" type="primary"
-                            onClick={this.install}>
-                        Install
-                    </Button>
-                </div>
+                <InstallModalFooter type="Install" operation={this.install} disabled={selectedRows.length === 0}/>
             </div>
         );
     }

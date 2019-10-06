@@ -22,6 +22,7 @@ import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import InstallModalFooter from "./installModalFooter/InstallModalFooter";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -75,19 +76,19 @@ class GroupUninstall extends React.Component {
 
     handleChange = value => {
         this.setState({
-                          value,
-                          data: [],
-                          fetching: false,
-                      });
+            value,
+            data: [],
+            fetching: false,
+        });
     };
 
-    install = () =>{
+    uninstall = (timestamp=null) =>{
         const {value} = this.state;
         const data = [];
         value.map(val=>{
             data.push(val.key);
         });
-        this.props.onInstall("group", data, "uninstall");
+        this.props.onUninstall("group", data, "uninstall",null);
     };
 
     render() {
@@ -108,15 +109,12 @@ class GroupUninstall extends React.Component {
                             filterOption={false}
                             onSearch={this.fetchUser}
                             onChange={this.handleChange}
-                            style={{width: '100%'}}
-                    >
+                            style={{width: '100%'}}>
                         {data.map(d => (
                                 <Option key={d.value}>{d.text}</Option>
                         ))}
                     </Select>
-                    <div style={{paddingTop:10, textAlign:"right"}}>
-                        <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
-                    </div>
+                    <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length===0}/>
                 </div>
         );
     }

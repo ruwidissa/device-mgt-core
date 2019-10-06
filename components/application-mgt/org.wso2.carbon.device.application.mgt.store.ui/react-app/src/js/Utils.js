@@ -25,7 +25,7 @@ export const handleApiError = (error, message) => {
     } else {
         notification["error"]({
             message: "There was a problem",
-            duration: 10,
+            duration: 2,
             description: message,
         });
     }

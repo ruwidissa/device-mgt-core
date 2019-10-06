@@ -18,13 +18,14 @@
 
 import React from "react";
 import axios from "axios";
-import {Button,Table, Typography} from "antd";
+import {Button, Select, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import InstallModalFooter from "./installModalFooter/InstallModalFooter";
 
 const {Text} = Typography;
 const columns = [
@@ -115,8 +116,8 @@ class DeviceUninstall extends React.Component {
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
             this.setState({
-                              selectedRows: selectedRows
-                          })
+                selectedRows: selectedRows
+            })
         },
         getCheckboxProps: record => ({
             disabled: record.name === 'Disabled User', // Column configuration not to be checked
@@ -151,7 +152,7 @@ class DeviceUninstall extends React.Component {
 
         const uuid = this.props.uuid;
         axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/"+
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" +
             "/devices?" + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
@@ -163,7 +164,7 @@ class DeviceUninstall extends React.Component {
                 });
             }
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load devices.");
+            handleApiError(error, "Error occurred while trying to load devices.");
             this.setState({loading: false});
         });
     };
@@ -172,59 +173,54 @@ class DeviceUninstall extends React.Component {
         const pager = {...this.state.pagination};
         pager.current = pagination.current;
         this.setState({
-                          pagination: pager,
-                      });
+            pagination: pager,
+        });
         this.fetch({
-                       results: pagination.pageSize,
-                       page: pagination.current,
-                       sortField: sorter.field,
-                       sortOrder: sorter.order,
-                       ...filters,
-                   });
+            results: pagination.pageSize,
+            page: pagination.current,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            ...filters,
+        });
     };
 
-    uninstall = () => {
+    uninstall = (timestamp = null) => {
         const {selectedRows} = this.state;
         const payload = [];
         selectedRows.map(device => {
             payload.push({
-                             id: device.deviceIdentifier,
-                             type: device.type
-                         });
+                id: device.deviceIdentifier,
+                type: device.type
+            });
         });
-        this.props.onUninstall("devices", payload, "uninstall");
+        this.props.onUninstall("devices", payload, "uninstall", null);
     };
 
     render() {
         const {data, pagination, loading, selectedRows} = this.state;
         return (
-                <div>
-                    <Text>
-                        Start uninstalling the application for devices by selecting the corresponding devices.
-                        Select uninstall to automatically start uninstalling the application for the respective devices.
-                    </Text>
-                    <Table
-                            style={{paddingTop: 20}}
-                            columns={columns}
-                            rowKey={record => record.deviceIdentifier}
-                            dataSource={data}
-                            pagination={{
-                                ...pagination,
-                                size: "small",
-                                showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
-                            }}
-                            loading={loading}
-                            onChange={this.handleTableChange}
-                            rowSelection={this.rowSelection}
-                            scroll={{x: 1000}}
-                    />
-                    <div style={{paddingTop: 10, textAlign: "right"}}>
-                        <Button disabled={selectedRows.length === 0} htmlType="button" type="primary"
-                                onClick={this.uninstall}>
-                            Uninstall
-                        </Button>
-                    </div>
-                </div>
+            <div>
+                <Text>
+                    Start uninstalling the application for devices by selecting the corresponding devices.
+                    Select uninstall to automatically start uninstalling the application for the respective devices.
+                </Text>
+                <Table
+                    style={{paddingTop: 20}}
+                    columns={columns}
+                    rowKey={record => record.deviceIdentifier}
+                    dataSource={data}
+                    pagination={{
+                        ...pagination,
+                        size: "small",
+                        showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
+                    }}
+                    loading={loading}
+                    onChange={this.handleTableChange}
+                    rowSelection={this.rowSelection}
+                    scroll={{x: 1000}}
+                />
+                <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={selectedRows.length === 0}/>
+            </div>
         );
     }
 }
