@@ -22,6 +22,7 @@ import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import InstallModalFooter from "./installModalFooter/InstallModalFooter";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -80,17 +81,16 @@ class RoleUninstall extends React.Component {
                       });
     };
 
-    install = () =>{
+    uninstall = (timestamp=null) =>{
         const {value} = this.state;
         const data = [];
         value.map(val=>{
             data.push(val.key);
         });
-        this.props.onInstall("role", data, "uninstall");
+        this.props.onUninstall("role", data, "uninstall",null);
     };
 
     render() {
-
         const {fetching, data, value} = this.state;
 
         return (
@@ -113,9 +113,7 @@ class RoleUninstall extends React.Component {
                                 <Option key={d.value}>{d.text}</Option>
                         ))}
                     </Select>
-                    <div style={{paddingTop:10, textAlign:"right"}}>
-                        <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
-                    </div>
+                    <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length===0}/>
                 </div>
         );
     }

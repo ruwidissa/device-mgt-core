@@ -117,7 +117,7 @@ class EditReleaseModal extends React.Component {
 
 
     showModal = () => {
-        const {release} = this.props;
+        const {app, release} = this.props;
         const {formConfig} = this.state;
         const {specificElements} = formConfig;
         let metaData = [];
@@ -142,6 +142,14 @@ class EditReleaseModal extends React.Component {
                 value: release.isSharedWithAllTenants
             }
         });
+
+        // if (specificElements.hasOwnProperty("packageName")) {
+        //     this.props.form.setFields({
+        //         packageName: {
+        //             value: app.packageName
+        //         }
+        //     });
+        // }
 
         if (specificElements.hasOwnProperty("version")) {
             this.props.form.setFields({
@@ -238,10 +246,10 @@ class EditReleaseModal extends React.Component {
                 if (specificElements.hasOwnProperty("url")) {
                     release.url = values.url;
                 }
-
-                if (specificElements.hasOwnProperty("packageName")) {
-                    release.packageName = values.packageName;
-                }
+                //
+                // if (specificElements.hasOwnProperty("packageName")) {
+                //     release.packageName = values.packageName;
+                // }
 
                 if (icons.length === 1) {
                     data.append('icon', icons[0].originFileObj);
@@ -362,18 +370,18 @@ class EditReleaseModal extends React.Component {
                                     </Form.Item>
                                 )}
 
-                                {formConfig.specificElements.hasOwnProperty("packageName") && (
-                                    <Form.Item {...formItemLayout} label="Package Name">
-                                        {getFieldDecorator('packageName', {
-                                            rules: [{
-                                                required: true,
-                                                message: 'Please input the package name'
-                                            }],
-                                        })(
-                                            <Input placeholder="Package Name"/>
-                                        )}
-                                    </Form.Item>
-                                )}
+                                {/*{formConfig.specificElements.hasOwnProperty("packageName") && (*/}
+                                {/*    <Form.Item {...formItemLayout} label="Package Name">*/}
+                                {/*        {getFieldDecorator('packageName', {*/}
+                                {/*            rules: [{*/}
+                                {/*                required: true,*/}
+                                {/*                message: 'Please input the package name'*/}
+                                {/*            }],*/}
+                                {/*        })(*/}
+                                {/*            <Input placeholder="Package Name"/>*/}
+                                {/*        )}*/}
+                                {/*    </Form.Item>*/}
+                                {/*)}*/}
 
                                 {formConfig.specificElements.hasOwnProperty("url") && (
                                     <Form.Item {...formItemLayout} label="URL">

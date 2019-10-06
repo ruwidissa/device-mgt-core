@@ -22,6 +22,7 @@ import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import InstallModalFooter from "./installModalFooter/InstallModalFooter";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -112,9 +113,7 @@ class GroupInstall extends React.Component {
                         <Option key={d.value}>{d.text}</Option>
                     ))}
                 </Select>
-                <div style={{paddingTop:10, textAlign:"right"}}>
-                    <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.install}>Install</Button>
-                </div>
+                <InstallModalFooter type="Install" operation={this.install} disabled={value.length===0}/>
             </div>
         );
     }

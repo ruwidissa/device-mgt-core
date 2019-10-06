@@ -37,6 +37,7 @@ import {withConfigContext} from "../../../../../context/ConfigContext";
 import axios from "axios";
 import Cluster from "../../../../../components/manage/android-enterprise/Pages/Cluster/Cluster";
 import EditLinks from "../../../../../components/manage/android-enterprise/Pages/EditLinks/EditLinks";
+import {handleApiError} from "../../../../../js/Utils";
 
 const {Option} = Select;
 const {Title, Text} = Typography;
@@ -110,18 +111,7 @@ class Page extends React.Component {
 
                 }
             }).catch((error) => {
-                if (error.hasOwnProperty("response") && error.response.status === 401) {
-                    message.error('You are not logged in');
-                    window.location.href = window.location.origin + '/publisher/login';
-                } else {
-                    notification["error"]({
-                        message: "There was a problem",
-                        duration: 0,
-                        description:
-                            "Error occurred while trying to save the page name.",
-                    });
-                }
-
+                handleApiError(error, "Error occurred while trying to save the page name.");
                 this.setState({loading: false});
             });
         }

@@ -52,7 +52,6 @@ class Logout extends React.Component {
                 window.location = window.location.origin + "/publisher/login";
             }
         }).catch(function (error) {
-
             if (error.hasOwnProperty("response") && error.response.status === 400) {
                 thisForm.setState({
                     inValid: true

@@ -1,7 +1,7 @@
 {
   "theme": {
     "logo": "https://entgra.io/assets/images/svg/logo.svg",
-    "primaryColor": "#badc58"
+    "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {
     "invoker": {

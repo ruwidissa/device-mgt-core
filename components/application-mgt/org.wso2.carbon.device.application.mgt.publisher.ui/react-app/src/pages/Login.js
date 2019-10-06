@@ -22,6 +22,7 @@ import './Login.css';
 import axios from 'axios';
 import "./Login.css";
 import {withConfigContext} from "../context/ConfigContext";
+import {handleApiError} from "../js/Utils";
 
 const {Title} = Typography;
 const {Text} = Typography;
@@ -98,21 +99,15 @@ class NormalLoginForm extends React.Component {
                 axios.post(window.location.origin+ config.serverConfig.loginUri, request
                 ).then(res=>{
                     if (res.status === 200) {
-                        window.location = window.location.origin+"/publisher";
+                        let redirectUrl = window.location.origin+"/publisher";
+                        const searchParams = new URLSearchParams(window.location.search);
+                        if(searchParams.has("redirect")){
+                            redirectUrl = searchParams.get("redirect");
+                        }
+                        window.location = redirectUrl;
                     }
                 }).catch(function (error) {
-                    if (error.hasOwnProperty("response") && error.response.status === 400) {
-                        thisForm.setState({
-                            inValid: true
-                        });
-                    } else {
-                        notification["error"]({
-                            message: "There was a problem",
-                            duration: 0,
-                            description:
-                                "Error occurred while trying to login.",
-                        });
-                    }
+                    handleApiError(error, "Error occurred while trying to login.");
                     thisForm.setState({
                         loading: false
                     });
@@ -162,7 +157,7 @@ class NormalLoginForm extends React.Component {
                     )}
                     <br/>
                     <a className="login-form-forgot" href="">Forgot password</a>
-                    <Button block type="primary" htmlType="submit" className="login-form-button">
+                    <Button loading={this.state.loading} block type="primary" htmlType="submit" className="login-form-button">
                         Log in
                     </Button>
                 </Form.Item>

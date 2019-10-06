@@ -24,6 +24,7 @@ import 'react-quill/dist/quill.snow.css';
 import './LifeCycle.css';
 import LifeCycleDetailsModal from "./lifeCycleDetailsModal/lifeCycleDetailsModal";
 import {withConfigContext} from "../../../../context/ConfigContext";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Text, Title, Paragraph} = Typography;
 const {Option} = Select;
@@ -120,15 +121,7 @@ class LifeCycle extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "Error",
-                    description:
-                        "Error occurred while trying to add lifecycle",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to add lifecycle");
             this.setState({
                 isConfirmButtonLoading: false
             });

@@ -15,25 +15,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-
-/* --- Shape for the nodes --- */
-
-.node {
-    width: 75px;
-    height: 30px;
-    border-radius: 20% 20% 20% 20%;
-    overflow: hidden;
-    box-sizing: border-box;
-    display: flex;
+.app-icon {
+    min-width: 100%;
+    height: auto;
 }
 
+.content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
 
-.node .name {
-    padding: 5%;
-    font-size: 0.5rem;
-    font-weight: bold;
-    text-align: center;
-    text-transform: uppercase;
-    color: white;
+.box {
+    position: relative;
+    width: 100%; /* desired width */
+}
+
+.box:before {
+    content: "";
+    display: block;
+    padding-top: 100%; /* initial ratio of 1:1*/
+}
+
+.release .release-icon {
+    margin-right: 15px;
+}
+
+.release .release-icon img {
+    width: 100%;
+    border-radius: 28%;
+}
+
+.release .app-name{
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
 }

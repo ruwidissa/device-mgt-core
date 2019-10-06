@@ -22,6 +22,7 @@ import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import InstallModalFooter from "./installModalFooter/InstallModalFooter";
 
 const {Text} = Typography;
 const {Option} = Select;
@@ -49,9 +50,8 @@ class UserUninstall extends React.Component {
         const uuid = this.props.uuid;
 
         axios.get(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+ "/subscription/" + uuid + "/"+
-                "/USER?",
-
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" +
+            "/USER?",
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {
@@ -67,54 +67,53 @@ class UserUninstall extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load users.");
+            handleApiError(error, "Error occurred while trying to load users.");
             this.setState({fetching: false});
         });
     };
 
     handleChange = value => {
         this.setState({
-                          value,
-                          data: [],
-                          fetching: false,
-                      });
+            value,
+            data: [],
+            fetching: false,
+        });
     };
 
-    uninstall = () => {
+    uninstall = (timestamp=null) => {
         const {value} = this.state;
         const data = [];
         value.map(val => {
             data.push(val.key);
         });
-        this.props.onUninstall("user", data, "uninstall");
+        this.props.onUninstall("user", data, "uninstall",null);
     };
 
     render() {
         const {fetching, data, value} = this.state;
 
         return (
-                <div>
-                    <Text>Start uninstalling the application for one or more users by entering the corresponding user name. Select uninstall to automatically start uninstalling the application for the respective user/users. </Text>
-                    <p>Select users</p>
-                    <Select
-                            mode="multiple"
-                            labelInValue
-                            value={value}
-                            placeholder="Enter the username"
-                            notFoundContent={fetching ? <Spin size="small"/> : null}
-                            filterOption={false}
-                            onSearch={this.fetchUser}
-                            onChange={this.handleChange}
-                            style={{width: '100%'}}
-                    >
-                        {data.map(d => (
-                                <Option key={d.value}>{d.text}</Option>
-                        ))}
-                    </Select>
-                    <div style={{paddingTop: 10, textAlign: "right"}}>
-                        <Button disabled={value.length===0} htmlType="button" type="primary" onClick={this.uninstall}>Uninstall</Button>
-                    </div>
-                </div>
+            <div>
+                <Text>Start uninstalling the application for one or more users by entering the corresponding user name.
+                    Select uninstall to automatically start uninstalling the application for the respective
+                    user/users. </Text>
+                <p>Select users</p>
+                <Select
+                    mode="multiple"
+                    labelInValue
+                    value={value}
+                    placeholder="Enter the username"
+                    notFoundContent={fetching ? <Spin size="small"/> : null}
+                    filterOption={false}
+                    onSearch={this.fetchUser}
+                    onChange={this.handleChange}
+                    style={{width: '100%'}}>
+                    {data.map(d => (
+                        <Option key={d.value}>{d.text}</Option>
+                    ))}
+                </Select>
+                <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length === 0}/>
+            </div>
         );
     }
 }

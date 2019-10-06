@@ -42,6 +42,7 @@ import pSBC from "shade-blend-color";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import ManagedConfigurationsIframe
     from "../../../manage/android-enterprise/ManagedConfigurationsIframe/ManagedConfigurationsIframe";
+import {handleApiError} from "../../../../js/Utils";
 
 const {Meta} = Card;
 const {Text, Title} = Typography;
@@ -135,16 +136,7 @@ class AppDetailsDrawer extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load app details.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load app details.");
             this.setState({
                 loading: false
             });
@@ -175,16 +167,7 @@ class AppDetailsDrawer extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load tags.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load tags.");
             this.setState({
                 loading: false
             });

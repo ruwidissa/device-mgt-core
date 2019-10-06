@@ -16,16 +16,16 @@
  * under the License.
  */
 
-import {message, notification} from "antd";
+import {notification} from "antd";
 
 export const handleApiError = (error, message) => {
     if (error.hasOwnProperty("response") && error.response.status === 401) {
-        message.error('You are not logged in');
-        window.location.href = window.location.origin + '/publisher/login';
+        const redirectUrl = encodeURI(window.location.href);
+        window.location.href = window.location.origin + `/publisher/login?redirect=${redirectUrl}`;
     } else {
         notification["error"]({
             message: "There was a problem",
-            duration: 0,
+            duration: 10,
             description: message,
         });
     }

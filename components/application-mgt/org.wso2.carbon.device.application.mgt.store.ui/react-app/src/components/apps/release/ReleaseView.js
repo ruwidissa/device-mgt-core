@@ -42,7 +42,7 @@ class ReleaseView extends React.Component {
         }
     }
 
-    appOperation = (type, payload, operation) => {
+    appOperation = (type, payload, operation, timestamp=null) => {
         const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
@@ -50,7 +50,11 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/" + operation;
+        let url = window.location.origin+ config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/" + operation;
+        if(timestamp!= null){
+            url += `?timestamp=${timestamp}`;
+        }
         axios.post(
             url,
             payload,
@@ -61,7 +65,8 @@ class ReleaseView extends React.Component {
             if (res.status === 200) {
                 this.setState({
                     loading: false,
-                    appInstallModalVisible: false
+                    appInstallModalVisible: false,
+                    appUnInstallModalVisible: false,
                 });
                 notification["success"]({
                     message: 'Done!',

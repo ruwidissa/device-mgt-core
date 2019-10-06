@@ -20,6 +20,7 @@ import React from "react";
 import {Button, Col, Divider, Form, Icon, Input, notification, Row, Select, Switch, Upload} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const formItemLayout = {
     labelCol: {
@@ -80,8 +81,6 @@ class NewAppDetailsForm extends React.Component {
 
     componentDidMount() {
         this.getCategories();
-        this.getTags();
-        this.getDeviceTypes();
     }
 
     getCategories = () => {
@@ -96,18 +95,10 @@ class NewAppDetailsForm extends React.Component {
                     loading: false
                 });
             }
+            this.getTags();
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load categories.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load categories.");
             this.setState({
                 loading: false
             });
@@ -126,18 +117,10 @@ class NewAppDetailsForm extends React.Component {
                     loading: false,
                 });
             }
+            this.getDeviceTypes();
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load tags.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load tags.");
             this.setState({
                 loading: false
             });
@@ -180,17 +163,7 @@ class NewAppDetailsForm extends React.Component {
 
 
         }).catch((error) => {
-            console.log(error);
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                window.location.href = window.location.origin + '/publisher/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load device types.",
-                });
-            }
+            handleApiError(error, "Error occurred while trying to load device types.");
             this.setState({
                 loading: false
             });
