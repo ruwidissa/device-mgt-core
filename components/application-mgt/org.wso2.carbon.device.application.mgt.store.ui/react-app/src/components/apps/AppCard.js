@@ -49,7 +49,7 @@ class AppCard extends React.Component {
                             {/*<Avatar shape="square" size={128} src={release.iconPath} />*/}
                         </Col>
                         <Col span={24} style={{paddingTop:10}}>
-                            <Text strong level={4}>{app.name}</Text><br/>
+                            <Text className="app-name" strong level={4}>{app.name}</Text><br/>
                             <Text type="secondary" level={4}>{app.subMethod.toLowerCase()}</Text><br/>
                             <StarRatings
                                 rating={app.rating}

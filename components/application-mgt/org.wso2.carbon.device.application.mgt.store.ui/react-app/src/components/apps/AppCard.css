@@ -47,3 +47,10 @@
     width: 100%;
     border-radius: 28%;
 }
+
+.release .app-name{
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+    text-overflow: ellipsis;
+}
