@@ -106,8 +106,6 @@ class AddNewReleaseFormComponent extends React.Component {
                     loading: true
                 });
                 const {price, isSharedWithAllTenants, icon, screenshots, releaseDescription, releaseType, binaryFile} = values;
-
-
                 const data = new FormData();
 
                 //add release data
@@ -115,7 +113,7 @@ class AddNewReleaseFormComponent extends React.Component {
                     description: releaseDescription,
                     price: (price === undefined) ? 0 : parseInt(price),
                     isSharedWithAllTenants,
-                    metaData: "string",
+                    metaData: "[]",
                     releaseType: releaseType,
                     supportedOsVersions: `${this.lowerOsVersion}-${this.upperOsVersion}`
                 };
@@ -132,7 +130,8 @@ class AddNewReleaseFormComponent extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + deviceType + "/ent-app/" + appId;
+                const url = window.location.origin + config.serverConfig.invoker.uri +
+                    config.serverConfig.invoker.publisher + "/applications/" + deviceType + "/ent-app/" + appId;
 
                 axios.post(
                     url,

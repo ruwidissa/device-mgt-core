@@ -67,16 +67,44 @@ class App extends React.Component {
         axios.get(
             window.location.origin + "/store/public/conf/config.json",
         ).then(res => {
-            console.log(res);
-            this.setState({
-                loading: false,
-                config: res.data
-            })
+            const config = res.data;
+            this.checkUserLoggedIn(config);
         }).catch((error) => {
             this.setState({
                 loading: false,
                 error: true
             })
+        });
+    }
+
+    checkUserLoggedIn = (config) => {
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.publisher + "/applications/categories"
+        ).then(res => {
+            this.setState({
+                loading: false,
+                config: config
+            })
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                const redirectUrl = encodeURI(window.location.href);
+                const pageURL = window.location.pathname;
+                const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+                if(lastURLSegment!=="login"){
+                    window.location.href = window.location.origin + `/store/login?redirect=${redirectUrl}`;
+                }else{
+                    this.setState({
+                        loading: false,
+                        config: config
+                    })
+                }
+            } else {
+                this.setState({
+                    loading: false,
+                    error: true
+                })
+            }
         });
     }
 
