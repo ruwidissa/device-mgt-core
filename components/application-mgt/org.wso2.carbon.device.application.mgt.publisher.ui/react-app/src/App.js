@@ -24,7 +24,7 @@ import {
     Redirect, Switch,
 } from 'react-router-dom';
 import axios from "axios";
-import {Layout, Spin, Result} from "antd";
+import {Layout, Spin, Result, notification} from "antd";
 import ConfigContext from "./context/ConfigContext";
 
 const {Content} = Layout;
@@ -68,9 +68,7 @@ class App extends React.Component {
             window.location.origin + "/publisher/public/conf/config.json",
         ).then(res => {
             const config = res.data;
-
-            this.getAndroidEnterpriseToken(config);
-
+            this.checkUserLoggedIn(config);
         }).catch((error) => {
             this.setState({
                 loading: false,
@@ -96,6 +94,31 @@ class App extends React.Component {
                 loading: false,
                 config: config
             })
+        });
+    };
+
+    checkUserLoggedIn = (config) => {
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.publisher + "/applications/categories"
+        ).then(res => {
+            this.getAndroidEnterpriseToken(config);
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                const redirectUrl = encodeURI(window.location.href);
+                const pageURL = window.location.pathname;
+                const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+                if(lastURLSegment!=="login"){
+                    window.location.href = window.location.origin + `/publisher/login?redirect=${redirectUrl}`;
+                }else{
+                    this.getAndroidEnterpriseToken(config);
+                }
+            } else {
+                this.setState({
+                    loading: false,
+                    error: true
+                })
+            }
         });
     };
 

@@ -21,7 +21,8 @@ import {notification} from "antd";
 export const handleApiError = (error, message) => {
     console.log(error);
     if (error.hasOwnProperty("response") && error.response.status === 401) {
-        window.location.href = window.location.origin + '/store/login';
+        const redirectUrl = encodeURI(window.location.href);
+        window.location.href = window.location.origin + `/store/login?redirect=${redirectUrl}`;
     } else {
         notification["error"]({
             message: "There was a problem",
