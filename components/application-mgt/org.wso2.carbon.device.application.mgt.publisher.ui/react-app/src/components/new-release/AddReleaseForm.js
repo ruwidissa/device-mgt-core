@@ -66,25 +66,26 @@ class AddNewReleaseFormComponent extends React.Component {
             isFree: true,
             supportedOsVersions: []
         };
+        this.lowerOsVersion = null;
+        this.upperOsVersion = null;
     }
 
     componentDidMount() {
-        this.getSupportedOsVersions();
+        this.getSupportedOsVersions(this.props.deviceType);
     }
 
-    getSupportedOsVersions = () => {
+    getSupportedOsVersions = (deviceType) => {
         const config = this.props.context;
         axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher +
-            "/admin/device-types/{deviceTypeName}/versions"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
+            `/admin/device-types/${deviceType}/versions`
         ).then(res => {
             if (res.status === 200) {
-
-                // let tags = JSON.parse(res.data.data);
-                // this.setState({
-                //     tags: tags,
-                //     loading: false,
-                // });
+                let supportedOsVersions = JSON.parse(res.data.data);
+                this.setState({
+                    supportedOsVersions,
+                    loading: false,
+                });
             }
         }).catch((error) => {
             handleApiError(error, "Error occurred while trying to load supported OS versions.");
@@ -116,9 +117,8 @@ class AddNewReleaseFormComponent extends React.Component {
                     isSharedWithAllTenants,
                     metaData: "string",
                     releaseType: releaseType,
-                    supportedOsVersions: "4-30"
+                    supportedOsVersions: `${this.lowerOsVersion}-${this.upperOsVersion}`
                 };
-
                 data.append('binaryFile', binaryFile[0].originFileObj);
                 data.append('icon', icon[0].originFileObj);
                 data.append('screenshot1', screenshots[0].originFileObj);
@@ -132,7 +132,7 @@ class AddNewReleaseFormComponent extends React.Component {
 
                 data.append("applicationRelease", blob);
 
-                const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/"+deviceType+"/ent-app/" + appId;
+                const url = window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + deviceType + "/ent-app/" + appId;
 
                 axios.post(
                     url,
@@ -151,7 +151,7 @@ class AddNewReleaseFormComponent extends React.Component {
 
                         const uuid = res.data.data.uuid;
 
-                        this.props.history.push('/publisher/apps/releases/'+uuid);
+                        this.props.history.push('/publisher/apps/releases/' + uuid);
                     }
 
                 }).catch((error) => {
@@ -182,8 +182,16 @@ class AddNewReleaseFormComponent extends React.Component {
         });
     };
 
+    handleLowerOsVersionChange = (lowerOsVersion) => {
+        this.lowerOsVersion = lowerOsVersion;
+    };
+
+    handleUpperOsVersionChange = (upperOsVersion) => {
+        this.upperOsVersion = upperOsVersion;
+    };
+
     render() {
-        const {isFree, icons, screenshots, loading, binaryFiles} = this.state;
+        const {isFree, icons, screenshots, loading, binaryFiles, supportedOsVersions} = this.state;
         const {getFieldDecorator} = this.props.form;
         return (
             <div>
@@ -288,6 +296,45 @@ class AddNewReleaseFormComponent extends React.Component {
                                                     }],
                                                 })(
                                                     <TextArea placeholder="Enter a description for release" rows={5}/>
+                                                )}
+                                            </Form.Item>
+
+                                            <Form.Item {...formItemLayout} label="Supported OS Versions">
+                                                {getFieldDecorator('supportedOS')(
+                                                    <div>
+                                                        <InputGroup>
+                                                            <Row gutter={8}>
+                                                                <Col span={11}>
+                                                                    <Select
+                                                                        placeholder="Lower version"
+                                                                        style={{width: "100%"}}
+                                                                        onChange={this.handleLowerOsVersionChange}>
+                                                                        {supportedOsVersions.map(version => (
+                                                                            <Option key={version.versionName}
+                                                                                    value={version.versionName}>
+                                                                                {version.versionName}
+                                                                            </Option>
+                                                                        ))}
+                                                                    </Select>
+                                                                </Col>
+                                                                <Col span={2}>
+                                                                    <p> - </p>
+                                                                </Col>
+                                                                <Col span={11}>
+                                                                    <Select style={{width: "100%"}}
+                                                                            placeholder="Upper version"
+                                                                            onChange={this.handleUpperOsVersionChange}>
+                                                                        {supportedOsVersions.map(version => (
+                                                                            <Option key={version.versionName}
+                                                                                    value={version.versionName}>
+                                                                                {version.versionName}
+                                                                            </Option>
+                                                                        ))}
+                                                                    </Select>
+                                                                </Col>
+                                                            </Row>
+                                                        </InputGroup>
+                                                    </div>
                                                 )}
                                             </Form.Item>
 
