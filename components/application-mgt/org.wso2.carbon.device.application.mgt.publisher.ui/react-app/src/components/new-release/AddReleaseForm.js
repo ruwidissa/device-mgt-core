@@ -63,9 +63,36 @@ class AddNewReleaseFormComponent extends React.Component {
             screenshots: [],
             loading: false,
             binaryFiles: [],
-            isFree: true
+            isFree: true,
+            supportedOsVersions: []
         };
     }
+
+    componentDidMount() {
+        this.getSupportedOsVersions();
+    }
+
+    getSupportedOsVersions = () => {
+        const config = this.props.context;
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher +
+            "/admin/device-types/{deviceTypeName}/versions"
+        ).then(res => {
+            if (res.status === 200) {
+
+                // let tags = JSON.parse(res.data.data);
+                // this.setState({
+                //     tags: tags,
+                //     loading: false,
+                // });
+            }
+        }).catch((error) => {
+            handleApiError(error, "Error occurred while trying to load supported OS versions.");
+            this.setState({
+                loading: false
+            });
+        });
+    };
 
     handleSubmit = e => {
         const config = this.props.context;

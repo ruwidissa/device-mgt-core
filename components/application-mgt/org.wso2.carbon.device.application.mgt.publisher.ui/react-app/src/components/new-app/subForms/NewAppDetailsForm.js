@@ -160,8 +160,6 @@ class NewAppDetailsForm extends React.Component {
                     loading: false,
                 });
             }
-
-
         }).catch((error) => {
             handleApiError(error, "Error occurred while trying to load device types.");
             this.setState({
@@ -175,7 +173,6 @@ class NewAppDetailsForm extends React.Component {
         const {categories, tags, deviceTypes} = this.state;
         const {getFieldDecorator} = this.props.form;
 
-
         return (
             <div>
                 <Row>
@@ -186,8 +183,7 @@ class NewAppDetailsForm extends React.Component {
                         <Form
                             labelAlign="right"
                             layout="horizontal"
-                            onSubmit={this.handleSubmit}
-                        >
+                            onSubmit={this.handleSubmit}>
                             {formConfig.installationType !== "WEB_CLIP" && (
                                 <Form.Item {...formItemLayout} label="Device Type">
                                     {getFieldDecorator('deviceType', {

@@ -52,11 +52,19 @@ class AddNewAppFormComponent extends React.Component {
             binaryFiles: [],
             application: null,
             release: null,
-            isError: false
+            isError: false,
+            deviceType: null,
+            supportedOsVersions: []
         };
     }
 
     onSuccessApplicationData = (application) => {
+        const {formConfig} = this.props;
+        if (application.hasOwnProperty("deviceType") &&
+            formConfig.installationType !== "WEB_CLIP" &&
+            formConfig.installationType !== "CUSTOM") {
+            this.getSupportedOsVersions(application.deviceType);
+        }
         this.setState({
             application,
             current: 1
@@ -84,7 +92,7 @@ class AddNewAppFormComponent extends React.Component {
         });
         data.append(formConfig.jsonPayloadName, blob);
 
-        const url = window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
+        const url = window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications" + formConfig.endpoint;
 
         axios.post(
             url,
@@ -119,10 +127,30 @@ class AddNewAppFormComponent extends React.Component {
         this.setState({current});
     };
 
-    render() {
-        const { loading, current, isError} = this.state;
-        const {formConfig} = this.props;
+    getSupportedOsVersions = (deviceType) => {
+        const config = this.props.context;
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
+            `/admin/device-types/${deviceType}/versions`
+        ).then(res => {
+            if (res.status === 200) {
+                let supportedOsVersions = JSON.parse(res.data.data);
+                this.setState({
+                    supportedOsVersions,
+                    loading: false,
+                });
+            }
+        }).catch((error) => {
+            handleApiError(error, "Error occurred while trying to load supported OS versions.");
+            this.setState({
+                loading: false
+            });
+        });
+    };
 
+    render() {
+        const {loading, current, isError, supportedOsVersions} = this.state;
+        const {formConfig} = this.props;
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
@@ -142,6 +170,7 @@ class AddNewAppFormComponent extends React.Component {
                                 <div style={{display: (current === 1 ? 'unset' : 'none')}}>
                                     <NewAppUploadForm
                                         formConfig={formConfig}
+                                        supportedOsVersions={supportedOsVersions}
                                         onSuccessReleaseData={this.onSuccessReleaseData}
                                         onClickBackButton={this.onClickBackButton}/>
                                 </div>
