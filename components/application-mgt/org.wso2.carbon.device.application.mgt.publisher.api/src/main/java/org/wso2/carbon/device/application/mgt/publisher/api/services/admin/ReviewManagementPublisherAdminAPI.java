@@ -51,7 +51,7 @@ info = @Info(
         extensions = {
                 @Extension(properties = {
                         @ExtensionProperty(name = "name", value = "PublisherReviewManagementAdminService"),
-                        @ExtensionProperty(name = "context", value = "/api/application-mgt-publisher/v1.0/admin/review"),
+                        @ExtensionProperty(name = "context", value = "/api/application-mgt-publisher/v1.0/admin/reviews"),
                 })
         }
 ),
