@@ -490,7 +490,7 @@ class AppDetailsDrawer extends React.Component {
                         <div className="releases-details">
 
                             {(app.type === "ENTERPRISE") && (
-                                <Link to={`/publisher/apps/${app.id}/add-release`}><Button htmlType="button"
+                                <Link to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}><Button htmlType="button"
                                                                                            size="small">Add
                                     new release</Button></Link>)}
                             <List

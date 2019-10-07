@@ -19,15 +19,17 @@
 import React from "react";
 import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, InputNumber, Modal} from "antd";
 import "@babel/polyfill";
+import axios from "axios";
+import {handleApiError} from "../../../js/Utils";
 
 const formItemLayout = {
     labelCol: {
         xs: {span: 24},
-        sm: {span: 5},
+        sm: {span: 8},
     },
     wrapperCol: {
         xs: {span: 24},
-        sm: {span: 19},
+        sm: {span: 16},
     },
 };
 const {Option} = Select;
@@ -60,7 +62,9 @@ class NewAppUploadForm extends React.Component {
             iconHelperText: '',
             screenshotHelperText: '',
             metaData: []
-        }
+        };
+        this.lowerOsVersion = null;
+        this.upperOsVersion = null;
     }
 
     normFile = e => {
@@ -95,7 +99,7 @@ class NewAppUploadForm extends React.Component {
                 };
 
                 if (formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") {
-                    release.supportedOsVersions = "4-30";
+                    release.supportedOsVersions = `${this.lowerOsVersion}-${this.upperOsVersion}`;
                 }
 
                 if (specificElements.hasOwnProperty("version")) {
@@ -190,8 +194,16 @@ class NewAppUploadForm extends React.Component {
         })
     };
 
+    handleLowerOsVersionChange = (lowerOsVersion) => {
+        this.lowerOsVersion = lowerOsVersion;
+    };
+
+    handleUpperOsVersionChange = (upperOsVersion) => {
+        this.upperOsVersion = upperOsVersion;
+    };
+
     render() {
-        const {formConfig} = this.props;
+        const {formConfig, supportedOsVersions} = this.props;
         const {getFieldDecorator} = this.props.form;
         const {
             icons,
@@ -354,6 +366,46 @@ class NewAppUploadForm extends React.Component {
                                 )}
                             </Form.Item>
 
+                            {(formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") && (
+                                <Form.Item {...formItemLayout} label="Supported OS Versions">
+                                    {getFieldDecorator('supportedOS')(
+                                        <div>
+                                            <InputGroup>
+                                                <Row gutter={8}>
+                                                    <Col span={11}>
+                                                        <Select
+                                                            placeholder="Lower version"
+                                                            style={{width: "100%"}}
+                                                            onChange={this.handleLowerOsVersionChange}>
+                                                            {supportedOsVersions.map(version => (
+                                                                <Option key={version.versionName}
+                                                                        value={version.versionName}>
+                                                                    {version.versionName}
+                                                                </Option>
+                                                            ))}
+                                                        </Select>
+                                                    </Col>
+                                                    <Col span={2}>
+                                                        <p> - </p>
+                                                    </Col>
+                                                    <Col span={11}>
+                                                        <Select style={{width: "100%"}}
+                                                                placeholder="Upper version"
+                                                                onChange={this.handleUpperOsVersionChange}>
+                                                            {supportedOsVersions.map(version => (
+                                                                <Option key={version.versionName}
+                                                                        value={version.versionName}>
+                                                                    {version.versionName}
+                                                                </Option>
+                                                            ))}
+                                                        </Select>
+                                                    </Col>
+                                                </Row>
+                                            </InputGroup>
+                                        </div>
+                                    )}
+                                </Form.Item>
+                            )}
                             <Form.Item {...formItemLayout} label="Price Type">
                                 {getFieldDecorator('select', {
                                     rules: [{required: true, message: 'Please select price Type'}],
@@ -419,22 +471,22 @@ class NewAppUploadForm extends React.Component {
                                                                         placeholder="key"
                                                                         value={data.key}
                                                                         onChange={(e) => {
-                                                                        metaData[index]['key'] = e.currentTarget.value;
-                                                                        this.setState({
-                                                                            metaData
-                                                                        })
-                                                                    }}/>
+                                                                            metaData[index]['key'] = e.currentTarget.value;
+                                                                            this.setState({
+                                                                                metaData
+                                                                            })
+                                                                        }}/>
                                                                 </Col>
                                                                 <Col span={8}>
                                                                     <Input
                                                                         placeholder="value"
                                                                         value={data.value}
                                                                         onChange={(e) => {
-                                                                        metaData[index].value = e.currentTarget.value;
-                                                                        this.setState({
-                                                                            metaData
-                                                                        });
-                                                                    }}/>
+                                                                            metaData[index].value = e.currentTarget.value;
+                                                                            this.setState({
+                                                                                metaData
+                                                                            });
+                                                                        }}/>
                                                                 </Col>
                                                                 <Col span={3}>
                                                                     <Button type="dashed"
