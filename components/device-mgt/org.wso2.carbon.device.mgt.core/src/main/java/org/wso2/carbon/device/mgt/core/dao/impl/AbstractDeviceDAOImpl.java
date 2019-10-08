@@ -164,16 +164,20 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     + "d.NAME, "
                     + "t.NAME AS DEVICE_TYPE, "
                     + "d.DEVICE_IDENTIFICATION "
-                    + "FROM DM_DEVICE d, DM_DEVICE_TYPE t, DM_DEVICE_DETAIL dt "
-                    + "WHERE "
+                    + "FROM DM_DEVICE d, DM_DEVICE_TYPE t";
+
+            if (deviceData.getLastModifiedDate() != null) {
+                sql += ", DM_DEVICE_DETAIL dt";
+            }
+
+            sql += " WHERE "
                     + "t.NAME = ? AND "
                     + "t.ID = d.DEVICE_TYPE_ID AND "
                     + "d.DEVICE_IDENTIFICATION = ? AND "
-                    + "d.TENANT_ID = ? AND "
-                    + "dt.DEVICE_ID = d.ID";
+                    + "d.TENANT_ID = ?";
 
             if (deviceData.getLastModifiedDate() != null) {
-                sql += " AND dt.UPDATE_TIMESTAMP > ?";
+                sql += " AND dt.DEVICE_ID = d.ID AND dt.UPDATE_TIMESTAMP > ?";
             }
 
             sql += ") d1 WHERE d1.ID = e.DEVICE_ID AND ";
