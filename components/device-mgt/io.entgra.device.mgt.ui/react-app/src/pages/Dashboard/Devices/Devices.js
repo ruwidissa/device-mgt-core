@@ -48,7 +48,7 @@ class Devices extends React.Component {
                         <Breadcrumb.Item>Devices</Breadcrumb.Item>
                     </Breadcrumb>
                     <div className="wrap">
-                        <h3>Devices</h3>
+                        <h3>Devicesssdsds</h3>
                         <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
                             illud incorrupte nam.</Paragraph>
                     </div>
