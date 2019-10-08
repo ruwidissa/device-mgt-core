@@ -840,7 +840,7 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3);
 
     @PUT
-    @Path("/pub-app-release/{uuid}")
+    @Path("/public-app-release/{uuid}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(

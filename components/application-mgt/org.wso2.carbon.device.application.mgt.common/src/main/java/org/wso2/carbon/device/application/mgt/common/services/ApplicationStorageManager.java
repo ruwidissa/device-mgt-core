@@ -28,65 +28,88 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * This manages all the storage related requirements of ApplicationDTO.
+ * This manages all the storage related requirements of Application.
  */
 public interface ApplicationStorageManager {
-    /**
-     * To upload image artifacts related with an ApplicationDTO.
-     *
-     * @param applicationRelease ApplicationReleaseDTO Object
-     * @param iconFile        Icon File input stream
-     * @param bannerFile      Banner File input stream
-     * @throws ResourceManagementException Resource Management Exception.
-     */
-    ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease,
-            InputStream iconFile, InputStream bannerFile, List<InputStream> screenshots) throws ResourceManagementException;
 
+    /**
+     * To upload image artifacts related with an Application.
+     *
+     * @param applicationRelease Application Release Object
+     * @param iconFile        InputStream of the icon file.
+     * @param bannerFile      InputStream of the banner file.
+     * @return {@link ApplicationReleaseDTO}
+     * @throws ResourceManagementException if it finds an empty screenshot array or IOException throws while handling
+     * input streams.
+     */
+    ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationRelease, InputStream iconFile,
+            InputStream bannerFile, List<InputStream> screenshots, int tenantId) throws ResourceManagementException;
+
+    /**
+     * To get App Installer data such as version, package name etc.
+     *
+     * @param binaryFile Binary file of the application.
+     * @param deviceType Compatible device type of the application.
+     * @return {@link ApplicationInstaller}
+     * @throws ApplicationStorageManagementException if device type is incorrect or error occurred while parsing binary
+     * data.
+     */
     ApplicationInstaller getAppInstallerData(InputStream binaryFile, String deviceType)
             throws ApplicationStorageManagementException;
-
 
     /**
      * To upload release artifacts for an Application.
      *
-     * @param applicationRelease ApplicationDTO Release Object.
+     * @param applicationRelease Application Release Object.
      * @param deviceType Compatible device type of the application.
      * @param binaryFile      Binary File for the release.
+     * @param tenantId  Tenant Id
      * @throws ResourceManagementException if IO Exception occured while saving the release artifacts in the server.
      */
-    void uploadReleaseArtifact(ApplicationReleaseDTO applicationRelease, String deviceType, InputStream binaryFile)
-            throws ResourceManagementException;
+    void uploadReleaseArtifact(ApplicationReleaseDTO applicationRelease, String deviceType, InputStream binaryFile,
+            int tenantId) throws ResourceManagementException;
 
     /**
-     * To upload release artifacts for an ApplicationDTO.
+     * To upload release artifacts for an Application.
      *
-     * @param applicationReleaseDTO applicationRelease ApplicationDTO release of a particular application.
+     * @param applicationReleaseDTO application Release of a particular application.
      * @param deletingAppHashValue Hash value of the deleting application release.
-     * @throws ApplicationStorageManagementException Resource Management Exception.
+     * @param tenantId Tenant Id
+     * @throws ApplicationStorageManagementException if IO Exception occurs while copying image artifacts and deleting
+     * application release installer file.
      */
     void copyImageArtifactsAndDeleteInstaller(String deletingAppHashValue,
-            ApplicationReleaseDTO applicationReleaseDTO) throws ApplicationStorageManagementException;
+            ApplicationReleaseDTO applicationReleaseDTO, int tenantId) throws ApplicationStorageManagementException;
 
     /**
-     * To delete the artifacts related with particular ApplicationDTO Release.
+     * To delete the artifacts related with particular Application Release.
      *
-     * @throws ApplicationStorageManagementException Not Found Exception.
+     * @param appReleaseHashVal Hash value of the application release.
+     * @param folderName Folder name of the application stored.
+     * @param fileName Name of the application release artifact.
+     * @throws ApplicationStorageManagementException if artifact doesn't exist.
      */
-    void deleteAppReleaseArtifact(String appReleaseHashVal, String folderName, String fileName) throws ApplicationStorageManagementException;
+    void deleteAppReleaseArtifact(String appReleaseHashVal, String folderName, String fileName, int tenantId)
+            throws ApplicationStorageManagementException;
 
     /**
-     * To delete all release artifacts related with particular ApplicationDTO Release.
+     * To delete all release artifacts related with particular Application Release.
      *
-     * @param directoryPaths Hash values of the ApplicationDTO.
-     * @throws ApplicationStorageManagementException ApplicationDTO Storage Management Exception
+     * @param directoryPaths Hash values of the Application.
+     * @param tenantId Tenant Id
+     * @throws ApplicationStorageManagementException if artifact doesn't exist or IO exception occurred while deleting
+     * application artifact.
      */
-    void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths) throws ApplicationStorageManagementException;
+    void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths, int tenantId)
+            throws ApplicationStorageManagementException;
 
-    /***
+    /**
      * Get the InputStream of the file which is located in filePath
+     *
      * @param hashVal Hash Value of the application release.
      * @return {@link InputStream}
      * @throws ApplicationStorageManagementException throws if an error occurs when accessing the file.
      */
-    InputStream getFileStream(String hashVal, String folderName, String fileName) throws ApplicationStorageManagementException;
+    InputStream getFileStream(String hashVal, String folderName, String fileName, int tenantId)
+            throws ApplicationStorageManagementException;
 }

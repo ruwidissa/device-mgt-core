@@ -74,7 +74,7 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
                 throw new NotFoundException(msg);
             }
             InputStream inputStream = applicationStorageManager
-                    .getFileStream(appReleaseHashValue, folderName, artifactName);
+                    .getFileStream(appReleaseHashValue, folderName, artifactName, tenantId);
             if (inputStream == null) {
                 String msg = "Couldn't file the file in the file system.";
                 log.error(msg);
