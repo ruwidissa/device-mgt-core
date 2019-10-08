@@ -77,8 +77,7 @@ class Dashboard extends React.Component {
                                             <Icon type="plus"/>
                                             Add New App
                                         </span>
-                                    }
-                                >
+                                    }>
                                     <Menu.Item key="add-new-public-app">
                                         <Link to="/publisher/add-new-app/public">
                                             Public App
@@ -105,8 +104,7 @@ class Dashboard extends React.Component {
                                     title={
                                         <span className="submenu-title-wrapper">
                                             <Icon type="control"/>Manage
-                                        </span>
-                                    }>
+                                        </span>}>
                                     <Menu.Item key="manage">
                                         <Link to="/publisher/manage">
                                             <Icon type="setting"/> General
@@ -125,8 +123,7 @@ class Dashboard extends React.Component {
                                          title={
                                              <span className="submenu-title-wrapper">
                                                <Icon type="user"/>Profile
-                                             </span>
-                                         }>
+                                             </span>}>
                                     <Logout/>
                                 </SubMenu>
                             </Menu>
@@ -137,9 +134,12 @@ class Dashboard extends React.Component {
                 <Layout className="mobile-layout">
                     <div className="mobile-menu-button">
                         <Button type="link" onClick={this.showMobileNavigationBar}>
-                            <Icon type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'} className="bar-icon"/>
+                            <Icon
+                                type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'}
+                                className="bar-icon"/>
                         </Button>
                     </div>
+                </Layout>
                     <Drawer
                         title={
                             <Link to="/publisher/apps">
@@ -160,8 +160,11 @@ class Dashboard extends React.Component {
                             mode="inline"
                             defaultSelectedKeys={['1']}
                             style={{lineHeight: '64px', width: 231}}>
-                            <Menu.Item key="1"><Link to="/publisher/apps"><Icon
-                                type="appstore"/>Apps</Link></Menu.Item>
+                            <Menu.Item key="1">
+                                <Link to="/publisher/apps">
+                                    <Icon type="appstore"/>Apps
+                                </Link>
+                            </Menu.Item>
                             <SubMenu
                                 title={
                                     <span className="submenu-title-wrapper">
@@ -188,6 +191,7 @@ class Dashboard extends React.Component {
                             </Menu.Item>
                         </Menu>
                     </Drawer>
+                <Layout className="mobile-layout">
                     <Menu
                         mode="horizontal"
                         defaultSelectedKeys={['1']}
@@ -196,8 +200,7 @@ class Dashboard extends React.Component {
                             title={
                                 <span className="submenu-title-wrapper">
                                     <Icon type="user"/>
-                                </span>
-                            }>
+                                </span>}>
                             <Logout/>
                         </SubMenu>
                     </Menu>
@@ -219,6 +222,6 @@ class Dashboard extends React.Component {
             </div>
         );
     }
-};
+}
 
 export default withConfigContext(Dashboard);
