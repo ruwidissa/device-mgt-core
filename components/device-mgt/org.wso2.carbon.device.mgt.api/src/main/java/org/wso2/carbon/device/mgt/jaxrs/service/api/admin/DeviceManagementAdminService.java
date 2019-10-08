@@ -248,12 +248,12 @@ public interface DeviceManagementAdminService {
                     required = true)
                     List<String> deviceIdentifiers);
 
-    @DELETE
+    @PUT
     @Path("/permanent-delete")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             consumes = MediaType.APPLICATION_JSON,
-            httpMethod = "DELETE",
+            httpMethod = "PUT",
             value = "Permanently remove the Device Specified by the Device ID",
             notes = "Returns the status of the permanently deleted device operation and the details of the deleted device.",
             tags = "Device Management",

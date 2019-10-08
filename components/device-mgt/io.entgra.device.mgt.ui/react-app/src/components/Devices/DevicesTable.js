@@ -24,6 +24,7 @@ import TimeAgo from 'javascript-time-ago'
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
+import BulkActionBar from "./BulkActionBar";
 
 const {Text} = Typography;
 
@@ -158,17 +159,6 @@ class DeviceTable extends React.Component {
         this.fetch();
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevProps.deleteRequest !== this.props.deleteRequest){
-            this.deleteDevice();
-        }
-        if(prevProps.deselectRequest !== this.props.deselectRequest){
-            this.rowSelection.getCheckboxProps = record => ({
-                disabled: record.enrolmentInfo.status !== 'REMOVED' // Column configuration not to be checked
-            })
-        }
-    }
-
     //fetch data from api
     fetch = (params = {}) => {
         const config = this.props.context;
@@ -222,19 +212,19 @@ class DeviceTable extends React.Component {
         const config = this.props.context;
         this.setState({loading: true});
 
-        const deviceData = JSON.stringify(this.state.deviceIds);
+        const deviceData = this.state.deviceIds;
 
         //send request to the invoker
-        axios.delete(
+        axios.put(
                 window.location.origin + config.serverConfig.invoker.uri +
                 config.serverConfig.invoker.deviceMgt +
                 "/admin/devices/permanent-delete",
-                {
-                    headers:{'Content-Type': 'application/json; charset=utf-8'} ,
-                    data: deviceData
-                },
+                deviceData,
+                { headers : {'Content-Type': 'application/json'}}
+
         ).then(res => {
             if (res.status === 200) {
+                this.fetch();
                 const pagination = {...this.state.pagination};
                 this.setState({
                                   loading: false,
@@ -242,7 +232,6 @@ class DeviceTable extends React.Component {
                                   pagination,
                               });
             }
-
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 //todo display a popop with error
@@ -253,7 +242,7 @@ class DeviceTable extends React.Component {
                                           message: "There was a problem",
                                           duration: 0,
                                           description:
-                                                  "Error occurred while trying to load devices.",
+                                                  "Error occurred while trying to delete devices.",
                                       });
             }
 
@@ -280,6 +269,9 @@ class DeviceTable extends React.Component {
         const {data, pagination, loading, selectedRows} = this.state;
         return (
             <div>
+                <BulkActionBar
+                        deleteDevice={this.deleteDevice}
+                        selectedRows={this.state.selectedRows}/>
                 <Table
                     columns={columns}
                     rowKey={record => (record.deviceIdentifier + record.enrolmentInfo.owner + record.enrolmentInfo.ownership)}
