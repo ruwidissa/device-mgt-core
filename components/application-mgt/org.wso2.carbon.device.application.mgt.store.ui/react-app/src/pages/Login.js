@@ -159,7 +159,7 @@ class NormalLoginForm extends React.Component {
                     )}
                     <br/>
                     <a className="login-form-forgot" href="">Forgot password</a>
-                    <Button block type="primary" htmlType="submit" className="login-form-button">
+                    <Button loading={this.state.loading} block type="primary" htmlType="submit" className="login-form-button">
                         Log in
                     </Button>
                 </Form.Item>

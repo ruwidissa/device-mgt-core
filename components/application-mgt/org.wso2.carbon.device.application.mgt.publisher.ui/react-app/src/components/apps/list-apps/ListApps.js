@@ -57,10 +57,10 @@ class ListApps extends React.Component {
         return (
             <Card>
                 <Row gutter={28}>
-                    <Col md={6}>
+                    <Col md={7}>
                         <Filters setFilters={this.setFilters}/>
                     </Col>
-                    <Col md={18}>
+                    <Col md={17}>
                         <Row>
                             <Col span={6}>
                                 <Title level={4}>Apps</Title>
