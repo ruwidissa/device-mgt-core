@@ -59,14 +59,15 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public ApplicationReleaseDTO uploadImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
-            InputStream iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams)
+            InputStream iconFileStream, InputStream bannerFileStream, List<InputStream> screenShotStreams, int tenantId)
             throws ResourceManagementException {
         String iconStoredLocation;
         String bannerStoredLocation;
         String scStoredLocation = null;
 
         try {
-            String artifactStoringBaseDirPath = storagePath + applicationReleaseDTO.getAppHashValue();
+            String artifactStoringBaseDirPath =
+                    storagePath + tenantId + File.separator + applicationReleaseDTO.getAppHashValue();
             StorageManagementUtil.createArtifactDirectory(artifactStoringBaseDirPath);
 
             if (iconFileStream != null) {
@@ -144,11 +145,12 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public void uploadReleaseArtifact(ApplicationReleaseDTO applicationReleaseDTO,
-            String deviceType, InputStream binaryFile) throws ResourceManagementException {
+            String deviceType, InputStream binaryFile, int tenantId) throws ResourceManagementException {
         try {
             byte [] content = IOUtils.toByteArray(binaryFile);
             String artifactDirectoryPath =
-                    storagePath + applicationReleaseDTO.getAppHashValue() + File.separator + Constants.APP_ARTIFACT;
+                    storagePath + tenantId + File.separator + applicationReleaseDTO.getAppHashValue() + File.separator
+                            + Constants.APP_ARTIFACT;
             StorageManagementUtil.createArtifactDirectory(artifactDirectoryPath);
             String artifactPath = artifactDirectoryPath + File.separator + applicationReleaseDTO.getInstallerName();
             saveFile(new ByteArrayInputStream(content), artifactPath);
@@ -162,7 +164,7 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
     @Override
     public void copyImageArtifactsAndDeleteInstaller(String deletingAppHashValue,
-            ApplicationReleaseDTO applicationReleaseDTO) throws ApplicationStorageManagementException {
+            ApplicationReleaseDTO applicationReleaseDTO, int tenantId) throws ApplicationStorageManagementException {
 
         try {
             String appHashValue = applicationReleaseDTO.getAppHashValue();
@@ -171,42 +173,41 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
             String screenshot1 = applicationReleaseDTO.getScreenshotName1();
             String screenshot2 = applicationReleaseDTO.getScreenshotName2();
             String screenshot3 = applicationReleaseDTO.getScreenshotName3();
+            String basePath = storagePath + tenantId + File.separator;
 
             if (bannerName != null) {
-                StorageManagementUtil
-                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.BANNER_ARTIFACT
-                                        + File.separator + bannerName,
-                                storagePath + appHashValue + File.separator + Constants.BANNER_ARTIFACT + File.separator
-                                        + bannerName);
+                StorageManagementUtil.copy(basePath + deletingAppHashValue + File.separator + Constants.BANNER_ARTIFACT
+                                + File.separator + bannerName,
+                        basePath + appHashValue + File.separator + Constants.BANNER_ARTIFACT + File.separator
+                                + bannerName);
             }
             if (iconName != null) {
-                StorageManagementUtil.copy(storagePath + deletingAppHashValue + File.separator + Constants.ICON_ARTIFACT
+                StorageManagementUtil.copy(basePath + deletingAppHashValue + File.separator + Constants.ICON_ARTIFACT
                                 + File.separator + iconName,
-                        storagePath + appHashValue + File.separator + Constants.ICON_ARTIFACT + File.separator
-                                + iconName);
+                        basePath + appHashValue + File.separator + Constants.ICON_ARTIFACT + File.separator + iconName);
             }
             if (screenshot1 != null) {
                 StorageManagementUtil
-                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 1
+                        .copy(basePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 1
                                         + File.separator + screenshot1,
-                                storagePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 1
+                                basePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 1
                                         + File.separator + screenshot1);
             }
             if (screenshot2 != null) {
                 StorageManagementUtil
-                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 2
+                        .copy(basePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 2
                                         + File.separator + screenshot2,
-                                storagePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 2
+                                basePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 2
                                         + File.separator + screenshot2);
             }
             if (screenshot3 != null) {
                 StorageManagementUtil
-                        .copy(storagePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 3
+                        .copy(basePath + deletingAppHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 3
                                         + File.separator + screenshot3,
-                                storagePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 3
+                                basePath + appHashValue + File.separator + Constants.SCREENSHOT_ARTIFACT + 3
                                         + File.separator + screenshot3);
             }
-            deleteAppReleaseArtifact( storagePath + deletingAppHashValue);
+            deleteAppReleaseArtifact( basePath + deletingAppHashValue);
         } catch (IOException e) {
             String msg = "Application installer updating is failed because of I/O issue";
             log.error(msg, e);
@@ -217,24 +218,28 @@ public class ApplicationStorageManagerImpl implements ApplicationStorageManager 
 
 
     @Override
-    public void deleteAppReleaseArtifact(String appReleaseHashVal, String folderName, String fileName)
+    public void deleteAppReleaseArtifact(String appReleaseHashVal, String folderName, String fileName, int tenantId)
             throws ApplicationStorageManagementException {
-        String artifactPath = storagePath + appReleaseHashVal + File.separator + folderName + File.separator + fileName;
+        String artifactPath = storagePath + tenantId + File.separator + appReleaseHashVal + File.separator + folderName
+                + File.separator + fileName;
         deleteAppReleaseArtifact(artifactPath);
     }
 
     @Override
-    public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths)
+    public void deleteAllApplicationReleaseArtifacts(List<String> directoryPaths, int tenantId)
             throws ApplicationStorageManagementException {
-        for (String directoryBasePath : directoryPaths) {
-            deleteAppReleaseArtifact(storagePath + directoryBasePath);
+        String basePath = storagePath + tenantId + File.separator;
+        for (String directoryPath : directoryPaths) {
+            deleteAppReleaseArtifact(basePath + directoryPath);
         }
     }
 
     @Override
-    public InputStream getFileStream(String hashVal, String folderName, String fileName)
+    public InputStream getFileStream(String hashVal, String folderName, String fileName, int tenantId)
             throws ApplicationStorageManagementException {
-        String filePath = storagePath + hashVal + File.separator + folderName + File.separator + fileName;
+        String filePath =
+                storagePath + tenantId + File.separator + hashVal + File.separator + folderName + File.separator
+                        + fileName;
         try {
             return StorageManagementUtil.getInputStream(filePath);
         } catch (IOException e) {
