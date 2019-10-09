@@ -26,24 +26,24 @@ class BulkActionBar extends React.Component {
         this.state = {
             selectedMultiple: false,
             selectedSingle: false,
-            deleteable: true,
+            canDelete: true,
         }
     }
 
-    //This method is used to trigger delete request on selected devices
+    //This method checks whether NON-REMOVED devices are selected
     onDeleteDeviceCall = () => {
         let i;
         for(i=0; i < this.props.selectedRows.length; i++){
             if(this.props.selectedRows[i].enrolmentInfo.status != "REMOVED"){
-                this.setState({deletable:false});
+                this.setState({canDelete:false});
                 break;
             }
-            this.setState({deletable:true});
+            this.setState({canDelete:true});
         }
     };
 
     onConfirmDelete = () => {
-        if (this.state.deletable) {
+        if (this.state.canDelete) {
             this.props.deleteDevice();
         }
     };
@@ -67,7 +67,7 @@ class BulkActionBar extends React.Component {
                     <Popconfirm
                         placement="topLeft"
                         title={
-                            this.state.deletable ?
+                            this.state.canDelete ?
                                 "Are you sure you want to delete?" : "You can only delete disenrolled devices"}
                         onConfirm={this.onConfirmDelete}
                         okText="Ok"
