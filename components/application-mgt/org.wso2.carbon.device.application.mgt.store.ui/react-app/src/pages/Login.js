@@ -80,7 +80,6 @@ class NormalLoginForm extends React.Component {
     handleSubmit = (e) => {
         const thisForm = this;
         const config = this.props.context;
-        console.log(config);
 
         e.preventDefault();
         this.props.form.validateFields((err, values) => {

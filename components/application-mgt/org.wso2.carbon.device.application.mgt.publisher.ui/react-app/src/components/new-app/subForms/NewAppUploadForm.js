@@ -84,9 +84,6 @@ class NewAppUploadForm extends React.Component {
                 this.setState({
                     loading: true
                 });
-
-                console.log(values);
-
                 const {price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription, releaseType} = values;
 
                 //add release data
@@ -234,8 +231,7 @@ class NewAppUploadForm extends React.Component {
                         <Form
                             labelAlign="right"
                             layout="horizontal"
-                            onSubmit={this.handleSubmit}
-                        >
+                            onSubmit={this.handleSubmit}>
                             {formConfig.specificElements.hasOwnProperty("binaryFile") && (
                                 <Form.Item {...formItemLayout}
                                            label="Application"
@@ -250,8 +246,7 @@ class NewAppUploadForm extends React.Component {
                                         <Upload
                                             name="binaryFile"
                                             onChange={this.handleBinaryFileChange}
-                                            beforeUpload={() => false}
-                                        >
+                                            beforeUpload={() => false}>
                                             {binaryFiles.length !== 1 && (
                                                 <Button>
                                                     <Icon type="upload"/> Click to upload
@@ -277,8 +272,7 @@ class NewAppUploadForm extends React.Component {
                                         listType="picture-card"
                                         onChange={this.handleIconChange}
                                         beforeUpload={() => false}
-                                        onPreview={this.handlePreview}
-                                    >
+                                        onPreview={this.handlePreview}>
                                         {icons.length === 1 ? null : uploadButton}
                                     </Upload>,
                                 )}
@@ -418,7 +412,6 @@ class NewAppUploadForm extends React.Component {
                                     </Select>,
                                 )}
                             </Form.Item>
-
                             <Form.Item {...formItemLayout} label="Price">
                                 {getFieldDecorator('price', {
                                     rules: [{
@@ -437,7 +430,6 @@ class NewAppUploadForm extends React.Component {
                                     />
                                 )}
                             </Form.Item>
-
                             <Form.Item {...formItemLayout} label="Is Shared?">
                                 {getFieldDecorator('isSharedWithAllTenants', {
                                     rules: [{
@@ -450,7 +442,6 @@ class NewAppUploadForm extends React.Component {
                                             unCheckedChildren={<Icon type="close"/>}
                                     />
                                 )}
-
                             </Form.Item>
                             <Form.Item {...formItemLayout} label="Meta Data">
                                 {getFieldDecorator('meta', {
@@ -510,7 +501,6 @@ class NewAppUploadForm extends React.Component {
                                         </Button>
                                     </div>
                                 )}
-
                             </Form.Item>
                             <Form.Item style={{float: "right", marginLeft: 8}}>
                                 <Button type="primary" htmlType="submit">
@@ -531,7 +521,6 @@ class NewAppUploadForm extends React.Component {
             </div>
         );
     }
-
 }
 
 export default (Form.create({name: 'app-upload-form'})(NewAppUploadForm));

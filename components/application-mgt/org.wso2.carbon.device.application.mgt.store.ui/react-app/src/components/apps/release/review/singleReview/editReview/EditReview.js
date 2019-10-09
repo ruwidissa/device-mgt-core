@@ -41,7 +41,6 @@ class EditReview extends React.Component {
 
     componentDidMount() {
         const {content,rating,id} = this.props.review;
-        console.log(this.props.review);
         this.setState({
             content,
             rating

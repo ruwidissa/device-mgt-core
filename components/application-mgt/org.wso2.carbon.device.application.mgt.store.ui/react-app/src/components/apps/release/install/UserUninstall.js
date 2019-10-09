@@ -86,7 +86,7 @@ class UserUninstall extends React.Component {
         value.map(val => {
             data.push(val.key);
         });
-        this.props.onUninstall("user", data, "uninstall",null);
+        this.props.onUninstall("user", data, "uninstall",timestamp);
     };
 
     render() {

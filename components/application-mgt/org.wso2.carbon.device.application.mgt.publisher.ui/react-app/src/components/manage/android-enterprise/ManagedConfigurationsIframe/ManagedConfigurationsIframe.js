@@ -43,14 +43,12 @@ class ManagedConfigurationsIframe extends React.Component {
     };
 
     handleOk = e => {
-        console.log(e);
         this.setState({
             visible: false,
         });
     };
 
     handleCancel = e => {
-        console.log(e);
         this.setState({
             visible: false,
         });
@@ -116,7 +114,6 @@ class ManagedConfigurationsIframe extends React.Component {
     updateConfig = (method, event) => {
         const {packageName} = this.props;
         this.setState({loading: true});
-        console.log(event);
 
         const data = {
             mcmId: event.mcmId,
@@ -151,7 +148,6 @@ class ManagedConfigurationsIframe extends React.Component {
     deleteConfig = (event) => {
         const {packageName} = this.props;
         this.setState({loading: true});
-        console.log(event);
 
         //send request to the invoker
         axios.delete(
