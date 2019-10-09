@@ -118,9 +118,12 @@ public class LoginHandler extends HttpServlet {
                 apiRegEndpoint.setEntity(constructAppRegPayload(tags));
 
                 ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
-                String clientAppResult = clientAppResponse.getData();
 
-                if (!StringUtils.isEmpty(clientAppResult) && getTokenAndPersistInSession(req, resp,
+                if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED){
+                    HandlerUtil.handleError(req, resp, serverUrl, platform, clientAppResponse);
+                    return;
+                }
+                if (clientAppResponse.getCode() == HttpStatus.SC_CREATED && getTokenAndPersistInSession(req, resp,
                         clientAppResponse.getData(), scopes)) {
                     ProxyResponse proxyResponse = new ProxyResponse();
                     proxyResponse.setCode(HttpStatus.SC_OK);
@@ -253,6 +256,8 @@ public class LoginHandler extends HttpServlet {
     private StringEntity constructAppRegPayload(JsonArray tags) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(HandlerConstants.APP_NAME_KEY, HandlerConstants.PUBLISHER_APPLICATION_NAME);
+        jsonObject.addProperty(HandlerConstants.USERNAME, username);
+        jsonObject.addProperty(HandlerConstants.PASSWORD, password);
         jsonObject.addProperty("isAllowedToAllDomains", "false");
         jsonObject.add(HandlerConstants.TAGS_KEY, tags);
         String payload = jsonObject.toString();
