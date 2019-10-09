@@ -248,7 +248,7 @@ public interface DeviceManagementAdminService {
                     required = true)
                     List<String> deviceIdentifiers);
 
-    @DELETE
+    @PUT
     @Path("/permanent-delete")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,

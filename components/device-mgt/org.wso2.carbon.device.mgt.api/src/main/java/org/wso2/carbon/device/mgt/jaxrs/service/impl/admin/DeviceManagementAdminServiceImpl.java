@@ -136,7 +136,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
         }
     }
 
-    @DELETE
+    @PUT
     @Override
     @Path("/permanent-delete")
     public Response deleteDevicesPermanently(List<String> deviceIdentifiers) {
