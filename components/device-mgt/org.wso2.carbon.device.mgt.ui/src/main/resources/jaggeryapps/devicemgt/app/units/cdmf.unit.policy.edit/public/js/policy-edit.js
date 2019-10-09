@@ -148,6 +148,7 @@ $("#policy-name-input").focus(function () {
 skipStep["policy-platform"] = function (policyPayloadObj) {
     policy["name"] = policyPayloadObj["policyName"];
     policy["platform"] = policyPayloadObj["profile"]["deviceType"];
+    policy["policyType"] = policyPayloadObj["policyType"];
 
     var userRoleInput = $("#user-roles-input");
     var ownershipInput = $("#ownership-input");
@@ -488,6 +489,7 @@ var updatePolicy = function (policy, state) {
     var payload = {
         "policyName": policy["policyName"],
         "description": policy["description"],
+        "policyType": policy["policyType"],
         "compliance": policy["selectedNonCompliantAction"],
         "ownershipType": null,
         "profile": {
