@@ -35,6 +35,10 @@ class ReleaseView extends React.Component {
         }
     }
 
+    componentDidMount() {
+        console.log("mounted: Release view");
+    }
+
     render() {
         const {app, release} = this.props;
         const config = this.props.context;
