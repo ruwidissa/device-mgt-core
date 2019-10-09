@@ -31,6 +31,8 @@ public class HandlerConstants {
     public static final String SESSION_AUTH_DATA_KEY = "authInfo";
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String PLATFORM = "platform";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
     public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
     public static final String ERROR_CALLBACK_KEY = "errorCallback";
     public static final String API_COMMON_CONTEXT = "/api";
