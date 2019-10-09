@@ -668,7 +668,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                     operation.setType(Operation.Type.PROFILE);
                     CustomApplication customApplication = new CustomApplication();
                     customApplication.setType(application.getType());
-                    //todo get application package name and set
+                    customApplication.setAppIdentifier(application.getPackageName());
                     operation.setPayLoad(customApplication.toJSON());
                     return operation;
                 } else {
