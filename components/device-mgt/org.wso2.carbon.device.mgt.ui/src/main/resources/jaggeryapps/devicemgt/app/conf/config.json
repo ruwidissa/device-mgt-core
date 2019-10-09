@@ -161,6 +161,7 @@
     "perm:device:enroll",
     "perm:geo-service:analytics-view",
     "perm:geo-service:alerts-manage",
+    "perm:devices:permanent-delete",
     "appm:read"
   ],
   "isOAuthEnabled": true,
