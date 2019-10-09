@@ -533,10 +533,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         try {
             DeviceManagementDAOFactory.beginTransaction();
             existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
-            if (existingDevices.size() != deviceIdentifiers.size()) {
-                for (Device device : existingDevices) {
-                    deviceIdentifiers.remove(device.getDeviceIdentifier());
-                }
+            for (Device device : existingDevices) {
+                deviceIdentifiers.remove(device.getDeviceIdentifier());
+            }
+            if (!deviceIdentifiers.isEmpty()) {
                 String msg =
                         "Couldn't find device ids for all the requested device identifiers. " +
                                 "Therefore payload should contain device identifiers which are not in the system. " +
