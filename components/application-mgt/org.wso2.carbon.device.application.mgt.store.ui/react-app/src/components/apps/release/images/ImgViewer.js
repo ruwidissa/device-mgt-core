@@ -44,13 +44,13 @@ class ImgViewer extends Component {
             movable : false
         };
         return (
-            <div>
+            <div className="release-images">
                 <RcViewer options={options} ref='viewer'>
                     {this.props.images.map((screenshotUrl) => {
                         return (
-                            <Col key={"col-" + screenshotUrl} lg={6} md={8} xs={8} className="release-screenshot">
-                                <img key={screenshotUrl} src={screenshotUrl}/>
-                            </Col>
+                            <div key={"col-" + screenshotUrl} className="release-screenshot">
+                                    <img alt="screenshot" key={screenshotUrl} src={screenshotUrl}/>
+                            </div>
                         )
                     })}
                 </RcViewer>
