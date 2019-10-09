@@ -17,67 +17,91 @@
  */
 
 import React from "react";
-import {Button, Icon, notification} from "antd";
+import {Button, Tooltip, Popconfirm, Divider} from "antd";
 
 class BulkActionBar extends React.Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
-            selectedMultiple:false,
-            selectedSingle:false
+            selectedMultiple: false,
+            selectedSingle: false,
+            deleteable: true,
         }
     }
 
     //This method is used to trigger delete request on selected devices
-    deleteDevice = () => {
-        const deviceStatusArray = this.props.selectedRows.map(obj => obj.enrolmentInfo.status);
-        if(deviceStatusArray.includes("ACTIVE") || deviceStatusArray.includes("INACTIVE")){
-            notification["error"]({
-                message: "There was a problem",
-                duration: 0,
-                description:
-                "Cannot delete ACTIVE/INACTIVE devices.",
-            });
-        }else{
+    onDeleteDeviceCall = () => {
+        let i;
+        for(i=0; i < this.props.selectedRows.length; i++){
+            if(this.props.selectedRows[i].enrolmentInfo.status != "REMOVED"){
+                this.setState({deletable:false});
+                break;
+            }
+            this.setState({deletable:true});
+        }
+    };
+
+    onConfirmDelete = () => {
+        if (this.state.deletable) {
             this.props.deleteDevice();
         }
-    }
+    };
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if(prevProps.selectedRows !== this.props.selectedRows){
-            if(this.props.selectedRows.length > 1){
-                this.setState({selectedMultiple:true,selectedSingle:false})
-            }else if(this.props.selectedRows.length == 1){
-                this.setState({selectedSingle:true,selectedMultiple:true})
-            }else{
-                this.setState({selectedSingle:false,selectedMultiple:false})
-            }
-        }
-    }
+    onConfirmDisenroll = () => {
+        //TODO: Implement disenrollment function
+    };
 
     render() {
-        return(
-                <div style={{padding:'5px'}}>
-                                <Button
-                                        type="normal"
-                                        icon="delete"
-                                        size={'default'}
-                                        onClick={this.deleteDevice}
-                                        style={
-                                            {display:this.state.selectedMultiple ? "inline" : "none"}
-                                        }>Delete
-                                </Button>
+        const isSelected = this.props.selectedRows.length > 0;
+        const isSelectedSingle = this.props.selectedRows.length == 1;
 
-                                <Button
-                                        type="normal"
-                                        icon="delete"
-                                        size={'default'}
-                                        style={
-                                            {display:this.state.selectedSingle ? "inline" : "none"}
-                                        }>Disenroll
-                                </Button>
-                </div>
+        return (
+            <div
+                style={{display: isSelected ? "inline" : "none", padding: '11px'}}>
+
+                <Tooltip
+                    placement="bottom"
+                    title={"Delete Device"}
+                    autoAdjustOverflow={true}>
+                    <Popconfirm
+                        placement="topLeft"
+                        title={
+                            this.state.deletable ?
+                                "Are you sure you want to delete?" : "You can only delete disenrolled devices"}
+                        onConfirm={this.onConfirmDelete}
+                        okText="Ok"
+                        cancelText="Cancel">
+
+                        <Button
+                            type="link"
+                            shape="circle"
+                            icon="delete"
+                            size={'default'}
+                            onClick={this.onDeleteDeviceCall}
+                            disabled={isSelected ? false : true}
+                            style={{margin: "2px"}}/>
+                    </Popconfirm>
+                </Tooltip>
+                <Divider type="vertical"/>
+                <Tooltip placement="bottom" title={"Disenroll Device"}>
+                    <Popconfirm
+                        placement="topLeft"
+                        title={"Are you sure?"}
+                        onConfirm={this.onConfirmDisenroll}
+                        okText="Ok"
+                        disabled={isSelectedSingle ? false : true}
+                        cancelText="Cancel">
+                        <Button
+                            type="link"
+                            shape="circle"
+                            icon="close"
+                            size={'default'}
+                            disabled={isSelectedSingle ? false : true}
+                            style={{margin: "2px"}}/>
+                    </Popconfirm>
+                </Tooltip>
+            </div>
         )
     }
 }

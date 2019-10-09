@@ -118,9 +118,9 @@ const columns = [
         key: 'action',
         render: () => (
             <span>
-                <a><Icon type="edit" /></a>
-                <Divider type="vertical" />
-                <a><Text type="danger"><Icon type="delete" /></Text></a>
+                <a><Icon type="edit"/></a>
+                <Divider type="vertical"/>
+                <a><Text type="danger"><Icon type="delete"/></Text></a>
             </span>
         ),
     },
@@ -135,7 +135,7 @@ const getTimeAgo = (time) => {
 class DeviceTable extends React.Component {
     constructor(props) {
         super(props);
-        config =  this.props.context;
+        config = this.props.context;
         TimeAgo.addLocale(en);
         this.state = {
             data: [],
@@ -173,7 +173,7 @@ class DeviceTable extends React.Component {
         };
 
         const encodedExtraParams = Object.keys(extraParams)
-                .map(key => key + '=' + extraParams[key]).join('&');
+            .map(key => key + '=' + extraParams[key]).join('&');
 
         //send request to the invoker
         axios.get(
@@ -216,21 +216,14 @@ class DeviceTable extends React.Component {
 
         //send request to the invoker
         axios.put(
-                window.location.origin + config.serverConfig.invoker.uri +
-                config.serverConfig.invoker.deviceMgt +
-                "/admin/devices/permanent-delete",
-                deviceData,
-                { headers : {'Content-Type': 'application/json'}}
-
+            window.location.origin + config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
+            "/admin/devices/permanent-delete",
+            deviceData,
+            {headers: {'Content-Type': 'application/json'}}
         ).then(res => {
             if (res.status === 200) {
                 this.fetch();
-                const pagination = {...this.state.pagination};
-                this.setState({
-                                  loading: false,
-                                  data: res.data.data.devices,
-                                  pagination,
-                              });
             }
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
@@ -239,16 +232,16 @@ class DeviceTable extends React.Component {
                 window.location.href = window.location.origin + '/entgra/login';
             } else {
                 notification["error"]({
-                                          message: "There was a problem",
-                                          duration: 0,
-                                          description:
-                                                  "Error occurred while trying to delete devices.",
-                                      });
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to delete devices.",
+                });
             }
 
             this.setState({loading: false});
         });
-    }
+    };
 
     handleTableChange = (pagination, filters, sorter) => {
         const pager = {...this.state.pagination};
@@ -270,24 +263,26 @@ class DeviceTable extends React.Component {
         return (
             <div>
                 <BulkActionBar
-                        deleteDevice={this.deleteDevice}
-                        selectedRows={this.state.selectedRows}/>
-                <Table
-                    columns={columns}
-                    rowKey={record => (record.deviceIdentifier + record.enrolmentInfo.owner + record.enrolmentInfo.ownership)}
-                    dataSource={data}
-                    pagination={{
-                        ...pagination,
-                        size: "small",
-                        // position: "top",
-                        showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
-                        // showQuickJumper: true
-                    }}
-                    loading={loading}
-                    onChange={this.handleTableChange}
-                    rowSelection={this.rowSelection}
-                    scroll={{x: 1000}}
-                />
+                    deleteDevice={this.deleteDevice}
+                    selectedRows={this.state.selectedRows}/>
+                <div>
+                    <Table
+                        columns={columns}
+                        rowKey={record => (record.deviceIdentifier + record.enrolmentInfo.owner + record.enrolmentInfo.ownership)}
+                        dataSource={data}
+                        pagination={{
+                            ...pagination,
+                            size: "small",
+                            // position: "top",
+                            showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
+                            // showQuickJumper: true
+                        }}
+                        loading={loading}
+                        onChange={this.handleTableChange}
+                        rowSelection={this.rowSelection}
+                        scroll={{x: 1000}}
+                    />
+                </div>
             </div>
         );
     }
