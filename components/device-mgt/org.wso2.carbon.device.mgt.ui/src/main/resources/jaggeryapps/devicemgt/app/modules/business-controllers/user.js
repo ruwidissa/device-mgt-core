@@ -623,6 +623,9 @@ var userModule = function () {
         if (publicMethods.isAuthorized("/permission/admin/device-mgt/admin/devices/update-enrollment")) {
             permissions["UPDATE_ENROLLMENT"] = true;
         }
+        if (publicMethods.isAuthorized("/permission/admin/device-mgt/admin/devices/permanent-delete")) {
+            permissions["PERMANENT_DELETE"] = true;
+        }
 
         return permissions;
     };

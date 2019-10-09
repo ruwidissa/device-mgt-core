@@ -70,7 +70,7 @@ function InitiateViewOption(url) {
 var deviceCheckbox = "#ast-container .ctrl-wr-asset .itm-select input[type='checkbox']";
 var assetContainer = "#ast-container";
 
-var deviceListing, currentUser, groupId;
+var deviceListing, currentUser, groupId, hasDeletePermission;
 
 /*
  * DOM ready functions.
@@ -87,8 +87,8 @@ $(document).ready(function () {
     };
 
     deviceListing = $("#device-listing");
+    hasDeletePermission = $("#permission").data("permission")['PERMANENT_DELETE'];
     currentUser = deviceListing.data("current-user");
-
     groupId = getParameterByName("groupId");
 
     /* Adding selected class for selected devices */
@@ -320,7 +320,7 @@ function loadDevices(searchType, searchParam) {
                         html = '<span><i class="fw fw-remove icon-danger"></i> Blocked</span>';
                         break;
                     case 'REMOVED' :
-                        html = '<span><i class="fw fw-delete icon-danger"></i> Removed</span>';
+                        html = '<span><i class="fw fw-disabled icon-danger"></i> Removed</span>';
                         break;
                     case 'UNREACHABLE' :
                         html = '<span><i class="fw fw-warning icon-warning"></i> Unreachable</span>';
@@ -361,12 +361,12 @@ function loadDevices(searchType, searchParam) {
                 var portalUrl = $("#device-listing").data("portal-url");
                 var serverUrl = $("#device-listing").data("server-url");
                 var userDomain = $("#device-listing").data("userDomain");
+                var statusCode = row.status;
                 var statURL;
-                if (status != 'REMOVED') {
+                if (statusCode != 'REMOVED') {
                     html = '';
 
                     if (analyticsEnabled(row.deviceType)) {
-
                         // redirecting to respective analytics view depending on device configs
                         switch (getAnalyticsView(deviceType)) {
                             case "DAS" : { statURL =portalUrl + "/portal/t/"+ userDomain+ "/dashboards/android-iot/battery?owner=" +currentUser+"&deviceId=";break;}
@@ -405,17 +405,115 @@ function loadDevices(searchType, searchParam) {
                             + 'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
                             + '" data-devicename="' + row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Remove from group">'
                             + '<span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>'
-                            + '<i class="fw fw-delete fw-stack-1x"></i></span>'
+                            + '<i class="fw fw-disabled fw-stack-1x"></i></span>'
                             + '<span class="hidden-xs hidden-on-grid-view">Remove from group</span>';
                     } else {
                         html +=
                             '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view remove-device-link" '
+                            + 'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
+                            + '" data-devicename="' + row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Dis-enroll">'
+                            + '<span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>'
+                            + '<i class="fw fw-disabled fw-stack-1x"></i></span>'
+                            + '<span class="hidden-xs hidden-on-grid-view">Dis-enroll</span>';
+                    }
+                } else if (statusCode == 'REMOVED' && hasDeletePermission) {
+                    html = '';
+
+                    if (analyticsEnabled(row.deviceType)) {
+                        // redirecting to respective analytics view depending on device configs
+                        switch (getAnalyticsView(deviceType)) {
+                            case "DAS" : {
+                                statURL = portalUrl + "/portal/t/" + userDomain + "/dashboards/android-iot/battery?owner=" + currentUser + "&deviceId=";
+                                break;
+                            }
+                            default : {
+                                statURL = context + "/device/" + row.deviceType + "/analytics?deviceId="
+                            }
+                        }
+
+                        html += '<a href="' + statURL +
+                            deviceIdentifier + '&deviceName=' + row.name + '" ' + 'data-click-event="remove-form"' +
+                            ' class="btn padding-reduce-on-grid-view" data-placement="top" data-toggle="tooltip" data-original-title="Analytics"><span class="fw-stack">' +
+                            '<i class="fw fw-circle-outline fw-stack-2x"></i><i class="fw fw-statistics fw-stack-1x"></i></span>' +
+                            '<span class="hidden-xs hidden-on-grid-view">Analytics</span>';
+                    }
+
+                    if (!groupId && groupingEnabled(row.deviceType)) {
+                        html +=
+                            '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view group-device-link" '
+                            +
+                            'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
+                            + '" data-devicename="' +
+                            row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Group"><span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>' +
+                            '<i class="fw fw-group fw-stack-1x"></i></span>' +
+                            '<span class="hidden-xs hidden-on-grid-view">Group</span></a>';
+                    }
+
+                    html +=
+                        '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view edit-device-link" '
+                        + 'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
+                        + '" data-devicename="' + row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Edit">'
+                        + '<span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>'
+                        + '<i class="fw fw-edit fw-stack-1x"></i></span>'
+                        + '<span class="hidden-xs hidden-on-grid-view">Edit</span></a>';
+                    var groupOwner = $('#group_owner').text();
+                    if (groupId && groupOwner != "wso2.system.user") {
+                        html +=
+                            '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view delete-device-link" '
+                            + 'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
+                            + '" data-devicename="' + row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Remove from group">'
+                            + '<span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>'
+                            + '<i class="fw fw-delete fw-stack-1x"></i></span>'
+                            + '<span class="hidden-xs hidden-on-grid-view">Remove from group</span>';
+                    } else {
+                        html +=
+                            '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view delete-device-link" '
                             + 'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
                             + '" data-devicename="' + row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Delete">'
                             + '<span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>'
                             + '<i class="fw fw-delete fw-stack-1x"></i></span>'
                             + '<span class="hidden-xs hidden-on-grid-view">Delete</span>';
                     }
+                } else {
+                    html = '';
+
+                    if (analyticsEnabled(row.deviceType)) {
+                        // redirecting to respective analytics view depending on device configs
+                        switch (getAnalyticsView(deviceType)) {
+                            case "DAS" : {
+                                statURL = portalUrl + "/portal/t/" + userDomain + "/dashboards/android-iot/battery?owner=" + currentUser + "&deviceId=";
+                                break;
+                            }
+                            default : {
+                                statURL = context + "/device/" + row.deviceType + "/analytics?deviceId="
+                            }
+                        }
+
+                        html += '<a href="' + statURL +
+                            deviceIdentifier + '&deviceName=' + row.name + '" ' + 'data-click-event="remove-form"' +
+                            ' class="btn padding-reduce-on-grid-view" data-placement="top" data-toggle="tooltip" data-original-title="Analytics"><span class="fw-stack">' +
+                            '<i class="fw fw-circle-outline fw-stack-2x"></i><i class="fw fw-statistics fw-stack-1x"></i></span>' +
+                            '<span class="hidden-xs hidden-on-grid-view">Analytics</span>';
+                    }
+
+                    if (!groupId && groupingEnabled(row.deviceType)) {
+                        html +=
+                            '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view group-device-link" '
+                            +
+                            'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
+                            + '" data-devicename="' +
+                            row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Group"><span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>' +
+                            '<i class="fw fw-group fw-stack-1x"></i></span>' +
+                            '<span class="hidden-xs hidden-on-grid-view">Group</span></a>';
+                    }
+
+                    html +=
+                        '<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view edit-device-link" '
+                        + 'data-deviceid="' + deviceIdentifier + '" data-devicetype="' + deviceType
+                        + '" data-devicename="' + row.name + '" data-placement="top" data-toggle="tooltip" data-original-title="Edit">'
+                        + '<span class="fw-stack"><i class="fw fw-circle-outline fw-stack-2x"></i>'
+                        + '<i class="fw fw-edit fw-stack-1x"></i></span>'
+                        + '<span class="hidden-xs hidden-on-grid-view">Edit</span></a>';
                 }
                 return html;
             }
@@ -423,6 +521,11 @@ function loadDevices(searchType, searchParam) {
     ];
 
     var fnCreatedRow = function (row, data, dataIndex) {
+        if (data.status != "REMOVED") {
+            $(row).attr('data-type', 'selectable');
+        } else {
+            $(row).attr('data-type', 'non-selectable');
+        }
         var model = htmlspecialchars(getPropertyValue(data.properties, 'DEVICE_MODEL'));
         var vendor = htmlspecialchars(getPropertyValue(data.properties, 'VENDOR'));
         var owner = htmlspecialchars(data.userPattern);
@@ -789,6 +892,57 @@ function attachDeviceEvents() {
 
     /**
      * Following click function would execute
+     * when a user clicks on "Delete" link
+     * on Device Management page in Entgra MDM Console.
+     */
+    $("a.delete-device-link").click(function () {
+        var deviceIdentifiers = [];
+        var deviceId = $(this).data("deviceid");
+        if (deviceId) {
+            deviceIdentifiers = [deviceId];
+        } else {
+            var selectedDevices = getSelectedDevices();
+            if (selectedDevices.length == 0) {
+                $(modalPopupContent).html($('#no-device-selected').html());
+                $("a#no-device-selected-link").click(function () {
+                    hidePopup();
+                });
+                showPopup();
+                return;
+            } else {
+                var hasEnrolledDevice;
+                for (var i = 0; i < selectedDevices.length; i++) {
+                    if (selectedDevices[i].selectability == 'selectable') {
+                        hasEnrolledDevice = true;
+                        break;
+                    } else {
+                        deviceIdentifiers.push(selectedDevices[i].id);
+                    }
+                }
+                if (hasEnrolledDevice) {
+                    $(modalPopupContent).html($('#enrolled-device-delete-content').html());
+                    $("a#enrolled-device-delete-link").click(function () {
+                        hidePopup();
+                    });
+                    showPopup();
+                } else {
+                    $(modalPopupContent).html($('#delete-device-modal-content').html());
+                    showPopup();
+                }
+            }
+        }
+
+        $("a#delete-device-yes-link").click(function () {
+            deleteDevices(deviceIdentifiers);
+        });
+
+        $("a#delete-device-cancel-link").click(function () {
+            hidePopup();
+        });
+    });
+
+    /**
+     * Following click function would execute
      * when a user clicks on "Edit" link
      * on Device Management page in WSO2 MDM Console.
      */
@@ -1100,6 +1254,19 @@ function removeDevices(deviceIdentifiers) {
     });
 }
 
+function deleteDevices(deviceIdentifiers) {
+    var serviceURL = "/api/device-mgt/v1.0/admin/devices/permanent-delete";
+    invokerUtil.put(serviceURL, deviceIdentifiers, function (message) {
+        $(modalPopupContent).html($('#delete-device-200-content').html());
+        setTimeout(function () {
+            hidePopup();
+            location.reload(false);
+        }, 2000);
+    }, function (jqXHR) {
+        displayDeviceErrors(jqXHR);
+    });
+}
+
 function displayDeviceErrors(jqXHR) {
     showPopup();
     if (jqXHR.status == 400) {
@@ -1144,7 +1311,8 @@ function getSelectedDevices() {
             deviceList.push(
                 {
                     "id": $(thisTable.api().row(this).node()).data('deviceid'),
-                    "type": $(thisTable.api().row(this).node()).data('devicetype')
+                    "type": $(thisTable.api().row(this).node()).data('devicetype'),
+                    "selectability": $(thisTable.api().row(this).node()).data('type')
                 }
             );
         }
