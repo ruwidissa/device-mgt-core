@@ -83,6 +83,7 @@ class UserInstall extends React.Component {
     };
 
     install = (timestamp=null) => {
+        console.log(7);
         const {value} = this.state;
         const data = [];
         value.map(val => {

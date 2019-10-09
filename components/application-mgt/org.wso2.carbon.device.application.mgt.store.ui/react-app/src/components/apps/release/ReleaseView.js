@@ -43,6 +43,7 @@ class ReleaseView extends React.Component {
     }
 
     appOperation = (type, payload, operation, timestamp=null) => {
+        console.log(timestamp);
         const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
