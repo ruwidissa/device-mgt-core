@@ -47,7 +47,6 @@ class Pages extends React.Component {
 
     rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-            // console.lohhhg(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
             this.setState({
                 selectedRows: selectedRows
             })

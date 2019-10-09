@@ -17,12 +17,28 @@
  */
 
 import React from "react";
-import {Modal, Button, Icon, notification, Spin, Tooltip, Upload, Input, Switch, Form, Divider, Row, Col} from 'antd';
+import {
+    Modal,
+    Button,
+    Icon,
+    notification,
+    Spin,
+    Tooltip,
+    Upload,
+    Input,
+    Switch,
+    Form,
+    Divider,
+    Row,
+    Col,
+    Select
+} from 'antd';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {TextArea} = Input;
 const InputGroup = Input.Group;
+const {Option} = Select;
 
 const formItemLayout = {
     labelCol: {
@@ -32,6 +48,15 @@ const formItemLayout = {
         span: 16,
     },
 };
+
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
 
 class EditReleaseModal extends React.Component {
 
@@ -51,6 +76,8 @@ class EditReleaseModal extends React.Component {
                 specificElements: {}
             }
         };
+        this.lowerOsVersion = null;
+        this.upperOsVersion = null;
     }
 
     componentDidMount = () => {
@@ -117,15 +144,16 @@ class EditReleaseModal extends React.Component {
 
 
     showModal = () => {
+        const config = this.props.context;
         const {app, release} = this.props;
         const {formConfig} = this.state;
         const {specificElements} = formConfig;
         let metaData = [];
-        
-        try{
-            metaData =JSON.parse(release.metaData);
-        }catch (e) {
-            
+
+        try {
+            metaData = JSON.parse(release.metaData);
+        } catch (e) {
+
         }
 
         this.props.form.setFields({
@@ -143,14 +171,19 @@ class EditReleaseModal extends React.Component {
             }
         });
 
-        // if (specificElements.hasOwnProperty("packageName")) {
-        //     this.props.form.setFields({
-        //         packageName: {
-        //             value: app.packageName
-        //         }
-        //     });
-        // }
-
+        if ((config.deviceTypes.mobileTypes.includes(this.props.deviceType))) {
+            const osVersions = release.supportedOsVersions.split("-");
+            this.lowerOsVersion = osVersions[0];
+            this.upperOsVersion = osVersions[1];
+            this.props.form.setFields({
+                lowerOsVersion: {
+                    value: osVersions[0]
+                },
+                upperOsVersion: {
+                    value: osVersions[1]
+                }
+            });
+        }
         if (specificElements.hasOwnProperty("version")) {
             this.props.form.setFields({
                 version: {
@@ -232,8 +265,11 @@ class EditReleaseModal extends React.Component {
                     isSharedWithAllTenants,
                     metaData: JSON.stringify(this.state.metaData),
                     releaseType: releaseType,
-                    supportedOsVersions: "4-30"
                 };
+
+                if ((config.deviceTypes.mobileTypes.includes(this.props.deviceType))) {
+                    release.supportedOsVersions = `${this.lowerOsVersion}-${this.upperOsVersion}`;
+                }
 
                 if (specificElements.hasOwnProperty("binaryFile") && binaryFiles.length === 1) {
                     data.append('binaryFile', binaryFiles[0].originFileObj);
@@ -322,10 +358,50 @@ class EditReleaseModal extends React.Component {
         })
     };
 
+    handlePreviewCancel = () => this.setState({previewVisible: false});
+
+    handlePreview = async file => {
+        if (!file.url && !file.preview) {
+            file.preview = await getBase64(file.originFileObj);
+        }
+
+        this.setState({
+            previewImage: file.url || file.preview,
+            previewVisible: true,
+        });
+    };
+
+    handleLowerOsVersionChange = (lowerOsVersion) => {
+        this.lowerOsVersion = lowerOsVersion;
+    };
+
+    handleUpperOsVersionChange = (upperOsVersion) => {
+        this.upperOsVersion = upperOsVersion;
+    };
+
     render() {
-        const {formConfig, icons, screenshots, loading, binaryFiles, metaData} = this.state;
+        const {
+            formConfig,
+            icons,
+            screenshots,
+            loading,
+            binaryFiles,
+            metaData,
+            previewImage,
+            previewVisible,
+            binaryFileHelperText,
+            iconHelperText,
+            screenshotHelperText
+        } = this.state;
         const {getFieldDecorator} = this.props.form;
-        const {isAppUpdatable} = this.props;
+        const {isAppUpdatable, supportedOsVersions, deviceType} = this.props;
+        const config = this.props.context;
+        const uploadButton = (
+            <div>
+                <Icon type="plus"/>
+                <div className="ant-upload-text">Select</div>
+            </div>
+        );
 
         return (
             <div>
@@ -340,8 +416,8 @@ class EditReleaseModal extends React.Component {
                     title="Edit release"
                     visible={this.state.visible}
                     footer={null}
-                    onCancel={this.handleCancel}
-                >
+                    width={580}
+                    onCancel={this.handleCancel}>
                     <div>
                         <Spin tip="Uploading..." spinning={loading}>
                             <Form labelAlign="left" layout="horizontal"
@@ -369,19 +445,6 @@ class EditReleaseModal extends React.Component {
                                         )}
                                     </Form.Item>
                                 )}
-
-                                {/*{formConfig.specificElements.hasOwnProperty("packageName") && (*/}
-                                {/*    <Form.Item {...formItemLayout} label="Package Name">*/}
-                                {/*        {getFieldDecorator('packageName', {*/}
-                                {/*            rules: [{*/}
-                                {/*                required: true,*/}
-                                {/*                message: 'Please input the package name'*/}
-                                {/*            }],*/}
-                                {/*        })(*/}
-                                {/*            <Input placeholder="Package Name"/>*/}
-                                {/*        )}*/}
-                                {/*    </Form.Item>*/}
-                                {/*)}*/}
 
                                 {formConfig.specificElements.hasOwnProperty("url") && (
                                     <Form.Item {...formItemLayout} label="URL">
@@ -418,18 +481,14 @@ class EditReleaseModal extends React.Component {
                                     })(
                                         <Upload
                                             name="logo"
+                                            listType="picture-card"
                                             onChange={this.handleIconChange}
                                             beforeUpload={() => false}
-                                        >
-                                            {icons.length !== 1 && (
-                                                <Button>
-                                                    <Icon type="upload"/> Change
-                                                </Button>
-                                            )}
+                                            onPreview={this.handlePreview}>
+                                            {icons.length === 1 ? null : uploadButton}
                                         </Upload>,
                                     )}
                                 </Form.Item>
-
 
                                 <Form.Item {...formItemLayout} label="Screenshots">
                                     {getFieldDecorator('screenshots', {
@@ -440,15 +499,11 @@ class EditReleaseModal extends React.Component {
                                     })(
                                         <Upload
                                             name="screenshots"
+                                            listType="picture-card"
                                             onChange={this.handleScreenshotChange}
                                             beforeUpload={() => false}
-                                            multiple
-                                        >
-                                            {screenshots.length < 3 && (
-                                                <Button>
-                                                    <Icon type="upload"/> Click to upload
-                                                </Button>
-                                            )}
+                                            onPreview={this.handlePreview}>
+                                            {screenshots.length >= 3 ? null : uploadButton}
                                         </Upload>,
                                     )}
                                 </Form.Item>
@@ -475,7 +530,65 @@ class EditReleaseModal extends React.Component {
                                                   rows={5}/>
                                     )}
                                 </Form.Item>
+                                {(config.deviceTypes.mobileTypes.includes(deviceType)) && (
+                                    <Form.Item {...formItemLayout} label="Supported OS Versions">
+                                        {getFieldDecorator('supportedOS')(
+                                            <div>
+                                                <InputGroup>
+                                                    <Row gutter={8}>
+                                                        <Col span={11}>
+                                                            <Form.Item>
+                                                                {getFieldDecorator('lowerOsVersion', {
+                                                                    rules: [{
+                                                                        required: true,
+                                                                        message: 'Please select Value'
+                                                                    }],
+                                                                })(
+                                                                    <Select
+                                                                        placeholder="Lower version"
+                                                                        style={{width: "100%"}}
+                                                                        onChange={this.handleLowerOsVersionChange}>
+                                                                        {supportedOsVersions.map(version => (
+                                                                            <Option key={version.versionName}
+                                                                                    value={version.versionName}>
+                                                                                {version.versionName}
+                                                                            </Option>
+                                                                        ))}
+                                                                    </Select>
+                                                                )}
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col span={2}>
+                                                            <p> - </p>
+                                                        </Col>
+                                                        <Col span={11}>
+                                                            <Form.Item>
+                                                                {getFieldDecorator('upperOsVersion', {
+                                                                    rules: [{
+                                                                        required: true,
+                                                                        message: 'Please select Value'
+                                                                    }],
+                                                                })(
+                                                                    <Select style={{width: "100%"}}
+                                                                            placeholder="Upper version"
+                                                                            onChange={this.handleUpperOsVersionChange}>
+                                                                        {supportedOsVersions.map(version => (
+                                                                            <Option key={version.versionName}
+                                                                                    value={version.versionName}>
+                                                                                {version.versionName}
+                                                                            </Option>
+                                                                        ))}
+                                                                    </Select>
+                                                                )}
+                                                            </Form.Item>
 
+                                                        </Col>
+                                                    </Row>
+                                                </InputGroup>
+                                            </div>
+                                        )}
+                                    </Form.Item>
+                                )}
                                 <Form.Item {...formItemLayout} label="Price">
                                     {getFieldDecorator('price', {
                                         rules: [{
@@ -575,6 +688,9 @@ class EditReleaseModal extends React.Component {
                             </Form>
                         </Spin>
                     </div>
+                    <Modal visible={previewVisible} footer={null} onCancel={this.handlePreviewCancel}>
+                        <img alt="Preview Image" style={{width: '100%'}} src={previewImage}/>
+                    </Modal>
                 </Modal>
             </div>
         );

@@ -88,7 +88,7 @@ class GroupUninstall extends React.Component {
         value.map(val=>{
             data.push(val.key);
         });
-        this.props.onUninstall("group", data, "uninstall",null);
+        this.props.onUninstall("group", data, "uninstall",timestamp);
     };
 
     render() {

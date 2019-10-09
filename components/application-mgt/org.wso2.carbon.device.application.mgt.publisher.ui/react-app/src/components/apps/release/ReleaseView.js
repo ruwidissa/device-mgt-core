@@ -28,6 +28,13 @@ import {withConfigContext} from "../../../context/ConfigContext";
 const {Title, Text, Paragraph} = Typography;
 
 class ReleaseView extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+
+        }
+    }
+
     render() {
         const {app, release} = this.props;
         const config = this.props.context;
@@ -88,8 +95,10 @@ class ReleaseView extends React.Component {
                             <EditRelease
                                 isAppUpdatable={isAppUpdatable}
                                 type={app.type}
+                                deviceType={app.deviceType}
                                 release={release}
                                 updateRelease={this.props.updateRelease}
+                                supportedOsVersions={[...this.props.supportedOsVersions]}
                             />
 
                         </Col>

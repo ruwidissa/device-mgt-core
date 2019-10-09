@@ -39,7 +39,8 @@ class Release extends React.Component {
             uuid: null,
             release: null,
             currentLifecycleStatus: null,
-            lifecycle: null
+            lifecycle: null,
+            supportedOsVersions:[]
         };
     }
 
@@ -85,14 +86,17 @@ class Release extends React.Component {
                     loading: false,
                     uuid: uuid
                 });
+                if(config.deviceTypes.mobileTypes.includes(app.deviceType)){
+                    this.getSupportedOsVersions(app.deviceType);
+                }else{
+                    this.getLifecycle();
+                }
             }
 
         }).catch((error) => {
             handleApiError(error, "Error occurred while trying to load the release.");
             this.setState({loading: false});
         });
-
-        this.getLifecycle();
     };
 
     getLifecycle = () => {
@@ -109,6 +113,28 @@ class Release extends React.Component {
 
         }).catch(function (error) {
             handleApiError(error, "Error occurred while trying to load lifecycle configuration.");
+        });
+    };
+
+    getSupportedOsVersions = (deviceType) => {
+        const config = this.props.context;
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
+            `/admin/device-types/${deviceType}/versions`
+        ).then(res => {
+            if (res.status === 200) {
+                let supportedOsVersions = JSON.parse(res.data.data);
+                this.setState({
+                    supportedOsVersions,
+                    loading: false,
+                });
+                this.getLifecycle();
+            }
+        }).catch((error) => {
+            handleApiError(error, "Error occurred while trying to load supported OS versions.");
+            this.setState({
+                loading: false
+            });
         });
     };
 
@@ -138,6 +164,7 @@ class Release extends React.Component {
                                             currentLifecycleStatus={currentLifecycleStatus}
                                             lifecycle={lifecycle}
                                             updateRelease={this.updateRelease}
+                                            supportedOsVersions = {[...this.state.supportedOsVersions]}
                                         />)
                                     }
                                 </Skeleton>

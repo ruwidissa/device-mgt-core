@@ -46,6 +46,14 @@ class InstallModalFooter extends React.Component{
         })
     };
 
+    triggerInstallOperation = () =>{
+        this.props.operation();
+    };
+    triggerScheduledInstallOperation = () =>{
+        const {scheduledTime} =this.state;
+        this.props.operation(scheduledTime);
+    };
+
     render() {
         const {scheduledTime,isScheduledInstallVisible} =this.state;
         const {disabled, type} = this.props;
@@ -56,7 +64,7 @@ class InstallModalFooter extends React.Component{
                   display: (!isScheduledInstallVisible)?'block':'none'
               }}>
                   <Button style={{margin: 5}} disabled={disabled} htmlType="button" type="primary"
-                          onClick={this.props.operation}>
+                          onClick={this.triggerInstallOperation}>
                       {type}
                   </Button>
                   <Button style={{margin: 5}} disabled={disabled} htmlType="button"
@@ -76,9 +84,7 @@ class InstallModalFooter extends React.Component{
                           style={{margin: 5}}
                           htmlType="button"
                           type="primary"
-                          onClick={()=>{
-                              this.props.operation(scheduledTime);
-                          }}>
+                          onClick={this.triggerScheduledInstallOperation}>
                       Schedule
                   </Button>
                   <Button style={{margin: 5}} htmlType="button"
