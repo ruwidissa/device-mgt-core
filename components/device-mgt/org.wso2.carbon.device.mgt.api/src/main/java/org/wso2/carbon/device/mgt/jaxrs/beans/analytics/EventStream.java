@@ -17,10 +17,9 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
 
-import com.sun.istack.NotNull;
 import io.swagger.annotations.ApiModelProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,12 +36,13 @@ public class EventStream {
     @ApiModelProperty(value = "Stream description")
     private String description;
     @ApiModelProperty(value = "Meta attribute list")
-    private List<Attribute> metaData;
+    private List<Attribute> metaData = new ArrayList<>();
     @ApiModelProperty(value = "Correlation attribute list")
-    private List<Attribute> correlationData;
+    private List<Attribute> correlationData = new ArrayList<>();
     @ApiModelProperty(value = "Payload attribute list")
-    private List<Attribute> payloadData;
-    @ApiModelProperty(value = "Stream definition") @NotNull @NotEmpty
+    private List<Attribute> payloadData = new ArrayList<>();
+
+    @ApiModelProperty(value = "Stream definition")
     private String definition;
 
     public String getName() {

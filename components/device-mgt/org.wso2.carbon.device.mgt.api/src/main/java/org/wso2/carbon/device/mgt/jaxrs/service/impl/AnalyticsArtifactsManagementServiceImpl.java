@@ -18,6 +18,7 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterMappingConfiguration;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MappingProperty;
@@ -27,6 +28,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MessageFormat;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.SiddhiExecutionPlan;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventPublisher;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventReceiver;
+import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
 import org.wso2.carbon.device.mgt.jaxrs.exception.ErrorDTO;
 import org.wso2.carbon.device.mgt.jaxrs.exception.InvalidExecutionPlanException;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.AnalyticsArtifactsManagementService;
@@ -58,7 +60,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.List;
 
@@ -67,14 +68,10 @@ import java.util.List;
  * siddhi scripts to the Analytics server as Artifacts
  */
 @Path("/analytics/artifacts")
-public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifactsManagementService {
+public class AnalyticsArtifactsManagementServiceImpl
+        implements AnalyticsArtifactsManagementService {
     private static final Log log = LogFactory.getLog(AnalyticsArtifactsManagementServiceImpl.class);
 
-    /**
-     * @param stream EventStream object with the properties of the stream
-     * @return A status code depending on the code result
-     * Function - Used to deploy stream as an artifact using a String
-     */
     @Override
     @POST
     @Path("/stream/{id}")
@@ -84,7 +81,7 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         EventStreamAdminServiceStub eventStreamAdminServiceStub = null;
         try {
-            String streamDefinition = new String(stream.getDefinition().getBytes(), StandardCharsets.UTF_8);
+            String streamDefinition = stream.getDefinition();
             eventStreamAdminServiceStub = DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
             if (!isEdited) {
                 eventStreamAdminServiceStub.addEventStreamDefinitionAsString(streamDefinition);
@@ -112,34 +109,14 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         }
     }
 
-    /**
-     * @param stream EventStream object with the properties of the stream
-     * @return A status code depending on the code result
-     * Function - Used to deploy stream as an artifact using a DTO
-     */
     @Override
     @POST
     @Path("/stream")
     public Response deployEventDefinitionAsDto(@Valid EventStream stream) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        // Categorize attributes to three lists depending on their type
-        List<Attribute> metaData = stream.getMetaData();
-        List<Attribute> payloadData = stream.getPayloadData();
-        List<Attribute> correlationData = stream.getCorrelationData();
-
         try {
-            /* Conditions
-             * - At least one list should always be not null
-             */
-            if (metaData == null && correlationData == null && payloadData == null) {
-                log.error("Invalid payload: event attributes");
-                return Response.status(Response.Status.BAD_REQUEST).build();
-
-            } else {
-                // Publish the event stream
-                publishStream(stream, metaData, correlationData, payloadData);
-                return Response.ok().build();
-            }
+            publishStream(stream);
+            return Response.ok().build();
         } catch (AxisFault e) {
             log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -155,13 +132,6 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         }
     }
 
-    /**
-     * @param name     Receiver name
-     * @param isEdited If receiver is created or edited
-     * @param receiver Receiver object with the properties of the receiver
-     * @return A status code depending on the code result
-     * Function - Used to deploy receiver as an artifact using a String
-     */
     @Override
     @POST
     @Path("/receiver/{name}")
@@ -194,11 +164,6 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return Response.ok().entity(name).build();
     }
 
-    /**
-     * @param receiver Receiver object with the properties of the receiver
-     * @return A status code depending on the code result
-     * Function - Used to deploy receiver as an artifact using a DTO
-     */
     @Override
     @POST
     @Path("/receiver")
@@ -260,13 +225,6 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         }
     }
 
-    /**
-     * @param name      Publisher name
-     * @param isEdited  If receiver is created or edited
-     * @param publisher Publisher object with the properties of the publisher
-     * @return A status code depending on the code result
-     * Function - Used to deploy publisher as an artifact using a String
-     */
     @Override
     @POST
     @Path("/publisher/{name}")
@@ -301,11 +259,6 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return Response.ok().entity(publisher).build();
     }
 
-    /**
-     * @param publisher Publisher object with the properties of the publisher
-     * @return A status code depending on the code result
-     * Function - Used to deploy publisher as an artifact using a DTO
-     */
     @Override
     @POST
     @Path("/publisher")
@@ -367,13 +320,6 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         }
     }
 
-    /**
-     * @param name     Siddhi plan name
-     * @param isEdited If receiver is created or edited
-     * @param plan     Siddhi plan definition
-     * @return a status code depending on the code execution
-     * Function - Used to deploy Siddhi script as an artifact using a String
-     */
     @Override
     @POST
     @Path("/siddhi-script/{name}")
@@ -403,17 +349,25 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
     }
 
     /**
+     * Set data to a stream dto and publish dto using a stub
+     *
      * @param stream          Stream definition
-     * @param metaData        Meta attributes of the stream
-     * @param correlationData Correlation attributes of the stream
-     * @param payloadData     Payload attributes of the stream
-     * @throws RemoteException    exception that may occur during a remote method call
-     * @throws UserStoreException exception that may occur during JWT token generation
-     * @throws JWTClientException exception that may occur during connecting to client store
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
      */
-    private void publishStream(EventStream stream, List<Attribute> metaData,
-                               List<Attribute> correlationData, List<Attribute> payloadData)
+    private void publishStream(EventStream stream)
             throws RemoteException, UserStoreException, JWTClientException {
+        List<Attribute> metaData = stream.getMetaData();
+        List<Attribute> payloadData = stream.getPayloadData();
+        List<Attribute> correlationData = stream.getCorrelationData();
+        if (metaData.isEmpty() && correlationData.isEmpty() && payloadData.isEmpty()) {
+            String errMsg = "Invalid payload: event mapping attributes invalid!!!";
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setMessage(errMsg);
+            log.error(errMsg);
+            throw new BadRequestException(errorResponse);
+        }
         EventStreamAdminServiceStub eventStreamAdminServiceStub =
                 DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
         try {
@@ -438,6 +392,8 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
     }
 
     /**
+     * Set data to a receiver dto and publish dto using a stub
+     *
      * @param receiverName                 Receiver name
      * @param adapterType                  Receiver type
      * @param adapterProperties            Receiver properties
@@ -449,9 +405,9 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
      * @param metaMappingProperties        Receiver meta attribute mapping
      * @param messageFormat                Receiver mapping format
      * @param eventStreamWithVersion       Attached stream
-     * @throws RemoteException    exception that may occur during a remote method call
-     * @throws UserStoreException exception that may occur during JWT token generation
-     * @throws JWTClientException exception that may occur during connecting to client store
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
      */
     private void publishReceiver(String receiverName, String adapterType,
                                  List<AdapterProperty> adapterProperties, boolean customMapping,
@@ -525,6 +481,8 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
     }
 
     /**
+     * Set data to a publisher dto and publish dto using a stub
+     *
      * @param publisherName                Publisher name
      * @param adapterType                  Publisher type
      * @param adapterProperties            Publisher properties
@@ -534,9 +492,9 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
      * @param metaMappingProperties        Publisher meta attribute mapping
      * @param messageFormat                Publisher mapping format
      * @param eventStreamWithVersion       Attached stream
-     * @throws RemoteException    exception that may occur during a remote method call
-     * @throws UserStoreException exception that may occur during JWT token generation
-     * @throws JWTClientException exception that may occur during connecting to client store
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
      */
     private void publishPublisher(String publisherName, String adapterType,
                                   List<AdapterProperty> adapterProperties,
@@ -611,13 +569,15 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
     }
 
     /**
-     * @param name     plan name
-     * @param isEdited is plan edited
-     * @param plan     plan data
-     * @throws RemoteException               exception that may occur during a remote method call
-     * @throws UserStoreException            exception that may occur during JWT token generation
-     * @throws JWTClientException            exception that may occur during connecting to client store
-     * @throws InvalidExecutionPlanException exception that may occur if execution plan validation fails
+     * Publish a siddhi execution plan using a stub
+     *
+     * @param name     Plan name
+     * @param isEdited Is plan edited
+     * @param plan     Plan data
+     * @throws RemoteException               Exception that may occur during a remote method call
+     * @throws UserStoreException            Exception that may occur during JWT token generation
+     * @throws JWTClientException            Exception that may occur during connecting to client store
+     * @throws InvalidExecutionPlanException Exception that may occur if execution plan validation fails
      */
     private void publishSiddhiExecutionPlan(String name, boolean isEdited,
                                             String plan)
@@ -646,6 +606,12 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         }
     }
 
+    /**
+     * This will set payload of event attributes to the DTO
+     *
+     * @param attributes list of event attributes
+     * @return DTO with all the event attributes
+     */
     private EventStreamAttributeDto[] addEventAttributesToDto(List<Attribute> attributes) {
         EventStreamAttributeDto[] eventStreamAttributeDtos = new EventStreamAttributeDto[attributes.size()];
         for (int i = 0; i < attributes.size(); i++) {
@@ -657,7 +623,12 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return eventStreamAttributeDtos;
     }
 
-
+    /**
+     * This will set payload of receiver attributes to the DTO
+     *
+     * @param adapterProperties List of receiver attributes
+     * @return DTO with all the receiver attributes
+     */
     private BasicInputAdapterPropertyDto[] addReceiverConfigToDto(
             List<AdapterProperty> adapterProperties) {
         BasicInputAdapterPropertyDto[] basicInputAdapterPropertyDtos
@@ -671,6 +642,12 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return basicInputAdapterPropertyDtos;
     }
 
+    /**
+     * This will set payload of receiver mapping attributes to the DTO
+     *
+     * @param mapProperties List of receiver mapping attributes
+     * @return DTO with all the receiver mapping attributes
+     */
     private EventMappingPropertyDto[] addReceiverMappingToDto(List<MappingProperty> mapProperties) {
         EventMappingPropertyDto[] eventMappingPropertyDtos = new EventMappingPropertyDto[mapProperties.size()];
         for (int i = 0; i < mapProperties.size(); i++) {
@@ -683,6 +660,12 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return eventMappingPropertyDtos;
     }
 
+    /**
+     * This will set payload of publisher attributes to the DTO
+     *
+     * @param adapterProperties List of publisher attributes
+     * @return DTO with all the publisher attributes
+     */
     private BasicOutputAdapterPropertyDto[] addPublisherConfigToDto(
             List<AdapterProperty> adapterProperties) {
         BasicOutputAdapterPropertyDto[] basicOutputAdapterPropertyDtos =
@@ -697,8 +680,14 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return basicOutputAdapterPropertyDtos;
     }
 
+    /**
+     * This will set payload of publisher mapping attributes to the DTO
+     *
+     * @param mapProperties List of publisher mapping attributes
+     * @return DTO with all the publisher mapping attributes
+     */
     private org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] addPublisherMappingToDto
-            (List<MappingProperty> mapProperties) {
+    (List<MappingProperty> mapProperties) {
         org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] eventMappingPropertyDtos
                 = new org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[mapProperties.size()];
         for (int i = 0; i < mapProperties.size(); i++) {
@@ -712,6 +701,11 @@ public class AnalyticsArtifactsManagementServiceImpl implements AnalyticsArtifac
         return eventMappingPropertyDtos;
     }
 
+    /**
+     * Clean Service client in the stub
+     *
+     * @param stub Stud that needs to be cleaned
+     */
     private void cleanup(Stub stub) {
         if (stub != null) {
             try {
