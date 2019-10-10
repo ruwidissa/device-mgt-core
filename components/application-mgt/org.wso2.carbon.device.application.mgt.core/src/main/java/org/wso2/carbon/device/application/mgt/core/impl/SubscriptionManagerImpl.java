@@ -686,6 +686,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                         app.setType(mobileAppType);
+                        app.setAppIdentifier(application.getPackageName());
                         return MDMAndroidOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
@@ -706,6 +707,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         app.setProperties(properties);
                         return MDMIOSOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
+                        app.setType(mobileAppType);
+                        app.setAppIdentifier(application.getPackageName());
                         return MDMIOSOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
@@ -713,35 +716,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         throw new ApplicationManagementException(msg);
                     }
                 } else {
-                    if (ApplicationType.CUSTOM.toString().equalsIgnoreCase(application.getType())) {
-                        if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                            ProfileOperation operation = new ProfileOperation();
-                            operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_INSTALL_APPLICATION);
-                            operation.setType(Operation.Type.PROFILE);
-                            CustomApplication customApplication = new CustomApplication();
-                            customApplication.setType(application.getType());
-                            customApplication.setUrl(application.getApplicationReleases().get(0).getInstallerPath());
-                            operation.setPayLoad(customApplication.toJSON());
-                            return operation;
-                        } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                            ProfileOperation operation = new ProfileOperation();
-                            operation.setCode(MDMAppConstants.AndroidConstants.OPCODE_UNINSTALL_APPLICATION);
-                            operation.setType(Operation.Type.PROFILE);
-                            CustomApplication customApplication = new CustomApplication();
-                            customApplication.setType(application.getType());
-                            //todo get application package name and set
-                            operation.setPayLoad(customApplication.toJSON());
-                            return MDMAndroidOperationUtil.createAppUninstallOperation(app);
-                        } else {
-                            String msg = "Invalid Action is found. Action: " + action;
-                            log.error(msg);
-                            throw new ApplicationManagementException(msg);
-                        }
-                    } else {
-                        String msg = "Invalid device type is found. Device Type: " + deviceType;
-                        log.error(msg);
-                        throw new ApplicationManagementException(msg);
-                    }
+                    String msg = "Invalid device type is found. Device Type: " + deviceType;
+                    log.error(msg);
+                    throw new ApplicationManagementException(msg);
                 }
             }
         } catch (UnknownApplicationTypeException e) {
