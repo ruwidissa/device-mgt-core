@@ -122,12 +122,12 @@ class ReleaseView extends React.Component {
                         </Col>
                     </Row>
                     <Divider/>
-                    <Row>
+                    <Row className="release-images">
                         {release.screenshots.map((screenshotUrl) => {
                             return (
-                                <Col key={"col-" + screenshotUrl} lg={6} md={8} xs={8} className="release-screenshot">
+                                <div key={"col-" + screenshotUrl} className="release-screenshot">
                                     <img key={screenshotUrl} src={screenshotUrl}/>
-                                </Col>
+                                </div>
                             )
                         })}
                     </Row>
