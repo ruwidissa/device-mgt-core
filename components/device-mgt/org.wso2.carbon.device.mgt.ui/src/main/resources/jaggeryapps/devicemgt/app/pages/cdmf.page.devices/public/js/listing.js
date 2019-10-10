@@ -932,6 +932,9 @@ function attachDeviceEvents() {
             }
         }
 
+        $(modalPopupContent).html($('#delete-device-modal-content').html());
+        showPopup();
+
         $("a#delete-device-yes-link").click(function () {
             deleteDevices(deviceIdentifiers);
         });
