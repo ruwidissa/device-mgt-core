@@ -32,14 +32,15 @@ class BulkActionBar extends React.Component {
 
     //This method checks whether NON-REMOVED devices are selected
     onDeleteDeviceCall = () => {
-        let i;
-        for(i=0; i < this.props.selectedRows.length; i++){
+        let tempDeleteState;
+        for(let i=0; i < this.props.selectedRows.length; i++){
             if(this.props.selectedRows[i].enrolmentInfo.status != "REMOVED"){
-                this.setState({canDelete:false});
+                tempDeleteState = false;
                 break;
             }
-            this.setState({canDelete:true});
+            tempDeleteState = true;
         }
+        this.setState({canDelete:tempDeleteState})
     };
 
     onConfirmDelete = () => {
@@ -52,13 +53,16 @@ class BulkActionBar extends React.Component {
         //TODO: Implement disenrollment function
     };
 
+    onDeviceGroupCall = () => {
+        this.props.getGroups();
+    }
+
     render() {
         const isSelected = this.props.selectedRows.length > 0;
         const isSelectedSingle = this.props.selectedRows.length == 1;
 
         return (
-            <div
-                style={{display: isSelected ? "inline" : "none", padding: '11px'}}>
+            <div style={{display: isSelected ? "inline" : "none", padding: '11px'}}>
 
                 <Tooltip
                     placement="bottom"
@@ -97,9 +101,20 @@ class BulkActionBar extends React.Component {
                             shape="circle"
                             icon="close"
                             size={'default'}
-                            disabled={isSelectedSingle ? false : true}
-                            style={{margin: "2px"}}/>
+                            style={{display:isSelectedSingle ? "inline" : "none", margin: "2px"}}/>
                     </Popconfirm>
+                </Tooltip>
+                <Divider type="vertical" style={{display:isSelectedSingle ? "inline-block" : "none"}}/>
+                <Tooltip placement="bottom" title={"Add to group"}>
+
+                        <Button
+                            type="link"
+                            shape="circle"
+                            icon="deployment-unit"
+                            size={'default'}
+                            onClick={this.onDeviceGroupCall}
+                            style={{margin: "2px"}}/>
+
                 </Tooltip>
             </div>
         )

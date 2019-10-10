@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Button} from "antd";
+import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Button, Modal, Select} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -112,18 +112,7 @@ const columns = [
             return <Tooltip title={new Date(dateOfLastUpdate).toString()}>{timeAgoString}</Tooltip>;
         }
         // todo add filtering options
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: () => (
-            <span>
-                <a><Icon type="edit"/></a>
-                <Divider type="vertical"/>
-                <a><Text type="danger"><Icon type="delete"/></Text></a>
-            </span>
-        ),
-    },
+    }
 ];
 
 const getTimeAgo = (time) => {
@@ -142,7 +131,9 @@ class DeviceTable extends React.Component {
             pagination: {},
             loading: false,
             selectedRows: [],
-            deviceIds: []
+            deviceGroups: [],
+            groupModalVisible: false,
+            selectedGroupId: []
         };
     }
 
@@ -151,7 +142,6 @@ class DeviceTable extends React.Component {
             this.setState({
                 selectedRows: selectedRows
             });
-            this.state.deviceIds = selectedRows.map(obj => obj.deviceIdentifier);
         }
     };
 
@@ -212,7 +202,7 @@ class DeviceTable extends React.Component {
         const config = this.props.context;
         this.setState({loading: true});
 
-        const deviceData = this.state.deviceIds;
+        const deviceData = this.state.selectedRows.map(obj => obj.deviceIdentifier);
 
         //send request to the invoker
         axios.put(
@@ -243,6 +233,126 @@ class DeviceTable extends React.Component {
         });
     };
 
+    addDevicesToGroup = (groupId) => {
+        const config = this.props.context;
+        this.setState({loading: true});
+
+        let apiUrl;
+        let deviceData;
+        if (this.state.selectedRows.length === 1) {
+            apiUrl = window.location.origin + config.serverConfig.invoker.uri +
+                config.serverConfig.invoker.deviceMgt +
+                "/groups/device/assign";
+            deviceData = {
+                deviceIdentifier: {
+                    id: this.state.selectedRows[0].deviceIdentifier,
+                    type: this.state.selectedRows[0].type
+                },
+                deviceGroupIds: groupId
+            }
+        } else if (!groupId[0]){
+            apiUrl = window.location.origin + config.serverConfig.invoker.uri +
+                config.serverConfig.invoker.deviceMgt +
+                "/groups/id/" + groupId + "/devices/add";
+            deviceData = this.state.selectedRows.map(obj => ({id: obj.deviceIdentifier, type: obj.type}));
+        } else{
+            apiUrl = window.location.origin + config.serverConfig.invoker.uri +
+                config.serverConfig.invoker.deviceMgt +
+                "/groups/id/" + groupId[0] + "/devices/add";
+            deviceData = this.state.selectedRows.map(obj => ({id: obj.deviceIdentifier, type: obj.type}));
+        }
+
+        //send request to the invoker
+        axios.post(
+            apiUrl,
+            deviceData,
+            {headers: {'Content-Type': 'application/json'}}
+        ).then(res => {
+            if (res.status === 200) {
+                this.setState({
+                    loading: false
+                });
+                notification["success"]({
+                    message: "Done",
+                    duration: 4,
+                    description:
+                        "Successfully added to the device group.",
+                });
+            }
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = window.location.origin + '/entgra/login';
+            } else {
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while adding to the device group.",
+                });
+            }
+
+            this.setState({loading: false});
+        });
+    };
+
+    getGroups = () => {
+        this.setState({
+            groupModalVisible: true
+        });
+        //send request to the invoker
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
+            "/groups"
+        ).then(res => {
+            this.setState({deviceGroups: res.data.data.deviceGroups})
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = window.location.origin + '/entgra/login';
+            } else {
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while retrieving device groups.",
+                });
+            }
+
+            this.setState({loading: false});
+        });
+    };
+
+    handleOk = e => {
+        if(this.state.selectedGroupId){
+            this.addDevicesToGroup(this.state.selectedGroupId);
+            this.setState({
+                groupModalVisible: false
+            });
+        }else{
+            notification["error"]({
+                message: "There was a problem",
+                duration: 0,
+                description:
+                    "Please select a group.",
+            });
+        }
+
+    };
+
+    handleCancel = e => {
+        this.setState({
+            groupModalVisible: false,
+        });
+    };
+
+    onGroupSelectChange = (value) => {
+        this.setState({selectedGroupId: value});
+    };
+
     handleTableChange = (pagination, filters, sorter) => {
         const pager = {...this.state.pagination};
         pager.current = pagination.current;
@@ -260,10 +370,20 @@ class DeviceTable extends React.Component {
 
     render() {
         const {data, pagination, loading, selectedRows} = this.state;
+
+        const isSelectedSingle = this.state.selectedRows.length == 1;
+
+        let item = this.state.deviceGroups.map((data) =>
+            <Select.Option
+                value={data.id}
+                key={data.id}>
+                {data.name}
+            </Select.Option>);
         return (
             <div>
                 <BulkActionBar
                     deleteDevice={this.deleteDevice}
+                    getGroups={this.getGroups}
                     selectedRows={this.state.selectedRows}/>
                 <div>
                     <Table
@@ -283,6 +403,25 @@ class DeviceTable extends React.Component {
                         scroll={{x: 1000}}
                     />
                 </div>
+
+                <Modal
+                    title="Grouping Devices"
+                    width="350px"
+                    visible={this.state.groupModalVisible}
+                    onOk={this.handleOk}
+                    onCancel={this.handleCancel}
+                >
+                    <Select
+                        mode={isSelectedSingle ? "multiple" : "default"}
+                        showSearch
+                        style={{width: 200}}
+                        placeholder="Select Group"
+                        optionFilterProp="children"
+                        onChange={this.onGroupSelectChange}
+                    >
+                        {item}
+                    </Select>
+                </Modal>
             </div>
         );
     }
