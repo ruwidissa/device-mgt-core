@@ -23,6 +23,7 @@ public class HandlerConstants {
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
     public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/config/ui-config";
     public static final String TOKEN_ENDPOINT = "/token";
+    public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String LOGIN_PAGE = "/login";
     public static final String BASIC = "Basic ";
     public static final String BEARER = "Bearer ";
