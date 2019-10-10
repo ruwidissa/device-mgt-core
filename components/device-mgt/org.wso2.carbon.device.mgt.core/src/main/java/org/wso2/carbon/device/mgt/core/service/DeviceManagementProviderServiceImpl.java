@@ -605,6 +605,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     "' devices";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 
