@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Rate, notification} from "antd";
+import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon} from "antd";
 import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
@@ -42,7 +42,7 @@ class ReleaseView extends React.Component {
         }
     }
 
-    appOperation = (type, payload, operation, timestamp=null) => {
+    appOperation = (type, payload, operation, timestamp = null) => {
         const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
@@ -50,9 +50,9 @@ class ReleaseView extends React.Component {
         this.setState({
             loading: true,
         });
-        let url = window.location.origin+ config.serverConfig.invoker.uri +
+        let url = window.location.origin + config.serverConfig.invoker.uri +
             config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/" + operation;
-        if(timestamp!= null){
+        if (timestamp != null) {
             url += `?timestamp=${timestamp}`;
         }
         axios.post(
@@ -81,18 +81,11 @@ class ReleaseView extends React.Component {
                     message: "There was a problem",
                     duration: 0,
                     description:
-                        "Error occurred while "+operation+"ing app",
+                        "Error occurred while " + operation + "ing app",
                 });
             }
         }).catch((error) => {
-            handleApiError(error,"Error occurred while "+operation+"ing the app.");
-        });
-    };
-
-
-    showAppInstallModal = () => {
-        this.setState({
-            appInstallModalVisible: true
+            handleApiError(error, "Error occurred while " + operation + "ing the app.");
         });
     };
 
@@ -103,37 +96,50 @@ class ReleaseView extends React.Component {
         });
     };
 
-    showAppUninstallModal = () => {
-        this.setState({
-             appUninstallModalVisible: true
-        });
+    handleSubscribeClick = (e) => {
+        if (e.key === "install") {
+            this.setState({
+                appInstallModalVisible: true // display app install modal
+            })
+        } else if (e.key === "uninstall") {
+            this.setState({
+                appUninstallModalVisible: true // display app uninstall modal
+            })
+        }
     };
 
     render() {
-        const {app,deviceType} = this.props;
+        const {app, deviceType} = this.props;
         const release = app.applicationReleases[0];
 
         let metaData = [];
-        try{
+        try {
             metaData = JSON.parse(release.metaData);
-        }catch (e) {
+        } catch (e) {
 
         }
+        const menu = (
+            <Menu onClick={this.handleSubscribeClick}>
+                <Menu.Item key="install">Install</Menu.Item>
+                <Menu.Item key="uninstall">Uninstall</Menu.Item>
+            </Menu>
+        );
+
 
         return (
             <div>
                 <AppInstallModal
                     uuid={release.uuid}
                     visible={this.state.appInstallModalVisible}
-                    deviceType = {deviceType}
+                    deviceType={deviceType}
                     onClose={this.closeAppOperationModal}
                     onInstall={this.appOperation}/>
                 <AppUninstallModal
-                        uuid={release.uuid}
-                        visible={this.state.appUninstallModalVisible}
-                        deviceType = {deviceType}
-                        onClose={this.closeAppOperationModal}
-                        onUninstall={this.appOperation}/>
+                    uuid={release.uuid}
+                    visible={this.state.appUninstallModalVisible}
+                    deviceType={deviceType}
+                    onClose={this.closeAppOperationModal}
+                    onUninstall={this.appOperation}/>
                 <div className="release">
                     <Row>
                         <Col xl={4} sm={6} xs={8} className="release-icon">
@@ -152,17 +158,14 @@ class ReleaseView extends React.Component {
                             />
                         </Col>
                         <Col xl={8} md={10} sm={24} xs={24} style={{float: "right"}}>
-                            <div>
-                                <Button.Group style={{float: "right"}}>
-                                    <Button onClick={this.showAppInstallModal} loading={this.state.loading}
-                                            htmlType="button" type="primary" icon="download">Install</Button>
-                                </Button.Group>
-                            </div>
-                            <div>
-                                <Button.Group style={{float: "right",marginRight:'3%'}}>
-                                    <Button onClick={this.showAppUninstallModal} loading={this.state.loading}
-                                            htmlType="button" type="primary" icon="delete">UnInstall</Button>
-                                </Button.Group>
+                            <div style={{
+                                textAlign: "right"
+                            }}>
+                                <Dropdown overlay={menu}>
+                                    <Button type="primary">
+                                        Subscribe <Icon type="down"/>
+                                    </Button>
+                                </Dropdown>
                             </div>
                         </Col>
                     </Row>
@@ -178,16 +181,16 @@ class ReleaseView extends React.Component {
                     <Text>META DATA</Text>
                     <Row>
                         {
-                            metaData.map((data, index)=>{
+                            metaData.map((data, index) => {
                                 return (
-                                    <Col key={index} lg={8} md={6} xs={24} style={{marginTop:15}}>
+                                    <Col key={index} lg={8} md={6} xs={24} style={{marginTop: 15}}>
                                         <Text>{data.key}</Text><br/>
                                         <Text type="secondary">{data.value}</Text>
                                     </Col>
                                 )
                             })
                         }
-                        {(metaData.length===0) && (<Text type="secondary">No meta data available.</Text>)}
+                        {(metaData.length === 0) && (<Text type="secondary">No meta data available.</Text>)}
                     </Row>
                     <Divider/>
                     <CurrentUsersReview uuid={release.uuid}/>

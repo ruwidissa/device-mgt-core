@@ -61,6 +61,8 @@ class NewAppUploadForm extends React.Component {
             binaryFileHelperText: '',
             iconHelperText: '',
             screenshotHelperText: '',
+            osVersionsHelperText: '',
+            osVersionsValidateStatus: 'validating',
             metaData: []
         };
         this.lowerOsVersion = null;
@@ -95,10 +97,6 @@ class NewAppUploadForm extends React.Component {
                     releaseType: releaseType
                 };
 
-                if (formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") {
-                    release.supportedOsVersions = `${this.lowerOsVersion}-${this.upperOsVersion}`;
-                }
-
                 if (specificElements.hasOwnProperty("version")) {
                     release.version = values.version;
                 }
@@ -110,20 +108,51 @@ class NewAppUploadForm extends React.Component {
                 }
 
                 const data = new FormData();
+                let isFormValid = true; // flag to check if this form is valid
+
+                if (formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") {
+                    if(this.lowerOsVersion==null || this.upperOsVersion==null){
+                        isFormValid = false;
+                        this.setState({
+                            osVersionsHelperText: 'Please select supported OS versions',
+                            osVersionsValidateStatus: 'error',
+                        });
+                    }else if(this.lowerOsVersion>=this.upperOsVersion){
+                        isFormValid = false;
+                        this.setState({
+                            osVersionsHelperText: 'Please select valid range',
+                            osVersionsValidateStatus: 'error',
+                        });
+                    }else{
+                        release.supportedOsVersions = `${this.lowerOsVersion}-${this.upperOsVersion}`;
+                    }
+                }
 
                 if (specificElements.hasOwnProperty("binaryFile") && this.state.binaryFiles.length !== 1) {
+                    isFormValid = false;
                     this.setState({
                         binaryFileHelperText: 'Please select the application'
                     });
-                } else if (this.state.icons.length !== 1) {
+                }
+                if (this.state.icons.length !== 1) {
+                    isFormValid = false;
                     this.setState({
                         iconHelperText: 'Please select an icon'
                     });
-                } else if (this.state.screenshots.length !== 3) {
+                }
+                if (this.state.screenshots.length !== 3) {
+                    isFormValid = false;
                     this.setState({
                         screenshotHelperText: 'Please select 3 screenshots'
                     });
-                } else {
+                }
+                if (this.state.screenshots.length !== 3) {
+                    isFormValid = false;
+                    this.setState({
+                        screenshotHelperText: 'Please select 3 screenshots'
+                    });
+                }
+                if(isFormValid) {
                     data.append('icon', icon[0].originFileObj);
                     data.append('screenshot1', screenshots[0].originFileObj);
                     data.append('screenshot2', screenshots[1].originFileObj);
@@ -193,10 +222,18 @@ class NewAppUploadForm extends React.Component {
 
     handleLowerOsVersionChange = (lowerOsVersion) => {
         this.lowerOsVersion = lowerOsVersion;
+        this.setState({
+            osVersionsValidateStatus: 'validating',
+            osVersionsHelperText: ''
+        });
     };
 
     handleUpperOsVersionChange = (upperOsVersion) => {
         this.upperOsVersion = upperOsVersion;
+        this.setState({
+            osVersionsValidateStatus: 'validating',
+            osVersionsHelperText: ''
+        });
     };
 
     render() {
@@ -212,7 +249,9 @@ class NewAppUploadForm extends React.Component {
             binaryFileHelperText,
             iconHelperText,
             screenshotHelperText,
-            metaData
+            metaData,
+            osVersionsHelperText,
+            osVersionsValidateStatus
         } = this.state;
         const uploadButton = (
             <div>
@@ -361,7 +400,11 @@ class NewAppUploadForm extends React.Component {
                             </Form.Item>
 
                             {(formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") && (
-                                <Form.Item {...formItemLayout} label="Supported OS Versions">
+                                <Form.Item
+                                    {...formItemLayout}
+                                    label="Supported OS Versions"
+                                    validateStatus={osVersionsValidateStatus}
+                                    help={osVersionsHelperText}>
                                     {getFieldDecorator('supportedOS')(
                                         <div>
                                             <InputGroup>
@@ -436,7 +479,6 @@ class NewAppUploadForm extends React.Component {
                                         required: true,
                                         message: 'Please select'
                                     }],
-                                    initialValue: false
                                 })(
                                     <Switch checkedChildren={<Icon type="check"/>}
                                             unCheckedChildren={<Icon type="close"/>}
@@ -444,13 +486,7 @@ class NewAppUploadForm extends React.Component {
                                 )}
                             </Form.Item>
                             <Form.Item {...formItemLayout} label="Meta Data">
-                                {getFieldDecorator('meta', {
-                                    rules: [{
-                                        required: true,
-                                        message: 'Please fill empty fields'
-                                    }],
-                                    initialValue: false
-                                })(
+                                {getFieldDecorator('meta', {})(
                                     <div>
                                         {
                                             metaData.map((data, index) => {

@@ -98,13 +98,18 @@ class NormalLoginForm extends React.Component {
 
                 const request = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
 
-                axios.post(window.location.origin+ config.serverConfig.loginUri, request
+                axios.post(window.location.origin + config.serverConfig.loginUri, request
                 ).then(res => {
                     if (res.status === 200) {
-                        window.location = window.location.origin+ "/store";
+                        let redirectUrl = window.location.origin + "/store";
+                        const searchParams = new URLSearchParams(window.location.search);
+                        if (searchParams.has("redirect")) {
+                            redirectUrl = searchParams.get("redirect");
+                        }
+                        window.location = redirectUrl;
                     }
                 }).catch(function (error) {
-                    handleApiError(error,"Error occurred while trying to load groups.");
+                    handleApiError(error, "Error occurred while trying to load groups.");
                     if (error.hasOwnProperty("response") && error.response.status === 400) {
                         thisForm.setState({
                             inValid: true,
@@ -158,7 +163,8 @@ class NormalLoginForm extends React.Component {
                     )}
                     <br/>
                     <a className="login-form-forgot" href="">Forgot password</a>
-                    <Button loading={this.state.loading} block type="primary" htmlType="submit" className="login-form-button">
+                    <Button loading={this.state.loading} block type="primary" htmlType="submit"
+                            className="login-form-button">
                         Log in
                     </Button>
                 </Form.Item>

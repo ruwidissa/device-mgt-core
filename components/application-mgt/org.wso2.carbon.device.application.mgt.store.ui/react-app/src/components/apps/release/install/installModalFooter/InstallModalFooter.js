@@ -17,12 +17,12 @@
  */
 
 import React from "react";
-import {Button, DatePicker} from "antd";
+import {Button, DatePicker, Checkbox} from "antd";
 
-class InstallModalFooter extends React.Component{
+class InstallModalFooter extends React.Component {
     constructor(props) {
         super(props);
-        this.state={
+        this.state = {
             scheduledTime: null,
             isScheduledInstallVisible: false
         }
@@ -34,65 +34,52 @@ class InstallModalFooter extends React.Component{
         });
     };
 
-    showScheduledInstall = ()=>{
+    toggleScheduledInstall = () => {
         this.setState({
-            isScheduledInstallVisible: true
+            isScheduledInstallVisible: !this.state.isScheduledInstallVisible
         })
     };
 
-    hideScheduledInstall = ()=>{
-        this.setState({
-            isScheduledInstallVisible: false
-        })
-    };
-
-    triggerInstallOperation = () =>{
-        this.props.operation();
-    };
-    triggerScheduledInstallOperation = () =>{
-        const {scheduledTime} =this.state;
-        this.props.operation(scheduledTime);
+    triggerInstallOperation = () => {
+        const {scheduledTime, isScheduledInstallVisible} = this.state;
+        if (isScheduledInstallVisible && scheduledTime != null) {
+            this.props.operation(scheduledTime);
+        } else {
+            this.props.operation();
+        }
     };
 
     render() {
-        const {scheduledTime,isScheduledInstallVisible} =this.state;
+        const {scheduledTime, isScheduledInstallVisible} = this.state;
         const {disabled, type} = this.props;
         return (
-          <div>
-              <div style={{
-                  textAlign: "right",
-                  display: (!isScheduledInstallVisible)?'block':'none'
-              }}>
-                  <Button style={{margin: 5}} disabled={disabled} htmlType="button" type="primary"
-                          onClick={this.triggerInstallOperation}>
-                      {type}
-                  </Button>
-                  <Button style={{margin: 5}} disabled={disabled} htmlType="button"
-                          onClick={this.showScheduledInstall}>
-                      Scheduled {type}
-                  </Button>
-              </div>
-              <div style={{
-                  textAlign: "right",
-                  display: (isScheduledInstallVisible)?'block':'none'
-              }}>
-                  <DatePicker showTime
-                              placeholder="Select Time"
-                              format="YYYY-MM-DDTHH:mm"
-                              onChange={this.onDateTimeChange}/>
-                  <Button disabled={scheduledTime == null}
-                          style={{margin: 5}}
-                          htmlType="button"
-                          type="primary"
-                          onClick={this.triggerScheduledInstallOperation}>
-                      Schedule
-                  </Button>
-                  <Button style={{margin: 5}} htmlType="button"
-                          onClick={this.hideScheduledInstall}>
-                      Cancel
-                  </Button>
-              </div>
-          </div>
+            <div>
+                <div style={{
+                    textAlign: "right"
+                }}>
+                    <div style={{margin: 8}}>
+                        <Checkbox checked={this.state.isScheduledInstallVisible} onChange={this.toggleScheduledInstall}>
+                            Schedule {type}
+                        </Checkbox>
+                    </div>
+                    <span style={{
+                        display: (isScheduledInstallVisible) ? 'inline' : 'none'
+                    }}>
+                        <DatePicker showTime
+                                    placeholder="Select Time"
+                                    format="YYYY-MM-DDTHH:mm"
+                                    onChange={this.onDateTimeChange}/>
+                    </span>
+                    <Button style={{margin: 5}}
+                            disabled={disabled || (isScheduledInstallVisible && scheduledTime == null)}
+                            htmlType="button"
+                            type="primary"
+                            onClick={this.triggerInstallOperation}>
+                        {type}
+                    </Button>
+                </div>
+
+            </div>
         );
     }
 }
