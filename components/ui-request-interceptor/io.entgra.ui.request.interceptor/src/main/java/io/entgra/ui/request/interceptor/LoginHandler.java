@@ -191,7 +191,6 @@ public class LoginHandler extends HttpServlet {
                     authData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
                     session.setAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY, authData);
                     return true;
-
                 }
             }
             return false;
