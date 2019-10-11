@@ -50,7 +50,7 @@ class BulkActionBar extends React.Component {
     };
 
     onConfirmDisenroll = () => {
-        //TODO: Implement disenrollment function
+        this.props.disenrollDevice();
     };
 
     onDeviceGroupCall = () => {

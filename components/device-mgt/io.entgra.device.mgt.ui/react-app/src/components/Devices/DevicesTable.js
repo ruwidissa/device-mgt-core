@@ -233,6 +233,47 @@ class DeviceTable extends React.Component {
         });
     };
 
+    disenrollDevice = () => {
+        const config = this.props.context;
+        this.setState({loading: true});
+
+        const deviceData = this.state.selectedRows[0];
+
+        //send request to the invoker
+        axios.delete(
+            window.location.origin + config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
+            "/devices/type/" + deviceData.type + "/id/" + deviceData.deviceIdentifier,
+            {headers: {'Content-Type': 'application/json'}}
+            
+        ).then(res => {
+            if (res.status === 200) {
+                this.fetch();
+                notification["success"]({
+                    message: "Done",
+                    duration: 4,
+                    description:
+                        "Successfully disenrolled the device.",
+                });
+            }
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = window.location.origin + '/entgra/login';
+            } else {
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:
+                        "Error occurred while trying to disenroll devices.",
+                });
+            }
+
+            this.setState({loading: false});
+        });
+    };
+
     addDevicesToGroup = (groupId) => {
         const config = this.props.context;
         this.setState({loading: true});
@@ -384,6 +425,7 @@ class DeviceTable extends React.Component {
                 <BulkActionBar
                     deleteDevice={this.deleteDevice}
                     getGroups={this.getGroups}
+                    disenrollDevice={this.disenrollDevice}
                     selectedRows={this.state.selectedRows}/>
                 <div>
                     <Table
