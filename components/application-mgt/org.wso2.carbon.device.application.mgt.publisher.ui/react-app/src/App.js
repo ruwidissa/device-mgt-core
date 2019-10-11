@@ -102,8 +102,9 @@ class App extends React.Component {
             window.location.origin + "/publisher-ui-request-handler/user",
             "platform=publisher"
         ).then(res => {
+            const pageURL = window.location.pathname;
             const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
-            if (lastURLSegment !== "login") {
+            if (lastURLSegment === "login") {
                 window.location.href = window.location.origin + `/publisher/`;
             } else {
                 this.getAndroidEnterpriseToken(config);
