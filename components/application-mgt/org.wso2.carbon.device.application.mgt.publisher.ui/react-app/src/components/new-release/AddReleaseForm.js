@@ -24,17 +24,23 @@ import {withConfigContext} from "../../context/ConfigContext";
 import {handleApiError} from "../../js/Utils";
 import NewAppUploadForm from "../new-app/subForms/NewAppUploadForm";
 
+const formConfig = {
+    specificElements: {
+        binaryFile: {
+            required: true
+        }
+    }
+};
+
 class AddNewReleaseFormComponent extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             loading: false,
-            isFree: true,
             supportedOsVersions: [],
             application: null,
             release: null,
-            isError: false,
             deviceType: null
         };
     }
@@ -68,20 +74,18 @@ class AddNewReleaseFormComponent extends React.Component {
         const config = this.props.context;
         const {appId, deviceType} = this.props;
         this.setState({
-            loading: true,
-            isError: false
+            loading: true
         });
         const {data, release} = releaseData;
-        const {formConfig} = this.props;
 
         const json = JSON.stringify(release);
         const blob = new Blob([json], {
             type: 'application/json'
         });
-        data.append(formConfig.jsonPayloadName, blob);
+        data.append("applicationRelease", blob);
 
         const url = window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher +
-                    "/applications/" + deviceType + formConfig.endpoint + "/" + appId;
+                    "/applications/" + deviceType + "/ent-app/" + appId;
         axios.post(
             url,
             data
@@ -101,15 +105,13 @@ class AddNewReleaseFormComponent extends React.Component {
 
             } else {
                 this.setState({
-                    loading: false,
-                    isError: true,
+                    loading: false
                 });
             }
         }).catch((error) => {
             handleApiError(error, "Sorry, we were unable to complete your request.");
             this.setState({
-                loading: false,
-                isError: true,
+                loading: false
             });
         });
 
@@ -121,11 +123,10 @@ class AddNewReleaseFormComponent extends React.Component {
 
     render() {
         const {loading, supportedOsVersions} = this.state;
-        const {formConfig} = this.props;
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
-                    <Card>
+                    <Card style={{ width: "65%", marginLeft: "18%" }}>
                         <NewAppUploadForm
                             formConfig={formConfig}
                             supportedOsVersions={supportedOsVersions}
