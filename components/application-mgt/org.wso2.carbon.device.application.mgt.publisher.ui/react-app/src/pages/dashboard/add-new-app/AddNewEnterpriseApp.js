@@ -53,7 +53,7 @@ class AddNewEnterpriseApp extends React.Component {
     render() {
         return (
             <div>
-                <PageHeader style={{paddingTop:0}}>
+                <PageHeader style={{paddingTop:0, backgroundColor: "#fff"}}>
                     <Breadcrumb style={{paddingBottom:16}}>
                         <Breadcrumb.Item>
                             <Link to="/publisher/apps"><Icon type="home"/> Home</Link>

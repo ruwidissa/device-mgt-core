@@ -43,32 +43,36 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-@MultipartConfig @WebServlet("/user") public class UserHandler extends HttpServlet {
+@MultipartConfig
+@WebServlet("/user")
+public class UserHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(UserHandler.class);
     private static final long serialVersionUID = 9050048549140517002L;
 
-    @Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String platform = req.getParameter(HandlerConstants.PLATFORM);
             String serverUrl =
                     req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
                             + System.getProperty("iot.gateway.https.port");
             if (StringUtils.isBlank(platform)) {
-                ProxyResponse proxyResponse = new ProxyResponse();
-                proxyResponse.setCode(HttpStatus.SC_BAD_REQUEST);
-                HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                sendUnAuthorizeResponse(req, resp, serverUrl, platform);
                 return;
             }
 
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
-                ProxyResponse proxyResponse = new ProxyResponse();
-                proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
-                HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                sendUnAuthorizeResponse(req, resp, serverUrl, platform);
                 return;
             }
 
             AuthData authData = (AuthData) httpSession.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
+            if (authData == null) {
+                sendUnAuthorizeResponse(req, resp, serverUrl, platform);
+                return;
+            }
+
             String accessToken = authData.getAccessToken();
 
             HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.INTROSPECT_ENDPOINT);
@@ -94,9 +98,7 @@ import java.io.IOException;
             if (jTokenResult.isJsonObject()) {
                 JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
                 if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
-                    ProxyResponse proxyResponse = new ProxyResponse();
-                    proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                    sendUnAuthorizeResponse(req, resp, serverUrl, platform);
                     return;
                 }
                 ProxyResponse proxyResponse = new ProxyResponse();
@@ -109,5 +111,19 @@ import java.io.IOException;
         } catch (JsonSyntaxException e) {
             log.error("Error occurred while parsing the response. ", e);
         }
+    }
+
+    /**
+     * Send UnAuthorized Response to the user
+     * @param req HttpServletRequest object
+     * @param resp HttpServletResponse object
+     * @param serverUrl Url of the server
+     * @param platform Requested platform
+     */
+    private void sendUnAuthorizeResponse(HttpServletRequest req, HttpServletResponse resp, String serverUrl, String platform)
+            throws IOException {
+        ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
+        HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
     }
 }

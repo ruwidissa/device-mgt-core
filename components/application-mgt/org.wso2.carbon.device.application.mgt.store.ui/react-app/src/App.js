@@ -78,22 +78,28 @@ class App extends React.Component {
     }
 
     checkUserLoggedIn = (config) => {
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.publisher + "/applications/categories"
+        axios.post(
+            window.location.origin + "/store-ui-request-handler/user",
+            "platform=publisher"
         ).then(res => {
-            this.setState({
-                loading: false,
-                config: config
-            })
+            const pageURL = window.location.pathname;
+            const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+            if (lastURLSegment === "login") {
+                window.location.href = window.location.origin + `/store/`;
+            } else {
+                this.setState({
+                    loading: false,
+                    config: config
+                });
+            }
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 const redirectUrl = encodeURI(window.location.href);
                 const pageURL = window.location.pathname;
                 const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
-                if(lastURLSegment!=="login"){
+                if (lastURLSegment !== "login") {
                     window.location.href = window.location.origin + `/store/login?redirect=${redirectUrl}`;
-                }else{
+                } else {
                     this.setState({
                         loading: false,
                         config: config
@@ -106,7 +112,7 @@ class App extends React.Component {
                 })
             }
         });
-    }
+    };
 
     render() {
         const {loading, error} = this.state;
