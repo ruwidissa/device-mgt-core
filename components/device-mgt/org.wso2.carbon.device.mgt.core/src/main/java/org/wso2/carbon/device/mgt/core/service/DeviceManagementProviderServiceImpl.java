@@ -523,7 +523,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException {
-        List<Integer> deviceIds = new ArrayList<>();
+        HashSet<Integer> deviceIds = new HashSet<>();
         List<Integer> enrollmentIds = new ArrayList<>();
         Map<String, List<String>> deviceIdentifierMap = new HashMap<>();
         Map<String, DeviceManager> deviceManagerMap = new HashMap<>();
@@ -577,7 +577,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
             //deleting device from the core
-            deviceDAO.deleteDevices(deviceIdentifiers, deviceIds, enrollmentIds);
+            deviceDAO.deleteDevices(deviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
             for (Map.Entry<String, DeviceManager> entry : deviceManagerMap.entrySet()) {
                 try {
                     // deleting device from the plugin level
