@@ -42,7 +42,7 @@ class AddNewRelease extends React.Component {
         const {appId, deviceType} = this.props.match.params;
         return (
             <div>
-                <PageHeader style={{paddingTop: 0}}>
+                <PageHeader style={{paddingTop:0, backgroundColor: "#fff"}}>
                     <Breadcrumb style={{paddingBottom: 16}}>
                         <Breadcrumb.Item>
                             <Link to="/publisher/apps"><Icon type="home"/> Home</Link>
