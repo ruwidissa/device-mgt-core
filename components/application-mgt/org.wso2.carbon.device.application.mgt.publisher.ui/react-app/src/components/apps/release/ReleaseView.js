@@ -127,9 +127,9 @@ class ReleaseView extends React.Component {
                     </Row>
                     <Divider/>
                     <Row className="release-images">
-                        {release.screenshots.map((screenshotUrl) => {
+                        {release.screenshots.map((screenshotUrl, index) => {
                             return (
-                                <div key={"col-" + screenshotUrl} className="release-screenshot">
+                                <div key={index} className="release-screenshot">
                                     <img key={screenshotUrl} src={screenshotUrl}/>
                                 </div>
                             )

@@ -28,6 +28,18 @@ import {Link} from "react-router-dom";
 
 const Paragraph = Typography;
 
+const formConfig = {
+    installationType: "ENTERPRISE",
+    endpoint: "/ent-app",
+    jsonPayloadName: "applicationRelease",
+    releaseWrapperName: "entAppReleaseWrappers",
+    specificElements: {
+        binaryFile: {
+            required: true
+        }
+    }
+};
+
 class AddNewRelease extends React.Component {
 
     constructor(props) {
@@ -55,7 +67,7 @@ class AddNewRelease extends React.Component {
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-                    <AddNewReleaseForm deviceType={deviceType} appId={appId}/>
+                    <AddNewReleaseForm deviceType={deviceType} appId={appId} formConfig={formConfig}/>
                 </div>
 
             </div>
