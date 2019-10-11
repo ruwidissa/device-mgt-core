@@ -30,4 +30,8 @@
         width: 210%;
     }
 
+    .app-release-cards{
+        display: grid;
+    }
+
 }

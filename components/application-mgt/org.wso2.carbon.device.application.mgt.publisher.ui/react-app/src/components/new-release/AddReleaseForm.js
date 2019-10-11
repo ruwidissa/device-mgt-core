@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Form, notification, Spin,} from "antd";
+import {Form, notification, Spin, Card} from "antd";
 import axios from "axios";
 import {withRouter} from 'react-router-dom'
 import {withConfigContext} from "../../context/ConfigContext";
@@ -73,9 +73,6 @@ class AddNewReleaseFormComponent extends React.Component {
         });
         const {data, release} = releaseData;
         const {formConfig} = this.props;
-        const {price} = release;
-
-        release.subMethod = (price === 0) ? "FREE" : "PAID";
 
         const json = JSON.stringify(release);
         const blob = new Blob([json], {
@@ -128,12 +125,14 @@ class AddNewReleaseFormComponent extends React.Component {
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
-                <NewAppUploadForm
-                    formConfig={formConfig}
-                    supportedOsVersions={supportedOsVersions}
-                    onSuccessReleaseData={this.onSuccessReleaseData}
-                    onClickBackButton={this.onClickBackButton}
-                />
+                    <Card>
+                        <NewAppUploadForm
+                            formConfig={formConfig}
+                            supportedOsVersions={supportedOsVersions}
+                            onSuccessReleaseData={this.onSuccessReleaseData}
+                            onClickBackButton={this.onClickBackButton}
+                        />
+                    </Card>
                 </Spin>
             </div>
         );

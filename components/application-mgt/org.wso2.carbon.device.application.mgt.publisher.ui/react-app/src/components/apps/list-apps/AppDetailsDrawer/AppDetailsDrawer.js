@@ -446,7 +446,7 @@ class AppDetailsDrawer extends React.Component {
             <div>
                 <Drawer
                     placement="right"
-                    width={640}
+                    width={this.state.drawerWidth}
                     closable={false}
                     onClose={onClose}
                     visible={visible}
@@ -498,6 +498,7 @@ class AppDetailsDrawer extends React.Component {
                                 grid={{gutter: 16, column: 2}}
                                 dataSource={app.applicationReleases}
                                 renderItem={release => (
+                                    <div className="app-release-cards">
                                     <List.Item>
                                         <Link to={"apps/releases/" + release.uuid}>
                                             <Card className="release-card">
@@ -521,6 +522,7 @@ class AppDetailsDrawer extends React.Component {
                                             </Card>
                                         </Link>
                                     </List.Item>
+                                    </div>
                                 )}
                             />
 
