@@ -113,6 +113,13 @@ public class UserHandler extends HttpServlet {
         }
     }
 
+    /**
+     * Send UnAuthorized Response to the user
+     * @param req HttpServletRequest object
+     * @param resp HttpServletResponse object
+     * @param serverUrl Url of the server
+     * @param platform Requested platform
+     */
     private void sendUnAuthorizeResponse(HttpServletRequest req, HttpServletResponse resp, String serverUrl, String platform)
             throws IOException {
         ProxyResponse proxyResponse = new ProxyResponse();
