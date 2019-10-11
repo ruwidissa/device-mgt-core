@@ -607,18 +607,18 @@ public class AnalyticsArtifactsManagementServiceImpl
     }
 
     /**
-     * This will set payload of event attributes to the DTO
+     * This will set payload of event attribute's mapping to the DTO
      *
      * @param attributes list of event attributes
      * @return DTO with all the event attributes
      */
     private EventStreamAttributeDto[] addEventAttributesToDto(List<Attribute> attributes) {
         EventStreamAttributeDto[] eventStreamAttributeDtos = new EventStreamAttributeDto[attributes.size()];
-        for (int i = 0; i < attributes.size(); i++) {
+        for (Attribute attribute : attributes) {
             EventStreamAttributeDto eventStreamAttributeDto = new EventStreamAttributeDto();
-            eventStreamAttributeDto.setAttributeName(attributes.get(i).getName());
-            eventStreamAttributeDto.setAttributeType(attributes.get(i).getType().toString());
-            eventStreamAttributeDtos[i] = eventStreamAttributeDto;
+            eventStreamAttributeDto.setAttributeName(attribute.getName());
+            eventStreamAttributeDto.setAttributeType(attribute.getType().toString());
+
         }
         return eventStreamAttributeDtos;
     }
