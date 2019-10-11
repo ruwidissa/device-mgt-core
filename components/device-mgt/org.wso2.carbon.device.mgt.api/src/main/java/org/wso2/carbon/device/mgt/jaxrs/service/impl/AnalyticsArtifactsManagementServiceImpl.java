@@ -86,24 +86,27 @@ public class AnalyticsArtifactsManagementServiceImpl
             if (!isEdited) {
                 eventStreamAdminServiceStub.addEventStreamDefinitionAsString(streamDefinition);
             } else {
-                // Find and edit stream
                 if (eventStreamAdminServiceStub.getStreamDetailsForStreamId(id) != null) {
                     eventStreamAdminServiceStub.editEventStreamDefinitionAsString(streamDefinition, id);
                 }
             }
             return Response.ok().build();
         } catch (AxisFault e) {
-            log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (RemoteException e) {
-            log.error("Failed to connect with the remote services for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to connect with the remote services for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (JWTClientException e) {
-            log.error("Failed to generate jwt token for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to generate jwt token for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (UserStoreException e) {
-            log.error("Failed to connect with the user store for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to connect with the user store for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } finally {
             cleanup(eventStreamAdminServiceStub);
         }
@@ -118,17 +121,21 @@ public class AnalyticsArtifactsManagementServiceImpl
             publishStream(stream);
             return Response.ok().build();
         } catch (AxisFault e) {
-            log.error("Failed to create event definitions for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (RemoteException e) {
-            log.error("Failed to connect with the remote services for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to connect with the remote services for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (JWTClientException e) {
-            log.error("Failed to generate jwt token for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to generate jwt token for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (UserStoreException e) {
-            log.error("Failed to connect with the user store for tenantDomain: " + tenantDomain, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            String errMsg = "Failed to connect with the user store for tenantDomain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         }
     }
 
@@ -351,7 +358,7 @@ public class AnalyticsArtifactsManagementServiceImpl
     /**
      * Set data to a stream dto and publish dto using a stub
      *
-     * @param stream          Stream definition
+     * @param stream Stream definition
      * @throws RemoteException    Exception that may occur during a remote method call
      * @throws UserStoreException Exception that may occur during JWT token generation
      * @throws JWTClientException Exception that may occur during connecting to client store
