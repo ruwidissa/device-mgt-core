@@ -1744,8 +1744,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 }
             }
         } catch (SQLException e) {
-            String msg ="Error occurred while deleting the devices: " + deviceIdentifiers;
-            log.error(msg,e);
+            String msg = "Error occurred while deleting the devices: " + deviceIdentifiers;
+            log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
     }
@@ -1759,9 +1759,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDeviceDetail(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_DETAIL WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove device details of devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing device details.";
+            String msg = "SQL error occurred while removing device details of devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1776,9 +1781,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDeviceLocation(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_LOCATION WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove locations of devices with deviceIds : " + deviceIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while obtaining locations of devices.";
+            String msg = "SQL error occurred while removing locations of devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1793,9 +1803,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDeviceInfo(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_INFO WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove device info of devices with deviceIds : " + deviceIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing device info.";
+            String msg = "SQL error occurred while removing device info of devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1810,9 +1825,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDeviceNotification(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_NOTIFICATION WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove device notifications of devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing device notifications.";
+            String msg = "SQL error occurred while removing device notifications of devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1829,9 +1849,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove device application mapping of of devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing device application mapping";
+            String msg = "SQL error occurred while removing device application mapping of devices with deviceIds : "
+                    + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1847,9 +1873,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_POLICY_APPLIED WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove policies applied on devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing policies applied on devices";
+            String msg = "SQL error occurred while removing policies applied on devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1864,9 +1895,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDevicePolicy(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_POLICY WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove policies of devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing policies of devices";
+            String msg = "SQL error occurred while removing policies of devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1882,9 +1918,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_DETAIL WHERE ENROLMENT_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove enrollment details of devices with enrollmentIds : " + enrollmentIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing enrollment details of devices";
+            String msg = "SQL error occurred while removing enrollment details of devices with enrollmentIds : "
+                    + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1900,9 +1942,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_LOCATION WHERE ENROLMENT_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove enrollment locations of devices with enrollmentIds : " + enrollmentIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing enrollment locations of devices";
+            String msg = "SQL error occurred while removing enrollment locations of devices with enrollmentIds : "
+                    + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1918,9 +1966,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_INFO WHERE ENROLMENT_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove enrollment info of devices with enrollmentIds : " + enrollmentIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing enrollment info of devices";
+            String msg = "SQL error occurred while removing enrollment info of devices with enrollmentIds : "
+                    + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1936,9 +1990,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE ENROLMENT_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove enrollment device application mapping of devices with enrollmentIds : "
+                        + enrollmentIds + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing enrollment device application mapping";
+            String msg = "SQL error occurred while removing enrollment device application mapping of devices with " +
+                    "enrollmentIds : " + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1954,9 +2014,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE WHERE ENROLMENT_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove device operation response of devices with enrollmentIds : "
+                        + enrollmentIds + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing device operation response";
+            String msg = "SQL error occurred while removing device operation response of devices with enrollmentIds : "
+                    + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1972,9 +2038,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove enrollment operation mapping of devices with enrollmentIds : "
+                        + enrollmentIds + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing enrollment operation mapping";
+            String msg = "SQL error occurred while removing enrollment operation mapping of devices with enrollmentIds :"
+                    + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -1990,9 +2062,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_ENROLMENT WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, enrollmentIds);
+            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
+                String msg = "Failed to remove enrollments of devices with enrollmentIds : " + enrollmentIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing enrollments of devices";
+            String msg = "SQL error occurred while removing enrollments of devices with enrollmentIds : "
+                    + enrollmentIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -2007,9 +2085,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDeviceGroupMapping(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE_GROUP_MAP WHERE DEVICE_ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove device group mapping of devices with deviceIds : " + deviceIds
+                        + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing device group mapping";
+            String msg = "SQL error occurred while removing device group mapping of devices with deviceIds : "
+                    + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -2024,9 +2108,13 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDevice(Connection conn, List<Integer> deviceIds) throws DeviceManagementDAOException {
         String sql = "DELETE FROM DM_DEVICE WHERE ID = ?";
         try {
-            executeBatchOperation(conn, sql, deviceIds);
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove devices with deviceIds : " + deviceIds + " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
         } catch (SQLException e) {
-            String msg = "Error occurred while removing devices.";
+            String msg = "SQL error occurred while removing devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -2036,12 +2124,15 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
      * This method executes batch operations for a given list of primary keys
      * where the statement only has one param of type int, following the given pattern:
      *    DELETE FROM TABLE WHERE ID = ?
+     *
+     *    This method does not check if the number of rows affected by the executeBatch() method is 0
+     *    because there can be tables with no records to delete.
      * @param sql SQL statement
      * @param conn Connection object
      * @param identifiers list of device ids (primary keys)
      * @throws SQLException if deletion fails.
      */
-    private void executeBatchOperation(Connection conn, String sql, List<Integer> identifiers) throws SQLException {
+    private boolean executeBatchOperation(Connection conn, String sql, List<Integer> identifiers) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             if (conn.getMetaData().supportsBatchUpdates()) {
                 for (int identifier : identifiers) {
@@ -2049,18 +2140,17 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     ps.addBatch();
                 }
                 for (int i : ps.executeBatch()) {
-                    if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
-                        break;
+                    if (i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
+                        return false;
                     }
                 }
             } else {
-                for (int enrollmentId : identifiers) {
-                    ps.setInt(1, enrollmentId);
-                    if (ps.executeUpdate() == 0) {
-                        break;
-                    }
+                for (int identifier : identifiers) {
+                    ps.setInt(1, identifier);
+                    ps.executeUpdate();
                 }
             }
         }
+        return true;
     }
 }
