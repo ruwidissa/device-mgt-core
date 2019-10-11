@@ -98,19 +98,24 @@ class App extends React.Component {
     };
 
     checkUserLoggedIn = (config) => {
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.publisher + "/applications/categories"
+        axios.post(
+            window.location.origin + "/publisher-ui-request-handler/user",
+            "platform=publisher"
         ).then(res => {
-            this.getAndroidEnterpriseToken(config);
+            const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+            if (lastURLSegment !== "login") {
+                window.location.href = window.location.origin + `/publisher/`;
+            } else {
+                this.getAndroidEnterpriseToken(config);
+            }
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 const redirectUrl = encodeURI(window.location.href);
                 const pageURL = window.location.pathname;
                 const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
-                if(lastURLSegment!=="login"){
+                if (lastURLSegment !== "login") {
                     window.location.href = window.location.origin + `/publisher/login?redirect=${redirectUrl}`;
-                }else{
+                } else {
                     this.getAndroidEnterpriseToken(config);
                 }
             } else {
