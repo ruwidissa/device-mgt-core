@@ -522,43 +522,39 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException {
+    public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException,
+                                                                        InvalidDeviceException {
+        if (deviceIdentifiers == null || deviceIdentifiers.isEmpty()) {
+            String msg = "Required values of device identifiers are not set to permanently delete device/s.";
+            log.error(msg);
+            throw new InvalidDeviceException(msg);
+        }
         HashSet<Integer> deviceIds = new HashSet<>();
         List<Integer> enrollmentIds = new ArrayList<>();
+        List<String> validDeviceIdentifiers = new ArrayList<>();
         Map<String, List<String>> deviceIdentifierMap = new HashMap<>();
         Map<String, DeviceManager> deviceManagerMap = new HashMap<>();
         List<DeviceCacheKey> deviceCacheKeyList = new ArrayList<>();
         int tenantId = this.getTenantId();
-        List<Device> existingDevices;
         try {
             DeviceManagementDAOFactory.beginTransaction();
-            existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+            List<Device> existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+            DeviceCacheKey deviceCacheKey;
             for (Device device : existingDevices) {
-                deviceIdentifiers.remove(device.getDeviceIdentifier());
-            }
-            if (!deviceIdentifiers.isEmpty()) {
-                String msg =
-                        "Couldn't find device ids for all the requested device identifiers. " +
-                                "Therefore payload should contain device identifiers which are not in the system. " +
-                                "Invalid device identifiers are " + deviceIdentifiers.toString();
-                log.error(msg);
-                DeviceManagementDAOFactory.rollbackTransaction();
-                throw new InvalidDeviceException(msg);
-            }
-            for (Device device : existingDevices) {
-                if (!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
-                    String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
-                            + " is not dis-enrolled to permanently delete the device";
-                    log.error(msg);
+                if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
                     DeviceManagementDAOFactory.rollbackTransaction();
+                    String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
+                                 + " is not dis-enrolled to permanently delete the device";
+                    log.error(msg);
                     throw new InvalidDeviceException(msg);
                 }
-                DeviceCacheKey deviceCacheKey = new DeviceCacheKey();
+                deviceCacheKey = new DeviceCacheKey();
                 deviceCacheKey.setDeviceId(device.getDeviceIdentifier());
                 deviceCacheKey.setDeviceType(device.getType());
                 deviceCacheKey.setTenantId(tenantId);
                 deviceCacheKeyList.add(deviceCacheKey);
                 deviceIds.add(device.getId());
+                validDeviceIdentifiers.add(device.getDeviceIdentifier());
                 enrollmentIds.add(device.getEnrolmentInfo().getId());
                 if (deviceIdentifierMap.containsKey(device.getType())) {
                     deviceIdentifierMap.get(device.getType()).add(device.getDeviceIdentifier());
@@ -567,17 +563,23 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             new ArrayList<>(Arrays.asList(device.getDeviceIdentifier())));
                     DeviceManager deviceManager = this.getDeviceManager(device.getType());
                     if (deviceManager == null) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Device Manager associated with the device type '"
-                                    + device.getType() + "' is null. Therefore, not attempting method 'deleteDevice'");
-                        }
+                        log.error("Device Manager associated with the device type '" +device.getType() +
+                                  "' is null. Therefore, not attempting method 'deleteDevice'");
                         return false;
                     }
                     deviceManagerMap.put(device.getType(), deviceManager);
                 }
             }
+            if (deviceIds.isEmpty()) {
+                String msg = "No device IDs found for the device identifiers '" + deviceIdentifiers + "'";
+                log.error(msg);
+                throw new InvalidDeviceException(msg);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Permanently deleting the details of devices : " + validDeviceIdentifiers);
+            }
             //deleting device from the core
-            deviceDAO.deleteDevices(deviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
+            deviceDAO.deleteDevices(validDeviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
             for (Map.Entry<String, DeviceManager> entry : deviceManagerMap.entrySet()) {
                 try {
                     // deleting device from the plugin level
@@ -594,6 +596,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             DeviceManagementDAOFactory.commitTransaction();
             this.removeDevicesFromCache(deviceCacheKeyList);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully permanently deleted the details of devices : " + validDeviceIdentifiers);
+            }
             return true;
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction";
