@@ -24,8 +24,6 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Adapter;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventStream;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.SiddhiExecutionPlan;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventPublisher;
-import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventReceiver;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import io.swagger.annotations.Api;
@@ -258,7 +256,7 @@ public interface AnalyticsArtifactsManagementService {
             @QueryParam("isEdited") boolean isEdited,
             @ApiParam(name = "receiver", value = "Add the data to complete the EventReceiver object.",
                     required = true)
-            @Valid EventReceiver receiver);
+            @Valid Adapter receiver);
 
     @POST
     @Path("/receiver")
@@ -366,7 +364,7 @@ public interface AnalyticsArtifactsManagementService {
             @QueryParam("isEdited") boolean isEdited,
             @ApiParam(name = "publisher", value = "Add the data to complete the EventPublisher object.",
                     required = true)
-            @Valid EventPublisher publisher);
+            @Valid Adapter publisher);
 
     @POST
     @Path("/publisher")

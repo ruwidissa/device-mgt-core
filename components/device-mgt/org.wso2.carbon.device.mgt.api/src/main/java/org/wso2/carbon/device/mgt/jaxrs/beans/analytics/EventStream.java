@@ -42,7 +42,7 @@ public class EventStream {
     @ApiModelProperty(value = "Payload attribute list")
     private List<Attribute> payloadData = new ArrayList<>();
 
-    @ApiModelProperty(value = "Stream definition")
+    @ApiModelProperty(value = "Stream definition" , notes = "use only when creating stream as a String")
     private String definition;
 
     public String getName() {
