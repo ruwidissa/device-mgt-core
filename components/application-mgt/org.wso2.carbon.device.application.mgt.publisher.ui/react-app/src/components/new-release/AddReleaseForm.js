@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Form, notification, Spin, Card} from "antd";
+import {Form, notification, Spin, Card, Row, Col} from "antd";
 import axios from "axios";
 import {withRouter} from 'react-router-dom'
 import {withConfigContext} from "../../context/ConfigContext";
@@ -126,14 +126,18 @@ class AddNewReleaseFormComponent extends React.Component {
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
-                    <Card style={{ width: "65%", marginLeft: "18%" }}>
-                        <NewAppUploadForm
-                            formConfig={formConfig}
-                            supportedOsVersions={supportedOsVersions}
-                            onSuccessReleaseData={this.onSuccessReleaseData}
-                            onClickBackButton={this.onClickBackButton}
-                        />
-                    </Card>
+                    <Row>
+                        <Col span={17} offset={4} >
+                            <Card>
+                                <NewAppUploadForm
+                                    formConfig={formConfig}
+                                    supportedOsVersions={supportedOsVersions}
+                                    onSuccessReleaseData={this.onSuccessReleaseData}
+                                    onClickBackButton={this.onClickBackButton}
+                                />
+                            </Card>
+                        </Col>
+                    </Row>
                 </Spin>
             </div>
         );
