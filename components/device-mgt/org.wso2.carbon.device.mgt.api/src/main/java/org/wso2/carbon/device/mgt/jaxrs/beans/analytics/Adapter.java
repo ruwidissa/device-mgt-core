@@ -29,9 +29,12 @@ public class Adapter {
     @ApiModelProperty(value = "Attached stream name:version")
     private String eventStreamWithVersion;
     @ApiModelProperty(value = "Adapter type")
-    private AdapterType adapterType;
+    private TransportType adapterType;
     @ApiModelProperty(value = "Adapter main configurations")
     private AdapterConfiguration adapterConfiguration;
+
+    @ApiModelProperty(value = "Adapter definition", notes = "use only when creating adapter as a String")
+    private String definition;
 
     public String getAdapterName() {
         return adapterName;
@@ -49,11 +52,11 @@ public class Adapter {
         this.eventStreamWithVersion = eventStreamWithVersion;
     }
 
-    public AdapterType getAdapterType() {
+    public TransportType getAdapterType() {
         return adapterType;
     }
 
-    public void setAdapterType(AdapterType adapterType) {
+    public void setAdapterType(TransportType adapterType) {
         this.adapterType = adapterType;
     }
 
@@ -64,5 +67,13 @@ public class Adapter {
     public void setAdapterConfiguration(
             AdapterConfiguration adapterConfiguration) {
         this.adapterConfiguration = adapterConfiguration;
+    }
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
     }
 }
