@@ -122,7 +122,7 @@ class Dashboard extends React.Component {
                                 <SubMenu className="profile"
                                          title={
                                              <span className="submenu-title-wrapper">
-                                               <Icon type="user"/>Profile
+                                               <Icon type="user"/>{this.config.user}
                                              </span>}>
                                     <Logout/>
                                 </SubMenu>

@@ -82,6 +82,7 @@ class App extends React.Component {
             window.location.origin + "/store-ui-request-handler/user",
             "platform=publisher"
         ).then(res => {
+            config.user = res.data.data;
             const pageURL = window.location.pathname;
             const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
             if (lastURLSegment === "login") {
