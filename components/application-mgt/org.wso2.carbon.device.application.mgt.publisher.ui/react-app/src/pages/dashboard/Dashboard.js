@@ -142,7 +142,7 @@ class Dashboard extends React.Component {
                 </Layout>
                     <Drawer
                         title={
-                            <Link to="/publisher/apps">
+                            <Link to="/publisher/apps" onClick={this.onCloseMobileNavigationBar}>
                                 <img alt="logo"
                                      src={this.Logo}
                                      style={{marginLeft: 30}}
@@ -159,7 +159,8 @@ class Dashboard extends React.Component {
                             theme="light"
                             mode="inline"
                             defaultSelectedKeys={['1']}
-                            style={{lineHeight: '64px', width: 231}}>
+                            style={{lineHeight: '64px', width: 231}}
+                            onClick={this.onCloseMobileNavigationBar}>
                             <Menu.Item key="1">
                                 <Link to="/publisher/apps">
                                     <Icon type="appstore"/>Apps

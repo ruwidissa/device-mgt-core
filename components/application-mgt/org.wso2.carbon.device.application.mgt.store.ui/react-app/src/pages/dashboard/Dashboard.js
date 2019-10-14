@@ -156,7 +156,7 @@ class Dashboard extends React.Component {
                     </div>
                 </Layout>
                     <Drawer
-                        title={<Link to="/store/android">
+                        title={<Link to="/store/android" onClick={this.onCloseMobileNavigationBar}>
                             <img alt="logo" src={this.logo} style={{marginLeft: 30}} width={"60%"}/>
                         </Link>}
                         placement="left"
@@ -169,7 +169,8 @@ class Dashboard extends React.Component {
                             theme="light"
                             mode="inline"
                             defaultSelectedKeys={selectedKeys}
-                            style={{lineHeight: '64px', width: 231}}>
+                            style={{lineHeight: '64px', width: 231}}
+                            onClick={this.onCloseMobileNavigationBar}>
 
                             {DeviceTypesData}
 
