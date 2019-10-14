@@ -41,6 +41,7 @@ class Dashboard extends React.Component {
             collapsed: false
         };
         this.logo = this.props.context.theme.logo;
+        this.config = this.props.context;
     }
 
     componentDidMount() {
@@ -138,7 +139,7 @@ class Dashboard extends React.Component {
                                          title={
                                              <span className="submenu-title-wrapper">
                                      <Icon type="user"/>
-                                         Profile
+                                                 {this.config.user}
                                      </span> }>
                                     <Logout/>
                                 </SubMenu>
