@@ -46,9 +46,9 @@ class ImgViewer extends Component {
         return (
             <div className="release-images">
                 <RcViewer options={options} ref='viewer'>
-                    {this.props.images.map((screenshotUrl) => {
+                    {this.props.images.map((screenshotUrl, index) => {
                         return (
-                            <div key={"col-" + screenshotUrl} className="release-screenshot">
+                            <div key={index} className="release-screenshot">
                                     <img alt="screenshot" key={screenshotUrl} src={screenshotUrl}/>
                             </div>
                         )
