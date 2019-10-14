@@ -69,7 +69,7 @@ class ListApps extends React.Component {
                                 <Search
                                     placeholder="input search text"
                                     onSearch={this.setSearchText}
-                                    style={{width: 170}}
+                                    style={{width: 170, zIndex:0}}
                                 />
                             </Col>
                         </Row>
