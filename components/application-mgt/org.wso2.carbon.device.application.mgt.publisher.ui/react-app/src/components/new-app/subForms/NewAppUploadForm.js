@@ -221,7 +221,7 @@ class NewAppUploadForm extends React.Component {
     };
 
     handleLowerOsVersionChange = (lowerOsVersion) => {
-        this.lowerOsVersion = lowerOsVersion;
+        this.lowerOsVersion = parseFloat(lowerOsVersion);
         this.setState({
             osVersionsValidateStatus: 'validating',
             osVersionsHelperText: ''
@@ -229,7 +229,7 @@ class NewAppUploadForm extends React.Component {
     };
 
     handleUpperOsVersionChange = (upperOsVersion) => {
-        this.upperOsVersion = upperOsVersion;
+        this.upperOsVersion = parseFloat(upperOsVersion);
         this.setState({
             osVersionsValidateStatus: 'validating',
             osVersionsHelperText: ''
@@ -479,6 +479,7 @@ class NewAppUploadForm extends React.Component {
                                         required: true,
                                         message: 'Please select'
                                     }],
+                                    initialValue: false
                                 })(
                                     <Switch checkedChildren={<Icon type="check"/>}
                                             unCheckedChildren={<Icon type="close"/>}
