@@ -21,22 +21,32 @@ package org.wso2.carbon.device.application.mgt.core.dao.common;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.exception.UnsupportedDatabaseEngineException;
-import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
-import org.wso2.carbon.device.application.mgt.core.dao.*;
-import org.wso2.carbon.device.application.mgt.core.dao.impl.review.ReviewDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.application.SQLServerApplicationDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.OracleApplicationReleaseDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.SQLServerApplicationReleaseDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.OracleLifecycleStateDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.SQLServerLifecycleStateDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.review.GenericReviewDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.GenericApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.GenericApplicationReleaseDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.OracleApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.GenericLifecycleStateDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.review.OracleReviewDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.review.SQLServerReviewDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.GenericSubscriptionDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.OracleSubscriptionDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.SQLServerSubscriptionDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.GenericVisibilityDAOImpl;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
-import org.wso2.carbon.device.application.mgt.core.util.ApplicationMgtDatabaseCreator;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.OracleVisibilityDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.SQLServerVisibilityDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
-import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
-import org.wso2.carbon.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
-import org.wso2.carbon.utils.dbcreator.DatabaseCreator;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -74,6 +84,8 @@ public class ApplicationManagementDAOFactory {
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
                 case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerApplicationDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new OracleApplicationDAOImpl();
                 default:
@@ -89,8 +101,11 @@ public class ApplicationManagementDAOFactory {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
                 case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
-                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new GenericLifecycleStateDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerLifecycleStateDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OracleLifecycleStateDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
@@ -109,8 +124,11 @@ public class ApplicationManagementDAOFactory {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
                 case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
-                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new GenericApplicationReleaseDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OracleApplicationReleaseDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerApplicationReleaseDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
@@ -128,8 +146,11 @@ public class ApplicationManagementDAOFactory {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
                 case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
-                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new GenericVisibilityDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OracleVisibilityDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerVisibilityDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
@@ -148,26 +169,12 @@ public class ApplicationManagementDAOFactory {
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
                 case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericSubscriptionDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                    return new OracleSubscriptionDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new SQLServerSubscriptionDAOImpl();
                 default:
                     throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
-            }
-        }
-        throw new IllegalStateException("Database engine has not initialized properly.");
-    }
-
-    /**
-     * To get the instance of DeviceTypeDAOImpl of the particular database engine.
-     * @return DeviceTypeDAOImpl
-     */
-    public static DeviceTypeDAO getDeviceTypeDAO() {
-        if (databaseEngine != null) {
-            switch (databaseEngine) {
-            case Constants.DataBaseTypes.DB_TYPE_H2:
-            case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-            case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
-                return new DeviceTypeDAOImpl();
-            default:
-                throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
         }
         throw new IllegalStateException("Database engine has not initialized properly.");
@@ -179,43 +186,15 @@ public class ApplicationManagementDAOFactory {
             case Constants.DataBaseTypes.DB_TYPE_H2:
             case Constants.DataBaseTypes.DB_TYPE_MYSQL:
             case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
-                return new ReviewDAOImpl();
+                return new GenericReviewDAOImpl();
+            case Constants.DataBaseTypes.DB_TYPE_ORACLE:
+                return new OracleReviewDAOImpl();
+            case Constants.DataBaseTypes.DB_TYPE_MSSQL:
+                return new SQLServerReviewDAOImpl();
             default:
                 throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
             }
         }
         throw new IllegalStateException("Database engine has not initialized properly.");
-    }
-
-    /**
-     * This method initializes the databases by creating the database.
-     *
-     * @throws ApplicationManagementDAOException Exceptions thrown during the creation of the tables
-     */
-    public static void initDatabases() throws ApplicationManagementDAOException {
-        String dataSourceName = ConfigurationManager.getInstance().getConfiguration().getDatasourceName();
-        String validationQuery = "SELECT * from APPM_PLATFORM";
-        try {
-            if (System.getProperty("setup") == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Application Management Database schema initialization check was skipped since "
-                            + "\'setup\' variable was not given during startup");
-                }
-            } else {
-                DatabaseCreator databaseCreator = new ApplicationMgtDatabaseCreator(dataSourceName);
-                if (!databaseCreator.isDatabaseStructureCreated(validationQuery)) {
-                    databaseCreator.createRegistryDatabase();
-                    log.info("Application Management tables are created in the database");
-                } else {
-                    log.info("Application Management Database structure already exists. Not creating the database.");
-                }
-            }
-        } catch (SQLException e) {
-            throw new ApplicationManagementDAOException(
-                    "Error while creating application-mgt database during the " + "startup ", e);
-        } catch (Exception e) {
-            throw new ApplicationManagementDAOException(
-                    "Error while creating application-mgt database in the " + "startup ", e);
-        }
     }
 }

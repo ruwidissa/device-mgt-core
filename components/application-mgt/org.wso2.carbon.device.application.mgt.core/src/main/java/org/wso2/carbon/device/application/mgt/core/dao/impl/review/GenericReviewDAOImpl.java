@@ -45,9 +45,9 @@ import java.util.StringJoiner;
  * This handles ReviewDAO related operations.
  */
 
-public class ReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
+public class GenericReviewDAOImpl extends AbstractDAOImpl implements ReviewDAO {
 
-    private static final Log log = LogFactory.getLog(ReviewDAOImpl.class);
+    private static final Log log = LogFactory.getLog(GenericReviewDAOImpl.class);
     private String sql;
 
     @Override
