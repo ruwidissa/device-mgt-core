@@ -850,6 +850,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
+    @Override
     public List<String> getAppSubscribedUsers(int offsetValue, int limitValue, int appReleaseId,
                                               int tenantId)
             throws ApplicationManagementDAOException {
@@ -864,12 +865,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                          + "US.USER_NAME AS USER "
                          + "FROM AP_USER_SUBSCRIPTION US "
                          + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
+                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, appReleaseId);
                 stmt.setInt(2, tenantId);
-                stmt.setInt(3, offsetValue);
-                stmt.setInt(4, limitValue);
+                stmt.setInt(3, limitValue);
+                stmt.setInt(4, offsetValue);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         subscribedUsers.add(rs.getString("USER"));
@@ -958,6 +959,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
+    @Override
     public List<String> getAppSubscribedRoles(int offsetValue, int limitValue, int appReleaseId,
                                               int tenantId)
             throws ApplicationManagementDAOException {
@@ -972,12 +974,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                          + "US.ROLE_NAME AS ROLE "
                          + "FROM AP_ROLE_SUBSCRIPTION US "
                          + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
+                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
-                ps.setInt(3, offsetValue);
-                ps.setInt(4, limitValue);
+                ps.setInt(3, limitValue);
+                ps.setInt(4, offsetValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedRoles.add(rs.getString("ROLE"));
@@ -1052,12 +1054,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                          + "GS.GROUP_NAME AS GROUPS "
                          + "FROM AP_GROUP_SUBSCRIPTION GS "
                          + "WHERE "
-                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ?,?";
+                         + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
-                ps.setInt(3, offsetValue);
-                ps.setInt(4, limitValue);
+                ps.setInt(3, limitValue);
+                ps.setInt(4, offsetValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedGroups.add(rs.getString("GROUPS"));

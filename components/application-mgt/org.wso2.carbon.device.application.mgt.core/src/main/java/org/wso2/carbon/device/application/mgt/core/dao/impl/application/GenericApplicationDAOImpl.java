@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * This handles ApplicationDAO related operations.
+ * This handles Application related operations.
  */
 public class GenericApplicationDAOImpl extends AbstractDAOImpl implements ApplicationDAO {
 

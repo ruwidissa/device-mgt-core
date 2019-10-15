@@ -317,7 +317,7 @@
     </RatingConfig>
 
     <MDMConfig>
-        <ArtifactDownloadProtocol>https</ArtifactDownloadProtocol>
+        <ArtifactDownloadProtocol>http</ArtifactDownloadProtocol>
         <ArtifactDownloadEndpoint>/api/application-mgt/v1.0/artifact</ArtifactDownloadEndpoint>
     </MDMConfig>
 </ApplicationManagementConfiguration>

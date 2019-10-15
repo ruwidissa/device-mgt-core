@@ -312,7 +312,7 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                     statement.setString(x++, applicationReleaseDTO.getCurrentState().toUpperCase());
                 }
                 statement.setInt(x++, applicationReleaseDTO.getId());
-                statement.setInt(x++, tenantId);
+                statement.setInt(x, tenantId);
                 if (statement.executeUpdate() == 0) {
                     return null;
                 }
