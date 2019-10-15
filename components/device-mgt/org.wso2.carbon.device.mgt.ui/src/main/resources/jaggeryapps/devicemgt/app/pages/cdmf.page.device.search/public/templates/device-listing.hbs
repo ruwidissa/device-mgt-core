@@ -23,7 +23,7 @@
                     {{#equal enrolmentInfo.status "ACTIVE"}}<span><i class="fw fw-success icon-success"></i> Active</span>{{/equal}}
                     {{#equal enrolmentInfo.status "INACTIVE"}}<span><i class="fw fw-warning icon-warning"></i> Inactive</span>{{/equal}}
                     {{#equal enrolmentInfo.status "BLOCKED"}}<span><i class="fw fw-remove icon-danger"></i> Blocked</span>{{/equal}}
-                    {{#equal enrolmentInfo.status "REMOVED"}}<span><i class="fw fw-delete icon-danger"></i> Removed</span>{{/equal}}
+                    {{#equal enrolmentInfo.status "REMOVED"}}<span><i class="fw fw-disabled icon-danger"></i> Removed</span>{{/equal}}
                 </td>
                 <td class="remove-padding-top" data-search="{{type}}" data-display="{{type}}" data-grid-label="Type">{{type}}</td>
                 <td class="remove-padding-top" data-search="{{enrolmentInfo.ownership}}" data-display="{{enrolmentInfo.ownership}}" data-grid-label="Ownership">{{enrolmentInfo.ownership}}</td>

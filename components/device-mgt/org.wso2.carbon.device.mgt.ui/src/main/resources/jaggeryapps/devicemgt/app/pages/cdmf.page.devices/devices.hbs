@@ -218,15 +218,31 @@
                                                data-toggle="modal" data-target="#modalDemo">
                                                 <span class="icon fw-stack">
                                                     <i class="fw fw-circle-outline fw-stack-2x"></i>
-                                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                                    <i class="fw fw-disabled fw-stack-1x"></i>
                                                 </span>
                                                 {{#if group}}
                                                     Remove from group
                                                 {{else}}
-                                                    Remove Device
+                                                    Dis-enroll Device
                                                 {{/if}}
                                             </a>
                                         </li>
+                                        <!--permanent delete-->
+                                        {{#if permissions.permanentDelete}}
+                                            <li>
+                                                <a href="#"
+                                                   data-click-event="remove-form"
+                                                   class="btn square-element delete-device-link"
+                                                   data-toggle="modal" data-target="#modalDemo">
+                                                    <span class="icon fw-stack">
+                                                        <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                                        <i class="fw fw-delete fw-stack-1x"></i>
+                                                    </span>
+                                                    Delete Device
+                                                </a>
+                                            </li>
+                                        {{/if}}
+                                        <!--/permanent delete-->
                                         <!--update enrollment-->
                                         {{#if permissions.updateEnrollment}}
                                             <li>
@@ -423,6 +439,58 @@
                     </div>
                 </div>
 
+                <div id="delete-device-modal-content" class="hide">
+                    <div class="modal-header">
+                        <h3 class="pull-left modal-title">
+                            {{#if group}}
+                                Do you really want to permanently delete this device(s) from '{{group.name}}' group?
+                            {{else}}
+                                Do you really want to permanently delete this device(s) from your Devices?
+                            {{/if}}
+                        </h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i
+                                class="fw fw-cancel"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+
+                    </div>
+                    <div class="modal-footer">
+                        <div class="buttons">
+                            <a href="#" id="delete-device-yes-link" class="btn-operations">
+                                Yes
+                            </a>
+
+                            <a href="#" id="delete-device-cancel-link" class="btn-operations">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="delete-device-200-content" class="hide">
+                    <div class="modal-header">
+                        <h3 class="pull-left modal-title">
+                            {{#if group}}
+                                Successfully deleted from '{{group.name}}' group.
+                            {{else}}
+                                Successfully deleted.
+                            {{/if}}
+                        </h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i
+                                class="fw fw-cancel"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+
+                    </div>
+                    <div class="modal-footer">
+                        <div class="buttons">
+                            <a href="javascript:hidePopup()" class="btn-operations">Ok</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="edit-device-modal-content" class="hide">
                     <div class="modal-header">
                         <h3 class="pull-left modal-title">
@@ -471,6 +539,22 @@
                                         <div class="col-lg-5 col-md-6 col-centered">
                                             <h3>Device was successfully updated.</h3>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="enrolled-device-delete-content" class="hide">
+                                <div class="modal-header">
+                                    <h3 class="pull-left modal-title">Could not delete devices since some are still
+                                        enrolled.</h3>
+                                </div>
+                                <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="buttons">
+                                        <a href="#" id="enrolled-device-delete-link" class="btn-operations">
+                                            Ok
+                                        </a>
                                     </div>
                                 </div>
                             </div>
