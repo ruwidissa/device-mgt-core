@@ -36,7 +36,7 @@ public class InvalidExecutionPlanException extends WebApplicationException {
                       .entity(errorDTO)
                       .header(Constants.DeviceConstants.HEADER_CONTENT_TYPE, Constants.DeviceConstants.APPLICATION_JSON)
                       .build());
-        message = errorDTO.getDescription();
+        message = errorDTO.getMessage();
     }
 
     @Override
