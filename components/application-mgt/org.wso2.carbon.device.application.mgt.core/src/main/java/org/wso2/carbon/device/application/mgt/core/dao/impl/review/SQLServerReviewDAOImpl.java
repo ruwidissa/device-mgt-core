@@ -63,7 +63,7 @@ public class SQLServerReviewDAOImpl extends GenericReviewDAOImpl {
                 + "WHERE AP_APP_REVIEW.AP_APP_RELEASE_ID = ? AND "
                 + "AP_APP_REVIEW.ROOT_PARENT_ID = ? AND "
                 + "AP_APP_REVIEW.TENANT_ID = ? "
-                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                + "ORDER BY AP_APP_REVIEW.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -114,7 +114,7 @@ public class SQLServerReviewDAOImpl extends GenericReviewDAOImpl {
                     ") AND AP_APP_REVIEW.ROOT_PARENT_ID = ? AND "
                             + "AP_APP_REVIEW.ACTIVE_REVIEW = true AND "
                             + "AP_APP_REVIEW.TENANT_ID = ? "
-                            + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+                            + "ORDER BY AP_APP_REVIEW.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
             releaseIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
@@ -169,7 +169,7 @@ public class SQLServerReviewDAOImpl extends GenericReviewDAOImpl {
                             + "AP_APP_REVIEW.ACTIVE_REVIEW = true AND "
                             + "AP_APP_REVIEW.USERNAME = ? AND "
                             + "AP_APP_REVIEW.TENANT_ID = ? "
-                            + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+                            + "ORDER BY AP_APP_REVIEW.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
             releaseIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {

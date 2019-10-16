@@ -81,7 +81,7 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
-                + "INNER JOIN (SELECT ID FROM AP_APP OFFSET ? ROWS FETCH NEXT ? ROWS ONLY) AS app_data ON app_data.ID = AP_APP.ID "
+                + "INNER JOIN (SELECT ID FROM AP_APP ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY) AS app_data ON app_data.ID = AP_APP.ID "
                 + "WHERE AP_APP.TENANT_ID = ?";
 
         if (filter == null) {

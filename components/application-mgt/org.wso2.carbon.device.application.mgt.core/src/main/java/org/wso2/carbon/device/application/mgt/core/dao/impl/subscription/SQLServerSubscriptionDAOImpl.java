@@ -51,7 +51,7 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
                     + "US.USER_NAME AS USER "
                     + "FROM AP_USER_SUBSCRIPTION US "
                     + "WHERE "
-                    + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                    + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? ORDER BY US.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, appReleaseId);
                 stmt.setInt(2, tenantId);
@@ -88,10 +88,10 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
             Connection conn = this.getDBConnection();
             List<String> subscribedRoles = new ArrayList<>();
             String sql = "SELECT "
-                    + "US.ROLE_NAME AS ROLE "
-                    + "FROM AP_ROLE_SUBSCRIPTION US "
+                    + "RS.ROLE_NAME AS ROLE "
+                    + "FROM AP_ROLE_SUBSCRIPTION RS "
                     + "WHERE "
-                    + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                    + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? ORDER BY RS.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
@@ -131,7 +131,7 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
                     + "GS.GROUP_NAME AS GROUPS "
                     + "FROM AP_GROUP_SUBSCRIPTION GS "
                     + "WHERE "
-                    + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                    + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? ORDER BY GS.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);

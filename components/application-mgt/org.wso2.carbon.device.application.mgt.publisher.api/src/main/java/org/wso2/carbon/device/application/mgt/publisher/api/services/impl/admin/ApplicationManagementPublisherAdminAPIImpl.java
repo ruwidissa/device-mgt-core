@@ -36,6 +36,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -49,6 +50,7 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
     private static Log log = LogFactory.getLog(ApplicationManagementPublisherAdminAPIImpl.class);
 
         @DELETE
+        @Consumes(MediaType.WILDCARD)
         @Path("/release/{uuid}")
         public Response deleteApplicationRelease(
                 @PathParam("uuid") String releaseUuid) {
@@ -76,6 +78,7 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         }
 
     @DELETE
+    @Consumes(MediaType.WILDCARD)
     @Path("/{appId}")
     public Response deleteApplication(
             @PathParam("appId") int applicationId) {
@@ -102,7 +105,7 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
 
     @DELETE
     @Override
-    @Consumes("application/json")
+    @Consumes(MediaType.WILDCARD)
     @Path("/tags/{tagName}")
     public Response deleteTag(
             @PathParam("tagName") String tagName) {
@@ -168,7 +171,7 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
 
     @DELETE
     @Override
-    @Consumes("application/json")
+    @Consumes(MediaType.WILDCARD)
     @Path("/categories/{categoryName}")
     public Response deleteCategory(
             @PathParam("categoryName") String categoryName) {

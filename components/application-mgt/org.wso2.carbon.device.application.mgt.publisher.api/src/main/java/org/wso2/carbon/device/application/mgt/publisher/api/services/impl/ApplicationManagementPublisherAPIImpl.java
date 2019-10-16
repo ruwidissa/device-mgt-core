@@ -48,7 +48,6 @@ import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManage
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 
-import java.beans.Customizer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -748,7 +747,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @DELETE
     @Override
-    @Consumes("application/json")
+    @Consumes(MediaType.WILDCARD)
     @Path("/{appId}/tags/{tagName}")
     public Response deleteApplicationTag(
             @PathParam("appId") int appId,
@@ -775,7 +774,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
 
     @DELETE
     @Override
-    @Consumes("application/json")
+    @Consumes(MediaType.WILDCARD)
     @Path("/tags/{tagName}")
     public Response deleteUnusedTag(
             @PathParam("tagName") String tagName) {

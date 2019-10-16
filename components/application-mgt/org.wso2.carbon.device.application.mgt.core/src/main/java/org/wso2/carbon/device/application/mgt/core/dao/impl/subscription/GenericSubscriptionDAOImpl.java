@@ -971,8 +971,8 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             List<String> subscribedRoles = new ArrayList<>();
             String sql = "SELECT "
-                         + "US.ROLE_NAME AS ROLE "
-                         + "FROM AP_ROLE_SUBSCRIPTION US "
+                         + "RS.ROLE_NAME AS ROLE "
+                         + "FROM AP_ROLE_SUBSCRIPTION RS "
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {

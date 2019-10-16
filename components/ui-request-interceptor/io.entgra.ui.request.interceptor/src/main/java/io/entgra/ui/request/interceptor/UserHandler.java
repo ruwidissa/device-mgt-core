@@ -115,6 +115,7 @@ public class UserHandler extends HttpServlet {
 
     /**
      * Send UnAuthorized Response to the user
+     * 
      * @param req HttpServletRequest object
      * @param resp HttpServletResponse object
      * @param serverUrl Url of the server
@@ -124,6 +125,8 @@ public class UserHandler extends HttpServlet {
             throws IOException {
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
+        proxyResponse.setExecutorResponse(
+                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
         HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
     }
 }

@@ -70,10 +70,9 @@ import java.util.List;
 public class InvokerHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(InvokerHandler.class);
     private static final long serialVersionUID = -6508020875358160165L;
-    private AuthData authData;
-    private String apiEndpoint;
-    private String serverUrl;
-    private String platform;
+    private static AuthData authData;
+    private static String serverUrl;
+    private static String platform;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -229,7 +228,7 @@ public class InvokerHandler extends HttpServlet {
      */
     private String generateBackendRequestURL(HttpServletRequest req) {
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(serverUrl).append(HandlerConstants.API_COMMON_CONTEXT).append(apiEndpoint);
+        urlBuilder.append(serverUrl).append(HandlerConstants.API_COMMON_CONTEXT).append(req.getPathInfo());
         if (StringUtils.isNotEmpty(req.getQueryString())) {
             urlBuilder.append("?").append(req.getQueryString());
         }
@@ -269,10 +268,9 @@ public class InvokerHandler extends HttpServlet {
      * @return If request is a valid one, returns TRUE, otherwise return FALSE
      * @throws IOException If and error occurs while witting error response to client side
      */
-    private boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
+    private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + System.getProperty("iot.gateway.https.port");
-        apiEndpoint = req.getPathInfo();
         HttpSession session = req.getSession(false);
 
         if (session == null) {
@@ -289,8 +287,8 @@ public class InvokerHandler extends HttpServlet {
             return false;
         }
 
-        if (apiEndpoint == null || req.getMethod() == null) {
-            log.error("Bad Request, Either destination api-endpoint or method is empty");
+        if (req.getMethod() == null) {
+            log.error("Bad Request, Request method is empty");
             handleError(req, resp, HttpStatus.SC_BAD_REQUEST);
             return false;
         }
@@ -322,13 +320,14 @@ public class InvokerHandler extends HttpServlet {
     }
 
     /***
+     * This method is responsible to get the refresh token
      *
      * @param req {@link HttpServletRequest}
      * @param resp {@link HttpServletResponse}
      * @return If successfully renew tokens, returns TRUE otherwise return FALSE
      * @throws IOException If an error occurs while witting error response to client side or invoke token renewal API
      */
-    private boolean refreshToken(HttpServletRequest req, HttpServletResponse resp)
+    private static boolean refreshToken(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (log.isDebugEnabled()) {
             log.debug("refreshing the token");
@@ -391,7 +390,7 @@ public class InvokerHandler extends HttpServlet {
      * @param errorCode HTTP error status code
      * @throws IOException If error occurred when trying to send the error response.
      */
-    private void handleError(HttpServletRequest req, HttpServletResponse resp, int errorCode)
+    private static void handleError(HttpServletRequest req, HttpServletResponse resp, int errorCode)
             throws IOException {
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(errorCode);
