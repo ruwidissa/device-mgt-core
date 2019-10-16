@@ -1275,7 +1275,7 @@ public interface ApplicationManagementPublisherAPI {
     );
 
     @PUT
-    @Path("/tags/{oldTagName}")
+    @Path("/tags/rename")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,

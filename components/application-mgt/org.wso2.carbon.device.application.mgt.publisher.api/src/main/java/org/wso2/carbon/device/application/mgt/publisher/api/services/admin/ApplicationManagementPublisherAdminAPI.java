@@ -229,12 +229,12 @@ public interface ApplicationManagementPublisherAdminAPI {
     );
 
     @PUT
-    @Path("/tags/{tagName}")
+    @Path("/categories/rename")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
+            httpMethod = "PUT",
             value = "Update application category",
             notes = "This will update application category.",
             tags = "Application Management",
