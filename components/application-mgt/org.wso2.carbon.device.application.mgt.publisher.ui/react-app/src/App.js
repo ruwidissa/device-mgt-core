@@ -79,9 +79,10 @@ class App extends React.Component {
 
     getAndroidEnterpriseToken = (config) => {
         axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + "/device-mgt/android/v1.0/enterprise/store-url?approveApps=true" +
+            window.location.origin + config.serverConfig.invoker.uri +
+            "/device-mgt/android/v1.0/enterprise/store-url?approveApps=true" +
             "&searchEnabled=true&isPrivateAppsEnabled=true&isWebAppEnabled=true&isOrganizeAppPageVisible=true&isManagedConfigEnabled=true" +
-            "&host=https://localhost:9443",
+            "&host=" + window.location.origin,
         ).then(res => {
             config.androidEnterpriseToken = res.data.data.token;
             this.setState({
