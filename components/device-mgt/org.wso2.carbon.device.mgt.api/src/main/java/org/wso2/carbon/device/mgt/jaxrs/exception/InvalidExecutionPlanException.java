@@ -28,11 +28,11 @@ public class InvalidExecutionPlanException extends WebApplicationException {
     private static final long serialVersionUID = 7583096344745990515L;
 
     public InvalidExecutionPlanException(ErrorResponse error) {
-        super(Response.status(Response.Status.NOT_FOUND).entity(error).build());
+        super(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build());
     }
 
     public InvalidExecutionPlanException(ErrorDTO errorDTO) {
-        super(Response.status(Response.Status.NOT_FOUND)
+        super(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                       .entity(errorDTO)
                       .header(Constants.DeviceConstants.HEADER_CONTENT_TYPE, Constants.DeviceConstants.APPLICATION_JSON)
                       .build());

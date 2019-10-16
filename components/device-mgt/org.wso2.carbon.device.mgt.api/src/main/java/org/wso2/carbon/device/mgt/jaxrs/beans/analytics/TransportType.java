@@ -21,6 +21,11 @@ package org.wso2.carbon.device.mgt.jaxrs.beans.analytics;
  * This hold the default transport types support by the server.
  */
 public enum TransportType {
-    HTTP, MQTT;
+    EMAIL, FILE_TAIL, HTTP, IOT_EVENT, JMS, KAFKA, MQTT, OAUTH_MQTT, SOAP, WEBSOCKET, WEBSOCKET_LOCAL,
+    WSO2_EVENT, XMPP, UI, RDBMS, SECURED_WEBSOCKET, CASSANDRA, LOGGER;
+
+    public String toStringFormatted() {
+        return super.toString().toLowerCase().replace("_", "-");
+    }
 }
 

@@ -135,12 +135,12 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql);
             ){
                 if (filter.getLimit() != -1) {
+                    stmt.setInt(paramIndex++, filter.getOffset());
                     if (filter.getLimit() == 0) {
                         stmt.setInt(paramIndex++, 100);
                     } else {
                         stmt.setInt(paramIndex++, filter.getLimit());
                     }
-                    stmt.setInt(paramIndex++, filter.getOffset());
                 }
                 stmt.setInt(paramIndex++, tenantId);
 

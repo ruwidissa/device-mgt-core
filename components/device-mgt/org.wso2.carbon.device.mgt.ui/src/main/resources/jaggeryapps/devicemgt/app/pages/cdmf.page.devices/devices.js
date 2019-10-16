@@ -46,6 +46,9 @@ function onRequest(context) {
         if (uiPermissions.UPDATE_ENROLLMENT) {
             viewModel.permissions.updateEnrollment = true;
         }
+        if (uiPermissions.PERMANENT_DELETE) {
+            viewModel.permissions.permanentDelete = true;
+        }
         viewModel.currentUser = currentUser;
         var deviceCount = 0;
         if (groupId) {
