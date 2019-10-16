@@ -333,6 +333,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @DELETE
+    @Consumes(MediaType.WILDCARD)
     @Override
     @Path("/type/{device-type}/id/{device-id}")
     public Response deleteDevice(@PathParam("device-type") String deviceType,

@@ -919,10 +919,11 @@ public interface DeviceManagementService {
     //device remove request would looks like follows
     //DELETE devices/type/virtual_firealarm/id/us06ww93auzp
     @DELETE
+    @Consumes(MediaType.WILDCARD)
     @Path("/type/{device-type}/id/{device-id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            consumes = MediaType.APPLICATION_JSON,
+            consumes = MediaType.WILDCARD,
             httpMethod = "DELETE",
             value = "Remove the Device Specified by the Device ID",
             notes = "Returns the status of the deleted device operation and the details of the deleted device.",
