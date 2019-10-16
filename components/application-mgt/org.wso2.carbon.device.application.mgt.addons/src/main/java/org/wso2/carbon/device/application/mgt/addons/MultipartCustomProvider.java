@@ -1,4 +1,3 @@
-package org.wso2.carbon.device.application.mgt.addons;/*
 /* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
@@ -15,6 +14,7 @@ package org.wso2.carbon.device.application.mgt.addons;/*
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.device.application.mgt.addons;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
