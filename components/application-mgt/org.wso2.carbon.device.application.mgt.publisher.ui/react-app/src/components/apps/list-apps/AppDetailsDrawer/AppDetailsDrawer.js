@@ -72,7 +72,7 @@ const formats = [
 class AppDetailsDrawer extends React.Component {
     constructor(props) {
         super(props);
-        const drawerWidth = window.innerWidth<=770 ? '80%' : '40%';
+        const drawerWidth = window.innerWidth <= 770 ? '80%' : '40%';
 
         this.state = {
             loading: false,
@@ -460,7 +460,9 @@ class AppDetailsDrawer extends React.Component {
                         <Divider/>
 
                         {/*display manage config button only if the app is public android app*/}
-                        {(app.type === "PUBLIC") && (app.deviceType === "android") && (
+                        {(app.type === "PUBLIC") && (app.deviceType === "android") &&
+                        (config.androidEnterpriseToken !== null) &&
+                        (
                             <div>
                                 <div>
                                     <Text strong={true}>Set up managed configurations</Text>
@@ -490,8 +492,9 @@ class AppDetailsDrawer extends React.Component {
                         <div className="releases-details">
 
                             {(app.type === "ENTERPRISE") && (
-                                <Link to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}><Button htmlType="button"
-                                                                                           size="small">Add
+                                <Link to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}><Button
+                                    htmlType="button"
+                                    size="small">Add
                                     new release</Button></Link>)}
                             <List
                                 style={{paddingTop: 16}}
@@ -499,29 +502,30 @@ class AppDetailsDrawer extends React.Component {
                                 dataSource={app.applicationReleases}
                                 renderItem={release => (
                                     <div className="app-release-cards">
-                                    <List.Item>
-                                        <Link to={"apps/releases/" + release.uuid}>
-                                            <Card className="release-card">
-                                                <Meta
-                                                    avatar={
-                                                        <Avatar size="large" shape="square" src={release.iconPath}/>
-                                                    }
-                                                    title={release.version}
-                                                    description={
-                                                        <div style={{
-                                                            fontSize: "0.7em"
-                                                        }} className="description-view">
-                                                            <IconText type="check" text={release.currentStatus}/>
-                                                            <Divider type="vertical"/>
-                                                            <IconText type="upload" text={release.releaseType}/>
-                                                            <Divider type="vertical"/>
-                                                            <IconText type="star-o" text={release.rating.toFixed(1)}/>
-                                                        </div>
-                                                    }
-                                                />
-                                            </Card>
-                                        </Link>
-                                    </List.Item>
+                                        <List.Item>
+                                            <Link to={"apps/releases/" + release.uuid}>
+                                                <Card className="release-card">
+                                                    <Meta
+                                                        avatar={
+                                                            <Avatar size="large" shape="square" src={release.iconPath}/>
+                                                        }
+                                                        title={release.version}
+                                                        description={
+                                                            <div style={{
+                                                                fontSize: "0.7em"
+                                                            }} className="description-view">
+                                                                <IconText type="check" text={release.currentStatus}/>
+                                                                <Divider type="vertical"/>
+                                                                <IconText type="upload" text={release.releaseType}/>
+                                                                <Divider type="vertical"/>
+                                                                <IconText type="star-o"
+                                                                          text={release.rating.toFixed(1)}/>
+                                                            </div>
+                                                        }
+                                                    />
+                                                </Card>
+                                            </Link>
+                                        </List.Item>
                                     </div>
                                 )}
                             />
@@ -661,7 +665,7 @@ class AppDetailsDrawer extends React.Component {
 
                         <div className="app-rate">
                             {app.applicationReleases.length > 0 && (
-                                <DetailedRating type="app" uuid={app.applicationReleases[0].uuid} />)}
+                                <DetailedRating type="app" uuid={app.applicationReleases[0].uuid}/>)}
                         </div>
                     </Spin>
                 </Drawer>
