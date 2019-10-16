@@ -32,15 +32,15 @@ public class AdapterMappingConfiguration {
     @ApiModelProperty(value = "Input mapping for json,text and xml mappings")
     private String inputMappingString;
     @ApiModelProperty(value = "Input mapping for json,map and xml mappings")
-    private List<MappingProperty> inputMappingProperties;
+    private List<MappingProperty> inputMappingProperties = new ArrayList<>();
     @ApiModelProperty(value = "Name-scape mapping for xml mapping")
-    private List<MappingProperty> namespaceMappingProperties;
+    private List<MappingProperty> namespaceMappingProperties = new ArrayList<>();
     @ApiModelProperty(value = "Correlation mapping for wso2 mapping")
-    private List<MappingProperty> correlationMappingProperties;
+    private List<MappingProperty> correlationMappingProperties = new ArrayList<>();
     @ApiModelProperty(value = "Payload mapping for wso2 mapping")
-    private List<MappingProperty> payloadMappingProperties;
+    private List<MappingProperty> payloadMappingProperties = new ArrayList<>();
     @ApiModelProperty(value = "Meta mapping for wso2 mapping")
-    private List<MappingProperty> metaMappingProperties;
+    private List<MappingProperty> metaMappingProperties = new ArrayList<>();
 
     public MessageFormat getMessageFormat() {
         return messageFormat;
