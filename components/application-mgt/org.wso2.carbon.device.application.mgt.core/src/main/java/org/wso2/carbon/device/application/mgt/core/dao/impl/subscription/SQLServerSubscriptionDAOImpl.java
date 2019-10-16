@@ -55,8 +55,8 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, appReleaseId);
                 stmt.setInt(2, tenantId);
-                stmt.setInt(3, limitValue);
-                stmt.setInt(4, offsetValue);
+                stmt.setInt(3, offsetValue);
+                stmt.setInt(4, limitValue);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         subscribedUsers.add(rs.getString("USER"));
@@ -95,8 +95,8 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
-                ps.setInt(3, limitValue);
-                ps.setInt(4, offsetValue);
+                ps.setInt(3, offsetValue);
+                ps.setInt(4, limitValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedRoles.add(rs.getString("ROLE"));
@@ -135,8 +135,8 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, appReleaseId);
                 ps.setInt(2, tenantId);
-                ps.setInt(3, limitValue);
-                ps.setInt(4, offsetValue);
+                ps.setInt(3, offsetValue);
+                ps.setInt(4, limitValue);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         subscribedGroups.add(rs.getString("GROUPS"));

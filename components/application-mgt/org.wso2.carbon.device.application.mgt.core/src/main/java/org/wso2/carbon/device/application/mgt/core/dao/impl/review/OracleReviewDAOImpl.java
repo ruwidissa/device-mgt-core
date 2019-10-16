@@ -70,8 +70,8 @@ public class OracleReviewDAOImpl extends GenericReviewDAOImpl {
                 statement.setInt(1, releaseId);
                 statement.setInt(2, Constants.REVIEW_PARENT_ID);
                 statement.setInt(3, tenantId);
-                statement.setInt(4, request.getLimit());
-                statement.setInt(5, request.getOffSet());
+                statement.setInt(4, request.getOffSet());
+                statement.setInt(5, request.getLimit());
                 try (ResultSet rs = statement.executeQuery()) {
                     return DAOUtil.loadReviews(rs);
                 }
@@ -124,8 +124,8 @@ public class OracleReviewDAOImpl extends GenericReviewDAOImpl {
                 }
                 ps.setInt(index++, Constants.REVIEW_PARENT_ID);
                 ps.setInt(index++, tenantId);
-                ps.setInt(index++, request.getLimit());
-                ps.setInt(index, request.getOffSet());
+                ps.setInt(index++, request.getOffSet());
+                ps.setInt(index, request.getLimit());
                 try (ResultSet rs = ps.executeQuery()) {
                     return DAOUtil.loadReviews(rs);
                 }
@@ -180,8 +180,8 @@ public class OracleReviewDAOImpl extends GenericReviewDAOImpl {
                 ps.setInt(index++, Constants.REVIEW_PARENT_ID);
                 ps.setString(index++, username);
                 ps.setInt(index++, tenantId);
-                ps.setInt(index++, request.getLimit());
-                ps.setInt(index, request.getOffSet());
+                ps.setInt(index++, request.getOffSet());
+                ps.setInt(index, request.getLimit());
                 try (ResultSet rs = ps.executeQuery()) {
                     return DAOUtil.loadReviews(rs);
                 }
