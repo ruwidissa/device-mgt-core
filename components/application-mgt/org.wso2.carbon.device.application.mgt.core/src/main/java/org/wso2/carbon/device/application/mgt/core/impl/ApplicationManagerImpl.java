@@ -3090,6 +3090,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ConnectionManagerUtil.beginDBTransaction();
             List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, tenantId);
             if (deviceSubIds.isEmpty()){
+                ConnectionManagerUtil.rollbackDBTransaction();
                 String msg = "Couldn't find device subscription for operation id " + operationId;
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
