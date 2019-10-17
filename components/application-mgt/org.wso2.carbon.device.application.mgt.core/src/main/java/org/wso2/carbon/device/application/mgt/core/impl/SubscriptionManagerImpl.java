@@ -138,17 +138,17 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             .isEmpty(deviceIdentifier.getType())) {
                         log.warn("Found a device identifier which has either empty identity of the device or empty"
                                 + " device type. Hence ignoring the device identifier. ");
+                        continue;
                     }
                     if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
                         DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                         if (!deviceType.getName().equals(deviceIdentifier.getType())) {
-                            String msg =
-                                    "Found a device identifier which is not matched with the application device Type. "
-                                            + "Application device type is " + deviceType.getName() + " and the "
-                                            + "identifier of which has a " + "different device type is "
-                                            + deviceIdentifier.getId();
-                            log.warn(msg);
+                            log.warn("Found a device identifier which is not matched with the supported device type "
+                                    + "of the application release which has UUID " + applicationUUID + " Application "
+                                    + "supported device type is " + deviceType.getName() + " and the "
+                                    + "identifier of which has a different device type is " + deviceIdentifier.getId());
                             errorDeviceIdentifiers.add(deviceIdentifier);
+                            continue;
                         }
                     }
                     devices.add(deviceManagementProviderService.getDevice(deviceIdentifier, false));
@@ -188,7 +188,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 applicationInstallResponse = performActionOnDevices(null, devices, applicationDTO, subType,
                         subscribers, action);
             }
-            applicationInstallResponse.setErrorDevices(errorDeviceIdentifiers);
+            applicationInstallResponse.setErrorDeviceIdentifiers(errorDeviceIdentifiers);
             return applicationInstallResponse;
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while getting devices of given users or given roles.";
@@ -400,21 +400,23 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         entry.getKey(), action);
                 activityList.add(activity);
             }
-        } else {
-            if (applicationDTO.getType().equals(ApplicationType.PUBLIC.toString())) {
-                List<String> categories = getApplicationCategories(applicationDTO.getId());
-                if (categories.contains("GooglePlaySyncedApp")) {
-                    ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
-                    applicationPolicyDTO.setApplicationDTO(applicationDTO);
-                    applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
-                    applicationPolicyDTO.setAction(action);
-                    installEnrollmentApplications(applicationPolicyDTO);
-                }
+        } else if (applicationDTO.getType().equals(ApplicationType.PUBLIC.toString())) {
+            List<String> categories = getApplicationCategories(applicationDTO.getId());
+            if (categories.contains("GooglePlaySyncedApp")) {
+                ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
+                applicationPolicyDTO.setApplicationDTO(applicationDTO);
+                applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
+                applicationPolicyDTO.setAction(action);
+                installEnrollmentApplications(applicationPolicyDTO);
             } else {
                 Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action);
                 activityList.add(activity);
             }
+        } else {
+            Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action);
+            activityList.add(activity);
         }
+
         ApplicationInstallResponse applicationInstallResponse = new ApplicationInstallResponse();
         applicationInstallResponse.setActivities(activityList);
         applicationInstallResponse.setIgnoredDeviceIdentifiers(ignoredDeviceIdentifiers);
@@ -600,16 +602,20 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     private List<Integer> getOperationAddedDeviceIds(Activity activity, Map<DeviceIdentifier, Integer> deviceMap) {
-        List<Integer> deviceIds = new ArrayList<>();
         List<ActivityStatus> activityStatuses = activity.getActivityStatus();
-        for (ActivityStatus status : activityStatuses) {
-            if (status.getStatus().equals(ActivityStatus.Status.PENDING)) {
-                deviceIds.add(deviceMap.get(status.getDeviceIdentifier()));
-            }
-        }
-        return deviceIds;
+        return activityStatuses.stream().map(status -> deviceMap.get(status.getDeviceIdentifier()))
+                .collect(Collectors.toList());
     }
 
+    /**
+     * This method is responsible to get device subscription of particular application releasee for given set of devices.
+     *
+     * @param deviceIds Set of device Ids
+     * @param appReleaseId Application release Id
+     * @return {@link HashMap} with key as device id and value as {@link DeviceSubscriptionDTO}
+     * @throws ApplicationManagementException if error occured while executing SQL query or if more than one data found
+     * for a device id.
+     */
     private Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);

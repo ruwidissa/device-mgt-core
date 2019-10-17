@@ -36,7 +36,7 @@ public class ApplicationInstallResponse {
             value = "List of devices that either device identity is not exist or device type doesn't compatible with the supported device type of the .",
             dataType = "List[org.wso2.carbon.device.mgt.common.DeviceIdentifier]"
     )
-    private List<DeviceIdentifier> errorDevices;
+    private List<DeviceIdentifier> errorDeviceIdentifiers;
 
 
     @ApiModelProperty(
@@ -61,7 +61,7 @@ public class ApplicationInstallResponse {
         this.ignoredDeviceIdentifiers = ignoredDeviceIdentifiers;
     }
 
-    public List<DeviceIdentifier> getErrorDevices() { return errorDevices; }
+    public List<DeviceIdentifier> getErrorDeviceIdentifiers() { return errorDeviceIdentifiers; }
 
-    public void setErrorDevices(List<DeviceIdentifier> errorDevices) { this.errorDevices = errorDevices; }
+    public void setErrorDeviceIdentifiers(List<DeviceIdentifier> errorDeviceIdentifiers) { this.errorDeviceIdentifiers = errorDeviceIdentifiers; }
 }
