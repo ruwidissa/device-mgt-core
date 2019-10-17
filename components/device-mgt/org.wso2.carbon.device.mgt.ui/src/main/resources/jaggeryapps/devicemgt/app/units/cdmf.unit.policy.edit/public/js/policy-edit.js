@@ -42,6 +42,7 @@ var currentlyEffected = {};
 var validateInline = {};
 var clearInline = {};
 var hasPolicyProfileScript = false;
+var isCorrectiveActionProfileAdded = false;
 
 var enableInlineError = function (inputField, errorMsg, errorSign) {
     var fieldIdentifier = "#" + inputField;
@@ -148,7 +149,6 @@ $("#policy-name-input").focus(function () {
 skipStep["policy-platform"] = function (policyPayloadObj) {
     policy["name"] = policyPayloadObj["policyName"];
     policy["platform"] = policyPayloadObj["profile"]["deviceType"];
-    policy["policyType"] = policyPayloadObj["policyType"];
 
     var userRoleInput = $("#user-roles-input");
     var ownershipInput = $("#ownership-input");
@@ -161,6 +161,8 @@ skipStep["policy-platform"] = function (policyPayloadObj) {
     currentlyEffected["roles"] = policyPayloadObj.roles;
     currentlyEffected["users"] = policyPayloadObj.users;
     currentlyEffected["groups"] = [];
+    currentlyEffected["policyType"] = policyPayloadObj.policyType;
+    currentlyEffected["correctiveActions"] = policyPayloadObj.correctiveActions;
 
     if (policyPayloadObj.deviceGroups) {
         var deviceGroups = policyPayloadObj.deviceGroups;
@@ -278,6 +280,71 @@ stepForwardFrom["policy-profile"] = function () {
          */
         policy["profile"] = generatePolicyProfile();
     }
+
+    var policyType = currentlyEffected.policyType;
+    $("input[name=policy-type-radio-btn][value=" + policyType + "]").prop("checked", true);
+
+    // add policy correction action page
+    if (!isCorrectiveActionProfileAdded) {
+        var policyCorrectiveActionTemplateSrc =
+                "/public/cdmf.unit.policy.corrective-action/templates/policy-corrective-action.hbs";
+        var policyCorrectiveActionScriptSrc =
+                "/public/cdmf.unit.policy.corrective-action/js/policy-corrective-action.js";
+        var policyCorrectiveActionTemplateCacheKey = "policy-corrective-action";
+
+        $.template(policyCorrectiveActionTemplateCacheKey, context + policyCorrectiveActionTemplateSrc,
+                   function (template) {
+                       var content = template(
+                               {
+                                   "deviceType": policy["platform"],
+                                   "correctivePolicies": $("#logged-in-user").data("corrective-policies")
+                               }
+                       );
+                       $("#select-general-policy-type").html(content);
+                       if ("GENERAL" === policyType && currentlyEffected.correctiveActions &&
+                            currentlyEffected.correctiveActions.length > 0) {
+                           currentlyEffected.correctiveActions.forEach(function (correctiveAction) {
+                              if ("POLICY" === correctiveAction.actionType) {
+                                  $("#corrective-policy-input").val(correctiveAction.policyId);
+                                  // returned from for each since currently only supported corrective action type is
+                                  // POLICY.
+                                  return true;
+                              }
+                           });
+                       }
+                   });
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = context + policyCorrectiveActionScriptSrc;
+        document.head.prepend(script);
+
+        isCorrectiveActionProfileAdded = true;
+    }
+
+    $(".policy-type-loading-corrective-actions").addClass("hidden");
+
+    // updating next-page wizard title with selected platform
+    $("#policy-type-page-wizard-title").text("EDIT " + policy["platform"] + " POLICY - " + policy["name"]);
+};
+
+/**
+ * Forward action of policy type page.
+ */
+stepForwardFrom["policy-type"] = function () {
+    policy["type"] = $("input[name=policy-type-radio-btn]:checked").val();
+    var correctiveActionList = [];
+    if (policy.type === "GENERAL") {
+        var selectedCorrectivePolicyId = $("#corrective-policy-input").val();
+        if (selectedCorrectivePolicyId !== "none") {
+            var correctiveAction = {
+                "actionType": "POLICY",
+                "policyId": selectedCorrectivePolicyId
+            };
+            correctiveActionList.push(correctiveAction);
+        }
+    }
+    policy["correctiveActionList"] = correctiveActionList;
     // updating next-page wizard title with selected platform
     $("#policy-criteria-page-wizard-title").text("EDIT " + policy["platform"] + " POLICY - " + policy["name"]);
 };
@@ -489,9 +556,10 @@ var updatePolicy = function (policy, state) {
     var payload = {
         "policyName": policy["policyName"],
         "description": policy["description"],
-        "policyType": policy["policyType"],
         "compliance": policy["selectedNonCompliantAction"],
         "ownershipType": null,
+        "policyType": policy["type"],
+        "correctiveActions": policy["correctiveActionList"],
         "profile": {
             "profileName": policy["policyName"],
             "deviceType": policy["platform"],
@@ -695,6 +763,16 @@ $(document).ready(function () {
     });
 
     $("#policy-profile-wizard-steps").html($(".wr-steps").html());
+
+    isCorrectiveActionProfileAdded = false;
+
+    $('input[type=radio][name=policy-type-radio-btn]').change(function() {
+        if ($(this).val() === "CORRECTIVE") {
+            $("#select-general-policy-type").addClass("hidden");
+        } else {
+            $("#select-general-policy-type").removeClass("hidden");
+        }
+    });
 
     $(".wizard-stepper").click(function () {
         // button clicked here can be either a continue button or a back button.
