@@ -1472,6 +1472,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             stmt.setInt(1, policyId);
             stmt.executeUpdate();
 
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting corrective actions of policy ID " + policyId);
+            }
             String deleteCorrectiveActions = "DELETE FROM DM_POLICY_CORRECTIVE_ACTION WHERE POLICY_ID = ?";
             stmt = conn.prepareStatement(deleteCorrectiveActions);
             stmt.setInt(1, policyId);
