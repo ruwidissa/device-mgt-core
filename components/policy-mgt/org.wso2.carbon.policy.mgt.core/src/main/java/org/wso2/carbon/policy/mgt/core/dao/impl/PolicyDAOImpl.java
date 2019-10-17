@@ -14,6 +14,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.policy.mgt.core.dao.impl;
@@ -22,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.policy.mgt.common.Criterion;
 import org.wso2.carbon.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
@@ -244,6 +262,108 @@ public class PolicyDAOImpl implements PolicyDAO {
         return policy;
     }
 
+    @Override
+    public void addCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+            throws PolicyManagerDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String query = "INSERT INTO DM_POLICY_CORRECTIVE_ACTION " +
+                           "(ACTION_TYPE, " +
+                           "CORRECTIVE_POLICY_ID, " +
+                           "POLICY_ID) VALUES (?, ?, ?)";
+            try (PreparedStatement insertStmt = conn.prepareStatement(query)) {
+                for (CorrectiveAction correctiveAction : correctiveActions) {
+                    insertStmt.setString(1, correctiveAction.getActionType());
+                    insertStmt.setInt(2, correctiveAction.getPolicyId());
+                    insertStmt.setInt(3, policyId);
+                    insertStmt.addBatch();
+                }
+                insertStmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while adding corrective actions of policy ID " + policyId;
+            log.error(msg, e);
+            throw new PolicyManagerDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId) throws PolicyManagerDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String query = "SELECT " +
+                           "ACTION_TYPE, " +
+                           "CORRECTIVE_POLICY_ID " +
+                           "FROM DM_POLICY_CORRECTIVE_ACTION " +
+                           "WHERE POLICY_ID = ?";
+            try (PreparedStatement selectStmt = conn.prepareStatement(query)) {
+                List<CorrectiveAction> correctiveActions = new ArrayList<>();
+                selectStmt.setInt(1, policyId);
+                try (ResultSet rs = selectStmt.executeQuery()) {
+                    CorrectiveAction correctiveAction;
+                    while (rs.next()) {
+                        correctiveAction = new CorrectiveAction();
+                        correctiveAction.setActionType(rs.getString("ACTION_TYPE"));
+                        correctiveAction.setPolicyId(rs.getInt("CORRECTIVE_POLICY_ID"));
+                        correctiveActions.add(correctiveAction);
+                    }
+                }
+                return correctiveActions;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving corrective actions of policy ID " + policyId;
+            log.error(msg, e);
+            throw new PolicyManagerDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+            throws PolicyManagerDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String query = "UPDATE DM_POLICY_CORRECTIVE_ACTION " +
+                           "SET CORRECTIVE_POLICY_ID = ? " +
+                           "WHERE ACTION_TYPE = ? " +
+                           "AND POLICY_ID = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(query)) {
+                for (CorrectiveAction correctiveAction : correctiveActions) {
+                    updateStmt.setInt(1, correctiveAction.getPolicyId());
+                    updateStmt.setString(2, correctiveAction.getActionType());
+                    updateStmt.setInt(3, policyId);
+                    updateStmt.addBatch();
+                }
+                updateStmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while updating corrective actions of policy ID " + policyId;
+            log.error(msg, e);
+            throw new PolicyManagerDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void deleteCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+            throws PolicyManagerDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String query = "DELETE FROM DM_POLICY_CORRECTIVE_ACTION " +
+                           "WHERE ACTION_TYPE = ? " +
+                           "AND POLICY_ID = ?";
+            try (PreparedStatement deleteStmt = conn.prepareStatement(query)) {
+                for (CorrectiveAction correctiveAction : correctiveActions) {
+                    deleteStmt.setString(1, correctiveAction.getActionType());
+                    deleteStmt.setInt(2, policyId);
+                    deleteStmt.addBatch();
+                }
+                deleteStmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting corrective actions of policy ID " + policyId;
+            log.error(msg, e);
+            throw new PolicyManagerDAOException(msg, e);
+        }
+    }
 
     @Override
     public Policy addPolicyToDevice(List<Device> devices, Policy policy) throws PolicyManagerDAOException {
@@ -1349,6 +1469,11 @@ public class PolicyDAOImpl implements PolicyDAO {
 
             String deleteGroup = "DELETE FROM DM_DEVICE_GROUP_POLICY WHERE POLICY_ID = ?";
             stmt = conn.prepareStatement(deleteGroup);
+            stmt.setInt(1, policyId);
+            stmt.executeUpdate();
+
+            String deleteCorrectiveActions = "DELETE FROM DM_POLICY_CORRECTIVE_ACTION WHERE POLICY_ID = ?";
+            stmt = conn.prepareStatement(deleteCorrectiveActions);
             stmt.setInt(1, policyId);
             stmt.executeUpdate();
 
