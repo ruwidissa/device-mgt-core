@@ -62,6 +62,8 @@ policyModule = function () {
                 policyObjectToView["priorityId"] = policyObjectFromRestEndpoint["priorityId"];
                 policyObjectToView["name"] = policyObjectFromRestEndpoint["policyName"];
                 policyObjectToView["platform"] = policyObjectFromRestEndpoint["profile"]["deviceType"];
+                policyObjectFromRestEndpoint["policyType"] = policyListFromRestEndpoint["policyType"];
+                policyObjectFromRestEndpoint["correctiveActions"] = policyListFromRestEndpoint["correctiveActions"];
                 if (policyObjectToView["platform"] == "ios") {
                     policyObjectToView["deviceTypeIcon"] = "apple";
                 } else {
@@ -164,6 +166,27 @@ policyModule = function () {
                       "/policies?offset=0&limit=100";
             return serviceInvokers.XMLHttp.get(url, privateMethods.handleGetAllPoliciesResponse);
         } catch (e) {
+            throw e;
+        }
+    };
+
+    /**
+     * Retrieve all policies based on policy type
+     */
+    publicMethods.getAllPoliciesByType = function (policyType) {
+        var carbonUser = session.get(constants["USER_SESSION_KEY"]);
+        if (!carbonUser) {
+            log.error("User object was not found in the session");
+            userModule.logout(function () {
+                response.sendRedirect(devicemgtProps["appContext"] + "login");
+            });
+        }
+        try {
+            var url = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"] +
+                      "/policies/type/" + policyType + "?offset=0&limit=100";
+            return serviceInvokers.XMLHttp.get(url, privateMethods.handleGetAllPoliciesResponse);
+        } catch (e) {
+            log.error("Error occurred while retrieving policies by policy type " + policyType);
             throw e;
         }
     };
