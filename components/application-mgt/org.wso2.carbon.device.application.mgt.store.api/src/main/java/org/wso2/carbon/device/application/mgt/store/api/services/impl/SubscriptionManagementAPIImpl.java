@@ -34,7 +34,6 @@ import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
 import org.wso2.carbon.device.application.mgt.common.RoleList;
 import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;

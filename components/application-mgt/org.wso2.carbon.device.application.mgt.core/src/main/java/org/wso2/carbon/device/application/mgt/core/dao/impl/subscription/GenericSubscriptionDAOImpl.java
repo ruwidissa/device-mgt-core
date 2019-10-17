@@ -140,7 +140,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 try (ResultSet rs = stmt.getGeneratedKeys()){
                     List<Integer> updatedDeviceSubIds = new ArrayList<>();
                     while (rs.next()) {
-                        updatedDeviceSubIds.add(rs.getInt(1));
+                        updatedDeviceSubIds.add(rs.getInt("ID"));
                     }
                     return updatedDeviceSubIds;
                 }
@@ -402,7 +402,13 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         DeviceSubscriptionDTO deviceSubscriptionDTO = DAOUtil.constructDeviceSubscriptionDTO(rs);
-                        deviceSubscriptionDTOHashMap.put(deviceSubscriptionDTO.getId(), deviceSubscriptionDTO);
+                        if (deviceSubscriptionDTOHashMap.containsKey(deviceSubscriptionDTO.getDeviceId())){
+                            String msg = "There shouldn't be Device ids in multiple times in AP_DEVICE_SUBSCRIPTION "
+                                    + "table.";
+                            log.error(msg);
+                            throw new ApplicationManagementDAOException(msg);
+                        }
+                        deviceSubscriptionDTOHashMap.put(deviceSubscriptionDTO.getDeviceId(), deviceSubscriptionDTO);
                     }
                 }
             }

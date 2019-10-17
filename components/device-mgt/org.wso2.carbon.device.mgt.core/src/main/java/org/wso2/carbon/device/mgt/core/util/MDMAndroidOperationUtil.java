@@ -61,6 +61,7 @@ public class MDMAndroidOperationUtil {
 				operation.setPayLoad(appStoreApplication.toJSON());
 				break;
 			case WEBAPP:
+			case WEB_CLIP:
 				WebApplication webApplication = new WebApplication();
 				webApplication.setUrl(application.getLocation());
 				webApplication.setName(application.getName());
@@ -101,6 +102,7 @@ public class MDMAndroidOperationUtil {
 				operation.setPayLoad(appStoreApplication.toJSON());
 				break;
 			case WEBAPP:
+			case WEB_CLIP:
 				WebApplication webApplication = new WebApplication();
 				webApplication.setUrl(application.getLocation());
 				webApplication.setName(application.getName());

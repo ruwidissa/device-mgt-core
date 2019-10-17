@@ -19,5 +19,5 @@
 package org.wso2.carbon.device.mgt.common.app.mgt;
 
 public enum MobileAppTypes {
-    ENTERPRISE,WEBAPP,PUBLIC
+    ENTERPRISE,WEBAPP,PUBLIC,WEB_CLIP
 }
