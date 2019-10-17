@@ -25,6 +25,7 @@ import java.util.Map;
 public class SubscribingDeviceIdHolder {
     private Map<DeviceIdentifier, Integer> appInstalledDevices = new HashMap<>();
     private Map<DeviceIdentifier, Integer> appInstallableDevices = new HashMap<>();
+    private Map<DeviceIdentifier, Integer> appReInstallableDevices = new HashMap<>();
 
     public Map<DeviceIdentifier, Integer> getAppInstalledDevices() {
         return appInstalledDevices;
@@ -40,5 +41,13 @@ public class SubscribingDeviceIdHolder {
 
     public void setAppInstallableDevices(Map<DeviceIdentifier, Integer> appInstallableDevices) {
         this.appInstallableDevices = appInstallableDevices;
+    }
+
+    public Map<DeviceIdentifier, Integer> getAppReInstallableDevices() {
+        return appReInstallableDevices;
+    }
+
+    public void setAppReInstallableDevices(Map<DeviceIdentifier, Integer> appReInstallableDevices) {
+        this.appReInstallableDevices = appReInstallableDevices;
     }
 }
