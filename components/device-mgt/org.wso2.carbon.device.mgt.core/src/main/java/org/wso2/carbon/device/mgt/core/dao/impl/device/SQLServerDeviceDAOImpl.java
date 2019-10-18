@@ -619,7 +619,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
             sql = sql + " AND e.OWNERSHIP = ?";
         }
 
-        sql = sql + " LIMIT ?,?";
+        sql = sql + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         try (Connection conn = this.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
