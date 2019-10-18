@@ -921,7 +921,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             conn = this.getConnection();
             String query = "UPDATE DM_POLICY SET NAME = ?,  PROFILE_ID = ?, PRIORITY = ?, COMPLIANCE = ?," +
-                    " UPDATED = ?, DESCRIPTION = ?, OWNERSHIP_TYPE = ? WHERE ID = ? AND TENANT_ID = ?";
+                    " UPDATED = ?, DESCRIPTION = ?, OWNERSHIP_TYPE = ?, POLICY_TYPE = ? WHERE ID = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setString(1, policy.getPolicyName());
             stmt.setInt(2, policy.getProfile().getProfileId());
@@ -930,8 +930,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             stmt.setInt(5, 1);
             stmt.setString(6, policy.getDescription());
             stmt.setString(7, policy.getOwnershipType());
-            stmt.setInt(8, policy.getId());
-            stmt.setInt(9, tenantId);
+            stmt.setString(8, policy.getPolicyType());
+            stmt.setInt(9, policy.getId());
+            stmt.setInt(10, tenantId);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
