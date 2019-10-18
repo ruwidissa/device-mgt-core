@@ -17,8 +17,52 @@
 
 package org.wso2.carbon.device.application.mgt.core.dao.impl.application.release;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.application.mgt.common.exception.DBConnectionException;
+import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * This handles Application Release operations which are specific to MSSQL.
  */
 public class SQLServerApplicationReleaseDAOImpl extends GenericApplicationReleaseDAOImpl {
+    private static final Log log = LogFactory.getLog(GenericApplicationReleaseDAOImpl.class);
+
+    public boolean isActiveReleaseExisitForPackageName(String packageName, int tenantId, String inactiveState)
+            throws ApplicationManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Verifying application release existence for package name:" + packageName);
+        }
+        String sql = "SELECT AR.ID AS RELEASE_ID "
+                + "FROM AP_APP_RELEASE AS AR "
+                + "WHERE AR.PACKAGE_NAME = ? AND "
+                + "AR.CURRENT_STATE != ? AND "
+                + "AR.TENANT_ID = ? ORDER BY AR.ID OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY;";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, packageName);
+                stmt.setString(2, inactiveState);
+                stmt.setInt(3, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to verify the existence of package name for "
+                    + "active application release. Package name: " + packageName;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while verifying the existence of package name for active application "
+                    + "release. package name: " + packageName;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
 }
