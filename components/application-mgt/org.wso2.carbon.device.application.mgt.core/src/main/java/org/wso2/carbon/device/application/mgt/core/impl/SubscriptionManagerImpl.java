@@ -692,15 +692,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 App app = new App();
                 MobileAppTypes mobileAppType = MobileAppTypes.valueOf(application.getType());
                 if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+                    app.setType(mobileAppType);
+                    app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
+                    app.setIdentifier(application.getPackageName());
+                    app.setName(application.getName());
                     if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                        app.setType(mobileAppType);
-                        app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
-                        app.setIdentifier(application.getPackageName());
-                        app.setName(application.getName());
                         return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                        app.setType(mobileAppType);
-                        app.setAppIdentifier(application.getPackageName());
                         return MDMAndroidOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
@@ -816,6 +814,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<Integer> deviceIdList = new ArrayList<>();
             for (DeviceSubscriptionDTO deviceIds : deviceSubscriptionDTOS) {
                 deviceIdList.add(deviceIds.getDeviceId());
+            }
+
+            if (deviceIdList.isEmpty()){
+                PaginationResult paginationResult = new PaginationResult();
+                paginationResult.setData(deviceIdList);
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+                return paginationResult;
             }
             //pass the device id list to device manager service method
             try {

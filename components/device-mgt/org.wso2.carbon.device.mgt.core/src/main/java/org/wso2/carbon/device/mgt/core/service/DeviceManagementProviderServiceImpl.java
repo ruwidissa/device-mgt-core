@@ -3734,12 +3734,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         PaginationResult paginationResult = new PaginationResult();
         int count;
-        List<Device> SubscribedDeviceDetails;
+        List<Device> subscribedDeviceDetails;
         try {
             DeviceManagementDAOFactory.openConnection();
-            SubscribedDeviceDetails = deviceDAO
+            subscribedDeviceDetails = deviceDAO
                     .getSubscribedDevices(offsetValue, limitValue, devicesIds, tenantId, status);
-            count = SubscribedDeviceDetails.size();
+            count = subscribedDeviceDetails.size();
 
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving device list for device ids " + devicesIds;
@@ -3752,7 +3752,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
-        paginationResult.setData(getAllDeviceInfo(SubscribedDeviceDetails));
+        paginationResult.setData(getAllDeviceInfo(subscribedDeviceDetails));
         paginationResult.setRecordsFiltered(count);
         paginationResult.setRecordsTotal(count);
         return paginationResult;

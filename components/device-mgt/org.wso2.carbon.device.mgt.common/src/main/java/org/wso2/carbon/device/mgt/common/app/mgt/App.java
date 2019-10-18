@@ -59,8 +59,6 @@ public class App {
             "tab and you will see the package name under the respective " +
             "application..", required = true)
     private String packageName;
-    @ApiModelProperty(name = "appIdentifier", value = "The package name of the application.", required = true)
-    private String appIdentifier;
     private String location;
     @ApiModelProperty(name = "properties", value = "List of meta data.", required = true)
     private Properties properties;
@@ -127,14 +125,6 @@ public class App {
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
-    }
-
-    public String getAppIdentifier() {
-        return appIdentifier;
-    }
-
-    public void setAppIdentifier(String appIdentifier) {
-        this.appIdentifier = appIdentifier;
     }
 
     public String getLocation() {
