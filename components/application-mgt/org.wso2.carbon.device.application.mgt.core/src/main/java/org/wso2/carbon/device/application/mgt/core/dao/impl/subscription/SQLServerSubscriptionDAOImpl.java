@@ -26,7 +26,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -152,6 +154,115 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
         } catch (SQLException e) {
             String msg = "SQL Error occurred while getting subscribed groups for given " +
                     "app release id.";
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Integer> updateDeviceSubscription(String updateBy, List<Integer> deviceIds,
+            boolean isUnsubscribed, String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
+            throws ApplicationManagementDAOException {
+        try {
+            String sql = "UPDATE AP_DEVICE_SUBSCRIPTION SET ";
+
+            if (isUnsubscribed) {
+                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ?, ";
+            } else {
+                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ?, ";
+            }
+            sql += "ACTION_TRIGGERED_FROM = ?, " +
+                    "STATUS = ? " +
+                    "WHERE " +
+                    "DM_DEVICE_ID = ? AND " +
+                    "AP_APP_RELEASE_ID = ? AND " +
+                    "TENANT_ID = ?";
+
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                Calendar calendar = Calendar.getInstance();
+                Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+                List<Integer> updatedDeviceSubIds = new ArrayList<>();
+                for (Integer deviceId : deviceIds) {
+                    stmt.setString(1, updateBy);
+                    stmt.setTimestamp(2, timestamp);
+                    stmt.setString(3, actionTriggeredFrom);
+                    stmt.setString(4, installStatus);
+                    stmt.setInt(5, deviceId);
+                    stmt.setInt(6, releaseId);
+                    stmt.setInt(7, tenantId);
+                    stmt.executeUpdate();
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            updatedDeviceSubIds.add(rs.getInt(1));
+                        }
+                    }
+                }
+                return updatedDeviceSubIds;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update device subscriptions of "
+                    + "application. Updated by: " + updateBy + " and updating action triggered from "
+                    + actionTriggeredFrom;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to update the device subscriptions of application. "
+                    + "Updated by: " + updateBy + " and updating action triggered from " + actionTriggeredFrom;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Integer> addDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
+            String subscribedFrom, String installStatus, int releaseId, int tenantId)
+            throws ApplicationManagementDAOException {
+        String sql = "INSERT INTO "
+                + "AP_DEVICE_SUBSCRIPTION("
+                + "SUBSCRIBED_BY, "
+                + "SUBSCRIBED_TIMESTAMP, "
+                + "ACTION_TRIGGERED_FROM, "
+                + "STATUS, "
+                + "DM_DEVICE_ID, "
+                + "AP_APP_RELEASE_ID,"
+                + "TENANT_ID) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                Calendar calendar = Calendar.getInstance();
+                Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+                List<Integer> deviceSubIds = new ArrayList<>();
+                for (Integer deviceId : deviceIds) {
+                    stmt.setString(1, subscribedBy);
+                    stmt.setTimestamp(2, timestamp);
+                    stmt.setString(3, subscribedFrom);
+                    stmt.setString(4, installStatus);
+                    stmt.setInt(5, deviceId);
+                    stmt.setInt(6, releaseId);
+                    stmt.setInt(7, tenantId);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding a device subscription for device id " + deviceId + " and application "
+                                + "release which has release id" + releaseId);
+                    }
+                    stmt.executeUpdate();
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            deviceSubIds.add(rs.getInt(1));
+                        }
+                    }
+                }
+                return deviceSubIds;
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occured while obtaining database connection to add device subscription for application "
+                    + "release which has release Id" + releaseId;
+            log.error(msg, e);
+            throw new ApplicationManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occured when processing SQL to add device subscription for application release which"
+                    + " has release Id " + releaseId;
             log.error(msg, e);
             throw new ApplicationManagementDAOException(msg, e);
         }
