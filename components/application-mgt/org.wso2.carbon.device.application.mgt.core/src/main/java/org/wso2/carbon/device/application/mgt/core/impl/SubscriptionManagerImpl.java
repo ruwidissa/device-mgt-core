@@ -642,6 +642,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /**
+     * This method is responsible to add operation on given devices.
+     *
+     * @param applicationDTO application.
+     * @param deviceIdentifierList list of device identifiers.
+     * @param deviceType device type
+     * @param action action e.g :- INSTALL, UNINSTALL
+     * @return {@link Activity}
+     * @throws ApplicationManagementException if found an invalid device.
+     */
     private Activity addAppOperationOnDevices(ApplicationDTO applicationDTO,
             List<DeviceIdentifier> deviceIdentifierList, String deviceType, String action)
             throws ApplicationManagementException {
@@ -664,7 +674,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     private Operation generateOperationPayloadByDeviceType(String deviceType, Application application, String action)
             throws ApplicationManagementException {
         try {
-            //todo rethink and modify the {@link App} usage
             if (ApplicationType.CUSTOM.toString().equalsIgnoreCase(application.getType())) {
                 ProfileOperation operation = new ProfileOperation();
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
@@ -692,15 +701,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 App app = new App();
                 MobileAppTypes mobileAppType = MobileAppTypes.valueOf(application.getType());
                 if (DeviceTypes.ANDROID.toString().equalsIgnoreCase(deviceType)) {
+                    app.setType(mobileAppType);
+                    app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
+                    app.setIdentifier(application.getPackageName());
+                    app.setName(application.getName());
                     if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                        app.setType(mobileAppType);
-                        app.setLocation(application.getApplicationReleases().get(0).getInstallerPath());
-                        app.setIdentifier(application.getPackageName());
-                        app.setName(application.getName());
                         return MDMAndroidOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                        app.setType(mobileAppType);
-                        app.setAppIdentifier(application.getPackageName());
                         return MDMAndroidOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
@@ -722,7 +729,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         return MDMIOSOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                         app.setType(mobileAppType);
-                        app.setAppIdentifier(application.getPackageName());
+                        app.setIdentifier(application.getPackageName());
                         return MDMIOSOperationUtil.createAppUninstallOperation(app);
                     } else {
                         String msg = "Invalid Action is found. Action: " + action;
@@ -816,6 +823,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<Integer> deviceIdList = new ArrayList<>();
             for (DeviceSubscriptionDTO deviceIds : deviceSubscriptionDTOS) {
                 deviceIdList.add(deviceIds.getDeviceId());
+            }
+
+            if (deviceIdList.isEmpty()){
+                PaginationResult paginationResult = new PaginationResult();
+                paginationResult.setData(deviceIdList);
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+                return paginationResult;
             }
             //pass the device id list to device manager service method
             try {

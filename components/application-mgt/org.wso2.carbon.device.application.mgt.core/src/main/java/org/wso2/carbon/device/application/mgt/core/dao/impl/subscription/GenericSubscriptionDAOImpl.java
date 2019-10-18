@@ -140,7 +140,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 try (ResultSet rs = stmt.getGeneratedKeys()){
                     List<Integer> updatedDeviceSubIds = new ArrayList<>();
                     while (rs.next()) {
-                        updatedDeviceSubIds.add(rs.getInt("ID"));
+                        updatedDeviceSubIds.add(rs.getInt(1));
                     }
                     return updatedDeviceSubIds;
                 }
