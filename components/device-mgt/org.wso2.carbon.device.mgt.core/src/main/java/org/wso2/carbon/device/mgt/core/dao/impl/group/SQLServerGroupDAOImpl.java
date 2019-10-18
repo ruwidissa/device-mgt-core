@@ -50,6 +50,8 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
         boolean hasGroupName = false;
         String owner = request.getOwner();
         boolean hasOwner = false;
+        String status = request.getStatus();
+        boolean hasStatus = false;
         boolean hasLimit = request.getRowCount() != 0;
 
         try {
@@ -63,6 +65,10 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
                 sql += " AND OWNER LIKE ?";
                 hasOwner = true;
             }
+            if (status != null && !status.isEmpty()) {
+                sql += " AND STATUS = ?";
+                hasStatus = true;
+            }
             if (hasLimit) {
                 sql += " ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
             }
@@ -75,6 +81,9 @@ public class SQLServerGroupDAOImpl extends AbstractGroupDAOImpl {
             }
             if (hasOwner) {
                 stmt.setString(paramIndex++, owner + "%");
+            }
+            if (hasStatus) {
+                stmt.setString(paramIndex++, status.toUpperCase());
             }
             if (hasLimit) {
                 stmt.setInt(paramIndex++, request.getStartIndex());

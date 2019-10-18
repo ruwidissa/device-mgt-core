@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.apache.solr.common.StringUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -46,14 +47,25 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         PreparedStatement stmt = null;
         ResultSet rs;
         int groupId = -1;
+        boolean hasStatus = false;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID) VALUES (?, ?, ?, ?)";
+            String sql;
+            if(deviceGroup.getStatus() == null || deviceGroup.getStatus().isEmpty()){
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID) VALUES (?, ?, ?, ?)";
+            } else {
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, STATUS) VALUES (?, ?, ?, ?, ?)";
+                hasStatus = true;
+            }
             stmt = conn.prepareStatement(sql, new String[]{"ID"});
             stmt.setString(1, deviceGroup.getDescription());
             stmt.setString(2, deviceGroup.getName());
             stmt.setString(3, deviceGroup.getOwner());
             stmt.setInt(4, tenantId);
+            if(hasStatus) {
+                stmt.setString(5, deviceGroup.getStatus());
+            }
+
             stmt.executeUpdate();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -128,16 +140,26 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     public void updateGroup(DeviceGroup deviceGroup, int groupId, int tenantId)
             throws GroupManagementDAOException {
         PreparedStatement stmt = null;
+        boolean hasStatus = false;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql =
                     "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ? WHERE ID = ? AND TENANT_ID = ?";
+
+            if(deviceGroup.getStatus() != null && !deviceGroup.getStatus().isEmpty()){
+                sql = "UPDATE DM_GROUP SET DESCRIPTION = ?, GROUP_NAME = ?, OWNER = ?, STATUS = ? WHERE ID = ? AND TENANT_ID = ?";
+                hasStatus = true;
+            }
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, deviceGroup.getDescription());
-            stmt.setString(2, deviceGroup.getName());
-            stmt.setString(3, deviceGroup.getOwner());
-            stmt.setInt(4, groupId);
-            stmt.setInt(5, tenantId);
+            int paramIndex = 1;
+            stmt.setString(paramIndex++, deviceGroup.getDescription());
+            stmt.setString(paramIndex++, deviceGroup.getName());
+            stmt.setString(paramIndex++, deviceGroup.getOwner());
+            if(hasStatus) {
+                stmt.setString(paramIndex++, deviceGroup.getStatus());
+            }
+            stmt.setInt(paramIndex++, groupId);
+            stmt.setInt(paramIndex++, tenantId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new GroupManagementDAOException("Error occurred while updating deviceGroup '" +
@@ -213,8 +235,8 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         Map<String,String> properties = new HashMap<String, String>();
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement(
-                    "SELECT PROPERTY_NAME, PROPERTY_VALUE FROM GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?");
+            String sql = "SELECT PROPERTY_NAME, PROPERTY_VALUE FROM GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?";
+            stmt = conn.prepareStatement(sql);
             stmt.setInt(1, groupId);
             stmt.setInt(2, tenantId);
             resultSet = stmt.executeQuery();
@@ -304,14 +326,22 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
     }
 
     @Override
-    public int getGroupCount(int tenantId) throws GroupManagementDAOException {
+    public int getGroupCount(int tenantId, String status) throws GroupManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
+        boolean statusAvailable = false;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql = "SELECT COUNT(ID) AS GROUP_COUNT FROM DM_GROUP WHERE TENANT_ID = ?";
+            if(!StringUtils.isEmpty(status)){
+                sql += " AND STATUS = ?";
+                statusAvailable = true;
+            }
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
+            if(statusAvailable){
+                stmt.setString(2, status);
+            }
             resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt("GROUP_COUNT");
@@ -335,6 +365,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         boolean hasGroupName = false;
         String owner = request.getOwner();
         boolean hasOwner = false;
+        boolean hasStatus = false;
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
@@ -347,6 +378,10 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                 sql += " AND OWNER LIKE ?";
                 hasOwner = true;
             }
+            if(!StringUtils.isEmpty(request.getStatus())){
+                sql += " AND STATUS = ?";
+                hasStatus = true;
+            }
 
             int paramIndex = 1;
             stmt = conn.prepareStatement(sql);
@@ -356,6 +391,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             }
             if (hasOwner) {
                 stmt.setString(paramIndex, owner + "%");
+            }
+            if (hasStatus) {
+                stmt.setString(paramIndex, request.getStatus());
             }
             resultSet = stmt.executeQuery();
             if (resultSet.next()) {
