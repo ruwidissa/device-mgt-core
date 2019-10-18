@@ -446,12 +446,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
             DeviceSubscriptionDTO deviceSubscriptionDTO = deviceSubscriptions.get(device.getId());
             if (deviceSubscriptionDTO != null) {
-                if (deviceSubscriptionDTO.isUnsubscribed()) {
-                    appReInstallableDevices.put(deviceIdentifier, device.getId());
-                }
                 if (!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
                         .equals(deviceSubscriptionDTO.getStatus())) {
                     appInstalledDevices.put(deviceIdentifier, device.getId());
+                } else {
+                    appReInstallableDevices.put(deviceIdentifier, device.getId());
                 }
             } else {
                 appInstallableDevices.put(deviceIdentifier, device.getId());
