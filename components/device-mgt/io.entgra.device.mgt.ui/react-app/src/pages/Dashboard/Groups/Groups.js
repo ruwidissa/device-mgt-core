@@ -48,8 +48,7 @@ class Groups extends React.Component {
                     </Breadcrumb>
                     <div className="wrap">
                         <h3>Groups</h3>
-                        <Paragraph>Lorem ipsum dolordd sit amet, est similique constituto at, quot inermis id mel, an
-                            illud incorrupte nam.</Paragraph>
+                        <Paragraph>All device groups.</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
                         <GroupsTable/>

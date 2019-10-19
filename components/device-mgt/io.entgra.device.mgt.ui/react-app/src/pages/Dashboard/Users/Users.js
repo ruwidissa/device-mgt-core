@@ -48,13 +48,15 @@ class Users extends React.Component {
                     </Breadcrumb>
                     <div className="wrap">
                         <h3>Users</h3>
-                        <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
-                            illud incorrupte nam.</Paragraph>
+                        <Paragraph>All users for device management.</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
                         <UsersTable/>
                     </div>
                 </PageHeader>
+                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
+
+                </div>
             </div>
         );
     }

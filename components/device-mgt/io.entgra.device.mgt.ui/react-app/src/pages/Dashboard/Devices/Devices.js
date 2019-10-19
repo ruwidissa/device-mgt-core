@@ -48,9 +48,8 @@ class Devices extends React.Component {
                         <Breadcrumb.Item>Devices</Breadcrumb.Item>
                     </Breadcrumb>
                     <div className="wrap">
-                        <h3>Devicessss</h3>
-                        <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
-                            illud incorrupte nam.</Paragraph>
+                        <h3>Devices</h3>
+                        <Paragraph>All enrolled devices</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
                         <DeviceTable/>

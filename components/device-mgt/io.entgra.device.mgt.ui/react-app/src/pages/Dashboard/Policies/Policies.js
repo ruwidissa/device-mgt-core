@@ -47,8 +47,7 @@ class Policies extends React.Component {
                     </Breadcrumb>
                     <div className="wrap">
                         <h3>Policies</h3>
-                        <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
-                            illud incorrupte nam.</Paragraph>
+                        <Paragraph>All policies for device management</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
 
