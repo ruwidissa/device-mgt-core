@@ -34,7 +34,7 @@ import {
     Select
 } from 'antd';
 import axios from "axios";
-import {withConfigContext} from "../../../../context/ConfigContext";
+import {withConfigContext} from "../../../context/ConfigContext";
 
 const {TextArea} = Input;
 const InputGroup = Input.Group;
