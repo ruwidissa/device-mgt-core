@@ -107,6 +107,7 @@ class Reviews extends React.Component {
                 data: res,
             });
         });
+        this.props.deleteCallback();
     };
 
     render() {
@@ -119,16 +120,14 @@ class Reviews extends React.Component {
                     pageStart={0}
                     loadMore={this.handleInfiniteOnLoad}
                     hasMore={!loading && hasMore}
-                    useWindow={true}
-                >
+                    useWindow={true}>
                     <List
                         dataSource={data}
                         renderItem={item => (
                             <List.Item key={item.id}>
                                 <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={false} deleteCallback={this.deleteCallback}/>
                             </List.Item>
-                        )}
-                    >
+                        )}>
                         {loading && hasMore && (
                             <div className="loading-container">
                                 <Spin/>

@@ -28,48 +28,9 @@ const {Text, Paragraph} = Typography;
 
 class CurrentUsersReview extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            data: []
-
-        };
-    }
-
-    componentDidMount() {
-        this.fetchData();
-    }
-
-    fetchData = () => {
-        const {uuid} = this.props;
-        const config = this.props.context;
-
-        axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/app/user/" + uuid,
-        ).then(res => {
-            if (res.status === 200) {
-                const data = res.data.data.data;
-                this.setState({data});
-            }
-
-        }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to get your review.");
-        });
-    };
-
-    deleteCallback = () =>{
-        this.setState({
-            data: []
-        });
-    };
-
-    addCallBack =(review) =>{
-
-    };
 
     render() {
-        const {data} = this.state;
-        const {uuid} = this.props;
+        const {uuid, currentUserReviews} = this.props;
         return (
             <div>
                 <Text>MY REVIEW</Text>
@@ -78,13 +39,20 @@ class CurrentUsersReview extends React.Component {
                     paddingTop: 8,
                     paddingLeft: 24
                 }}>
-                    {data.length > 0 && (
+                    {currentUserReviews.length > 0 && (
                         <div>
                             <List
-                                dataSource={data}
+                                dataSource={currentUserReviews}
                                 renderItem={item => (
                                     <List.Item key={item.id}>
-                                        <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={true} deleteCallback={this.deleteCallback} isPersonalReview={true}/>
+                                        <SingleReview
+                                            uuid={uuid}
+                                            review={item}
+                                            isDeletable={true}
+                                            isEditable={true}
+                                            deleteCallback={this.props.deleteCallback}
+                                            onUpdateReview={this.props.onUpdateReview}
+                                            isPersonalReview={true}/>
                                     </List.Item>
                                 )}
                             >
@@ -92,7 +60,7 @@ class CurrentUsersReview extends React.Component {
                         </div>
                     )}
 
-                    {data.length === 0 && (
+                    {currentUserReviews.length === 0 && (
                         <div>
                             <Empty
                                 image={Empty.PRESENTED_IMAGE_DEFAULT}
@@ -104,7 +72,9 @@ class CurrentUsersReview extends React.Component {
                                 }
                             >
                                 {/*<Button type="primary">Add review</Button>*/}
-                                <AddReview uuid={uuid}/>
+                                <AddReview
+                                    uuid={uuid}
+                                    onUpdateReview={this.props.onUpdateReview}/>
                             </Empty>
                         </div>
                     )}

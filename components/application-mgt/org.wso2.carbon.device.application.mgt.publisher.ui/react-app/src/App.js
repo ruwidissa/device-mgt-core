@@ -64,6 +64,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        this.updateFavicon();
         axios.get(
             window.location.origin + "/publisher/public/conf/config.json",
         ).then(res => {
@@ -128,6 +129,14 @@ class App extends React.Component {
                 })
             }
         });
+    };
+
+    updateFavicon = () =>{
+        const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = window.location.origin+'/devicemgt/public/uuf.unit.favicon/img/favicon.png';
+        document.getElementsByTagName('head')[0].appendChild(link);
     };
 
     render() {

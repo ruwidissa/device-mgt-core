@@ -29,46 +29,9 @@ const { Text } = Typography;
 
 class DetailedRating extends React.Component{
 
-    constructor(props){
-        super(props);
-        this.state={
-            detailedRating: null
-        }
-    }
-
-    componentDidMount() {
-        const {type,uuid} = this.props;
-        this.getData(type,uuid);
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        if (prevProps.uuid !== this.props.uuid) {
-            const {type,uuid} = this.props;
-            this.getData(type,uuid);
-        }
-    }
-
-
-    getData = (type, uuid)=>{
-        const config = this.props.context;
-
-        return axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+uuid+"/"+type+"-rating",
-            ).then(res => {
-            if (res.status === 200) {
-                let detailedRating = res.data.data;
-                this.setState({
-                    detailedRating
-                })
-            }
-
-        }).catch(function (error) {
-            handleApiError(error,"Error occurred while trying to load ratings.");
-        });
-    };
 
     render() {
-        const detailedRating = this.state.detailedRating;
+        const {detailedRating} = this.props;
 
         if(detailedRating ==null){
             return null;
