@@ -36,9 +36,8 @@ public interface SubscriptionDAO {
     List<Integer> addDeviceSubscription(String subscribedBy, List<Integer> deviceIds, String subscribedFrom,
             String installStatus, int releaseId, int tenantId ) throws ApplicationManagementDAOException;
 
-    List<Integer> updateDeviceSubscription(String updateBy, List<Integer> deviceIds, boolean isUnsubscribed,
-            String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
-            throws ApplicationManagementDAOException;
+    void updateDeviceSubscription(String updateBy, List<Integer> deviceIds, String action, String actionTriggeredFrom,
+            String installStatus, int releaseId, int tenantId) throws ApplicationManagementDAOException;
 
     void addOperationMapping (int operationId, List<Integer> deviceSubscriptionId, int tenantId) throws ApplicationManagementDAOException;
 
@@ -79,7 +78,7 @@ public interface SubscriptionDAO {
     void updateSubscriptions(int tenantId, String updateBy, List<String> paramList,
             int releaseId, String subType, String action) throws ApplicationManagementDAOException;
 
-    List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int applicationReleaseId, int tenantId)
+    List<Integer> getDeviceSubIds(List<Integer> deviceIds, int applicationReleaseId, int tenantId)
             throws ApplicationManagementDAOException;
 
     List<Integer> getDeviceSubIdsForOperation (int operationId, int tenantId) throws ApplicationManagementDAOException;
