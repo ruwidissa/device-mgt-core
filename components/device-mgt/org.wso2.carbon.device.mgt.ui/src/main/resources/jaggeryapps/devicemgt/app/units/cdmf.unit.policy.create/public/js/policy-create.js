@@ -276,7 +276,7 @@ stepForwardFrom["policy-type"] = function () {
     var correctiveActionList = [];
     if (policy.type === "GENERAL") {
         var selectedCorrectivePolicyId = $("#corrective-policy-input").val();
-        if (selectedCorrectivePolicyId !== "none") {
+        if (selectedCorrectivePolicyId && selectedCorrectivePolicyId !== "none") {
             var correctiveAction = {
                 "actionType": "POLICY",
                 "policyId": selectedCorrectivePolicyId

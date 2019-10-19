@@ -282,7 +282,7 @@ stepForwardFrom["policy-profile"] = function () {
     }
 
     var policyType = currentlyEffected.policyType;
-    $("input[name=policy-type-radio-btn][value=" + policyType + "]").prop("checked", true);
+    $("input[name=policy-type-radio-btn][value=" + policyType + "]").prop("checked", true).trigger('change');
 
     // add policy correction action page
     if (!isCorrectiveActionProfileAdded) {
@@ -336,7 +336,7 @@ stepForwardFrom["policy-type"] = function () {
     var correctiveActionList = [];
     if (policy.type === "GENERAL") {
         var selectedCorrectivePolicyId = $("#corrective-policy-input").val();
-        if (selectedCorrectivePolicyId !== "none") {
+        if (selectedCorrectivePolicyId && selectedCorrectivePolicyId !== "none") {
             var correctiveAction = {
                 "actionType": "POLICY",
                 "policyId": selectedCorrectivePolicyId

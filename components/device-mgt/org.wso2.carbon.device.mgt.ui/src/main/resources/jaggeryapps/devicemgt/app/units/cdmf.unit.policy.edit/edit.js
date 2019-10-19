@@ -35,6 +35,7 @@
 
 function onRequest(context) {
     var deviceType = request.getParameter("deviceType");
+    var policyId = request.getParameter("id");
     var utility = require("/app/modules/utility.js").utility;
     var userModule = require("/app/modules/business-controllers/user.js")["userModule"];
     var groupModule = require("/app/modules/business-controllers/group.js")["groupModule"];
@@ -84,7 +85,18 @@ function onRequest(context) {
     var enrollmentApps = policyModule.getStoreAppsForPolicy();
     context["storeApps"] = JSON.stringify(enrollmentApps["content"]);
 
-    context["correctivePolicies"] = JSON.stringify(policyModule.getAllPoliciesByType("CORRECTIVE")["content"]);
+    var correctivePolicies = policyModule.getAllPoliciesByType("CORRECTIVE")["content"];
+    if (correctivePolicies) {
+        var i;
+        for (i = 0; i < correctivePolicies.length; i++) {
+            if (correctivePolicies[i].id.toString() === policyId) {
+                correctivePolicies.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    context["correctivePolicies"] = JSON.stringify(correctivePolicies);
 
     return context;
 }
