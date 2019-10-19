@@ -436,9 +436,9 @@ class NewAppUploadForm extends React.Component {
                                                                 defaultActiveFirstOption={true}
                                                                 onChange={this.handleUpperOsVersionChange}>
                                                             {(supportedOsVersions.length > 0) &&(
-                                                                <Option key="any"
+                                                                <Option key="all"
                                                                         value={supportedOsVersions[supportedOsVersions.length-1]["versionName"]}>
-                                                                    Any
+                                                                    All
                                                                 </Option>
                                                             )}
                                                             {supportedOsVersions.map(version => (
