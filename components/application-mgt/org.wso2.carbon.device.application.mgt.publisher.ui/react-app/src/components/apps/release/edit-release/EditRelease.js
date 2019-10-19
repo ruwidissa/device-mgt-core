@@ -34,6 +34,7 @@ import {
     Select
 } from 'antd';
 import axios from "axios";
+import "@babel/polyfill";
 import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {TextArea} = Input;
