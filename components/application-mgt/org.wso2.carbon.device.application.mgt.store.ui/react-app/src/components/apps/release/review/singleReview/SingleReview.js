@@ -52,6 +52,7 @@ class SingleReview extends React.Component {
         this.setState({
             review
         });
+        this.props.onUpdateReview();
     };
 
     deleteReview = () => {
