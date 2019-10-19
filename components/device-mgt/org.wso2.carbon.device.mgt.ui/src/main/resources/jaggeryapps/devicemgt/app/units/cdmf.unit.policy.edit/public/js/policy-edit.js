@@ -305,7 +305,11 @@ stepForwardFrom["policy-profile"] = function () {
                             currentlyEffected.correctiveActions.length > 0) {
                            currentlyEffected.correctiveActions.forEach(function (correctiveAction) {
                               if ("POLICY" === correctiveAction.actionType) {
-                                  $("#corrective-policy-input").val(correctiveAction.policyId);
+                                  if ($("#corrective-policy-input option[value=" + correctiveAction.policyId + "]").length > 0) {
+                                      $("#corrective-policy-input").val(correctiveAction.policyId);
+                                  } else {
+                                      $("#corrective-action-policy-id-missing-msg").removeClass("hidden");
+                                  }
                                   // returned from for each since currently only supported corrective action type is
                                   // POLICY.
                                   return true;
