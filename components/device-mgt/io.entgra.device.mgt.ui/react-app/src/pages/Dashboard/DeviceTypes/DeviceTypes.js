@@ -21,15 +21,14 @@ import {
     PageHeader,
     Typography,
     Breadcrumb,
-    Icon,
-    Button, Select
+    Icon
 } from "antd";
 import {Link} from "react-router-dom";
-import DeviceTable from "../../../components/Devices/DevicesTable";
+import DeviceTypesTable from "../../../components/DeviceTypes/DeviceTypesTable";
 
 const {Paragraph} = Typography;
 
-class Devices extends React.Component {
+class DeviceTypes extends React.Component {
     routes;
 
     constructor(props) {
@@ -43,17 +42,17 @@ class Devices extends React.Component {
                 <PageHeader style={{paddingTop: 0}}>
                     <Breadcrumb style={{paddingBottom: 16}}>
                         <Breadcrumb.Item>
-                            <Link to="/entgra/devices"><Icon type="home"/> Home</Link>
+                            <Link to="/entgra"><Icon type="home"/> Home</Link>
                         </Breadcrumb.Item>
-                        <Breadcrumb.Item>Devices</Breadcrumb.Item>
+                        <Breadcrumb.Item>Device Types</Breadcrumb.Item>
                     </Breadcrumb>
                     <div className="wrap">
-                        <h3>Devicessss</h3>
+                        <h3>Device Types</h3>
                         <Paragraph>Lorem ipsum dolor sit amet, est similique constituto at, quot inermis id mel, an
                             illud incorrupte nam.</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                        <DeviceTable/>
+                        <DeviceTypesTable/>
                     </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
@@ -64,4 +63,4 @@ class Devices extends React.Component {
     }
 }
 
-export default Devices;
+export default DeviceTypes;
