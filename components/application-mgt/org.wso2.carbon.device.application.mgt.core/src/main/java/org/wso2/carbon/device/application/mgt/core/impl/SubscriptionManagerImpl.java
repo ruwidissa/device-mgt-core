@@ -438,6 +438,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         Map<DeviceIdentifier, Integer> appInstalledDevices = new HashMap<>();
         Map<DeviceIdentifier, Integer> appInstallableDevices = new HashMap<>();
         Map<DeviceIdentifier, Integer> appReInstallableDevices = new HashMap<>();
+        Map<DeviceIdentifier, Integer> skippedDevices = new HashMap<>();
 
         List<Integer> deviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
         //get device subscriptions for given device id list.
@@ -449,6 +450,9 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 if (!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
                         .equals(deviceSubscriptionDTO.getStatus())) {
                     appInstalledDevices.put(deviceIdentifier, device.getId());
+                } else if (Operation.Status.PENDING.toString().equals(deviceSubscriptionDTO.getStatus())
+                        || Operation.Status.IN_PROGRESS.toString().equals(deviceSubscriptionDTO.getStatus())) {
+                    skippedDevices.put(deviceIdentifier, device.getId());
                 } else {
                     appReInstallableDevices.put(deviceIdentifier, device.getId());
                 }
@@ -461,6 +465,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         subscribingDeviceIdHolder.setAppInstallableDevices(appInstallableDevices);
         subscribingDeviceIdHolder.setAppInstalledDevices(appInstalledDevices);
         subscribingDeviceIdHolder.setAppReInstallableDevices(appReInstallableDevices);
+        subscribingDeviceIdHolder.setSkippedDevices(skippedDevices);
         return subscribingDeviceIdHolder;
     }
 
@@ -530,8 +535,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            List<Integer> deviceSubIds = new ArrayList<>();
-
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 List<String> subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
@@ -560,29 +563,33 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             for (Activity activity : activities) {
                 int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
+                List<Integer> subUpdatingDeviceIds = new ArrayList<>();
+                List<Integer> subInsertingDeviceIds = new ArrayList<>();
+                List<Integer> deviceSubIds = new ArrayList<>();
+
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    List<Integer> alreadyUnsubscribedDevices = getOperationAddedDeviceIds(activity,
-                            subscribingDeviceIdHolder.getAppReInstallableDevices());
-                    List<Integer> deviceIdsOfNewSubscriptions = getOperationAddedDeviceIds(activity,
-                            subscribingDeviceIdHolder.getAppInstallableDevices());
-                    if (!alreadyUnsubscribedDevices.isEmpty()) {
-                        List<Integer> deviceResubscribingIds = subscriptionDAO
-                                .updateDeviceSubscription(username, alreadyUnsubscribedDevices, false, subType,
-                                        Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-                        deviceSubIds.addAll(deviceResubscribingIds);
-                    }
-                    List<Integer> subscribingDevices = subscriptionDAO
-                            .addDeviceSubscription(username, deviceIdsOfNewSubscriptions, subType,
-                                    Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-                    deviceSubIds.addAll(subscribingDevices);
+                    subUpdatingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
+                            subscribingDeviceIdHolder.getAppReInstallableDevices()));
+                    subInsertingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
+                            subscribingDeviceIdHolder.getAppInstallableDevices()));
+
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                    List<Integer> alreadySubscribedDevices = getOperationAddedDeviceIds(activity,
-                            subscribingDeviceIdHolder.getAppInstalledDevices());
-                    List<Integer> deviceResubscribingIds = subscriptionDAO
-                            .updateDeviceSubscription(username, alreadySubscribedDevices, true, subType,
-                                    Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-                    deviceSubIds.addAll(deviceResubscribingIds);
+                    subUpdatingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
+                            subscribingDeviceIdHolder.getAppInstalledDevices()));
                 }
+
+                List<Integer> subscribingDevices = subscriptionDAO
+                        .addDeviceSubscription(username, subInsertingDeviceIds, subType,
+                                Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
+                subscriptionDAO.updateDeviceSubscription(username, subUpdatingDeviceIds, action, subType,
+                        Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
+
+                if (!subUpdatingDeviceIds.isEmpty()) {
+                    deviceSubIds.addAll(subscriptionDAO
+                            .getDeviceSubIds(subUpdatingDeviceIds, applicationReleaseId, tenantId));
+                }
+                deviceSubIds.addAll(subscribingDevices);
+
                 subscriptionDAO.addOperationMapping(operationId, deviceSubIds, tenantId);
             }
             ConnectionManagerUtil.commitDBTransaction();
@@ -606,6 +613,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /**
+     * This method is responsible to get device IDs thta operation has added.
+     *
+     * @param activity Activity
+     * @param deviceMap Device map, key is device identifier and value is primary key of device.
+     * @return List of device primary keys
+     */
     private List<Integer> getOperationAddedDeviceIds(Activity activity, Map<DeviceIdentifier, Integer> deviceMap) {
         List<ActivityStatus> activityStatuses = activity.getActivityStatus();
         return activityStatuses.stream()

@@ -104,16 +104,20 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<Integer> updateDeviceSubscription(String updateBy, List<Integer> deviceIds,
-            boolean isUnsubscribed, String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
+    public void updateDeviceSubscription(String updateBy, List<Integer> deviceIds,
+            String action, String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
             throws ApplicationManagementDAOException {
         try {
             String sql = "UPDATE AP_DEVICE_SUBSCRIPTION SET ";
 
-            if (isUnsubscribed) {
+            if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                 sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ?, ";
+            } else if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
+                sql += "UNSUBSCRIBED = false, SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ?, ";
             } else {
-                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ?, ";
+                String msg = "Found invalid action " + action + ". Hence can't construct the query.";
+                log.error(msg);
+                throw new ApplicationManagementDAOException(msg);
             }
             sql += "ACTION_TRIGGERED_FROM = ?, " +
                     "STATUS = ? " +
@@ -137,13 +141,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
-                try (ResultSet rs = stmt.getGeneratedKeys()){
-                    List<Integer> updatedDeviceSubIds = new ArrayList<>();
-                    while (rs.next()) {
-                        updatedDeviceSubIds.add(rs.getInt(1));
-                    }
-                    return updatedDeviceSubIds;
-                }
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update device subscriptions of "
@@ -546,7 +543,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<Integer> getSubscribedDeviceIds(List<Integer> deviceIds, int applicationReleaseId,
+    public List<Integer> getDeviceSubIds(List<Integer> deviceIds, int applicationReleaseId,
             int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
@@ -557,7 +554,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             int index = 1;
             List<Integer> subscribedDevices = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT DS.DM_DEVICE_ID "
+                    "SELECT DS.ID "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
                             + "WHERE DS.DM_DEVICE_ID IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
@@ -604,7 +601,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                 sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
             } else {
-                sql += "SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
+                sql += "UNSUBSCRIBED = false, SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
             }
 
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
@@ -650,7 +647,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             List<Integer> deviceSubIds = new ArrayList<>();
             String sql = "SELECT "
-                    + "ID "
+                    + "AP_DEVICE_SUBSCRIPTION_ID "
                     + "FROM AP_APP_SUB_OP_MAPPING "
                     + "WHERE "
                     + "OPERATION_ID = ? AND "
@@ -660,7 +657,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setInt(2, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        deviceSubIds.add(rs.getInt("ID"));
+                        deviceSubIds.add(rs.getInt("AP_DEVICE_SUBSCRIPTION_ID"));
                     }
                 }
                 return deviceSubIds;
