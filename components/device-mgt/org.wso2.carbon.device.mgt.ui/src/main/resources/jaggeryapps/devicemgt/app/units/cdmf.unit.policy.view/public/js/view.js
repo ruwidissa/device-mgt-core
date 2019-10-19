@@ -28,6 +28,7 @@ var displayPolicy = function (policyPayloadObj) {
     $("#policy-assignment").text(policyPayloadObj.deviceGroups);
     $("#policy-action").text(policyPayloadObj.compliance.toUpperCase());
     $("#policy-description").text(policyPayloadObj["description"]);
+    $("#policy-type").text(policyPayloadObj.policyType);
     var policyStatus = "Active";
     if (policyPayloadObj["active"] === true && policyPayloadObj["updated"] === true) {
         policyStatus = '<i class="fw fw-warning icon-success"></i> Active/Updated</span>';
@@ -67,6 +68,20 @@ var displayPolicy = function (policyPayloadObj) {
     } else if (policyPayloadObj.roles.length > 0) {
         $("#policy-roles").text(policyPayloadObj.roles.toString().split(",").join(", "));
     }
+
+    if ("GENERAL" === policyPayloadObj.policyType &&
+            policyPayloadObj.correctiveActions && policyPayloadObj.correctiveActions.length > 0) {
+        policyPayloadObj.correctiveActions.forEach(function (correctiveAction) {
+            if ("POLICY" === correctiveAction.actionType) {
+               $("#corrective-action-type-policy-id").html(correctiveAction.policyId);
+               return true;
+            }
+        });
+        $("#policy-corrective-actions-list").removeClass("hidden");
+    } else {
+        $("#policy-corrective-actions-list").addClass("hidden");
+    }
+
 
     var policyId = policyPayloadObj["id"];
     var deviceType = policy["platform"];

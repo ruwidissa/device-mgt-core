@@ -1,7 +1,8 @@
 {{#zone "content"}}
     {{#if isAuthorized }}
         <span id="logged-in-user" class="hidden" data-username="{{@user.username}}" data-domain="{{@user.domain}}"
-              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}" data-storeapps="{{storeApps}}"></span>
+              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}" data-storeapps="{{storeApps}}"
+              data-corrective-policies="{{correctivePolicies}}"></span>
         <span id="policy-operations" class="hidden" data-template="{{policyOperations.template}}"
               data-script="{{policyOperations.script}}" data-style="{{policyOperations.style}}"></span>
         <div class="row">
@@ -16,15 +17,22 @@
                         <br class="c-both"/>
                     </div>
                     <div class="col-md-3 col-xs-3">
-                        <div class="itm-wiz" data-step="policy-criteria">
+                        <div class="itm-wiz itm-wiz" data-step="policy-type">
                             <div class="wiz-no">2</div>
+                            <div class="wiz-lbl hidden-xs"><span>Edit policy type</span></div>
+                        </div>
+                        <br class="c-both"/>
+                    </div>
+                    <div class="col-md-3 col-xs-3">
+                        <div class="itm-wiz" data-step="policy-criteria">
+                            <div class="wiz-no">3</div>
                             <div class="wiz-lbl hidden-xs"><span>Edit assignment groups</span></div>
                         </div>
                         <br class="c-both"/>
                     </div>
                     <div class="col-md-3 col-xs-3">
                         <div class="itm-wiz" data-step="policy-naming">
-                            <div class="wiz-no">3</div>
+                            <div class="wiz-no">4</div>
                             <div class="wiz-lbl hidden-xs"><span>Republish to devices</span></div>
                         </div>
                         <br class="c-both"/>
@@ -48,7 +56,7 @@
                         <hr>
                         <div class="row">
                             <div class="col-lg-12">
-                                <h4 class="visible-xs">Step 3: Republish to devices</h4>
+                                <h4 class="visible-xs">Step 4: Republish to devices</h4>
                                 <br>
                                 <div id="policy-naming-main-error-msg" class="alert alert-danger hidden" role="alert">
                                     <i class="icon fw fw-error"></i><span></span>
@@ -107,7 +115,7 @@
                         <hr>
                         <div class="row">
                             <div class="col-lg-12">
-                                <h4 class="visible-xs">Step 2: Edit assignment groups</h4>
+                                <h4 class="visible-xs">Step 3: Edit assignment groups</h4>
                                 <br>
                                 <div id="policy-criteria-main-error-msg" class="alert alert-danger hidden" role="alert">
                                     <i class="icon fw fw-error"></i><span></span>
@@ -196,13 +204,60 @@
                                 </div>
                                 <div class="wr-input-control wr-btn-grp">
                                     <a href="#" class="wr-btn wizard-stepper" data-is-back-btn="true"
-                                       data-current="policy-criteria" data-next="policy-profile">
+                                       data-current="policy-criteria" data-next="policy-type">
                                         Back
                                     </a>
                                     <a href="#" class="wr-btn wizard-stepper" data-current="policy-criteria"
                                        data-next="policy-naming" data-validate="true">
                                         Continue
                                     </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-centered wr-content policy-type hidden">
+                    <div class="wr-form">
+                        <h1 id="policy-type-page-wizard-title" class="page-sub-title">EDIT POLICY</h1>
+                        <hr>
+                        <div id="policy-type-wizard-steps" class="row wr-wizard"></div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h4 class="visible-xs"> Step 2: Select policy type</h4>
+                                <br>
+                                <div id="policy-type-main-error-msg" class="alert alert-danger hidden" role="alert">
+                                    <i class="icon fw fw-error"></i><span></span>
+                                </div>
+                                <div>
+                                    <div class="wr-input-control">
+                                        <label class="wr-input-control radio light">
+                                            <input type="radio" id="policy-type-general" name="policy-type-radio-btn"
+                                                   value="GENERAL"/>
+                                            <span class="helper">General Policy</span>
+                                        </label>
+                                        <label class="wr-input-control radio light">
+                                            <input type="radio" id="policy-type-corrective" name="policy-type-radio-btn"
+                                                   value="CORRECTIVE"/>
+                                            <span class="helper">Corrective Policy</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class='policy-type-loading-corrective-actions'>
+                                    <br/>
+                                    <i class='fw fw-settings fw-spin fw-2x'></i>
+                                    Loading corrective actions . . .
+                                    <br/>
+                                    <br/>
+                                </div>
+                                <div id="select-general-policy-type"></div>
+                                <div class="wr-input-control wr-btn-grp">
+                                    <a href="#" class="wr-btn wizard-stepper" data-is-back-btn="true"
+                                       data-current="policy-type" data-next="policy-profile">Back</a>
+                                    <a href="#" class="wr-btn wizard-stepper"
+                                       data-current="policy-type"
+                                       data-next="policy-criteria" data-validate="false">Continue</a>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +293,7 @@
                                 </div>
                                 <div class="wr-input-control wr-btn-grp">
                                     <a href="#" class="wr-btn wizard-stepper" data-current="policy-profile"
-                                       data-next="policy-criteria" data-validate="true">
+                                       data-next="policy-type" data-validate="true">
                                         Continue
                                     </a>
                                 </div>

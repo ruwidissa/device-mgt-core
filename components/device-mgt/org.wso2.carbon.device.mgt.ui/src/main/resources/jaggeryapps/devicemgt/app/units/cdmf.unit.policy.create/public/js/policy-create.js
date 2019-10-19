@@ -39,6 +39,7 @@ var validateInline = {};
 var clearInline = {};
 var validateStep = {};
 var hasPolicyProfileScript = false;
+var isCorrectiveActionProfileAdded = false;
 
 var enableInlineError = function (inputField, errorMsg, errorSign) {
     var fieldIdentifier = "#" + inputField;
@@ -221,8 +222,36 @@ stepForwardFrom["policy-profile"] = function () {
          */
         policy["profile"] = generatePolicyProfile();
     }
+
+    // add policy correction action page
+    if (!isCorrectiveActionProfileAdded) {
+        var policyCorrectiveActionTemplateSrc =
+                "/public/cdmf.unit.policy.corrective-action/templates/policy-corrective-action.hbs";
+        var policyCorrectiveActionScriptSrc =
+                "/public/cdmf.unit.policy.corrective-action/js/policy-corrective-action.js";
+        var policyCorrectiveActionTemplateCacheKey = "policy-corrective-action";
+
+        $.template(policyCorrectiveActionTemplateCacheKey, context + policyCorrectiveActionTemplateSrc,
+                   function (template) {
+            var content = template(
+                    {
+                        "deviceType": policy["platform"],
+                        "correctivePolicies": $("#logged-in-user").data("corrective-policies")
+                    }
+            );
+            $("#select-general-policy-type").html(content)
+        });
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = context + policyCorrectiveActionScriptSrc;
+        document.head.append(script);
+
+        isCorrectiveActionProfileAdded = true
+    }
+
     // updating next-page wizard title with selected platform
-    $("#policy-criteria-page-wizard-title").text("ADD " + policy["platform"] + " POLICY");
+    $("#policy-type-page-wizard-title").text("ADD " + policy["platform"] + " POLICY");
 };
 
 /**
@@ -236,6 +265,28 @@ stepBackFrom["policy-profile"] = function () {
          */
         resetPolicyProfile();
     }
+};
+
+
+/**
+ * Forward action of policy type page.
+ */
+stepForwardFrom["policy-type"] = function () {
+    policy["type"] = $("input[name=policy-type-radio-btn]:checked").val();
+    var correctiveActionList = [];
+    if (policy.type === "GENERAL") {
+        var selectedCorrectivePolicyId = $("#corrective-policy-input").val();
+        if (selectedCorrectivePolicyId && selectedCorrectivePolicyId !== "none") {
+            var correctiveAction = {
+                "actionType": "POLICY",
+                "policyId": selectedCorrectivePolicyId
+            };
+            correctiveActionList.push(correctiveAction);
+        }
+    }
+    policy["correctiveActionList"] = correctiveActionList;
+    //updating next-page wizard title with selected platform
+    $("#policy-criteria-page-wizard-title").text("ADD " + policy["platform"] + " POLICY");
 };
 
 /**
@@ -438,6 +489,8 @@ var savePolicy = function (policy, isActive, serviceURL) {
         "compliance": policy["selectedNonCompliantAction"],
         "ownershipType": null,
         "active": isActive,
+        "policyType": policy["type"],
+        "correctiveActions": policy["correctiveActionList"],
         "profile": {
             "profileName": policy["policyName"],
             "deviceType": policy["platform"],
@@ -457,8 +510,6 @@ var savePolicy = function (policy, isActive, serviceURL) {
     if(policy["selectedGroups"] && policy["selectedGroups"][0] !== "NONE") {
         payload["deviceGroups"] = policy["selectedGroups"];
     }
-
-    payload["policyType"] = "GENERAL";
 
     invokerUtil.post(
         serviceURL,
@@ -591,6 +642,16 @@ $(document).ready(function () {
             $(this).val("NONE").trigger("change");
         } else {
             $("option[value=NONE]", this).prop("selected", false).parent().trigger("change");
+        }
+    });
+
+    isCorrectiveActionProfileAdded = false;
+
+    $('input[type=radio][name=policy-type-radio-btn]').change(function() {
+        if ($(this).val() === "CORRECTIVE") {
+            $("#select-general-policy-type").addClass("hidden");
+        } else {
+            $("#select-general-policy-type").removeClass("hidden");
         }
     });
 
