@@ -107,13 +107,15 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     public void updateDeviceSubscription(String updateBy, List<Integer> deviceIds,
             String action, String actionTriggeredFrom, String installStatus, int releaseId, int tenantId)
             throws ApplicationManagementDAOException {
+        boolean unsubscribed = false;
         try {
             String sql = "UPDATE AP_DEVICE_SUBSCRIPTION SET ";
 
             if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ?, ";
+                sql += "UNSUBSCRIBED = ?, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ?, ";
+                unsubscribed = true;
             } else if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                sql += "UNSUBSCRIBED = false, SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ?, ";
+                sql += "UNSUBSCRIBED = ?, SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ?, ";
             } else {
                 String msg = "Found invalid action " + action + ". Hence can't construct the query.";
                 log.error(msg);
@@ -131,13 +133,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 Calendar calendar = Calendar.getInstance();
                 Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
                 for (Integer deviceId : deviceIds) {
-                    stmt.setString(1, updateBy);
-                    stmt.setTimestamp(2, timestamp);
-                    stmt.setString(3, actionTriggeredFrom);
-                    stmt.setString(4, installStatus);
-                    stmt.setInt(5, deviceId);
-                    stmt.setInt(6, releaseId);
-                    stmt.setInt(7, tenantId);
+                    stmt.setBoolean(1, unsubscribed);
+                    stmt.setString(2, updateBy);
+                    stmt.setTimestamp(3, timestamp);
+                    stmt.setString(4, actionTriggeredFrom);
+                    stmt.setString(5, installStatus);
+                    stmt.setInt(6, deviceId);
+                    stmt.setInt(7, releaseId);
+                    stmt.setInt(8, tenantId);
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
@@ -554,7 +557,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             int index = 1;
             List<Integer> subscribedDevices = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT DS.ID "
+                    "SELECT DS.ID AS DM_DEVICE_ID "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
                             + "WHERE DS.DM_DEVICE_ID IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
