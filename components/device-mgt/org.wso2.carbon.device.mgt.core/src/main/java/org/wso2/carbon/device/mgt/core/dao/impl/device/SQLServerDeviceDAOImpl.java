@@ -552,7 +552,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 isStatusProvided = true;
             }
 
-            query = query + " LIMIT ?,?";
+            query = query + " ORDER BY f.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement ps = conn.prepareStatement(query)) {
 
