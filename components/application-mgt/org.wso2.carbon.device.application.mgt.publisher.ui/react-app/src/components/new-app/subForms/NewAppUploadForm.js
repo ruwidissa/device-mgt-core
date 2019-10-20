@@ -91,8 +91,8 @@ class NewAppUploadForm extends React.Component {
                 //add release data
                 const release = {
                     description: releaseDescription,
-                    price: (price === undefined) ? 0 : parseInt(price),
-                    isSharedWithAllTenants,
+                    price: 0,
+                    isSharedWithAllTenants: false,
                     metaData: JSON.stringify(this.state.metaData),
                     releaseType: releaseType
                 };
@@ -111,19 +111,19 @@ class NewAppUploadForm extends React.Component {
                 let isFormValid = true; // flag to check if this form is valid
 
                 if (formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") {
-                    if(this.lowerOsVersion==null || this.upperOsVersion==null){
+                    if (this.lowerOsVersion == null || this.upperOsVersion == null) {
                         isFormValid = false;
                         this.setState({
                             osVersionsHelperText: 'Please select supported OS versions',
                             osVersionsValidateStatus: 'error',
                         });
-                    }else if(this.lowerOsVersion>=this.upperOsVersion){
+                    } else if (this.lowerOsVersion >= this.upperOsVersion) {
                         isFormValid = false;
                         this.setState({
                             osVersionsHelperText: 'Please select valid range',
                             osVersionsValidateStatus: 'error',
                         });
-                    }else{
+                    } else {
                         release.supportedOsVersions = `${this.lowerOsVersion}-${this.upperOsVersion}`;
                     }
                 }
@@ -152,7 +152,7 @@ class NewAppUploadForm extends React.Component {
                         screenshotHelperText: 'Please select 3 screenshots'
                     });
                 }
-                if(isFormValid) {
+                if (isFormValid) {
                     data.append('icon', icon[0].originFileObj);
                     data.append('screenshot1', screenshots[0].originFileObj);
                     data.append('screenshot2', screenshots[1].originFileObj);
@@ -405,7 +405,12 @@ class NewAppUploadForm extends React.Component {
                                     label="Supported OS Versions"
                                     validateStatus={osVersionsValidateStatus}
                                     help={osVersionsHelperText}>
-                                    {getFieldDecorator('supportedOS')(
+                                    {getFieldDecorator('supportedOS', {
+                                        rules: [{
+                                            required: true
+                                        }],
+                                        initialValue: false
+                                    })(
                                         <div>
                                             <InputGroup>
                                                 <Row gutter={8}>
@@ -428,7 +433,14 @@ class NewAppUploadForm extends React.Component {
                                                     <Col span={11}>
                                                         <Select style={{width: "100%"}}
                                                                 placeholder="Upper version"
+                                                                defaultActiveFirstOption={true}
                                                                 onChange={this.handleUpperOsVersionChange}>
+                                                            {(supportedOsVersions.length > 0) &&(
+                                                                <Option key="all"
+                                                                        value={supportedOsVersions[supportedOsVersions.length-1]["versionName"]}>
+                                                                    All
+                                                                </Option>
+                                                            )}
                                                             {supportedOsVersions.map(version => (
                                                                 <Option key={version.versionName}
                                                                         value={version.versionName}>
@@ -443,49 +455,6 @@ class NewAppUploadForm extends React.Component {
                                     )}
                                 </Form.Item>
                             )}
-                            <Form.Item {...formItemLayout} label="Price Type">
-                                {getFieldDecorator('select', {
-                                    rules: [{required: true, message: 'Please select price Type'}],
-                                })(
-                                    <Select
-                                        placeholder="Please select a price type"
-                                        onChange={this.handlePriceTypeChange}>
-                                        <Option value="free">Free</Option>
-                                        <Option value="paid">Paid</Option>
-                                    </Select>,
-                                )}
-                            </Form.Item>
-                            <Form.Item {...formItemLayout} label="Price">
-                                {getFieldDecorator('price', {
-                                    rules: [{
-                                        required: !isFree
-                                    }],
-                                })(
-                                    <InputNumber
-                                        disabled={isFree}
-                                        options={{
-                                            initialValue: 1
-                                        }}
-                                        min={0}
-                                        max={10000}
-                                        formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                        parser={value => value.replace(/\$\s?|(,*)/g, '')}
-                                    />
-                                )}
-                            </Form.Item>
-                            <Form.Item {...formItemLayout} label="Is Shared?">
-                                {getFieldDecorator('isSharedWithAllTenants', {
-                                    rules: [{
-                                        required: true,
-                                        message: 'Please select'
-                                    }],
-                                    initialValue: false
-                                })(
-                                    <Switch checkedChildren={<Icon type="check"/>}
-                                            unCheckedChildren={<Icon type="close"/>}
-                                    />
-                                )}
-                            </Form.Item>
                             <Form.Item {...formItemLayout} label="Meta Data">
                                 {getFieldDecorator('meta', {})(
                                     <div>

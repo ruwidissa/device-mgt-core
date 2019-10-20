@@ -34,6 +34,7 @@ import {
     Select
 } from 'antd';
 import axios from "axios";
+import "@babel/polyfill";
 import {withConfigContext} from "../../../../context/ConfigContext";
 
 const {TextArea} = Input;
@@ -59,7 +60,7 @@ function getBase64(file) {
 }
 
 class EditReleaseModal extends React.Component {
-
+    // To add subscription type & tenancy sharing, refer https://gitlab.com/entgra/carbon-device-mgt/merge_requests/331
     constructor(props) {
         super(props);
         this.state = {
@@ -162,12 +163,6 @@ class EditReleaseModal extends React.Component {
             },
             releaseDescription: {
                 value: release.description
-            },
-            price: {
-                value: release.price
-            },
-            isSharedWithAllTenants: {
-                value: release.isSharedWithAllTenants
             }
         });
 
@@ -252,7 +247,7 @@ class EditReleaseModal extends React.Component {
                 this.setState({
                     loading: true
                 });
-                const {price, isSharedWithAllTenants, releaseDescription, releaseType} = values;
+                const {releaseDescription, releaseType} = values;
 
                 const {icons, screenshots, binaryFiles} = this.state;
 
@@ -261,8 +256,8 @@ class EditReleaseModal extends React.Component {
                 //add release data
                 const release = {
                     description: releaseDescription,
-                    price: (price === undefined) ? 0 : parseInt(price),
-                    isSharedWithAllTenants,
+                    price: 0,
+                    isSharedWithAllTenants: false,
                     metaData: JSON.stringify(this.state.metaData),
                     releaseType: releaseType,
                 };
@@ -282,10 +277,6 @@ class EditReleaseModal extends React.Component {
                 if (specificElements.hasOwnProperty("url")) {
                     release.url = values.url;
                 }
-                //
-                // if (specificElements.hasOwnProperty("packageName")) {
-                //     release.packageName = values.packageName;
-                // }
 
                 if (icons.length === 1) {
                     data.append('icon', icons[0].originFileObj);
@@ -589,30 +580,6 @@ class EditReleaseModal extends React.Component {
                                         )}
                                     </Form.Item>
                                 )}
-                                <Form.Item {...formItemLayout} label="Price">
-                                    {getFieldDecorator('price', {
-                                        rules: [{
-                                            required: false
-                                        }],
-                                    })(
-                                        <Input prefix="$" placeholder="00.00"/>
-                                    )}
-                                </Form.Item>
-
-                                <Form.Item {...formItemLayout} label="Is Shared?">
-                                    {getFieldDecorator('isSharedWithAllTenants', {
-                                        rules: [{
-                                            required: true,
-                                            message: 'Please select'
-                                        }],
-                                        initialValue: false
-                                    })(
-                                        <Switch checkedChildren={<Icon type="check"/>}
-                                                unCheckedChildren={<Icon type="close"/>}
-                                        />
-                                    )}
-
-                                </Form.Item>
                                 <Form.Item {...formItemLayout} label="Meta Data">
                                     {getFieldDecorator('meta', {
                                         rules: [{

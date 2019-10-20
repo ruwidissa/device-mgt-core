@@ -14,11 +14,29 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.policy.mgt.core.dao;
 
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.policy.mgt.common.Criterion;
 import org.wso2.carbon.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
@@ -52,6 +70,41 @@ public interface PolicyDAO {
      * @throws PolicyManagerDAOException
      */
     Policy addPolicyToUser(List<String> usernameList, Policy policy) throws PolicyManagerDAOException;
+
+    /**
+     * This method is used to add corrective actions of policy in the database based on the policy ID
+     * @param correctiveActions list of corrective actions to be added to database
+     * @param policyId is used uniquely identify the policy to which corrective actions are to be added
+     * @throws PolicyManagerDAOException is thrown when there is an error in adding corrective actions to database
+     */
+    void addCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+            throws PolicyManagerDAOException;
+
+    /**
+     * This method is used to retrieve corrective actions of policy from the database based on the policy ID
+     * @param policyId is used uniquely identify the policy from which corrective actions are retrieved
+     * @return list of retrieved {@link CorrectiveAction}
+     * @throws PolicyManagerDAOException is thrown when there is an error in retrieving corrective actions to database
+     */
+    List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId) throws PolicyManagerDAOException;
+
+    /**
+     * This method is used to update corrective actions of policy in the database based on the policy ID
+     * @param correctiveActions list of corrective actions to be updated in the database
+     * @param policyId is used uniquely identify the policy to which corrective actions are to be updated
+     * @throws PolicyManagerDAOException is thrown when there is an error in updating corrective actions to database
+     */
+    void updateCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+            throws PolicyManagerDAOException;
+
+    /**
+     * This method is used to delete corrective actions of policy in the database based on the policy ID
+     * @param correctiveActions list of corrective actions to be deleted in the database
+     * @param policyId is used uniquely identify the policy to which corrective actions are to be deleted
+     * @throws PolicyManagerDAOException is thrown when there is an error in deleting corrective actions to database
+     */
+    void deleteCorrectiveActionsOfPolicy(List<CorrectiveAction> correctiveActions, int policyId)
+            throws PolicyManagerDAOException;
 
     Policy updateUserOfPolicy(List<String> usersToAdd, Policy policy) throws PolicyManagerDAOException;
 

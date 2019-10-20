@@ -29,6 +29,7 @@ import AppUninstallModal from "./install/AppUninstallModal";
 import CurrentUsersReview from "./review/CurrentUsersReview";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
+import ReviewContainer from "./review/ReviewContainer";
 
 const {Title, Text, Paragraph} = Typography;
 
@@ -193,15 +194,7 @@ class ReleaseView extends React.Component {
                         {(metaData.length === 0) && (<Text type="secondary">No meta data available.</Text>)}
                     </Row>
                     <Divider/>
-                    <CurrentUsersReview uuid={release.uuid}/>
-                    <Divider dashed={true}/>
-                    <Text>REVIEWS</Text>
-                    <Row>
-                        <Col lg={18} md={24}>
-                            <DetailedRating type="app" uuid={release.uuid}/>
-                        </Col>
-                    </Row>
-                    <Reviews type="app" uuid={release.uuid}/>
+                    <ReviewContainer uuid={release.uuid}/>
                 </div>
             </div>
         );

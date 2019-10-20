@@ -14,10 +14,28 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.policy.mgt.core.util;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -28,17 +46,21 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
+import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.operation.mgt.PolicyOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
+import org.wso2.carbon.policy.mgt.common.PolicyTransformException;
 import org.wso2.carbon.policy.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.policy.mgt.core.config.datasource.JNDILookupDefinition;
 import org.wso2.carbon.policy.mgt.core.dao.util.PolicyManagementDAOUtil;
+import org.wso2.carbon.policy.mgt.core.impl.PolicyAdministratorPointImpl;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -116,28 +138,71 @@ public class PolicyManagerUtil {
         return buff.toString();
     }
 
-    public static Operation transformPolicy(Policy policy) {
+    public static Operation transformPolicy(Policy policy) throws PolicyTransformException {
         List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
-        List<ProfileOperation> profileOperationList = new ArrayList<ProfileOperation>();
 
         PolicyOperation policyOperation = new PolicyOperation();
         policyOperation.setEnabled(true);
         policyOperation.setType(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Type.POLICY);
         policyOperation.setCode(PolicyOperation.POLICY_OPERATION_CODE);
 
+        if (policy.getPolicyType() != null &&
+                PolicyManagementConstants.GENERAL_POLICY_TYPE.equals(policy.getPolicyType()) &&
+                policy.getCorrectiveActions() != null) {
+            for (CorrectiveAction correctiveAction : policy.getCorrectiveActions()) {
+                if (PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE
+                        .equalsIgnoreCase(correctiveAction.getActionType())) {
+                    PolicyAdministratorPoint pap = new PolicyAdministratorPointImpl();
+                    try {
+                        Policy correctivePolicy = pap.getPolicy(correctiveAction.getPolicyId());
+                        if (correctivePolicy == null || PolicyManagementConstants.CORRECTIVE_POLICY_TYPE
+                                .equalsIgnoreCase(correctivePolicy.getPolicyType())) {
+                            String msg = "No corrective policy was found for the policy " + policy.getPolicyName() +
+                                    " and policy ID " + policy.getId();
+                            log.error(msg);
+                            throw new PolicyTransformException(msg);
+                        } else {
+                            List<ProfileOperation> correctiveProfileOperations = createProfileOperations(
+                                    correctivePolicy.getProfile().getProfileFeaturesList());
+                            ProfileFeature correctivePolicyFeature = new ProfileFeature();
+                            correctivePolicyFeature.setProfileId(correctivePolicy.getProfileId());
+                            correctivePolicyFeature.setContent(new Gson().toJson(correctiveProfileOperations));
+                            correctivePolicyFeature.setDeviceType(correctivePolicy.getProfile().getDeviceType());
+                            correctivePolicyFeature.setFeatureCode(
+                                    PolicyManagementConstants.CORRECTIVE_POLICY_FEATURE_CODE);
+                            correctivePolicyFeature.setId(correctivePolicy.getId());
+                            effectiveFeatures.add(correctivePolicyFeature);
+                        }
+                    } catch (PolicyManagementException e) {
+                        String msg = "Error occurred while retrieving corrective policy for policy " +
+                                     policy.getPolicyName() + " and policy ID " + policy.getId();
+                        log.error(msg, e);
+                        throw new PolicyTransformException(msg, e);
+                    }
+                    // Currently only supported POLICY corrective action type so the break is added. This should be
+                    // removed when we start supporting other corrective action types
+                    break;
+                }
+            }
+        }
+
+        policyOperation.setProfileOperations(createProfileOperations(effectiveFeatures));
+        policyOperation.setPayLoad(policyOperation.getProfileOperations());
+        return policyOperation;
+    }
+
+    public static List<ProfileOperation> createProfileOperations(List<ProfileFeature> effectiveFeatures) {
+        List<ProfileOperation> profileOperations = new ArrayList<>();
         for (ProfileFeature feature : effectiveFeatures) {
             ProfileOperation profileOperation = new ProfileOperation();
-
             profileOperation.setCode(feature.getFeatureCode());
             profileOperation.setEnabled(true);
             profileOperation.setStatus(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Status.PENDING);
             profileOperation.setType(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Type.PROFILE);
             profileOperation.setPayLoad(feature.getContent());
-            profileOperationList.add(profileOperation);
+            profileOperations.add(profileOperation);
         }
-        policyOperation.setProfileOperations(profileOperationList);
-        policyOperation.setPayLoad(policyOperation.getProfileOperations());
-        return policyOperation;
+        return  profileOperations;
     }
 
 

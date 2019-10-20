@@ -86,10 +86,7 @@ class AddReview extends React.Component {
                     description:
                         'Your review has been posted successfully.',
                 });
-
-                setTimeout(() => {
-                    window.location.href = uuid;
-                }, 2000)
+                this.props.onUpdateReview();
             } else {
                 this.setState({
                     loading: false,
