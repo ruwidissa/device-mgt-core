@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -175,7 +176,7 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = this.getDBConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 Calendar calendar = Calendar.getInstance();
                 Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
                 List<Integer> deviceSubIds = new ArrayList<>();
