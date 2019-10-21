@@ -562,13 +562,13 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     @Override
     public boolean updateApplication(ApplicationDTO applicationDTO, int tenantId)
             throws ApplicationManagementDAOException {
-        String sql = "UPDATE AP_APP AP " +
+        String sql = "UPDATE AP_APP " +
                 "SET " +
-                "AP.NAME = ?,  " +
-                "AP.DESCRIPTION = ?, " +
-                "AP.SUB_TYPE = ?, " +
-                "AP.CURRENCY = ? " +
-                "WHERE AP.ID = ? AND AP.TENANT_ID = ?";
+                "NAME = ?,  " +
+                "DESCRIPTION = ?, " +
+                "SUB_TYPE = ?, " +
+                "CURRENCY = ? " +
+                "WHERE ID = ? AND TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -594,12 +594,12 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     @Override
     public void updateApplicationRating(String uuid, double rating, int tenantId)
             throws ApplicationManagementDAOException {
-        String sql = "UPDATE AP_APP AP " +
+        String sql = "UPDATE AP_APP " +
                 "SET " +
-                "AP.RATING = ? " +
+                "RATING = ? " +
                 "WHERE " +
-                "AP.ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND " +
-                "AP.TENANT_ID = ?";
+                "ID = (SELECT AP_APP_ID FROM AP_APP_RELEASE WHERE UUID = ?) AND " +
+                "TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1013,11 +1013,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Request received in DAO Layer to update a category.");
         }
         String sql = "UPDATE " +
-                "AP_APP_CATEGORY cat " +
-                "SET cat.CATEGORY = ? " +
+                "AP_APP_CATEGORY " +
+                "SET CATEGORY = ? " +
                 "WHERE " +
-                "cat.ID = ? AND " +
-                "cat.TENANT_ID = ?";
+                "ID = ? AND " +
+                "TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -1444,11 +1444,11 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Request received in DAO Layer to update a Tag.");
         }
         String sql = "UPDATE " +
-                "AP_APP_TAG tag " +
-                "SET tag.TAG = ? " +
+                "AP_APP_TAG " +
+                "SET TAG = ? " +
                 "WHERE " +
-                "tag.ID = ? AND " +
-                "tag.TENANT_ID = ?";
+                "ID = ? AND " +
+                "TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
