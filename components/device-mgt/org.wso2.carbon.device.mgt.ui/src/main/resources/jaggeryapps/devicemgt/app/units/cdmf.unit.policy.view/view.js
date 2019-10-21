@@ -18,6 +18,8 @@
 
 function onRequest(context) {
     var utility = require("/app/modules/utility.js").utility;
+    var policyModule = require("/app/modules/business-controllers/policy.js")["policyModule"];
+
     var page = {};
     var deviceType = request.getParameter("deviceType");
     var policyViewSrc = "/app/units/" + utility.getTenantedDeviceUnitName(deviceType, "policy-view");
@@ -42,6 +44,8 @@ function onRequest(context) {
 
     var devicemgtProps = require("/app/modules/conf-reader/main.js")["conf"];
     page["isCloud"] = devicemgtProps.isCloud;
+
+    page["correctivePolicies"] = JSON.stringify(policyModule.getAllPoliciesByType("CORRECTIVE")["content"]);
     
     return page;
 }
