@@ -3702,6 +3702,44 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
     }
 
+    @Override
+    public PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue, List<Integer> devicesIds,
+            String status) throws DeviceManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        if (log.isDebugEnabled()) {
+            log.debug("Getting all devices details for device ids: " + devicesIds);
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        int count;
+        List<Device> subscribedDeviceDetails;
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            subscribedDeviceDetails = deviceDAO
+                    .getSubscribedDevices(offsetValue, limitValue, devicesIds, tenantId, status);
+            if (subscribedDeviceDetails.isEmpty()){
+                paginationResult.setData(new ArrayList<>());
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+            }
+            count = deviceDAO.getSubscribedDeviceCount(devicesIds, tenantId, status);
+            paginationResult.setData(getAllDeviceInfo(subscribedDeviceDetails));
+            paginationResult.setRecordsFiltered(count);
+            paginationResult.setRecordsTotal(count);
+            return paginationResult;
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list for device ids " + devicesIds;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
     /**
      * Wrap the device configuration data into DeviceConfiguration bean
      * @param device Device queried using the properties
@@ -3721,40 +3759,5 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         deviceConfiguration.setConfigurationEntries(configurationEntries);
         deviceConfiguration.setDeviceOwner(deviceOwner);
         return deviceConfiguration;
-    }
-
-    @Override
-    public PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
-                                                    List<Integer> devicesIds, String status)
-            throws DeviceManagementException {
-
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        if (log.isDebugEnabled()) {
-            log.debug("Getting all devices details for device ids: " + devicesIds);
-        }
-        PaginationResult paginationResult = new PaginationResult();
-        int count;
-        List<Device> subscribedDeviceDetails;
-        try {
-            DeviceManagementDAOFactory.openConnection();
-            subscribedDeviceDetails = deviceDAO
-                    .getSubscribedDevices(offsetValue, limitValue, devicesIds, tenantId, status);
-            count = subscribedDeviceDetails.size();
-
-        } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving device list for device ids " + devicesIds;
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
-        } finally {
-            DeviceManagementDAOFactory.closeConnection();
-        }
-        paginationResult.setData(getAllDeviceInfo(subscribedDeviceDetails));
-        paginationResult.setRecordsFiltered(count);
-        paginationResult.setRecordsTotal(count);
-        return paginationResult;
     }
 }

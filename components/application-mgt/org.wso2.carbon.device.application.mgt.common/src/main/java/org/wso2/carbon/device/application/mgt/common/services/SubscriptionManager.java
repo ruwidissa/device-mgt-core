@@ -108,4 +108,18 @@ public interface SubscriptionManager {
      */
     PaginationResult getAppInstalledCategories(int offsetValue, int limitValue, String appUUID,
                                                String subType) throws ApplicationManagementException;
+
+    /**
+     * This method is responsible to provide application subscription data for given application release UUID.
+     *
+     * @param offsetValue offset
+     * @param limitValue limit
+     * @param appUUID application release UUID
+     * @return {@link PaginationResult}
+     * @throws ApplicationManagementException if values are incorrect for offset and limit or couldn't find an
+     * application release for given UUID or error occurred while getting device details of subscribed device ids or
+     * getting subscription details of given application release UUID.
+     */
+    PaginationResult getAppSubscriptionDetails(int offsetValue, int limitValue, String appUUID)
+            throws ApplicationManagementException;
 }

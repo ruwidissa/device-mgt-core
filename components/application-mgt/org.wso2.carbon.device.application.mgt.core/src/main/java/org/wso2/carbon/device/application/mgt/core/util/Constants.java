@@ -58,6 +58,9 @@ public class Constants {
     public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
     public static final String TENANT_ID = "__TENANT_ID_PROP__";
     public static final String TASK_NAME = "TASK_NAME";
+    public  static final String SUBSCRIBED = "SUBSCRIBED";
+    public  static final String UNSUBSCRIBED = "UNSUBSCRIBED";
+
 
     /**
      * Database types supported by Application Management.

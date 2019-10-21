@@ -18,9 +18,6 @@ package org.wso2.carbon.device.application.mgt.store.api.services.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.application.mgt.common.PaginationResult;
-import org.wso2.carbon.device.application.mgt.common.Rating;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ReviewManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.ReviewManager;
@@ -28,9 +25,12 @@ import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.store.api.services.admin.ReviewManagementStoreAdminAPI;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -44,6 +44,8 @@ public class ReviewManagementStoreAdminAPIImpl implements ReviewManagementStoreA
     @Override
     @DELETE
     @Path("/{uuid}/{reviewId}")
+    @Produces(MediaType.WILDCARD)
+    @Consumes(MediaType.WILDCARD)
     public Response deleteReview(
             @PathParam("uuid") String uuid,
             @PathParam("reviewId") int reviewId) {
