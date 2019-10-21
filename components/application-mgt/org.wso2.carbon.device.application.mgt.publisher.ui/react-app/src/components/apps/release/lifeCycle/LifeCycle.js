@@ -132,7 +132,7 @@ class LifeCycle extends React.Component {
 
 
     render() {
-        const {currentStatus, selectedStatus} = this.state;
+        const {currentStatus, selectedStatus, isConfirmButtonLoading} = this.state;
         const {lifecycle} = this.props;
         const selectedValue = selectedStatus == null ? [] : selectedStatus;
         let proceedingStates = [];
@@ -180,21 +180,17 @@ class LifeCycle extends React.Component {
                     type="primary"
                     htmlType="button"
                     onClick={this.showReasonModal}
-                    disabled={selectedStatus == null}
-                >
+                    loading={isConfirmButtonLoading}
+                    disabled={selectedStatus == null}>
                     Change
                 </Button>
-
-
                 <Divider/>
-
                 <Modal
                     title="Confirm changing lifecycle state"
                     visible={this.state.isReasonModalVisible}
                     onOk={this.addLifeCycle}
                     onCancel={this.closeReasonModal}
-                    okText="Confirm"
-                >
+                    okText="Confirm">
                     <Text>
                         You are going to change the lifecycle state from,<br/>
                         <Tag color="blue">{currentStatus}</Tag>to <Tag
