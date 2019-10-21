@@ -316,6 +316,15 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /**
+     * THis method is responsible to validate application install or uninstall request.
+     *
+     * @param params params could be either list of {@link DeviceIdentifier} or list of username or list of group
+     *               names or list or role names.
+     * @param subType Subscription type. i.e DEVICE or USER or ROLE or GROUP
+     * @param action performing action. i.e Install or Uninstall
+     * @throws BadRequestException if incompatible data is found with app install/uninstall request.
+     */
     private <T> void validateRequest(List<T> params, String subType, String action) throws BadRequestException {
         if (params.isEmpty()) {
             String msg = "In order to install application release, you should provide list of subscribers. "
@@ -339,7 +348,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
-    /***
+    /**
      * This method perform given action (i.e APP INSTALL or APP UNINSTALL) on given set of devices.
      *
      * @param deviceType Application supported device type.
@@ -425,7 +434,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return applicationInstallResponse;
     }
 
-    /***
+    /**
      * Filter given devices and davide given list of device into two sets, those are already application installed
      * devices and application installable devices.
      *
@@ -470,6 +479,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         return subscribingDeviceIdHolder;
     }
 
+    /**
+     * This method returns the application categories of a particular application
+     *
+     * @param id Application Id
+     * @return List of application categories.
+     * @throws ApplicationManagementException if error occurred while getting application categories from the DB.
+     */
     private List<String> getApplicationCategories(int id) throws ApplicationManagementException {
         List<String> categories;
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -529,6 +545,18 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /**
+     * This method is responsible to update subscription data.
+     *
+     * @param applicationReleaseId Application release Id
+     * @param activities List of {@link Activity}
+     * @param subscribingDeviceIdHolder Subscribing device id holder.
+     * @param params subscribers. If subscription is performed via user, group or role, params is a list of
+     * {@link String}
+     * @param subType Subscription type. i.e USER, GROUP, ROLE or DEVICE
+     * @param action performing action. ie INSTALL or UNINSTALL>
+     * @throws ApplicationManagementException if error occurred while getting or updating subscription data.
+     */
     private void updateSubscriptions(int applicationReleaseId, List<Activity> activities,
             SubscribingDeviceIdHolder subscribingDeviceIdHolder, List<String> params, String subType,
             String action) throws ApplicationManagementException {
@@ -686,6 +714,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    /**
+     * This method constructs operation payload to install/uninstall an application.
+     *
+     * @param deviceType Device type
+     * @param application {@link Application} data.
+     * @param action Action is either ININSTALL or UNINSTALL
+     * @return {@link Operation}
+     * @throws ApplicationManagementException if unknown application type is found to generate operation payload or
+     * invalid action is found to generate operation payload.
+     */
     private Operation generateOperationPayloadByDeviceType(String deviceType, Application application, String action)
             throws ApplicationManagementException {
         try {
@@ -941,7 +979,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.openDBConnection();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(appUUID, tenantId);
             if (applicationDTO == null) {
-                String msg = "Couldn't found an application with application release which has UUID " + appUUID;
+                String msg = "Couldn't find an application with application release which has UUID " + appUUID;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }

@@ -116,9 +116,9 @@ public interface SubscriptionManager {
      * @param limitValue limit
      * @param appUUID application release UUID
      * @return {@link PaginationResult}
-     * @throws ApplicationManagementException if values are incorrect for offset and limit or couldn't find an
-     * application release for given UUID or error occurred while getting device details of subscribed device ids or
-     * getting subscription details of given application release UUID.
+     * @throws ApplicationManagementException if offset or limit contains incorrect values, if it couldn't find an
+     * application release for given UUID, if an error occurred while getting device details of subscribed device ids,
+     * if an error occurred while getting subscription details of given application release UUID.
      */
     PaginationResult getAppSubscriptionDetails(int offsetValue, int limitValue, String appUUID)
             throws ApplicationManagementException;
