@@ -51,7 +51,7 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
             Connection conn = this.getDBConnection();
             List<String> subscribedUsers = new ArrayList<>();
             String sql = "SELECT "
-                    + "US.USER_NAME AS USER "
+                    + "US.USER_NAME AS USER_NAME "
                     + "FROM AP_USER_SUBSCRIPTION US "
                     + "WHERE "
                     + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? ORDER BY US.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -62,7 +62,7 @@ public class SQLServerSubscriptionDAOImpl extends GenericSubscriptionDAOImpl {
                 stmt.setInt(4, limitValue);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        subscribedUsers.add(rs.getString("USER"));
+                        subscribedUsers.add(rs.getString("USER_NAME"));
                     }
                 }
                 return subscribedUsers;

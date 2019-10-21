@@ -436,7 +436,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             int index = 1;
             List<String> subscribedUsers = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT US.USER_NAME AS USER "
+                    "SELECT US.USER_NAME AS USER_NAME "
                             + "FROM AP_USER_SUBSCRIPTION US "
                             + "WHERE US.USER_NAME IN (", ") AND TENANT_ID = ?");
             users.stream().map(ignored -> "?").forEach(joiner::add);
@@ -448,7 +448,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedUsers.add(rs.getString("USER"));
+                        subscribedUsers.add(rs.getString("USER_NAME"));
                     }
                 }
             }
@@ -516,7 +516,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             int index = 1;
             List<String> subscribedUsers = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT GS.GROUP_NAME AS GROUP "
+                    "SELECT GS.GROUP_NAME AS GROUP_NAME "
                             + "FROM AP_GROUP_SUBSCRIPTION GS "
                             + "WHERE GS.GROUP_NAME IN (", ") AND TENANT_ID = ?");
             groups.stream().map(ignored -> "?").forEach(joiner::add);
@@ -528,7 +528,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedUsers.add(rs.getString("GROUP"));
+                        subscribedUsers.add(rs.getString("GROUP_NAME"));
                     }
                 }
             }
@@ -557,7 +557,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             int index = 1;
             List<Integer> subscribedDevices = new ArrayList<>();
             StringJoiner joiner = new StringJoiner(",",
-                    "SELECT DS.ID AS DM_DEVICE_ID "
+                    "SELECT DS.ID AS DEVICE_SUBSCRIPTION_ID "
                             + "FROM AP_DEVICE_SUBSCRIPTION DS "
                             + "WHERE DS.DM_DEVICE_ID IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
@@ -570,7 +570,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        subscribedDevices.add(rs.getInt("DM_DEVICE_ID"));
+                        subscribedDevices.add(rs.getInt("DEVICE_SUBSCRIPTION_ID"));
                     }
                 }
             }
@@ -592,6 +592,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             String subType, String action) throws ApplicationManagementDAOException {
         try {
             Connection conn = this.getDBConnection();
+            boolean isUnsubscribed = false;
             String sql = "UPDATE ";
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 sql += "AP_USER_SUBSCRIPTION SET ";
@@ -602,9 +603,10 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             }
 
             if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
-                sql += "UNSUBSCRIBED = true, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
+                sql += "UNSUBSCRIBED = ?, UNSUBSCRIBED_BY = ?, UNSUBSCRIBED_TIMESTAMP = ? ";
+                isUnsubscribed = true;
             } else {
-                sql += "UNSUBSCRIBED = false, SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
+                sql += "UNSUBSCRIBED = ?, SUBSCRIBED_BY = ?, SUBSCRIBED_TIMESTAMP = ? ";
             }
 
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
@@ -621,11 +623,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 Calendar calendar = Calendar.getInstance();
                 Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
                 for (String username : paramList) {
-                    stmt.setString(1, updateBy);
-                    stmt.setTimestamp(2, timestamp);
-                    stmt.setString(3, username);
-                    stmt.setInt(4, releaseId);
-                    stmt.setInt(5, tenantId);
+                    stmt.setBoolean(1, isUnsubscribed);
+                    stmt.setString(2, updateBy);
+                    stmt.setTimestamp(3, timestamp);
+                    stmt.setString(4, username);
+                    stmt.setInt(5, releaseId);
+                    stmt.setInt(6, tenantId);
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
@@ -755,12 +758,12 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     @Override
     public boolean updateScheduledSubscription(int id, LocalDateTime scheduledAt, String scheduledBy)
             throws ApplicationManagementDAOException {
-        String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION AP "
+        String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION "
                      + "SET "
-                     + "AP.SCHEDULED_AT = ?, "
-                     + "AP.SCHEDULED_BY = ?, "
-                     + "AP.SCHEDULED_TIMESTAMP = ? "
-                     + "WHERE AP.ID = ?";
+                     + "SCHEDULED_AT = ?, "
+                     + "SCHEDULED_BY = ?, "
+                     + "SCHEDULED_TIMESTAMP = ? "
+                     + "WHERE ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -786,9 +789,9 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
 
     @Override
     public boolean deleteScheduledSubscription(List<Integer> subscriptionIdList) throws ApplicationManagementDAOException {
-        String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION AP "
-                     + "SET AP.DELETED = ? "
-                     + "WHERE AP.ID = ?";
+        String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION "
+                     + "SET DELETED = ? "
+                     + "WHERE ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -816,9 +819,9 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     @Override
     public boolean updateScheduledSubscriptionStatus(int id, ExecutionStatus status)
             throws ApplicationManagementDAOException {
-        String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION AP "
-                     + "SET AP.STATUS = ? "
-                     + "WHERE AP.ID = ?";
+        String sql = "UPDATE AP_SCHEDULED_SUBSCRIPTION "
+                     + "SET STATUS = ? "
+                     + "WHERE ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -850,7 +853,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             Connection conn = this.getDBConnection();
             List<String> subscribedUsers = new ArrayList<>();
             String sql = "SELECT "
-                         + "US.USER_NAME AS USER "
+                         + "US.USER_NAME AS USER_NAME "
                          + "FROM AP_USER_SUBSCRIPTION US "
                          + "WHERE "
                          + "AP_APP_RELEASE_ID = ? AND TENANT_ID = ? LIMIT ? OFFSET ?";
@@ -861,7 +864,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                 stmt.setInt(4, offsetValue);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        subscribedUsers.add(rs.getString("USER"));
+                        subscribedUsers.add(rs.getString("USER_NAME"));
                     }
                 }
                 return subscribedUsers;
