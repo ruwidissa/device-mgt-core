@@ -1,7 +1,8 @@
 {{#zone "content"}}
     {{#if isAuthorized}}
         <span id="logged-in-user" class="hidden" data-username="{{@user.username}}" data-domain="{{@user.domain}}"
-              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}"></span>
+              data-tenant-id="{{@user.tenantId}}" data-iscloud="{{isCloud}}"
+                data-corrective-policies="{{correctivePolicies}}"></span>
         {{#defineZone "policy-profile-top"}}
             <div class="row wr-device-board">
                 <div class="col-lg-12 wr-secondary-bar">
@@ -66,6 +67,16 @@
                                             <td style="padding:10px 15px;">POLICY</td>
                                             <td class="sorting_1" style="padding:10px 15px; width: 14%;">Policy ID</td>
                                             <td id="corrective-action-type-policy-id" style="padding:10px 15px;"></td>
+                                        </tr>
+                                        <tr id="corrective-action-policy-id-missing-msg">
+                                            <td class="alert alert-danger" colspan="4" style="padding:10px 15px;">
+                                                <strong>
+                                                    <i class="icon fw fw-error"></i>
+                                                    Corrective policy having the above Policy ID has been updated to
+                                                    a GENERAL policy or it has been deleted. Hence this policy will
+                                                    not be applied till modified correctly.
+                                                </strong>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
