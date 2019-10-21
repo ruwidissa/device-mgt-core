@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon} from "antd";
+import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon, Spin} from "antd";
 import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
@@ -126,17 +126,18 @@ class ReleaseView extends React.Component {
             </Menu>
         );
 
-
         return (
             <div>
                 <AppInstallModal
                     uuid={release.uuid}
+                    loading={this.state.loading}
                     visible={this.state.appInstallModalVisible}
                     deviceType={deviceType}
                     onClose={this.closeAppOperationModal}
                     onInstall={this.appOperation}/>
                 <AppUninstallModal
                     uuid={release.uuid}
+                    loading={this.state.loading}
                     visible={this.state.appUninstallModalVisible}
                     deviceType={deviceType}
                     onClose={this.closeAppOperationModal}

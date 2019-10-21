@@ -16,31 +16,33 @@
  * under the License.
  */
 import React from "react";
-import {Modal, Tabs} from "antd";
+import {Modal, Spin, Tabs} from "antd";
 import DeviceUninstall from "./DeviceUninstall";
 import UserUninstall from "./UserUninstall";
 import RoleUninstall from "./RoleUninstall";
 import GroupUninstall from "./GroupUninstall";
 
-const { TabPane } = Tabs;
+const {TabPane} = Tabs;
 
-class AppUninstallModal extends React.Component{
-    state={
-        data:[]
+class AppUninstallModal extends React.Component {
+    state = {
+        data: []
     };
+
     render() {
         const {deviceType} = this.props;
         return (
-                <div>
-                    <Modal
-                            title="Uninstall App"
-                            visible={this.props.visible}
-                            onCancel={this.props.onClose}
-                            footer={null}
-                    >
+            <div>
+                <Modal
+                    title="Uninstall App"
+                    visible={this.props.visible}
+                    onCancel={this.props.onClose}
+                    footer={null}>
+                    <Spin spinning={this.props.loading}>
                         <Tabs defaultActiveKey="device">
                             <TabPane tab="Device" key="device">
-                                <DeviceUninstall deviceType={deviceType} onUninstall={this.props.onUninstall} uuid={this.props.uuid}/>
+                                <DeviceUninstall deviceType={deviceType} onUninstall={this.props.onUninstall}
+                                                 uuid={this.props.uuid}/>
                             </TabPane>
                             <TabPane tab="User" key="user">
                                 <UserUninstall onUninstall={this.props.onUninstall} uuid={this.props.uuid}/>
@@ -52,8 +54,9 @@ class AppUninstallModal extends React.Component{
                                 <GroupUninstall onUninstall={this.props.onUninstall} uuid={this.props.uuid}/>
                             </TabPane>
                         </Tabs>
-                    </Modal>
-                </div>
+                    </Spin>
+                </Modal>
+            </div>
         );
     }
 }
