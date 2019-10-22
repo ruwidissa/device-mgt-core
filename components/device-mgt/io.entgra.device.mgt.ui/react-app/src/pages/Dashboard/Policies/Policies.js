@@ -24,6 +24,7 @@ import {
     Icon
 } from "antd";
 import {Link} from "react-router-dom";
+import PoliciesTable from "../../../components/Policies/PoliciesTable";
 
 const {Paragraph} = Typography;
 
@@ -50,9 +51,12 @@ class Policies extends React.Component {
                         <Paragraph>All policies for device management</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-
+                        <PoliciesTable/>
                     </div>
                 </PageHeader>
+                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
+
+                </div>
             </div>
         );
     }

@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Card, Col, Row, Select} from "antd";
+import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -30,7 +30,41 @@ const {Text} = Typography;
 let config = null;
 let apiUrl;
 
-class DeviceTypesTable extends React.Component {
+const columns = [
+    {
+        title: 'Policy Name',
+        dataIndex: 'policyName',
+        width: 100,
+    },
+    {
+        title: 'Description',
+        dataIndex: 'description',
+        key: 'description',
+        // render: enrolmentInfo => enrolmentInfo.owner
+        // todo add filtering options
+    },
+    {
+        title: 'Compilance',
+        dataIndex: 'compliance',
+        key: 'compliance',
+        //  render: enrolmentInfo => enrolmentInfo.ownership
+        // todo add filtering options
+    },
+    {
+        title: 'Policy Type',
+        dataIndex: 'policyType',
+        key: 'policyType',
+        //  render: enrolmentInfo => enrolmentInfo.ownership
+        // todo add filtering options
+    }
+];
+
+const getTimeAgo = (time) => {
+    const timeAgo = new TimeAgo('en-US');
+    return timeAgo.format(time);
+};
+
+class PoliciesTable extends React.Component {
     constructor(props) {
         super(props);
         config =  this.props.context;
@@ -43,12 +77,20 @@ class DeviceTypesTable extends React.Component {
         };
     }
 
+    rowSelection = {
+        onChange: (selectedRowKeys, selectedRows) => {
+            this.setState({
+                selectedRows: selectedRows
+            })
+        }
+    };
+
     componentDidMount() {
-        this.fetchUsers();
+        this.fetchGroups();
     }
 
     //fetch data from api
-    fetchUsers = (params = {}) => {
+    fetchGroups = (params = {}) => {
         const config = this.props.context;
         this.setState({loading: true});
 
@@ -65,7 +107,7 @@ class DeviceTypesTable extends React.Component {
 
         apiUrl = window.location.origin + config.serverConfig.invoker.uri +
             config.serverConfig.invoker.deviceMgt +
-            "/device-types";
+            "/policies?" + encodedExtraParams;
 
         //send request to the invokerss
         axios.get(apiUrl).then(res => {
@@ -73,7 +115,7 @@ class DeviceTypesTable extends React.Component {
                 const pagination = {...this.state.pagination};
                 this.setState({
                     loading: false,
-                    data: JSON.parse(res.data.data),
+                    data: res.data.data.policies,
                     pagination,
                 });
             }
@@ -87,7 +129,7 @@ class DeviceTypesTable extends React.Component {
                 notification["error"]({
                     message: "There was a problem",
                     duration: 0,
-                    description:"Error occurred while trying to load device types.",
+                    description:"Error occurred while trying to load policies.",
                 });
             }
 
@@ -113,22 +155,27 @@ class DeviceTypesTable extends React.Component {
     render() {
 
         const {data, pagination, loading, selectedRows} = this.state;
-
-        const itemCard = data.map((data) =>
-            <Col span={8} key={data.id}>
-                <Card hoverable title="Device Type" bordered={true}>
-                    {data.name}
-                </Card>
-            </Col>
-        );
         return (
-            <div style={{ background: '#ECECEC', padding: '30px' }}>
-                <Row gutter={16}>
-                    {itemCard}
-                </Row>
+            <div>
+                <Table
+                    columns={columns}
+                    rowKey={record => (record.id)}
+                    dataSource={data}
+                    pagination={{
+                        ...pagination,
+                        size: "small",
+                        // position: "top",
+                        showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} groups`
+                        // showQuickJumper: true
+                    }}
+                    loading={loading}
+                    onChange={this.handleTableChange}
+                    rowSelection={this.rowSelection}
+                    scroll={{x: 1000}}
+                />
             </div>
         );
     }
 }
 
-export default withConfigContext(DeviceTypesTable);
+export default withConfigContext(PoliciesTable);
