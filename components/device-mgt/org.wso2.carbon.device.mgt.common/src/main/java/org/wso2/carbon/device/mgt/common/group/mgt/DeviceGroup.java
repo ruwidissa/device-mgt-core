@@ -44,6 +44,17 @@ public class DeviceGroup implements Serializable {
 
     private String owner;
 
+    @ApiModelProperty(name = "status", value = "The status of group that needs updating/retrieval.")
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     private Map<String,String> groupProperties;
 
     public DeviceGroup() {}

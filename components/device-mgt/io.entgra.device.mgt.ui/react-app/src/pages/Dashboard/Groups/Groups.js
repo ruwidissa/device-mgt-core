@@ -21,15 +21,14 @@ import {
     PageHeader,
     Typography,
     Breadcrumb,
-    Icon,
-    Button, Select
+    Icon
 } from "antd";
 import {Link} from "react-router-dom";
-import DeviceTable from "../../../components/Devices/DevicesTable";
+import GroupsTable from "../../../components/Groups/GroupsTable";
 
 const {Paragraph} = Typography;
 
-class Devices extends React.Component {
+class Groups extends React.Component {
     routes;
 
     constructor(props) {
@@ -43,24 +42,21 @@ class Devices extends React.Component {
                 <PageHeader style={{paddingTop: 0}}>
                     <Breadcrumb style={{paddingBottom: 16}}>
                         <Breadcrumb.Item>
-                            <Link to="/entgra/devices"><Icon type="home"/> Home</Link>
+                            <Link to="/entgra"><Icon type="home"/> Home</Link>
                         </Breadcrumb.Item>
-                        <Breadcrumb.Item>Devices</Breadcrumb.Item>
+                        <Breadcrumb.Item>Groups</Breadcrumb.Item>
                     </Breadcrumb>
                     <div className="wrap">
-                        <h3>Devices</h3>
-                        <Paragraph>All enrolled devices</Paragraph>
+                        <h3>Groups</h3>
+                        <Paragraph>All device groups.</Paragraph>
                     </div>
                     <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                        <DeviceTable/>
+                        <GroupsTable/>
                     </div>
                 </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
-                </div>
             </div>
         );
     }
 }
 
-export default Devices;
+export default Groups;

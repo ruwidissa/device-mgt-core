@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl.admin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.common.StringUtils;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
@@ -36,7 +37,7 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
     private static final Log log = LogFactory.getLog(GroupManagementAdminServiceImpl.class);
 
     @Override
-    public Response getGroups(String name, String owner, int offset, int limit) {
+    public Response getGroups(String name, String owner, int offset, int limit, String status) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
@@ -45,6 +46,9 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             }
             if (owner != null) {
                 request.setOwner(owner.toUpperCase());
+            }
+            if (status != null && !status.isEmpty()) {
+                request.setStatus(status.toUpperCase());
             }
             PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
                     .getGroups(request);
@@ -65,9 +69,14 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
     }
 
     @Override
-    public Response getGroupCount() {
+    public Response getGroupCount(String status) {
         try {
-            int count = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroupCount();
+            int count;
+            if (status == null || status.isEmpty()) {
+                count = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroupCount();
+            } else {
+                count = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroupCountByStatus(status);
+            }
             return Response.status(Response.Status.OK).entity(count).build();
         } catch (GroupManagementException e) {
             String msg = "ErrorResponse occurred while retrieving group count.";

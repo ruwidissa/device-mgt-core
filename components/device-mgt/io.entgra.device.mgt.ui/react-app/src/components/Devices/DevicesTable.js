@@ -176,7 +176,7 @@ class DeviceTable extends React.Component {
                 this.setState({
                     loading: false,
                     data: res.data.data.devices,
-                    pagination,
+                    pagination
                 });
             }
 
@@ -253,7 +253,7 @@ class DeviceTable extends React.Component {
                     message: "Done",
                     duration: 4,
                     description:
-                        "Successfully disenrolled the device.",
+                        "Successfully dis-enrolled the device.",
                 });
             }
         }).catch((error) => {
@@ -266,7 +266,7 @@ class DeviceTable extends React.Component {
                     message: "There was a problem",
                     duration: 0,
                     description:
-                        "Error occurred while trying to disenroll devices.",
+                        "Error occurred while trying to dis-enroll devices.",
                 });
             }
 

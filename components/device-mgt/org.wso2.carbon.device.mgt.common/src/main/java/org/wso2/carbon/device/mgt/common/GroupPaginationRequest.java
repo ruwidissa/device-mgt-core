@@ -27,10 +27,19 @@ public class GroupPaginationRequest {
     private int rowCount;
     private String owner;
     private String groupName;
+    private String status;
 
     public GroupPaginationRequest(int start, int rowCount) {
         this.startIndex = start;
         this.rowCount = rowCount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public int getStartIndex() {

@@ -472,9 +472,32 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             GroupManagementDAOFactory.openConnection();
-            return groupDAO.getGroupCount(tenantId);
+            return groupDAO.getGroupCount(tenantId, null);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving all groups in tenant";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+    @Override
+    public int getGroupCountByStatus(String status) throws GroupManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get groups count by Status");
+        }
+        int tenantId = -1;
+        try {
+            tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            GroupManagementDAOFactory.openConnection();
+            return groupDAO.getGroupCount(tenantId, status);
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while retrieving all groups in tenant " + tenantId
+                         +" by status : " + status;
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } catch (Exception e) {
@@ -882,6 +905,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         DeviceGroup defaultGroup = this.getGroup(groupName);
         if (defaultGroup == null) {
             defaultGroup = new DeviceGroup(groupName);
+            defaultGroup.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
             // Setting system level user (wso2.system.user) as the owner
             defaultGroup.setOwner(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
             defaultGroup.setDescription("Default system group for devices with " + groupName + " ownership.");

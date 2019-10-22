@@ -112,18 +112,7 @@ const columns = [
             return <Tooltip title={new Date(dateOfLastUpdate).toString()}>{timeAgoString}</Tooltip>;
         }
         // todo add filtering options
-    },
-    {
-        title: 'Action',
-        key: 'action',
-        render: () => (
-                <span>
-                <a><Icon type="edit" /></a>
-                <Divider type="vertical" />
-                <a><Text type="danger"><Icon type="delete" /></Text></a>
-            </span>
-        ),
-    },
+    }
 ];
 
 const getTimeAgo = (time) => {
