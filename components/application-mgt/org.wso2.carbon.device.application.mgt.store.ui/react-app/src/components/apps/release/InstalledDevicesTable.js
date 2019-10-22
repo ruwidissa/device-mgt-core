@@ -32,29 +32,72 @@ let config = null;
 const columns = [
     {
         title: 'Device',
-        dataIndex: 'name',
+        dataIndex: 'device',
         width: 100,
+        render: device => device.name
     },
     {
         title: 'Owner',
-        dataIndex: 'enrolmentInfo',
+        dataIndex: 'device',
         key: 'owner',
-        render: enrolmentInfo => enrolmentInfo.owner
-        // todo add filtering options
+        render: device => device.enrolmentInfo.owner
     },
     {
-        title: 'Ownership',
-        dataIndex: 'enrolmentInfo',
-        key: 'ownership',
-        render: enrolmentInfo => enrolmentInfo.ownership
-        // todo add filtering options
+        title: 'Action Type',
+        dataIndex: 'actionType',
+        key: 'actionType',
+        render: actionType => actionType.toLowerCase()
     },
     {
-        title: 'Status',
-        dataIndex: 'enrolmentInfo',
-        key: 'status',
-        render: (enrolmentInfo) => {
-            const status = enrolmentInfo.status.toLowerCase();
+        title: 'Action',
+        dataIndex: 'action',
+        key: 'action',
+        render: action => action.toLowerCase()
+    },
+    {
+        title: 'Triggered By',
+        dataIndex: 'actionTriggeredBy',
+        key: 'actionTriggeredBy'
+    },
+    {
+        title: 'Action Triggered At',
+        dataIndex: 'actionTriggeredTimestamp',
+        key: 'actionTriggeredTimestamp'
+    },
+    {
+        title: 'Action Status',
+        dataIndex: 'status',
+        key: 'actionStatus',
+        render: (status) => {
+            let color = "#f9ca24";
+            switch (status) {
+                case "COMPLETED":
+                    color = "#badc58";
+                    break;
+                case "REPEATED":
+                    color = "#6ab04c";
+                    break;
+                case "ERROR":
+                case "INVALID":
+                case "UNAUTHORIZED":
+                    color = "#ff7979";
+                    break;
+                case "IN_PROGRESS":
+                    color = "#f9ca24";
+                    break;
+                case "PENDING":
+                    color = "#636e72";
+                    break;
+            }
+            return <Tag color={color}>{status.toLowerCase()}</Tag>;
+        }
+    },
+    {
+        title: 'Device Status',
+        dataIndex: 'device',
+        key: 'deviceStatus',
+        render: (device) => {
+            const status = device.enrolmentInfo.status.toLowerCase();
             let color = "#f9ca24";
             switch (status) {
                 case "active":
@@ -75,18 +118,6 @@ const columns = [
             }
             return <Tag color={color}>{status}</Tag>;
         }
-        // todo add filtering options
-    },
-    {
-        title: 'Last Updated',
-        dataIndex: 'enrolmentInfo',
-        key: 'dateOfLastUpdate',
-        render: (data) => {
-            const {dateOfLastUpdate} = data;
-            const timeAgoString = getTimeAgo(dateOfLastUpdate);
-            return <Tooltip title={new Date(dateOfLastUpdate).toString()}>{timeAgoString}</Tooltip>;
-        }
-        // todo add filtering options
     }
 ];
 
@@ -135,14 +166,15 @@ class InstalledDevicesTable extends React.Component {
         //send request to the invoker
         axios.get(
             window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
-            "/devices?" + encodedExtraParams,
+            config.serverConfig.invoker.store +
+            `/admin/subscription/${this.props.uuid}?` + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
                 const pagination = {...this.state.pagination};
+                console.log(res.data.data.data);
                 this.setState({
                     loading: false,
-                    data: res.data.data.devices,
+                    data: res.data.data.data,
                     pagination,
                 });
             }
@@ -169,7 +201,7 @@ class InstalledDevicesTable extends React.Component {
         const {data, pagination, loading, selectedRows} = this.state;
         return (
             <div>
-                <div style={{paddingBottom:24}}>
+                <div style={{paddingBottom: 24}}>
                     <Text>
                         Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
                         laudantium,
@@ -179,7 +211,7 @@ class InstalledDevicesTable extends React.Component {
                 </div>
                 <Table
                     columns={columns}
-                    rowKey={record => (record.deviceIdentifier + record.enrolmentInfo.owner + record.enrolmentInfo.ownership)}
+                    rowKey={record => (record.device.deviceIdentifier + record.device.enrolmentInfo.owner + record.device.enrolmentInfo.ownership)}
                     dataSource={data}
                     pagination={{
                         ...pagination,

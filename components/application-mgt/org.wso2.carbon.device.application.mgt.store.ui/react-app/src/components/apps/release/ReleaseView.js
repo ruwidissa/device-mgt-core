@@ -208,7 +208,7 @@ class ReleaseView extends React.Component {
                             <ReviewContainer uuid={release.uuid}/>
                         </TabPane>
                         <TabPane tab="Installed devices" key="2">
-                            <InstalledDevicesTable/>
+                            <InstalledDevicesTable uuid={release.uuid}/>
                         </TabPane>
                     </Tabs>
                 </div>
