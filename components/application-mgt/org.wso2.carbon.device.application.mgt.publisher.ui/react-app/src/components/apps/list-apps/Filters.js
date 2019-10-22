@@ -63,9 +63,6 @@ class FiltersForm extends React.Component {
                 delete values["deviceType"];
             }
 
-            if(values.hasOwnProperty("subscriptionType") && values.subscriptionType==="ALL"){
-                delete values["subscriptionType"];
-            }
             if(values.hasOwnProperty("appType") && values.appType==="ALL"){
                 delete values["appType"];
             }
@@ -268,17 +265,6 @@ class FiltersForm extends React.Component {
                                 <Option value="CUSTOM">Custom</Option>
                                 <Option value="ALL">All</Option>
                             </Select>
-                        )}
-                    </Form.Item>
-                    <Divider/>
-
-                    <Form.Item label="Subscription Type">
-                        {getFieldDecorator('subscriptionType', {})(
-                            <Radio.Group style={{width: '100%'}}>
-                                <Radio value="FREE">Free</Radio>
-                                <Radio value="PAID">Paid</Radio>
-                                <Radio value="ALL">All</Radio>
-                            </Radio.Group>,
                         )}
                     </Form.Item>
                     <Divider/>
