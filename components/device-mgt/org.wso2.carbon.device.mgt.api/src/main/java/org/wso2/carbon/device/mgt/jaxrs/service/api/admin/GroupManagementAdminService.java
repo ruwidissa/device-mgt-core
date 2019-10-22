@@ -142,7 +142,13 @@ public interface GroupManagementAdminService {
                                value = "Provide how many device details you require from the starting pagination index/offset.",
                                defaultValue = "5")
                        @QueryParam("limit")
-                               int limit);
+                               int limit,
+
+                       @ApiParam(
+                               name = "status",
+                               value = "status of group to be retrieve.")
+                       @QueryParam("status")
+                               String status);
 
     @Path("/count")
     @GET
@@ -190,6 +196,10 @@ public interface GroupManagementAdminService {
                     message = "Internal Server Error. \n Server error occurred while fetching the group count.",
                     response = ErrorResponse.class)
     })
-    Response getGroupCount();
+    Response getGroupCount(@ApiParam(
+                    name = "status",
+                    value = "status of groups of which count should be retrieved")
+            @QueryParam("status")
+                    String status);
 
 }
