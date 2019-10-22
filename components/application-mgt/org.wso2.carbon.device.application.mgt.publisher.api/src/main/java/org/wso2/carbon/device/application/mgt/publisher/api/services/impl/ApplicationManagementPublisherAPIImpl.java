@@ -198,12 +198,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+        } catch (BadRequestException e) {
+            String msg = "Found incompatible payload with ent. app creating request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the ent. application";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while handling the ent. application creating request";
+            String msg = "Couldn't find the required artifacts to create new ent. application with the request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -237,12 +241,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+        } catch (BadRequestException e) {
+            String msg = "Found incompatible payload with web app creating request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the web application";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while handling the web app creating request";
+            String msg = "Couldn't find the required artifacts to create new web application with the request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -276,12 +284,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+        } catch (BadRequestException e) {
+            String msg = "Found incompatible payload with pub app creating request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the public app.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while handling the public app creating request";
+            String msg = "Couldn't find the required artifacts to create new public application with the request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -317,12 +329,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
+        } catch (BadRequestException e) {
+            String msg = "Found incompatible payload with pub custom creating request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while creating the application";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
-            String msg = "Error occurred while handling the application creating request";
+            String msg = "Couldn't find the required artifacts to create new custom application with the request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
@@ -908,6 +924,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
     }
 
     /***
+     * This method can be used to construct {@link ApplicationArtifact}
      *
      * @param binaryFile binary file of the application release
      * @param iconFile icon file of the application release

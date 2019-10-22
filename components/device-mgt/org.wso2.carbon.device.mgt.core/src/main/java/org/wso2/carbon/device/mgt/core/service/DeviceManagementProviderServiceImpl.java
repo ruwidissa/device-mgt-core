@@ -3712,7 +3712,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("Getting all devices details for device ids: " + devicesIds);
         }
         PaginationResult paginationResult = new PaginationResult();
-        int count;
         List<Device> subscribedDeviceDetails;
         try {
             DeviceManagementDAOFactory.openConnection();
@@ -3722,12 +3721,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 paginationResult.setData(new ArrayList<>());
                 paginationResult.setRecordsFiltered(0);
                 paginationResult.setRecordsTotal(0);
+                return paginationResult;
             }
-            count = deviceDAO.getSubscribedDeviceCount(devicesIds, tenantId, status);
-            paginationResult.setData(getAllDeviceInfo(subscribedDeviceDetails));
+            int count = deviceDAO.getSubscribedDeviceCount(devicesIds, tenantId, status);
             paginationResult.setRecordsFiltered(count);
             paginationResult.setRecordsTotal(count);
-            return paginationResult;
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving device list for device ids " + devicesIds;
             log.error(msg, e);
@@ -3739,6 +3737,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
+        paginationResult.setData(getAllDeviceInfo(subscribedDeviceDetails));
+        return paginationResult;
     }
 
     /**
