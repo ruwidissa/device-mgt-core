@@ -26,6 +26,11 @@ import './index.css';
 import Devices from "./pages/Dashboard/Devices/Devices";
 import Reports from "./pages/Dashboard/Reports/Reports";
 import Geo from "./pages/Dashboard/Geo/Geo";
+import Groups from "./pages/Dashboard/Groups/Groups";
+import Users from "./pages/Dashboard/Users/Users";
+import Policies from "./pages/Dashboard/Policies/Policies";
+import Roles from "./pages/Dashboard/Roles/Roles";
+import DeviceTypes from "./pages/Dashboard/DeviceTypes/DeviceTypes";
 
 const routes = [
     {
@@ -51,6 +56,31 @@ const routes = [
             {
                 path: '/entgra/reports',
                 component: Reports,
+                exact: true
+            },
+            {
+                path: '/entgra/groups',
+                component: Groups,
+                exact: true
+            },
+            {
+                path: '/entgra/users',
+                component: Users,
+                exact: true
+            },
+            {
+                path: '/entgra/policies',
+                component: Policies,
+                exact: true
+            },
+            {
+                path: '/entgra/roles',
+                component: Roles,
+                exact: true
+            },
+            {
+                path: '/entgra/devicetypes',
+                component: DeviceTypes,
                 exact: true
             }
         ]
