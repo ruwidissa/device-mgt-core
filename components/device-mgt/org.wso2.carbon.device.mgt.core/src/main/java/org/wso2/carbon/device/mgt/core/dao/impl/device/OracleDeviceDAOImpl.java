@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl.device;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
@@ -643,6 +644,52 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving information of all registered devices " +
                          "according to device ids and the limit area.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, String status)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            int index = 1;
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT " +
+                            "COUNT(e.DEVICE_ID) AS DEVICE_ID "+
+                            "FROM DM_ENROLMENT AS e, DM_DEVICE AS f "+
+                            "WHERE " +
+                            "e.DEVICE_ID=f.ID AND " +
+                            "e.DEVICE_ID IN (", ") AND e.TENANT_ID = ?");
+
+            deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
+            String query = joiner.toString();
+
+            if (!StringUtils.isBlank(status)) {
+                query = query + " AND e.STATUS = ?";
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (Integer deviceId : deviceIds) {
+                    ps.setObject(index++, deviceId);
+                }
+
+                ps.setInt(index++, tenantId);
+                if (!StringUtils.isBlank(status)) {
+                    ps.setString(index, status);
+                }
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("DEVICE_ID");
+                    }
+                    return 0;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all registered devices " +
+                    "according to device ids and the limit area.";
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }

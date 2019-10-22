@@ -802,9 +802,8 @@ public interface DeviceManagementProviderService {
      * @param limitValue limit value for get paginated request.
      * @param status status of the devices.
      * @return {@link PaginationResult}
-     * @throws {@link DeviceManagementException} if any service level or DAO level error occurs.
+     * @throws DeviceManagementException if any service level or DAO level error occurs.
      */
     PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
-                                             List<Integer> devicesIds, String status)
-            throws DeviceManagementException;
+                                             List<Integer> devicesIds, String status) throws DeviceManagementException;
 }

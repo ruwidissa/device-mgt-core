@@ -576,8 +576,18 @@ public interface DeviceDAO {
      * @param limitValue  limit value for get paginated request.
      * @param status      status of the devices.
      * @return devices - subscribed device details list
-     * @throws {@link DeviceManagementDAOException} if connections establishment fails.
+     * @throws DeviceManagementDAOException if connections establishment fails.
      */
     List<Device> getSubscribedDevices(int offsetValue, int limitValue, List<Integer> deviceIds,
                                       int tenantId, String status) throws DeviceManagementDAOException;
+
+    /**
+     * @param deviceIds device ids of the subscribed devices.
+     * @param tenantId  tenant id
+     * @param status    current status of the device. (e.g ACTIVE, REMOVED, etc)
+     * @return number of subscribed device count.
+     * @throws DeviceManagementDAOException if error occurred while processing the SQL statement.
+     */
+    int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, String status)
+            throws DeviceManagementDAOException;
 }

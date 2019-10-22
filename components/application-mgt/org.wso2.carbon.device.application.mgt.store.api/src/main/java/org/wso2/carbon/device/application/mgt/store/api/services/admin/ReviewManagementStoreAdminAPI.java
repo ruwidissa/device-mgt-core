@@ -49,7 +49,7 @@ info = @Info(
         extensions = {
                 @Extension(properties = {
                         @ExtensionProperty(name = "name", value = "StoreReviewManagementAdminService"),
-                        @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/admin/review"),
+                        @ExtensionProperty(name = "context", value = "/api/application-mgt-store/v1.0/admin/reviews"),
                 })
         }
 ),
@@ -70,14 +70,13 @@ scopes = {
 
 @Path("/admin/reviews")
 @Api(value = "Store Review Management Admin API")
-@Produces(MediaType.APPLICATION_JSON)
 public interface ReviewManagementStoreAdminAPI {
 String SCOPE = "scope";
 
     @DELETE
     @Path("/{uuid}/{reviewId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.WILDCARD)
+    @Consumes(MediaType.WILDCARD)
     @ApiOperation(
         consumes = MediaType.APPLICATION_JSON,
         produces = MediaType.APPLICATION_JSON,
