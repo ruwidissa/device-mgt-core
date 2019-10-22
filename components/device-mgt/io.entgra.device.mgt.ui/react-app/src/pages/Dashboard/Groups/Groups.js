@@ -54,6 +54,9 @@ class Groups extends React.Component {
                         <GroupsTable/>
                     </div>
                 </PageHeader>
+                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
+
+                </div>
             </div>
         );
     }
