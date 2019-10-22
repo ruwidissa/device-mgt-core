@@ -29,6 +29,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
@@ -100,6 +101,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         group.setOwner(owner);
+        group.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().createGroup(group, DEFAULT_ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS);
             return Response.status(Response.Status.CREATED).build();

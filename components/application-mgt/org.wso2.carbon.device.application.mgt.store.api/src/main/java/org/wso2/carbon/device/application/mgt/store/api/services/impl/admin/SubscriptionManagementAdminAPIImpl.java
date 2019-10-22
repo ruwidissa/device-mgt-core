@@ -18,45 +18,24 @@
 
 package org.wso2.carbon.device.application.mgt.store.api.services.impl.admin;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.application.mgt.common.ApplicationInstallResponse;
-import org.wso2.carbon.device.application.mgt.common.BasicUserInfo;
-import org.wso2.carbon.device.application.mgt.common.BasicUserInfoList;
-import org.wso2.carbon.device.application.mgt.common.DeviceGroupList;
-import org.wso2.carbon.device.application.mgt.common.DeviceList;
-import org.wso2.carbon.device.application.mgt.common.ErrorResponse;
-import org.wso2.carbon.device.application.mgt.common.RoleList;
-import org.wso2.carbon.device.application.mgt.common.SubAction;
-import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
-import org.wso2.carbon.device.application.mgt.core.exception.ApplicationOperationTaskException;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
-import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
-import org.wso2.carbon.device.application.mgt.core.task.ScheduledAppSubscriptionTaskManager;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.store.api.services.SubscriptionManagementAPI;
 import org.wso2.carbon.device.application.mgt.store.api.services.admin.SubscriptionManagementAdminAPI;
-import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
-import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * Implementation of Subscription Management related APIs.

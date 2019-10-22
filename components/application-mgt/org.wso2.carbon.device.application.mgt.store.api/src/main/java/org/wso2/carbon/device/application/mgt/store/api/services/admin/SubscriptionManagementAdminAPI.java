@@ -67,8 +67,8 @@ import java.util.List;
                 @org.wso2.carbon.apimgt.annotations.api.Scope(
                         name = "View Application Subscriptions",
                         description = "View Application Subscriptions.",
-                        key = "perm:app:subscription:view",
-                        permissions = {"/app-mgt/store/subscription/view"}
+                        key = "perm:admin:app:subscription:view",
+                        permissions = {"/app-mgt/store/admin/subscription/view"}
                 )
         }
 )

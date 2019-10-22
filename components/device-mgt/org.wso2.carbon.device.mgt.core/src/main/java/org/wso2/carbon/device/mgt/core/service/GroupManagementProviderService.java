@@ -128,6 +128,14 @@ public interface GroupManagementProviderService {
     int getGroupCount() throws GroupManagementException;
 
     /**
+     * Get all device group count in tenant by group status
+     *
+     * @return group count
+     * @throws GroupManagementException
+     */
+    int getGroupCountByStatus(String status) throws GroupManagementException;
+
+    /**
      * Get device group count of user
      *
      * @param username of the user

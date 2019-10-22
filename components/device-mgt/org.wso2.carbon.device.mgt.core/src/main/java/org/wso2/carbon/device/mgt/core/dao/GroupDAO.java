@@ -158,7 +158,7 @@ public interface GroupDAO {
      * @return List of all Device Groups in tenant.
      * @throws GroupManagementDAOException
      */
-    int getGroupCount(int tenantId) throws GroupManagementDAOException;
+    int getGroupCount(int tenantId, String status) throws GroupManagementDAOException;
 
     /**
      * Get paginated count of Device Groups in tenant.

@@ -48,7 +48,9 @@ public class GenericGroupDAOImpl extends AbstractGroupDAOImpl {
         String groupName = request.getGroupName();
         boolean hasGroupName = false;
         String owner = request.getOwner();
+        String status = request.getStatus();
         boolean hasOwner = false;
+        boolean hasStatus = false;
         boolean hasLimit = request.getRowCount() != 0;
 
         try {
@@ -62,6 +64,10 @@ public class GenericGroupDAOImpl extends AbstractGroupDAOImpl {
                 sql += " AND UPPER(OWNER) LIKE ?";
                 hasOwner = true;
             }
+            if (status != null && !status.isEmpty()) {
+                sql += " AND STATUS = ?";
+                hasStatus = true;
+            }
             if (hasLimit) {
                 sql += " LIMIT ?, ?";
             }
@@ -74,6 +80,9 @@ public class GenericGroupDAOImpl extends AbstractGroupDAOImpl {
             }
             if (hasOwner) {
                 stmt.setString(paramIndex++, owner + "%");
+            }
+            if (hasStatus) {
+                stmt.setString(paramIndex++, status.toUpperCase());
             }
             if (hasLimit) {
                 stmt.setInt(paramIndex++, request.getStartIndex());

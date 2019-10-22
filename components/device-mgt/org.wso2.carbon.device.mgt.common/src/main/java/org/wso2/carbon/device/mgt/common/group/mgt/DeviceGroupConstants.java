@@ -65,6 +65,11 @@ public class DeviceGroupConstants {
         public static final String DEFAULT_VIEW_EVENTS = "view-events";
     }
 
+    public static class GroupStatus {
+        public static final String ACTIVE = "ACTIVE";
+        public static final String INACTIVE = "INACTIVE";
+    }
+
     public static class Permissions {
         public static final String[] DEFAULT_ADMIN_PERMISSIONS =
                 {"/permission/device-mgt/groups", "/permission/device-mgt/user/groups"};
