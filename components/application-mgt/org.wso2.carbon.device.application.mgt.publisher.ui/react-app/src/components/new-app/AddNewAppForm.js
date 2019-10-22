@@ -54,7 +54,8 @@ class AddNewAppFormComponent extends React.Component {
             release: null,
             isError: false,
             deviceType: null,
-            supportedOsVersions: []
+            supportedOsVersions: [],
+            errorText: ""
         };
     }
 
@@ -112,11 +113,12 @@ class AddNewAppFormComponent extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Sorry, we were unable to complete your request.")
+            handleApiError(error, error.response.data.data);
             this.setState({
                 loading: false,
                 isError: true,
-                current: 2
+                current: 2,
+                errorText: error.response.data.data
             });
         });
 
@@ -149,7 +151,7 @@ class AddNewAppFormComponent extends React.Component {
     };
 
     render() {
-        const {loading, current, isError, supportedOsVersions} = this.state;
+        const {loading, current, isError, supportedOsVersions, errorText} = this.state;
         const {formConfig} = this.props;
         return (
             <div>
@@ -190,7 +192,7 @@ class AddNewAppFormComponent extends React.Component {
 
                                     {isError && (<Result
                                         status="500"
-                                        title="Error occurred while creating the application."
+                                        title={errorText}
                                         subTitle="Go back to edit the details and submit again."
                                         extra={<Button onClick={this.onClickBackButton}>Back</Button>}
                                     />)}

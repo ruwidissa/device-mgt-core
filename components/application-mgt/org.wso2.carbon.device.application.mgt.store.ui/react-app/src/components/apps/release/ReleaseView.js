@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon, Spin} from "antd";
+import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon, Spin, Tabs} from "antd";
 import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
@@ -30,8 +30,10 @@ import CurrentUsersReview from "./review/CurrentUsersReview";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
 import ReviewContainer from "./review/ReviewContainer";
+import InstalledDevicesTable from "./InstalledDevicesTable";
 
 const {Title, Text, Paragraph} = Typography;
+const {TabPane} = Tabs;
 
 class ReleaseView extends React.Component {
     constructor(props) {
@@ -119,6 +121,12 @@ class ReleaseView extends React.Component {
         } catch (e) {
 
         }
+        if (app.hasOwnProperty("packageName")) {
+            metaData.push({
+                key: "Package Name",
+                value: app.packageName
+            });
+        }
         const menu = (
             <Menu onClick={this.handleSubscribeClick}>
                 <Menu.Item key="install">Install</Menu.Item>
@@ -171,31 +179,38 @@ class ReleaseView extends React.Component {
                             </div>
                         </Col>
                     </Row>
-                    <Divider/>
-                    <Row>
-                        <ImgViewer images={release.screenshots}/>
-                    </Row>
-                    <Divider/>
-                    <Paragraph type="secondary" ellipsis={{rows: 3, expandable: true}}>
-                        {release.description}
-                    </Paragraph>
-                    <Divider/>
-                    <Text>META DATA</Text>
-                    <Row>
-                        {
-                            metaData.map((data, index) => {
-                                return (
-                                    <Col key={index} lg={8} md={6} xs={24} style={{marginTop: 15}}>
-                                        <Text>{data.key}</Text><br/>
-                                        <Text type="secondary">{data.value}</Text>
-                                    </Col>
-                                )
-                            })
-                        }
-                        {(metaData.length === 0) && (<Text type="secondary">No meta data available.</Text>)}
-                    </Row>
-                    <Divider/>
-                    <ReviewContainer uuid={release.uuid}/>
+                    <Divider dashed={true}/>
+                    <Tabs>
+                        <TabPane tab="App" key="1">
+                            <Row>
+                                <ImgViewer images={release.screenshots}/>
+                            </Row>
+                            <Divider/>
+                            <Paragraph type="secondary" ellipsis={{rows: 3, expandable: true}}>
+                                {release.description}
+                            </Paragraph>
+                            <Divider/>
+                            <Text>META DATA</Text>
+                            <Row>
+                                {
+                                    metaData.map((data, index) => {
+                                        return (
+                                            <Col key={index} lg={8} md={6} xs={24} style={{marginTop: 15}}>
+                                                <Text>{data.key}</Text><br/>
+                                                <Text type="secondary">{data.value}</Text>
+                                            </Col>
+                                        )
+                                    })
+                                }
+                                {(metaData.length === 0) && (<Text type="secondary">No meta data available.</Text>)}
+                            </Row>
+                            <Divider/>
+                            <ReviewContainer uuid={release.uuid}/>
+                        </TabPane>
+                        <TabPane tab="Installed devices" key="2">
+                            <InstalledDevicesTable uuid={release.uuid}/>
+                        </TabPane>
+                    </Tabs>
                 </div>
             </div>
         );

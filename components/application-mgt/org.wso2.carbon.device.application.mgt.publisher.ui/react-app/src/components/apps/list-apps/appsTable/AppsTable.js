@@ -123,7 +123,8 @@ class AppsTable extends React.Component {
             filters: {},
             isDrawerVisible: false,
             selectedApp: null,
-            selectedAppIndex: -1
+            selectedAppIndex: -1,
+            loading: false
         };
         config = this.props.context;
     }
@@ -222,14 +223,14 @@ class AppsTable extends React.Component {
 
     onUpdateApp = (key, value) => {
         const apps = [...this.state.apps];
-        apps[this.state.selectedAppIndex][key]= value;
+        apps[this.state.selectedAppIndex][key] = value;
         this.setState({
             apps
         });
     };
 
     render() {
-        const {isDrawerVisible} = this.state;
+        const {isDrawerVisible, loading} = this.state;
         return (
             <div className="apps-table">
                 <Table
@@ -239,6 +240,7 @@ class AppsTable extends React.Component {
                     pagination={this.state.pagination}
                     onChange={this.handleTableChange}
                     rowClassName="app-row"
+                    loading={loading}
                     onRow={(record, rowIndex) => {
                         return {
                             onClick: event => {
