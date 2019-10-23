@@ -239,7 +239,6 @@ class ReportDeviceTable extends React.Component {
                             loading={loading}
                             onChange={this.handleTableChange}
                             rowSelection={this.rowSelection}
-                            scroll={{x: 1000}}
                     />
                 </div>
         );

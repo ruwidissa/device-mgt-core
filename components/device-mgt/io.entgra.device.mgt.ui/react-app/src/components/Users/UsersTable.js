@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {message, notification, Table, Typography, Panel, Collapse, Button, List, Modal, Icon} from "antd";
+import {message, notification, Table, Typography, Panel, Collapse, Button, List, Modal, Icon, Tabs} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -174,9 +174,9 @@ class UsersTable extends React.Component {
     };
 
     render() {
-
         const {data, pagination, loading, selectedRows} = this.state;
         const { Panel } = Collapse;
+        const { TabPane } = Tabs;
         const columns = [
             {
                 title: 'User Name',
@@ -231,30 +231,44 @@ class UsersTable extends React.Component {
                         loading={loading}
                         onChange={this.handleTableChange}
                         rowSelection={this.rowSelection}
-                        scroll={{x: 1000}}
                     />
                 </div>
                 <div>
                     <Modal
                         width="900px"
-                        title="Info"
                         visible={this.state.rolesModalVisible}
                         onOk={this.handleOk}
                         onCancel={this.handleCancel}
                     >
-                        <Collapse>
-                            <Panel header="User Roles" key="1">
+                        <Tabs size="small" defaultActiveKey="1">
+                            <TabPane
+                                tab={
+                                    <span>
+                                        <Icon type="book"/>
+                                      Roles
+                                    </span>
+                                }
+                                key="1"
+                            >
                                 <List
                                     size="small"
                                     bordered
                                     dataSource={this.state.rolesData}
                                     renderItem={item => <List.Item>{item}</List.Item>}
                                 />
-                            </Panel>
-                            <Panel header="Enrolled Devices" key="2">
+                            </TabPane>
+                            <TabPane
+                                tab={
+                                    <span>
+                                      <Icon type="appstore"/>
+                                      Enrolled Devices
+                                    </span>
+                                }
+                                key="2"
+                            >
                                 <UsersDevices user={this.state.user}/>
-                            </Panel>
-                        </Collapse>
+                            </TabPane>
+                        </Tabs>
                     </Modal>
                 </div>
             </div>

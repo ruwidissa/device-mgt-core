@@ -56,45 +56,29 @@ public class DeviceLocation implements Serializable {
     @ApiModelProperty(name = "updatedTime", value = "Update time of the device.", required = true)
     private Date updatedTime;
     @ApiModelProperty(name = "altitude", value = "Device altitude.", required = true)
-    private Double altitude;
+    private double altitude;
     @ApiModelProperty(name = "speed", value = "Device speed.", required = true)
-    private Float speed;
+    private float speed;
     @ApiModelProperty(name = "bearing", value = "Device bearing.", required = true)
-    private Float bearing;
+    private float bearing;
     @ApiModelProperty(name = "distance", value = "Device distance.", required = true)
-    private Double distance;
+    private double distance;
 
-    public Double getDistance() {
-        return distance;
-    }
+    public double getAltitude() { return altitude; }
 
-    public void setDistance(Double distance) {
-        this.distance = distance;
-    }
+    public void setAltitude(double altitude) { this.altitude = altitude; }
 
-    public Double getAltitude() {
-        return altitude;
-    }
+    public float getSpeed() { return speed; }
 
-    public Float getSpeed() {
-        return speed;
-    }
+    public void setSpeed(float speed) { this.speed = speed; }
 
-    public void setSpeed(Float speed) {
-        this.speed = speed;
-    }
+    public float getBearing() { return bearing; }
 
-    public Float getBearing() {
-        return bearing;
-    }
+    public void setBearing(float bearing) { this.bearing = bearing; }
 
-    public void setBearing(Float bearing) {
-        this.bearing = bearing;
-    }
+    public double getDistance() { return distance; }
 
-    public void setAltitude(Double altitude) {
-        this.altitude = altitude;
-    }
+    public void setDistance(double distance) { this.distance = distance; }
 
     public int getDeviceId() {
         return deviceId;
