@@ -18,8 +18,7 @@
 
 import React from "react";
 import moment from "moment";
-import DateTimeRangeContainer from "react-advanced-datetimerange-picker";
-import {Button, Select, message, notification, Tag, Tooltip, Empty} from "antd";
+import {Button, Select, message, notification, Tag, Tooltip, Empty, DatePicker} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
 import GeoCustomMap from "../geo-custom-map/GeoCustomMap";
@@ -29,15 +28,16 @@ class GeoDashboard extends React.Component {
 
     constructor(props) {
         super(props);
-        let start = moment(new Date());
+        let start = moment(
+                new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0, 0)
+        );
         let end = moment(start)
-                .add(5, "days")
-                .subtract(1, "minute");
+                .add(1, "days")
+                .subtract(1, "seconds");
         this.state = {
             deviceData: [],
             selectedDevice: '',
             locationData: [],
-            // currentLocation: [],
             loading: false,
             start: start,
             end: end,
@@ -55,11 +55,11 @@ class GeoDashboard extends React.Component {
      * @param startDate - start date
      * @param endDate - end date
      */
-    applyCallback = (startDate, endDate) => {
+    applyCallback = (dates, dateStrings) => {
         console.log("Apply Callback");
         this.setState({
-                          start: startDate,
-                          end: endDate
+                          start: dateStrings[0],
+                          end: dateStrings[1]
                       });
     };
 
@@ -180,6 +180,7 @@ class GeoDashboard extends React.Component {
      */
     controllerBar = () => {
 
+        const {RangePicker} = DatePicker;
         let now = new Date();
         let start = moment(
                 new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
@@ -199,32 +200,20 @@ class GeoDashboard extends React.Component {
             "2 Weeks": [moment(start).subtract(14, "days"), moment(end)],
             "1 Month": [moment(start).subtract(1, "months"), moment(end)],
         };
-        let local = {
-            format: "DD-MM-YYYY HH:mm",
-            sundayFirst: false
-        };
-        let maxDate = moment(start).add(24, "hour");
-        let value =
-                `
-            ${this.state.start.format("DD-MM-YYYY HH:mm")} - ${this.state.end.format("DD-MM-YYYY HH:mm")}
-            `;
+
         let {deviceData} = this.state;
 
         return (
                 <div className="controllerDiv">
+                    <RangePicker
+                            ranges={ranges}
+                            style={{marginRight: 20}}
+                            showTime
+                            format="YYYY-MM-DD HH:mm:ss"
+                            defaultValue={[this.state.start, this.state.end]}
+                            onChange={this.applyCallback}
 
-                    <Button style={{marginRight: 20}}>
-                        <DateTimeRangeContainer
-                                ranges={ranges}
-                                start={this.state.start}
-                                end={this.state.end}
-                                local={local}
-                                maxDate={maxDate}
-                                applyCallback={this.applyCallback}
-                        >
-                            {value}
-                        </DateTimeRangeContainer>
-                    </Button>
+                    />
 
                     <Select
                             showSearch
