@@ -74,12 +74,25 @@ class Dashboard extends React.Component {
                                     <span>Devices</span>
                                 </Link>
                             </Menu.Item>
-                            <Menu.Item key="geo">
-                                <Link to="/entgra/geo">
-                                    <Icon type="environment"/>
-                                    <span>Geo</span>
-                                </Link>
-                            </Menu.Item>
+                            <SubMenu
+                                    key="geo"
+                                    title={
+                                        <span>
+                                        <Icon type="environment"/>
+                                        <span>Geo</span>
+                                        </span>}
+                            >
+                                <Menu.Item key="singleDevice">
+                                    <Link to="/entgra/geo">
+                                    <span>Single Device View</span>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="deviceGroup">
+                                    <Link to="#">
+                                        <span>Device Group View</span>
+                                    </Link>
+                                </Menu.Item>
+                            </SubMenu>
                             <Menu.Item key="reports">
                                 <Link to="/entgra/reports">
                                     <Icon type="bar-chart"/>
