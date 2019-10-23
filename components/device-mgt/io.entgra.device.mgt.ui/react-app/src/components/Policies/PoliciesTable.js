@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider} from "antd";
+import {message, notification, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -171,7 +171,6 @@ class PoliciesTable extends React.Component {
                     loading={loading}
                     onChange={this.handleTableChange}
                     rowSelection={this.rowSelection}
-                    scroll={{x: 1000}}
                 />
             </div>
         );
