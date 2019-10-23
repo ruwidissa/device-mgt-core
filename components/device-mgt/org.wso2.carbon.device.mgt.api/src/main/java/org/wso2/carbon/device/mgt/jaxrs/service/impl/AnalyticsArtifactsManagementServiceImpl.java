@@ -121,7 +121,7 @@ public class AnalyticsArtifactsManagementServiceImpl
         } catch (BadRequestException e) {
             String errMsg = "Failed to deploy stream due to invalid payload";
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenant " + tenantDomain;
             log.error(errMsg, e);
@@ -194,7 +194,7 @@ public class AnalyticsArtifactsManagementServiceImpl
         } catch (BadRequestException e) {
             String errMsg = "Failed to deploy receiver due to invalid payload";
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -267,7 +267,7 @@ public class AnalyticsArtifactsManagementServiceImpl
         } catch (BadRequestException e) {
             String errMsg = "Failed to deploy publisher due to invalid payload";
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -300,7 +300,7 @@ public class AnalyticsArtifactsManagementServiceImpl
         } catch (InvalidExecutionPlanException e) {
             String errMsg = "Failed to deploy siddhi script due to invalid payload";
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);

@@ -36,7 +36,7 @@ public class BadRequestException extends WebApplicationException {
     }
 
     public BadRequestException(ErrorDTO errorDTO) {
-        super(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+        super(Response.status(Response.Status.BAD_REQUEST)
                       .entity(errorDTO)
                       .header(Constants.DeviceConstants.HEADER_CONTENT_TYPE, Constants.DeviceConstants.APPLICATION_JSON)
                       .build());
