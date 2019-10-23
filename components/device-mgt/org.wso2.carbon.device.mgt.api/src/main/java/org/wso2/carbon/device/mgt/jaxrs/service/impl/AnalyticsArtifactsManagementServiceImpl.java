@@ -119,8 +119,9 @@ public class AnalyticsArtifactsManagementServiceImpl
             deployStream(stream);
             return Response.ok().build();
         } catch (BadRequestException e) {
-            log.error(e.getMessage(), e);
-            return e.getResponse();
+            String errMsg = "Failed to deploy stream due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenant " + tenantDomain;
             log.error(errMsg, e);
@@ -191,8 +192,9 @@ public class AnalyticsArtifactsManagementServiceImpl
             deployReceiver(receiver, customMapping, adapterConfiguration);
             return Response.ok().build();
         } catch (BadRequestException e) {
-            log.error(e.getMessage(), e);
-            return e.getResponse();
+            String errMsg = "Failed to deploy receiver due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -263,8 +265,9 @@ public class AnalyticsArtifactsManagementServiceImpl
             deployPublisher(publisher, customMapping, adapterConfiguration);
             return Response.ok().build();
         } catch (BadRequestException e) {
-            log.error(e.getMessage(), e);
-            return e.getResponse();
+            String errMsg = "Failed to deploy publisher due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -295,8 +298,9 @@ public class AnalyticsArtifactsManagementServiceImpl
             deploySiddhiExecutionPlan(name, isEdited, plan.getDefinition());
             return Response.ok().build();
         } catch (InvalidExecutionPlanException e) {
-            log.error(e.getMessage(), e);
-            return e.getResponse();
+            String errMsg = "Failed to deploy siddhi script due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -634,9 +638,7 @@ public class AnalyticsArtifactsManagementServiceImpl
                     eventProcessorAdminServiceStub.editActiveExecutionPlan(plan, name);
                 }
             } else {
-                ErrorDTO errorDTO = new ErrorDTO();
-                errorDTO.setMessage(validationResponse);
-                throw new InvalidExecutionPlanException(errorDTO);
+                throw new InvalidExecutionPlanException(validationResponse);
             }
         } finally {
             cleanup(eventProcessorAdminServiceStub);
@@ -655,9 +657,7 @@ public class AnalyticsArtifactsManagementServiceImpl
             String errMsg = String.format("Failed to validate Stream property attributes of %s:%s. " +
                                           "Stream mapping can't be null or empty",
                                           stream.getName(), stream.getVersion());
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setMessage(errMsg);
-            throw new BadRequestException(errorDTO);
+            throw new BadRequestException(errMsg);
         }
     }
 
@@ -670,9 +670,7 @@ public class AnalyticsArtifactsManagementServiceImpl
             throws BadRequestException {
         if (adapterProperties == null) {
             String errMsg = "Failed to validate adapter attributes. Adapter attributes can't be null";
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setMessage(errMsg);
-            throw new BadRequestException(errorDTO);
+            throw new BadRequestException(errMsg);
         }
     }
 
@@ -692,9 +690,7 @@ public class AnalyticsArtifactsManagementServiceImpl
         if (adapterMappingConfiguration == null) {
             String errMsg = "Failed to validate adapter mapping attributes. " +
                             "Adapter mapping configuration can't be null";
-            ErrorDTO errorDTO = new ErrorDTO();
-            errorDTO.setMessage(errMsg);
-            throw new BadRequestException(errorDTO);
+            throw new BadRequestException(errMsg);
         } else if (adapterMappingConfiguration.getMessageFormat() == null ||
                    ((adapterMappingConfiguration.getInputMappingString() == null)
                     && (adapterMappingConfiguration.getInputMappingProperties() == null ||

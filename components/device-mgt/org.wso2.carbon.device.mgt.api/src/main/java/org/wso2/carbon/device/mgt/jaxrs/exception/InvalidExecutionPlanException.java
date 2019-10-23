@@ -39,6 +39,10 @@ public class InvalidExecutionPlanException extends WebApplicationException {
         message = errorDTO.getMessage();
     }
 
+    public InvalidExecutionPlanException(String message) {
+        this.message = message;
+    }
+
     @Override
     public String getMessage() {
         return message;

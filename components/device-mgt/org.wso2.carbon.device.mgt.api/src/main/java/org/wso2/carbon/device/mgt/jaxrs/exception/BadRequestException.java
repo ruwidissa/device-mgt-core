@@ -43,6 +43,10 @@ public class BadRequestException extends WebApplicationException {
         message = errorDTO.getMessage();
     }
 
+    public BadRequestException(String message) {
+        this.message = message;
+    }
+
     public String getMessage() {
         return message;
     }
