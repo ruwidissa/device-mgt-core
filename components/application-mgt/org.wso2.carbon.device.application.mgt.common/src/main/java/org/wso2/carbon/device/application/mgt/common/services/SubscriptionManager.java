@@ -83,6 +83,23 @@ public interface SubscriptionManager {
      */
     void updateScheduledSubscriptionStatus(int id, ExecutionStatus status) throws SubscriptionManagementException;
 
+    /**
+     * Perform google enterprise app install
+     *  @param applicationUUID UUID of the application to subscribe/unsubscribe
+     * @param params          list of subscribers. This list can be of either
+     *                        {@link org.wso2.carbon.device.mgt.common.DeviceIdentifier} if {@param subType} is equal
+     *                        to DEVICE or {@link String} if {@param subType} is USER, ROLE or GROUP
+     * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code> {@see {
+ * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code> {@see {
+ * @param <T>             generic type of the method.
+ * @return {@link ApplicationInstallResponse}
+ * @throws ApplicationManagementException ApplicationManagementException if error occurs when subscribing to the
+ * given application
+ * @link org.wso2.carbon.device.application.mgt.common.SubscriptionType}}
+     */
+     <T> void performEntAppInstall(String applicationUUID, List<T> params, String subType)
+            throws ApplicationManagementException;
+
     /***
      * This method used to get the app id ,device ids and pass them to DM service method.
      *
