@@ -24,6 +24,7 @@ import TimeAgo from 'javascript-time-ago'
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../../context/ConfigContext";
+import {handleApiError} from "../../../js/Utils";
 
 const {Text} = Typography;
 
@@ -180,19 +181,7 @@ class InstalledDevicesTable extends React.Component {
             }
 
         }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/entgra/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:
-                        "Error occurred while trying to load devices.",
-                });
-            }
-
+            handleApiError(error, "Something went wrong when trying to load subscription data.");
             this.setState({loading: false});
         });
     };
@@ -203,10 +192,7 @@ class InstalledDevicesTable extends React.Component {
             <div>
                 <div style={{paddingBottom: 24}}>
                     <Text>
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
-                        laudantium,
-                        totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae
-                        dicta sunt explicabo.
+                       The following are the subscription details of the application in each respective device.
                     </Text>
                 </div>
                 <Table
