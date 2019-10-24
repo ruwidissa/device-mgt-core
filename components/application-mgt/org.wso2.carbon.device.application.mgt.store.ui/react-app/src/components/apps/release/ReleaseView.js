@@ -21,12 +21,9 @@ import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Ico
 import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
-import DetailedRating from "./DetailedRating";
-import Reviews from "./review/Reviews";
 import axios from "axios";
 import AppInstallModal from "./install/AppInstallModal";
 import AppUninstallModal from "./install/AppUninstallModal";
-import CurrentUsersReview from "./review/CurrentUsersReview";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
 import ReviewContainer from "./review/ReviewContainer";
@@ -207,7 +204,7 @@ class ReleaseView extends React.Component {
                             <Divider/>
                             <ReviewContainer uuid={release.uuid}/>
                         </TabPane>
-                        <TabPane tab="Installed devices" key="2">
+                        <TabPane tab="Subscription Details" key="2">
                             <InstalledDevicesTable uuid={release.uuid}/>
                         </TabPane>
                     </Tabs>
