@@ -585,20 +585,20 @@ public class GenericApplicationReleaseDAOImpl extends AbstractDAOImpl implements
                 + "AR.CURRENT_STATE AS RELEASE_CURRENT_STATE, "
                 + "AR.RATED_USERS AS RATED_USER_COUNT "
                 + "FROM AP_APP_RELEASE AS AR "
-                + "WHERE AR.TENANT_ID = ? AND AR.PACKAGE_NAME IN (";
+                + "WHERE AR.PACKAGE_NAME IN (";
 
-        StringJoiner joiner = new StringJoiner(",", sql, ")");
+        StringJoiner joiner = new StringJoiner(",", sql, ") AND AR.TENANT_ID = ? ");
         packages.stream().map(ignored -> "?").forEach(joiner::add);
         sql = joiner.toString();
 
         try {
             Connection connection = this.getDBConnection();
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setInt(1, tenantId);
-                for (int y = 0; y < packages.size(); y++) {
-                    // y +2 because tenantId parameter is 1 and the counter is starting at o for y
-                    statement.setString(y+2, packages.get(y));
+                int index = 1;
+                for (String packageName : packages) {
+                    statement.setObject(index++, packageName);
                 }
+                statement.setInt(index, tenantId);
                 try (ResultSet resultSet = statement.executeQuery()) {
                     List<ApplicationReleaseDTO> releaseDTOs = new ArrayList<>();
                     while (resultSet.next()) {

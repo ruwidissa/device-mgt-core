@@ -1,6 +1,6 @@
 {
   "theme": {
-    "logo" : "https://localhost:9443/entgra/public/images/logo.svg",
+    "logo" : "https://entgra.io/assets/images/svg/logo.svg",
     "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {

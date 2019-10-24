@@ -67,11 +67,8 @@ class App extends React.Component {
         axios.get(
             window.location.origin + "/entgra/public/conf/config.json",
         ).then(res => {
-            console.log(res);
-            this.setState({
-                loading: false,
-                config: res.data
-            })
+            const config = res.data;
+            this.checkUserLoggedIn(config);
         }).catch((error) => {
             this.setState({
                 loading: false,
@@ -79,6 +76,44 @@ class App extends React.Component {
             })
         });
     }
+
+    checkUserLoggedIn = (config) => {
+        axios.post(
+            window.location.origin + "/entgra-ui-request-handler/user",
+            "platform=entgra"
+        ).then(res => {
+            config.user = res.data.data;
+            const pageURL = window.location.pathname;
+            const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+            if (lastURLSegment === "login") {
+                window.location.href = window.location.origin + `/entgra/`;
+            } else {
+                this.setState({
+                    loading: false,
+                    config: config
+                });
+            }
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                const redirectUrl = encodeURI(window.location.href);
+                const pageURL = window.location.pathname;
+                const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+                if (lastURLSegment !== "login") {
+                    window.location.href = window.location.origin + `/entgra/login?redirect=${redirectUrl}`;
+                } else {
+                    this.setState({
+                        loading: false,
+                        config: config
+                    })
+                }
+            } else {
+                this.setState({
+                    loading: false,
+                    error: true
+                })
+            }
+        });
+    };
 
     render() {
         const {loading, error} = this.state;
