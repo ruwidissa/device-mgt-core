@@ -25,6 +25,7 @@ import {
 } from "antd";
 import {Link} from "react-router-dom";
 import GroupsTable from "../../../components/Groups/GroupsTable";
+import AddGroup from "../../../components/Groups/AddGroup";
 
 const {Paragraph} = Typography;
 

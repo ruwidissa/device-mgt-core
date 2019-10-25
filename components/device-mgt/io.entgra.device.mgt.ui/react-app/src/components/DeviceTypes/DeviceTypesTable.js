@@ -18,9 +18,8 @@
 
 import React from "react";
 import axios from "axios";
-import {message, notification, Typography, Icon, Card, Col, Row} from "antd";
+import {Card, Col, Icon, message, notification, Row, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
-
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
