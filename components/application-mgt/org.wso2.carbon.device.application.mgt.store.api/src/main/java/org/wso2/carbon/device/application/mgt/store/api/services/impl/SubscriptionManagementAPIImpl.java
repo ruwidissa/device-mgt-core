@@ -106,7 +106,6 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
         }
     }
 
-
     @Override
     @POST
     @Path("/{uuid}/{subType}/{action}")
@@ -151,16 +150,17 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
     @Override
     @POST
-    @Path("/{uuid}/devices/ent-app-install")
-    public Response performEntAppInstallationOnDevices(
+    @Path("/{uuid}/devices/ent-app-install/{action}")
+    public Response performEntAppSubscriptionOnDevices(
             @PathParam("uuid") String uuid,
+            @PathParam("action") String action,
             @Valid List<DeviceIdentifier> deviceIdentifiers,
             @QueryParam("timestamp") String timestamp) {
         try {
             if (StringUtils.isEmpty(timestamp)) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 subscriptionManager
-                        .performEntAppInstall(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString());
+                        .performEntAppSubscription(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(), action);
                 String msg = "Application release which has UUID " + uuid + " is installed to given valid device "
                         + "identifiers.";
                 return Response.status(Response.Status.OK).entity(msg).build();
@@ -194,16 +194,17 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
     @Override
     @POST
-    @Path("/{uuid}/{subType}/ent-app-install")
-    public Response performBulkEntAppInstallation(
+    @Path("/{uuid}/{subType}/ent-app-install/{action}")
+    public Response performBulkEntAppSubscription(
             @PathParam("uuid") String uuid,
             @PathParam("subType") String subType,
+            @PathParam("action") String action,
             @Valid List<String> subscribers,
             @QueryParam("timestamp") String timestamp) {
         try {
             if (StringUtils.isEmpty(timestamp)) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-                subscriptionManager.performEntAppInstall(uuid, subscribers, subType);
+                subscriptionManager.performEntAppSubscription(uuid, subscribers, subType, action);
                 String msg = "Application release which has UUID " + uuid + " is installed to subscriber's valid device"
                         + " identifiers.";
                 return Response.status(Response.Status.OK).entity(msg).build();
@@ -277,15 +278,11 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @QueryParam("status") String status) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-
             PaginationResult subscribedDeviceDetails = subscriptionManager
                     .getAppInstalledDevices(offset, limit, uuid, status);
-
             DeviceList devices = new DeviceList();
-
             devices.setList((List<Device>) subscribedDeviceDetails.getData());
             devices.setCount(subscribedDeviceDetails.getRecordsTotal());
-
             return Response.status(Response.Status.OK).entity(devices).build();
         } catch (NotFoundException e) {
             String msg = "Application with application release UUID: " + uuid + " is not found";
@@ -324,7 +321,7 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
 
             PaginationResult subscribedCategoryDetails = subscriptionManager
-                    .getAppInstalledCategories(offset, limit, uuid, subType);
+                    .getAppInstalledSubscribers(offset, limit, uuid, subType);
 
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 BasicUserInfoList users = new BasicUserInfoList();

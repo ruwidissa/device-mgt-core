@@ -954,7 +954,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                     log.error(msg);
                     throw new BadRequestException(msg);
                 }
-                applicationArtifact.setInstallerName(installerFileName);
+                applicationArtifact.setInstallerName(installerFileName.replaceAll("\\s", ""));
                 applicationArtifact.setInstallerStream(installerStream);
             }
 

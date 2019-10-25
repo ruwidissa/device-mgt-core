@@ -49,7 +49,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     private static Log log = LogFactory.getLog(GenericSubscriptionDAOImpl.class);
 
     @Override
-    public List<Integer> addDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
+    public void addDeviceSubscription(String subscribedBy, List<Integer> deviceIds,
             String subscribedFrom, String installStatus, int releaseId, int tenantId)
             throws ApplicationManagementDAOException {
         String sql = "INSERT INTO "
@@ -82,13 +82,6 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
                     }
                 }
                 stmt.executeBatch();
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    List<Integer> deviceSubIds = new ArrayList<>();
-                    while (rs.next()) {
-                        deviceSubIds.add(rs.getInt(1));
-                    }
-                    return deviceSubIds;
-                }
             }
         } catch (DBConnectionException e) {
             String msg = "Error occured while obtaining database connection to add device subscription for application "
@@ -425,8 +418,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
-    @Override
-    public List<String> getSubscribedUserNames(List<String> users, int tenantId)
+    public List<String> getAppSubscribedUserNames(List<String> users, int appReleaseId, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get already subscribed users for given list of user names.");
@@ -438,13 +430,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT US.USER_NAME AS USER_NAME "
                             + "FROM AP_USER_SUBSCRIPTION US "
-                            + "WHERE US.USER_NAME IN (", ") AND TENANT_ID = ?");
+                            + "WHERE US.USER_NAME IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             users.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 for (String username : users) {
                     ps.setObject(index++, username);
                 }
+                ps.setInt(index++, appReleaseId);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -465,8 +458,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
         }
     }
 
-    @Override
-    public List<String> getSubscribedRoleNames(List<String> roles, int tenantId)
+    public List<String> getAppSubscribedRoleNames(List<String> roles, int appReleaseId, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get already subscribed role names for given list of roles.");
@@ -478,13 +470,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT RS.ROLE_NAME AS ROLE "
                             + "FROM AP_ROLE_SUBSCRIPTION RS "
-                            + "WHERE RS.ROLE_NAME IN (", ") AND TENANT_ID = ?");
+                            + "WHERE RS.ROLE_NAME IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             roles.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 for (String roleName : roles) {
                     ps.setObject(index++, roleName);
                 }
+                ps.setInt(index++, appReleaseId);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -506,7 +499,7 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<String> getSubscribedGroupNames(List<String> groups, int tenantId)
+    public List<String> getAppSubscribedGroupNames(List<String> groups, int appReleaseId, int tenantId)
             throws ApplicationManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get already subscribed groups for given list of groups.");
@@ -518,13 +511,14 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
             StringJoiner joiner = new StringJoiner(",",
                     "SELECT GS.GROUP_NAME AS GROUP_NAME "
                             + "FROM AP_GROUP_SUBSCRIPTION GS "
-                            + "WHERE GS.GROUP_NAME IN (", ") AND TENANT_ID = ?");
+                            + "WHERE GS.GROUP_NAME IN (", ") AND AP_APP_RELEASE_ID = ? AND TENANT_ID = ?");
             groups.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 for (String groupName : groups) {
                     ps.setObject(index++, groupName);
                 }
+                ps.setInt(index++, appReleaseId);
                 ps.setInt(index, tenantId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -647,20 +641,22 @@ public class GenericSubscriptionDAOImpl extends AbstractDAOImpl implements Subsc
     }
 
     @Override
-    public List<Integer> getDeviceSubIdsForOperation(int operationId, int tenantId)
+    public List<Integer> getDeviceSubIdsForOperation(int operationId, int deviceId, int tenantId)
             throws ApplicationManagementDAOException {
         try {
             Connection conn = this.getDBConnection();
             List<Integer> deviceSubIds = new ArrayList<>();
-            String sql = "SELECT "
-                    + "AP_DEVICE_SUBSCRIPTION_ID "
-                    + "FROM AP_APP_SUB_OP_MAPPING "
-                    + "WHERE "
-                    + "OPERATION_ID = ? AND "
-                    + "TENANT_ID = ?";
+            String sql = "SELECT AP_APP_SUB_OP_MAPPING.AP_DEVICE_SUBSCRIPTION_ID "
+                    + "FROM "
+                    + "AP_APP_SUB_OP_MAPPING INNER JOIN AP_DEVICE_SUBSCRIPTION "
+                    + "ON AP_APP_SUB_OP_MAPPING.AP_DEVICE_SUBSCRIPTION_ID = AP_DEVICE_SUBSCRIPTION.ID "
+                    + "WHERE AP_APP_SUB_OP_MAPPING.OPERATION_ID = ? AND "
+                    + "AP_DEVICE_SUBSCRIPTION.DM_DEVICE_ID = ? AND "
+                    + "AP_APP_SUB_OP_MAPPING.TENANT_ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, operationId);
-                stmt.setInt(2, tenantId);
+                stmt.setInt(2, deviceId);
+                stmt.setInt(3, tenantId);
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
                         deviceSubIds.add(rs.getInt("AP_DEVICE_SUBSCRIPTION_ID"));

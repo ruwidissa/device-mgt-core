@@ -319,7 +319,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public <T> void performEntAppInstall(String applicationUUID, List<T> params, String subType)
+    public <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action)
             throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Google Ent app Install operation is received to application which has UUID "
@@ -358,8 +358,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             List<Device> devices = new ArrayList<>();
             List<String> subscribers = new ArrayList<>();
-            List<Integer> appInstallingDeviceIds;
-            List<Integer> appReInstallingDeviceIds = new ArrayList<>();
+            List<Integer> appSubscribingDeviceIds;
+            List<Integer> appReSubscribingDeviceIds = new ArrayList<>();
             List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
 
             //todo validate users, groups and roles
@@ -409,14 +409,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 throw new BadRequestException(msg);
             }
 
-            appInstallingDeviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
-            Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = getDeviceSubscriptions(appInstallingDeviceIds,
-                    applicationReleaseId);
-            for (Map.Entry<Integer, DeviceSubscriptionDTO> deviceSubscription: deviceSubscriptions.entrySet()){
-                appReInstallingDeviceIds.add(deviceSubscription.getKey());
-                appInstallingDeviceIds.remove(deviceSubscription.getKey());
-            }
-
             /*If subscription type is not device we need to crete device identifiers object list by referring retrieved
             list of devices.*/
             if (!SubscriptionType.DEVICE.toString().equalsIgnoreCase(subType)) {
@@ -436,11 +428,19 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
             applicationPolicyDTO.setApplicationDTO(applicationDTO);
             applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
-            applicationPolicyDTO.setAction(SubAction.INSTALL.toString());
+            applicationPolicyDTO.setAction(action);
             installEnrollmentApplications(applicationPolicyDTO);
 
-            updateSubscriptionsForEntInstall(applicationReleaseId, appInstallingDeviceIds, appReInstallingDeviceIds,
-                    subscribers, subType);
+            appSubscribingDeviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
+            Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = getDeviceSubscriptions(appSubscribingDeviceIds,
+                    applicationReleaseId);
+            for (Map.Entry<Integer, DeviceSubscriptionDTO> deviceSubscription: deviceSubscriptions.entrySet()){
+                appReSubscribingDeviceIds.add(deviceSubscription.getKey());
+                appSubscribingDeviceIds.remove(deviceSubscription.getKey());
+            }
+
+            updateSubscriptionsForEntInstall(applicationReleaseId, appSubscribingDeviceIds, appReSubscribingDeviceIds,
+                    subscribers, subType, action);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while getting devices of given users or given roles.";
             log.error(msg, e);
@@ -459,10 +459,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      * @param params subscribers. If subscription is performed via user, group or role, params is a list of
      * {@link String}
      * @param subType Subscription type. i.e USER, GROUP, ROLE or DEVICE
+     * @param action Performing action. (i.e INSTALL or UNINSTALL)
      * @throws ApplicationManagementException if error occurred while getting or updating subscription data.
      */
-    private void updateSubscriptionsForEntInstall(int applicationReleaseId, List<Integer> appInstallingDeviceIds,
-            List<Integer> appReInstallingDeviceIds, List<String> params, String subType)
+    private void updateSubscriptionsForEntInstall(int applicationReleaseId, List<Integer> appSubscribingDeviceIds,
+            List<Integer> appReSubscribingDeviceIds, List<String> params, String subType, String action)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -470,11 +471,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             ConnectionManagerUtil.beginDBTransaction();
             List<String> subscribedEntities = new ArrayList<>();
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
+                subscribedEntities = subscriptionDAO.getAppSubscribedUserNames(params, applicationReleaseId, tenantId);
             } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
+                subscribedEntities = subscriptionDAO.getAppSubscribedRoleNames(params, applicationReleaseId, tenantId);
             } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
+                subscribedEntities = subscriptionDAO.getAppSubscribedGroupNames(params, applicationReleaseId, tenantId);
             }
 
             params.removeAll(subscribedEntities);
@@ -484,17 +485,16 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             if (!subscribedEntities.isEmpty()) {
                 subscriptionDAO
                         .updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                                SubAction.INSTALL.toString());
+                                action);
             }
 
-            if (!appInstallingDeviceIds.isEmpty()) {
-                subscriptionDAO.addDeviceSubscription(username, appInstallingDeviceIds, subType,
+            if (SubAction.INSTALL.toString().equalsIgnoreCase(action) && !appSubscribingDeviceIds.isEmpty()) {
+                subscriptionDAO.addDeviceSubscription(username, appSubscribingDeviceIds, subType,
                         Operation.Status.COMPLETED.toString(), applicationReleaseId, tenantId);
             }
-            if (!appReInstallingDeviceIds.isEmpty()) {
-                subscriptionDAO
-                        .updateDeviceSubscription(username, appReInstallingDeviceIds, SubAction.INSTALL.toString(),
-                                subType, Operation.Status.COMPLETED.toString(), applicationReleaseId, tenantId);
+            if (!appReSubscribingDeviceIds.isEmpty()) {
+                subscriptionDAO.updateDeviceSubscription(username, appReSubscribingDeviceIds, action, subType,
+                        Operation.Status.COMPLETED.toString(), applicationReleaseId, tenantId);
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
@@ -578,10 +578,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet()));
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppReInstallableDevices().keySet()));
-            ignoredDeviceIdentifiers
-                    .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet()));
+            deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet()));
         } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
             deviceIdentifiers.addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstalledDevices().keySet()));
+            deviceIdentifiers
+                    .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppReUnInstallableDevices().keySet()));
             ignoredDeviceIdentifiers
                     .addAll(new ArrayList<>(subscribingDeviceIdHolder.getAppInstallableDevices().keySet()));
         }
@@ -636,10 +637,13 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
      */
     private SubscribingDeviceIdHolder getSubscribingDeviceIdHolder(List<Device> devices, int appReleaseId)
             throws ApplicationManagementException {
-        Map<DeviceIdentifier, Integer> appInstalledDevices = new HashMap<>();
-        Map<DeviceIdentifier, Integer> appInstallableDevices = new HashMap<>();
-        Map<DeviceIdentifier, Integer> appReInstallableDevices = new HashMap<>();
-        Map<DeviceIdentifier, Integer> skippedDevices = new HashMap<>();
+
+        SubscribingDeviceIdHolder subscribingDeviceIdHolder = new SubscribingDeviceIdHolder();
+        subscribingDeviceIdHolder.setAppInstallableDevices(new HashMap<>());
+        subscribingDeviceIdHolder.setAppInstalledDevices(new HashMap<>());
+        subscribingDeviceIdHolder.setAppReInstallableDevices(new HashMap<>());
+        subscribingDeviceIdHolder.setAppReUnInstallableDevices(new HashMap<>());
+        subscribingDeviceIdHolder.setSkippedDevices(new HashMap<>());
 
         List<Integer> deviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
         //get device subscriptions for given device id list.
@@ -650,23 +654,20 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             if (deviceSubscriptionDTO != null) {
                 if (!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
                         .equals(deviceSubscriptionDTO.getStatus())) {
-                    appInstalledDevices.put(deviceIdentifier, device.getId());
+                    subscribingDeviceIdHolder.getAppInstalledDevices().put(deviceIdentifier, device.getId());
+                } else if (deviceSubscriptionDTO.isUnsubscribed() && !Operation.Status.COMPLETED.toString()
+                        .equals(deviceSubscriptionDTO.getStatus())) {
+                    subscribingDeviceIdHolder.getAppReUnInstallableDevices().put(deviceIdentifier, device.getId());
                 } else if (Operation.Status.PENDING.toString().equals(deviceSubscriptionDTO.getStatus())
                         || Operation.Status.IN_PROGRESS.toString().equals(deviceSubscriptionDTO.getStatus())) {
-                    skippedDevices.put(deviceIdentifier, device.getId());
+                    subscribingDeviceIdHolder.getSkippedDevices().put(deviceIdentifier, device.getId());
                 } else {
-                    appReInstallableDevices.put(deviceIdentifier, device.getId());
+                    subscribingDeviceIdHolder.getAppReInstallableDevices().put(deviceIdentifier, device.getId());
                 }
             } else {
-                appInstallableDevices.put(deviceIdentifier, device.getId());
+                subscribingDeviceIdHolder.getAppInstallableDevices().put(deviceIdentifier, device.getId());
             }
         }
-
-        SubscribingDeviceIdHolder subscribingDeviceIdHolder = new SubscribingDeviceIdHolder();
-        subscribingDeviceIdHolder.setAppInstallableDevices(appInstallableDevices);
-        subscribingDeviceIdHolder.setAppInstalledDevices(appInstalledDevices);
-        subscribingDeviceIdHolder.setAppReInstallableDevices(appReInstallableDevices);
-        subscribingDeviceIdHolder.setSkippedDevices(skippedDevices);
         return subscribingDeviceIdHolder;
     }
 
@@ -756,7 +757,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
-                List<String> subscribedEntities = subscriptionDAO.getSubscribedUserNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO
+                        .getAppSubscribedUserNames(params, applicationReleaseId, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
@@ -764,7 +766,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
                         action);
             } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                List<String> subscribedEntities = subscriptionDAO.getSubscribedRoleNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO
+                        .getAppSubscribedRoleNames(params, applicationReleaseId, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId);
@@ -772,7 +775,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
                         action);
             } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                List<String> subscribedEntities = subscriptionDAO.getSubscribedGroupNames(params, tenantId);
+                List<String> subscribedEntities = subscriptionDAO
+                        .getAppSubscribedGroupNames(params, applicationReleaseId, tenantId);
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     params.removeAll(subscribedEntities);
                     subscriptionDAO.addGroupSubscriptions(tenantId, username, params, applicationReleaseId);
@@ -785,11 +789,12 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
                 List<Integer> subUpdatingDeviceIds = new ArrayList<>();
                 List<Integer> subInsertingDeviceIds = new ArrayList<>();
-                List<Integer> deviceSubIds = new ArrayList<>();
 
                 if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
                     subUpdatingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
                             subscribingDeviceIdHolder.getAppReInstallableDevices()));
+                    subUpdatingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
+                            subscribingDeviceIdHolder.getAppInstalledDevices()));
                     subInsertingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
                             subscribingDeviceIdHolder.getAppInstallableDevices()));
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
@@ -797,19 +802,18 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                             subscribingDeviceIdHolder.getAppInstalledDevices()));
                 }
 
-                List<Integer> subscribingDevices = subscriptionDAO
-                        .addDeviceSubscription(username, subInsertingDeviceIds, subType,
+                subscriptionDAO.addDeviceSubscription(username, subInsertingDeviceIds, subType,
                                 Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-                subscriptionDAO.updateDeviceSubscription(username, subUpdatingDeviceIds, action, subType,
-                        Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
-
                 if (!subUpdatingDeviceIds.isEmpty()) {
-                    deviceSubIds.addAll(subscriptionDAO
-                            .getDeviceSubIds(subUpdatingDeviceIds, applicationReleaseId, tenantId));
+                    subscriptionDAO.updateDeviceSubscription(username, subUpdatingDeviceIds, action, subType,
+                            Operation.Status.PENDING.toString(), applicationReleaseId, tenantId);
                 }
-                deviceSubIds.addAll(subscribingDevices);
-
-                subscriptionDAO.addOperationMapping(operationId, deviceSubIds, tenantId);
+                subUpdatingDeviceIds.addAll(subInsertingDeviceIds);
+                if (!subUpdatingDeviceIds.isEmpty()) {
+                    List<Integer> deviceSubIds = new ArrayList<>(
+                            subscriptionDAO.getDeviceSubIds(subUpdatingDeviceIds, applicationReleaseId, tenantId));
+                    subscriptionDAO.addOperationMapping(operationId, deviceSubIds, tenantId);
+                }
             }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (ApplicationManagementDAOException e) {
@@ -1059,14 +1063,21 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
                     .getDeviceSubscriptions(applicationReleaseId, tenantId);
             if (deviceSubscriptionDTOS.isEmpty()) {
-                String msg = "Couldn't found an subscribed devices for application release id: "
-                             + applicationReleaseId;
-                log.info(msg);
+                PaginationResult paginationResult = new PaginationResult();
+                paginationResult.setData(new ArrayList<>());
+                paginationResult.setRecordsFiltered(0);
+                paginationResult.setRecordsTotal(0);
+                return paginationResult;
             }
             List<Integer> deviceIdList = new ArrayList<>();
-            for (DeviceSubscriptionDTO deviceIds : deviceSubscriptionDTOS) {
-                deviceIdList.add(deviceIds.getDeviceId());
-            }
+            deviceSubscriptionDTOS.forEach(deviceSubscriptionDTO -> {
+                if ((!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
+                        .equalsIgnoreCase(deviceSubscriptionDTO.getStatus())) || (deviceSubscriptionDTO.isUnsubscribed()
+                        && !Operation.Status.COMPLETED.toString()
+                        .equalsIgnoreCase(deviceSubscriptionDTO.getStatus()))) {
+                    deviceIdList.add(deviceSubscriptionDTO.getDeviceId());
+                }
+            });
 
             if (deviceIdList.isEmpty()){
                 PaginationResult paginationResult = new PaginationResult();
@@ -1109,7 +1120,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public PaginationResult getAppInstalledCategories(int offsetValue, int limitValue, String appUUID, String subType)
+    public PaginationResult getAppInstalledSubscribers(int offsetValue, int limitValue, String appUUID, String subType)
             throws ApplicationManagementException {
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
@@ -1178,18 +1189,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
                     .getDeviceSubscriptions(applicationReleaseId, tenantId);
             if (deviceSubscriptionDTOS.isEmpty()) {
-                String msg = "Couldn't found an subscribed devices for application release id: " + applicationReleaseId;
-                log.info(msg);
-            }
-            List<Integer> deviceIdList = deviceSubscriptionDTOS.stream().map(DeviceSubscriptionDTO::getDeviceId)
-                    .collect(Collectors.toList());
-            if (deviceIdList.isEmpty()) {
                 PaginationResult paginationResult = new PaginationResult();
-                paginationResult.setData(deviceIdList);
+                paginationResult.setData(new ArrayList<>());
                 paginationResult.setRecordsFiltered(0);
                 paginationResult.setRecordsTotal(0);
                 return paginationResult;
             }
+            List<Integer> deviceIdList = deviceSubscriptionDTOS.stream().map(DeviceSubscriptionDTO::getDeviceId)
+                    .collect(Collectors.toList());
             try {
                 //pass the device id list to device manager service method
                 PaginationResult paginationResult = deviceManagementProviderService

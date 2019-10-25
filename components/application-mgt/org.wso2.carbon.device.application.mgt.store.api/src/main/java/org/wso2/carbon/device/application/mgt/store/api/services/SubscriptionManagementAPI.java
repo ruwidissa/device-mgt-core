@@ -186,7 +186,7 @@ public interface SubscriptionManagementAPI {
     );
 
     @POST
-    @Path("/{uuid}/devices/ent-app-install")
+    @Path("/{uuid}/devices/ent-app-install/{action}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -206,13 +206,19 @@ public interface SubscriptionManagementAPI {
             value = {
 
             })
-    Response performEntAppInstallationOnDevices(
+    Response performEntAppSubscriptionOnDevices(
             @ApiParam(
                     name = "UUID",
                     value = "The application UUID",
                     required = true
             )
             @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "action",
+                    value = "Performing action.",
+                    required = true
+            )
+            @PathParam("action") String action,
             @ApiParam(
                     name = "installationDetails",
                     value = "The  list of device identifiers",
@@ -227,7 +233,7 @@ public interface SubscriptionManagementAPI {
     );
 
     @POST
-    @Path("/{uuid}/{subType}/ent-app-install")
+    @Path("/{uuid}/{subType}/ent-app-install/{action}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
@@ -247,7 +253,7 @@ public interface SubscriptionManagementAPI {
             value = {
 
             })
-    Response performBulkEntAppInstallation(
+    Response performBulkEntAppSubscription(
             @ApiParam(
                     name = "uuid",
                     value = "The application release UUID",
@@ -260,6 +266,12 @@ public interface SubscriptionManagementAPI {
                     required = true
             )
             @PathParam("subType") String subType,
+            @ApiParam(
+                    name = "action",
+                    value = "Performing action.",
+                    required = true
+            )
+            @PathParam("action") String action,
             @ApiParam(
                     name = "subscribers",
                     value = "Subscriber list of the application release.",
