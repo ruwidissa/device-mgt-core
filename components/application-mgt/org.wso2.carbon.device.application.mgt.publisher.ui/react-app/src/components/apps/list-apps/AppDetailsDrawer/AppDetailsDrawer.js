@@ -30,7 +30,7 @@ import {
     Spin,
     message,
     Icon,
-    Card
+    Card, Badge
 } from 'antd';
 import DetailedRating from "../../detailed-rating/DetailedRating";
 import {Link} from "react-router-dom";
@@ -487,18 +487,14 @@ class AppDetailsDrawer extends React.Component {
                         )}
 
                         <Text strong={true}>Releases </Text>
-                        {/*display add new release only if app type is enterprise*/}
-
                         <div className="releases-details">
-
-                            {(app.type === "ENTERPRISE") && (
-                                <Link to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}><Button
-                                    htmlType="button"
-                                    size="small">Add
-                                    new release</Button></Link>)}
                             <List
                                 style={{paddingTop: 16}}
                                 grid={{gutter: 16, column: 2}}
+                                pagination={{
+                                    pageSize: 4, // number of releases per page
+                                    size: "small",
+                                }}
                                 dataSource={app.applicationReleases}
                                 renderItem={release => (
                                     <div className="app-release-cards">
@@ -507,7 +503,27 @@ class AppDetailsDrawer extends React.Component {
                                                 <Card className="release-card">
                                                     <Meta
                                                         avatar={
-                                                            <Avatar size="large" shape="square" src={release.iconPath}/>
+                                                            <div>
+                                                                {(release.currentStatus === "PUBLISHED") ? (
+                                                                    <Badge
+                                                                        title="Published"
+                                                                        style={{
+                                                                            backgroundColor: '#52c41a',
+                                                                            borderRadius:"50%",
+                                                                            color:"white"
+                                                                        }}
+                                                                        count={
+                                                                            <Icon
+                                                                                type="check-circle"/>
+                                                                        }>
+                                                                        <Avatar size="large" shape="square"
+                                                                                src={release.iconPath}/>
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <Avatar size="large" shape="square"
+                                                                            src={release.iconPath}/>
+                                                                )}
+                                                            </div>
                                                         }
                                                         title={release.version}
                                                         description={
@@ -529,9 +545,26 @@ class AppDetailsDrawer extends React.Component {
                                     </div>
                                 )}
                             />
-
                         </div>
 
+                        <Divider dashed={true}/>
+                        {/*display add new release only if app type is enterprise*/}
+                        {(app.type === "ENTERPRISE") && (
+                            <div>
+                                <div style={{paddingBottom: 16}}>
+                                    <Text>
+                                        Add new release for the application
+                                    </Text>
+                                </div>
+                                <Link to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}>
+                                    <Button
+                                        htmlType="button"
+                                        type="primary"
+                                        size="small">
+                                        Add
+                                    </Button>
+                                </Link>
+                            </div>)}
                         <Divider dashed={true}/>
 
                         <Text strong={true}>Description </Text>

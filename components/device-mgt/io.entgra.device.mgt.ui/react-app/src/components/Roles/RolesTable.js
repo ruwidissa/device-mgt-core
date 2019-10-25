@@ -18,9 +18,8 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Card, Col, Row, Select} from "antd";
+import {Card, Col, Icon, message, notification, Row, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
-
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
@@ -124,18 +123,27 @@ class RolesTable extends React.Component {
     };
 
     render() {
-
         const {data, pagination, loading, selectedRows} = this.state;
-
+        const { Meta } = Card;
         const itemCard = data.map((data) =>
-            <Col span={8} key={data}>
-                <Card hoverable title="Role" bordered={true}>
-                    {data}
-                </Card>
+            <Col span={5} key={data}>
+                    <Card
+                size="default"
+                style={{ width: 200 }}
+                bordered={true}
+                actions={[
+                        <Icon type="setting" key="setting" />,
+                        <Icon type="edit" key="edit" />,]}
+            >
+            <Meta
+                avatar={<Icon type="book" key="roles"/>}
+                title={data}
+                />
+            </Card>
             </Col>
         );
         return (
-            <div style={{ background: '#ECECEC', padding: '30px' }}>
+            <div style={{ background: '#ECECEC', padding: '20px' }}>
                 <Row gutter={16}>
                     {itemCard}
                 </Row>

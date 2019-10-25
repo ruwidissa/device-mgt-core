@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Avatar, Table, Tag, Icon, message, notification, Col} from "antd";
+import {Avatar, Table, Tag, Icon, message, notification, Col, Badge} from "antd";
 import axios from "axios";
 import pSBC from 'shade-blend-color';
 import "./AppsTable.css";
@@ -47,7 +47,31 @@ const columns = [
                     </Avatar>
                 );
             } else {
-                avatar = (
+                const {applicationReleases} = row;
+                let hasPublishedRelease = false;
+                for (let i = 0; i < applicationReleases.length; i++) {
+                    if (applicationReleases[i].currentStatus === "PUBLISHED") {
+                        hasPublishedRelease = true;
+                        break;
+                    }
+                }
+                avatar = (hasPublishedRelease) ? (
+                    <Badge
+                        title="Published"
+                        style={{ backgroundColor: '#52c41a', borderRadius:"50%", color:"white"}}
+                        count={
+                            <Icon
+                                type="check-circle"/>
+                        }>
+                        <Avatar shape="square" size="large"
+                                style={{
+                                    borderRadius: "28%",
+                                    border: "1px solid #ddd"
+                                }}
+                                src={row.applicationReleases[0].iconPath}
+                        />
+                    </Badge>
+                ) : (
                     <Avatar shape="square" size="large"
                             style={{
                                 marginRight: 20,
@@ -56,13 +80,13 @@ const columns = [
                             }}
                             src={row.applicationReleases[0].iconPath}
                     />
-                )
+                );
             }
 
             return (
                 <div>
                     {avatar}
-                    {name}
+                    <span style={{marginLeft: 20}}>{name}</span>
                 </div>);
         }
     },

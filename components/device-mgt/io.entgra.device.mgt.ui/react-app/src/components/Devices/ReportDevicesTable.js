@@ -18,9 +18,8 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider} from "antd";
+import {Icon, message, notification, Table, Tag, Tooltip, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
-
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
@@ -239,7 +238,6 @@ class ReportDeviceTable extends React.Component {
                             loading={loading}
                             onChange={this.handleTableChange}
                             rowSelection={this.rowSelection}
-                            scroll={{x: 1000}}
                     />
                 </div>
         );

@@ -18,9 +18,8 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Button, Modal, Select} from "antd";
+import {Icon, message, Modal, notification, Select, Table, Tag, Tooltip, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
-
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
@@ -133,17 +132,10 @@ class DeviceTable extends React.Component {
             selectedRows: [],
             deviceGroups: [],
             groupModalVisible: false,
-            selectedGroupId: []
+            selectedGroupId: [],
+            selectedRowKeys:[]
         };
     }
-
-    rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            this.setState({
-                selectedRows: selectedRows
-            });
-        }
-    };
 
     componentDidMount() {
         this.fetch();
@@ -249,6 +241,9 @@ class DeviceTable extends React.Component {
         ).then(res => {
             if (res.status === 200) {
                 this.fetch();
+                this.setState({
+                    selectedRowKeys:[]
+                })
                 notification["success"]({
                     message: "Done",
                     duration: 4,
@@ -409,10 +404,29 @@ class DeviceTable extends React.Component {
         });
     };
 
-    render() {
-        const {data, pagination, loading, selectedRows} = this.state;
+    onSelectChange = (selectedRowKeys, selectedRows) => {
+        this.setState({
+            selectedRowKeys,
+            selectedRows: selectedRows
+        });
+    };
 
+    render() {
+        const {data, pagination, loading, selectedRows, selectedRowKeys} = this.state;
         const isSelectedSingle = this.state.selectedRows.length == 1;
+
+        let selectedText;
+        if(isSelectedSingle){
+            selectedText = "You have selected 1 device"
+        }else{
+            selectedText = "You have selected " + this.state.selectedRows.length + " devices"
+        }
+
+        const rowSelection = {
+            selectedRowKeys,
+            selectedRows,
+            onChange: this.onSelectChange,
+        };
 
         let item = this.state.deviceGroups.map((data) =>
             <Select.Option
@@ -441,8 +455,7 @@ class DeviceTable extends React.Component {
                         }}
                         loading={loading}
                         onChange={this.handleTableChange}
-                        rowSelection={this.rowSelection}
-                        scroll={{x: 1000}}
+                        rowSelection={rowSelection}
                     />
                 </div>
 
@@ -453,10 +466,11 @@ class DeviceTable extends React.Component {
                     onOk={this.handleOk}
                     onCancel={this.handleCancel}
                 >
+                    <p>{selectedText}</p>
                     <Select
                         mode={isSelectedSingle ? "multiple" : "default"}
                         showSearch
-                        style={{width: 200}}
+                        style={{display:"block"}}
                         placeholder="Select Group"
                         optionFilterProp="children"
                         onChange={this.onGroupSelectChange}

@@ -973,20 +973,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
-    @Path("/status/count/{tenantDomain}/{type}/{status}")
-    public Response getDeviceCountByStatus(@PathParam("tenantDomain") String tenantDomain, @PathParam("type") String type, @PathParam("status") String status) {
+    @Path("/type/{type}/status/{status}/count")
+    public Response getDeviceCountByStatus(@PathParam("type") String type, @PathParam("status") String status) {
         int deviceCount;
         try {
-            int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
-            deviceCount = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCountOfTypeByStatus(tenantId, type, status);
+            deviceCount = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCountOfTypeByStatus(type, status);
             return Response.status(Response.Status.OK).entity(deviceCount).build();
         } catch (DeviceManagementException e) {
             String errorMessage = "Error while retrieving device count.";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
-        } catch (UserStoreException e) {
-            String errorMessage = "Error resolving tenant Domain";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
@@ -995,20 +989,14 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
-    @Path("/status/ids/{tenantDomain}/{type}/{status}")
-    public Response getDeviceIdentifiersByStatus(@PathParam("tenantDomain") String tenantDomain, @PathParam("type") String type, @PathParam("status") String status) {
+    @Path("/type/{type}/status/{status}/ids")
+    public Response getDeviceIdentifiersByStatus(@PathParam("type") String type, @PathParam("status") String status) {
         List<String> deviceIds;
         try {
-            int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
-            deviceIds = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(tenantId, type, status);
+            deviceIds = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceIdentifiersByStatus(type, status);
             return Response.status(Response.Status.OK).entity(deviceIds.toArray(new String[0])).build();
         } catch (DeviceManagementException e) {
             String errorMessage = "Error while obtaining list of devices";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
-        } catch (UserStoreException e) {
-            String errorMessage = "Error resolving tenant Domain";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
@@ -1017,19 +1005,13 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @PUT
     @Override
-    @Path("/status/update/{tenantDomain}/{type}/{status}")
-    public Response bulkUpdateDeviceStatus(@PathParam("tenantDomain") String tenantDomain, @PathParam("type") String type,
-                                           @PathParam("status") String status, @Valid List<String> deviceList) {
+    @Path("/type/{type}/status/{status}")
+    public Response bulkUpdateDeviceStatus(@PathParam("type") String type, @PathParam("status") String status,
+                                           @Valid List<String> deviceList) {
         try {
-            int tenantId = DeviceMgtAPIUtils.getRealmService().getTenantManager().getTenantId(tenantDomain);
-            DeviceMgtAPIUtils.getDeviceManagementService().bulkUpdateDeviceStatus(tenantId, type, deviceList, status);
+            DeviceMgtAPIUtils.getDeviceManagementService().bulkUpdateDeviceStatus(type, deviceList, status);
         } catch (DeviceManagementException e) {
             String errorMessage = "Error while updating device status in bulk.";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
-        } catch (UserStoreException e) {
-            String errorMessage = "Error resolving tenant Domain";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
