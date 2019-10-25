@@ -89,13 +89,13 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for installing application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "Found invalid payload for installing application which has UUID: " + uuid + ". Hence verify "
+                    + "the payload";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
-            String msg = "Application release is not in the installable state. Hence you are not permitted to install "
-                    + "the application.";
+            String msg = "Application release is not in the installable state. Hence you are not permitted to perform "
+                    + "the action on the application.";
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
@@ -132,8 +132,50 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e) {
-            String msg = "Found invalid payload for installing application which has UUID: " + uuid
-                    + ". Hence verify the payload";
+            String msg = "Found invalid payload for installing application which has UUID: " + uuid + ". Hence verify "
+                    + "the payload";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "Application release is not in the installable state. Hence you are not permitted to perform "
+                    + "the action on the application.";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while installing the application release which has UUID: " + uuid
+                    + " for user devices";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
+    @POST
+    @Path("/{uuid}/devices/ent-app-install")
+    public Response performEntAppInstallationOnDevices(
+            @PathParam("uuid") String uuid,
+            @Valid List<DeviceIdentifier> deviceIdentifiers,
+            @QueryParam("timestamp") String timestamp) {
+        try {
+            if (StringUtils.isEmpty(timestamp)) {
+                SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
+                subscriptionManager
+                        .performEntAppInstall(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString());
+                String msg = "Application release which has UUID " + uuid + " is installed to given valid device "
+                        + "identifiers.";
+                return Response.status(Response.Status.OK).entity(msg).build();
+            } else {
+                return scheduleApplicationOperationTask(uuid, deviceIdentifiers, SubscriptionType.DEVICE,
+                        SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp);
+            }
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUI: " + uuid + " to perform ent app installation "
+                    + "on subscriber's devices";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Found invalid payload when performing ent app installation on application which has UUID: "
+                    + uuid + ". Hence verify the payload of the request.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -142,8 +184,51 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             log.error(msg, e);
             return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while installing the application release which has UUID: " + uuid
-                    + " for user devices";
+            String msg =
+                    "Error occurred while performing ent app installation on the application release which has UUID: "
+                            + uuid + " for devices";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Override
+    @POST
+    @Path("/{uuid}/{subType}/ent-app-install")
+    public Response performBulkEntAppInstallation(
+            @PathParam("uuid") String uuid,
+            @PathParam("subType") String subType,
+            @Valid List<String> subscribers,
+            @QueryParam("timestamp") String timestamp) {
+        try {
+            if (StringUtils.isEmpty(timestamp)) {
+                SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
+                subscriptionManager.performEntAppInstall(uuid, subscribers, subType);
+                String msg = "Application release which has UUID " + uuid + " is installed to subscriber's valid device"
+                        + " identifiers.";
+                return Response.status(Response.Status.OK).entity(msg).build();
+            } else {
+                return scheduleApplicationOperationTask(uuid, subscribers,
+                        SubscriptionType.valueOf(subType.toUpperCase()),
+                        SubAction.valueOf(SubAction.INSTALL.toString().toUpperCase()), timestamp);
+            }
+        } catch (NotFoundException e) {
+            String msg = "Couldn't found an application release for UUID: " + uuid + ". Hence, verify the payload";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Found invalid payload when performing ent app installation on application which has UUID: "
+                    + uuid + ". Hence verify the payload of the request.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ForbiddenException e) {
+            String msg = "Application release is not in the installable state. Hence you are not permitted to install "
+                    + "the application.";
+            log.error(msg, e);
+            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while performing ent app installation on the application release which has "
+                    + "UUID: " + uuid + " for user devices";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
@@ -183,13 +268,13 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     @Consumes("application/json")
     @Produces("application/json")
     @Path("/{uuid}/devices")
-    public Response getAppInstalledDevices(@PathParam("uuid") String uuid,
-                                           @DefaultValue("0")
-                                           @QueryParam("offset") int offset,
-                                           @DefaultValue("5")
-                                           @QueryParam("limit") int limit,
-                                           @QueryParam("status") String status) {
-
+    public Response getAppInstalledDevices(
+            @PathParam("uuid") String uuid,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @DefaultValue("5")
+            @QueryParam("limit") int limit,
+            @QueryParam("status") String status) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
 
@@ -228,13 +313,13 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
     @Consumes("application/json")
     @Produces("application/json")
     @Path("/{uuid}/{subType}")
-    public Response getAppInstalledCategories(@PathParam("uuid") String uuid,
-                                              @PathParam("subType") String subType,
-                                              @DefaultValue("0")
-                                              @QueryParam("offset") int offset,
-                                              @DefaultValue("5")
-                                              @QueryParam("limit") int limit) {
-
+    public Response getAppInstalledCategories(
+            @PathParam("uuid") String uuid,
+            @PathParam("subType") String subType,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @DefaultValue("5")
+            @QueryParam("limit") int limit) {
         try {
             SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
 

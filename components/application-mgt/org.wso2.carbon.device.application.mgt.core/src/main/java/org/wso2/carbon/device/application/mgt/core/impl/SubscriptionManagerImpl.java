@@ -175,7 +175,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 }
             }
 
-            if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType())) {
+            if (!ApplicationType.WEB_CLIP.toString().equals(applicationDTO.getType()) && !SubscriptionType.DEVICE
+                    .toString().equals(subType)) {
                 DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                 deviceTypeName = deviceType.getName();
                 //filter devices by device type
@@ -334,11 +335,20 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
+            //todo need to check application release status if it is not in installable state send forbidden exception
             int applicationReleaseId = applicationReleaseDTO.getId();
             if (!ApplicationType.PUBLIC.toString().equals(applicationDTO.getType())) {
                 String msg = "Application type is not public. Hence you can't perform google ent.install operation on "
                         + "this application. Application name " + applicationDTO.getName() + " Application Type "
                         + applicationDTO.getType();
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+
+            List<String> categories = getApplicationCategories(applicationDTO.getId());
+            if (!categories.contains("GooglePlaySyncedApp")) {
+                String msg = "This is not google play store synced application. Hence can't perform enteprise app "
+                        + "installation.";
                 log.error(msg);
                 throw new BadRequestException(msg);
             }
@@ -350,9 +360,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             List<String> subscribers = new ArrayList<>();
             List<Integer> appInstallingDeviceIds;
             List<Integer> appReInstallingDeviceIds = new ArrayList<>();
+            List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
 
             //todo validate users, groups and roles
             if (SubscriptionType.DEVICE.toString().equals(subType)) {
+                DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
                 for (T param : params) {
                     DeviceIdentifier deviceIdentifier = (DeviceIdentifier) param;
                     if (StringUtils.isEmpty(deviceIdentifier.getId()) || StringUtils
@@ -361,6 +373,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                 + " device type. Hence ignoring the device identifier. ");
                         continue;
                     }
+                    if (!deviceType.getName().equals(deviceIdentifier.getType())) {
+                        log.warn("Found a device identifier which is not matched with the supported device type "
+                                + "of the application release which has UUID " + applicationUUID + " Application "
+                                + "supported device type is " + deviceType.getName() + " and the "
+                                + "identifier of which has a different device type is " + deviceIdentifier.getId());
+                        continue;
+                    }
+                    deviceIdentifiers.add(deviceIdentifier);
                     devices.add(deviceManagementProviderService.getDevice(deviceIdentifier, false));
                 }
             } else if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
@@ -396,6 +416,28 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 appReInstallingDeviceIds.add(deviceSubscription.getKey());
                 appInstallingDeviceIds.remove(deviceSubscription.getKey());
             }
+
+            /*If subscription type is not device we need to crete device identifiers object list by referring retrieved
+            list of devices.*/
+            if (!SubscriptionType.DEVICE.toString().equalsIgnoreCase(subType)) {
+                DeviceType deviceType = APIUtil.getDeviceTypeData(applicationDTO.getDeviceTypeId());
+                String deviceTypeName = deviceType.getName();
+                //filter devices by device type
+                devices.removeIf(device -> !deviceTypeName.equals(device.getType()));
+                devices.forEach(device -> {
+                    DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+                    deviceIdentifier.setId(device.getDeviceIdentifier());
+                    deviceIdentifier.setType(device.getType());
+                    deviceIdentifiers.add(deviceIdentifier);
+                });
+            }
+
+            //Installing the application
+            ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
+            applicationPolicyDTO.setApplicationDTO(applicationDTO);
+            applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
+            applicationPolicyDTO.setAction(SubAction.INSTALL.toString());
+            installEnrollmentApplications(applicationPolicyDTO);
 
             updateSubscriptionsForEntInstall(applicationReleaseId, appInstallingDeviceIds, appReInstallingDeviceIds,
                     subscribers, subType);
@@ -567,18 +609,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             for (Map.Entry<String, List<DeviceIdentifier>> entry : deviceIdentifierMap.entrySet()) {
                 Activity activity = addAppOperationOnDevices(applicationDTO, new ArrayList<>(entry.getValue()),
                         entry.getKey(), action);
-                activityList.add(activity);
-            }
-        } else if (applicationDTO.getType().equals(ApplicationType.PUBLIC.toString())) {
-            List<String> categories = getApplicationCategories(applicationDTO.getId());
-            if (categories.contains("GooglePlaySyncedApp")) {
-                ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
-                applicationPolicyDTO.setApplicationDTO(applicationDTO);
-                applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
-                applicationPolicyDTO.setAction(action);
-                installEnrollmentApplications(applicationPolicyDTO);
-            } else {
-                Activity activity = addAppOperationOnDevices(applicationDTO, deviceIdentifiers, deviceType, action);
                 activityList.add(activity);
             }
         } else {
@@ -982,7 +1012,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             String payload = gson.toJson(applicationPolicyDTO);
 
             StringRequestEntity requestEntity = new StringRequestEntity(payload, MediaType.APPLICATION_JSON
-                    , Constants.ApplicationInstall.ENCODING);;
+                    , Constants.ApplicationInstall.ENCODING);
             httpClient = new HttpClient();
             request = new PostMethod(requestUrl);
             request.addRequestHeader(Constants.ApplicationInstall.AUTHORIZATION
