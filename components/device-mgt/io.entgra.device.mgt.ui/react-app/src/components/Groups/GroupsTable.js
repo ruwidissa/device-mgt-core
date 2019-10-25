@@ -164,8 +164,8 @@ class GroupsTable extends React.Component {
 
         return (
             <div>
-                <div style={{background: '#f0f2f5', marginBottom:"5px"}}>
-                    <AddGroup fetchGroups={this.fetchGroups}/>
+                <div style={{background: '#f0f2f5'}}>
+                    <AddGroup fetchGroups={this.fetchGroups} style={{marginBottom:"10px"}}/>
                 </div>
                 <div>
                     <Table
