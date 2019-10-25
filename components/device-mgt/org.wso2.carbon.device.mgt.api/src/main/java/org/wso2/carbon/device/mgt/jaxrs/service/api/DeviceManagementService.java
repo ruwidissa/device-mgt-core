@@ -1713,16 +1713,16 @@ public interface DeviceManagementService {
                           @Valid OperationRequest operationRequest);
 
     @GET
-    @Path("/status/count/{tenantDomain}/{type}/{status}")
+    @Path("/type/{type}/status/{status}/count")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Get Device Count with status",
-            notes = "Get specified device count with status.",
+            notes = "Get specified device count with type and status.",
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
                     })
             }
     )
@@ -1730,7 +1730,7 @@ public interface DeviceManagementService {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully fetched the details of the device.",
+                            message = "OK. \n Successfully fetched the count of matching devices.",
                             response = int.class,
                             responseHeaders = {
                                     @ResponseHeader(
@@ -1765,13 +1765,6 @@ public interface DeviceManagementService {
             })
     Response getDeviceCountByStatus(
             @ApiParam(
-                    name = "tenantDomain",
-                    value = "The tenant doamin.",
-                    required = true)
-            @PathParam("tenantDomain")
-            @Size(max = 45)
-                    String tenantDomain,
-            @ApiParam(
                     name = "type",
                     value = "The device type name, such as ios, android, windows or fire-alarm.",
                     required = true)
@@ -1788,17 +1781,16 @@ public interface DeviceManagementService {
 
 
     @GET
-    @Path("/status/ids/{tenantDomain}/{type}/{status}")
+    @Path("/type/{type}/status/{status}/ids")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Details of a Device",
-            notes = "Get the details of a device by specifying the device type and device identifier and optionally " +
-                    "the owner.",
+            value = "Getting ids of devices with specified type and status",
+            notes = "Get the ids of a device by specifying the device type and status.",
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
                     })
             }
     )
@@ -1841,13 +1833,6 @@ public interface DeviceManagementService {
             })
     Response getDeviceIdentifiersByStatus(
             @ApiParam(
-                    name = "tenantDomain",
-                    value = "The tenant domain.",
-                    required = true)
-            @PathParam("tenantDomain")
-            @Size(max = 45)
-                    String tenantDomain,
-            @ApiParam(
                     name = "type",
                     value = "The device type name, such as ios, android, windows or fire-alarm.",
                     required = true)
@@ -1863,7 +1848,7 @@ public interface DeviceManagementService {
                     String status);
 
     @PUT
-    @Path("/status/update/{tenantDomain}/{type}/{status}")
+    @Path("/type/{type}/status/{status}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             consumes = MediaType.APPLICATION_JSON,
@@ -1915,8 +1900,6 @@ public interface DeviceManagementService {
                             response = ErrorResponse.class)
             })
     Response bulkUpdateDeviceStatus(
-            @ApiParam(name = "tenantDomain", value = "The tenant domain.", required = true)
-            @PathParam("tenantDomain") String tenantDomain,
             @ApiParam(name = "type", value = "The device type, such as ios, android or windows.", required = true)
             @PathParam("type") String type,
             @ApiParam(name = "status", value = "The device type, such as ios, android or windows.", required = true)

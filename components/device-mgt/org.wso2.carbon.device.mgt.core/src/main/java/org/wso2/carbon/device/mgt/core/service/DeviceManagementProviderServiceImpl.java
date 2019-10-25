@@ -3125,10 +3125,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public int getDeviceCountOfTypeByStatus(int tenantId, String deviceType, String deviceStatus) throws DeviceManagementException {
+    public int getDeviceCountOfTypeByStatus(String deviceType, String deviceStatus) throws DeviceManagementException {
         try {
             DeviceManagementDAOFactory.openConnection();
-            return deviceDAO.getDeviceCount(deviceType, deviceStatus, tenantId);
+            return deviceDAO.getDeviceCount(deviceType, deviceStatus, getTenantId());
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred in while retrieving device count by status for deviceType :" +deviceType + " status : " + deviceStatus;
             log.error(msg, e);
@@ -3143,11 +3143,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<String> getDeviceIdentifiersByStatus(int tenantId, String deviceType, String deviceStatus) throws DeviceManagementException {
+    public List<String> getDeviceIdentifiersByStatus(String deviceType, String deviceStatus) throws DeviceManagementException {
         List<String> deviceIds;
         try {
             DeviceManagementDAOFactory.openConnection();
-            deviceIds = deviceDAO.getDeviceIdentifiers(deviceType, deviceStatus, tenantId);
+            deviceIds = deviceDAO.getDeviceIdentifiers(deviceType, deviceStatus, getTenantId());
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred in while retrieving devices by status for deviceType :" +deviceType + " status : " + deviceStatus;
             log.error(msg, e);
@@ -3163,20 +3163,19 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean bulkUpdateDeviceStatus(int tenantId, String deviceType,
-                                          List<String> deviceList, String status)
+    public boolean bulkUpdateDeviceStatus(String deviceType, List<String> deviceList, String status)
             throws DeviceManagementException {
         boolean success;
         try {
-            DeviceManagementDAOFactory.openConnection();
-            success = deviceDAO.setEnrolmentStatusInBulk(deviceType, status, tenantId, deviceList);
+            DeviceManagementDAOFactory.beginTransaction();
+            success = deviceDAO.setEnrolmentStatusInBulk(deviceType, status, getTenantId(), deviceList);
             DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred in while updating status of devices :" + deviceType + " status : " + deviceList
-                    .toString();
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred in while updating status of devices :" + deviceType + " status : " + status;
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
+        } catch (TransactionManagementException e) {
             String msg = "Error occurred while opening a connection to the data source";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
