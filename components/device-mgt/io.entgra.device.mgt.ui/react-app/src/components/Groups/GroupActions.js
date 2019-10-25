@@ -291,7 +291,7 @@ class GroupActions extends React.Component {
                 <div>
                     <Modal
                         title="Update Group"
-                        width="500px"
+                        width="40%"
                         visible={this.state.editModalVisible}
                         onOk={this.handleEditOk}
                         onCancel={this.handleEditCancel}
@@ -308,8 +308,7 @@ class GroupActions extends React.Component {
                             <p>Enter new name and description for the group</p>
                             <Form
                                 labelCol={{ span: 5 }}
-                                wrapperCol={{ span: 12 }}
-                                style={{alignItems:"center"}}
+                                wrapperCol={{ span: 18 }}
                             >
                                 <Form.Item label="Name" style={{display:"block"}}>
                                     {getFieldDecorator(
@@ -351,22 +350,25 @@ class GroupActions extends React.Component {
                         onOk={this.handleShareOk}
                         onCancel={this.handleShareCancel}
                         footer={[
-                            <Button key="cancel" onClick={this.handleShareCancel}>
-                                Cancel
+                            <Button key="new-role" onClick={this.handleShareCancel}>
+                                New Role
+                            </Button>,
+                            <Button key="new-role-selection" onClick={this.handleShareCancel}>
+                                New Role from Selection
                             </Button>,
                             <Button key="submit" type="primary" onClick={this.handleShareOk}>
-                                Submit
+                                Share
                             </Button>,
                         ]}
                     >
+                        <p>Select user role(s)</p>
                         <Select
-                            placeholder={"Select user role(s)"}
                             mode="multiple"
+                            defaultValue={"admin"}
                             style={{ width: '100%' }}
                             onChange={this.handleRolesDropdownChange}>
                             {item}
                         </Select>,
-
                     </Modal>
                 </div>
             </div>

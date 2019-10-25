@@ -124,7 +124,7 @@ class AddGroup extends React.Component {
                 <div>
                     <Modal
                         title="ADD NEW GROUP"
-                        width="500px"
+                        width="40%"
                         visible={this.state.addModalVisible}
                         onOk={this.handleAddOk}
                         onCancel={this.handleAddCancel}
@@ -141,8 +141,7 @@ class AddGroup extends React.Component {
                             <p>Create new device group on IoT Server.</p>
                             <Form
                                 labelCol={{ span: 5 }}
-                                wrapperCol={{ span: 12 }}
-                                style={{alignItems:"center"}}
+                                wrapperCol={{ span: 18 }}
                             >
                                 <Form.Item label="Name" style={{display:"block"}}>
                                     {getFieldDecorator('name', {
