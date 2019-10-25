@@ -3167,7 +3167,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throws DeviceManagementException {
         boolean success;
         try {
-            DeviceManagementDAOFactory.openConnection();
+            DeviceManagementDAOFactory.beginTransaction();
             success = deviceDAO.setEnrolmentStatusInBulk(deviceType, status, getTenantId(), deviceList);
             DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
@@ -3175,7 +3175,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             String msg = "Error occurred in while updating status of devices :" + deviceType + " status : " + status;
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
-        } catch (SQLException e) {
+        } catch (TransactionManagementException e) {
             String msg = "Error occurred while opening a connection to the data source";
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
