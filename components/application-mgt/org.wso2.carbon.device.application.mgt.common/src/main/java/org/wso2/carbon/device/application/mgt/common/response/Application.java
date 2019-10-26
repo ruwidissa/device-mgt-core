@@ -48,6 +48,12 @@ public class Application {
             example = "ENTERPRISE, PUBLIC, WEB, WEB_CLIP etc")
     private String type;
 
+    @ApiModelProperty(name = "isAndroidEnterpriseApp",
+            value = "Android enterprise app or not",
+            required = true,
+            example = "true or false")
+    private boolean isAndroidEnterpriseApp;
+
     @ApiModelProperty(name = "subMethod",
             value = "Subscription type of the application",
             required = true,
@@ -149,4 +155,8 @@ public class Application {
     public double getRating() { return rating; }
 
     public void setRating(double rating) { this.rating = rating; }
+
+    public boolean isAndroidEnterpriseApp() { return isAndroidEnterpriseApp; }
+
+    public void setAndroidEnterpriseApp(boolean androidEnterpriseApp) { isAndroidEnterpriseApp = androidEnterpriseApp; }
 }
