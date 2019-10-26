@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Button, Col, Divider, Form, Icon, Input, notification, Row, Select, Spin, Switch, Upload} from "antd";
+import {Alert, Button, Col, Divider, Form, Icon, Input, notification, Row, Select, Spin, Switch, Upload} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
@@ -46,10 +46,16 @@ class NewAppDetailsForm extends React.Component {
             deviceTypes: [],
             fetching: false,
             roleSearchValue: [],
-            unrestrictedRoles: []
+            unrestrictedRoles: [],
+            forbiddenErrors: {
+                categories: false,
+                tags: false,
+                deviceTypes: false,
+                roles: false
+            }
         };
         this.lastFetchId = 0;
-        this.fetchUser = debounce(this.fetchRoles, 800);
+        this.fetchRoles = debounce(this.fetchRoles, 800);
     }
 
     handleSubmit = e => {
@@ -64,7 +70,7 @@ class NewAppDetailsForm extends React.Component {
                 });
                 const {name, description, categories, tags, unrestrictedRoles} = values;
                 const unrestrictedRolesData = [];
-                unrestrictedRoles.map(val=>{
+                unrestrictedRoles.map(val => {
                     unrestrictedRolesData.push(val.key);
                 });
                 const application = {
@@ -89,6 +95,8 @@ class NewAppDetailsForm extends React.Component {
 
     componentDidMount() {
         this.getCategories();
+        this.getTags();
+        this.getDeviceTypes();
     }
 
     getCategories = () => {
@@ -103,13 +111,20 @@ class NewAppDetailsForm extends React.Component {
                     loading: false
                 });
             }
-            this.getTags();
-
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load categories.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load categories.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.categories = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -125,13 +140,20 @@ class NewAppDetailsForm extends React.Component {
                     loading: false,
                 });
             }
-            this.getDeviceTypes();
-
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load tags.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load tags.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.tags = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -169,10 +191,19 @@ class NewAppDetailsForm extends React.Component {
                 });
             }
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load device types.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load device types.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.deviceTypes = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -203,8 +234,19 @@ class NewAppDetailsForm extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load roles.");
-            this.setState({fetching: false});
+            handleApiError(error, "Error occurred while trying to load roles.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.roles = true;
+                this.setState({
+                    forbiddenErrors,
+                    fetching: false
+                })
+            } else {
+                this.setState({
+                    fetching: false
+                });
+            }
         });
     };
 
@@ -218,7 +260,7 @@ class NewAppDetailsForm extends React.Component {
 
     render() {
         const {formConfig} = this.props;
-        const {categories, tags, deviceTypes, fetching, roleSearchValue, unrestrictedRoles} = this.state;
+        const {categories, tags, deviceTypes, fetching, roleSearchValue, unrestrictedRoles, forbiddenErrors} = this.state;
         const {getFieldDecorator} = this.props.form;
 
         return (
@@ -233,33 +275,41 @@ class NewAppDetailsForm extends React.Component {
                             layout="horizontal"
                             onSubmit={this.handleSubmit}>
                             {formConfig.installationType !== "WEB_CLIP" && (
-                                <Form.Item {...formItemLayout} label="Device Type">
-                                    {getFieldDecorator('deviceType', {
-                                            rules: [
-                                                {
-                                                    required: true,
-                                                    message: 'Please select device type'
-                                                }
-                                            ],
-                                        }
-                                    )(
-                                        <Select
-                                            style={{width: '100%'}}
-                                            placeholder="select device type"
-                                            onChange={this.handleCategoryChange}>
-                                            {
-                                                deviceTypes.map(deviceType => {
-                                                    return (
-                                                        <Option
-                                                            key={deviceType.name}>
-                                                            {deviceType.name}
-                                                        </Option>
-                                                    )
-                                                })
-                                            }
-                                        </Select>
+                                <div>
+                                    {(forbiddenErrors.deviceTypes) && (
+                                        <Alert
+                                            message="You don't have permission to view device types."
+                                            type="warning"
+                                            banner
+                                            closable/>
                                     )}
-                                </Form.Item>
+                                    <Form.Item {...formItemLayout} label="Device Type">
+                                        {getFieldDecorator('deviceType', {
+                                                rules: [
+                                                    {
+                                                        required: true,
+                                                        message: 'Please select device type'
+                                                    }
+                                                ],
+                                            }
+                                        )(
+                                            <Select
+                                                style={{width: '100%'}}
+                                                placeholder="select device type">
+                                                {
+                                                    deviceTypes.map(deviceType => {
+                                                        return (
+                                                            <Option
+                                                                key={deviceType.name}>
+                                                                {deviceType.name}
+                                                            </Option>
+                                                        )
+                                                    })
+                                                }
+                                            </Select>
+                                        )}
+                                    </Form.Item>
+                                </div>
                             )}
 
                             {/*app name*/}
@@ -287,6 +337,13 @@ class NewAppDetailsForm extends React.Component {
                             </Form.Item>
 
                             {/*Unrestricted Roles*/}
+                            {(forbiddenErrors.roles) && (
+                                <Alert
+                                    message="You don't have permission to view roles."
+                                    type="warning"
+                                    banner
+                                    closable/>
+                            )}
                             <Form.Item {...formItemLayout} label="Unrestricted Roles">
                                 {getFieldDecorator('unrestrictedRoles', {
                                     rules: [],
@@ -295,7 +352,7 @@ class NewAppDetailsForm extends React.Component {
                                     <Select
                                         mode="multiple"
                                         labelInValue
-                                        value={roleSearchValue}
+                                        // value={roleSearchValue}
                                         placeholder="Search roles"
                                         notFoundContent={fetching ? <Spin size="small"/> : null}
                                         filterOption={false}
@@ -308,6 +365,13 @@ class NewAppDetailsForm extends React.Component {
                                     </Select>
                                 )}
                             </Form.Item>
+                            {(forbiddenErrors.categories) && (
+                                <Alert
+                                    message="You don't have permission to view categories."
+                                    type="warning"
+                                    banner
+                                    closable/>
+                            )}
                             <Form.Item {...formItemLayout} label="Categories">
                                 {getFieldDecorator('categories', {
                                     rules: [{
@@ -333,6 +397,13 @@ class NewAppDetailsForm extends React.Component {
                                     </Select>
                                 )}
                             </Form.Item>
+                            {(forbiddenErrors.tags) && (
+                                <Alert
+                                    message="You don't have permission to view tags."
+                                    type="warning"
+                                    banner
+                                    closable/>
+                            )}
                             <Form.Item {...formItemLayout} label="Tags">
                                 {getFieldDecorator('tags', {
                                     rules: [{

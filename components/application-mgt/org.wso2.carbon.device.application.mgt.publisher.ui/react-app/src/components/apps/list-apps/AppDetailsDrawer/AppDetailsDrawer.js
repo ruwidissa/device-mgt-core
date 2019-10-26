@@ -136,7 +136,7 @@ class AppDetailsDrawer extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load app details.");
+            handleApiError(error, "Error occurred while trying to load categories.", true);
             this.setState({
                 loading: false
             });

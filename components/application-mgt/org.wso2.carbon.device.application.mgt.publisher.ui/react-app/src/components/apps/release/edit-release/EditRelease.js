@@ -31,7 +31,7 @@ import {
     Divider,
     Row,
     Col,
-    Select
+    Select, Alert
 } from 'antd';
 import axios from "axios";
 import "@babel/polyfill";
@@ -522,63 +522,72 @@ class EditReleaseModal extends React.Component {
                                     )}
                                 </Form.Item>
                                 {(config.deviceTypes.mobileTypes.includes(deviceType)) && (
-                                    <Form.Item {...formItemLayout} label="Supported OS Versions">
-                                        {getFieldDecorator('supportedOS')(
-                                            <div>
-                                                <InputGroup>
-                                                    <Row gutter={8}>
-                                                        <Col span={11}>
-                                                            <Form.Item>
-                                                                {getFieldDecorator('lowerOsVersion', {
-                                                                    rules: [{
-                                                                        required: true,
-                                                                        message: 'Please select Value'
-                                                                    }],
-                                                                })(
-                                                                    <Select
-                                                                        placeholder="Lower version"
-                                                                        style={{width: "100%"}}
-                                                                        onChange={this.handleLowerOsVersionChange}>
-                                                                        {supportedOsVersions.map(version => (
-                                                                            <Option key={version.versionName}
-                                                                                    value={version.versionName}>
-                                                                                {version.versionName}
-                                                                            </Option>
-                                                                        ))}
-                                                                    </Select>
-                                                                )}
-                                                            </Form.Item>
-                                                        </Col>
-                                                        <Col span={2}>
-                                                            <p> - </p>
-                                                        </Col>
-                                                        <Col span={11}>
-                                                            <Form.Item>
-                                                                {getFieldDecorator('upperOsVersion', {
-                                                                    rules: [{
-                                                                        required: true,
-                                                                        message: 'Please select Value'
-                                                                    }],
-                                                                })(
-                                                                    <Select style={{width: "100%"}}
-                                                                            placeholder="Upper version"
-                                                                            onChange={this.handleUpperOsVersionChange}>
-                                                                        {supportedOsVersions.map(version => (
-                                                                            <Option key={version.versionName}
-                                                                                    value={version.versionName}>
-                                                                                {version.versionName}
-                                                                            </Option>
-                                                                        ))}
-                                                                    </Select>
-                                                                )}
-                                                            </Form.Item>
-
-                                                        </Col>
-                                                    </Row>
-                                                </InputGroup>
-                                            </div>
+                                    <div>
+                                        {(this.props.forbiddenErrors.supportedOsVersions) && (
+                                            <Alert
+                                                message="You don't have permission to view supported OS versions."
+                                                type="warning"
+                                                banner
+                                                closable/>
                                         )}
-                                    </Form.Item>
+                                        <Form.Item {...formItemLayout} label="Supported OS Versions">
+                                            {getFieldDecorator('supportedOS')(
+                                                <div>
+                                                    <InputGroup>
+                                                        <Row gutter={8}>
+                                                            <Col span={11}>
+                                                                <Form.Item>
+                                                                    {getFieldDecorator('lowerOsVersion', {
+                                                                        rules: [{
+                                                                            required: true,
+                                                                            message: 'Please select Value'
+                                                                        }],
+                                                                    })(
+                                                                        <Select
+                                                                            placeholder="Lower version"
+                                                                            style={{width: "100%"}}
+                                                                            onChange={this.handleLowerOsVersionChange}>
+                                                                            {supportedOsVersions.map(version => (
+                                                                                <Option key={version.versionName}
+                                                                                        value={version.versionName}>
+                                                                                    {version.versionName}
+                                                                                </Option>
+                                                                            ))}
+                                                                        </Select>
+                                                                    )}
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={2}>
+                                                                <p> - </p>
+                                                            </Col>
+                                                            <Col span={11}>
+                                                                <Form.Item>
+                                                                    {getFieldDecorator('upperOsVersion', {
+                                                                        rules: [{
+                                                                            required: true,
+                                                                            message: 'Please select Value'
+                                                                        }],
+                                                                    })(
+                                                                        <Select style={{width: "100%"}}
+                                                                                placeholder="Upper version"
+                                                                                onChange={this.handleUpperOsVersionChange}>
+                                                                            {supportedOsVersions.map(version => (
+                                                                                <Option key={version.versionName}
+                                                                                        value={version.versionName}>
+                                                                                    {version.versionName}
+                                                                                </Option>
+                                                                            ))}
+                                                                        </Select>
+                                                                    )}
+                                                                </Form.Item>
+
+                                                            </Col>
+                                                        </Row>
+                                                    </InputGroup>
+                                                </div>
+                                            )}
+                                        </Form.Item>
+                                    </div>
                                 )}
                                 <Form.Item {...formItemLayout} label="Meta Data">
                                     {getFieldDecorator('meta', {

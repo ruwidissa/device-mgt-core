@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Avatar, Table, Tag, Icon, message, notification, Col, Badge} from "antd";
+import {Avatar, Table, Tag, Icon, message, notification, Col, Badge, Alert} from "antd";
 import axios from "axios";
 import pSBC from 'shade-blend-color';
 import "./AppsTable.css";
@@ -58,7 +58,7 @@ const columns = [
                 avatar = (hasPublishedRelease) ? (
                     <Badge
                         title="Published"
-                        style={{ backgroundColor: '#52c41a', borderRadius:"50%", color:"white"}}
+                        style={{backgroundColor: '#52c41a', borderRadius: "50%", color: "white"}}
                         count={
                             <Icon
                                 type="check-circle"/>
@@ -147,7 +147,8 @@ class AppsTable extends React.Component {
             isDrawerVisible: false,
             selectedApp: null,
             selectedAppIndex: -1,
-            loading: false
+            loading: false,
+            isForbiddenErrorVisible: false
         };
         config = this.props.context;
     }
@@ -239,7 +240,12 @@ class AppsTable extends React.Component {
                 });
             }
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load apps.");
+            handleApiError(error, "Error occurred while trying to load apps.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbiddenErrorVisible: true
+                })
+            }
             this.setState({loading: false});
         });
     };
@@ -255,29 +261,37 @@ class AppsTable extends React.Component {
     render() {
         const {isDrawerVisible, loading} = this.state;
         return (
-            <div className="apps-table">
-                <Table
-                    rowKey={record => record.id}
-                    dataSource={this.state.apps}
-                    columns={columns}
-                    pagination={this.state.pagination}
-                    onChange={this.handleTableChange}
-                    rowClassName="app-row"
-                    loading={loading}
-                    onRow={(record, rowIndex) => {
-                        return {
-                            onClick: event => {
-                                this.showDrawer(record, rowIndex);
-                            },
-                        };
-                    }}/>
-                <AppDetailsDrawer
-                    visible={isDrawerVisible}
-                    onClose={this.closeDrawer}
-                    app={this.state.selectedApp}
-                    onUpdateApp={this.onUpdateApp}/>
+            <div>
+                {(this.state.isForbiddenErrorVisible) && (
+                    <Alert
+                        message="You don't have permission to view apps."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
+                <div className="apps-table">
+                    <Table
+                        rowKey={record => record.id}
+                        dataSource={this.state.apps}
+                        columns={columns}
+                        pagination={this.state.pagination}
+                        onChange={this.handleTableChange}
+                        rowClassName="app-row"
+                        loading={loading}
+                        onRow={(record, rowIndex) => {
+                            return {
+                                onClick: event => {
+                                    this.showDrawer(record, rowIndex);
+                                },
+                            };
+                        }}/>
+                    <AppDetailsDrawer
+                        visible={isDrawerVisible}
+                        onClose={this.closeDrawer}
+                        app={this.state.selectedApp}
+                        onUpdateApp={this.onUpdateApp}/>
+                </div>
             </div>
-
         );
     }
 }
