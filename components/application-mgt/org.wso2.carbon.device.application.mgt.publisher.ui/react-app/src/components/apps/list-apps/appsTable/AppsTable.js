@@ -74,7 +74,6 @@ const columns = [
                 ) : (
                     <Avatar shape="square" size="large"
                             style={{
-                                marginRight: 20,
                                 borderRadius: "28%",
                                 border: "1px solid #ddd"
                             }}

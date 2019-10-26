@@ -17,10 +17,11 @@
  */
 
 import React from "react";
-import {Button, Col, Divider, Form, Icon, Input, notification, Row, Select, Switch, Upload} from "antd";
+import {Button, Col, Divider, Form, Icon, Input, notification, Row, Select, Spin, Switch, Upload} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
+import debounce from 'lodash.debounce';
 
 const formItemLayout = {
     labelCol: {
@@ -42,11 +43,14 @@ class NewAppDetailsForm extends React.Component {
         this.state = {
             categories: [],
             tags: [],
-            deviceTypes:[]
+            deviceTypes: [],
+            fetching: false,
+            roleSearchValue: [],
+            unrestrictedRoles: []
         };
-
+        this.lastFetchId = 0;
+        this.fetchUser = debounce(this.fetchRoles, 800);
     }
-
 
     handleSubmit = e => {
         e.preventDefault();
@@ -58,13 +62,17 @@ class NewAppDetailsForm extends React.Component {
                 this.setState({
                     loading: true
                 });
-                const {name, description, categories, tags, price, isSharedWithAllTenants, binaryFile, icon, screenshots, releaseDescription, releaseType} = values;
+                const {name, description, categories, tags, unrestrictedRoles} = values;
+                const unrestrictedRolesData = [];
+                unrestrictedRoles.map(val=>{
+                    unrestrictedRolesData.push(val.key);
+                });
                 const application = {
                     name,
                     description,
                     categories,
                     tags,
-                    unrestrictedRoles: [],
+                    unrestrictedRoles: unrestrictedRolesData,
                 };
 
                 if (formConfig.installationType !== "WEB_CLIP") {
@@ -141,15 +149,15 @@ class NewAppDetailsForm extends React.Component {
                 const allowedDeviceTypes = [];
 
                 // exclude mobile device types if installation type is custom
-                if(installationType==="CUSTOM"){
-                    allDeviceTypes.forEach(deviceType=>{
-                        if(!mobileDeviceTypes.includes(deviceType.name)){
+                if (installationType === "CUSTOM") {
+                    allDeviceTypes.forEach(deviceType => {
+                        if (!mobileDeviceTypes.includes(deviceType.name)) {
                             allowedDeviceTypes.push(deviceType);
                         }
                     });
-                }else{
-                    allDeviceTypes.forEach(deviceType=>{
-                        if(mobileDeviceTypes.includes(deviceType.name)){
+                } else {
+                    allDeviceTypes.forEach(deviceType => {
+                        if (mobileDeviceTypes.includes(deviceType.name)) {
                             allowedDeviceTypes.push(deviceType);
                         }
                     });
@@ -168,9 +176,49 @@ class NewAppDetailsForm extends React.Component {
         });
     };
 
+    fetchRoles = value => {
+        const config = this.props.context;
+        this.lastFetchId += 1;
+        const fetchId = this.lastFetchId;
+        this.setState({data: [], fetching: true});
+
+        axios.get(
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/roles?filter=" + value,
+        ).then(res => {
+            if (res.status === 200) {
+                if (fetchId !== this.lastFetchId) {
+                    // for fetch callback order
+                    return;
+                }
+
+                const data = res.data.data.roles.map(role => ({
+                    text: role,
+                    value: role,
+                }));
+
+                this.setState({
+                    unrestrictedRoles: data,
+                    fetching: false
+                });
+            }
+
+        }).catch((error) => {
+            handleApiError(error, "Error occurred while trying to load roles.");
+            this.setState({fetching: false});
+        });
+    };
+
+    handleRoleSearch = roleSearchValue => {
+        this.setState({
+            roleSearchValue,
+            unrestrictedRoles: [],
+            fetching: false,
+        });
+    };
+
     render() {
         const {formConfig} = this.props;
-        const {categories, tags, deviceTypes} = this.state;
+        const {categories, tags, deviceTypes, fetching, roleSearchValue, unrestrictedRoles} = this.state;
         const {getFieldDecorator} = this.props.form;
 
         return (
@@ -198,8 +246,7 @@ class NewAppDetailsForm extends React.Component {
                                         <Select
                                             style={{width: '100%'}}
                                             placeholder="select device type"
-                                            onChange={this.handleCategoryChange}
-                                        >
+                                            onChange={this.handleCategoryChange}>
                                             {
                                                 deviceTypes.map(deviceType => {
                                                     return (
@@ -238,6 +285,29 @@ class NewAppDetailsForm extends React.Component {
                                     <TextArea placeholder="Enter the description..." rows={7}/>
                                 )}
                             </Form.Item>
+
+                            {/*Unrestricted Roles*/}
+                            <Form.Item {...formItemLayout} label="Unrestricted Roles">
+                                {getFieldDecorator('unrestrictedRoles', {
+                                    rules: [],
+                                    initialValue: []
+                                })(
+                                    <Select
+                                        mode="multiple"
+                                        labelInValue
+                                        value={roleSearchValue}
+                                        placeholder="Search roles"
+                                        notFoundContent={fetching ? <Spin size="small"/> : null}
+                                        filterOption={false}
+                                        onSearch={this.fetchRoles}
+                                        onChange={this.handleRoleSearch}
+                                        style={{width: '100%'}}>
+                                        {unrestrictedRoles.map(d => (
+                                            <Option key={d.value}>{d.text}</Option>
+                                        ))}
+                                    </Select>
+                                )}
+                            </Form.Item>
                             <Form.Item {...formItemLayout} label="Categories">
                                 {getFieldDecorator('categories', {
                                     rules: [{
@@ -249,8 +319,7 @@ class NewAppDetailsForm extends React.Component {
                                         mode="multiple"
                                         style={{width: '100%'}}
                                         placeholder="Select a Category"
-                                        onChange={this.handleCategoryChange}
-                                    >
+                                        onChange={this.handleCategoryChange}>
                                         {
                                             categories.map(category => {
                                                 return (
@@ -274,8 +343,7 @@ class NewAppDetailsForm extends React.Component {
                                     <Select
                                         mode="tags"
                                         style={{width: '100%'}}
-                                        placeholder="Tags"
-                                    >
+                                        placeholder="Tags">
                                         {
                                             tags.map(tag => {
                                                 return (

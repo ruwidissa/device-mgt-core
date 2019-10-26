@@ -509,8 +509,8 @@ class AppDetailsDrawer extends React.Component {
                                                                         title="Published"
                                                                         style={{
                                                                             backgroundColor: '#52c41a',
-                                                                            borderRadius:"50%",
-                                                                            color:"white"
+                                                                            borderRadius: "50%",
+                                                                            color: "white"
                                                                         }}
                                                                         count={
                                                                             <Icon
@@ -547,10 +547,10 @@ class AppDetailsDrawer extends React.Component {
                             />
                         </div>
 
-                        <Divider dashed={true}/>
                         {/*display add new release only if app type is enterprise*/}
                         {(app.type === "ENTERPRISE") && (
                             <div>
+                                <Divider dashed={true}/>
                                 <div style={{paddingBottom: 16}}>
                                     <Text>
                                         Add new release for the application

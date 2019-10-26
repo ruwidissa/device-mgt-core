@@ -107,8 +107,7 @@ class RoleInstall extends React.Component {
                     filterOption={false}
                     onSearch={this.fetchUser}
                     onChange={this.handleChange}
-                    style={{width: '100%'}}
-                >
+                    style={{width: '100%'}}>
                     {data.map(d => (
                         <Option key={d.value}>{d.text}</Option>
                     ))}
