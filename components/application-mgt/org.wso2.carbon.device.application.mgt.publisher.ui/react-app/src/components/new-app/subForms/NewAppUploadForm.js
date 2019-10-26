@@ -117,7 +117,7 @@ class NewAppUploadForm extends React.Component {
                             osVersionsHelperText: 'Please select supported OS versions',
                             osVersionsValidateStatus: 'error',
                         });
-                    } else if (this.lowerOsVersion >= this.upperOsVersion) {
+                    } else if (parseFloat(this.lowerOsVersion) >= parseFloat(this.upperOsVersion)) {
                         isFormValid = false;
                         this.setState({
                             osVersionsHelperText: 'Please select valid range',
@@ -221,7 +221,7 @@ class NewAppUploadForm extends React.Component {
     };
 
     handleLowerOsVersionChange = (lowerOsVersion) => {
-        this.lowerOsVersion = parseFloat(lowerOsVersion);
+        this.lowerOsVersion = lowerOsVersion;
         this.setState({
             osVersionsValidateStatus: 'validating',
             osVersionsHelperText: ''
@@ -229,7 +229,11 @@ class NewAppUploadForm extends React.Component {
     };
 
     handleUpperOsVersionChange = (upperOsVersion) => {
-        this.upperOsVersion = parseFloat(upperOsVersion);
+        if (upperOsVersion === "all") {
+            this.upperOsVersion = this.props.supportedOsVersions[this.props.supportedOsVersions.length - 1]["versionName"];
+        }else{
+            this.upperOsVersion = upperOsVersion;
+        }
         this.setState({
             osVersionsValidateStatus: 'validating',
             osVersionsHelperText: ''
@@ -445,7 +449,7 @@ class NewAppUploadForm extends React.Component {
                                                                     onChange={this.handleUpperOsVersionChange}>
                                                                 {(supportedOsVersions.length > 0) && (
                                                                     <Option key="all"
-                                                                            value={supportedOsVersions[supportedOsVersions.length - 1]["versionName"]}>
+                                                                            value="all">
                                                                         All
                                                                     </Option>
                                                                 )}
