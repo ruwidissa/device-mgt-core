@@ -155,8 +155,8 @@ public class PolicyManagerUtil {
                     PolicyAdministratorPoint pap = new PolicyAdministratorPointImpl();
                     try {
                         Policy correctivePolicy = pap.getPolicy(correctiveAction.getPolicyId());
-                        if (correctivePolicy == null || PolicyManagementConstants.CORRECTIVE_POLICY_TYPE
-                                .equalsIgnoreCase(correctivePolicy.getPolicyType())) {
+                        if (correctivePolicy == null || !PolicyManagementConstants.CORRECTIVE_POLICY_TYPE
+                                .equalsIgnoreCase(correctivePolicy.getPolicyType() )) {
                             String msg = "No corrective policy was found for the policy " + policy.getPolicyName() +
                                     " and policy ID " + policy.getId();
                             log.error(msg);

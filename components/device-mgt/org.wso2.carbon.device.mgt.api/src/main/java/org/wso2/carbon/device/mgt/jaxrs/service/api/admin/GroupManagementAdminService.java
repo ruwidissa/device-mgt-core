@@ -33,10 +33,12 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -75,6 +77,12 @@ import javax.ws.rs.core.Response;
                         description = "",
                         key = "perm:admin-groups:count",
                         permissions = {"/device-mgt/admin/groups/view"}
+                ),
+                @Scope(
+                        name = "Add groups",
+                        description = "",
+                        key = "perm:admin-groups:add",
+                        permissions = {"/device-mgt/admin/groups/add"}
                 )
         }
 )
@@ -166,7 +174,7 @@ public interface GroupManagementAdminService {
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device group count.",
-                    response = DeviceGroupList.class,
+                    response = Integer.class,
                     responseHeaders = {
                             @ResponseHeader(
                                     name = "Content-Type",
@@ -201,5 +209,72 @@ public interface GroupManagementAdminService {
                     value = "status of groups of which count should be retrieved")
             @QueryParam("status")
                     String status);
+
+    @POST
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_POST,
+            value = "Adding a New Device Group",
+            notes = "Add device group with the current user as the owner.",
+            tags = "Device Group Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin-groups:add")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 201,
+                            message = "Created. \n Device group has successfully been created",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Location",
+                                            description = "The URL of the added group."),
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource has been modified the last time" +
+                                                    ".\n" + "Used by caches, or in conditional requests.")
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 303,
+                            message = "See Other. \n Source can be retrieved from the URL specified at the Location " +
+                                    "header.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Location",
+                                            description = "The Source URL of the document.")}),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 401,
+                            message = "Unauthorized. \n Current logged in user is not authorized to add device groups.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 415,
+                            message = "Unsupported media type. \n The entity of the request was in a not supported " +
+                                    "format."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while adding a new device group.",
+                            response = ErrorResponse.class)
+            })
+    Response createGroup(@ApiParam(
+            name = "group",
+            value = "Define the group object with data.",
+            required = true)
+                         @Valid DeviceGroup group);
 
 }

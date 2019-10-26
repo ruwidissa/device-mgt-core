@@ -18,13 +18,11 @@
 
 import React from "react";
 import axios from "axios";
-import {message, notification, Table, Typography, Panel, Collapse, Button, List, Modal, Icon, Tabs} from "antd";
+import {Button, Collapse, Icon, List, message, Modal, notification, Table, Tabs, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
-
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
-import DeviceTable from "../Devices/DevicesTable";
 import UsersDevices from "./UsersDevices";
 
 const {Text} = Typography;

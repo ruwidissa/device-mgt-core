@@ -185,6 +185,106 @@ public interface SubscriptionManagementAPI {
             @QueryParam("timestamp") String timestamp
     );
 
+    @POST
+    @Path("/{uuid}/devices/ent-app-install/{action}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for devices via google enterprise app installing service",
+            notes = "This will install an application to a given list of devices",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:install")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response performEntAppSubscriptionOnDevices(
+            @ApiParam(
+                    name = "UUID",
+                    value = "The application UUID",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "action",
+                    value = "Performing action.",
+                    required = true
+            )
+            @PathParam("action") String action,
+            @ApiParam(
+                    name = "installationDetails",
+                    value = "The  list of device identifiers",
+                    required = true
+            )
+            @Valid List<DeviceIdentifier> deviceIdentifiers,
+            @ApiParam(
+                    name = "timestamp",
+                    value = "Timestamp of scheduled ent. install operation"
+            )
+            @QueryParam("timestamp") String timestamp
+    );
+
+    @POST
+    @Path("/{uuid}/{subType}/ent-app-install/{action}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Install an application for subscription type via google enterprise install.",
+            notes = "This will install an application to a given subscription type and this is bulk app installation.",
+            tags = "Subscription Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:install")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+
+            })
+    Response performBulkEntAppSubscription(
+            @ApiParam(
+                    name = "uuid",
+                    value = "The application release UUID",
+                    required = true
+            )
+            @PathParam("uuid") String uuid,
+            @ApiParam(
+                    name = "subType",
+                    value = "Subscription type of the app installing operation.",
+                    required = true
+            )
+            @PathParam("subType") String subType,
+            @ApiParam(
+                    name = "action",
+                    value = "Performing action.",
+                    required = true
+            )
+            @PathParam("action") String action,
+            @ApiParam(
+                    name = "subscribers",
+                    value = "Subscriber list of the application release.",
+                    required = true
+            )
+            @Valid List<String> subscribers,
+            @ApiParam(
+                    name = "timestamp",
+                    value = "Timestamp of scheduled ent app install operation"
+            )
+            @QueryParam("timestamp") String timestamp
+    );
+
     @GET
     @Path("/{uuid}/devices")
     @Produces(MediaType.APPLICATION_JSON)

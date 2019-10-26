@@ -103,7 +103,8 @@ public class UserHandler extends HttpServlet {
                 }
                 ProxyResponse proxyResponse = new ProxyResponse();
                 proxyResponse.setCode(HttpStatus.SC_OK);
-                proxyResponse.setData(jTokenResultAsJsonObject.get("username").getAsString());
+                proxyResponse.setData(
+                        jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));
                 HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
             }
         } catch (IOException e) {

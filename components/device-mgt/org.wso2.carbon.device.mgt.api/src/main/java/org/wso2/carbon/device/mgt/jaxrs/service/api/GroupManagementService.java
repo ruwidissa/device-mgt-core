@@ -458,8 +458,10 @@ public interface GroupManagementService {
 
     @Path("/id/{groupId}")
     @DELETE
+    @Consumes(MediaType.WILDCARD)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
+            consumes = MediaType.WILDCARD,
             httpMethod = HTTPConstants.HEADER_DELETE,
             value = "Deleting a Group",
             notes = "If you wish to remove an existing group, that can be done by updating the group using this API.",

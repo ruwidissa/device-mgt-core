@@ -92,7 +92,7 @@ public interface SubscriptionManagementAdminAPI {
             tags = "Subscription Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = SCOPE, value = "perm:app:subscription:view")
+                            @ExtensionProperty(name = SCOPE, value = "perm:admin:app:subscription:view")
                     })
             }
     )
