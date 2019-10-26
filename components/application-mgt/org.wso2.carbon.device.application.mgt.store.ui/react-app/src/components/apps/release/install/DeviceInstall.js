@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Button, message, DatePicker, Table, Typography} from "antd";
+import {Button, message, DatePicker, Table, Typography, Alert} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -112,7 +112,8 @@ class DeviceInstall extends React.Component {
             loading: false,
             selectedRows: [],
             scheduledTime: null,
-            isScheduledInstallVisible: false
+            isScheduledInstallVisible: false,
+            isForbidden: false
         };
     }
 
@@ -169,8 +170,17 @@ class DeviceInstall extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load devices.");
-            this.setState({loading: false});
+            handleApiError(error, "Error occurred while trying to load devices.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -209,6 +219,13 @@ class DeviceInstall extends React.Component {
                     Start installing the application for one or more users by entering the corresponding user name.
                     Select install to automatically start downloading the application for the respective user/users.
                 </Text>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view devices."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
                 <Table
                     style={{paddingTop: 20}}
                     columns={columns}

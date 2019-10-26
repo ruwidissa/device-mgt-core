@@ -18,7 +18,7 @@
 
 import React from "react";
 import AppCard from "./AppCard";
-import {Col, message, notification, Row, Result, Skeleton} from "antd";
+import {Col, message, notification, Row, Result, Skeleton, Alert} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../context/ConfigContext";
 import {handleApiError} from "../../js/Utils";
@@ -28,7 +28,10 @@ class AppList extends React.Component {
         super(props);
         this.state = {
             apps: [],
-            loading: true
+            loading: true,
+            forbiddenErrors: {
+                apps: false
+            }
         }
     }
 
@@ -60,7 +63,7 @@ class AppList extends React.Component {
         });
         //send request to the invoker
         axios.post(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/",
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/applications/",
             payload,
         ).then(res => {
             if (res.status === 200) {
@@ -73,18 +76,37 @@ class AppList extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load apps.");
-            this.setState({loading: false});
+            handleApiError(error, "Error occurred while trying to load apps.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.apps = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
     render() {
-        const {apps,loading} = this.state;
+        const {apps, loading, forbiddenErrors} = this.state;
 
         return (
             <Skeleton loading={loading} active>
                 <Row gutter={16}>
-                    {apps.length === 0 && (
+                    {(forbiddenErrors.apps) && (
+                        <Result
+                            status="403"
+                            title="403"
+                            subTitle="You don't have permission to view apps."
+                            // extra={<Button type="primary">Back Home</Button>}
+                        />
+                    )}
+                    {!((forbiddenErrors.apps)) && apps.length === 0 && (
                         <Result
                             status="404"
                             title="No apps, yet."

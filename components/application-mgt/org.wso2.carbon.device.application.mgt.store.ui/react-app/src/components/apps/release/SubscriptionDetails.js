@@ -18,7 +18,20 @@
 
 import React from "react";
 import axios from "axios";
-import {Tag, message, notification, Table, Typography, Tooltip, Icon, Divider, Button, Modal, Select} from "antd";
+import {
+    Tag,
+    message,
+    notification,
+    Table,
+    Typography,
+    Tooltip,
+    Icon,
+    Divider,
+    Button,
+    Modal,
+    Select,
+    Alert
+} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -149,7 +162,8 @@ class SubscriptionDetails extends React.Component {
             selectedRows: [],
             deviceGroups: [],
             groupModalVisible: false,
-            selectedGroupId: []
+            selectedGroupId: [],
+            isForbidden: false
         };
     }
 
@@ -188,8 +202,17 @@ class SubscriptionDetails extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Something went wrong when trying to load subscription data.");
-            this.setState({loading: false});
+            handleApiError(error, "Something went wrong when trying to load subscription data.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -197,6 +220,13 @@ class SubscriptionDetails extends React.Component {
         const {data, pagination, loading, selectedRows} = this.state;
         return (
             <div>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view subscription details."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
                 <div style={{paddingBottom: 24}}>
                     <Text>
                         The following are the subscription details of the application in each respective device.

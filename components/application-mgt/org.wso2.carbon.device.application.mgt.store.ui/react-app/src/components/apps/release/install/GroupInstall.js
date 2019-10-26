@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Typography, Select, Spin, message, notification, Button} from "antd";
+import {Typography, Select, Spin, message, notification, Button, Alert} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
@@ -40,6 +40,7 @@ class GroupInstall extends React.Component {
         data: [],
         value: [],
         fetching: false,
+        isForbidden: false
     };
 
     fetchUser = value => {
@@ -67,8 +68,17 @@ class GroupInstall extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load groups.");
-            this.setState({fetching: false});
+            handleApiError(error,"Error occurred while trying to load groups.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -96,6 +106,13 @@ class GroupInstall extends React.Component {
         return (
             <div>
                 <Text>Start installing the application for one or more groups by entering the corresponding group name. Select install to automatically start downloading the application for the respective device group/ groups.</Text>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view groups."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
                 <br/>
                 <br/>
                 <Select

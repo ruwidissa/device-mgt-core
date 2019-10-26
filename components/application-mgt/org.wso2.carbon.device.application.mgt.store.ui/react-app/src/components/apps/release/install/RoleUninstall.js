@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Typography, Select, Spin, message, notification, Button} from "antd";
+import {Typography, Select, Spin, message, notification, Button, Alert} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
@@ -39,6 +39,7 @@ class RoleUninstall extends React.Component {
         data: [],
         value: [],
         fetching: false,
+        isForbidden: false
     };
 
     fetchUser = value => {
@@ -50,8 +51,8 @@ class RoleUninstall extends React.Component {
         const uuid = this.props.uuid;
 
         axios.get(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+ "/subscription/" + uuid + "/"+
-                "/ROLE?",
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" +
+            "/ROLE?",
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {
@@ -68,53 +69,71 @@ class RoleUninstall extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load roles.");
-            this.setState({fetching: false});
+            handleApiError(error, "Error occurred while trying to load roles.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
     handleChange = value => {
         this.setState({
-                          value,
-                          data: [],
-                          fetching: false,
-                      });
+            value,
+            data: [],
+            fetching: false,
+        });
     };
 
-    uninstall = (timestamp=null) =>{
+    uninstall = (timestamp = null) => {
         const {value} = this.state;
         const data = [];
-        value.map(val=>{
+        value.map(val => {
             data.push(val.key);
         });
-        this.props.onUninstall("role", data, "uninstall",timestamp);
+        this.props.onUninstall("role", data, "uninstall", timestamp);
     };
 
     render() {
         const {fetching, data, value} = this.state;
 
         return (
-                <div>
-                    <Text>Start uninstalling the application for one or more roles by entering the corresponding role name. Select uninstall to automatically start uninstalling the application for the respective user role/roles.</Text>
-                    <br/>
-                    <br/>
-                    <Select
-                            mode="multiple"
-                            labelInValue
-                            value={value}
-                            placeholder="Search roles"
-                            notFoundContent={fetching ? <Spin size="small"/> : null}
-                            filterOption={false}
-                            onSearch={this.fetchUser}
-                            onChange={this.handleChange}
-                            style={{width: '100%'}}
-                    >
-                        {data.map(d => (
-                                <Option key={d.value}>{d.text}</Option>
-                        ))}
-                    </Select>
-                    <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length===0}/>
-                </div>
+            <div>
+                <Text>Start uninstalling the application for one or more roles by entering the corresponding role name.
+                    Select uninstall to automatically start uninstalling the application for the respective user
+                    role/roles.</Text>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view uninstalled roles."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
+                <br/>
+                <br/>
+                <Select
+                    mode="multiple"
+                    labelInValue
+                    value={value}
+                    placeholder="Search roles"
+                    notFoundContent={fetching ? <Spin size="small"/> : null}
+                    filterOption={false}
+                    onSearch={this.fetchUser}
+                    onChange={this.handleChange}
+                    style={{width: '100%'}}
+                >
+                    {data.map(d => (
+                        <Option key={d.value}>{d.text}</Option>
+                    ))}
+                </Select>
+                <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length === 0}/>
+            </div>
         );
     }
 }
