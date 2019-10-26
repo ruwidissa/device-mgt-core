@@ -53,7 +53,16 @@ const columns = [
         title: 'Action',
         dataIndex: 'action',
         key: 'action',
-        render: action => action.toLowerCase()
+        render: action => {
+            action = action.toLowerCase();
+            let color = "fff";
+            if(action==="subscribed"){
+                color = "#6ab04c"
+            }else if(action === "unsubscribed"){
+                color = "#f0932b"
+            }
+            return <span style={{color:color}}>{action}</span>
+        }
     },
     {
         title: 'Triggered By',
@@ -128,7 +137,7 @@ const getTimeAgo = (time) => {
 };
 
 
-class InstalledDevicesTable extends React.Component {
+class SubscriptionDetails extends React.Component {
     constructor(props) {
         super(props);
         config = this.props.context;
@@ -171,12 +180,10 @@ class InstalledDevicesTable extends React.Component {
             `/admin/subscription/${this.props.uuid}?` + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
-                const pagination = {...this.state.pagination};
                 console.log(res.data.data.data);
                 this.setState({
                     loading: false,
-                    data: res.data.data.data,
-                    pagination,
+                    data: res.data.data.data
                 });
             }
 
@@ -192,8 +199,13 @@ class InstalledDevicesTable extends React.Component {
             <div>
                 <div style={{paddingBottom: 24}}>
                     <Text>
-                       The following are the subscription details of the application in each respective device.
+                        The following are the subscription details of the application in each respective device.
                     </Text>
+                </div>
+                <div style={{textAlign: "right", paddingBottom: 6}}>
+                    <Button icon="sync" onClick={this.fetch}>
+                        Refresh
+                    </Button>
                 </div>
                 <Table
                     columns={columns}
@@ -214,4 +226,4 @@ class InstalledDevicesTable extends React.Component {
     }
 }
 
-export default withConfigContext(InstalledDevicesTable);
+export default withConfigContext(SubscriptionDetails);
