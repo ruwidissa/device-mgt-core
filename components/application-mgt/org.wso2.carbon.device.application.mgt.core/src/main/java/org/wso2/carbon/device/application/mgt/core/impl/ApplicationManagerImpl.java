@@ -3163,7 +3163,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, tenantId);
+            List<Integer> deviceSubIds = subscriptionDAO.getDeviceSubIdsForOperation(operationId, deviceId, tenantId);
             if (deviceSubIds.isEmpty()){
                 ConnectionManagerUtil.rollbackDBTransaction();
                 String msg = "Couldn't find device subscription for operation id " + operationId;

@@ -26,6 +26,7 @@ public class SubscribingDeviceIdHolder {
     private Map<DeviceIdentifier, Integer> appInstalledDevices = new HashMap<>();
     private Map<DeviceIdentifier, Integer> appInstallableDevices = new HashMap<>();
     private Map<DeviceIdentifier, Integer> appReInstallableDevices = new HashMap<>();
+    private Map<DeviceIdentifier, Integer> appReUnInstallableDevices = new HashMap<>();
     private Map<DeviceIdentifier, Integer> skippedDevices = new HashMap<>();
 
     public Map<DeviceIdentifier, Integer> getAppInstalledDevices() {
@@ -56,5 +57,13 @@ public class SubscribingDeviceIdHolder {
 
     public void setSkippedDevices(Map<DeviceIdentifier, Integer> skippedDevices) {
         this.skippedDevices = skippedDevices;
+    }
+
+    public Map<DeviceIdentifier, Integer> getAppReUnInstallableDevices() {
+        return appReUnInstallableDevices;
+    }
+
+    public void setAppReUnInstallableDevices(Map<DeviceIdentifier, Integer> appReUnInstallableDevices) {
+        this.appReUnInstallableDevices = appReUnInstallableDevices;
     }
 }

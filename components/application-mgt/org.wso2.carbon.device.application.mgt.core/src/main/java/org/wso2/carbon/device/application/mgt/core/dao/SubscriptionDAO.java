@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public interface SubscriptionDAO {
 
-    List<Integer> addDeviceSubscription(String subscribedBy, List<Integer> deviceIds, String subscribedFrom,
+    void addDeviceSubscription(String subscribedBy, List<Integer> deviceIds, String subscribedFrom,
             String installStatus, int releaseId, int tenantId ) throws ApplicationManagementDAOException;
 
     void updateDeviceSubscription(String updateBy, List<Integer> deviceIds, String action, String actionTriggeredFrom,
@@ -66,13 +66,13 @@ public interface SubscriptionDAO {
     Map<Integer, DeviceSubscriptionDTO> getDeviceSubscriptions(List<Integer> deviceIds, int appReleaseId, int tenantId)
             throws ApplicationManagementDAOException;
 
-    List<String> getSubscribedUserNames(List<String> users, int tenantId) throws
+    List<String> getAppSubscribedUserNames(List<String> users, int appReleaseId, int tenantId) throws
             ApplicationManagementDAOException;
 
-    List<String> getSubscribedRoleNames(List<String> roles, int tenantId) throws
+    List<String> getAppSubscribedRoleNames(List<String> roles, int appReleaseId, int tenantId) throws
             ApplicationManagementDAOException;
 
-    List<String> getSubscribedGroupNames(List<String> groups, int tenantId) throws
+    List<String> getAppSubscribedGroupNames(List<String> groups, int appReleaseId, int tenantId) throws
             ApplicationManagementDAOException;
 
     void updateSubscriptions(int tenantId, String updateBy, List<String> paramList,
@@ -81,7 +81,8 @@ public interface SubscriptionDAO {
     List<Integer> getDeviceSubIds(List<Integer> deviceIds, int applicationReleaseId, int tenantId)
             throws ApplicationManagementDAOException;
 
-    List<Integer> getDeviceSubIdsForOperation (int operationId, int tenantId) throws ApplicationManagementDAOException;
+    List<Integer> getDeviceSubIdsForOperation(int operationId, int deviceID, int tenantId)
+            throws ApplicationManagementDAOException;
 
     boolean updateDeviceSubStatus(int deviceId, List<Integer> deviceSubIds, String status, int tenantcId)
             throws ApplicationManagementDAOException;
