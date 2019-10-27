@@ -36,7 +36,10 @@ class Release extends React.Component {
         this.state = {
             loading: true,
             app: null,
-            uuid: null
+            uuid: null,
+            forbiddenErrors: {
+                app: false
+            }
         };
     }
 
@@ -72,8 +75,19 @@ class Release extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load releases.");
-            this.setState({loading: false});
+            handleApiError(error,"Error occurred while trying to load releases.", false);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.app = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 

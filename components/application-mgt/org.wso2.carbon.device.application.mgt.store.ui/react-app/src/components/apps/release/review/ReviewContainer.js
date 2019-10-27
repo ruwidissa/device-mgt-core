@@ -32,7 +32,12 @@ class ReviewContainer extends React.Component {
         super(props);
         this.state = {
             currentUserReviews: [],
-            detailedRating: null
+            detailedRating: null,
+            forbiddenErrors: {
+                currentReview: false,
+                reviews: false,
+                rating: false
+            }
         }
     }
 
@@ -54,7 +59,19 @@ class ReviewContainer extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to get your review.");
+            handleApiError(error, "Error occurred while trying to get your review.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.currentReview = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -79,7 +96,7 @@ class ReviewContainer extends React.Component {
             }
 
         }).catch(function (error) {
-            handleApiError(error, "Error occurred while trying to load ratings.");
+            handleApiError(error, "Error occurred while trying to load ratings.", true);
         });
     };
 
@@ -90,10 +107,11 @@ class ReviewContainer extends React.Component {
 
     render() {
         const {uuid} = this.props;
-        const {currentUserReviews,detailedRating} = this.state;
+        const {currentUserReviews,detailedRating, forbiddenErrors} = this.state;
         return (
             <div>
                 <CurrentUsersReview
+                    forbidden={forbiddenErrors.currentReview}
                     uuid={uuid}
                     currentUserReviews={currentUserReviews}
                     onUpdateReview={this.onUpdateReview}

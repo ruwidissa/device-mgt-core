@@ -41,7 +41,10 @@ class AddNewReleaseFormComponent extends React.Component {
             supportedOsVersions: [],
             application: null,
             release: null,
-            deviceType: null
+            deviceType: null,
+            forbiddenErrors: {
+                supportedOsVersions: false
+            }
         };
     }
 
@@ -63,10 +66,19 @@ class AddNewReleaseFormComponent extends React.Component {
                 });
             }
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load supported OS versions.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load supported OS versions.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.supportedOsVersions = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -85,7 +97,7 @@ class AddNewReleaseFormComponent extends React.Component {
         data.append("applicationRelease", blob);
 
         const url = window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher +
-                    "/applications/" + deviceType + "/ent-app/" + appId;
+            "/applications/" + deviceType + "/ent-app/" + appId;
         axios.post(
             url,
             data
@@ -122,14 +134,15 @@ class AddNewReleaseFormComponent extends React.Component {
     };
 
     render() {
-        const {loading, supportedOsVersions} = this.state;
+        const {loading, supportedOsVersions, forbiddenErrors} = this.state;
         return (
             <div>
                 <Spin tip="Uploading..." spinning={loading}>
                     <Row>
-                        <Col span={17} offset={4} >
+                        <Col span={17} offset={4}>
                             <Card>
                                 <NewAppUploadForm
+                                    forbiddenErrors={forbiddenErrors}
                                     formConfig={formConfig}
                                     supportedOsVersions={supportedOsVersions}
                                     onSuccessReleaseData={this.onSuccessReleaseData}

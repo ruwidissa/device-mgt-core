@@ -32,7 +32,7 @@ import {
     Modal,
     Row,
     Col,
-    Typography
+    Typography, Alert
 } from "antd";
 import axios from "axios";
 import {TweenOneGroup} from 'rc-tween-one';
@@ -53,13 +53,16 @@ class ManageCategories extends React.Component {
         isAddNewVisible: false,
         isEditModalVisible: false,
         currentlyEditingId: null,
-        editingValue: null
+        editingValue: null,
+        forbiddenErrors: {
+            categories: false
+        }
     };
 
     componentDidMount() {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories",
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
@@ -70,10 +73,19 @@ class ManageCategories extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occured while trying to load categories");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occured while trying to load categories", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.categories = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     }
 
@@ -90,7 +102,7 @@ class ManageCategories extends React.Component {
             loading: true
         });
         axios.delete(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/" + id,
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/" + id,
         ).then(res => {
             if (res.status === 200) {
                 notification["success"]({
@@ -125,8 +137,7 @@ class ManageCategories extends React.Component {
         const tagElem = (
             <Tag
                 color={pSBC(0.30, config.theme.primaryColor)}
-                style={{marginTop:8}}
-            >
+                style={{marginTop: 8}}>
                 {categoryName}
                 <Divider type="vertical"/>
                 <Tooltip title="edit">
@@ -150,8 +161,7 @@ class ManageCategories extends React.Component {
                             }
                         }}
                         okText="Yes"
-                        cancelText="No"
-                    >
+                        cancelText="No">
                         <Icon type="delete"/>
                     </Popconfirm>
                 </Tooltip>
@@ -168,7 +178,7 @@ class ManageCategories extends React.Component {
         const config = this.props.context;
         const tagElem = (
             <Tag
-                style={{marginTop:8}}
+                style={{marginTop: 8}}
                 closable
                 onClose={e => {
                     e.preventDefault();
@@ -229,7 +239,7 @@ class ManageCategories extends React.Component {
         const data = tempElements.map(category => category.categoryName);
 
         axios.post(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories",
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories",
             data,
         ).then(res => {
             if (res.status === 200) {
@@ -287,7 +297,7 @@ class ManageCategories extends React.Component {
         });
 
         axios.put(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/rename?from=" + currentlyEditingId + "&to=" + editingValue,
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/admin/applications/categories/rename?from=" + currentlyEditingId + "&to=" + editingValue,
             {},
         ).then(res => {
             if (res.status === 200) {
@@ -324,11 +334,18 @@ class ManageCategories extends React.Component {
     };
 
     render() {
-        const {categories, inputVisible, inputValue, tempElements, isAddNewVisible} = this.state;
+        const {categories, inputVisible, inputValue, tempElements, isAddNewVisible, forbiddenErrors} = this.state;
         const categoriesElements = categories.map(this.renderElement);
         const temporaryElements = tempElements.map(this.renderTempElement);
         return (
             <div style={{marginBottom: 16}}>
+                {(forbiddenErrors.categories) && (
+                    <Alert
+                        message="You don't have permission to view categories."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
                 <Card>
                     <Spin tip="Working on it..." spinning={this.state.loading}>
                         <Row>

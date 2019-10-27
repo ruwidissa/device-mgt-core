@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, InputNumber, Modal} from "antd";
+import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, InputNumber, Modal, Alert} from "antd";
 import "@babel/polyfill";
 import axios from "axios";
 import {handleApiError} from "../../../js/Utils";
@@ -117,7 +117,7 @@ class NewAppUploadForm extends React.Component {
                             osVersionsHelperText: 'Please select supported OS versions',
                             osVersionsValidateStatus: 'error',
                         });
-                    } else if (this.lowerOsVersion >= this.upperOsVersion) {
+                    } else if (parseFloat(this.lowerOsVersion) >= parseFloat(this.upperOsVersion)) {
                         isFormValid = false;
                         this.setState({
                             osVersionsHelperText: 'Please select valid range',
@@ -221,7 +221,7 @@ class NewAppUploadForm extends React.Component {
     };
 
     handleLowerOsVersionChange = (lowerOsVersion) => {
-        this.lowerOsVersion = parseFloat(lowerOsVersion);
+        this.lowerOsVersion = lowerOsVersion;
         this.setState({
             osVersionsValidateStatus: 'validating',
             osVersionsHelperText: ''
@@ -229,7 +229,11 @@ class NewAppUploadForm extends React.Component {
     };
 
     handleUpperOsVersionChange = (upperOsVersion) => {
-        this.upperOsVersion = parseFloat(upperOsVersion);
+        if (upperOsVersion === "all") {
+            this.upperOsVersion = this.props.supportedOsVersions[this.props.supportedOsVersions.length - 1]["versionName"];
+        }else{
+            this.upperOsVersion = upperOsVersion;
+        }
         this.setState({
             osVersionsValidateStatus: 'validating',
             osVersionsHelperText: ''
@@ -400,60 +404,69 @@ class NewAppUploadForm extends React.Component {
                             </Form.Item>
 
                             {(formConfig.installationType !== "WEB_CLIP" && formConfig.installationType !== "CUSTOM") && (
-                                <Form.Item
-                                    {...formItemLayout}
-                                    label="Supported OS Versions"
-                                    validateStatus={osVersionsValidateStatus}
-                                    help={osVersionsHelperText}>
-                                    {getFieldDecorator('supportedOS', {
-                                        rules: [{
-                                            required: true
-                                        }],
-                                        initialValue: false
-                                    })(
-                                        <div>
-                                            <InputGroup>
-                                                <Row gutter={8}>
-                                                    <Col span={11}>
-                                                        <Select
-                                                            placeholder="Lower version"
-                                                            style={{width: "100%"}}
-                                                            onChange={this.handleLowerOsVersionChange}>
-                                                            {supportedOsVersions.map(version => (
-                                                                <Option key={version.versionName}
-                                                                        value={version.versionName}>
-                                                                    {version.versionName}
-                                                                </Option>
-                                                            ))}
-                                                        </Select>
-                                                    </Col>
-                                                    <Col span={2}>
-                                                        <p> - </p>
-                                                    </Col>
-                                                    <Col span={11}>
-                                                        <Select style={{width: "100%"}}
-                                                                placeholder="Upper version"
-                                                                defaultActiveFirstOption={true}
-                                                                onChange={this.handleUpperOsVersionChange}>
-                                                            {(supportedOsVersions.length > 0) &&(
-                                                                <Option key="all"
-                                                                        value={supportedOsVersions[supportedOsVersions.length-1]["versionName"]}>
-                                                                    All
-                                                                </Option>
-                                                            )}
-                                                            {supportedOsVersions.map(version => (
-                                                                <Option key={version.versionName}
-                                                                        value={version.versionName}>
-                                                                    {version.versionName}
-                                                                </Option>
-                                                            ))}
-                                                        </Select>
-                                                    </Col>
-                                                </Row>
-                                            </InputGroup>
-                                        </div>
+                                <div>
+                                    {(this.props.forbiddenErrors.supportedOsVersions) && (
+                                        <Alert
+                                            message="You don't have permission to view supported OS versions."
+                                            type="warning"
+                                            banner
+                                            closable/>
                                     )}
-                                </Form.Item>
+                                    <Form.Item
+                                        {...formItemLayout}
+                                        label="Supported OS Versions"
+                                        validateStatus={osVersionsValidateStatus}
+                                        help={osVersionsHelperText}>
+                                        {getFieldDecorator('supportedOS', {
+                                            rules: [{
+                                                required: true
+                                            }],
+                                            initialValue: false
+                                        })(
+                                            <div>
+                                                <InputGroup>
+                                                    <Row gutter={8}>
+                                                        <Col span={11}>
+                                                            <Select
+                                                                placeholder="Lower version"
+                                                                style={{width: "100%"}}
+                                                                onChange={this.handleLowerOsVersionChange}>
+                                                                {supportedOsVersions.map(version => (
+                                                                    <Option key={version.versionName}
+                                                                            value={version.versionName}>
+                                                                        {version.versionName}
+                                                                    </Option>
+                                                                ))}
+                                                            </Select>
+                                                        </Col>
+                                                        <Col span={2}>
+                                                            <p> - </p>
+                                                        </Col>
+                                                        <Col span={11}>
+                                                            <Select style={{width: "100%"}}
+                                                                    placeholder="Upper version"
+                                                                    defaultActiveFirstOption={true}
+                                                                    onChange={this.handleUpperOsVersionChange}>
+                                                                {(supportedOsVersions.length > 0) && (
+                                                                    <Option key="all"
+                                                                            value="all">
+                                                                        All
+                                                                    </Option>
+                                                                )}
+                                                                {supportedOsVersions.map(version => (
+                                                                    <Option key={version.versionName}
+                                                                            value={version.versionName}>
+                                                                        {version.versionName}
+                                                                    </Option>
+                                                                ))}
+                                                            </Select>
+                                                        </Col>
+                                                    </Row>
+                                                </InputGroup>
+                                            </div>
+                                        )}
+                                    </Form.Item>
+                                </div>
                             )}
                             <Form.Item {...formItemLayout} label="Meta Data">
                                 {getFieldDecorator('meta', {})(

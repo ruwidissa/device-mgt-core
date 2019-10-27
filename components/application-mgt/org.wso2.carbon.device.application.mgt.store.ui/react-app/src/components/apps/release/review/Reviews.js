@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {List, message, Avatar, Spin, Button, notification} from 'antd';
+import {List, message, Avatar, Spin, Button, notification, Alert} from 'antd';
 import "./Reviews.css";
 
 import InfiniteScroll from 'react-infinite-scroller';
@@ -33,7 +33,10 @@ class Reviews extends React.Component {
         data: [],
         loading: false,
         hasMore: false,
-        loadMore: false
+        loadMore: false,
+        forbiddenErrors: {
+            reviews: false
+        }
     };
 
 
@@ -51,7 +54,7 @@ class Reviews extends React.Component {
         const config = this.props.context;
 
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri +config.serverConfig.invoker.store+"/reviews/"+type+"/"+uuid,
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/reviews/" + type + "/" + uuid,
             {
                 headers: {'X-Platform': config.serverConfig.platform}
             }).then(res => {
@@ -60,8 +63,20 @@ class Reviews extends React.Component {
                 callback(reviews);
             }
 
-        }).catch(function (error) {
-            handleApiError(error,"Error occurred while trying to load reviews.");
+        }).catch((error) => {
+            handleApiError(error, "Error occurred while trying to load reviews.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.reviews = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -101,7 +116,7 @@ class Reviews extends React.Component {
         });
     };
 
-    deleteCallback = () =>{
+    deleteCallback = () => {
         this.fetchData(0, limit, res => {
             this.setState({
                 data: res,
@@ -114,30 +129,40 @@ class Reviews extends React.Component {
         const {loading, hasMore, data, loadMore} = this.state;
         const {uuid} = this.props;
         return (
-            <div className="infinite-container">
-                <InfiniteScroll
-                    initialLoad={false}
-                    pageStart={0}
-                    loadMore={this.handleInfiniteOnLoad}
-                    hasMore={!loading && hasMore}
-                    useWindow={true}>
-                    <List
-                        dataSource={data}
-                        renderItem={item => (
-                            <List.Item key={item.id}>
-                                <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={false} deleteCallback={this.deleteCallback}/>
-                            </List.Item>
-                        )}>
-                        {loading && hasMore && (
-                            <div className="loading-container">
-                                <Spin/>
-                            </div>
-                        )}
-                    </List>
-                </InfiniteScroll>
-                {!loadMore && (data.length >= limit) && (<div style={{textAlign: "center"}}>
-                    <Button type="dashed" htmlType="button" onClick={this.enableLoading}>Read All Reviews</Button>
-                </div>)}
+            <div>
+                {(this.state.forbiddenErrors.reviews) && (
+                    <Alert
+                        message="You don't have permission to view reviews."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
+                <div className="infinite-container">
+                    <InfiniteScroll
+                        initialLoad={false}
+                        pageStart={0}
+                        loadMore={this.handleInfiniteOnLoad}
+                        hasMore={!loading && hasMore}
+                        useWindow={true}>
+                        <List
+                            dataSource={data}
+                            renderItem={item => (
+                                <List.Item key={item.id}>
+                                    <SingleReview uuid={uuid} review={item} isDeletable={true} isEditable={false}
+                                                  deleteCallback={this.deleteCallback}/>
+                                </List.Item>
+                            )}>
+                            {loading && hasMore && (
+                                <div className="loading-container">
+                                    <Spin/>
+                                </div>
+                            )}
+                        </List>
+                    </InfiniteScroll>
+                    {!loadMore && (data.length >= limit) && (<div style={{textAlign: "center"}}>
+                        <Button type="dashed" htmlType="button" onClick={this.enableLoading}>Read All Reviews</Button>
+                    </div>)}
+                </div>
             </div>
         );
     }
