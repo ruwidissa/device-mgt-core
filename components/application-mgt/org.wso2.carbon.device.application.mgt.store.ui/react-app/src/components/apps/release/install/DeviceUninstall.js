@@ -18,7 +18,7 @@
 
 import React from "react";
 import axios from "axios";
-import {Button, Select, Table, Typography} from "antd";
+import {Alert, Button, Select, Table, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 
 // Load locale-specific relative date/time formatting rules.
@@ -109,7 +109,8 @@ class DeviceUninstall extends React.Component {
             data: [],
             pagination: {},
             loading: false,
-            selectedRows: []
+            selectedRows: [],
+            isForbidden: false
         };
     }
 
@@ -164,8 +165,17 @@ class DeviceUninstall extends React.Component {
                 });
             }
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load devices.");
-            this.setState({loading: false});
+            handleApiError(error, "Error occurred while trying to load devices.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -204,6 +214,13 @@ class DeviceUninstall extends React.Component {
                     Start uninstalling the application for devices by selecting the corresponding devices.
                     Select uninstall to automatically start uninstalling the application for the respective devices.
                 </Text>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view installed devices."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
                 <Table
                     style={{paddingTop: 20}}
                     columns={columns}

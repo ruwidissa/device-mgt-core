@@ -27,7 +27,7 @@ import AppUninstallModal from "./install/AppUninstallModal";
 import {withConfigContext} from "../../../context/ConfigContext";
 import {handleApiError} from "../../../js/Utils";
 import ReviewContainer from "./review/ReviewContainer";
-import InstalledDevicesTable from "./InstalledDevicesTable";
+import SubscriptionDetails from "./SubscriptionDetails";
 
 const {Title, Text, Paragraph} = Typography;
 const {TabPane} = Tabs;
@@ -205,7 +205,7 @@ class ReleaseView extends React.Component {
                             <ReviewContainer uuid={release.uuid}/>
                         </TabPane>
                         <TabPane tab="Subscription Details" key="2">
-                            <InstalledDevicesTable uuid={release.uuid}/>
+                            <SubscriptionDetails uuid={release.uuid}/>
                         </TabPane>
                     </Tabs>
                 </div>

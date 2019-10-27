@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Typography, Select, Spin, message, notification, Button} from "antd";
+import {Typography, Select, Spin, message, notification, Button, Alert} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
@@ -39,6 +39,7 @@ class UserUninstall extends React.Component {
         data: [],
         value: [],
         fetching: false,
+        isForbidden: false
     };
 
     fetchUser = (value) => {
@@ -67,8 +68,17 @@ class UserUninstall extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load users.");
-            this.setState({fetching: false});
+            handleApiError(error, "Error occurred while trying to load users.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -97,6 +107,13 @@ class UserUninstall extends React.Component {
                 <Text>Start uninstalling the application for one or more users by entering the corresponding user name.
                     Select uninstall to automatically start uninstalling the application for the respective
                     user/users. </Text>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view uninstalled users."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
                 <p>Select users</p>
                 <Select
                     mode="multiple"

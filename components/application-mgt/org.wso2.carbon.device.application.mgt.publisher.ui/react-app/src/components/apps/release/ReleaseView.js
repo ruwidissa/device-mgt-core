@@ -24,6 +24,7 @@ import "../../../App.css";
 import DetailedRating from "../detailed-rating/DetailedRating";
 import EditRelease from "./edit-release/EditRelease";
 import {withConfigContext} from "../../../context/ConfigContext";
+import NewAppUploadForm from "../../new-app/subForms/NewAppUploadForm";
 
 const {Title, Text, Paragraph} = Typography;
 
@@ -97,6 +98,7 @@ class ReleaseView extends React.Component {
                             <Text>Version : {release.version}</Text><br/>
 
                             <EditRelease
+                                forbiddenErrors={this.props.forbiddenErrors}
                                 isAppUpdatable={isAppUpdatable}
                                 type={app.type}
                                 deviceType={app.deviceType}

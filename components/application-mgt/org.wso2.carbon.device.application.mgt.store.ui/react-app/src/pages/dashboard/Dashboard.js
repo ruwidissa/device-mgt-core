@@ -17,7 +17,8 @@
  */
 
 import React from "react";
-import {Layout, Menu, Icon, Drawer, Button} from 'antd';
+import {Layout, Menu, Icon, Drawer, Button, Alert} from 'antd';
+
 const {Header, Content, Footer} = Layout;
 import {Link} from "react-router-dom";
 import RouteWithSubRoutes from "../../components/RouteWithSubRoutes";
@@ -38,7 +39,10 @@ class Dashboard extends React.Component {
             selectedKeys: [],
             deviceTypes: [],
             visible: false,
-            collapsed: false
+            collapsed: false,
+            forbiddenErrors: {
+                deviceTypes: false
+            }
         };
         this.logo = this.props.context.theme.logo;
         this.config = this.props.context;
@@ -62,10 +66,19 @@ class Dashboard extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load device types.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load device types.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.deviceTypes = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -81,7 +94,7 @@ class Dashboard extends React.Component {
             collapsed: !this.state.collapsed,
         });
     };
-    
+
     onCloseMobileNavigationBar = () => {
         this.setState({
             visible: false,
@@ -90,7 +103,7 @@ class Dashboard extends React.Component {
 
     render() {
         const config = this.props.context;
-        const {selectedKeys, deviceTypes} = this.state;
+        const {selectedKeys, deviceTypes, forbiddenErrors} = this.state;
 
         const DeviceTypesData = deviceTypes.map((deviceType) => {
             const platform = deviceType.name;
@@ -116,7 +129,7 @@ class Dashboard extends React.Component {
                 <Layout>
                     <Header style={{paddingLeft: 0, paddingRight: 0, backgroundColor: "white"}}>
                         <div className="logo-image">
-                            <Link to="/store/android"><img alt="logo" src={this.logo}/></Link>
+                            <Link to="/store"><img alt="logo" src={this.logo}/></Link>
                         </div>
 
                         <div className="web-layout">
@@ -131,7 +144,7 @@ class Dashboard extends React.Component {
                                 <Menu.Item key="web-clip">
                                     <Link to="/store/web-clip">
                                         <Icon type="upload"/>
-                                            Web Clips
+                                        Web Clips
                                     </Link>
                                 </Menu.Item>
 
@@ -140,7 +153,7 @@ class Dashboard extends React.Component {
                                              <span className="submenu-title-wrapper">
                                      <Icon type="user"/>
                                                  {this.config.user}
-                                     </span> }>
+                                     </span>}>
                                     <Logout/>
                                 </SubMenu>
                             </Menu>
@@ -156,32 +169,32 @@ class Dashboard extends React.Component {
                         </Button>
                     </div>
                 </Layout>
-                    <Drawer
-                        title={<Link to="/store/android" onClick={this.onCloseMobileNavigationBar}>
-                            <img alt="logo" src={this.logo} style={{marginLeft: 30}} width={"60%"}/>
-                        </Link>}
-                        placement="left"
-                        closable={false}
-                        onClose={this.onCloseMobileNavigationBar}
-                        visible={this.state.visible}
-                        getContainer={false}
-                        style={{position: 'absolute'}}>
-                        <Menu
-                            theme="light"
-                            mode="inline"
-                            defaultSelectedKeys={selectedKeys}
-                            style={{lineHeight: '64px', width: 231}}
-                            onClick={this.onCloseMobileNavigationBar}>
+                <Drawer
+                    title={<Link to="/store" onClick={this.onCloseMobileNavigationBar}>
+                        <img alt="logo" src={this.logo} style={{marginLeft: 30}} width={"60%"}/>
+                    </Link>}
+                    placement="left"
+                    closable={false}
+                    onClose={this.onCloseMobileNavigationBar}
+                    visible={this.state.visible}
+                    getContainer={false}
+                    style={{position: 'absolute'}}>
+                    <Menu
+                        theme="light"
+                        mode="inline"
+                        defaultSelectedKeys={selectedKeys}
+                        style={{lineHeight: '64px', width: 231}}
+                        onClick={this.onCloseMobileNavigationBar}>
 
-                            {DeviceTypesData}
+                        {DeviceTypesData}
 
-                            <Menu.Item key="web-clip">
-                                <Link to="/store/web-clip">
+                        <Menu.Item key="web-clip">
+                            <Link to="/store/web-clip">
                                 <Icon type="upload"/>Web Clips
-                                </Link>
-                            </Menu.Item>
-                        </Menu>
-                    </Drawer>
+                            </Link>
+                        </Menu.Item>
+                    </Menu>
+                </Drawer>
                 <Layout className="mobile-layout">
                     <Menu
                         mode="horizontal"
@@ -198,6 +211,13 @@ class Dashboard extends React.Component {
                 </Layout>
 
                 <Layout className="dashboard-body">
+                    {(forbiddenErrors.deviceTypes) && (
+                        <Alert
+                            message="You don't have permission to view device types."
+                            type="warning"
+                            banner
+                            closable/>
+                    )}
                     <Content style={{padding: '0 0'}}>
                         <Switch>
                             {this.state.routes.map((route) => (

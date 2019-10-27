@@ -50,7 +50,7 @@ class AppCard extends React.Component {
                         </Col>
                         <Col span={24} style={{paddingTop:10}}>
                             <Text className="app-name" strong level={4}>{app.name}</Text><br/>
-                            <Text type="secondary" level={4}>{app.subMethod.toLowerCase()}</Text><br/>
+                            <Text type="secondary" level={4}>{app.type.toLowerCase()}</Text><br/>
                             <StarRatings
                                 rating={app.rating}
                                 starRatedColor="#777"

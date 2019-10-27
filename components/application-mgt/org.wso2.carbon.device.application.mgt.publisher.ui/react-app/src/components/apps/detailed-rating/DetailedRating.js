@@ -61,7 +61,7 @@ class DetailedRating extends React.Component{
             }
 
         }).catch(function (error) {
-            handleApiError(error, "Error occurred while trying to load rating for the release.");
+            handleApiError(error, "Error occurred while trying to load rating for the release.", true);
         });
     };
 

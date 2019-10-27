@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Typography, Select, Spin, message, notification, Button} from "antd";
+import {Typography, Select, Spin, message, notification, Button, Alert} from "antd";
 import debounce from 'lodash.debounce';
 import axios from "axios";
 import {withConfigContext} from "../../../../context/ConfigContext";
@@ -39,6 +39,7 @@ class GroupUninstall extends React.Component {
         data: [],
         value: [],
         fetching: false,
+        isForbidden: false
     };
 
     fetchUser = value => {
@@ -50,9 +51,8 @@ class GroupUninstall extends React.Component {
         const uuid = this.props.uuid;
 
         axios.get(
-                window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store+ "/subscription/" + uuid + "/"+
-                "/GROUP?",
-
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" +
+            "/GROUP?",
         ).then(res => {
             if (res.status === 200) {
                 if (fetchId !== this.lastFetchId) {
@@ -69,8 +69,17 @@ class GroupUninstall extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load groups.");
-            this.setState({fetching: false});
+            handleApiError(error, "Error occurred while trying to load groups.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                this.setState({
+                    isForbidden: true,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -82,13 +91,13 @@ class GroupUninstall extends React.Component {
         });
     };
 
-    uninstall = (timestamp=null) =>{
+    uninstall = (timestamp = null) => {
         const {value} = this.state;
         const data = [];
-        value.map(val=>{
+        value.map(val => {
             data.push(val.key);
         });
-        this.props.onUninstall("group", data, "uninstall",timestamp);
+        this.props.onUninstall("group", data, "uninstall", timestamp);
     };
 
     render() {
@@ -96,26 +105,35 @@ class GroupUninstall extends React.Component {
         const {fetching, data, value} = this.state;
 
         return (
-                <div>
-                    <Text>Start uninstalling the application for one or more groups by entering the corresponding group name. Select uninstall to automatically start uninstalling the application for the respective device group/ groups.</Text>
-                    <br/>
-                    <br/>
-                    <Select
-                            mode="multiple"
-                            labelInValue
-                            value={value}
-                            placeholder="Search groups"
-                            notFoundContent={fetching ? <Spin size="small"/> : null}
-                            filterOption={false}
-                            onSearch={this.fetchUser}
-                            onChange={this.handleChange}
-                            style={{width: '100%'}}>
-                        {data.map(d => (
-                                <Option key={d.value}>{d.text}</Option>
-                        ))}
-                    </Select>
-                    <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length===0}/>
-                </div>
+            <div>
+                <Text>Start uninstalling the application for one or more groups by entering the corresponding group
+                    name. Select uninstall to automatically start uninstalling the application for the respective device
+                    group/ groups.</Text>
+                {(this.state.isForbidden) && (
+                    <Alert
+                        message="You don't have permission to view installed groups."
+                        type="warning"
+                        banner
+                        closable/>
+                )}
+                <br/>
+                <br/>
+                <Select
+                    mode="multiple"
+                    labelInValue
+                    value={value}
+                    placeholder="Search groups"
+                    notFoundContent={fetching ? <Spin size="small"/> : null}
+                    filterOption={false}
+                    onSearch={this.fetchUser}
+                    onChange={this.handleChange}
+                    style={{width: '100%'}}>
+                    {data.map(d => (
+                        <Option key={d.value}>{d.text}</Option>
+                    ))}
+                </Select>
+                <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length === 0}/>
+            </div>
         );
     }
 }

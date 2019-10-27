@@ -30,7 +30,7 @@ import {
     Form,
     message,
     Radio,
-    notification
+    notification, Alert
 } from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../../context/ConfigContext";
@@ -46,7 +46,12 @@ class FiltersForm extends React.Component {
         this.state = {
             categories: [],
             tags: [],
-            deviceTypes: []
+            deviceTypes: [],
+            forbiddenErrors: {
+                categories: false,
+                tags: false,
+                deviceTypes: false
+            }
         };
     }
 
@@ -59,11 +64,11 @@ class FiltersForm extends React.Component {
                 }
             }
 
-            if(values.hasOwnProperty("deviceType") && values.deviceType==="ALL"){
+            if (values.hasOwnProperty("deviceType") && values.deviceType === "ALL") {
                 delete values["deviceType"];
             }
 
-            if(values.hasOwnProperty("appType") && values.appType==="ALL"){
+            if (values.hasOwnProperty("appType") && values.appType === "ALL") {
                 delete values["appType"];
             }
 
@@ -73,16 +78,17 @@ class FiltersForm extends React.Component {
 
     componentDidMount() {
         this.getCategories();
+        this.getTags();
+        this.getDeviceTypes();
     }
 
     getCategories = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/categories"
         ).then(res => {
             if (res.status === 200) {
                 let categories = JSON.parse(res.data.data);
-                this.getTags();
                 this.setState({
                     categories: categories,
                     loading: false
@@ -90,21 +96,29 @@ class FiltersForm extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load categories.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load categories.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.categories = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
     getTags = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/tags"
         ).then(res => {
             if (res.status === 200) {
                 let tags = JSON.parse(res.data.data);
-                this.getDeviceTypes();
                 this.setState({
                     tags: tags,
                     loading: false,
@@ -112,10 +126,19 @@ class FiltersForm extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load tags.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load tags.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.tags = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
@@ -123,7 +146,7 @@ class FiltersForm extends React.Component {
     getDeviceTypes = () => {
         const config = this.props.context;
         axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
+            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt + "/device-types"
         ).then(res => {
             if (res.status === 200) {
                 const deviceTypes = JSON.parse(res.data.data);
@@ -134,15 +157,24 @@ class FiltersForm extends React.Component {
             }
 
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load device types.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load device types.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.deviceTypes = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
     render() {
-        const {categories, tags, deviceTypes} = this.state;
+        const {categories, tags, deviceTypes, forbiddenErrors} = this.state;
         const {getFieldDecorator} = this.props.form;
 
         return (
@@ -170,7 +202,13 @@ class FiltersForm extends React.Component {
                             </Form.Item>
                         </Col>
                     </Row>
-
+                    {(forbiddenErrors.categories) && (
+                        <Alert
+                            message="You don't have permission to view categories."
+                            type="warning"
+                            banner
+                            closable/>
+                    )}
                     <Form.Item label="Categories">
                         {getFieldDecorator('categories', {
                             rules: [{
@@ -182,8 +220,7 @@ class FiltersForm extends React.Component {
                                 mode="multiple"
                                 style={{width: '100%'}}
                                 placeholder="Select a Category"
-                                onChange={this.handleCategoryChange}
-                            >
+                                onChange={this.handleCategoryChange}>
                                 {
                                     categories.map(category => {
                                         return (
@@ -198,7 +235,13 @@ class FiltersForm extends React.Component {
                         )}
                     </Form.Item>
 
-
+                    {(forbiddenErrors.deviceTypes) && (
+                        <Alert
+                            message="You don't have permission to view device types."
+                            type="warning"
+                            banner
+                            closable/>
+                    )}
                     <Form.Item label="Device Type">
                         {getFieldDecorator('deviceType', {
                             rules: [{
@@ -208,8 +251,7 @@ class FiltersForm extends React.Component {
                         })(
                             <Select
                                 style={{width: '100%'}}
-                                placeholder="Select device types"
-                            >
+                                placeholder="Select device types">
                                 {
                                     deviceTypes.map(deviceType => {
                                         return (
@@ -226,7 +268,13 @@ class FiltersForm extends React.Component {
                             </Select>
                         )}
                     </Form.Item>
-
+                    {(forbiddenErrors.tags) && (
+                        <Alert
+                            message="You don't have permission to view tags."
+                            type="warning"
+                            banner
+                            closable/>
+                    )}
                     <Form.Item label="Tags">
                         {getFieldDecorator('tags', {
                             rules: [{

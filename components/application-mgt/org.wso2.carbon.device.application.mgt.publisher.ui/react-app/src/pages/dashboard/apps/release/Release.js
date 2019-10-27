@@ -24,6 +24,7 @@ import ReleaseView from "../../../../components/apps/release/ReleaseView";
 import LifeCycle from "../../../../components/apps/release/lifeCycle/LifeCycle";
 import {withConfigContext} from "../../../../context/ConfigContext";
 import {handleApiError} from "../../../../js/Utils";
+import NewAppUploadForm from "../../../../components/new-app/subForms/NewAppUploadForm";
 
 const {Title} = Typography;
 
@@ -40,13 +41,19 @@ class Release extends React.Component {
             release: null,
             currentLifecycleStatus: null,
             lifecycle: null,
-            supportedOsVersions:[]
+            supportedOsVersions: [],
+            forbiddenErrors: {
+                supportedOsVersions: false,
+                lifeCycle: false
+            }
         };
     }
 
     componentDidMount() {
         const {uuid} = this.props.match.params;
         this.fetchData(uuid);
+        this.getLifecycle();
+
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -86,10 +93,8 @@ class Release extends React.Component {
                     loading: false,
                     uuid: uuid
                 });
-                if(config.deviceTypes.mobileTypes.includes(app.deviceType)){
+                if (config.deviceTypes.mobileTypes.includes(app.deviceType)) {
                     this.getSupportedOsVersions(app.deviceType);
-                }else{
-                    this.getLifecycle();
                 }
             }
 
@@ -111,8 +116,15 @@ class Release extends React.Component {
                 })
             }
 
-        }).catch(function (error) {
-            handleApiError(error, "Error occurred while trying to load lifecycle configuration.");
+        }).catch((error) => {
+            handleApiError(error, "Error occurred while trying to load lifecycle configuration.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.lifeCycle = true;
+                this.setState({
+                    forbiddenErrors
+                })
+            }
         });
     };
 
@@ -125,21 +137,28 @@ class Release extends React.Component {
             if (res.status === 200) {
                 let supportedOsVersions = JSON.parse(res.data.data);
                 this.setState({
-                    supportedOsVersions,
-                    loading: false,
+                    supportedOsVersions
                 });
-                this.getLifecycle();
             }
         }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load supported OS versions.");
-            this.setState({
-                loading: false
-            });
+            handleApiError(error, "Error occurred while trying to load supported OS versions.", true);
+            if (error.hasOwnProperty("response") && error.response.status === 403) {
+                const {forbiddenErrors} = this.state;
+                forbiddenErrors.supportedOsVersions = true;
+                this.setState({
+                    forbiddenErrors,
+                    loading: false
+                })
+            } else {
+                this.setState({
+                    loading: false
+                });
+            }
         });
     };
 
     render() {
-        const {app, release, currentLifecycleStatus, lifecycle, loading} = this.state;
+        const {app, release, currentLifecycleStatus, lifecycle, loading, forbiddenErrors} = this.state;
 
         if (release == null && loading === false) {
             return (
@@ -159,12 +178,13 @@ class Release extends React.Component {
                                 <Skeleton loading={loading} avatar={{size: 'large'}} active paragraph={{rows: 18}}>
                                     {(release !== null) && (
                                         <ReleaseView
+                                            forbiddenErrors={forbiddenErrors}
                                             app={app}
                                             release={release}
                                             currentLifecycleStatus={currentLifecycleStatus}
                                             lifecycle={lifecycle}
                                             updateRelease={this.updateRelease}
-                                            supportedOsVersions = {[...this.state.supportedOsVersions]}
+                                            supportedOsVersions={[...this.state.supportedOsVersions]}
                                         />)
                                     }
                                 </Skeleton>

@@ -39,7 +39,8 @@
     "redux-thunk": "^2.3.0",
     "shade-blend-color": "^1.0.0",
     "storm-react-diagrams": "^5.2.1",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "lodash.debounce": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",
