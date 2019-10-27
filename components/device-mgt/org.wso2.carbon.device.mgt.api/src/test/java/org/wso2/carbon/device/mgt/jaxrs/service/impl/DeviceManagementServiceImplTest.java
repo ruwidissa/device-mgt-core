@@ -51,13 +51,13 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
@@ -70,7 +70,6 @@ import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
-import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceAgentService;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.DeviceMgtAPITestHelper;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
@@ -78,12 +77,10 @@ import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.text.ParseException;
+import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
-import javax.ws.rs.core.Response;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -105,6 +102,7 @@ public class DeviceManagementServiceImplTest {
     private static final String DEFAULT_ROLE = "admin";
     private static final String DEFAULT_OWNERSHIP = "BYOD";
     private static final String DEFAULT_STATUS = "ACTIVE";
+    private static final String DEFAULT_EXCLUDED_STATUS = "REMOVED";
     private static final String DEFAULT_DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
     private DeviceManagementService deviceManagementService;
     private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
@@ -173,7 +171,7 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(this.deviceAccessAuthorizationService);
         Response response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -190,19 +188,19 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, null, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, null, null, null, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(TEST_DEVICE_NAME, TEST_DEVICE_TYPE, null, null, null, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, true, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, true, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
@@ -311,7 +309,7 @@ public class DeviceManagementServiceImplTest {
                 .toReturn(null);
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
@@ -329,11 +327,11 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, null, DEFAULT_USERNAME, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
@@ -352,8 +350,8 @@ public class DeviceManagementServiceImplTest {
         Mockito.when(this.deviceAccessAuthorizationService.isDeviceAdminUser()).thenReturn(false);
 
         Response response = this.deviceManagementService
-                .getDevices(null, TEST_DEVICE_TYPE, "newuser", null, DEFAULT_ROLE, DEFAULT_OWNERSHIP, DEFAULT_STATUS, 1,
-                        null, null, false, 10, 5);
+                .getDevices(null, TEST_DEVICE_TYPE, "newuser", null, DEFAULT_ROLE, DEFAULT_OWNERSHIP, DEFAULT_EXCLUDED_STATUS,
+                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.UNAUTHORIZED.getStatusCode());
         Mockito.reset(this.deviceAccessAuthorizationService);
     }
@@ -372,15 +370,15 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, ifModifiedSince, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, ifModifiedSince, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_MODIFIED.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, ifModifiedSince, true, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, ifModifiedSince, true, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_MODIFIED.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, "ErrorModifiedSince", false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, "ErrorModifiedSince", false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -398,15 +396,15 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, since, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, since, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, since, null, true, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, since, null, true, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, "ErrorSince", null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, "ErrorSince", null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -426,7 +424,7 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         Mockito.reset(this.deviceManagementProviderService);
     }
@@ -446,7 +444,7 @@ public class DeviceManagementServiceImplTest {
 
         Response response = this.deviceManagementService
                 .getDevices(null, TEST_DEVICE_TYPE, DEFAULT_USERNAME, null, DEFAULT_ROLE, DEFAULT_OWNERSHIP,
-                        DEFAULT_STATUS, 1, null, null, false, 10, 5);
+                        DEFAULT_EXCLUDED_STATUS, DEFAULT_STATUS, 1, null, null, false, 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         Mockito.reset(this.deviceAccessAuthorizationService);
     }

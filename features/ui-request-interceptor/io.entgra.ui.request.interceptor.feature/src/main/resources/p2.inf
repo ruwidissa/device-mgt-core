@@ -1,0 +1,5 @@
+instructions.configure = \
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/webapps/);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.ui.request.interceptor_${feature.version}/webapps/ui-request-handler.war,target:${installFolder}/../../deployment/server/webapps/publisher-ui-request-handler.war,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.ui.request.interceptor_${feature.version}/webapps/ui-request-handler.war,target:${installFolder}/../../deployment/server/webapps/store-ui-request-handler.war,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/io.entgra.ui.request.interceptor_${feature.version}/webapps/ui-request-handler.war,target:${installFolder}/../../deployment/server/webapps/entgra-ui-request-handler.war,overwrite:true);\

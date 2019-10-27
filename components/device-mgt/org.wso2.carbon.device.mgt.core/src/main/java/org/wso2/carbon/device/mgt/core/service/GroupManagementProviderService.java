@@ -20,7 +20,7 @@ package org.wso2.carbon.device.mgt.core.service;
 
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -128,6 +128,14 @@ public interface GroupManagementProviderService {
     int getGroupCount() throws GroupManagementException;
 
     /**
+     * Get all device group count in tenant by group status
+     *
+     * @return group count
+     * @throws GroupManagementException
+     */
+    int getGroupCountByStatus(String status) throws GroupManagementException;
+
+    /**
      * Get device group count of user
      *
      * @param username of the user
@@ -165,6 +173,9 @@ public interface GroupManagementProviderService {
      * @throws GroupManagementException
      */
     List<Device> getDevices(int groupId, int startIndex, int rowCount, boolean requireDeviceProps) throws GroupManagementException;
+
+    List<Device> getAllDevicesOfGroup(String groupName) throws GroupManagementException;
+
 
     /**
      * This method is used to retrieve the device count of a given group.

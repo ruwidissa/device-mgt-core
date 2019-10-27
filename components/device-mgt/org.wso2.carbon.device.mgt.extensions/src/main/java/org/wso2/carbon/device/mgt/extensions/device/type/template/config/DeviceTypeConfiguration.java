@@ -34,6 +34,8 @@
  */
 package org.wso2.carbon.device.mgt.extensions.device.type.template.config;
 
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -102,6 +104,17 @@ public class DeviceTypeConfiguration {
     @XmlElementWrapper(name = "InitialOperationConfig")
     @XmlElement(name = "Operation", required = true)
     protected List<String> operations;
+    @XmlElement(name = "DeviceTypePlatformDetails", required = true)
+    protected DeviceTypePlatformDetails deviceTypePlatformDetails;
+
+    public DeviceTypePlatformDetails getDeviceTypePlatformDetails() {
+        return deviceTypePlatformDetails;
+    }
+
+    public void setDeviceTypePlatformDetails(DeviceTypePlatformDetails deviceTypePlatformDetails) {
+        this.deviceTypePlatformDetails = deviceTypePlatformDetails;
+    }
+
     @XmlElementWrapper(name = "StartupOperationConfig")
     @XmlElement(name = "Operation", required = true)
     protected List<String> startupOperations;

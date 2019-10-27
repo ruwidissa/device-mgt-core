@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.application.extension.APIManagementProviderService;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Registry;
@@ -31,7 +31,6 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -44,8 +43,10 @@ public class APIUtil {
     private static final String DEFAULT_CDMF_API_TAG = "device_management";
     private static final String DEFAULT_AGENT_API_TAG = "device_agent";
     private static final String DEFAULT_CERT_API_TAG = "scep_management";
+    private static final String DEFAULT_APP_MGT_TAG = "application_management";
+    private static final String DEFAULT_APP_MGT_REVIEW_MGT_TAG = "review_management";
+    private static final String DEFAULT_APP_MGT_SUB_MGT_TAG = "subscription_management";
     private static final String DEFAULT_ANALYTICS_ARTIFACT_TAG = "analytics_artifacts_management";
-
 
     public static final String PERMISSION_PROPERTY_NAME = "name";
 
@@ -111,6 +112,9 @@ public class APIUtil {
         allowedApisTags.add(DEFAULT_CDMF_API_TAG);
         allowedApisTags.add(DEFAULT_CERT_API_TAG);
         allowedApisTags.add(DEFAULT_AGENT_API_TAG);
+        allowedApisTags.add(DEFAULT_APP_MGT_TAG);
+        allowedApisTags.add(DEFAULT_APP_MGT_REVIEW_MGT_TAG);
+        allowedApisTags.add(DEFAULT_APP_MGT_SUB_MGT_TAG);
         allowedApisTags.add(DEFAULT_ANALYTICS_ARTIFACT_TAG);
         return allowedApisTags;
     }

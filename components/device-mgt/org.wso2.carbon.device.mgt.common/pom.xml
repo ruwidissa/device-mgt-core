@@ -51,7 +51,8 @@
                             javax.xml.bind.annotation; version="${javax.xml.bind.imp.pkg.version}",
                             com.fasterxml.jackson.annotation;version="${jackson-annotations.version}",
                             org.wso2.carbon.analytics.datasource.commons;version="${carbon.analytics.version.range}",
-                            io.swagger.annotations; version="${swagger.annotations.version}"; resolution:=optional
+                            io.swagger.annotations; version="${swagger.annotations.version}"; resolution:=optional,
+                            com.google.gson
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -102,6 +103,10 @@
         <dependency>
             <groupId>org.wso2.carbon.analytics</groupId>
             <artifactId>org.wso2.carbon.analytics.datasource.commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
     </dependencies>
 

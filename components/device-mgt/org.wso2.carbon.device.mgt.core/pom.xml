@@ -78,12 +78,10 @@
                         <Private-Package>org.wso2.carbon.device.mgt.core.internal</Private-Package>
                         <Import-Package>
                             org.apache.axis2.*;version="${axis2.osgi.version.range}",
-                            org.apache.axiom.*; version="${axiom.osgi.version.range}",
                             org.osgi.framework,
                             org.osgi.service.component,
                             org.apache.commons.logging,
                             javax.naming,
-                            javax.xml.*,
                             javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             javax.servlet.*,
                             org.xml.sax,
@@ -177,7 +175,7 @@
                 </exclusion>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
+                    <artifactId>javax.servlet-api</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.wso2.carbon.registry</groupId>
@@ -357,6 +355,10 @@
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
+            <artifactId>org.wso2.carbon.tenant.mgt</artifactId>
         </dependency>
     </dependencies>
 

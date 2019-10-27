@@ -38,11 +38,11 @@ import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
@@ -59,7 +59,6 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
-import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
 import org.wso2.carbon.device.mgt.core.operation.mgt.util.DeviceIDHolder;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
@@ -483,34 +482,25 @@ public final class DeviceManagerUtil {
     }
 
     public static DeviceIDHolder validateDeviceIdentifiers(List<DeviceIdentifier> deviceIDs) {
-
-        List<String> errorDeviceIdList = new ArrayList<String>();
-        List<DeviceIdentifier> validDeviceIDList = new ArrayList<DeviceIdentifier>();
-
-        int deviceIDCounter = 0;
+        List<DeviceIdentifier> errorDeviceIdList = new ArrayList<>();
+        List<DeviceIdentifier> validDeviceIDList = new ArrayList<>();
         for (DeviceIdentifier deviceIdentifier : deviceIDs) {
-
-            deviceIDCounter++;
             String deviceID = deviceIdentifier.getId();
-
             if (deviceID == null || deviceID.isEmpty()) {
-                errorDeviceIdList.add(String.format(OperationMgtConstants.DeviceConstants.DEVICE_ID_NOT_FOUND,
-                        deviceIDCounter));
+                log.warn("When adding operation for devices, found a device identifiers which doesn't have defined "
+                        + "the identity of the device, with the request. Hence ignoring the device identifier.");
                 continue;
             }
-
             try {
-
                 if (isValidDeviceIdentifier(deviceIdentifier)) {
                     validDeviceIDList.add(deviceIdentifier);
                 } else {
-                    errorDeviceIdList.add(deviceID);
+                    errorDeviceIdList.add(deviceIdentifier);
                 }
             } catch (DeviceManagementException e) {
-                errorDeviceIdList.add(deviceID);
+                errorDeviceIdList.add(deviceIdentifier);
             }
         }
-
         DeviceIDHolder deviceIDHolder = new DeviceIDHolder();
         deviceIDHolder.setValidDeviceIDList(validDeviceIDList);
         deviceIDHolder.setErrorDeviceIdList(errorDeviceIdList);
@@ -524,10 +514,8 @@ public final class DeviceManagerUtil {
         if (device == null || device.getDeviceIdentifier() == null ||
                 device.getDeviceIdentifier().isEmpty() || device.getEnrolmentInfo() == null) {
             return false;
-        } else if (EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
-            return false;
-        }
-        return true;
+        } else
+            return !EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus());
     }
 
     public static boolean isDeviceExists(DeviceIdentifier deviceIdentifier) throws DeviceManagementException {
@@ -618,7 +606,7 @@ public final class DeviceManagerUtil {
      */
     @SuppressWarnings("PackageAccessibility")
     public static AppRegistrationCredentials getApplicationRegistrationCredentials(String host, String port,
-                                                                            String credentials)
+                                                                            String username, String password)
             throws ApplicationRegistrationException {
         if (host == null || port == null) {
             String msg = "Required gatewayHost or gatewayPort system property is null";
@@ -633,8 +621,8 @@ public final class DeviceManagerUtil {
 
             apiEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
             apiEndpoint.setHeader(DeviceManagementConstants.ConfigurationManagement.AUTHORIZATION_HEADER,
-                                  DeviceManagementConstants.ConfigurationManagement.BASIC_AUTH.concat(" ")
-                    .concat(getBase64EncodedCredentials(credentials)));
+                    DeviceManagementConstants.ConfigurationManagement.BASIC_AUTH.concat(" ")
+                            .concat(getBase64EncodedCredentials(username + ":" + password)));
             apiEndpoint.setEntity(constructApplicationRegistrationPayload());
             HttpResponse response = client.execute(apiEndpoint);
             if (response != null) {

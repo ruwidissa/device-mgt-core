@@ -1,19 +1,36 @@
 /*
-*  Copyright (c) 2015 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
+ * Copyright (c) 2015 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ *
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
 */
 
 package org.wso2.carbon.policy.mgt.core.mgt.impl;
@@ -22,12 +39,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.device.mgt.common.policy.mgt.DeviceGroupWrapper;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyCriterion;
@@ -122,6 +140,14 @@ public class PolicyManagerImpl implements PolicyManager {
 
                 policyDAO.addPolicyCriteria(policy);
                 policyDAO.addPolicyCriteriaProperties(policy.getPolicyCriterias());
+            }
+
+            if (policy.getCorrectiveActions() != null && !policy.getCorrectiveActions().isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding corrective actions for policy " + policy.getPolicyName() +
+                              " having policy id " + policy.getId());
+                }
+                policyDAO.addCorrectiveActionsOfPolicy(policy.getCorrectiveActions(), policy.getId());
             }
 
             if (policy.isActive()) {
@@ -246,6 +272,55 @@ public class PolicyManagerImpl implements PolicyManager {
 
                 policyDAO.addPolicyCriteria(policy);
                 policyDAO.addPolicyCriteriaProperties(policy.getPolicyCriterias());
+            }
+
+            List<CorrectiveAction> updatedCorrectiveActions = policy.getCorrectiveActions();
+            List<CorrectiveAction> existingCorrectiveActions = previousPolicy.getCorrectiveActions();
+            List<CorrectiveAction> correctiveActionsToUpdate = new ArrayList<>();
+            List<CorrectiveAction> correctiveActionsToDelete = new ArrayList<>();
+            List<CorrectiveAction> correctiveActionsToAdd = new ArrayList<>();
+            List<String> correctiveActionTypesToUpdate = new ArrayList<>();
+            List<String> existingCorrectiveActionTypes = new ArrayList<>();
+
+            if (updatedCorrectiveActions != null) {
+                for (CorrectiveAction updatedCorrectiveAction : updatedCorrectiveActions) {
+                    for (CorrectiveAction existingCorrectiveAction : existingCorrectiveActions) {
+                        if (updatedCorrectiveAction.getActionType().equals(existingCorrectiveAction.getActionType())) {
+                            correctiveActionsToUpdate.add(updatedCorrectiveAction);
+                            existingCorrectiveActionTypes.add(updatedCorrectiveAction.getActionType());
+                        }
+                    }
+                    correctiveActionTypesToUpdate.add(updatedCorrectiveAction.getActionType());
+                }
+
+                for (CorrectiveAction updatedCorrectiveAction : updatedCorrectiveActions) {
+                    if (!existingCorrectiveActionTypes.contains(updatedCorrectiveAction.getActionType())) {
+                        correctiveActionsToAdd.add(updatedCorrectiveAction);
+                    }
+                }
+            }
+
+            for (CorrectiveAction existingCorrectiveAction : existingCorrectiveActions) {
+                if (!correctiveActionTypesToUpdate.contains(existingCorrectiveAction.getActionType())) {
+                    correctiveActionsToDelete.add(existingCorrectiveAction);
+                }
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Updating corrective actions for policy " + policy.getPolicyName() +
+                          " having policy id " + policy.getId());
+            }
+
+            if (!correctiveActionsToUpdate.isEmpty()) {
+                policyDAO.updateCorrectiveActionsOfPolicy(correctiveActionsToUpdate, previousPolicy.getId());
+            }
+
+            if (!correctiveActionsToAdd.isEmpty()) {
+                policyDAO.addCorrectiveActionsOfPolicy(correctiveActionsToAdd, previousPolicy.getId());
+            }
+
+            if (!correctiveActionsToDelete.isEmpty()) {
+                policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActionsToDelete, previousPolicy.getId());
             }
 
             PolicyManagementDAOFactory.commitTransaction();
@@ -577,6 +652,12 @@ public class PolicyManagerImpl implements PolicyManager {
 
             policy.setRoles(roleNames);
             policy.setUsers(userNames);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving corrective actions of policy " + policy.getPolicyName() +
+                          " having policy id " + policy.getId());
+            }
+            policy.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policyId));
 
         } catch (PolicyManagerDAOException e) {
             throw new PolicyManagementException("Error occurred while getting the policy related to policy ID (" +
@@ -1179,6 +1260,11 @@ public class PolicyManagerImpl implements PolicyManager {
                 deviceGroupWrappers = this.getDeviceGroupNames(deviceGroupWrappers);
             }
             policy.setDeviceGroups(deviceGroupWrappers);
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving corrective actions for policy " + policy.getPolicyName() +
+                          " having policy id " + policy.getId());
+            }
+            policy.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policy.getId()));
         }
         Collections.sort(policyList);
     }

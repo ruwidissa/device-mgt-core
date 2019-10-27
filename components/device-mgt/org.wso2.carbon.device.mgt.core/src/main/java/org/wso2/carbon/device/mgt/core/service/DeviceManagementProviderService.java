@@ -37,24 +37,25 @@ package org.wso2.carbon.device.mgt.core.service;
 
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.DeviceNotFoundException;
-import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
+import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.InvalidArgumentException;
-import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
+import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
-import org.wso2.carbon.device.mgt.common.UnauthorizedDeviceAccessException;
-import org.wso2.carbon.device.mgt.common.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -65,6 +66,7 @@ import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationExecu
 import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 
@@ -727,6 +729,18 @@ public interface DeviceManagementProviderService {
     List<DeviceType> getDeviceTypes() throws DeviceManagementException;
 
     /**
+     * This retrieves the device location histories
+     *
+     * @param deviceIdentifier Device Identifier object
+     * @param from Specified start timestamp
+     * @param to Specified end timestamp
+     * @throws DeviceManagementException
+     * @return list of device's location histories
+     */
+    List<DeviceLocationHistory> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
+            throws DeviceManagementException;
+
+    /**
      * This retrieves the device pull notification payload and passes to device type pull notification subscriber.
      * @throws PullNotificationExecutionFailedException
      */
@@ -747,6 +761,16 @@ public interface DeviceManagementProviderService {
     boolean updateEnrollment(String owner, List<String> deviceIdentifiers)
             throws DeviceManagementException, UserNotFoundException, InvalidDeviceException;
 
+    boolean addDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException;
+
+    List<DeviceTypeVersion> getDeviceTypeVersions(String typeName) throws DeviceManagementException;
+
+    boolean updateDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException;
+
+    boolean isDeviceTypeVersionChangeAuthorized(String typeName, String version) throws DeviceManagementException;
+
+    DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
+            DeviceManagementException;
     /**
      * Retrieves a list of configurations of a specific device
      * using the device's properties
@@ -761,4 +785,25 @@ public interface DeviceManagementProviderService {
     DeviceConfiguration getDeviceConfiguration(Map<String, String> propertyMap)
             throws DeviceManagementException, DeviceNotFoundException, UnauthorizedDeviceAccessException,
                    AmbiguousConfigurationException;
+
+    /**
+     * Transfer device from super tenant to another tenant
+     *
+     * @param deviceTransferRequest DTO of the transfer request
+     * @return tru if device transferee, otherwise false
+     */
+    List<String> transferDeviceToTenant(DeviceTransferRequest deviceTransferRequest) throws DeviceManagementException, DeviceNotFoundException;
+
+    /**
+     * This method retrieves a list of subscribed devices.
+     *
+     * @param devicesIds devices ids of the subscribed devices.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue limit value for get paginated request.
+     * @param status status of the devices.
+     * @return {@link PaginationResult}
+     * @throws DeviceManagementException if any service level or DAO level error occurs.
+     */
+    PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
+                                             List<Integer> devicesIds, String status) throws DeviceManagementException;
 }

@@ -33,6 +33,7 @@ public class PaginationRequest {
     private String owner;
     private String ownerPattern;
     private String status;
+    private String excludeStatus;
     private String deviceType;
     private String deviceName;
     private String ownership;
@@ -83,6 +84,14 @@ public class PaginationRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getExcludeStatus() {
+        return excludeStatus;
+    }
+
+    public void setExcludeStatus(String excludeStatus) {
+        this.excludeStatus = excludeStatus;
     }
 
     public String getDeviceType() {

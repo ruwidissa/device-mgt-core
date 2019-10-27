@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl.group;
 
+import org.apache.solr.common.StringUtils;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -44,15 +45,26 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
         PreparedStatement stmt = null;
         ResultSet rs;
         int groupId = -1;
+        boolean hasStatus = false;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID) " +
-                    "VALUES (?, ?, ?, ?) RETURNING ID";
+            String sql;
+            if(StringUtils.isEmpty(deviceGroup.getStatus())) {
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID) " +
+                      "VALUES (?, ?, ?, ?) RETURNING ID";
+            } else {
+                sql = "INSERT INTO DM_GROUP(DESCRIPTION, GROUP_NAME, OWNER, TENANT_ID, STATUS) " +
+                      "VALUES (?, ?, ?, ?, ?) RETURNING ID";
+                hasStatus = true;
+            }
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, deviceGroup.getDescription());
             stmt.setString(2, deviceGroup.getName());
             stmt.setString(3, deviceGroup.getOwner());
             stmt.setInt(4, tenantId);
+            if(hasStatus) {
+                stmt.setString(5, deviceGroup.getStatus());
+            }
             stmt.execute();
             rs = stmt.getGeneratedKeys();
             if (rs.next()) {
@@ -77,7 +89,9 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
         String groupName = request.getGroupName();
         boolean hasGroupName = false;
         String owner = request.getOwner();
+        String status = request.getStatus();
         boolean hasOwner = false;
+        boolean hasStatus = false;
         boolean hasLimit = request.getRowCount() != 0;
 
         try {
@@ -91,6 +105,10 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
                 sql += " AND OWNER LIKE ?";
                 hasOwner = true;
             }
+            if (status != null && !status.isEmpty()) {
+                sql += " AND STATUS = ?";
+                hasStatus = true;
+            }
             if (hasLimit) {
                 sql += " LIMIT ? OFFSET ?";
             }
@@ -103,6 +121,9 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
             }
             if (hasOwner) {
                 stmt.setString(paramIndex++, owner + "%");
+            }
+            if (hasStatus) {
+                stmt.setString(paramIndex++, status.toUpperCase());
             }
             if (hasLimit) {
                 stmt.setInt(paramIndex++, request.getRowCount());

@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.core.TestUtils;
 import org.wso2.carbon.device.mgt.core.common.BaseDeviceManagementTest;
 import org.wso2.carbon.device.mgt.core.common.TestDataHolder;

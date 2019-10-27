@@ -20,13 +20,6 @@ package org.wso2.carbon.device.mgt.core.operation.mgt;
 
 public class OperationMgtConstants {
 
-    public final class DeviceConstants {
-        private DeviceConstants() {
-        }
-
-        public static final String DEVICE_ID_NOT_FOUND = "Device not found for device id: %s";
-    }
-
     public final class OperationCodes {
         private OperationCodes() {
         }

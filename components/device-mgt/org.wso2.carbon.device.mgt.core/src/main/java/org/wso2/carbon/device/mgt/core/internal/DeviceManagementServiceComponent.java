@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
@@ -31,6 +31,7 @@ import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagement
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
+import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
@@ -55,6 +56,7 @@ import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.privacy.impl.PrivacyComplianceProviderImpl;
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.PushNotificationProviderRepository;
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.task.PushNotificationSchedulerTask;
+import org.wso2.carbon.device.mgt.core.report.mgt.ReportManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
@@ -294,6 +296,10 @@ public class DeviceManagementServiceComponent {
         NotificationManagementService notificationManagementService
                 = new NotificationManagementServiceImpl();
         bundleContext.registerService(NotificationManagementService.class.getName(), notificationManagementService, null);
+
+        /* Registering Report Service */
+        ReportManagementService reportManagementService = new ReportManagementServiceImpl();
+        bundleContext.registerService(ReportManagementService.class.getName(), reportManagementService, null);
 
         /* Registering DeviceAccessAuthorization Service */
         DeviceAccessAuthorizationService deviceAccessAuthorizationService = new DeviceAccessAuthorizationServiceImpl();

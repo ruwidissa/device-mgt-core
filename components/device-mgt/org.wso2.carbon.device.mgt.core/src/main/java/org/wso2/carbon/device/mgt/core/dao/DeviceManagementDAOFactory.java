@@ -21,12 +21,11 @@ package org.wso2.carbon.device.mgt.core.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
-import org.wso2.carbon.device.mgt.common.IllegalTransactionStateException;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
-import org.wso2.carbon.device.mgt.common.UnsupportedDatabaseEngineException;
+import org.wso2.carbon.device.mgt.common.exceptions.IllegalTransactionStateException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.UnsupportedDatabaseEngineException;
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
-import org.wso2.carbon.device.mgt.core.dao.impl.AbstractApplicationDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.ApplicationMappingDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.EnrollmentDAOImpl;
@@ -289,5 +288,4 @@ public class DeviceManagementDAOFactory {
         }
         return dataSource;
     }
-
 }

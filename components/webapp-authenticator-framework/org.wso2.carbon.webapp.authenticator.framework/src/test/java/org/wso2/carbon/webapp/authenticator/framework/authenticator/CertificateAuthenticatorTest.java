@@ -46,7 +46,7 @@ import org.wso2.carbon.certificate.mgt.core.scep.TenantedDeviceWrapper;
 import org.wso2.carbon.certificate.mgt.core.service.CertificateManagementService;
 import org.wso2.carbon.certificate.mgt.core.service.CertificateManagementServiceImpl;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationInfo;

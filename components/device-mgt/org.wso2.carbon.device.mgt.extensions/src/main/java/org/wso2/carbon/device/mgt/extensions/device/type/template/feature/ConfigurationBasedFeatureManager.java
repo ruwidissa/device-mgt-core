@@ -37,8 +37,8 @@
 
 package org.wso2.carbon.device.mgt.extensions.device.type.template.feature;
 
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Operation;

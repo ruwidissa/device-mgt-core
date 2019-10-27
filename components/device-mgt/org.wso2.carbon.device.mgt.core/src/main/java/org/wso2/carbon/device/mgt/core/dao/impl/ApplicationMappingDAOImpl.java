@@ -21,18 +21,14 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
-import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.core.dao.ApplicationMappingDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
-import org.wso2.carbon.device.mgt.core.dto.operation.mgt.ProfileOperation;
 
 import java.io.*;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 public class ApplicationMappingDAOImpl implements ApplicationMappingDAO {
 

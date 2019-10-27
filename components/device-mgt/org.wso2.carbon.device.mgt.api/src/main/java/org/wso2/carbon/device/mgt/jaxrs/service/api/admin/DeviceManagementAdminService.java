@@ -45,9 +45,11 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.ResponseHeader;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
@@ -198,6 +200,59 @@ public interface DeviceManagementAdminService {
                     defaultValue = "5")
             @QueryParam("limit") int limit);
 
+    @Path("/count")
+    @GET
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_GET,
+            value = "Get the count of devices.",
+            notes = "Returns count of all devices enrolled with the system.",
+            tags = "Device Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device count.",
+                    response = Integer.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource has been modified the last time.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client has already the latest version of " +
+                            "the requested resource."),
+            @ApiResponse(
+                    code = 404,
+                    message = "No groups found.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device count.",
+                    response = ErrorResponse.class)
+    })
+    Response getDeviceCount(@ApiParam(
+            name = "status",
+            value = "status of group of which count should be retrieved")
+                            @QueryParam("status")
+                                    String status);
+
+
     @PUT
     @Path("/device-owner")
     @ApiOperation(
@@ -253,7 +308,7 @@ public interface DeviceManagementAdminService {
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             consumes = MediaType.APPLICATION_JSON,
-            httpMethod = "DELETE",
+            httpMethod = "PUT",
             value = "Permanently remove the Device Specified by the Device ID",
             notes = "Returns the status of the permanently deleted device operation and the details of the deleted device.",
             tags = "Device Management",

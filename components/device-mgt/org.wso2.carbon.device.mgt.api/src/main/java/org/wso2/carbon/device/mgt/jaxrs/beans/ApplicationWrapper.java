@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.jaxrs.beans;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.app.mgt.App;
 
 import java.util.List;
 
@@ -52,13 +53,13 @@ public class ApplicationWrapper {
             name = "application",
             value = "Details of the mobile application.",
             required = true)
-    private MobileApp application;
+    private App application;
 
-    public MobileApp getApplication() {
+    public App getApplication() {
         return application;
     }
 
-    public void setApplication(MobileApp application) {
+    public void setApplication(App application) {
         this.application = application;
     }
 

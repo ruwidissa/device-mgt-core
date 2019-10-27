@@ -25,8 +25,8 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
@@ -53,7 +53,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     private static final Log log = LogFactory.getLog(DeviceInformationManagerImpl.class);
     private static final String LOCATION_EVENT_STREAM_DEFINITION = "org.wso2.iot.LocationStream";
     private static final String DEVICE_INFO_EVENT_STREAM_DEFINITION = "org.wso2.iot.DeviceInfoStream";
-
 
     public DeviceInformationManagerImpl() {
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
@@ -212,6 +211,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             deviceLocation.setDeviceId(device.getId());
             DeviceManagementDAOFactory.beginTransaction();
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
+            deviceDetailsDAO.addDeviceLocationInfo(device, deviceLocation,
+                    CarbonContext.getThreadLocalCarbonContext().getTenantId());
             deviceDetailsDAO.deleteDeviceLocation(deviceLocation.getDeviceId(), device.getEnrolmentInfo().getId());
             deviceDetailsDAO.addDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
             if (DeviceManagerUtil.isPublishLocationResponseEnabled()) {
@@ -219,7 +220,11 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 Object[] payload = new Object[]{
                         deviceLocation.getUpdatedTime().getTime(),
                         deviceLocation.getLatitude(),
-                        deviceLocation.getLongitude()
+                        deviceLocation.getLongitude(),
+                        deviceLocation.getAltitude(),
+                        deviceLocation.getSpeed(),
+                        deviceLocation.getBearing(),
+                        deviceLocation.getDistance()
                 };
                 DeviceManagerUtil.getEventPublisherService().publishEvent(
                         LOCATION_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload

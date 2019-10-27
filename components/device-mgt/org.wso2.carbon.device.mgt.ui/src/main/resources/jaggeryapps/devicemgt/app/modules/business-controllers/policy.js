@@ -62,12 +62,13 @@ policyModule = function () {
                 policyObjectToView["priorityId"] = policyObjectFromRestEndpoint["priorityId"];
                 policyObjectToView["name"] = policyObjectFromRestEndpoint["policyName"];
                 policyObjectToView["platform"] = policyObjectFromRestEndpoint["profile"]["deviceType"];
+                policyObjectFromRestEndpoint["policyType"] = policyListFromRestEndpoint["policyType"];
+                policyObjectFromRestEndpoint["correctiveActions"] = policyListFromRestEndpoint["correctiveActions"];
                 if (policyObjectToView["platform"] == "ios") {
                     policyObjectToView["deviceTypeIcon"] = "apple";
                 } else {
                     policyObjectToView["deviceTypeIcon"] = policyObjectToView["platform"];
                 }
-                //policyObjectToView["icon"] = utility.getDeviceThumb(policyObjectToView["platform"]);
                 var ownershipType = "None";
                 var deviceGroups = policyObjectFromRestEndpoint["deviceGroups"];
                 if (deviceGroups) {
@@ -169,6 +170,27 @@ policyModule = function () {
         }
     };
 
+    /**
+     * Retrieve all policies based on policy type
+     */
+    publicMethods.getAllPoliciesByType = function (policyType) {
+        var carbonUser = session.get(constants["USER_SESSION_KEY"]);
+        if (!carbonUser) {
+            log.error("User object was not found in the session");
+            userModule.logout(function () {
+                response.sendRedirect(devicemgtProps["appContext"] + "login");
+            });
+        }
+        try {
+            var url = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"] +
+                      "/policies/type/" + policyType + "?offset=0&limit=100";
+            return serviceInvokers.XMLHttp.get(url, privateMethods.handleGetAllPoliciesResponse);
+        } catch (e) {
+            log.error("Error occurred while retrieving policies by policy type " + policyType);
+            throw e;
+        }
+    };
+
     /*
      Get policies count from backend services.
      */
@@ -210,29 +232,31 @@ policyModule = function () {
         }
         try {
             var url = devicemgtProps["managerHTTPSURL"] + devicemgtProps["backendRestEndpoints"]["appMgt"] +
-                "/apps/mobileapp?field-filter=all";
-            return serviceInvokers.XMLHttp.get(url,
+                      "/applications";
+            var data = {
+              limit: -1
+            };
+            return serviceInvokers.XMLHttp.post(url, data,
                 function (backendResponse) {
                     var response = {};
                     if (backendResponse.status === 200 && backendResponse.responseText) {
-                        var appListFromRestEndpoint = parse(backendResponse.responseText)["appList"];
+                        var appListFromRestEndpoint = parse(backendResponse.responseText)["applications"];
                         var storeApps = [];
                         var i, appObjectFromRestEndpoint, appObjectToView;
                         for (i=0; i<appListFromRestEndpoint.length; i++) {
                             appObjectFromRestEndpoint = appListFromRestEndpoint[i];
                             appObjectToView = {};
                             appObjectToView["appName"] = appObjectFromRestEndpoint["name"];
+                            appObjectToView["packageName"] = appObjectFromRestEndpoint["packageName"];
                             appObjectToView["appId"] = appObjectFromRestEndpoint["id"];
-                            appObjectToView["webUrl"] = appObjectFromRestEndpoint["appmeta"]["weburl"];
-                            if ("webapp" === appObjectFromRestEndpoint["platform"]) {
-                                appObjectToView["packageName"] = appObjectFromRestEndpoint["appmeta"]["weburl"];
+                            if ("WEB_CLIP" === appObjectFromRestEndpoint["type"]) {
                                 appObjectToView["type"] = "Web Clip"
                             } else {
-                                appObjectToView["packageName"] = appObjectFromRestEndpoint["appmeta"]["package"];
                                 appObjectToView["type"] = "Mobile App"
                             }
-                            appObjectToView["version"] = appObjectFromRestEndpoint["version"];
-                            appObjectToView["platform"] = appObjectFromRestEndpoint["platform"];
+                            appObjectToView["uuid"] = appObjectFromRestEndpoint["applicationReleases"][0]["uuid"];
+                            appObjectToView["version"] = appObjectFromRestEndpoint["applicationReleases"][0]["version"];
+                            appObjectToView["platform"] = appObjectFromRestEndpoint["deviceType"];
                             storeApps.push(appObjectToView);
                         }
                         response.status = "success";

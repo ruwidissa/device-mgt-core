@@ -47,4 +47,13 @@
         <Text>This is license text</Text>
     </License>
 
+    <DeviceTypePlatformDetails>
+        <DeviceTypePlatformVersion>
+            <VersionName>32bit</VersionName>
+        </DeviceTypePlatformVersion>
+        <DeviceTypePlatformVersion>
+            <VersionName>64bit</VersionName>
+        </DeviceTypePlatformVersion>
+    </DeviceTypePlatformDetails>
+
 </DeviceTypeConfiguration>

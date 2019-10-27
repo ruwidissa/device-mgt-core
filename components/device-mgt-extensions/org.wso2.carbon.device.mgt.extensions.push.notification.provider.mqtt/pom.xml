@@ -112,6 +112,11 @@
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
         </dependency>
@@ -148,12 +153,15 @@
                             org.wso2.carbon.device.mgt.common.operation.mgt,
                             org.wso2.carbon.device.mgt.common.push.notification,
                             org.wso2.carbon.device.mgt.common,
+                            org.wso2.carbon.device.mgt.common.exceptions,
                             org.wso2.carbon.device.mgt.core.service,
                             org.wso2.carbon.event.output.adapter.core,
                             org.wso2.carbon.event.output.adapter.core.exception,
                             org.osgi.framework,
                             org.wso2.carbon.device.mgt.core.operation.mgt,
-                            org.wso2.carbon.core
+                            org.wso2.carbon.core,
+                            org.wso2.carbon.device.application.mgt.common.*,
+                            org.wso2.carbon.device.application.mgt.common.services.*
                         </Import-Package>
                     </instructions>
                 </configuration>

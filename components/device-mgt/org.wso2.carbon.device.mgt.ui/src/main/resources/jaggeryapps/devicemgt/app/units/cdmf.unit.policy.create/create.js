@@ -118,5 +118,7 @@ function onRequest(context) {
     var enrollmentApps = policyModule.getStoreAppsForPolicy();
     types["storeApps"] = JSON.stringify(enrollmentApps["content"]);
 
+	types["correctivePolicies"] = JSON.stringify(policyModule.getAllPoliciesByType("CORRECTIVE")["content"]);
+
 	return types;
 }

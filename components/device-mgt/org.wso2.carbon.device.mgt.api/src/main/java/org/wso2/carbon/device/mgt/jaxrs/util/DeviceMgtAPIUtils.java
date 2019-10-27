@@ -38,7 +38,7 @@ import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
@@ -46,13 +46,16 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
+import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
+import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
+import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
@@ -85,7 +88,6 @@ import javax.cache.Caching;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import javax.ws.rs.core.MediaType;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -430,6 +432,23 @@ public class DeviceMgtAPIUtils {
         return notificationManagementService;
     }
 
+    /**
+     * Method for initializing ReportManagementService
+     * @return ReportManagementServie Instance
+     */
+    public static ReportManagementService getReportManagementService() {
+        ReportManagementService reportManagementService;
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        reportManagementService = (ReportManagementService) ctx.getOSGiService(
+                ReportManagementService.class, null);
+        if (reportManagementService == null) {
+            String msg = "Report Management service not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        return reportManagementService;
+    }
+
     public static DeviceInformationManager getDeviceInformationManagerService() {
         PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         DeviceInformationManager deviceInformationManager =
@@ -754,5 +773,15 @@ public class DeviceMgtAPIUtils {
             }
         }
         return false;
+    }
+
+    public static DeviceTypeVersion convertDeviceTypeVersionWrapper(String deviceTypeName, int deviceTypeId,
+            DeviceTypeVersionWrapper deviceTypeVersion) {
+        DeviceTypeVersion typeVersion = new DeviceTypeVersion();
+        typeVersion.setDeviceTypeId(deviceTypeId);
+        typeVersion.setDeviceTypeName(deviceTypeName);
+        typeVersion.setVersionName(deviceTypeVersion.getVersionName());
+        typeVersion.setVersionStatus(deviceTypeVersion.getVersionStatus());
+        return typeVersion;
     }
 }

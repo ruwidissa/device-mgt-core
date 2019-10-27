@@ -25,11 +25,11 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
@@ -472,9 +472,32 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         try {
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             GroupManagementDAOFactory.openConnection();
-            return groupDAO.getGroupCount(tenantId);
+            return groupDAO.getGroupCount(tenantId, null);
         } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving all groups in tenant";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+    @Override
+    public int getGroupCountByStatus(String status) throws GroupManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get groups count by Status");
+        }
+        int tenantId = -1;
+        try {
+            tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            GroupManagementDAOFactory.openConnection();
+            return groupDAO.getGroupCount(tenantId, status);
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while retrieving all groups in tenant " + tenantId
+                         +" by status : " + status;
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } catch (Exception e) {
@@ -669,6 +692,30 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         return devices;
     }
 
+    public List<Device> getAllDevicesOfGroup(String groupName) throws GroupManagementException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Group devices of group: " + groupName);
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        List<Device> devices;
+        try {
+            GroupManagementDAOFactory.openConnection();
+            devices = this.groupDAO.getAllDevicesOfGroup(groupName, tenantId);
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while getting devices in group.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDevices for group name: " + groupName;
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+        return devices;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -858,6 +905,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         DeviceGroup defaultGroup = this.getGroup(groupName);
         if (defaultGroup == null) {
             defaultGroup = new DeviceGroup(groupName);
+            defaultGroup.setStatus(DeviceGroupConstants.GroupStatus.ACTIVE);
             // Setting system level user (wso2.system.user) as the owner
             defaultGroup.setOwner(CarbonConstants.REGISTRY_SYSTEM_USERNAME);
             defaultGroup.setDescription("Default system group for devices with " + groupName + " ownership.");

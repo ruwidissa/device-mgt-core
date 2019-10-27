@@ -19,7 +19,6 @@ package org.wso2.carbon.device.mgt.core.task;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -27,9 +26,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.MonitoringOperation;
-import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;

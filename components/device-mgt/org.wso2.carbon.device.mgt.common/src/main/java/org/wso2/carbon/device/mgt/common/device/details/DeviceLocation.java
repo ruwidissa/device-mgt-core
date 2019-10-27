@@ -55,6 +55,30 @@ public class DeviceLocation implements Serializable {
     private String country;
     @ApiModelProperty(name = "updatedTime", value = "Update time of the device.", required = true)
     private Date updatedTime;
+    @ApiModelProperty(name = "altitude", value = "Device altitude.", required = true)
+    private double altitude;
+    @ApiModelProperty(name = "speed", value = "Device speed.", required = true)
+    private float speed;
+    @ApiModelProperty(name = "bearing", value = "Device bearing.", required = true)
+    private float bearing;
+    @ApiModelProperty(name = "distance", value = "Device distance.", required = true)
+    private double distance;
+
+    public double getAltitude() { return altitude; }
+
+    public void setAltitude(double altitude) { this.altitude = altitude; }
+
+    public float getSpeed() { return speed; }
+
+    public void setSpeed(float speed) { this.speed = speed; }
+
+    public float getBearing() { return bearing; }
+
+    public void setBearing(float bearing) { this.bearing = bearing; }
+
+    public double getDistance() { return distance; }
+
+    public void setDistance(double distance) { this.distance = distance; }
 
     public int getDeviceId() {
         return deviceId;

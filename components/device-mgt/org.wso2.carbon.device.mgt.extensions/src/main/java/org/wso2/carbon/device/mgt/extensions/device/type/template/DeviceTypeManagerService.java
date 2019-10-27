@@ -36,7 +36,7 @@ package org.wso2.carbon.device.mgt.extensions.device.type.template;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
@@ -52,6 +52,7 @@ import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
+import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.ConfigProperties;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceStatusTaskConfiguration;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
@@ -90,6 +91,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private StartupOperationConfig startupOperationConfig;
     private PullNotificationSubscriber pullNotificationSubscriber;
     private DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
+    private DeviceTypePlatformDetails deviceTypePlatformDetails;
     private GeneralConfig generalConfig;
     private boolean isRegistryBasedConfigs = false;
     private boolean isScheduled = false;
@@ -108,6 +110,8 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.startupOperationConfig = new StartupOperationConfig();
         this.setStartupOperationConfig(deviceTypeConfiguration);
         this.deviceStatusTaskPluginConfig = new DeviceStatusTaskPluginConfig();
+        this.deviceTypePlatformDetails = new DeviceTypePlatformDetails();
+        this.setDeviceTypePlatformDetails(deviceTypeConfiguration);
         this.setDeviceStatusTaskPluginConfig(deviceTypeConfiguration.getDeviceStatusTaskConfiguration());
         this.setPolicyMonitoringManager(deviceTypeConfiguration.getPolicyMonitoring());
         this.setPullNotificationSubscriber(deviceTypeConfiguration.getPullNotificationSubscriberConfig());
@@ -245,6 +249,11 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     }
 
     @Override
+    public DeviceTypePlatformDetails getDeviceTypePlatformDetails() {
+        return deviceTypePlatformDetails;
+    }
+
+    @Override
     public GeneralConfig getGeneralConfig() {
         return generalConfig;
     }
@@ -335,6 +344,13 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.generalConfig = new GeneralConfig();
         if (deviceTypeConfiguration.getPolicyMonitoring() != null) {
             this.generalConfig.setPolicyMonitoringEnabled(deviceTypeConfiguration.getPolicyMonitoring().isEnabled());
+        }
+    }
+
+    protected void setDeviceTypePlatformDetails(DeviceTypeConfiguration deviceTypeConfiguration) {
+        DeviceTypePlatformDetails deviceTypeVersions = deviceTypeConfiguration.getDeviceTypePlatformDetails();
+        if (deviceTypeVersions != null) {
+            deviceTypePlatformDetails.setDeviceTypePlatformVersion(deviceTypeVersions.getDeviceTypePlatformVersion());
         }
     }
 }

@@ -40,11 +40,11 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
-import org.wso2.carbon.device.mgt.common.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -53,7 +53,13 @@ import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -105,6 +111,26 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    @Override
+    @Path("/count")
+    @GET
+    public Response getDeviceCount(@QueryParam("status") String status) {
+        int deviceCount;
+        try {
+            if (status == null) {
+                deviceCount = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCount();
+            } else {
+                deviceCount = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceCount(EnrolmentInfo.Status.valueOf(status));
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while fetching device count.";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+        return Response.status(Response.Status.OK).entity(deviceCount).build();
     }
 
     @PUT

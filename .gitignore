@@ -26,3 +26,17 @@ target
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+components/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui/react-app/node_modules/
+components/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui/react-app/package-lock.json
+components/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui/react-app/npm-debug.log
+components/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui/react-app/dist/
+components/application-mgt/org.wso2.carbon.device.application.mgt.publisher.ui/react-app/tmp/
+components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/node_modules/
+components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/dist/
+components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/package-lock.json
+components/application-mgt/org.wso2.carbon.device.application.mgt.store.ui/react-app/tmp/
+components/device-mgt/io.entgra.device.mgt.ui/react-app/node_modules/
+components/device-mgt/io.entgra.device.mgt.ui/react-app/dist/
+components/device-mgt/io.entgra.device.mgt.ui/react-app/package-lock.json
+components/device-mgt/io.entgra.device.mgt.ui/react-app/tmp/
+

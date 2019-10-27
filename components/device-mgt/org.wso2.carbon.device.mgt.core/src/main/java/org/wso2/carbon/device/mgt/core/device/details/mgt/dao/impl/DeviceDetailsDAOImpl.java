@@ -21,6 +21,8 @@ package org.wso2.carbon.device.mgt.core.device.details.mgt.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -238,8 +240,9 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement("INSERT INTO DM_DEVICE_LOCATION (DEVICE_ID, LATITUDE, LONGITUDE, STREET1, " +
-                    "STREET2, CITY, ZIP, STATE, COUNTRY, GEO_HASH, UPDATE_TIMESTAMP, ENROLMENT_ID) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "STREET2, CITY, ZIP, STATE, COUNTRY, GEO_HASH, UPDATE_TIMESTAMP, ENROLMENT_ID, ALTITUDE, SPEED, BEARING, " +
+                    "DISTANCE) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             stmt.setInt(1, deviceLocation.getDeviceId());
             stmt.setDouble(2, deviceLocation.getLatitude());
             stmt.setDouble(3, deviceLocation.getLongitude());
@@ -252,6 +255,10 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setString(10, GeoHashGenerator.encodeGeohash(deviceLocation));
             stmt.setLong(11, System.currentTimeMillis());
             stmt.setInt(12, enrollmentId);
+            stmt.setDouble(13, deviceLocation.getAltitude());
+            stmt.setFloat(14, deviceLocation.getSpeed());
+            stmt.setFloat(15, deviceLocation.getBearing());
+            stmt.setDouble(16, deviceLocation.getDistance());
             stmt.execute();
         } catch (SQLException e) {
             throw new DeviceDetailsMgtDAOException("Error occurred while adding the device location to database.", e);
@@ -312,6 +319,45 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
 
         } catch (SQLException e) {
             throw new DeviceDetailsMgtDAOException("Error occurred while deleting the device location from the data base.", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void addDeviceLocationInfo(Device device, DeviceLocation deviceLocation, int tenantId)
+            throws DeviceDetailsMgtDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        String errMessage;
+        try {
+            conn = this.getConnection();
+            stmt = conn.prepareStatement(
+                    "INSERT INTO " +
+                            "DM_DEVICE_HISTORY_LAST_SEVEN_DAYS " +
+                            "(DEVICE_ID, DEVICE_ID_NAME, TENANT_ID, DEVICE_TYPE_NAME, LATITUDE, LONGITUDE, SPEED, HEADING, " +
+                            "TIMESTAMP, GEO_HASH, DEVICE_OWNER, DEVICE_ALTITUDE, DISTANCE) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+            stmt.setInt(1, device.getId());
+            stmt.setString(2, device.getDeviceIdentifier());
+            stmt.setInt(3, tenantId);
+            stmt.setString(4, device.getType());
+            stmt.setDouble(5, deviceLocation.getLatitude());
+            stmt.setDouble(6, deviceLocation.getLongitude());
+            stmt.setFloat(7, deviceLocation.getSpeed());
+            stmt.setFloat(8, deviceLocation.getBearing());
+            stmt.setLong(9, System.currentTimeMillis());
+            stmt.setString(10, GeoHashGenerator.encodeGeohash(deviceLocation));
+            stmt.setString(11, device.getEnrolmentInfo().getOwner());
+            stmt.setDouble(12, deviceLocation.getAltitude());
+            stmt.setDouble(13, deviceLocation.getDistance());
+            stmt.execute();
+
+        } catch (SQLException e) {
+            errMessage = "Error occurred while updating the device location information to database.";
+            log.error(errMessage);
+            throw new DeviceDetailsMgtDAOException(errMessage, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }

@@ -80,9 +80,13 @@ public class PermissionUtils {
     }
 
     public static boolean putPermission(Permission permission) throws PermissionManagementException {
+        return putPermission(permission.getPath());
+    }
+
+    public static boolean putPermission(String permissionPath) throws PermissionManagementException {
         boolean status;
         try {
-            StringTokenizer tokenizer = new StringTokenizer(permission.getPath(), "/");
+            StringTokenizer tokenizer = new StringTokenizer(permissionPath, "/");
             String lastToken = "", currentToken, tempPath;
             while (tokenizer.hasMoreTokens()) {
                 currentToken = tokenizer.nextToken();
@@ -95,7 +99,7 @@ public class PermissionUtils {
             status = true;
         } catch (RegistryException e) {
             throw new PermissionManagementException("Error occurred while persisting permission : " +
-                    permission.getName(), e);
+                    permissionPath, e);
         }
         return status;
     }

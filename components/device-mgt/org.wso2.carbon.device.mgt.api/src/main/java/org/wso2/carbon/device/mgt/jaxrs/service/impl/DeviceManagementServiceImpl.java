@@ -43,13 +43,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.InvalidConfigurationException;
-import org.wso2.carbon.device.mgt.common.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
@@ -59,6 +55,11 @@ import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorization
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
@@ -82,10 +83,12 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
@@ -147,6 +150,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("role") String role,
             @QueryParam("ownership") String ownership,
             @QueryParam("status") String status,
+            @QueryParam("excludeStatus") String excludeStatus,
             @QueryParam("groupId") int groupId,
             @QueryParam("since") String since,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
@@ -187,6 +191,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             if (status != null && !status.isEmpty()) {
                 RequestValidationUtil.validateStatus(status);
                 request.setStatus(status);
+            }
+            if (excludeStatus != null && !excludeStatus.isEmpty()) {
+                RequestValidationUtil.validateStatus(excludeStatus);
+                request.setExcludeStatus(excludeStatus);
             }
             if (groupId != 0) {
                 request.setGroupId(groupId);
@@ -325,6 +333,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @DELETE
+    @Consumes(MediaType.WILDCARD)
     @Override
     @Path("/type/{device-type}/id/{device-id}")
     public Response deleteDevice(@PathParam("device-type") String deviceType,
@@ -443,6 +452,68 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                             type + "', which carries id '" + id + "' does not exist").build()).build();
         }
         return Response.status(Response.Status.OK).entity(device).build();
+    }
+
+    @Path("/{deviceType}/{deviceId}/location-history")
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getDeviceLocationInfo(@PathParam("deviceType") String deviceType,
+                                          @PathParam("deviceId") String deviceId,
+                                          @QueryParam("from") long from, @QueryParam("to") long to) {
+
+        List<DeviceLocationHistory> deviceLocationHistory;
+        String errorMessage;
+
+        try {
+            RequestValidationUtil.validateDeviceIdentifier(deviceType, deviceId);
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            DeviceAccessAuthorizationService deviceAccessAuthorizationService =
+                    DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
+            String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
+            deviceIdentifier.setId(deviceId);
+            deviceIdentifier.setType(deviceType);
+
+            if (deviceAccessAuthorizationService == null) {
+                errorMessage = "Device access authorization service is failed";
+                log.error(errorMessage);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
+            }
+            if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
+                String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" +
+                        deviceId + "'";
+                log.error(msg);
+                return Response.status(Response.Status.UNAUTHORIZED).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(msg).build()).build();
+            }
+            if (from == 0 || to == 0) {
+                errorMessage = "Invalid values for from/to";
+                log.error(errorMessage);
+                return Response.status(Response.Status.BAD_REQUEST).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
+            }
+
+            deviceLocationHistory = dms.getDeviceLocationInfo(deviceIdentifier, from, to);
+
+        } catch (DeviceManagementException e) {
+            errorMessage = "Error occurred while fetching the device information.";
+            log.error(errorMessage, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
+        } catch (DeviceAccessAuthorizationException e) {
+            errorMessage = "Error occurred while checking the device authorization.";
+            log.error(errorMessage, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
+        } catch (InputValidationException e){
+            errorMessage = "Invalid device Id or device type";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
+        }
+        return Response.status(Response.Status.OK).entity(deviceLocationHistory).build();
     }
 
     @GET
@@ -902,7 +973,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
-    @Path("/status/count/{type}/{status}")
+    @Path("/type/{type}/status/{status}/count")
     public Response getDeviceCountByStatus(@PathParam("type") String type, @PathParam("status") String status) {
         int deviceCount;
         try {
@@ -918,7 +989,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @GET
     @Override
-    @Path("/status/ids/{type}/{status}")
+    @Path("/type/{type}/status/{status}/ids")
     public Response getDeviceIdentifiersByStatus(@PathParam("type") String type, @PathParam("status") String status) {
         List<String> deviceIds;
         try {
@@ -934,7 +1005,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @PUT
     @Override
-    @Path("/status/update/{type}/{status}")
+    @Path("/type/{type}/status/{status}")
     public Response bulkUpdateDeviceStatus(@PathParam("type") String type, @PathParam("status") String status,
                                            @Valid List<String> deviceList) {
         try {

@@ -51,11 +51,13 @@ import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeList;
+import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -369,5 +371,214 @@ public interface DeviceTypeManagementAdminService {
                     required = true)
                     PlatformConfiguration config);
 
+
+    @Path("/versions")
+    @POST
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add Device Type Version",
+            notes = "Add a new device type version.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully updated the device type version.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response addDeviceTypeVersion(
+            @ApiParam(
+                    name = "deviceTypeName",
+                    value = "Device type name.",
+                    required = true)
+            @PathParam("deviceTypeName")
+                    String deviceTypeName,
+            @ApiParam(
+                    name = "deviceTypeVersion",
+                    value = "The device type version details.",
+                    required = true) DeviceTypeVersionWrapper deviceTypeVersion);
+
+    @Path("/{deviceTypeName}/versions")
+    @GET
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Get Device Type Version",
+            notes = "Get a new device type version.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device type version.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response getDeviceTypeVersion(
+            @ApiParam(
+                    name = "deviceTypeName",
+                    value = "Device type name.",
+                    required = true)
+            @PathParam("deviceTypeName")
+                    String deviceTypeName);
+
+
+    @Path("{deviceTypeName}/versions")
+    @PUT
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update Device Type Version",
+            notes = "Update a new device type version.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully updated the device type version.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response updateDeviceTypeVersion(
+            @ApiParam(
+                    name = "deviceTypeName",
+                    value = "Device type name.",
+                    required = true)
+            @PathParam("deviceTypeName")
+                    String deviceTypeName,
+            @ApiParam(
+                    name = "deviceTypeVersion",
+                    value = "The device type version details.",
+                    required = true) DeviceTypeVersionWrapper deviceTypeVersion);
+
+
+    @Path("{deviceTypeName}/versions/{version}")
+    @DELETE
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Move Device Type Version to removed state",
+            notes = "Move Device Type Version to removed state.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully moved the device type version to removed.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found.\n The specified device does not exist",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the device list.",
+                    response = ErrorResponse.class)
+    })
+    Response deleteDeviceTypeVersion(@ApiParam(
+            name = "deviceTypeName",
+            value = "Device type name.",
+            required = true)
+                                     @PathParam("deviceTypeName") String deviceTypeName,
+                                     @ApiParam(
+                                             name = "version",
+                                             value = "Device type version.",
+                                             required = true)
+                                     @PathParam("version")String version);
 
 }

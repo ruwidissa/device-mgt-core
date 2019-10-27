@@ -43,7 +43,7 @@ import org.wso2.carbon.certificate.mgt.core.util.CSRGenerator;
 import org.wso2.carbon.certificate.mgt.core.util.CertificateManagementConstants;
 import org.wso2.carbon.certificate.mgt.core.util.DummyCertificate;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import sun.misc.BASE64Encoder;
 import java.io.ByteArrayInputStream;

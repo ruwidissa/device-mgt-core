@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.certificate.mgt.core.util.TestUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;

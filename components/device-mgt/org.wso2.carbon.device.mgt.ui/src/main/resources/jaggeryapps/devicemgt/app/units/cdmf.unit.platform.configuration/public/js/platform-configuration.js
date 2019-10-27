@@ -163,7 +163,7 @@ var loadDynamicDeviceTypeConfig = function (deviceType) {
         configAPI,
         function (data) {
             data = JSON.parse(data);
-            var fieldWrapper = "#" + deviceType + "-config-field-wrapper";
+            var fieldWrapper = "#" + escapeSelector(deviceType + "-config-field-wrapper");
             $(fieldWrapper).html("");
             if (data.configuration) {
                 var config;
@@ -197,15 +197,18 @@ var loadDynamicDeviceTypeConfig = function (deviceType) {
 
 var onDynamicConfigSubmit = function (deviceType) {
 
-    var errorMsgWrapper = "#" + deviceType + "-config-error-msg";
-    var errorMsg = "#" + deviceType + "-config-error-msg span";
+    var errorMsgWrapper = "#" + escapeSelector(deviceType + "-config-error-msg");
+    var errorMsg = "#" + escapeSelector(deviceType + "-config-error-msg span");
+    var filedRaw = '.' + escapeSelector(deviceType + '-config-row');
+    var filedName = "." + escapeSelector(deviceType + "-config-name");
+    var filedValue = "." + escapeSelector(deviceType + "-config-value");
 
     var addConfigFormData = {};
     var configList = [];
 
-    $('.' + deviceType + '-config-row').each(function () {
-        var configName = $(this).find("." + deviceType + "-config-name").val();
-        var configVal = $(this).find("." + deviceType + "-config-value").val();
+    $(filedRaw).each(function () {
+        var configName = $(this).find(filedName).val();
+        var configVal = $(this).find(filedValue).val();
         if (configName && configName.trim() !== "" && configVal && configVal.trim() !== "") {
             var configurationEntry = {};
             configurationEntry.name = configName.trim();
@@ -252,7 +255,8 @@ var onDynamicConfigSubmit = function (deviceType) {
 };
 
 var onDynamicConfigAddNew = function (deviceType, name, value) {
-    $("#" + deviceType + "-config-field-wrapper").append(
+    var fieldWrapper = "#" + escapeSelector(deviceType + "-config-field-wrapper");
+    $(fieldWrapper).append(
         '<div class="row form-group ' + deviceType + '-config-row"' +
         ' id="' + deviceType + '-config-row-' + (++configRowId) + '">' +
         '<div class="col-xs-3">' +
@@ -272,5 +276,13 @@ var onDynamicConfigAddNew = function (deviceType, name, value) {
 };
 
 var onDynamicConfigRemove = function (deviceType, rawId) {
-    $("#" + deviceType + "-config-row-" + rawId).remove()
+    var fieldWrapper = "#" + escapeSelector(deviceType + "-config-row-" + rawId);
+    $(fieldWrapper).remove()
+};
+
+var escapeSelector = function (text) {
+    return text.replace(
+        /([$%&()*+,./:;<=>?@\[\\\]^\{|}~])/g,
+        '\\$1'
+    );
 };

@@ -40,12 +40,14 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -533,6 +535,59 @@ public interface DeviceDAO {
      * @param enrollmentIds list of enrollment ids.
      * @throws DeviceManagementDAOException when no enrolments are found for the given device.
      */
-    void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds)
+    void deleteDevices(List<String> deviceIdentifiers, List<Integer> deviceIds, List<Integer> enrollmentIds) throws DeviceManagementDAOException;
+
+    boolean transferDevice(String deviceType, String deviceId, String owner, int destinationTenantId)
+            throws DeviceManagementDAOException, SQLException;
+
+    /**
+     * This method is used to get a device list which enrolled within a specific time period
+     *
+     * @param request  Pagination request to get paginated result
+     * @param tenantId ID of the current tenant
+     * @param fromDate Start date to filter devices(YYYY-MM-DD)
+     * @param toDate   End date to filter devices(YYYY-MM-DD)
+     * @return returns a list of Device objects
+     * @throws {@Link DeviceManagementDAOException} If failed to retrieve devices
+     *
+     */
+    List<Device> getDevicesByDuration(PaginationRequest request,
+                                      int tenantId,
+                                      String fromDate,
+                                      String toDate) throws DeviceManagementDAOException;
+
+    /**
+     * Retrieve device location information
+     * @param deviceIdentifier Device Identifier object
+     * @param from Specified start timestamp
+     * @param to Specified end timestamp
+     * @return
+     * @throws DeviceManagementDAOException
+     */
+    List<DeviceLocationHistory> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
+            throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to get the details of subscribed devices.
+     *
+     * @param deviceIds   device ids of the subscribed devices.
+     * @param tenantId    Id of the current tenant.
+     * @param offsetValue offset value for get paginated request.
+     * @param limitValue  limit value for get paginated request.
+     * @param status      status of the devices.
+     * @return devices - subscribed device details list
+     * @throws DeviceManagementDAOException if connections establishment fails.
+     */
+    List<Device> getSubscribedDevices(int offsetValue, int limitValue, List<Integer> deviceIds,
+                                      int tenantId, String status) throws DeviceManagementDAOException;
+
+    /**
+     * @param deviceIds device ids of the subscribed devices.
+     * @param tenantId  tenant id
+     * @param status    current status of the device. (e.g ACTIVE, REMOVED, etc)
+     * @return number of subscribed device count.
+     * @throws DeviceManagementDAOException if error occurred while processing the SQL statement.
+     */
+    int getSubscribedDeviceCount(List<Integer> deviceIds, int tenantId, String status)
             throws DeviceManagementDAOException;
 }

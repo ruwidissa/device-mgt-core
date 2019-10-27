@@ -167,6 +167,6 @@
   "isOAuthEnabled": true,
   "backendRestEndpoints": {
     "deviceMgt": "/api/device-mgt/v1.0",
-    "appMgt": "/api/appm/store/v1.1"
+    "appMgt": "/api/application-mgt-store/v1.0"
   }
 }

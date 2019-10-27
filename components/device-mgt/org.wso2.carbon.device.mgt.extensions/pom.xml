@@ -78,6 +78,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.devicemgt</groupId>
+            <artifactId>org.wso2.carbon.device.application.mgt.common</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
             <scope>test</scope>
@@ -154,7 +159,6 @@
                             javax.xml.namespace;resolution:=optional,
                             org.wso2.carbon.context,
                             org.wso2.carbon.device.mgt.common.*,
-                            org.wso2.carbon.device.mgt.common.license.mgt,
                             org.wso2.carbon.registry.api,
                             org.wso2.carbon.registry.core,
                             org.wso2.carbon.registry.core.exceptions,

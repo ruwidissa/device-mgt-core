@@ -21,16 +21,13 @@ package org.wso2.carbon.device.mgt.core.archival;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.core.archival.beans.*;
 import org.wso2.carbon.device.mgt.core.archival.dao.*;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ArchivalServiceImpl implements ArchivalService {
     private static Log log = LogFactory.getLog(ArchivalServiceImpl.class);
