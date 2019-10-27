@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class AdapterConfiguration {
     @ApiModelProperty(value = "Adapter properties list")
-    private List<AdapterProperty> adapterProperties = new ArrayList<>();
+    private List<AdapterProperty> adapterProperties;
     @ApiModelProperty(value = "Custom-mapping flag")
     private boolean isCustomMappingEnabled;
     @ApiModelProperty(value = "Mapping configurations")

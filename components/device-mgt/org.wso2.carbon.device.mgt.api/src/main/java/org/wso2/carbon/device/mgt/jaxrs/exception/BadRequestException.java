@@ -19,6 +19,7 @@
 package org.wso2.carbon.device.mgt.jaxrs.exception;
 
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -27,8 +28,30 @@ import javax.ws.rs.core.Response;
  * Custom exception class for wrapping BadRequest related exceptions.
  */
 public class BadRequestException extends WebApplicationException {
+    private String message;
+    private static final long serialVersionUID = -24991723711391192L;
 
     public BadRequestException(ErrorResponse error) {
         super(Response.status(Response.Status.BAD_REQUEST).entity(error).build());
+    }
+
+    public BadRequestException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.BAD_REQUEST)
+                      .entity(errorDTO)
+                      .header(Constants.DeviceConstants.HEADER_CONTENT_TYPE, Constants.DeviceConstants.APPLICATION_JSON)
+                      .build());
+        message = errorDTO.getMessage();
+    }
+
+    public BadRequestException(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
