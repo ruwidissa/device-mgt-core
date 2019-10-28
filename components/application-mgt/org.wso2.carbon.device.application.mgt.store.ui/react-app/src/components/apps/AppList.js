@@ -18,7 +18,7 @@
 
 import React from "react";
 import AppCard from "./AppCard";
-import {Col, Row, Result, Pagination} from "antd";
+import {Col, Row, Result} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../context/ConfigContext";
 import {handleApiError} from "../../js/Utils";
@@ -89,7 +89,6 @@ class AppList extends React.Component {
             }
 
         }).catch((error) => {
-            console.log(error);
             handleApiError(error, "Error occurred while trying to load apps.", true);
             if (error.hasOwnProperty("response") && error.response.status === 403) {
                 const {forbiddenErrors} = this.state;
@@ -104,10 +103,6 @@ class AppList extends React.Component {
                 });
             }
         });
-    };
-
-    handlePaginationChange = (page, pageSize) => {
-        this.fetchData(page, pageSize);
     };
 
     handleInfiniteOnLoad = (count) => {
@@ -134,7 +129,7 @@ class AppList extends React.Component {
     };
 
     render() {
-        const {apps, loading, forbiddenErrors, totalAppCount, hasMore} = this.state;
+        const {apps, loading, forbiddenErrors, hasMore} = this.state;
 
         return (
             <div>
@@ -144,31 +139,29 @@ class AppList extends React.Component {
                     loadMore={this.handleInfiniteOnLoad}
                     hasMore={!loading && hasMore}
                     useWindow={true}>
-                        <Row gutter={16}>
-                            {(forbiddenErrors.apps) && (
-                                <Result
-                                    status="403"
-                                    title="403"
-                                    subTitle="You don't have permission to view apps."
-                                    // extra={<Button type="primary">Back Home</Button>}
+                    <Row gutter={16}>
+                        {(forbiddenErrors.apps) && (
+                            <Result
+                                status="403"
+                                title="403"
+                                subTitle="You don't have permission to view apps."
+                            />
+                        )}
+                        {!(forbiddenErrors.apps) && apps.length === 0 && (
+                            <Result
+                                status="404"
+                                title="No apps, yet."
+                                subTitle="No apps available, yet! When the administration uploads, apps will show up here."
+                            />
+                        )}
+                        {apps.map(app => (
+                            <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>
+                                <AppCard key={app.id}
+                                         app={app}
                                 />
-                            )}
-                            {!((forbiddenErrors.apps)) && apps.length === 0 && (
-                                <Result
-                                    status="404"
-                                    title="No apps, yet."
-                                    subTitle="No apps available, yet! When the administration uploads, apps will show up here."
-                                    // extra={<Button type="primary">Back Home</Button>}
-                                />
-                            )}
-                            {apps.map(app => (
-                                <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>
-                                    <AppCard key={app.id}
-                                             app={app}
-                                    />
-                                </Col>
-                            ))}
-                        </Row>
+                            </Col>
+                        ))}
+                    </Row>
                 </InfiniteScroll>
             </div>
         );
