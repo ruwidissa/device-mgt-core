@@ -31,10 +31,16 @@ class ListApps extends React.Component {
         super(props);
         this.state = {
             filters: {}
-        }
+        };
+        this.appName = '';
     }
 
     setFilters = (filters) => {
+        if (this.appName === '' && filters.hasOwnProperty("appName")) {
+            delete filters["appName"];
+        } else {
+            filters.appName = this.appName;
+        }
         this.setState({
             filters
         });
@@ -42,6 +48,7 @@ class ListApps extends React.Component {
 
     setSearchText = (appName) => {
         const filters = {...this.state.filters};
+        this.appName = appName;
         if (appName === '' && filters.hasOwnProperty("appName")) {
             delete filters["appName"];
         } else {
@@ -50,6 +57,17 @@ class ListApps extends React.Component {
         this.setState({
             filters
         });
+    };
+
+    onChangeSearchText = (e) => {
+        const filters = {...this.state.filters};
+        const appName = e.target.value;
+        if (appName === '' && filters.hasOwnProperty("appName")) {
+            delete filters["appName"];
+            this.setState({
+                filters
+            });
+        }
     };
 
     render() {
@@ -67,9 +85,10 @@ class ListApps extends React.Component {
                             </Col>
                             <Col span={18} style={{textAlign: "right"}}>
                                 <Search
-                                    placeholder="input search text"
+                                    placeholder="Search by app name"
                                     onSearch={this.setSearchText}
-                                    style={{width: 170, zIndex:0}}
+                                    onChange={this.onChangeSearchText}
+                                    style={{width: 240, zIndex: 0}}
                                 />
                             </Col>
                         </Row>

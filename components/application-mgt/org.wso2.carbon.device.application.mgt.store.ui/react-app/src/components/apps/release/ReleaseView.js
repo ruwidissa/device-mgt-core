@@ -46,15 +46,27 @@ class ReleaseView extends React.Component {
         const config = this.props.context;
         const release = this.props.app.applicationReleases[0];
         const {uuid} = release;
+        const {isAndroidEnterpriseApp} = this.props.app;
 
         this.setState({
             loading: true,
         });
+        const parameters = {};
+
         let url = window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/" + operation;
-        if (timestamp != null) {
-            url += `?timestamp=${timestamp}`;
+            config.serverConfig.invoker.store + "/subscription/" + uuid + "/" + type + "/";
+        if (isAndroidEnterpriseApp) {
+            url += "ent-app-install/"; // add ent-app-install path param for android enterprise app
+            parameters.requiresUpdatingExternal = true;
         }
+        url += operation; // add operation to url
+        if (timestamp != null) {
+            parameters.timestamp = timestamp; // add timestamp for scheduled operations
+        }
+
+        const queryParams = Object.keys(parameters).map(key => key + '=' + parameters[key]).join('&');
+        url += '?' + queryParams;
+
         axios.post(
             url,
             payload,
