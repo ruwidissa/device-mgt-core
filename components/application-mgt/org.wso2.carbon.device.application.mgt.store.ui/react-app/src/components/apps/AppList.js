@@ -18,10 +18,13 @@
 
 import React from "react";
 import AppCard from "./AppCard";
-import {Col, message, notification, Row, Result, Skeleton, Alert} from "antd";
+import {Col, Row, Result, Pagination} from "antd";
 import axios from "axios";
 import {withConfigContext} from "../../context/ConfigContext";
 import {handleApiError} from "../../js/Utils";
+import InfiniteScroll from "react-infinite-scroller";
+
+const limit = 10;
 
 class AppList extends React.Component {
     constructor(props) {
@@ -29,16 +32,24 @@ class AppList extends React.Component {
         this.state = {
             apps: [],
             loading: true,
+            hasMore: true,
+            loadMore: true,
             forbiddenErrors: {
                 apps: false
-            }
+            },
+            totalAppCount: 0
         }
     }
 
     componentDidMount() {
         const {deviceType} = this.props;
         this.props.changeSelectedMenuItem(deviceType);
-        this.fetchData(deviceType);
+        this.fetchData(0, limit, res => {
+            this.setState({
+                apps: res,
+                loading: false
+            });
+        });
     }
 
 
@@ -50,14 +61,19 @@ class AppList extends React.Component {
         }
     }
 
-    fetchData = (deviceType) => {
+    fetchData = (offset, limit, callbackFunction) => {
+        const {deviceType} = this.props;
         const config = this.props.context;
-        const payload = {};
+        const payload = {
+            offset,
+            limit
+        };
         if (deviceType === "web-clip") {
             payload.appType = "WEB_CLIP";
         } else {
             payload.deviceType = deviceType;
         }
+
         this.setState({
             loading: true
         });
@@ -69,13 +85,11 @@ class AppList extends React.Component {
             if (res.status === 200) {
                 //todo remove this property check after backend improvement
                 let apps = (res.data.data.hasOwnProperty("applications")) ? res.data.data.applications : [];
-                this.setState({
-                    apps: apps,
-                    loading: false
-                })
+                callbackFunction(apps);
             }
 
         }).catch((error) => {
+            console.log(error);
             handleApiError(error, "Error occurred while trying to load apps.", true);
             if (error.hasOwnProperty("response") && error.response.status === 403) {
                 const {forbiddenErrors} = this.state;
@@ -92,37 +106,71 @@ class AppList extends React.Component {
         });
     };
 
+    handlePaginationChange = (page, pageSize) => {
+        this.fetchData(page, pageSize);
+    };
+
+    handleInfiniteOnLoad = (count) => {
+        const offset = count * limit;
+        let apps = this.state.apps;
+        this.setState({
+            loading: true,
+        });
+
+        this.fetchData(offset, limit, res => {
+            if (res.length > 0) {
+                apps = apps.concat(res);
+                this.setState({
+                    apps,
+                    loading: false,
+                });
+            } else {
+                this.setState({
+                    hasMore: false,
+                    loading: false
+                });
+            }
+        });
+    };
+
     render() {
-        const {apps, loading, forbiddenErrors} = this.state;
+        const {apps, loading, forbiddenErrors, totalAppCount, hasMore} = this.state;
 
         return (
-            <Skeleton loading={loading} active>
-                <Row gutter={16}>
-                    {(forbiddenErrors.apps) && (
-                        <Result
-                            status="403"
-                            title="403"
-                            subTitle="You don't have permission to view apps."
-                            // extra={<Button type="primary">Back Home</Button>}
-                        />
-                    )}
-                    {!((forbiddenErrors.apps)) && apps.length === 0 && (
-                        <Result
-                            status="404"
-                            title="No apps, yet."
-                            subTitle="No apps available, yet! When the administration uploads, apps will show up here."
-                            // extra={<Button type="primary">Back Home</Button>}
-                        />
-                    )}
-                    {apps.map(app => (
-                        <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>
-                            <AppCard key={app.id}
-                                     app={app}
-                            />
-                        </Col>
-                    ))}
-                </Row>
-            </Skeleton>
+            <div>
+                <InfiniteScroll
+                    initialLoad={false}
+                    pageStart={0}
+                    loadMore={this.handleInfiniteOnLoad}
+                    hasMore={!loading && hasMore}
+                    useWindow={true}>
+                        <Row gutter={16}>
+                            {(forbiddenErrors.apps) && (
+                                <Result
+                                    status="403"
+                                    title="403"
+                                    subTitle="You don't have permission to view apps."
+                                    // extra={<Button type="primary">Back Home</Button>}
+                                />
+                            )}
+                            {!((forbiddenErrors.apps)) && apps.length === 0 && (
+                                <Result
+                                    status="404"
+                                    title="No apps, yet."
+                                    subTitle="No apps available, yet! When the administration uploads, apps will show up here."
+                                    // extra={<Button type="primary">Back Home</Button>}
+                                />
+                            )}
+                            {apps.map(app => (
+                                <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>
+                                    <AppCard key={app.id}
+                                             app={app}
+                                    />
+                                </Col>
+                            ))}
+                        </Row>
+                </InfiniteScroll>
+            </div>
         );
     }
 }
