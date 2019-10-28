@@ -92,13 +92,14 @@ public interface SubscriptionManager {
      * @param subType         subscription type. E.g. <code>DEVICE, USER, ROLE, GROUP</code> {@see {
      * @param action          subscription action. E.g. <code>INSTALL/UNINSTALL</code> {@see {
      * @param <T>             generic type of the method.
+     * @param requiresUpdatingExternal  should an external server be updated. Such as Google EMM APIs
      * @return {@link ApplicationInstallResponse}
      * @throws ApplicationManagementException ApplicationManagementException if error occurs when subscribing to the
      * given application
      * @link org.wso2.carbon.device.application.mgt.common.SubscriptionType}}
      */
-    <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action)
-            throws ApplicationManagementException;
+    <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action,
+                                       boolean requiresUpdatingExternal) throws ApplicationManagementException;
 
     /***
      * This method used to get the app id ,device ids and pass them to DM service method.

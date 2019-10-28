@@ -229,7 +229,12 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled ent. install operation"
             )
-            @QueryParam("timestamp") String timestamp
+            @QueryParam("timestamp") String timestamp,
+            @ApiParam(
+                    name = "requiresUpdatingExternal",
+                    value = "Should external system such as Google EMM APIs need to be updated."
+            )
+            @QueryParam("requiresUpdatingExternal") boolean requiresUpdatingExternal
     );
 
     @POST
@@ -282,7 +287,12 @@ public interface SubscriptionManagementAPI {
                     name = "timestamp",
                     value = "Timestamp of scheduled ent app install operation"
             )
-            @QueryParam("timestamp") String timestamp
+            @QueryParam("timestamp") String timestamp,
+            @ApiParam(
+                    name = "requiresUpdatingExternal",
+                    value = "Should external system such as Google EMM APIs need to be updated."
+            )
+            @QueryParam("requiresUpdatingExternal") boolean requiresUpdatingExternal
     );
 
     @GET

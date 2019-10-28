@@ -319,7 +319,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
     }
 
     @Override
-    public <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action)
+    public <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action,
+                                              boolean requiresUpdatingExternal)
             throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Google Ent app Install operation is received to application which has UUID "
@@ -347,7 +348,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             List<String> categories = getApplicationCategories(applicationDTO.getId());
             if (!categories.contains("GooglePlaySyncedApp")) {
-                String msg = "This is not google play store synced application. Hence can't perform enteprise app "
+                String msg = "This is not google play store synced application. Hence can't perform enterprise app "
                         + "installation.";
                 log.error(msg);
                 throw new BadRequestException(msg);
@@ -424,12 +425,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 });
             }
 
-            //Installing the application
-            ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
-            applicationPolicyDTO.setApplicationDTO(applicationDTO);
-            applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
-            applicationPolicyDTO.setAction(action);
-            installEnrollmentApplications(applicationPolicyDTO);
+            if (requiresUpdatingExternal) {
+                //Installing the application
+                ApplicationPolicyDTO applicationPolicyDTO = new ApplicationPolicyDTO();
+                applicationPolicyDTO.setApplicationDTO(applicationDTO);
+                applicationPolicyDTO.setDeviceIdentifierList(deviceIdentifiers);
+                applicationPolicyDTO.setAction(action.toUpperCase());
+                installEnrollmentApplications(applicationPolicyDTO);
+            }
 
             appSubscribingDeviceIds = devices.stream().map(Device::getId).collect(Collectors.toList());
             Map<Integer, DeviceSubscriptionDTO> deviceSubscriptions = getDeviceSubscriptions(appSubscribingDeviceIds,
@@ -972,6 +975,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                         Properties properties = new Properties();
                         properties.put(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP, true);
                         properties.put(MDMAppConstants.IOSConstants.IS_REMOVE_APP, true);
+                        properties.put(MDMAppConstants.IOSConstants.I_TUNES_ID, application.getPackageName());
                         app.setProperties(properties);
                         return MDMIOSOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
