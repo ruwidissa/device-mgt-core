@@ -31,7 +31,7 @@ class Login extends React.Component {
     render() {
         const config = this.props.context;
         return (
-            <div>
+            <div className="login">
                 <div className="background">
                 </div>
                 <div className="content">
