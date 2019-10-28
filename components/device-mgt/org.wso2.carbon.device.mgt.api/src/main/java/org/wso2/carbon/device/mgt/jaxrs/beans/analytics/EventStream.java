@@ -36,11 +36,11 @@ public class EventStream {
     @ApiModelProperty(value = "Stream description")
     private String description;
     @ApiModelProperty(value = "Meta attribute list")
-    private List<Attribute> metaData = new ArrayList<>();
+    private List<Attribute> metaData;
     @ApiModelProperty(value = "Correlation attribute list")
-    private List<Attribute> correlationData = new ArrayList<>();
+    private List<Attribute> correlationData;
     @ApiModelProperty(value = "Payload attribute list")
-    private List<Attribute> payloadData = new ArrayList<>();
+    private List<Attribute> payloadData;
 
     @ApiModelProperty(value = "Stream definition" , notes = "use only when creating stream as a String")
     private String definition;

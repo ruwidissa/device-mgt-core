@@ -1767,6 +1767,11 @@
                 <version>${carbon.multitenancy.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyle.vesion}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2246,6 +2251,8 @@
         <frontend.mave.version>1.7.6</frontend.mave.version>
         <node.version>v10.15.3</node.version>
         <npm.version>6.9.0</npm.version>
+
+        <maven.checkstyle.vesion>3.1.0</maven.checkstyle.vesion>
         
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>

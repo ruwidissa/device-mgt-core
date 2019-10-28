@@ -18,7 +18,6 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Attribute;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterMappingConfiguration;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MappingProperty;
@@ -116,8 +115,13 @@ public class AnalyticsArtifactsManagementServiceImpl
     public Response deployEventDefinitionAsDto(@Valid EventStream stream) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
+            validateStreamProperties(stream);
             deployStream(stream);
             return Response.ok().build();
+        } catch (BadRequestException e) {
+            String errMsg = "Failed to deploy stream due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenant " + tenantDomain;
             log.error(errMsg, e);
@@ -187,6 +191,10 @@ public class AnalyticsArtifactsManagementServiceImpl
             }
             deployReceiver(receiver, customMapping, adapterConfiguration);
             return Response.ok().build();
+        } catch (BadRequestException e) {
+            String errMsg = "Failed to deploy receiver due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -256,6 +264,10 @@ public class AnalyticsArtifactsManagementServiceImpl
             }
             deployPublisher(publisher, customMapping, adapterConfiguration);
             return Response.ok().build();
+        } catch (BadRequestException e) {
+            String errMsg = "Failed to deploy publisher due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -283,8 +295,12 @@ public class AnalyticsArtifactsManagementServiceImpl
                                                  @Valid SiddhiExecutionPlan plan) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
-            publishSiddhiExecutionPlan(name, isEdited, plan.getDefinition());
+            deploySiddhiExecutionPlan(name, isEdited, plan.getDefinition());
             return Response.ok().build();
+        } catch (InvalidExecutionPlanException e) {
+            String errMsg = "Failed to deploy siddhi script due to invalid payload";
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
@@ -315,14 +331,6 @@ public class AnalyticsArtifactsManagementServiceImpl
         List<Attribute> metaData = stream.getMetaData();
         List<Attribute> payloadData = stream.getPayloadData();
         List<Attribute> correlationData = stream.getCorrelationData();
-        if (metaData.isEmpty() && correlationData.isEmpty() && payloadData.isEmpty()) {
-            String errMsg = String.format("Failed to validate Stream property attributes of %s:%s",
-                                          stream.getName(), stream.getVersion());
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(errMsg);
-            log.error(errMsg);
-            throw new BadRequestException(errorResponse);
-        }
         try {
             eventStreamAdminServiceStub = DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
 
@@ -331,10 +339,15 @@ public class AnalyticsArtifactsManagementServiceImpl
             eventStreamDefinitionDto.setVersion(stream.getVersion());
             eventStreamDefinitionDto.setNickName(stream.getNickName());
             eventStreamDefinitionDto.setDescription(stream.getDescription());
-            eventStreamDefinitionDto.setMetaData(addEventAttributesToDto(metaData));
-            eventStreamDefinitionDto.setPayloadData(addEventAttributesToDto(payloadData));
-            eventStreamDefinitionDto.setCorrelationData(addEventAttributesToDto(correlationData));
-
+            if (metaData != null) {
+                eventStreamDefinitionDto.setMetaData(addEventAttributesToDto(metaData));
+            }
+            if (payloadData != null) {
+                eventStreamDefinitionDto.setPayloadData(addEventAttributesToDto(payloadData));
+            }
+            if (correlationData != null) {
+                eventStreamDefinitionDto.setCorrelationData(addEventAttributesToDto(correlationData));
+            }
             String streamId = stream.getName() + ":" + stream.getVersion();
             if (eventStreamAdminServiceStub.getStreamDefinitionDto(streamId) != null) {
                 eventStreamAdminServiceStub.editEventStreamDefinitionAsDto(eventStreamDefinitionDto, streamId);
@@ -344,7 +357,6 @@ public class AnalyticsArtifactsManagementServiceImpl
         } finally {
             cleanup(eventStreamAdminServiceStub);
         }
-
     }
 
     /**
@@ -360,8 +372,8 @@ public class AnalyticsArtifactsManagementServiceImpl
     private void deployReceiver(Adapter receiver, boolean customMapping,
                                 AdapterConfiguration adapterConfiguration)
             throws RemoteException, UserStoreException, JWTClientException {
-        EventReceiverAdminServiceStub eventReceiverAdminServiceStub = DeviceMgtAPIUtils.getEventReceiverAdminServiceStub();
-
+        EventReceiverAdminServiceStub eventReceiverAdminServiceStub = DeviceMgtAPIUtils
+                .getEventReceiverAdminServiceStub();
         try {
             String receiverName = receiver.getAdapterName();
             String adapterType = receiver.getAdapterType().toStringFormatted();
@@ -374,52 +386,92 @@ public class AnalyticsArtifactsManagementServiceImpl
             }
             BasicInputAdapterPropertyDto[] basicInputAdapterPropertyDtos = addReceiverConfigToDto(adapterProperties);
 
-            AdapterMappingConfiguration adapterMappingConfiguration = adapterConfiguration.getAdapterMappingConfiguration();
-            MessageFormat messageFormat = adapterMappingConfiguration.getMessageFormat();
-            if (!messageFormat.toString().equals("wso2event")) {
-                EventMappingPropertyDto[] inputMappingPropertyDtos =
-                        addReceiverMappingToDto(adapterMappingConfiguration.getInputMappingProperties());
-                if (messageFormat.toString().equals("xml")) {
-                    EventMappingPropertyDto[] namespaceMappingPropertyDtos =
-                            addReceiverMappingToDto(adapterMappingConfiguration.getNamespaceMappingProperties());
-                    eventReceiverAdminServiceStub.deployXmlEventReceiverConfiguration(receiverName
-                            , eventStreamWithVersion, adapterType, null
-                            , namespaceMappingPropertyDtos, inputMappingPropertyDtos
-                            , basicInputAdapterPropertyDtos, customMapping);
-                } else {
-                    if (messageFormat.toString().equals("map")) {
-                        eventReceiverAdminServiceStub.deployMapEventReceiverConfiguration(receiverName
-                                , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
-                                , basicInputAdapterPropertyDtos, customMapping);
-                    } else if (messageFormat.toString().equals("text")) {
-                        eventReceiverAdminServiceStub.deployTextEventReceiverConfiguration(receiverName
-                                , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
-                                , basicInputAdapterPropertyDtos, customMapping);
+            if (customMapping) {
+                AdapterMappingConfiguration adapterMappingConfiguration = adapterConfiguration
+                        .getAdapterMappingConfiguration();
+                MessageFormat messageFormat = adapterMappingConfiguration.getMessageFormat();
+                if (!messageFormat.toString().equals("wso2event")) {
+                    EventMappingPropertyDto[] inputMappingPropertyDtos =
+                            addReceiverMappingToDto(adapterMappingConfiguration.getInputMappingProperties());
+                    if (messageFormat.toString().equals("xml")) {
+                        EventMappingPropertyDto[] namespaceMappingPropertyDtos =
+                                addReceiverMappingToDto(adapterMappingConfiguration.getNamespaceMappingProperties());
+                        eventReceiverAdminServiceStub.deployXmlEventReceiverConfiguration(receiverName
+                                , eventStreamWithVersion, adapterType, null
+                                , namespaceMappingPropertyDtos, inputMappingPropertyDtos
+                                , basicInputAdapterPropertyDtos, true);
                     } else {
-                        eventReceiverAdminServiceStub.deployJsonEventReceiverConfiguration(receiverName
-                                , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
-                                , basicInputAdapterPropertyDtos, customMapping);
+                        if (messageFormat.toString().equals("map")) {
+                            eventReceiverAdminServiceStub.deployMapEventReceiverConfiguration(receiverName
+                                    , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
+                                    , basicInputAdapterPropertyDtos, true);
+                        } else if (messageFormat.toString().equals("text")) {
+                            eventReceiverAdminServiceStub.deployTextEventReceiverConfiguration(receiverName
+                                    , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
+                                    , basicInputAdapterPropertyDtos, true);
+                        } else {
+                            eventReceiverAdminServiceStub.deployJsonEventReceiverConfiguration(receiverName
+                                    , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
+                                    , basicInputAdapterPropertyDtos, true);
+                        }
                     }
+                } else {
+                    EventMappingPropertyDto[] correlationMappingPropertyDtos = addReceiverMappingToDto(
+                            adapterMappingConfiguration.getCorrelationMappingProperties()
+                    );
+                    EventMappingPropertyDto[] metaMappingPropertyDtos = addReceiverMappingToDto(
+                            adapterMappingConfiguration.getInputMappingProperties()
+                    );
+                    EventMappingPropertyDto[] payloadMappingPropertyDtos = addReceiverMappingToDto(
+                            adapterMappingConfiguration.getPayloadMappingProperties()
+                    );
+
+                    eventReceiverAdminServiceStub.deployWso2EventReceiverConfiguration(receiverName
+                            , eventStreamWithVersion, adapterType, metaMappingPropertyDtos
+                            , correlationMappingPropertyDtos, payloadMappingPropertyDtos
+                            , basicInputAdapterPropertyDtos, true
+                            , eventStreamWithVersion);
                 }
             } else {
-                EventMappingPropertyDto[] correlationMappingPropertyDtos = addReceiverMappingToDto(
-                        adapterMappingConfiguration.getCorrelationMappingProperties()
-                );
-                EventMappingPropertyDto[] metaMappingPropertyDtos = addReceiverMappingToDto(
-                        adapterMappingConfiguration.getInputMappingProperties()
-                );
-                EventMappingPropertyDto[] payloadMappingPropertyDtos = addReceiverMappingToDto(
-                        adapterMappingConfiguration.getPayloadMappingProperties()
-                );
-
-                eventReceiverAdminServiceStub.deployWso2EventReceiverConfiguration(receiverName
-                        , eventStreamWithVersion, adapterType, metaMappingPropertyDtos
-                        , correlationMappingPropertyDtos, payloadMappingPropertyDtos
-                        , basicInputAdapterPropertyDtos, customMapping
-                        , eventStreamWithVersion);
+                deployReceiverWithoutMapping(receiverName, eventStreamWithVersion, adapterType,
+                                             eventReceiverAdminServiceStub, basicInputAdapterPropertyDtos);
             }
         } finally {
             cleanup(eventReceiverAdminServiceStub);
+        }
+    }
+
+    /**
+     * To deploy receiver if custom mapping is false
+     *
+     * @param receiverName                  Name of the receiver
+     * @param eventStreamWithVersion        Attached event stream of the receiver
+     * @param adapterType                   Adapter type name
+     * @param eventReceiverAdminServiceStub Stub to deploy receiver
+     * @param basicInputAdapterPropertyDtos DTO to attach receiver data
+     * @throws RemoteException Exception that may occur during a remote method call
+     */
+    private void deployReceiverWithoutMapping(String receiverName, String eventStreamWithVersion
+            , String adapterType, EventReceiverAdminServiceStub eventReceiverAdminServiceStub
+            , BasicInputAdapterPropertyDto[] basicInputAdapterPropertyDtos)
+            throws RemoteException {
+        switch (adapterType) {
+            case "iot-event":
+            case "wso2event":
+                eventReceiverAdminServiceStub.deployWso2EventReceiverConfiguration(receiverName
+                        , eventStreamWithVersion, adapterType, null, null
+                        , null, basicInputAdapterPropertyDtos, false
+                        , eventStreamWithVersion);
+                break;
+            case "soap":
+                eventReceiverAdminServiceStub.deployXmlEventReceiverConfiguration(receiverName
+                        , eventStreamWithVersion, adapterType, null, null
+                        , null, basicInputAdapterPropertyDtos, false);
+                break;
+            default:
+                eventReceiverAdminServiceStub.deployTextEventReceiverConfiguration(receiverName
+                        , eventStreamWithVersion, adapterType, null
+                        , basicInputAdapterPropertyDtos, false);
         }
     }
 
@@ -436,7 +488,8 @@ public class AnalyticsArtifactsManagementServiceImpl
     private void deployPublisher(Adapter publisher, boolean customMapping,
                                  AdapterConfiguration adapterConfiguration)
             throws RemoteException, UserStoreException, JWTClientException {
-        EventPublisherAdminServiceStub eventPublisherAdminServiceStub = DeviceMgtAPIUtils.getEventPublisherAdminServiceStub();
+        EventPublisherAdminServiceStub eventPublisherAdminServiceStub = DeviceMgtAPIUtils
+                .getEventPublisherAdminServiceStub();
         try {
             String publisherName = publisher.getAdapterName();
             String adapterType = publisher.getAdapterType().toStringFormatted();
@@ -451,57 +504,112 @@ public class AnalyticsArtifactsManagementServiceImpl
             BasicOutputAdapterPropertyDto[] basicOutputAdapterPropertyDtos =
                     addPublisherConfigToDto(adapterProperties);
 
-            AdapterMappingConfiguration adapterMappingConfiguration = adapterConfiguration.getAdapterMappingConfiguration();
-            MessageFormat messageFormat = adapterMappingConfiguration.getMessageFormat();
-            if (!messageFormat.toString().equals("wso2event")) {
-                if (!messageFormat.toString().equals("map")) {
-                    if (messageFormat.toString().equals("xml")) {
-                        eventPublisherAdminServiceStub.deployXmlEventPublisherConfiguration(publisherName
-                                , eventStreamWithVersion, adapterType, adapterMappingConfiguration.getInputMappingString()
-                                , basicOutputAdapterPropertyDtos, eventStreamWithVersion
-                                , customMapping);
-                    } else if (messageFormat.toString().equals("text")) {
-                        eventPublisherAdminServiceStub.deployTextEventPublisherConfiguration(publisherName
-                                , eventStreamWithVersion, adapterType, adapterMappingConfiguration.getInputMappingString()
-                                , basicOutputAdapterPropertyDtos, eventStreamWithVersion
-                                , customMapping);
+            if (customMapping) {
+                AdapterMappingConfiguration adapterMappingConfiguration = adapterConfiguration
+                        .getAdapterMappingConfiguration();
+                MessageFormat messageFormat = adapterMappingConfiguration.getMessageFormat();
+                if (!messageFormat.toString().equals("wso2event")) {
+                    if (!messageFormat.toString().equals("map")) {
+                        if (messageFormat.toString().equals("xml")) {
+                            eventPublisherAdminServiceStub.deployXmlEventPublisherConfiguration(
+                                    publisherName, eventStreamWithVersion, adapterType
+                                    , adapterMappingConfiguration.getInputMappingString()
+                                    , basicOutputAdapterPropertyDtos, eventStreamWithVersion
+                                    , true);
+                        } else if (messageFormat.toString().equals("text")) {
+                            eventPublisherAdminServiceStub.deployTextEventPublisherConfiguration(
+                                    publisherName, eventStreamWithVersion, adapterType
+                                    , adapterMappingConfiguration.getInputMappingString()
+                                    , basicOutputAdapterPropertyDtos, eventStreamWithVersion
+                                    , true);
+                        } else {
+                            eventPublisherAdminServiceStub.deployJsonEventPublisherConfiguration(
+                                    publisherName, eventStreamWithVersion, adapterType
+                                    , adapterMappingConfiguration.getInputMappingString()
+                                    , basicOutputAdapterPropertyDtos, eventStreamWithVersion
+                                    , true);
+                        }
                     } else {
-                        eventPublisherAdminServiceStub.deployJsonEventPublisherConfiguration(publisherName
-                                , eventStreamWithVersion, adapterType, adapterMappingConfiguration.getInputMappingString()
-                                , basicOutputAdapterPropertyDtos, eventStreamWithVersion
-                                , customMapping);
+                        org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] inputMappingPropertyDtos =
+                                addPublisherMappingToDto(
+                                        adapterMappingConfiguration.getInputMappingProperties()
+                                );
+                        eventPublisherAdminServiceStub.deployMapEventPublisherConfiguration(publisherName
+                                , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
+                                , basicOutputAdapterPropertyDtos, true);
                     }
                 } else {
-                    org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] inputMappingPropertyDtos =
-                            addPublisherMappingToDto(
-                                    adapterMappingConfiguration.getInputMappingProperties()
+                    org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[]
+                            correlationMappingPropertyDtos = addPublisherMappingToDto
+                            (
+                                    adapterMappingConfiguration.getCorrelationMappingProperties()
                             );
-                    eventPublisherAdminServiceStub.deployMapEventPublisherConfiguration(publisherName
-                            , eventStreamWithVersion, adapterType, inputMappingPropertyDtos
-                            , basicOutputAdapterPropertyDtos, customMapping);
+                    org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[]
+                            metaMappingPropertyDtos = addPublisherMappingToDto
+                            (
+                                    adapterMappingConfiguration.getMetaMappingProperties()
+                            );
+                    org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[]
+                            payloadMappingPropertyDtos = addPublisherMappingToDto
+                            (
+                                    adapterMappingConfiguration.getPayloadMappingProperties()
+                            );
+                    eventPublisherAdminServiceStub.deployWSO2EventPublisherConfiguration(
+                            publisherName, eventStreamWithVersion, adapterType, metaMappingPropertyDtos
+                            , correlationMappingPropertyDtos, payloadMappingPropertyDtos
+                            , basicOutputAdapterPropertyDtos, true
+                            , eventStreamWithVersion);
                 }
             } else {
-                org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] correlationMappingPropertyDtos =
-                        addPublisherMappingToDto(
-                                adapterMappingConfiguration.getCorrelationMappingProperties()
-                        );
-                org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] metaMappingPropertyDtos =
-                        addPublisherMappingToDto(
-                                adapterMappingConfiguration.getMetaMappingProperties()
-                        );
-                org.wso2.carbon.event.publisher.stub.types.EventMappingPropertyDto[] payloadMappingPropertyDtos =
-                        addPublisherMappingToDto(
-                                adapterMappingConfiguration.getPayloadMappingProperties()
-                        );
-                eventPublisherAdminServiceStub.deployWSO2EventPublisherConfiguration(publisherName
-                        , eventStreamWithVersion, adapterType, metaMappingPropertyDtos
-                        , correlationMappingPropertyDtos, payloadMappingPropertyDtos
-                        , basicOutputAdapterPropertyDtos, customMapping
-                        , eventStreamWithVersion);
+                deployPublisherWithoutMapping(publisherName, eventStreamWithVersion, adapterType
+                        , eventPublisherAdminServiceStub, basicOutputAdapterPropertyDtos);
             }
 
         } finally {
             cleanup(eventPublisherAdminServiceStub);
+        }
+    }
+
+    /**
+     * To deploy publisher if custom mapping is false
+     *
+     * @param publisherName                  Name of the publisher
+     * @param eventStreamWithVersion         Attached event stream of the publisher
+     * @param adapterType                    Adapter type name
+     * @param eventPublisherAdminServiceStub Stub to deploy publisher
+     * @param basicOutputAdapterPropertyDtos DTO to attach publisher data
+     * @throws RemoteException Exception that may occur during a remote method call
+     */
+    private void deployPublisherWithoutMapping(String publisherName, String eventStreamWithVersion
+            , String adapterType, EventPublisherAdminServiceStub eventPublisherAdminServiceStub
+            , BasicOutputAdapterPropertyDto[] basicOutputAdapterPropertyDtos)
+            throws RemoteException {
+        switch (adapterType) {
+            case "wso2event":
+            case "ui":
+            case "secured-websocket":
+                eventPublisherAdminServiceStub.deployWSO2EventPublisherConfiguration(publisherName
+                        , eventStreamWithVersion, adapterType, null
+                        , null, null, basicOutputAdapterPropertyDtos
+                        , false, eventStreamWithVersion);
+                break;
+            case "soap":
+                eventPublisherAdminServiceStub.deployXmlEventPublisherConfiguration(publisherName
+                        , eventStreamWithVersion, adapterType, null
+                        , basicOutputAdapterPropertyDtos, eventStreamWithVersion
+                        , false);
+                break;
+            case "cassandra":
+            case "rdbms":
+                eventPublisherAdminServiceStub.deployMapEventPublisherConfiguration(publisherName
+                        , eventStreamWithVersion, adapterType, null
+                        , basicOutputAdapterPropertyDtos, false);
+                break;
+            default:
+                eventPublisherAdminServiceStub.deployTextEventPublisherConfiguration(publisherName
+                        , eventStreamWithVersion, adapterType, null
+                        , basicOutputAdapterPropertyDtos, eventStreamWithVersion
+                        , false);
         }
     }
 
@@ -516,9 +624,9 @@ public class AnalyticsArtifactsManagementServiceImpl
      * @throws JWTClientException            Exception that may occur during connecting to client store
      * @throws InvalidExecutionPlanException Exception that may occur if execution plan validation fails
      */
-    private void publishSiddhiExecutionPlan(String name, boolean isEdited,
-                                            String plan)
-            throws RemoteException, UserStoreException, JWTClientException {
+    private void deploySiddhiExecutionPlan(String name, boolean isEdited, String plan)
+            throws RemoteException, UserStoreException, JWTClientException,
+                   InvalidExecutionPlanException {
         EventProcessorAdminServiceStub eventProcessorAdminServiceStub = null;
         try {
             eventProcessorAdminServiceStub = DeviceMgtAPIUtils.getEventProcessorAdminServiceStub();
@@ -530,10 +638,7 @@ public class AnalyticsArtifactsManagementServiceImpl
                     eventProcessorAdminServiceStub.editActiveExecutionPlan(plan, name);
                 }
             } else {
-                ErrorDTO errorDTO = new ErrorDTO();
-                errorDTO.setMessage(validationResponse);
-                log.error(validationResponse);
-                throw new InvalidExecutionPlanException(errorDTO);
+                throw new InvalidExecutionPlanException(validationResponse);
             }
         } finally {
             cleanup(eventProcessorAdminServiceStub);
@@ -541,20 +646,19 @@ public class AnalyticsArtifactsManagementServiceImpl
     }
 
     /**
-     * This will set payload of event attribute's mapping to the DTO
+     * Validate stream properties
      *
-     * @param attributes list of event attributes
-     * @return DTO with all the event attributes
+     * @param stream EventStream object
      */
-    private EventStreamAttributeDto[] addEventAttributesToDto(List<Attribute> attributes) {
-        EventStreamAttributeDto[] eventStreamAttributeDtos = new EventStreamAttributeDto[attributes.size()];
-        for (Attribute attribute : attributes) {
-            EventStreamAttributeDto eventStreamAttributeDto = new EventStreamAttributeDto();
-            eventStreamAttributeDto.setAttributeName(attribute.getName());
-            eventStreamAttributeDto.setAttributeType(attribute.getType().toString());
-
+    private void validateStreamProperties(EventStream stream) throws BadRequestException {
+        if ((stream.getMetaData() == null || stream.getMetaData().isEmpty()) &&
+            (stream.getCorrelationData() == null || stream.getCorrelationData().isEmpty()) &&
+            (stream.getPayloadData() == null || stream.getPayloadData().isEmpty())) {
+            String errMsg = String.format("Failed to validate Stream property attributes of %s:%s. " +
+                                          "Stream mapping can't be null or empty",
+                                          stream.getName(), stream.getVersion());
+            throw new BadRequestException(errMsg);
         }
-        return eventStreamAttributeDtos;
     }
 
     /**
@@ -562,13 +666,11 @@ public class AnalyticsArtifactsManagementServiceImpl
      *
      * @param adapterProperties Adapter payload attributes
      */
-    private void validateAdapterProperties(List<AdapterProperty> adapterProperties) {
-        if (adapterProperties.isEmpty()) {
-            String errMsg = "Invalid payload: event property attributes invalid!!!";
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(errMsg);
-            log.error(errMsg);
-            throw new BadRequestException(errorResponse);
+    private void validateAdapterProperties(List<AdapterProperty> adapterProperties)
+            throws BadRequestException {
+        if (adapterProperties == null) {
+            String errMsg = "Failed to validate adapter attributes. Adapter attributes can't be null";
+            throw new BadRequestException(errMsg);
         }
     }
 
@@ -583,23 +685,49 @@ public class AnalyticsArtifactsManagementServiceImpl
      *
      * @param adapterMappingConfiguration Adapter mapping attributes
      */
-    private void validateAdapterMapping(AdapterMappingConfiguration adapterMappingConfiguration) {
-
-        if (adapterMappingConfiguration.getInputMappingString() == null &&
-            (adapterMappingConfiguration.getInputMappingProperties().isEmpty() &&
-             adapterMappingConfiguration.getNamespaceMappingProperties().isEmpty()) &&
-            (
-                    adapterMappingConfiguration.getCorrelationMappingProperties().isEmpty() &&
-                    adapterMappingConfiguration.getPayloadMappingProperties().isEmpty() &&
-                    adapterMappingConfiguration.getMetaMappingProperties().isEmpty()
-            )
-            || adapterMappingConfiguration.getMessageFormat() == null) {
-            String errMsg = "Invalid payload: event mapping attributes invalid!!!";
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage(errMsg);
-            log.error(errMsg);
-            throw new BadRequestException(errorResponse);
+    private void validateAdapterMapping(AdapterMappingConfiguration adapterMappingConfiguration)
+            throws BadRequestException {
+        if (adapterMappingConfiguration == null) {
+            String errMsg = "Failed to validate adapter mapping attributes. " +
+                            "Adapter mapping configuration can't be null";
+            throw new BadRequestException(errMsg);
+        } else if (adapterMappingConfiguration.getMessageFormat() == null ||
+                   ((adapterMappingConfiguration.getInputMappingString() == null)
+                    && (adapterMappingConfiguration.getInputMappingProperties() == null ||
+                        adapterMappingConfiguration.getInputMappingProperties().isEmpty())
+                    && (adapterMappingConfiguration.getNamespaceMappingProperties() == null ||
+                        adapterMappingConfiguration.getNamespaceMappingProperties().isEmpty()))
+                   &&
+                   ((adapterMappingConfiguration.getCorrelationMappingProperties() == null ||
+                     adapterMappingConfiguration.getCorrelationMappingProperties().isEmpty())
+                    && (adapterMappingConfiguration.getPayloadMappingProperties() == null ||
+                        adapterMappingConfiguration.getPayloadMappingProperties().isEmpty())
+                    && (adapterMappingConfiguration.getMetaMappingProperties() == null ||
+                        adapterMappingConfiguration.getMetaMappingProperties().isEmpty()))
+        ) {
+            String errMsg = "Failed to validate adapter mapping attributes. " +
+                            "Adapter mapping configuration invalid";
+            ErrorDTO errorDTO = new ErrorDTO();
+            errorDTO.setMessage(errMsg);
+            throw new BadRequestException(errorDTO);
         }
+    }
+
+    /**
+     * This will set payload of event attribute's mapping to the DTO
+     *
+     * @param attributes list of event attributes
+     * @return DTO with all the event attributes
+     */
+    private EventStreamAttributeDto[] addEventAttributesToDto(List<Attribute> attributes) {
+        EventStreamAttributeDto[] eventStreamAttributeDtos = new EventStreamAttributeDto[attributes.size()];
+        for (int i = 0; i < attributes.size(); i++) {
+            EventStreamAttributeDto eventStreamAttributeDto = new EventStreamAttributeDto();
+            eventStreamAttributeDto.setAttributeName(attributes.get(i).getName());
+            eventStreamAttributeDto.setAttributeType(attributes.get(i).getType().toString());
+            eventStreamAttributeDtos[i] = eventStreamAttributeDto;
+        }
+        return eventStreamAttributeDtos;
     }
 
     /**

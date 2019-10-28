@@ -352,6 +352,10 @@ public class APIUtil {
         application.setUnrestrictedRoles(applicationDTO.getUnrestrictedRoles());
         application.setRating(applicationDTO.getAppRating());
         List<ApplicationRelease> applicationReleases = new ArrayList<>();
+        if (ApplicationType.PUBLIC.toString().equals(applicationDTO.getType()) && application.getCategories()
+                .contains("GooglePlaySyncedApp")) {
+            application.setAndroidEnterpriseApp(true);
+        }
         for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
             applicationReleases.add(releaseDtoToRelease(applicationReleaseDTO));
         }
