@@ -22,10 +22,10 @@
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>device-mgt</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1-SNAPSHOT</version>
     </parent>
     <artifactId>io.entgra.device.mgt.ui</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.1-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Entgra - Device Management UI Component</name>
     <url>https://entgra.io</url>
