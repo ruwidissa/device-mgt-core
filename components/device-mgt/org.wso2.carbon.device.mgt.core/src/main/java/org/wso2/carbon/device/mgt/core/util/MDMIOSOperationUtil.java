@@ -67,8 +67,8 @@ public class MDMIOSOperationUtil {
                 appStoreApplication.setPreventBackupOfAppData((Boolean) application.getProperties().
                         get(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP));
                 appStoreApplication.setBundleId(application.getId());
-                appStoreApplication.setiTunesStoreID((Integer) application.getProperties().
-                        get(MDMAppConstants.IOSConstants.I_TUNES_ID));
+                appStoreApplication.setiTunesStoreID(Integer.parseInt(application.getProperties().
+                        get(MDMAppConstants.IOSConstants.I_TUNES_ID).toString()));
                 operation.setCode(MDMAppConstants.IOSConstants.OPCODE_INSTALL_STORE_APPLICATION);
                 operation.setType(Operation.Type.COMMAND);
                 operation.setPayLoad(appStoreApplication.toJSON());

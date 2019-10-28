@@ -155,12 +155,14 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("uuid") String uuid,
             @PathParam("action") String action,
             @Valid List<DeviceIdentifier> deviceIdentifiers,
-            @QueryParam("timestamp") String timestamp) {
+            @QueryParam("timestamp") String timestamp,
+            @QueryParam("requiresUpdatingExternal") boolean requiresUpdatingExternal) {
         try {
             if (StringUtils.isEmpty(timestamp)) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
                 subscriptionManager
-                        .performEntAppSubscription(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(), action);
+                        .performEntAppSubscription(uuid, deviceIdentifiers, SubscriptionType.DEVICE.toString(),
+                                action, requiresUpdatingExternal);
                 String msg = "Application release which has UUID " + uuid + " is installed to given valid device "
                         + "identifiers.";
                 return Response.status(Response.Status.OK).entity(msg).build();
@@ -200,11 +202,12 @@ public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
             @PathParam("subType") String subType,
             @PathParam("action") String action,
             @Valid List<String> subscribers,
-            @QueryParam("timestamp") String timestamp) {
+            @QueryParam("timestamp") String timestamp,
+            @QueryParam("requiresUpdatingExternal") boolean requiresUpdatingExternal) {
         try {
             if (StringUtils.isEmpty(timestamp)) {
                 SubscriptionManager subscriptionManager = APIUtil.getSubscriptionManager();
-                subscriptionManager.performEntAppSubscription(uuid, subscribers, subType, action);
+                subscriptionManager.performEntAppSubscription(uuid, subscribers, subType, action, requiresUpdatingExternal);
                 String msg = "Application release which has UUID " + uuid + " is installed to subscriber's valid device"
                         + " identifiers.";
                 return Response.status(Response.Status.OK).entity(msg).build();
