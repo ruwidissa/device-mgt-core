@@ -1872,6 +1872,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     this.applicationDAO.deleteAppCategories(categoryIds, applicationId, tenantId);
                     appCategories.removeAll(removingAppCategories);
                 }
+                applicationDTO.setAppCategories(appCategories);
             }
 
             List<String> updatingAppTags = applicationUpdateWrapper.getTags();
@@ -1894,6 +1895,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     this.applicationDAO.deleteApplicationTags(removingTagIds, applicationId, tenantId);
                     appTags.removeAll(removingTagList);
                 }
+                applicationDTO.setTags(appTags);
             }
             if (!applicationDAO.updateApplication(applicationDTO, tenantId)){
                 ConnectionManagerUtil.rollbackDBTransaction();
