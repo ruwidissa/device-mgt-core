@@ -185,15 +185,16 @@ class AppDetailsDrawer extends React.Component {
                 window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/" + id,
                 data
             ).then(res => {
-                this.props.onUpdateApp("name", name);
                 if (res.status === 200) {
+                    const app = res.data.data;
+                    this.props.onUpdateApp("name", app.name);
                     notification["success"]({
                         message: 'Saved!',
                         description: 'App name updated successfully!'
                     });
                     this.setState({
                         loading: false,
-                        name: name,
+                        name: app.name,
                     });
 
                 }
@@ -268,6 +269,7 @@ class AppDetailsDrawer extends React.Component {
                 data
             ).then(res => {
                 if (res.status === 200) {
+                    const app = res.data.data;
                     this.props.onUpdateApp("categories", temporaryCategories);
                     notification["success"]({
                         message: 'Saved!',
@@ -275,7 +277,7 @@ class AppDetailsDrawer extends React.Component {
                     });
                     this.setState({
                         loading: false,
-                        categories: temporaryCategories,
+                        categories: app.categories,
                         isCategoriesEditEnabled: false
                     });
 
@@ -334,13 +336,14 @@ class AppDetailsDrawer extends React.Component {
                 data
             ).then(res => {
                 if (res.status === 200) {
+                    const app = res.data.data;
                     notification["success"]({
                         message: 'Saved!',
                         description: 'App tags updated successfully!'
                     });
                     this.setState({
                         loading: false,
-                        tags: temporaryTags,
+                        tags: app.tags,
                         isTagsEditEnabled: false
                     });
                 }
@@ -375,13 +378,14 @@ class AppDetailsDrawer extends React.Component {
                 data
             ).then(res => {
                 if (res.status === 200) {
+                    const app = res.data.data;
                     notification["success"]({
                         message: 'Saved!',
                         description: 'App description updated successfully!'
                     });
                     this.setState({
                         loading: false,
-                        description: temporaryDescription,
+                        description: app.description,
                         isDescriptionEditEnabled: false
                     });
                 }
