@@ -1802,6 +1802,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             }
 
             List<String> appUnrestrictedRoles = this.visibilityDAO.getUnrestrictedRoles(applicationId, tenantId);
+            List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
+            List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
 
             boolean isExistingAppRestricted = !appUnrestrictedRoles.isEmpty();
             boolean isUpdatingAppRestricted = false;
@@ -1812,6 +1814,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             if (isExistingAppRestricted && !isUpdatingAppRestricted) {
                 visibilityDAO.deleteUnrestrictedRoles(appUnrestrictedRoles, applicationId, tenantId);
+                appUnrestrictedRoles.clear();
             } else if (isUpdatingAppRestricted) {
                 if (!hasUserRole(applicationUpdateWrapper.getUnrestrictedRoles(), userName)) {
                     String msg =
@@ -1827,6 +1830,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 if (!isExistingAppRestricted) {
                     visibilityDAO
                             .addUnrestrictedRoles(applicationUpdateWrapper.getUnrestrictedRoles(), applicationId, tenantId);
+                    appUnrestrictedRoles = applicationUpdateWrapper.getUnrestrictedRoles();
                 } else {
                     List<String> addingRoleList = getDifference(applicationUpdateWrapper.getUnrestrictedRoles(),
                             applicationDTO.getUnrestrictedRoles());
@@ -1834,15 +1838,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
                             applicationUpdateWrapper.getUnrestrictedRoles());
                     if (!addingRoleList.isEmpty()) {
                         visibilityDAO.addUnrestrictedRoles(addingRoleList, applicationId, tenantId);
+                        appUnrestrictedRoles.addAll(addingRoleList);
                     }
                     if (!removingRoleList.isEmpty()) {
                         visibilityDAO.deleteUnrestrictedRoles(removingRoleList, applicationId, tenantId);
+                        appUnrestrictedRoles.removeAll(removingRoleList);
                     }
                 }
             }
-            applicationDTO.setUnrestrictedRoles(applicationUpdateWrapper.getUnrestrictedRoles());
-            List<String> updatingAppCategries = applicationUpdateWrapper.getCategories();
 
+            List<String> updatingAppCategries = applicationUpdateWrapper.getCategories();
             if (updatingAppCategries != null){
                 List<CategoryDTO> allCategories = this.applicationDAO.getAllCategories(tenantId);
                 List<String> allCategoryName = allCategories.stream().map(CategoryDTO::getCategoryName)
@@ -1854,22 +1859,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
                    throw new BadRequestException(msg);
                 }
 
-                List<String> appCategories = this.applicationDAO.getAppCategories(applicationId, tenantId);
+
                 List<String> addingAppCategories = getDifference(updatingAppCategries, appCategories);
                 List<String> removingAppCategories = getDifference(appCategories, updatingAppCategries);
                 if (!addingAppCategories.isEmpty()) {
                     List<Integer> categoryIds = this.applicationDAO.getCategoryIdsForCategoryNames(addingAppCategories, tenantId);
                     this.applicationDAO.addCategoryMapping(categoryIds, applicationId, tenantId);
+                    appCategories.addAll(addingAppCategories);
                 }
                 if (!removingAppCategories.isEmpty()) {
                     List<Integer> categoryIds = this.applicationDAO.getCategoryIdsForCategoryNames(removingAppCategories, tenantId);
                     this.applicationDAO.deleteAppCategories(categoryIds, applicationId, tenantId);
+                    appCategories.removeAll(removingAppCategories);
                 }
             }
 
             List<String> updatingAppTags = applicationUpdateWrapper.getTags();
             if (updatingAppTags!= null){
-                List<String> appTags = this.applicationDAO.getAppTags(applicationId, tenantId);
                 List<String> addingTagList = getDifference(updatingAppTags, appTags);
                 List<String> removingTagList = getDifference(appTags, updatingAppTags);
                 if (!addingTagList.isEmpty()) {
@@ -1881,10 +1887,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     }
                     List<Integer> addingTagIds = this.applicationDAO.getTagIdsForTagNames(addingTagList, tenantId);
                     this.applicationDAO.addTagMapping(addingTagIds, applicationId, tenantId);
+                    appTags.addAll(addingTagList);
                 }
                 if (!removingTagList.isEmpty()) {
                     List<Integer> removingTagIds = this.applicationDAO.getTagIdsForTagNames(removingTagList, tenantId);
                     this.applicationDAO.deleteApplicationTags(removingTagIds, applicationId, tenantId);
+                    appTags.removeAll(removingTagList);
                 }
             }
             if (!applicationDAO.updateApplication(applicationDTO, tenantId)){
@@ -1893,6 +1901,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
+
+            applicationDTO.setUnrestrictedRoles(appUnrestrictedRoles);
+            applicationDTO.setAppCategories(appCategories);
+            applicationDTO.setTags(appTags);
             ConnectionManagerUtil.commitDBTransaction();
             return APIUtil.appDtoToAppResponse(applicationDTO);
         } catch (UserStoreException e) {

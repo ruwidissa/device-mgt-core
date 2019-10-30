@@ -336,7 +336,6 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
 
             ApplicationDTO applicationDTO = getApplicationDTO(applicationUUID);
             ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
-            //todo need to check application release status if it is not in installable state send forbidden exception
             int applicationReleaseId = applicationReleaseDTO.getId();
             if (!ApplicationType.PUBLIC.toString().equals(applicationDTO.getType())) {
                 String msg = "Application type is not public. Hence you can't perform google ent.install operation on "
@@ -726,6 +725,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 log.error(msg);
                 throw new ForbiddenException(msg);
             }
+            applicationDTO.setTags(this.applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
+            applicationDTO.setAppCategories(this.applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
             return applicationDTO;
         } catch (LifecycleManagementException e) {
             String msg = "Error occured when getting life-cycle state from life-cycle state manager.";
