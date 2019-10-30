@@ -449,18 +449,15 @@ class AppDetailsDrawer extends React.Component {
                     width={this.state.drawerWidth}
                     closable={false}
                     onClose={onClose}
-                    visible={visible}
-                >
+                    visible={visible}>
                     <Spin spinning={loading} delay={500}>
                         <div style={{textAlign: "center"}}>
                             {avatar}
                             <Title editable={{onChange: this.handleNameSave}} level={2}>{name}</Title>
                         </div>
-
                         <Divider/>
-
                         {/*display manage config button only if the app is public android app*/}
-                        {(app.type === "PUBLIC") && (app.deviceType === "android") &&
+                        {(app.isAndroidEnterpriseApp) &&
                         (config.androidEnterpriseToken !== null) &&
                         (
                             <div>
