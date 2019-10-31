@@ -60,7 +60,8 @@ class AppList extends React.Component {
             this.fetchData(0, limit, res => {
                 this.setState({
                     apps: res,
-                    loading: false
+                    loading: false,
+                    hasMore: true
                 });
             });
         }
@@ -139,6 +140,7 @@ class AppList extends React.Component {
         return (
             <div>
                 <InfiniteScroll
+                    key={this.props.deviceType}
                     initialLoad={false}
                     pageStart={0}
                     loadMore={this.handleInfiniteOnLoad}
