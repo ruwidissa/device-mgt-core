@@ -24,7 +24,7 @@ import {withConfigContext} from "../../context/ConfigContext";
 import {handleApiError} from "../../js/Utils";
 import InfiniteScroll from "react-infinite-scroller";
 
-const limit = 10;
+const limit = 30;
 
 class AppList extends React.Component {
     constructor(props) {
@@ -44,7 +44,7 @@ class AppList extends React.Component {
     componentDidMount() {
         const {deviceType} = this.props;
         this.props.changeSelectedMenuItem(deviceType);
-        this.fetchData(0, limit, res => {
+        this.fetchData(0, 30, res => {
             this.setState({
                 apps: res,
                 loading: false
@@ -57,7 +57,13 @@ class AppList extends React.Component {
         if (prevProps.deviceType !== this.props.deviceType) {
             const {deviceType} = this.props;
             this.props.changeSelectedMenuItem(deviceType);
-            this.fetchData(deviceType);
+            this.fetchData(0, 30, res => {
+                this.setState({
+                    apps: res,
+                    loading: false,
+                    hasMore: true
+                });
+            });
         }
     }
 
@@ -134,6 +140,7 @@ class AppList extends React.Component {
         return (
             <div>
                 <InfiniteScroll
+                    key={this.props.deviceType}
                     initialLoad={false}
                     pageStart={0}
                     loadMore={this.handleInfiniteOnLoad}

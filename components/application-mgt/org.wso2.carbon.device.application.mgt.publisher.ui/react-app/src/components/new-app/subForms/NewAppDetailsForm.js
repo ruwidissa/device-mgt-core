@@ -344,7 +344,7 @@ class NewAppDetailsForm extends React.Component {
                                     banner
                                     closable/>
                             )}
-                            <Form.Item {...formItemLayout} label="Unrestricted Roles">
+                            <Form.Item {...formItemLayout} label="Visible Roles">
                                 {getFieldDecorator('unrestrictedRoles', {
                                     rules: [],
                                     initialValue: []
