@@ -57,7 +57,12 @@ class AppList extends React.Component {
         if (prevProps.deviceType !== this.props.deviceType) {
             const {deviceType} = this.props;
             this.props.changeSelectedMenuItem(deviceType);
-            this.fetchData(deviceType);
+            this.fetchData(0, limit, res => {
+                this.setState({
+                    apps: res,
+                    loading: false
+                });
+            });
         }
     }
 
