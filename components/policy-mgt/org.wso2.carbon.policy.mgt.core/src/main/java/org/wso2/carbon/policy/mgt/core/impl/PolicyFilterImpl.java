@@ -14,6 +14,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2019, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 
@@ -61,6 +78,33 @@ public class PolicyFilterImpl implements PolicyFilter {
         }
 
         return temp;
+    }
+
+    @Override
+    public List<Policy> filterGeneralPolicies(List<Policy> policies) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("No of policies went in to filterGeneralPolicies : " + policies.size());
+            for (Policy policy : policies) {
+                log.debug("Names of policy went in to  filterGeneralPolicies : " + policy.getPolicyName());
+            }
+        }
+
+        List<Policy> generalPolicies = new ArrayList<>();
+        for (Policy policy : policies) {
+            if (PolicyManagementConstants.GENERAL_POLICY_TYPE.equalsIgnoreCase(policy.getPolicyType())) {
+                generalPolicies.add(policy);
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("No of policies returned from filterGeneralPolicies :" + policies.size());
+            for (Policy policy : generalPolicies) {
+                log.debug("Names of policy filtered in filterGeneralPolicies : " + policy.getPolicyName());
+            }
+        }
+
+        return generalPolicies;
     }
 
     @Override
