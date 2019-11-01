@@ -42,7 +42,6 @@ var currentlyEffected = {};
 var validateInline = {};
 var clearInline = {};
 var hasPolicyProfileScript = false;
-var isCorrectiveActionProfileAdded = false;
 
 var enableInlineError = function (inputField, errorMsg, errorSign) {
     var fieldIdentifier = "#" + inputField;
@@ -285,46 +284,41 @@ stepForwardFrom["policy-profile"] = function () {
     $("input[name=policy-type-radio-btn][value=" + policyType + "]").prop("checked", true).trigger('change');
 
     // add policy correction action page
-    if (!isCorrectiveActionProfileAdded) {
-        var policyCorrectiveActionTemplateSrc =
-                "/public/cdmf.unit.policy.corrective-action/templates/policy-corrective-action.hbs";
-        var policyCorrectiveActionScriptSrc =
-                "/public/cdmf.unit.policy.corrective-action/js/policy-corrective-action.js";
-        var policyCorrectiveActionTemplateCacheKey = "policy-corrective-action";
+    var policyCorrectiveActionTemplateSrc =
+            "/public/cdmf.unit.policy.corrective-action/templates/policy-corrective-action.hbs";
+    var policyCorrectiveActionScriptSrc =
+            "/public/cdmf.unit.policy.corrective-action/js/policy-corrective-action.js";
+    var policyCorrectiveActionTemplateCacheKey = "policy-corrective-action";
 
-        $.template(policyCorrectiveActionTemplateCacheKey, context + policyCorrectiveActionTemplateSrc,
-                   function (template) {
-                       var content = template(
-                               {
-                                   "deviceType": policy["platform"],
-                                   "correctivePolicies": $("#logged-in-user").data("corrective-policies")
-                               }
-                       );
-                       $("#select-general-policy-type").html(content);
-                       if ("GENERAL" === policyType && currentlyEffected.correctiveActions &&
-                            currentlyEffected.correctiveActions.length > 0) {
-                           currentlyEffected.correctiveActions.forEach(function (correctiveAction) {
-                              if ("POLICY" === correctiveAction.actionType) {
-                                  if ($("#corrective-policy-input option[value=" + correctiveAction.policyId + "]").length > 0) {
-                                      $("#corrective-policy-input").val(correctiveAction.policyId);
-                                  } else {
-                                      $("#corrective-action-policy-id-missing-msg").removeClass("hidden");
-                                  }
-                                  // returned from for each since currently only supported corrective action type is
-                                  // POLICY.
-                                  return true;
+    $.template(policyCorrectiveActionTemplateCacheKey, context + policyCorrectiveActionTemplateSrc,
+               function (template) {
+                   var content = template(
+                           {
+                               "deviceType": policy["platform"],
+                               "correctivePolicies": $("#logged-in-user").data("corrective-policies")
+                           }
+                   );
+                   $("#select-general-policy-type").html(content);
+                   if ("GENERAL" === policyType && currentlyEffected.correctiveActions &&
+                        currentlyEffected.correctiveActions.length > 0) {
+                       currentlyEffected.correctiveActions.forEach(function (correctiveAction) {
+                          if ("POLICY" === correctiveAction.actionType) {
+                              if ($("#corrective-policy-input option[value=" + correctiveAction.policyId + "]").length > 0) {
+                                  $("#corrective-policy-input").val(correctiveAction.policyId);
+                              } else {
+                                  $("#corrective-action-policy-id-missing-msg").removeClass("hidden");
                               }
-                           });
-                       }
-                   });
-
-        var script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = context + policyCorrectiveActionScriptSrc;
-        document.head.prepend(script);
-
-        isCorrectiveActionProfileAdded = true;
-    }
+                              // returned from for each since currently only supported corrective action type is
+                              // POLICY.
+                              return true;
+                          }
+                       });
+                   }
+                   var script = document.createElement('script');
+                   script.type = 'text/javascript';
+                   script.src = context + policyCorrectiveActionScriptSrc;
+                   document.head.prepend(script);
+               });
 
     $(".policy-type-loading-corrective-actions").addClass("hidden");
 
@@ -767,8 +761,6 @@ $(document).ready(function () {
     });
 
     $("#policy-profile-wizard-steps").html($(".wr-steps").html());
-
-    isCorrectiveActionProfileAdded = false;
 
     $('input[type=radio][name=policy-type-radio-btn]').change(function() {
         if ($(this).val() === "CORRECTIVE") {
