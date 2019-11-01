@@ -31,7 +31,7 @@
     "react-twemoji": "^0.2.3",
     "react-virtualized": "^9.21.1",
     "reqwest": "^2.0.5",
-    "storm-react-diagrams": "^5.2.1"
+    "shade-blend-color": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.4",

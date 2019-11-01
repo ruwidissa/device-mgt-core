@@ -107,10 +107,22 @@ class NormalLoginForm extends React.Component {
                         window.location = redirectUrl;
                     }
                 }).catch(function (error) {
-                    handleApiError(error, "Error occurred while trying to login.");
-                    thisForm.setState({
-                        loading: false
-                    });
+                    if (error.hasOwnProperty("response") && error.response.status === 401) {
+                        thisForm.setState({
+                            loading: false,
+                            inValid: true
+                        });
+                    } else {
+                        notification["error"]({
+                            message: "There was a problem",
+                            duration: 10,
+                            description: message,
+                        });
+                        thisForm.setState({
+                            loading: false,
+                            inValid: false
+                        });
+                    }
                 });
             }
 
@@ -149,14 +161,6 @@ class NormalLoginForm extends React.Component {
                 {loading}
                 {errorMsg}
                 <Form.Item>
-                    {getFieldDecorator('remember', {
-                        valuePropName: 'checked',
-                        initialValue: true,
-                    })(
-                        <Checkbox>Remember me</Checkbox>
-                    )}
-                    <br/>
-                    <a className="login-form-forgot" href="">Forgot password</a>
                     <Button loading={this.state.loading} block type="primary" htmlType="submit" className="login-form-button">
                         Log in
                     </Button>

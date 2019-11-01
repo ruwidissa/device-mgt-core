@@ -17,11 +17,12 @@
  */
 
 import React from "react";
-import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon, Spin, Tabs} from "antd";
+import {Divider, Row, Col, Typography, Button, Dropdown, notification, Menu, Icon, Spin, Tabs, Tag} from "antd";
 import "../../../App.css";
 import ImgViewer from "../../apps/release/images/ImgViewer";
 import StarRatings from "react-star-ratings";
 import axios from "axios";
+import pSBC from "shade-blend-color";
 import AppInstallModal from "./install/AppInstallModal";
 import AppUninstallModal from "./install/AppUninstallModal";
 import {withConfigContext} from "../../../context/ConfigContext";
@@ -122,6 +123,7 @@ class ReleaseView extends React.Component {
 
     render() {
         const {app, deviceType} = this.props;
+        const config = this.props.context;
         const release = app.applicationReleases[0];
 
         let metaData = [];
@@ -199,7 +201,35 @@ class ReleaseView extends React.Component {
                                 {release.description}
                             </Paragraph>
                             <Divider/>
+                            <Text>CATEGORIES</Text>
+                            <div style={{marginTop: 8}}>
+                                {
+                                    app.categories.map(category => {
+                                        return (
+                                            <Tag color={pSBC(0.30, config.theme.primaryColor)} key={category}
+                                                 style={{marginBottom: 5}}>
+                                                {category}
+                                            </Tag>
+                                        );
+                                    })
+                                }
+                            </div>
+                            <Divider/>
+                            <Text>TAGS</Text>
+                            <div style={{marginTop: 8}}>
+                                {
+                                    app.tags.map(tag => {
+                                        return (
+                                            <Tag color="#34495e" key={tag} style={{marginBottom: 5}}>
+                                                {tag}
+                                            </Tag>
+                                        );
+                                    })
+                                }
+                            </div>
+                            <Divider/>
                             <Text>META DATA</Text>
+
                             <Row>
                                 {
                                     metaData.map((data, index) => {
