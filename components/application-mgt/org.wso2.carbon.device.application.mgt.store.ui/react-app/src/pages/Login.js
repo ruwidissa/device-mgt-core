@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox} from 'antd';
+import {Typography, Row, Col, Form, Icon, Input, Button, Checkbox, notification} from 'antd';
 import './Login.css';
 import axios from 'axios';
 import {withConfigContext} from "../context/ConfigContext";
@@ -109,11 +109,20 @@ class NormalLoginForm extends React.Component {
                         window.location = redirectUrl;
                     }
                 }).catch(function (error) {
-                    handleApiError(error, "Error occurred while trying to load groups.");
-                    if (error.hasOwnProperty("response") && error.response.status === 400) {
+                    if (error.hasOwnProperty("response") && error.response.status === 401) {
                         thisForm.setState({
-                            inValid: true,
-                            loading: false
+                            loading: false,
+                            inValid: true
+                        });
+                    } else {
+                        notification["error"]({
+                            message: "There was a problem",
+                            duration: 10,
+                            description: message,
+                        });
+                        thisForm.setState({
+                            loading: false,
+                            inValid: false
                         });
                     }
                 });
