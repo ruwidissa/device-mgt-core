@@ -51,6 +51,7 @@ public class MDMAndroidOperationUtil {
 				EnterpriseApplication enterpriseApplication = new EnterpriseApplication();
 				enterpriseApplication.setType(application.getType().toString());
 				enterpriseApplication.setUrl(application.getLocation());
+				enterpriseApplication.setAppIdentifier(application.getIdentifier());
 				operation.setPayLoad(enterpriseApplication.toJSON());
 				break;
 			case PUBLIC:

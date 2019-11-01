@@ -119,11 +119,11 @@ public class SQLServerApplicationDAOImpl extends GenericApplicationDAOImpl {
         }
 
         if (filter.getLimit() == -1) {
-            sql = sql.replace("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY", "");
+            sql = sql.replace("ORDER BY ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY", "");
         }
 
         String sortingOrder = "ASC";
-        if (!StringUtils.isEmpty(filter.getSortBy() )) {
+        if (!StringUtils.isEmpty(filter.getSortBy())) {
             sortingOrder = filter.getSortBy();
         }
         sql += " ORDER BY APP_ID " + sortingOrder;
