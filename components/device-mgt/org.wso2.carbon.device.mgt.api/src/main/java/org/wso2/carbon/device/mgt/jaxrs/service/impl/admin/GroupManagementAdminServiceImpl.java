@@ -43,7 +43,7 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
             "/permission/device-mgt/user/groups"};
 
     @Override
-    public Response getGroups(String name, String owner, int offset, int limit, String status) {
+    public Response getGroups(String name, String owner, int offset, int limit, String status, boolean requireGroupProps) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             GroupPaginationRequest request = new GroupPaginationRequest(offset, limit);
@@ -57,7 +57,7 @@ public class GroupManagementAdminServiceImpl implements GroupManagementAdminServ
                 request.setStatus(status.toUpperCase());
             }
             PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                    .getGroups(request);
+                    .getGroups(request, requireGroupProps);
             DeviceGroupList deviceGroupList = new DeviceGroupList();
             if (deviceGroupsResult.getData() != null) {
                 deviceGroupList.setList(deviceGroupsResult.getData());

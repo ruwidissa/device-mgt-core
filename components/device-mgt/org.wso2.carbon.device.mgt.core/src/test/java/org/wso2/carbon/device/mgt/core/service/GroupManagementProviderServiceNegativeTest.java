@@ -68,28 +68,28 @@ public class GroupManagementProviderServiceNegativeTest extends BaseDeviceManage
             + "negative conditions", expectedExceptions = {GroupManagementException.class},
             expectedExceptionsMessageRegExp = "Error occurred while obtaining group.*")
     public void testGetGroup() throws GroupManagementException {
-        groupManagementProviderService.getGroup(1);
+        groupManagementProviderService.getGroup(1, false);
     }
 
     @Test(description = "This method tests the getGroup method of the GroupManagementProviderService under "
             + "negative conditions", expectedExceptions = {GroupManagementException.class},
             expectedExceptionsMessageRegExp = "Error occurred while obtaining group with name.*")
     public void testGetGroupWithName() throws GroupManagementException {
-        groupManagementProviderService.getGroup("1");
+        groupManagementProviderService.getGroup("1", false);
     }
 
     @Test(description = "This method tests the getGroups method of the GroupManagementProviderService under negative "
             + "conditions", expectedExceptions = {GroupManagementException.class}, expectedExceptionsMessageRegExp =
             "Error occurred while retrieving all groups in tenant.*")
     public void testGetGroups() throws GroupManagementException {
-        groupManagementProviderService.getGroups();
+        groupManagementProviderService.getGroups(true);
     }
 
     @Test(description = "This method tests the getGroups method of the GroupManagementProviderService under negative "
             + "conditions", expectedExceptions = {GroupManagementException.class}, expectedExceptionsMessageRegExp =
             "Error occurred while retrieving all groups accessible to user.*")
     public void testGetGroupsWithUserName() throws GroupManagementException {
-        groupManagementProviderService.getGroups("test");
+        groupManagementProviderService.getGroups("test", false);
     }
 
     @Test(description = "This method tests the getGroupCount method under negative circumstances", expectedExceptions
@@ -111,14 +111,14 @@ public class GroupManagementProviderServiceNegativeTest extends BaseDeviceManage
             + "circumstances", expectedExceptions = {GroupManagementException.class},
             expectedExceptionsMessageRegExp = "Error occurred while retrieving all groups in tenant")
     public void testGetGroupsWithPaginationRequest() throws GroupManagementException {
-        groupManagementProviderService.getGroups(TestUtils.createPaginationRequest());
+        groupManagementProviderService.getGroups(TestUtils.createPaginationRequest(), false);
     }
 
     @Test(description = "This method tests the getGroups method with pagination request and username under negative "
             + "circumstances", expectedExceptions = {GroupManagementException.class},
             expectedExceptionsMessageRegExp = "Error occurred while retrieving all groups accessible to user.")
     public void testGetGroupsWithPaginationRequestAndUserName() throws GroupManagementException {
-        groupManagementProviderService.getGroups("test", TestUtils.createPaginationRequest());
+        groupManagementProviderService.getGroups("test", TestUtils.createPaginationRequest(), false);
     }
 
     @Test(description = "This method tests the get roles method under negative circumstances",
@@ -152,6 +152,6 @@ public class GroupManagementProviderServiceNegativeTest extends BaseDeviceManage
             expectedExceptionsMessageRegExp = "Received empty device identifier for getGroups",
             expectedExceptions = {GroupManagementException.class})
     public void testGetGroupsWithDeviceIdentifier() throws GroupManagementException {
-        groupManagementProviderService.getGroups((DeviceIdentifier) null);
+        groupManagementProviderService.getGroups((DeviceIdentifier) null, false);
     }
 }

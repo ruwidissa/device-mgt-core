@@ -151,12 +151,17 @@ public interface GroupManagementAdminService {
                                defaultValue = "5")
                        @QueryParam("limit")
                                int limit,
-
                        @ApiParam(
                                name = "status",
                                value = "status of group to be retrieve.")
                        @QueryParam("status")
-                               String status);
+                               String status,
+                       @ApiParam(
+                               name = "requireGroupProps",
+                               value = "Request group properties to include in the response",
+                               defaultValue = "false")
+                       @QueryParam("requireGroupProps")
+                               boolean requireGroupProps);
 
     @Path("/count")
     @GET

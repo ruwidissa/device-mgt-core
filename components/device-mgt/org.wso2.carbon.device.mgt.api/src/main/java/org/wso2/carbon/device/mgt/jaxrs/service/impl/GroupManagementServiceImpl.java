@@ -56,7 +56,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
                                                                "/permission/device-mgt/user/groups"};
 
     @Override
-    public Response getGroups(String name, String owner, int offset, int limit) {
+    public Response getGroups(String name, String owner, int offset, int limit, boolean requireGroupProps) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
             String currentUser = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -64,7 +64,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             request.setGroupName(name);
             request.setOwner(owner);
             PaginationResult deviceGroupsResult = DeviceMgtAPIUtils.getGroupManagementProviderService()
-                    .getGroups(currentUser, request);
+                    .getGroups(currentUser, request, requireGroupProps);
             DeviceGroupList deviceGroupList = new DeviceGroupList();
             if (deviceGroupsResult.getData() != null && deviceGroupsResult.getRecordsTotal() > 0) {
                 deviceGroupList.setList(deviceGroupsResult.getData());
@@ -117,10 +117,27 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
-    public Response getGroup(int groupId) {
+    public Response getGroup(int groupId, boolean requireGroupProps) {
         try {
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
-            DeviceGroup deviceGroup = service.getGroup(groupId);
+            DeviceGroup deviceGroup = service.getGroup(groupId, requireGroupProps);
+            if (deviceGroup != null) {
+                return Response.status(Response.Status.OK).entity(deviceGroup).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (GroupManagementException e) {
+            String error = "Error occurred while getting the group.";
+            log.error(error, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+        }
+    }
+
+    @Override
+    public Response getGroup(String groupName, boolean requireGroupProps) {
+        try {
+            GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
+            DeviceGroup deviceGroup = service.getGroup(groupName, requireGroupProps);
             if (deviceGroup != null) {
                 return Response.status(Response.Status.OK).entity(deviceGroup).build();
             } else {
@@ -272,7 +289,7 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
             deviceIdentifiers.add(deviceToGroupsAssignment.getDeviceIdentifier());
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
-            List<DeviceGroup> deviceGroups = service.getGroups(deviceToGroupsAssignment.getDeviceIdentifier());
+            List<DeviceGroup> deviceGroups = service.getGroups(deviceToGroupsAssignment.getDeviceIdentifier(), false);
             for (DeviceGroup group : deviceGroups) {
                 Integer groupId = group.getGroupId();
                 if (deviceToGroupsAssignment.getDeviceGroupIds().contains(groupId)) {
@@ -295,10 +312,11 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     }
 
     @Override
-    public Response getGroups(String deviceId, String deviceType) {
+    public Response getGroups(String deviceId, String deviceType, boolean requireGroupProps) {
         try {
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
-            List<DeviceGroup> deviceGroups = DeviceMgtAPIUtils.getGroupManagementProviderService().getGroups(deviceIdentifier);
+            List<DeviceGroup> deviceGroups = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                    .getGroups(deviceIdentifier, requireGroupProps);
             return Response.status(Response.Status.OK).entity(deviceGroups).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while getting groups of device.";

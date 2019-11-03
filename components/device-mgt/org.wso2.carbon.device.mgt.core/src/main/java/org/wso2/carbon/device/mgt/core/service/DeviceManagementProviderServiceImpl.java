@@ -2789,7 +2789,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         if (log.isDebugEnabled()) {
             log.debug("Create default group with name '" + groupName + "'");
         }
-        DeviceGroup defaultGroup = service.getGroup(groupName);
+        DeviceGroup defaultGroup = service.getGroup(groupName, false);
         if (defaultGroup == null) {
             defaultGroup = new DeviceGroup(groupName);
             // Setting system level user (wso2.system.user) as the owner
@@ -2808,7 +2808,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 log.error(msg, e);
                 throw new GroupManagementException(msg, e);
             }
-            return service.getGroup(groupName);
+            return service.getGroup(groupName, false);
         } else {
             return defaultGroup;
         }

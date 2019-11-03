@@ -171,7 +171,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 for (T param : params) {
                     String groupName = (String) param;
                     subscribers.add(groupName);
-                    devices.addAll(groupManagementProviderService.getAllDevicesOfGroup(groupName));
+                    devices.addAll(groupManagementProviderService.getAllDevicesOfGroup(groupName, true));
                 }
             }
 
@@ -401,7 +401,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 for (T param : params) {
                     String groupName = (String) param;
                     subscribers.add(groupName);
-                    devices.addAll(groupManagementProviderService.getAllDevicesOfGroup(groupName));
+                    devices.addAll(groupManagementProviderService.getAllDevicesOfGroup(groupName, false));
                 }
             } else {
                 String msg = "Found invalid subscription type " + subType+  " to install application release" ;

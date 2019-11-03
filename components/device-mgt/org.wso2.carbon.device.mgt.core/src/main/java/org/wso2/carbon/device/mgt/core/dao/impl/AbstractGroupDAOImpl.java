@@ -216,7 +216,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             stmt = conn.prepareStatement(
-                    "DELETE GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?");
+                    "DELETE FROM GROUP_PROPERTIES WHERE GROUP_ID = ? AND TENANT_ID = ?");
             stmt.setInt(1, groupId);
             stmt.setInt(2, tenantId);
             stmt.executeUpdate();

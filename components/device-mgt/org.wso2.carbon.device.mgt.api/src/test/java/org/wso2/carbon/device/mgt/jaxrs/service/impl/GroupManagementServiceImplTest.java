@@ -84,8 +84,8 @@ public class GroupManagementServiceImplTest {
                 .toReturn(context);
         PaginationResult paginationResult = new PaginationResult();
         Mockito.doReturn(paginationResult).when(groupManagementProviderService)
-                .getGroups(Mockito.anyString(), Mockito.any(GroupPaginationRequest.class));
-        Response response = groupManagementService.getGroups("test", "admin", 0, 10);
+                .getGroups(Mockito.anyString(), Mockito.any(GroupPaginationRequest.class), Mockito.anyBoolean());
+        Response response = groupManagementService.getGroups("test", "admin", 0, 10, false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "GetGroups request failed with valid parameters");
 
@@ -95,8 +95,8 @@ public class GroupManagementServiceImplTest {
         paginationResult.setData(deviceGroupList);
         paginationResult.setRecordsTotal(1);
         Mockito.doReturn(paginationResult).when(groupManagementProviderService)
-                .getGroups(Mockito.anyString(), Mockito.any(GroupPaginationRequest.class));
-        response = groupManagementService.getGroups("test", "admin", 0, 10);
+                .getGroups(Mockito.anyString(), Mockito.any(GroupPaginationRequest.class), Mockito.anyBoolean());
+        response = groupManagementService.getGroups("test", "admin", 0, 10, false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "GetGroups request failed with valid parameters");
     }
@@ -110,8 +110,8 @@ public class GroupManagementServiceImplTest {
                 .toReturn(context);
         Mockito.reset(groupManagementProviderService);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService)
-                .getGroups(Mockito.anyString(), Mockito.any(GroupPaginationRequest.class));
-        Response response = groupManagementService.getGroups("test", "admin", 0, 10);
+                .getGroups(Mockito.anyString(), Mockito.any(GroupPaginationRequest.class), Mockito.anyBoolean());
+        Response response = groupManagementService.getGroups("test", "admin", 0, 10, false);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "GetGroups request succeeded with in-valid parameters");
     }
@@ -167,16 +167,16 @@ public class GroupManagementServiceImplTest {
     public void testGetGroup() throws GroupManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
-        Mockito.doReturn(new DeviceGroup()).when(groupManagementProviderService).getGroup(1);
-        Mockito.doReturn(null).when(groupManagementProviderService).getGroup(2);
-        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getGroup(3);
-        Response response = groupManagementService.getGroup(1);
+        Mockito.doReturn(new DeviceGroup()).when(groupManagementProviderService).getGroup(1, false);
+        Mockito.doReturn(null).when(groupManagementProviderService).getGroup(2, false);
+        Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).getGroup(3, false);
+        Response response = groupManagementService.getGroup(1, false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "getGroup request failed for a request with valid parameters");
-        response = groupManagementService.getGroup(2);
+        response = groupManagementService.getGroup(2, false);
         Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode(),
                 "getGroup request returned a group for a non-existing group");
-        response = groupManagementService.getGroup(3);
+        response = groupManagementService.getGroup(3, false);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "getGroup request returned a group for a in-valid request");
     }
@@ -341,14 +341,14 @@ public class GroupManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
         DeviceIdentifier deviceIdentifier = new DeviceIdentifier("test", "android");
-        Mockito.doReturn(new ArrayList<DeviceGroup>()).when(groupManagementProviderService).getGroups(deviceIdentifier);
-        Response response = groupManagementService.getGroups("test", "android");
+        Mockito.doReturn(new ArrayList<DeviceGroup>()).when(groupManagementProviderService).getGroups(deviceIdentifier, true);
+        Response response = groupManagementService.getGroups("test", "android", false);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "getGroups request failed with valid parameters");
         Mockito.reset(groupManagementProviderService);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService)
-                .getGroups(Mockito.any(DeviceIdentifier.class));
-        response = groupManagementService.getGroups("test", "android2");
+                .getGroups(Mockito.any(DeviceIdentifier.class), Mockito.anyBoolean());
+        response = groupManagementService.getGroups("test", "android2", false);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "getGroups request succeeded with in-valid parameters");
     }
@@ -377,7 +377,7 @@ public class GroupManagementServiceImplTest {
         deviceGroup.setOwner("test");
         deviceGroups.add(deviceGroup);
         Mockito.doReturn(deviceGroups).when(groupManagementProviderService)
-                .getGroups(Mockito.any(DeviceIdentifier.class));
+                .getGroups(Mockito.any(DeviceIdentifier.class), Mockito.anyBoolean());
         Mockito.doNothing().when(groupManagementProviderService).addDevices(Mockito.anyInt(), Mockito.any());
         Mockito.doNothing().when(groupManagementProviderService).removeDevice(Mockito.anyInt(), Mockito.any());
         Response response = groupManagementService.updateDeviceAssigningToGroups(deviceToGroupsAssignment);
@@ -389,7 +389,7 @@ public class GroupManagementServiceImplTest {
         Assert.assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(),
                 "updateDeviceAssigningToGroups request succeeded with in-valid parameters");
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService)
-                .getGroups(Mockito.any(DeviceIdentifier.class));
+                .getGroups(Mockito.any(DeviceIdentifier.class), Mockito.anyBoolean());
         response = groupManagementService.updateDeviceAssigningToGroups(deviceToGroupsAssignment);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "updateDeviceAssigningToGroups request succeeded with in-valid parameters");

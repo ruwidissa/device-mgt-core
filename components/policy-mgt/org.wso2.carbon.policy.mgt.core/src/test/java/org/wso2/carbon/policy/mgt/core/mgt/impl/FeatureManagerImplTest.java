@@ -85,7 +85,7 @@ public class FeatureManagerImplTest extends BasePolicyManagementDAOTest {
 
         enrollDevice(DEVICE4, DEVICE_TYPE_D);
         createDeviceGroup(GROUP4);
-        DeviceGroup group4 = groupMgtService.getGroup(GROUP4);
+        DeviceGroup group4 = groupMgtService.getGroup(GROUP4, false);
         addDeviceToGroup(new DeviceIdentifier(DEVICE4, DEVICE_TYPE_D), GROUP4);
 
         Profile profile = new Profile();
