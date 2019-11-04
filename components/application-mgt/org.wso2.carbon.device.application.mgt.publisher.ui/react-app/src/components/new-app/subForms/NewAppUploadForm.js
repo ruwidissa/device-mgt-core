@@ -17,10 +17,10 @@
  */
 
 import React from "react";
-import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, InputNumber, Modal, Alert} from "antd";
+import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, Typography, Modal, Alert} from "antd";
 import "@babel/polyfill";
-import axios from "axios";
-import {handleApiError} from "../../../js/Utils";
+
+const {Text} = Typography;
 
 const formItemLayout = {
     labelCol: {
@@ -196,12 +196,6 @@ class NewAppUploadForm extends React.Component {
         });
     };
 
-    handlePriceTypeChange = (value) => {
-        this.setState({
-            isFree: (value === 'free')
-        });
-    };
-
     handlePreviewCancel = () => this.setState({previewVisible: false});
     handlePreview = async file => {
         if (!file.url && !file.preview) {
@@ -231,7 +225,7 @@ class NewAppUploadForm extends React.Component {
     handleUpperOsVersionChange = (upperOsVersion) => {
         if (upperOsVersion === "all") {
             this.upperOsVersion = this.props.supportedOsVersions[this.props.supportedOsVersions.length - 1]["versionName"];
-        }else{
+        } else {
             this.upperOsVersion = upperOsVersion;
         }
         this.setState({
@@ -247,7 +241,6 @@ class NewAppUploadForm extends React.Component {
             icons,
             screenshots,
             binaryFiles,
-            isFree,
             previewImage,
             previewVisible,
             binaryFileHelperText,
@@ -310,17 +303,19 @@ class NewAppUploadForm extends React.Component {
                                     required: true,
                                     message: 'Please select a icon'
                                 })(
-                                    <Upload
-                                        name="logo"
-                                        listType="picture-card"
-                                        onChange={this.handleIconChange}
-                                        beforeUpload={() => false}
-                                        onPreview={this.handlePreview}>
-                                        {icons.length === 1 ? null : uploadButton}
-                                    </Upload>,
+                                    <div>
+                                        <Upload
+                                            name="logo"
+                                            listType="picture-card"
+                                            onChange={this.handleIconChange}
+                                            beforeUpload={() => false}
+                                            onPreview={this.handlePreview}>
+                                            {icons.length === 1 ? null : uploadButton}
+                                        </Upload>
+                                        <Text>Recommended : 240px x 240px</Text>
+                                    </div>
                                 )}
                             </Form.Item>
-
                             <Form.Item {...formItemLayout}
                                        label="Screenshots"
                                        validateStatus="error"
@@ -331,14 +326,17 @@ class NewAppUploadForm extends React.Component {
                                     required: true,
                                     message: 'Please select a icon'
                                 })(
-                                    <Upload
-                                        name="screenshots"
-                                        listType="picture-card"
-                                        onChange={this.handleScreenshotChange}
-                                        beforeUpload={() => false}
-                                        onPreview={this.handlePreview}>
-                                        {screenshots.length >= 3 ? null : uploadButton}
-                                    </Upload>,
+                                    <div>
+                                        <Upload
+                                            name="screenshots"
+                                            listType="picture-card"
+                                            onChange={this.handleScreenshotChange}
+                                            beforeUpload={() => false}
+                                            onPreview={this.handlePreview}>
+                                            {screenshots.length >= 3 ? null : uploadButton}
+                                        </Upload>
+                                        <Text>Required 3 screenshots, Recommended min. 320px max. 3840px</Text>
+                                    </div>
                                 )}
                             </Form.Item>
 

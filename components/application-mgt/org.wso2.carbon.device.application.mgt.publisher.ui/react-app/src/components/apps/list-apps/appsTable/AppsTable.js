@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Avatar, Table, Tag, Icon, message, notification, Col, Badge, Alert} from "antd";
+import {Avatar, Table, Tag, Icon, message, notification, Col, Badge, Alert, Tooltip} from "antd";
 import axios from "axios";
 import pSBC from 'shade-blend-color';
 import "./AppsTable.css";
@@ -60,8 +60,16 @@ const columns = [
                         title="Published"
                         style={{backgroundColor: '#52c41a', borderRadius: "50%", color: "white"}}
                         count={
-                            <Icon
-                                type="check-circle"/>
+                            <Tooltip
+                                title="Published">
+                                <Icon
+                                    style={{
+                                        backgroundColor: '#52c41a',
+                                        borderRadius: "50%",
+                                        color: "white"
+                                    }}
+                                    type="check-circle"/>
+                            </Tooltip>
                         }>
                         <Avatar shape="square" size="large"
                                 style={{
