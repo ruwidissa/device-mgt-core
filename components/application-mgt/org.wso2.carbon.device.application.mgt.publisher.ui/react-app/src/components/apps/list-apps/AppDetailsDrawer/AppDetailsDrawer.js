@@ -30,7 +30,7 @@ import {
     Spin,
     message,
     Icon,
-    Card, Badge
+    Card, Badge, Tooltip, Popover
 } from 'antd';
 import DetailedRating from "../../detailed-rating/DetailedRating";
 import {Link} from "react-router-dom";
@@ -486,7 +486,6 @@ class AppDetailsDrawer extends React.Component {
                                 <Divider dashed={true}/>
                             </div>
                         )}
-
                         <Text strong={true}>Releases </Text>
                         <div className="releases-details">
                             <List
@@ -500,48 +499,55 @@ class AppDetailsDrawer extends React.Component {
                                 renderItem={release => (
                                     <div className="app-release-cards">
                                         <List.Item>
-                                            <Link to={"apps/releases/" + release.uuid}>
-                                                <Card className="release-card">
-                                                    <Meta
-                                                        avatar={
-                                                            <div>
-                                                                {(release.currentStatus === "PUBLISHED") ? (
-                                                                    <Badge
-                                                                        title="Published"
-                                                                        style={{
-                                                                            backgroundColor: '#52c41a',
-                                                                            borderRadius: "50%",
-                                                                            color: "white"
-                                                                        }}
-                                                                        count={
-                                                                            <Icon
-                                                                                type="check-circle"/>
-                                                                        }>
+                                            <Tooltip title="Click to view full details"
+                                                     placement="topRight">
+                                                <Link to={"apps/releases/" + release.uuid}>
+                                                    <Card className="release-card">
+                                                        <Meta
+                                                            avatar={
+                                                                <div>
+                                                                    {(release.currentStatus === "PUBLISHED") ? (
+                                                                        <Badge
+                                                                            title="Published"
+                                                                            count={
+                                                                                <Tooltip
+                                                                                    title="Published">
+                                                                                    <Icon
+                                                                                        style={{
+                                                                                            backgroundColor: '#52c41a',
+                                                                                            borderRadius: "50%",
+                                                                                            color: "white"
+                                                                                        }}
+                                                                                        type="check-circle"/>
+                                                                                </Tooltip>
+                                                                            }>
+                                                                            <Avatar size="large" shape="square"
+                                                                                    src={release.iconPath}/>
+                                                                        </Badge>
+                                                                    ) : (
                                                                         <Avatar size="large" shape="square"
                                                                                 src={release.iconPath}/>
-                                                                    </Badge>
-                                                                ) : (
-                                                                    <Avatar size="large" shape="square"
-                                                                            src={release.iconPath}/>
-                                                                )}
-                                                            </div>
-                                                        }
-                                                        title={release.version}
-                                                        description={
-                                                            <div style={{
-                                                                fontSize: "0.7em"
-                                                            }} className="description-view">
-                                                                <IconText type="check" text={release.currentStatus}/>
-                                                                <Divider type="vertical"/>
-                                                                <IconText type="upload" text={release.releaseType}/>
-                                                                <Divider type="vertical"/>
-                                                                <IconText type="star-o"
-                                                                          text={release.rating.toFixed(1)}/>
-                                                            </div>
-                                                        }
-                                                    />
-                                                </Card>
-                                            </Link>
+                                                                    )}
+                                                                </div>
+                                                            }
+                                                            title={release.version}
+                                                            description={
+                                                                <div style={{
+                                                                    fontSize: "0.7em"
+                                                                }} className="description-view">
+                                                                    <IconText type="check"
+                                                                              text={release.currentStatus}/>
+                                                                    <Divider type="vertical"/>
+                                                                    <IconText type="upload" text={release.releaseType}/>
+                                                                    <Divider type="vertical"/>
+                                                                    <IconText type="star-o"
+                                                                              text={release.rating.toFixed(1)}/>
+                                                                </div>
+                                                            }
+                                                        />
+                                                    </Card>
+                                                </Link>
+                                            </Tooltip>
                                         </List.Item>
                                     </div>
                                 )}
