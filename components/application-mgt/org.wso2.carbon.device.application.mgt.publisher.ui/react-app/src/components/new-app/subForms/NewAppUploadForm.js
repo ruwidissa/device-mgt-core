@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, Typography, Modal, Alert} from "antd";
+import {Button, Col, Form, Icon, Input, Row, Select, Switch, Upload, Typography, Modal, Alert, Tooltip} from "antd";
 import "@babel/polyfill";
 
 const {Text} = Typography;
@@ -296,50 +296,72 @@ class NewAppUploadForm extends React.Component {
                             <Form.Item {...formItemLayout}
                                        label="Icon"
                                        validateStatus="error"
-                                       help={iconHelperText}>
+                                       help={iconHelperText}
+                                       style={{
+                                           marginBottom: 0
+                                       }}>
                                 {getFieldDecorator('icon', {
                                     valuePropName: 'icon',
                                     getValueFromEvent: this.normFile,
                                     required: true,
                                     message: 'Please select a icon'
                                 })(
-                                    <div>
-                                        <Upload
-                                            name="logo"
-                                            listType="picture-card"
-                                            onChange={this.handleIconChange}
-                                            beforeUpload={() => false}
-                                            onPreview={this.handlePreview}>
-                                            {icons.length === 1 ? null : uploadButton}
-                                        </Upload>
-                                        <Text>Recommended : 240px x 240px</Text>
-                                    </div>
+                                    <Upload
+                                        name="logo"
+                                        listType="picture-card"
+                                        onChange={this.handleIconChange}
+                                        beforeUpload={() => false}
+                                        onPreview={this.handlePreview}>
+                                        {icons.length === 1 ? null : uploadButton}
+                                    </Upload>
                                 )}
                             </Form.Item>
+                            <Row style={{
+                                marginBottom: 24
+                            }}>
+                                <Col xs={24} sm={8}>
+                                </Col>
+                                <Col xs={24} sm={16}>
+                                    <Text type="secondary">
+                                        Recommended : 240px x 240px
+                                    </Text>
+                                </Col>
+                            </Row>
                             <Form.Item {...formItemLayout}
                                        label="Screenshots"
                                        validateStatus="error"
-                                       help={screenshotHelperText}>
+                                       help={screenshotHelperText}
+                                       style={{
+                                           marginBottom: 0
+                                       }}>
                                 {getFieldDecorator('screenshots', {
                                     valuePropName: 'icon',
                                     getValueFromEvent: this.normFile,
                                     required: true,
                                     message: 'Please select a icon'
                                 })(
-                                    <div>
-                                        <Upload
-                                            name="screenshots"
-                                            listType="picture-card"
-                                            onChange={this.handleScreenshotChange}
-                                            beforeUpload={() => false}
-                                            onPreview={this.handlePreview}>
-                                            {screenshots.length >= 3 ? null : uploadButton}
-                                        </Upload>
-                                        <Text>Required 3 screenshots, Recommended min. 320px max. 3840px</Text>
-                                    </div>
+                                    <Upload
+                                        name="screenshots"
+                                        listType="picture-card"
+                                        onChange={this.handleScreenshotChange}
+                                        beforeUpload={() => false}
+                                        onPreview={this.handlePreview}>
+                                        {screenshots.length >= 3 ? null : uploadButton}
+                                    </Upload>
                                 )}
                             </Form.Item>
-
+                            <Row style={{
+                                marginBottom: 24
+                            }}>
+                                <Col xs={24} sm={8}>
+                                </Col>
+                                <Col xs={24} sm={16}>
+                                    <Text type="secondary">
+                                        It is mandatory to upload three screenshots and the
+                                        recommended screenshot size - min. 320px max. 3840px.
+                                    </Text>
+                                </Col>
+                            </Row>
                             {formConfig.specificElements.hasOwnProperty("packageName") && (
                                 <Form.Item {...formItemLayout} label="Package Name">
                                     {getFieldDecorator('packageName', {
