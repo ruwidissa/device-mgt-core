@@ -77,7 +77,7 @@ public class ProfileManagerImplTest extends BasePolicyManagementDAOTest {
         operationManager = new OperationManagerImpl(DEVICE_TYPE_C, deviceManagementService);
         enrollDevice(DEVICE3, DEVICE_TYPE_C);
         createDeviceGroup(GROUP3);
-        DeviceGroup group1 = groupMgtService.getGroup(GROUP3);
+        DeviceGroup group1 = groupMgtService.getGroup(GROUP3, false);
         addDeviceToGroup(new DeviceIdentifier(DEVICE3, DEVICE_TYPE_C), GROUP3);
     }
 

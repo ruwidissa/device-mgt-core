@@ -247,7 +247,7 @@ public abstract class BasePolicyManagementDAOTest {
         List<DeviceIdentifier> groupDevices = new ArrayList<>();
         groupDevices.add(deviceIdentifier);
         try {
-            DeviceGroup group = groupMgtService.getGroup(groupName);
+            DeviceGroup group = groupMgtService.getGroup(groupName, false);
             groupMgtService.addDevices(group.getGroupId(), groupDevices);
         } catch (DeviceNotFoundException | GroupManagementException e) {
             String msg = "Failed to add device " + deviceIdentifier.getId() + " to group " + groupName;

@@ -1160,7 +1160,7 @@ public class PolicyManagerImpl implements PolicyManager {
     private List<DeviceGroupWrapper> getDeviceGroupNames(List<DeviceGroupWrapper> groupWrappers) throws GroupManagementException {
         GroupManagementProviderService groupManagementProviderService = new GroupManagementProviderServiceImpl();
         for (DeviceGroupWrapper wrapper : groupWrappers) {
-            DeviceGroup deviceGroup = groupManagementProviderService.getGroup(wrapper.getId());
+            DeviceGroup deviceGroup = groupManagementProviderService.getGroup(wrapper.getId(), false);
             wrapper.setName(deviceGroup.getName());
             wrapper.setOwner(deviceGroup.getOwner());
         }

@@ -212,29 +212,36 @@ public interface GroupManagementService {
                     message = "Internal Server Error. \n Server error occurred while fetching the groups list.",
                     response = ErrorResponse.class)
     })
-    Response getGroups(@ApiParam(
-            name = "name",
-            value = "Name of the group.")
-                       @QueryParam("name")
-                               String name,
-                       @ApiParam(
-                               name = "owner",
-                               value = "Owner of the group.")
-                       @QueryParam("owner")
-                               String owner,
-                       @ApiParam(
-                               name = "offset",
-                               value = "The starting pagination index for the complete list of qualified items.",
-                               defaultValue = "0")
-                       @QueryParam("offset")
-                               int offset,
-                       @ApiParam(
-                               name = "limit",
-                               value = "Provide how many device details you require from the starting pagination " +
-                                       "index/offset.",
-                               defaultValue = "5")
-                       @QueryParam("limit")
-                               int limit);
+    Response getGroups(
+            @ApiParam(
+                    name = "name",
+                    value = "Name of the group.")
+            @QueryParam("name")
+                    String name,
+            @ApiParam(
+                    name = "owner",
+                    value = "Owner of the group.")
+            @QueryParam("owner")
+                    String owner,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination " +
+                            "index/offset.",
+                    defaultValue = "5")
+            @QueryParam("limit")
+                    int limit,
+            @ApiParam(
+                    name = "requireGroupProps",
+                    value = "Request group properties to include in the response",
+                    defaultValue = "false")
+            @QueryParam("requireGroupProps")
+                    boolean requireGroupProps);
 
     @Path("/count")
     @GET
@@ -394,11 +401,77 @@ public interface GroupManagementService {
                     message = "Internal Server Error. \n Server error occurred while fetching the group details.",
                     response = ErrorResponse.class)
     })
-    Response getGroup(@ApiParam(
-            name = "groupId",
-            value = "The ID of the group.",
-            required = true)
-                      @PathParam("groupId") int groupId);
+    Response getGroup(
+            @ApiParam(
+                    name = "groupId",
+                    value = "The ID of the group.",
+                    required = true)
+            @PathParam("groupId") int groupId,
+            @ApiParam(
+                    name = "requireGroupProps",
+                    value = "Request group properties to include in the response",
+                    defaultValue = "false")
+            @QueryParam("requireGroupProps")
+                    boolean requireGroupProps);
+
+    @Path("/name/{groupName}")
+    @GET
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = HTTPConstants.HEADER_GET,
+            value = "Getting Details of a Specific Device Group",
+            notes = "Get the details of a specific device group.",
+            tags = "Device Group Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:groups:groups-view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the device group.",
+                    response = DeviceGroup.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource has been modified the last time.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. \n Empty body because the client has already the latest version of " +
+                            "the requested resource."),
+            @ApiResponse(
+                    code = 404,
+                    message = "Group not found.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable.\n The requested media type is not supported."),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the group details.",
+                    response = ErrorResponse.class)
+    })
+    Response getGroup(
+            @ApiParam(
+                    name = "groupName",
+                    value = "Name of the group.",
+                    required = true)
+            @PathParam("groupName") String groupName,
+            @ApiParam(
+                    name = "requireGroupProps",
+                    value = "Request group properties to include in the response",
+                    defaultValue = "false")
+            @QueryParam("requireGroupProps")
+                    boolean requireGroupProps);
 
     @Path("/id/{groupId}")
     @PUT
@@ -739,11 +812,12 @@ public interface GroupManagementService {
                     message = "Internal Server Error. \n Server error occurred while fetching device count.",
                     response = ErrorResponse.class)
     })
-    Response getDeviceCountOfGroup(@ApiParam(
-            name = "groupId",
-            value = "ID of the group.",
-            required = true)
-                                   @PathParam("groupId") int groupId);
+    Response getDeviceCountOfGroup(
+            @ApiParam(
+                    name = "groupId",
+                    value = "ID of the group.",
+                    required = true)
+            @PathParam("groupId") int groupId);
 
     @Path("/id/{groupId}/devices/add")
     @POST
@@ -966,6 +1040,12 @@ public interface GroupManagementService {
                     value = "The type of the device, such as android, ios, or windows.",
                     required = true)
             @QueryParam("deviceType")
-                    String deviceType);
+                    String deviceType,
+            @ApiParam(
+                    name = "requireGroupProps",
+                    value = "Request group properties to include in the response",
+                    defaultValue = "false")
+            @QueryParam("requireGroupProps")
+                    boolean requireGroupProps);
 
 }

@@ -97,7 +97,7 @@ public class MonitoringManagerImplTest extends BasePolicyManagementDAOTest{
         enrollDevice(DEVICE5, DEVICE_TYPE_E);
         createDeviceGroup(GROUP5);
         addDeviceToGroup(new DeviceIdentifier(DEVICE5, DEVICE_TYPE_E), GROUP5);
-        DeviceGroup group5 = groupMgtService.getGroup(GROUP5);
+        DeviceGroup group5 = groupMgtService.getGroup(GROUP5, false);
 
         device5 = deviceMgtService.getAllDevices().get(0);
 

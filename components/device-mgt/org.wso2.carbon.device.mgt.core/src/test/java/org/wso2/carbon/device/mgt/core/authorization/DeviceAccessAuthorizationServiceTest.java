@@ -167,7 +167,7 @@ public class DeviceAccessAuthorizationServiceTest {
         GroupManagementProviderService groupManagementProviderService = DeviceManagementDataHolder.getInstance()
                 .getGroupManagementProviderService();
         groupManagementProviderService.createDefaultGroup(DEFAULT_GROUP);
-        int groupId = groupManagementProviderService.getGroup(DEFAULT_GROUP).getGroupId();
+        int groupId = groupManagementProviderService.getGroup(DEFAULT_GROUP, false).getGroupId();
         //Sharing group with admin and non admin roles
         groupManagementProviderService.manageGroupSharing(groupId, new ArrayList<>(Arrays.asList(ADMIN_ROLE,
                 NON_ADMIN_ROLE)));

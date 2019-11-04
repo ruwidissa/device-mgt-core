@@ -98,7 +98,7 @@ public class PolicyInformationPointImpl implements PolicyInformationPoint {
                 pipDevice.setDeviceIdentifier(deviceIdentifier);
                 pipDevice.setUserId(device.getEnrolmentInfo().getOwner());
                 pipDevice.setOwnershipType(device.getEnrolmentInfo().getOwnership().toString());
-                pipDevice.setDeviceGroups(groupManagementProviderService.getGroups(pipDevice.getDeviceIdentifier()));
+                pipDevice.setDeviceGroups(groupManagementProviderService.getGroups(pipDevice.getDeviceIdentifier(), false));
 
             } else {
                 throw new PolicyManagementException("Device details cannot be null.");

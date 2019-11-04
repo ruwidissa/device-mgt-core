@@ -94,7 +94,7 @@ public class  PolicyManagerServiceImplTest extends BasePolicyManagementDAOTest {
         operationManager = new OperationManagerImpl(DEVICE_TYPE_A, deviceManagementService);
         enrollDevice(DEVICE1, DEVICE_TYPE_A);
         createDeviceGroup(GROUP1);
-        DeviceGroup group1 = groupMgtService.getGroup(GROUP1);
+        DeviceGroup group1 = groupMgtService.getGroup(GROUP1, false);
         addDeviceToGroup(new DeviceIdentifier(DEVICE1, DEVICE_TYPE_A), GROUP1);
 
         Profile profile = new Profile();
