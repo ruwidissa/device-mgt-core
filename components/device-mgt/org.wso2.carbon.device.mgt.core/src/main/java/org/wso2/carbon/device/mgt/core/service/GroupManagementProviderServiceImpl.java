@@ -569,12 +569,16 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             count = groupDAO.getOwnGroupsCount(username, tenantId);
             count += groupDAO.getGroupsCount(roleList, tenantId);
             return count;
-        } catch (UserStoreException | GroupManagementDAOException | SQLException e) {
-            String msg = "Error occurred while retrieving group count of user '" + username + "'";
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while retrieving role list of user '" + username + "'";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred in getGroupCount for username '" + username + "'";
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening db connection to get group count.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (GroupManagementDAOException e) {
+            String msg = "Error occurred while retrieving group count of user '" + username + "'";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
         } finally {
@@ -1002,6 +1006,13 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
+    /**
+     * This is populating group properties in to the group pass as an argument. Call should be manage the transactions.
+     *
+     * @param deviceGroup which needs to populate with properties
+     * @param tenantId of the caller
+     * @throws GroupManagementDAOException on DAO exceptions
+     */
     private void populateGroupProperties(DeviceGroup deviceGroup, int tenantId) throws GroupManagementDAOException {
         if (deviceGroup != null && deviceGroup.getGroupId() > 0) {
             deviceGroup.setGroupProperties(this.groupDAO.getAllGroupProperties(deviceGroup.getGroupId(),

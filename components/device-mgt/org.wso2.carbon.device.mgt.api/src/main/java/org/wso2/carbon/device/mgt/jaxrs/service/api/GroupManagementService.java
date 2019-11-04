@@ -450,7 +450,7 @@ public interface GroupManagementService {
                             "the requested resource."),
             @ApiResponse(
                     code = 404,
-                    message = "Group found.",
+                    message = "Group not found.",
                     response = ErrorResponse.class),
             @ApiResponse(
                     code = 406,
