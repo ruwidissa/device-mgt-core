@@ -73,14 +73,14 @@ public class MDMIOSOperationUtil {
                 operation.setType(Operation.Type.COMMAND);
                 operation.setPayLoad(appStoreApplication.toJSON());
                 break;
-            case WEBAPP:
+            case WEB_CLIP:
                 WebClip webClip = new WebClip();
                 webClip.setIcon(application.getIconImage());
                 webClip.setIsRemovable(application.getProperties().
                         getProperty(MDMAppConstants.IOSConstants.IS_REMOVE_APP));
                 webClip.setLabel(application.getProperties().
                         getProperty(MDMAppConstants.IOSConstants.LABEL));
-                webClip.setURL(application.getLocation());
+                webClip.setURL(application.getProperties().getProperty(MDMAppConstants.IOSConstants.WEB_CLIP_URL));
 
                 operation.setCode(MDMAppConstants.IOSConstants.OPCODE_INSTALL_WEB_APPLICATION);
                 operation.setType(Operation.Type.PROFILE);
