@@ -600,21 +600,33 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
             boolean isStatusProvided = false;
             StringJoiner joiner = new StringJoiner(",",
-                      "SELECT " +
-                       "f.ID AS DEVICE_ID, f.NAME AS DEVICE_NAME, f.DESCRIPTION AS DESCRIPTION, " +
-                       "f.DEVICE_TYPE_ID, f.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, " +
-                       "e.ID AS ENROLMENT_ID, e.OWNER, e.OWNERSHIP, e.DATE_OF_ENROLMENT, " +
-                       "e.DATE_OF_LAST_UPDATE, e.STATUS, t.NAME AS DEVICE_TYPE " +
-                       "FROM DM_ENROLMENT AS e,DM_DEVICE AS f, DM_DEVICE_TYPE t " +
-                       "WHERE " +
-                       "e.DEVICE_ID=f.ID AND " +
-                       "e.DEVICE_ID IN (", ") AND e.TENANT_ID=?");
+                    "SELECT "
+                            + "DM_DEVICE.ID AS DEVICE_ID, "
+                            + "DM_DEVICE.NAME AS DEVICE_NAME, "
+                            + "DM_DEVICE.DESCRIPTION AS DESCRIPTION, "
+                            + "DM_DEVICE.DEVICE_TYPE_ID, "
+                            + "DM_DEVICE.DEVICE_IDENTIFICATION AS DEVICE_IDENTIFICATION, "
+                            + "DM_ENROLMENT.ID AS ENROLMENT_ID, "
+                            + "DM_ENROLMENT.OWNER, "
+                            + "DM_ENROLMENT.OWNERSHIP, "
+                            + "DM_ENROLMENT.DATE_OF_ENROLMENT, "
+                            + "DM_ENROLMENT.DATE_OF_LAST_UPDATE, "
+                            + "DM_ENROLMENT.STATUS, "
+                            + "device_types.NAME AS DEVICE_TYPE "
+                            + "FROM DM_DEVICE "
+                            + "INNER JOIN DM_ENROLMENT ON "
+                            + "DM_DEVICE.ID = DM_ENROLMENT.DEVICE_ID AND "
+                            + "DM_DEVICE.TENANT_ID = DM_ENROLMENT.TENANT_ID "
+                            + "INNER JOIN (SELECT ID, NAME FROM DM_DEVICE_TYPE) AS device_types ON "
+                            + "device_types.ID = DM_DEVICE.DEVICE_TYPE_ID "
+                            + "WHERE DM_DEVICE.ID IN (",
+                    ") AND DM_DEVICE.TENANT_ID = ?");
 
             deviceIds.stream().map(ignored -> "?").forEach(joiner::add);
             String query = joiner.toString();
 
             if (status != null && !status.isEmpty()) {
-                query = query + " AND e.STATUS=?";
+                query = query + " AND DM_ENROLMENT.STATUS=?";
                 isStatusProvided = true;
             }
 
