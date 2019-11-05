@@ -759,6 +759,8 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {
                     subUpdatingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
                             subscribingDeviceIdHolder.getAppInstalledDevices()));
+                    subUpdatingDeviceIds.addAll(getOperationAddedDeviceIds(activity,
+                            subscribingDeviceIdHolder.getAppReUnInstallableDevices()));
                 }
 
                 subscriptionDAO.addDeviceSubscription(username, subInsertingDeviceIds, subType,

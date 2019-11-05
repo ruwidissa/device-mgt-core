@@ -565,7 +565,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 isStatusProvided = true;
             }
 
-            query = query + " ORDER BY f.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            query = query + " ORDER BY DM_DEVICE.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement ps = conn.prepareStatement(query)) {
 
