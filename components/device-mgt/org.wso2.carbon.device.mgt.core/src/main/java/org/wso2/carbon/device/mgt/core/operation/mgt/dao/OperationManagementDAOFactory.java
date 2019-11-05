@@ -51,7 +51,20 @@ public class OperationManagementDAOFactory {
     }
 
     public static OperationDAO getConfigOperationDAO() {
-        return new ConfigOperationDAOImpl();
+        if (databaseEngine != null) {
+            switch (databaseEngine) {
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
+                    return new ConfigOperationMSSQLDAOImpl();
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
+                case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
+                    return new ConfigOperationDAOImpl();
+                default:
+                    throw new UnsupportedDatabaseEngineException("Unsupported database engine : " + databaseEngine);
+            }
+        }
+        throw new IllegalStateException("Database engine has not initialized properly.");
     }
 
     public static OperationDAO getProfileOperationDAO() {
