@@ -51,10 +51,10 @@ const columns = [
     },
     {
         title: 'Last Updated',
-        dataIndex: 'enrolmentInfo',
-        key: 'dateOfLastUpdate',
+        dataIndex: 'deviceInfo',
+        key: 'updatedTime',
         render: (data) => {
-            return (getTimeAgo(data.dateOfLastUpdate));
+            return data.updatedTime;
         }
         // todo add filtering options
     },
@@ -95,11 +95,6 @@ const columns = [
         // todo add filtering options
     },
 ];
-
-const getTimeAgo = (time) => {
-    const timeAgo = new TimeAgo('en-US');
-    return timeAgo.format(time);
-};
 
 class DeviceUninstall extends React.Component {
     constructor(props) {
