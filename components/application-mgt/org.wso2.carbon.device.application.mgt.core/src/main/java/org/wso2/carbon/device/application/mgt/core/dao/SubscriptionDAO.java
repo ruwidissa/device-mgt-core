@@ -165,6 +165,8 @@ public interface SubscriptionDAO {
                                        int tenantId)
             throws ApplicationManagementDAOException;
 
+    int getSubscribedUserCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
+
     /**
      * This method is used to get the details of roles
      *
@@ -179,6 +181,8 @@ public interface SubscriptionDAO {
                                        int tenantId)
             throws ApplicationManagementDAOException;
 
+    int getSubscribedRoleCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
+
     /**
      * This method is used to get the details of subscribed groups
      *
@@ -191,4 +195,6 @@ public interface SubscriptionDAO {
      */
     List<String> getAppSubscribedGroups(int offsetValue, int limitValue, int appReleaseId, int tenantId)
             throws ApplicationManagementDAOException;
+
+    int getSubscribedGroupCount(int appReleaseId, int tenantId) throws ApplicationManagementDAOException;
 }
