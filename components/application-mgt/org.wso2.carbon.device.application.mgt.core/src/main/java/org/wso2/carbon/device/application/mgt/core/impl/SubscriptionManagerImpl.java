@@ -973,10 +973,14 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                                         .getUuid();
                         app.setType(mobileAppType);
                         app.setLocation(plistDownloadEndpoint);
+                        app.setIconImage(application.getApplicationReleases().get(0).getIconPath());
                         Properties properties = new Properties();
                         properties.put(MDMAppConstants.IOSConstants.IS_PREVENT_BACKUP, true);
                         properties.put(MDMAppConstants.IOSConstants.IS_REMOVE_APP, true);
                         properties.put(MDMAppConstants.IOSConstants.I_TUNES_ID, application.getPackageName());
+                        properties.put(MDMAppConstants.IOSConstants.LABEL, application.getName());
+                        properties.put(MDMAppConstants.IOSConstants.WEB_CLIP_URL,
+                                application.getApplicationReleases().get(0).getInstallerPath());
                         app.setProperties(properties);
                         return MDMIOSOperationUtil.createInstallAppOperation(app);
                     } else if (SubAction.UNINSTALL.toString().equalsIgnoreCase(action)) {

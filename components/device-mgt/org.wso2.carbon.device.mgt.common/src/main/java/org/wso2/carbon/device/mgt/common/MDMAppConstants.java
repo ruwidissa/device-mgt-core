@@ -33,6 +33,7 @@ public class MDMAppConstants {
 		public static final String I_TUNES_ID = "iTunesId";
 		public static final String LABEL = "label";
 		public static final String PLIST = "plist";
+		public static final String WEB_CLIP_URL = "webClipURL";
 		public static final String OPCODE_INSTALL_ENTERPRISE_APPLICATION = "INSTALL_ENTERPRISE_APPLICATION";
 		public static final String OPCODE_INSTALL_STORE_APPLICATION = "INSTALL_STORE_APPLICATION";
 		public static final String OPCODE_INSTALL_WEB_APPLICATION = "WEB_CLIP";
