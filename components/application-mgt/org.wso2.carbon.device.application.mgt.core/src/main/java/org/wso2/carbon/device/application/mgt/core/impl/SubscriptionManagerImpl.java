@@ -1137,18 +1137,22 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             int applicationReleaseId = applicationDTO.getApplicationReleaseDTOs().get(0).getId();
 
             List<String> subscriptionList = new ArrayList<>();
+            int count = 0;
 
             if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
                 subscriptionList = subscriptionDAO
                         .getAppSubscribedUsers(offsetValue, limitValue, applicationReleaseId, tenantId);
+                count = subscriptionDAO.getSubscribedUserCount(applicationReleaseId, tenantId);
             } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
                 subscriptionList = subscriptionDAO
                         .getAppSubscribedRoles(offsetValue, limitValue, applicationReleaseId, tenantId);
+                count = subscriptionDAO.getSubscribedRoleCount(applicationReleaseId, tenantId);
             } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
                 subscriptionList = subscriptionDAO
                         .getAppSubscribedGroups(offsetValue, limitValue, applicationReleaseId, tenantId);
+                count = subscriptionDAO.getSubscribedGroupCount(applicationReleaseId, tenantId);
             }
-            int count = subscriptionList.size();
+
             paginationResult.setData(subscriptionList);
             paginationResult.setRecordsFiltered(count);
             paginationResult.setRecordsTotal(count);
