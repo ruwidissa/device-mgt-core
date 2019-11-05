@@ -471,24 +471,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            List<String> subscribedEntities = new ArrayList<>();
-            if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getAppSubscribedUserNames(params, applicationReleaseId, tenantId);
-            } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getAppSubscribedRoleNames(params, applicationReleaseId, tenantId);
-            } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                subscribedEntities = subscriptionDAO.getAppSubscribedGroupNames(params, applicationReleaseId, tenantId);
-            }
-
-            params.removeAll(subscribedEntities);
-            if (!params.isEmpty()) {
-                subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
-            }
-            if (!subscribedEntities.isEmpty()) {
-                subscriptionDAO
-                        .updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                                action);
-            }
+            updateBulkSubscribers(applicationReleaseId, params, subType, action, tenantId, username);
 
             if (SubAction.INSTALL.toString().equalsIgnoreCase(action) && !appSubscribingDeviceIds.isEmpty()) {
                 subscriptionDAO.addDeviceSubscription(username, appSubscribingDeviceIds, subType,
@@ -760,35 +743,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
-                List<String> subscribedEntities = subscriptionDAO
-                        .getAppSubscribedUserNames(params, applicationReleaseId, tenantId);
-                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    params.removeAll(subscribedEntities);
-                    subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId);
-                }
-                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                        action);
-            } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
-                List<String> subscribedEntities = subscriptionDAO
-                        .getAppSubscribedRoleNames(params, applicationReleaseId, tenantId);
-                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    params.removeAll(subscribedEntities);
-                    subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId);
-                }
-                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                        action);
-            } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
-                List<String> subscribedEntities = subscriptionDAO
-                        .getAppSubscribedGroupNames(params, applicationReleaseId, tenantId);
-                if (SubAction.INSTALL.toString().equalsIgnoreCase(action)) {
-                    params.removeAll(subscribedEntities);
-                    subscriptionDAO.addGroupSubscriptions(tenantId, username, params, applicationReleaseId);
-                }
-                subscriptionDAO.updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType,
-                        action);
-            }
-
+            updateBulkSubscribers(applicationReleaseId, params, subType, action, tenantId, username);
             for (Activity activity : activities) {
                 int operationId = Integer.parseInt(activity.getActivityId().split("ACTIVITY_")[1]);
                 List<Integer> subUpdatingDeviceIds = new ArrayList<>();
@@ -837,6 +792,48 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    /**
+     * This method is responsible to update bulk subscriber's data. i.e USER, ROLE, GROUP. Before invoke this method it
+     * is required to start DB transaction
+     *
+     * @param applicationReleaseId Application release Id
+     * @param params subscribers. If subscription is performed via user, group or role, params is a list of
+     * {@link String}
+     * @param subType Subscription type. i.e USER, GROUP, ROLE or DEVICE
+     * @param action performing action. ie INSTALL or UNINSTALL>
+     * @param tenantId Tenant Id
+     * @param username Username
+     * @throws ApplicationManagementDAOException if error occurred while updating or inserting subscriber entities
+     */
+    private void updateBulkSubscribers(int applicationReleaseId, List<String> params, String subType, String action,
+            int tenantId, String username) throws ApplicationManagementDAOException {
+        List<String> subscribedEntities = new ArrayList<>();
+        if (SubscriptionType.USER.toString().equalsIgnoreCase(subType)) {
+            subscribedEntities = subscriptionDAO.getAppSubscribedUserNames(params, applicationReleaseId, tenantId);
+            params.removeAll(subscribedEntities);
+            if (!params.isEmpty()) {
+                subscriptionDAO.addUserSubscriptions(tenantId, username, params, applicationReleaseId, action);
+            }
+        } else if (SubscriptionType.ROLE.toString().equalsIgnoreCase(subType)) {
+            subscribedEntities = subscriptionDAO.getAppSubscribedRoleNames(params, applicationReleaseId, tenantId);
+            params.removeAll(subscribedEntities);
+            if (!params.isEmpty()) {
+                subscriptionDAO.addRoleSubscriptions(tenantId, username, params, applicationReleaseId, action);
+            }
+        } else if (SubscriptionType.GROUP.toString().equalsIgnoreCase(subType)) {
+            subscribedEntities = subscriptionDAO.getAppSubscribedGroupNames(params, applicationReleaseId, tenantId);
+            params.removeAll(subscribedEntities);
+            if (!params.isEmpty()) {
+                subscriptionDAO.addGroupSubscriptions(tenantId, username, params, applicationReleaseId, action);
+            }
+        }
+
+        if (!subscribedEntities.isEmpty()) {
+            subscriptionDAO
+                    .updateSubscriptions(tenantId, username, subscribedEntities, applicationReleaseId, subType, action);
         }
     }
 

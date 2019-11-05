@@ -42,22 +42,42 @@ public interface SubscriptionDAO {
     void addOperationMapping (int operationId, List<Integer> deviceSubscriptionId, int tenantId) throws ApplicationManagementDAOException;
 
     /**
-     * Adds a mapping between user and the application which the application is installed on. This mapping will be
-     * added when an enterprise installation triggered to the user.
+     * Adds a mapping between user and the application which the application is subscribed on. This mapping will be
+     * added when an app subscription triggered to the user.
      *
      * @param tenantId id of the tenant
      * @param subscribedBy username of the user who subscribe the application
      * @param users list of user names of the users whose devices are subscribed to the application
      * @param releaseId id of the {@link ApplicationReleaseDTO}
-     * @throws ApplicationManagementDAOException If unable to add a mapping between device and application
+     * @throws ApplicationManagementDAOException If unable to add a mapping between user and application
      */
-    void addUserSubscriptions(int tenantId, String subscribedBy, List<String> users, int releaseId)
+    void addUserSubscriptions(int tenantId, String subscribedBy, List<String> users, int releaseId, String action)
             throws ApplicationManagementDAOException;
 
-    void addRoleSubscriptions(int tenantId, String subscribedBy, List<String> roles, int releaseId)
+    /**
+     * Adds a mapping between role and the application which the application is subscribed on. This mapping will be
+     * added when an app subscription triggered to the role.
+     *
+     * @param tenantId id of the tenant
+     * @param subscribedBy username of the user who subscribe the application
+     * @param roles list of role names of the roles whose devices are subscribed to the application
+     * @param releaseId id of the {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementDAOException If unable to add a mapping between role and application
+     */
+    void addRoleSubscriptions(int tenantId, String subscribedBy, List<String> roles, int releaseId, String action)
             throws ApplicationManagementDAOException;
 
-    void addGroupSubscriptions(int tenantId, String subscribedBy, List<String> groups, int releaseId)
+    /**
+     * Adds a mapping between group and the application which the application is subscribed on. This mapping will be
+     * added when an app subscription triggered to the user.
+     *
+     * @param tenantId id of the tenant
+     * @param subscribedBy username of the user who subscribe the application
+     * @param groups list of group names of the groups whose devices are subscribed to the application
+     * @param releaseId id of the {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementDAOException If unable to add a mapping between group and application
+     */
+    void addGroupSubscriptions(int tenantId, String subscribedBy, List<String> groups, int releaseId, String action)
             throws ApplicationManagementDAOException;
 
     List<DeviceSubscriptionDTO> getDeviceSubscriptions(int appReleaseId, int tenantId) throws
