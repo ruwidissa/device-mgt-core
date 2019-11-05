@@ -24,6 +24,7 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
 import UsersDevices from "./UsersDevices";
+import AddUser from "./AddUser";
 
 const {Text} = Typography;
 
@@ -214,6 +215,9 @@ class UsersTable extends React.Component {
         ];
         return (
             <div>
+                <div style={{background: '#f0f2f5'}}>
+                    <AddUser fetchUsers={this.fetchUsers}/>
+                </div>
                 <div>
                     <Table
                         columns={columns}
