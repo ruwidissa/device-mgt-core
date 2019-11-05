@@ -630,7 +630,7 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 isStatusProvided = true;
             }
 
-            query = query + " ORDER BY ENROLMENT_ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            query = query + " ORDER BY DM_DEVICE.ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement ps = conn.prepareStatement(query)) {
 
