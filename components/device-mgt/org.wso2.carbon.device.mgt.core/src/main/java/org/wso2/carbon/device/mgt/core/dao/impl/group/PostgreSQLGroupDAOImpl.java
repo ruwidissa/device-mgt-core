@@ -96,7 +96,7 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP WHERE TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
             if (groupName != null && !groupName.isEmpty()) {
                 sql += " AND GROUP_NAME LIKE ?";
                 hasGroupName = true;
@@ -161,7 +161,7 @@ public class PostgreSQLGroupDAOImpl extends AbstractGroupDAOImpl {
 
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP WHERE TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
             if (groupName != null && !groupName.isEmpty()) {
                 sql += " AND GROUP_NAME LIKE ?";
                 hasGroupName = true;
