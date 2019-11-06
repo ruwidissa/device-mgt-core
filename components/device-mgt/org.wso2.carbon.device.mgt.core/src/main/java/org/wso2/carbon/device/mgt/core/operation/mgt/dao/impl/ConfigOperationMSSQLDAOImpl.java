@@ -47,7 +47,7 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
 
     @Override
     public int addOperation(Operation operation) throws OperationManagementDAOException {
-        int operationId;
+        int operationId = 0;
         PreparedStatement stmt = null;
         try {
             operationId = super.addOperation(operation);
@@ -58,7 +58,9 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
             stmt.setBinaryStream(2, toByteArrayInputStream(operation));
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while adding command operation", e);
+            String msg = "Error occurred while adding command operation " + operationId;
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt);
         }
@@ -113,8 +115,6 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
         ResultSet rs = null;
         ConfigOperation configOperation = null;
 
-        ByteArrayInputStream bais;
-        ObjectInputStream ois;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
             String sql = "SELECT OPERATION_ID, ENABLED, OPERATION_CONFIG FROM DM_CONFIG_OPERATION WHERE OPERATION_ID = ?";
@@ -129,9 +129,10 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
                 configOperation.setEnabled(rs.getBoolean("ENABLED"));
             }
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("SQL Error occurred while retrieving the policy operation " +
-                    "object available for the id '"
-                    + operationId, e);
+            String msg = "SQL Error occurred while retrieving the policy operation object available for the id '"
+                    + operationId;
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -139,15 +140,13 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
     }
 
     @Override
-    public List<? extends Operation> getOperationsByDeviceAndStatus(int enrolmentId,
-                                                                    Operation.Status status) throws OperationManagementDAOException {
+    public List<? extends Operation> getOperationsByDeviceAndStatus(int enrolmentId, Operation.Status status)
+            throws OperationManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         ConfigOperation configOperation;
         List<Operation> operations = new ArrayList<>();
 
-        ByteArrayInputStream bais = null;
-        ObjectInputStream ois = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
             String sql = "SELECT co.OPERATION_ID, co.OPERATION_CONFIG FROM DM_CONFIG_OPERATION co " +
@@ -167,23 +166,11 @@ public class ConfigOperationMSSQLDAOImpl extends GenericOperationDAOImpl {
                 operations.add(configOperation);
             }
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("SQL error occurred while retrieving the operation available " +
-                    "for the device'" + enrolmentId + "' with status '" + status.toString(), e);
+            String msg = "SQL error occurred while retrieving the operation available " +
+                    "for the device'" + enrolmentId + "' with status '" + status.toString();
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
         } finally {
-            if (bais != null) {
-                try {
-                    bais.close();
-                } catch (IOException e) {
-                    log.warn("Error occurred while closing ByteArrayOutputStream", e);
-                }
-            }
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException e) {
-                    log.warn("Error occurred while closing ObjectOutputStream", e);
-                }
-            }
             OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return operations;
