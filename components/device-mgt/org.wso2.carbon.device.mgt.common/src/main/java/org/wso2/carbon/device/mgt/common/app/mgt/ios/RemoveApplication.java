@@ -25,6 +25,7 @@ import java.io.Serializable;
 public class RemoveApplication implements Serializable {
 
     private String bundleId;
+    private String url;
 
     public String getBundleId() {
         return bundleId;
@@ -32,6 +33,14 @@ public class RemoveApplication implements Serializable {
 
     public void setBundleId(String bundleId) {
         this.bundleId = bundleId;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String toJSON() {

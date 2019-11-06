@@ -96,9 +96,9 @@ public class MDMIOSOperationUtil {
         operation.setCode(MDMAppConstants.IOSConstants.OPCODE_REMOVE_APPLICATION);
         operation.setType(Operation.Type.PROFILE);
 
-        RemoveApplication removeApplication =
-                new RemoveApplication();
+        RemoveApplication removeApplication = new RemoveApplication();
         removeApplication.setBundleId(application.getIdentifier());
+        removeApplication.setUrl(application.getLocation());
         operation.setPayLoad(removeApplication.toJSON());
 
         return operation;
