@@ -259,7 +259,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         ResultSet resultSet = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP WHERE ID = ? AND TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE ID = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, groupId);
             stmt.setInt(2, tenantId);
@@ -284,7 +284,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupBuilders = new ArrayList<>();
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT G.ID, G.GROUP_NAME, G.DESCRIPTION, G.OWNER FROM DM_GROUP G " +
+            String sql = "SELECT G.ID, G.GROUP_NAME, G.DESCRIPTION, G.OWNER, G.STATUS FROM DM_GROUP G " +
                     "INNER JOIN DM_DEVICE_GROUP_MAP GM ON G.ID = GM.GROUP_ID " +
                     "WHERE GM.DEVICE_ID = ? AND GM.TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
@@ -309,7 +309,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupList = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP WHERE TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
             resultSet = stmt.executeQuery();
@@ -415,7 +415,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
             String sql =
-                    "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?";
+                    "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE GROUP_NAME = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, groupName);
             stmt.setInt(2, tenantId);
@@ -585,7 +585,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupList = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP g, " +
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP g, " +
                     "(SELECT GROUP_ID FROM DM_ROLE_GROUP_MAP WHERE ROLE IN (";
 
             int index = 0;
@@ -693,7 +693,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
         List<DeviceGroup> deviceGroupList = null;
         try {
             Connection conn = GroupManagementDAOFactory.getConnection();
-            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER FROM DM_GROUP WHERE OWNER = ? AND TENANT_ID = ?";
+            String sql = "SELECT ID, DESCRIPTION, GROUP_NAME, OWNER, STATUS FROM DM_GROUP WHERE OWNER = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setInt(2, tenantId);

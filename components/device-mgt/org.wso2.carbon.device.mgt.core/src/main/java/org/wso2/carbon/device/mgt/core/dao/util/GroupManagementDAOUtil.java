@@ -85,6 +85,7 @@ public final class GroupManagementDAOUtil {
         group.setDescription(resultSet.getString("DESCRIPTION"));
         group.setName(resultSet.getString("GROUP_NAME"));
         group.setOwner(resultSet.getString("OWNER"));
+        group.setStatus(resultSet.getString("STATUS"));
         return group;
     }
 
