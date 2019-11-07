@@ -20,6 +20,6 @@
 
 $(document).ready(function () {
 
-    $("select.select2").select2();
+    $("select#corrective-policy-input").select2();
 
 });
