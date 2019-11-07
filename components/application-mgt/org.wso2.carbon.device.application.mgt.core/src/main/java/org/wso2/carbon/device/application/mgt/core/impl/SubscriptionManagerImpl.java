@@ -637,15 +637,21 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
             DeviceSubscriptionDTO deviceSubscriptionDTO = deviceSubscriptions.get(device.getId());
             if (deviceSubscriptionDTO != null) {
-                if (!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
-                        .equals(deviceSubscriptionDTO.getStatus())) {
-                    subscribingDeviceIdHolder.getAppInstalledDevices().put(deviceIdentifier, device.getId());
-                } else if (deviceSubscriptionDTO.isUnsubscribed() && !Operation.Status.COMPLETED.toString()
-                        .equals(deviceSubscriptionDTO.getStatus())) {
-                    subscribingDeviceIdHolder.getAppReUnInstallableDevices().put(deviceIdentifier, device.getId());
-                } else if (Operation.Status.PENDING.toString().equals(deviceSubscriptionDTO.getStatus())
+                if (Operation.Status.PENDING.toString().equals(deviceSubscriptionDTO.getStatus())
                         || Operation.Status.IN_PROGRESS.toString().equals(deviceSubscriptionDTO.getStatus())) {
                     subscribingDeviceIdHolder.getSkippedDevices().put(deviceIdentifier, device.getId());
+                } else if (deviceSubscriptionDTO.isUnsubscribed()) {
+                    if (Operation.Status.COMPLETED.toString().equals(deviceSubscriptionDTO.getStatus())) {
+                        subscribingDeviceIdHolder.getAppReInstallableDevices().put(deviceIdentifier, device.getId());
+                    } else {
+                        /*We can't ensure whether app is uninstalled successfully or not hence allow to perform both
+                        install and uninstall operations*/
+                        subscribingDeviceIdHolder.getAppReUnInstallableDevices().put(deviceIdentifier, device.getId());
+                        subscribingDeviceIdHolder.getAppReInstallableDevices().put(deviceIdentifier, device.getId());
+                    }
+                } else if (!deviceSubscriptionDTO.isUnsubscribed() && Operation.Status.COMPLETED.toString()
+                        .equals(deviceSubscriptionDTO.getStatus())) {
+                    subscribingDeviceIdHolder.getAppInstalledDevices().put(deviceIdentifier, device.getId());
                 } else {
                     subscribingDeviceIdHolder.getAppReInstallableDevices().put(deviceIdentifier, device.getId());
                 }
