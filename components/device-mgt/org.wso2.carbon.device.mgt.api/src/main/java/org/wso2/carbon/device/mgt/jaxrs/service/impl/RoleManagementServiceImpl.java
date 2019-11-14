@@ -1,20 +1,36 @@
 /*
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *   WSO2 Inc. licenses this file to you under the Apache License,
- *   Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License.
- *   You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing,
- *   software distributed under the License is distributed on an
- *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *   KIND, either express or implied.  See the License for the
- *   specific language governing permissions and limitations
- *   under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  *
+ *
+ * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
@@ -197,29 +213,21 @@ public class RoleManagementServiceImpl implements RoleManagementService {
         final UserRealmProxy userRealmProxy = new UserRealmProxy(userRealmCore);
         final UIPermissionNode rolePermissions =
                 userRealmProxy.getRolePermissions(roleName, MultitenantConstants.SUPER_TENANT_ID);
-        UIPermissionNode[] deviceMgtPermissions = new UIPermissionNode[4];
+        List<UIPermissionNode> deviceMgtPermissionsList = new ArrayList<>();
 
         for (UIPermissionNode permissionNode : rolePermissions.getNodeList()) {
-            if (permissionNode.getResourcePath().equals("/permission/admin")) {
+            if (Constants.Permission.ADMIN.equals(permissionNode.getResourcePath())) {
                 for (UIPermissionNode node : permissionNode.getNodeList()) {
-                    if (node.getResourcePath().equals("/permission/admin/device-mgt")) {
-                        deviceMgtPermissions[0] = node;
-                    } else if (node.getResourcePath().equals("/permission/admin/login")) {
-                        deviceMgtPermissions[1] = node;
-                    } else if (node.getResourcePath().equals("/permission/admin/manage")) {
-                        // Adding permissions related to app-store in emm-console
-                        for (UIPermissionNode subNode : node.getNodeList()) {
-                            if (subNode.getResourcePath().equals("/permission/admin/manage/mobileapp")) {
-                                deviceMgtPermissions[2] = subNode;
-                            } else if (subNode.getResourcePath().equals("/permission/admin/manage/webapp")) {
-                                deviceMgtPermissions[3] = subNode;
-                            }
-                        }
+                    if (Constants.Permission.LOGIN.equals(node.getResourcePath()) ||
+                            Constants.Permission.DEVICE_MGT.equals(node.getResourcePath()) ||
+                            Constants.Permission.APP_MGT.equals(node.getResourcePath())) {
+                        deviceMgtPermissionsList.add(node);
                     }
                 }
             }
         }
-        rolePermissions.setNodeList(deviceMgtPermissions);
+        UIPermissionNode[] deviceMgtPermissions = new UIPermissionNode[deviceMgtPermissionsList.size()];
+        rolePermissions.setNodeList(deviceMgtPermissionsList.toArray(deviceMgtPermissions));
         return rolePermissions;
     }
 
