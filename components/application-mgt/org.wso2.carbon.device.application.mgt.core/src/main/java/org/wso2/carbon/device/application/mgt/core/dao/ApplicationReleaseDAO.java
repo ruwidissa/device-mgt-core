@@ -116,7 +116,15 @@ public interface ApplicationReleaseDAO {
     boolean hasExistInstallableAppRelease(String releaseUuid, String installableStateName, int tenantId)
             throws ApplicationManagementDAOException;
 
+    /**
+     * This method is responsible to return list of application releases which contains one of the
+     * providing package name.
+     *
+     * @param packages List of package names
+     * @param tenantId Tenant Id
+     * @return List of application releases {@link ApplicationReleaseDTO}
+     * @throws ApplicationManagementDAOException if error occurred while getting application releases from the DB.
+     */
     List<ApplicationReleaseDTO> getReleaseByPackages(List<String> packages, int tenantId)
             throws ApplicationManagementDAOException;
-
 }

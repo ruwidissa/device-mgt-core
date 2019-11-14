@@ -404,11 +404,11 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             return Response.status(Response.Status.OK)
                     .entity("Successfully uploaded artifacts for the application " + applicationReleaseUuid).build();
         } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
+            String msg = "Couldn't found an application release which has application release UUID "
+                    + applicationReleaseUuid + ". HEnce please verify the application release UUID again and execute "
+                    + "the operation";
+            log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        } catch (ForbiddenException e) {
-            log.error(e.getMessage(), e);
-            return Response.status(Response.Status.FORBIDDEN).entity(e.getMessage()).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while updating the application image artifacts for application release uuid: "
                     + applicationReleaseUuid;

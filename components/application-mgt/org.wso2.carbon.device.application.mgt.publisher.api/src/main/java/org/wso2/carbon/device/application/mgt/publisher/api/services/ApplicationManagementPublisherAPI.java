@@ -680,10 +680,6 @@ public interface ApplicationManagementPublisherAPI {
                             code = 200,
                             message = "OK. \n Successfully updated artifacts."),
                     @ApiResponse(
-                            code = 403,
-                            message = "FORBIDDEN. \n Can't Update the application release in PUBLISHED or DEPRECATED "
-                                    + "state. Hence please demote the application and update the application release"),
-                    @ApiResponse(
                             code = 404,
                             message = "NOT FOUND. \n Error occurred while updating the application."),
                     @ApiResponse(

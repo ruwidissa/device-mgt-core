@@ -111,6 +111,16 @@ public interface ApplicationManager {
     ApplicationList getApplications(Filter filter) throws ApplicationManagementException;
 
     /**
+     * To get list of applications that application releases has given package names.
+     *
+     * @param packageNames List of package names.
+     * @return List of applications {@link Application}
+     * @throws ApplicationManagementException if error occurred while getting application data from DB or error
+     * occurred while accessing user store.
+     */
+    List<Application> getApplications(List<String> packageNames) throws ApplicationManagementException;
+
+    /**
      * To get the Application for given Id.
      *
      * @param id id of the ApplicationDTO
@@ -166,7 +176,8 @@ public interface ApplicationManager {
      * @param applicationArtifact Application artifact that contains names and input streams of the application artifacts.
      * @throws ApplicationManagementException ApplicationDTO Management Exception.
      */
-    void updateApplicationImageArtifact(String uuid, ApplicationArtifact applicationArtifact) throws ApplicationManagementException;
+    void updateApplicationImageArtifact(String uuid, ApplicationArtifact applicationArtifact)
+            throws ApplicationManagementException;
 
 
     /**

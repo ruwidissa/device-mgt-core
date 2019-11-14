@@ -43,7 +43,7 @@ public class EntAppReleaseWrapper {
     private Double price;
 
     @ApiModelProperty(name = "isSharedWithAllTenants",
-            value = "If application release is shared with all tenants it is eqal to 1 otherwise 0",
+            value = "If application release is shared with all tenants it is equal to true otherwise false",
             required = true)
     @NotNull
     private boolean isSharedWithAllTenants;
