@@ -25,7 +25,8 @@ import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
 import UsersDevices from "./UsersDevices";
 import AddUser from "./AddUser";
-
+import UserActions from "./UserActions";
+const ButtonGroup = Button.Group
 const {Text} = Typography;
 
 let config = null;
@@ -42,6 +43,7 @@ class UsersTable extends React.Component {
             loading: false,
             selectedRows: [],
             rolesModalVisible: false,
+            devicesModalVisible: false,
             rolesData: [],
             user:''
         };
@@ -88,6 +90,8 @@ class UsersTable extends React.Component {
                     data: res.data.data.users,
                     pagination,
                 });
+
+                console.log(res.data.data)
             }
 
         }).catch((error) => {
@@ -107,7 +111,6 @@ class UsersTable extends React.Component {
         });
     };
 
-    //fetch data from api
     fetchRoles = (username) => {
         const config = this.props.context;
 
@@ -120,7 +123,6 @@ class UsersTable extends React.Component {
             config.serverConfig.invoker.deviceMgt +
             "/users/" + username + "/roles";
 
-        //send request to the invokerss
         axios.get(apiUrl).then(res => {
             if (res.status === 200) {
                 this.setState({
@@ -163,13 +165,21 @@ class UsersTable extends React.Component {
     handleOk = e => {
         this.setState({
             rolesModalVisible: false,
+            devicesModalVisible: false
         });
     };
 
     handleCancel = e => {
         this.setState({
             rolesModalVisible: false,
+            devicesModalVisible: false
         });
+    };
+
+    openDeviceListModal = e =>{
+        this.setState({
+            devicesModalVisible: true,
+        })
     };
 
     render() {
@@ -180,38 +190,52 @@ class UsersTable extends React.Component {
             {
                 title: 'User Name',
                 dataIndex: 'username',
-                width: 150,
                 key: "username",
             },
             {
                 title: 'First Name',
-                width: 150,
                 dataIndex: 'firstname',
                 key: 'firstname',
             },
             {
                 title: 'Last Name',
-                width: 150,
                 dataIndex: 'lastname',
                 key: 'lastname',
             },
             {
                 title: 'Email',
-                width: 100,
                 dataIndex: 'emailAddress',
                 key: 'emailAddress',
             },
             {
-                title: '',
+                title: 'View',
                 dataIndex: 'username',
                 key: 'roles',
                 render: (username) =>
-                    <Button
-                        type="link"
-                        size={"default"}
-                        icon="info-circle"
-                        onClick={() => this.fetchRoles(username)}>Info</Button>
-            }
+                    <ButtonGroup>
+                        <Button
+                            type="primary"
+                            size={"small"}
+                            icon="book"
+                            onClick={() => this.fetchRoles(username)}>Roles</Button>
+                        <Button
+                            type="primary"
+                            size={"small"}
+                            icon="desktop"
+                            onClick={this.openDeviceListModal}>Devices</Button>
+                    </ButtonGroup>
+            },
+            {
+                title: 'Action',
+                dataIndex: 'id',
+                key: 'action',
+                render: (id, row) => (
+                    <span>
+                    <UserActions data={row} fetchUsers={this.fetchUsers}/>
+                </span>
+                ),
+            },
+
         ];
         return (
             <div>
@@ -237,40 +261,31 @@ class UsersTable extends React.Component {
                 </div>
                 <div>
                     <Modal
+                        title="ROLES"
                         width="900px"
                         visible={this.state.rolesModalVisible}
                         onOk={this.handleOk}
-                        onCancel={this.handleCancel}
-                    >
-                        <Tabs size="small" defaultActiveKey="1">
-                            <TabPane
-                                tab={
-                                    <span>
-                                        <Icon type="book"/>
-                                      Roles
-                                    </span>
-                                }
-                                key="1"
-                            >
+                        onCancel={this.handleCancel} >
+                        <div>
                                 <List
                                     size="small"
                                     bordered
                                     dataSource={this.state.rolesData}
-                                    renderItem={item => <List.Item>{item}</List.Item>}
-                                />
-                            </TabPane>
-                            <TabPane
-                                tab={
-                                    <span>
-                                      <Icon type="appstore"/>
-                                      Enrolled Devices
-                                    </span>
-                                }
-                                key="2"
-                            >
-                                <UsersDevices user={this.state.user}/>
-                            </TabPane>
-                        </Tabs>
+                                    renderItem={item => <List.Item>{item}</List.Item>}/>
+                        </div>
+                    </Modal>
+                </div>
+
+                <div>
+                    <Modal
+                        title="DEVICES"
+                        width="900px"
+                        visible={this.state.devicesModalVisible}
+                        onOk={this.handleOk}
+                        onCancel={this.handleCancel}>
+                        <div>
+                            <UsersDevices user={this.state.user}/>
+                        </div>
                     </Modal>
                 </div>
             </div>

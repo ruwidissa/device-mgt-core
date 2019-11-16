@@ -18,24 +18,19 @@
 
 import React from "react";
 import axios from "axios";
-import {Card, Col, Icon, message, notification, Row, Typography} from "antd";
+import {
+    Button,
+    message,
+    Modal,
+    notification,
+    Table, List
+} from "antd";
 import TimeAgo from 'javascript-time-ago'
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
-
-const {Text} = Typography;
-
-let config = null;
-let apiUrl;
-
-const columns = [
-    {
-        title: 'User Name',
-        dataIndex: 'username',
-        width: 100,
-    }
-];
+import AddRole from "./AddRole";
+import RoleAction from "./RoleAction";
 
 const getTimeAgo = (time) => {
     const timeAgo = new TimeAgo('en-US');
@@ -45,23 +40,76 @@ const getTimeAgo = (time) => {
 class RolesTable extends React.Component {
     constructor(props) {
         super(props);
-        config =  this.props.context;
+        this.config =  this.props.context;
         TimeAgo.addLocale(en);
         this.state = {
             data: [],
             pagination: {},
             loading: false,
-            selectedRows: []
+            selectedRows: [],
+            userData: [],
+            users : [],
+            isEditRoleModalVisible: false,
+            isUserListModalVisible :false,
         };
     }
+
+    rowSelection = {
+        onChange: (selectedRowKeys, selectedRows) => {
+            this.setState({
+                selectedRows: selectedRows
+            })
+        }
+    };
 
     componentDidMount() {
         this.fetchUsers();
     }
 
+    openUserListModal = (event) => {
+        let apiUrl = window.location.origin + this.config.serverConfig.invoker.uri +
+            this.config.serverConfig.invoker.deviceMgt +
+            "/roles/"+ event;
+
+        //send request to the invokerss
+        axios.get(apiUrl).then(res => {
+            if (res.status === 200) {
+                this.setState({
+                    userData : res.data.data.users,
+                    isUserListModalVisible: true,
+                });
+            }
+
+        }).catch((error) => {
+            if (error.hasOwnProperty("response") && error.response.status === 401) {
+                //todo display a popop with error
+                message.error('You are not logged in');
+                window.location.href = window.location.origin + '/entgra/login';
+            } else {
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:"Error occurred while trying to load users.",
+                });
+            }
+        });
+    };
+
+    handleOk = e => {
+        this.setState({
+            isUserListModalVisible: false,
+        });
+    };
+
+    handleCancel = e => {
+        this.setState({
+            isUserListModalVisible: false,
+        });
+    };
+
     //fetch data from api
     fetchUsers = (params = {}) => {
-        const config = this.props.context;
+        // const config = this.props.context;
         this.setState({loading: true});
 
         // get current page
@@ -75,8 +123,8 @@ class RolesTable extends React.Component {
         const encodedExtraParams = Object.keys(extraParams)
             .map(key => key + '=' + extraParams[key]).join('&');
 
-        apiUrl = window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
+        let apiUrl = window.location.origin + this.config.serverConfig.invoker.uri +
+            this.config.serverConfig.invoker.deviceMgt +
             "/roles";
 
         //send request to the invokerss
@@ -124,30 +172,77 @@ class RolesTable extends React.Component {
 
     render() {
         const {data, pagination, loading, selectedRows} = this.state;
-        const { Meta } = Card;
-        const itemCard = data.map((data) =>
-            <Col span={5} key={data}>
-                    <Card
-                size="default"
-                style={{ width: 200 }}
-                bordered={true}
-                actions={[
-                        <Icon type="setting" key="setting" />,
-                        <Icon type="edit" key="edit" />,]}
-            >
-            <Meta
-                avatar={<Icon type="book" key="roles"/>}
-                title={data}
-                />
-            </Card>
-            </Col>
-        );
+        const columns = [
+            {
+                title: 'Role Name',
+                dataIndex: '',
+                key: "role",
+                width: "60%",
+            },
+            {
+                title: 'View',
+                dataIndex: '',
+                key: 'users',
+                render: (id, row) =>
+                        <Button
+                            type="primary"
+                            size={"small"}
+                            icon="book"
+                            onClick={()=>this.openUserListModal(row)}>Users</Button>
+
+            },
+            {
+                title: 'Action',
+                dataIndex: 'id',
+                key: 'action',
+                render: (id, row) => (
+                    <span>
+                    <RoleAction data={row} fetchUsers={this.fetchUsers}/>
+                </span>
+                ),
+            },
+
+        ];
         return (
-            <div style={{ background: '#ECECEC', padding: '20px' }}>
-                <Row gutter={16}>
-                    {itemCard}
-                </Row>
+            <div>
+                <div style={{background: '#f0f2f5'}}>
+                    <AddRole fetchUsers={this.fetchUsers}/>
+                </div>
+                <div>
+                    <Table
+                        columns={columns}
+                        rowKey={record => (record)}
+                        dataSource={data}
+                        pagination={{
+                            ...pagination,
+                            size: "small",
+                            // position: "top",
+                            showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} groups`
+                            // showQuickJumper: true
+                        }}
+                        loading={loading}
+                        onChange={this.handleTableChange}
+                        rowSelection={this.rowSelection}
+                    />
+                </div>
+                <div>
+                    <Modal
+                        title="USERS"
+                        width="900px"
+                        visible={this.state.isUserListModalVisible}
+                        onOk={this.handleOk}
+                        onCancel={this.handleCancel} >
+                        <div>
+                            <List
+                                size="small"
+                                bordered
+                                dataSource={this.state.userData}
+                                renderItem={item => <List.Item>{item}</List.Item>}/>
+                        </div>
+                    </Modal>
+                </div>
             </div>
+
         );
     }
 }
