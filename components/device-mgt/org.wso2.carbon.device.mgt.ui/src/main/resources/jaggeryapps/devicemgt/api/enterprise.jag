@@ -125,6 +125,12 @@ if (!user || accessToken == null) {
         session.put("externalEndpoint", restAPIRequestDetails["endpoint"]);
         session.put("externalToken", restAPIRequestDetails["externalToken"]);
         callBackend(restAPIRequestDetails["endpoint"], session.get("externalToken"), "GET", restAPIRequestDetails);
+        log.info("Calling unenroll");
+        if (response["status"] == 200) {
+            log.info("Unenroll success, wiping devices.");
+            var wipeURL = devicemgtProps["httpsURL"] + "/api/device-mgt/android/v1.0/enterprise/wipe-device"
+            callBackend(wipeURL, accessToken, "GET");
+        }
     }
 
 }

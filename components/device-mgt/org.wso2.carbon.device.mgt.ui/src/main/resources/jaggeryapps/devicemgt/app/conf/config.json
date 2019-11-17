@@ -162,7 +162,9 @@
     "perm:geo-service:analytics-view",
     "perm:geo-service:alerts-manage",
     "perm:devices:permanent-delete",
-    "appm:read"
+    "appm:read",
+    "perm:enterprise:modify",
+    "perm:enterprise:view"
   ],
   "isOAuthEnabled": true,
   "backendRestEndpoints": {
