@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.device.application.mgt.api.services.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.api.services.ArtifactDownloadAPI;
@@ -27,13 +28,15 @@ import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.InputStream;
 
 /**
  * Implementation of ApplicationDTO Management related APIs.
@@ -54,13 +57,20 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
             @PathParam("folderName") String folderName,
             @PathParam("fileName") String fileName) {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
-        try {
-            InputStream fileInputStream = dataHandler.getArtifactStream(tenantId, uuid, folderName, fileName);
-            Response.ResponseBuilder response = Response
-                    .ok(fileInputStream, MediaType.APPLICATION_OCTET_STREAM);
-            response.status(Response.Status.OK);
-            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-            return response.build();
+        try (InputStream fileInputStream = dataHandler.getArtifactStream(tenantId, uuid, folderName, fileName)) {
+            byte[] content = IOUtils.toByteArray(fileInputStream);
+            try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
+                Response.ResponseBuilder response = Response
+                        .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
+                response.status(Response.Status.OK);
+                response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+                response.header("Content-Length", content.length);
+                return response.build();
+            } catch (IOException e) {
+                String msg = "Error occurred while creating input stream from buffer array. ";
+                log.error(msg, e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
         } catch (NotFoundException e) {
             String msg = "Couldn't find an application release for UUID: " + uuid + " and file name:  " + fileName;
             log.error(msg, e);
@@ -72,6 +82,10 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error occurred while getting the application release artifact file. ";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (IOException e) {
+            String msg = "Error occurred while getting the byte array of application release artifact file. ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }

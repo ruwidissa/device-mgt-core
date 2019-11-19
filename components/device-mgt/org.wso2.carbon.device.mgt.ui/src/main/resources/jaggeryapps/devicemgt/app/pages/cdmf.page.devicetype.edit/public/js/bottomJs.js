@@ -236,7 +236,7 @@ $(document).ready(function () {
 			    deviceType,
 		        function (data, textStatus, jqXHR) {
 		            if (jqXHR.status == 200) {
-		            	$(errorMsgIdentifier).addClass(" hidden");
+		            	$(errorMsgWrapper).addClass(" hidden");
 						$("#modalDevice").modal('show');
 		            }
 		        },
