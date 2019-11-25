@@ -133,7 +133,28 @@ public interface ApplicationDAO {
      */
     ApplicationDTO getApplication(String releaseUuid, int tenantId) throws ApplicationManagementDAOException;
 
+    /**
+     * To get application with a specific application release which has given application release UUID
+     *
+     * @param releaseUuid Applicatioon Release UUID
+     * @param tenantId Tenant Id
+     * @return {@link ApplicationDTO}
+     * @throws ApplicationManagementDAOException if error occurred while getting application and
+     * application release data from the DB.
+     */
     ApplicationDTO getAppWithRelatedRelease(String releaseUuid, int tenantId) throws ApplicationManagementDAOException;
+
+    /**
+     * To get list of applications with a specific application releases which has given package names.
+     *
+     * @param packageNames List of package names
+     * @param tenantId Tenant Id
+     * @return List of {@link ApplicationDTO}
+     * @throws ApplicationManagementDAOException if error occurred while getting application and
+     * application release data from the DB.
+     */
+    List<ApplicationDTO> getAppWithRelatedReleases(List<String> packageNames, int tenantId)
+            throws ApplicationManagementDAOException;
 
     /**
      * Verify whether application exist for given application name and device type. Because a name and device type is
@@ -179,6 +200,4 @@ public interface ApplicationDAO {
     int getApplicationCount(Filter filter, int deviceTypeId, int tenantId) throws ApplicationManagementDAOException;
 
     void deleteApplication(int appId, int tenantId) throws ApplicationManagementDAOException;
-
 }
-
