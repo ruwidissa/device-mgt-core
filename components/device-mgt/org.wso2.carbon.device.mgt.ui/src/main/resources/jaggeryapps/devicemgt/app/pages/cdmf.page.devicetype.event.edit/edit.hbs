@@ -48,89 +48,91 @@
             <div class="col-md-12">
                 <!-- content -->
                 <div id="devicetype-create-form" class="container col-centered wr-content">
-                <div class="wr-form">
-                    <p class="page-sub-title">{{name}}</p>
-                    <hr/>
-                    <div class="row">
-                        <div class="col-lg-8">
-                            <div id="devicetype-create-error-msg" class="alert alert-danger hidden" role="alert">
-                                <i class="icon fw fw-error"></i><span></span>
-                            </div>
-                            <br>
-                            <input aria-describedby="basic-addon1" type="text" id="deviceTypeName"
-                                   data-error-msg="invalid device type name" class="form-control hidden-input" value="{{name}}"/>
+                    <div class="wr-form">
+                        <p class="page-sub-title">{{name}}</p>
+                        <hr/>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div id="devicetype-create-error-msg" class="alert alert-danger hidden" role="alert">
+                                    <i class="icon fw fw-error"></i><span></span>
+                                </div>
+                                <br>
+                                <input aria-describedby="basic-addon1" type="text" id="deviceTypeName"
+                                       data-error-msg="invalid device type name" class="form-control hidden-input" value="{{name}}"/>
 
-                            <label class="wr-input-label">Transport</label>
-                            <div class="wr-input-control">
-                                <!--suppress HtmlFormInputWithoutLabel -->
-                                <select id="transport" class="form-control select">
-                                    {{#if event}}
-                                        <option {{selected event.transport "HTTP"}}>HTTP</option>
-                                        <option {{selected event.transport "MQTT"}}>MQTT</option>
-                                    {{else}}
-                                        <option>HTTP</option>
-                                        <option>MQTT</option>
-                                    {{/if}}
+                                <label class="wr-input-label">Transport</label>
+                                <div class="wr-input-control">
+                                    <!--suppress HtmlFormInputWithoutLabel -->
+                                    <select id="transport" class="form-control select">
+                                        {{#if event}}
+                                            <option {{selected event.transport "HTTP"}}>HTTP</option>
+                                            <option {{selected event.transport "MQTT"}}>MQTT</option>
+                                        {{else}}
+                                            <option>HTTP</option>
+                                            <option>MQTT</option>
+                                        {{/if}}
 
-                                </select>
-                            </div>
+                                    </select>
+                                </div>
 
-                            <label class="wr-input-label">
-                                Event Attributes (eg: alarm_status, temperature)
-                            </label>
-                            <br>
-                            <div class="form-group event_field_wrapper">
-                                {{#if event.eventAttributes}}
-                                    {{#each event.eventAttributes.attributes}}
-                                        <div class="row">
-                                            <div class="dontfloat" name="deviceEvent">
-                                                <div class="col-xs-3">
-                                                    <input type="text" class="form-control" id="event-name" placeholder="name" value="{{this.name}}"/>
+                                <label class="wr-input-label">
+                                    Event Attributes (eg: alarm_status, temperature)
+                                </label>
+                                <br>
+                                <div class="form-group event_field_wrapper">
+                                    {{#if event.eventAttributes}}
+                                        {{#each event.eventAttributes.attributes}}
+                                            <div class="row">
+                                                <div class="dontfloat" name="deviceEvent">
+                                                    <div class="col-xs-3">
+                                                        <input type="text" class="form-control" id="event-name" placeholder="name" value="{{this.name}}"/>
+                                                    </div>
+                                                    <div class="col-xs-4">
+                                                        <select class="form-control select" id="event-type">
+                                                            <option {{selected this.type "STRING"}}>STRING</option>
+                                                            <option {{selected this.type "LONG"}}>LONG</option>
+                                                            <option {{selected this.type "BOOL"}}>BOOL</option>
+                                                            <option {{selected this.type "INT"}}>INT</option>
+                                                            <option {{selected this.type "FLOAT"}}>FLOAT</option>
+                                                            <option {{selected this.type "DOUBLE"}}>DOUBLE</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="button" class="wr-btn wr-btn-horizontal remove_event_button"><i class="fa fa-minus"></i></button>
                                                 </div>
-                                                <div class="col-xs-4">
-                                                    <select class="form-control select" id="event-type">
-                                                        <option {{selected this.type "STRING"}}>STRING</option>
-                                                        <option {{selected this.type "LONG"}}>LONG</option>
-                                                        <option {{selected this.type "BOOL"}}>BOOL</option>
-                                                        <option {{selected this.type "INT"}}>INT</option>
-                                                        <option {{selected this.type "FLOAT"}}>FLOAT</option>
-                                                        <option {{selected this.type "DOUBLE"}}>DOUBLE</option>
-                                                    </select>
-                                                </div>
-                                                <button type="button" class="wr-btn wr-btn-horizontal remove_event_button"><i class="fa fa-minus"></i></button>
                                             </div>
+                                        {{/each}}
+                                    {{/if}}
+                                    <div class="row">
+                                        <div class="dontfloat event-wrapper" name="deviceEvent">
+                                            <div class="col-xs-3">
+                                                <input type="text" class="form-control" id="event-name" placeholder="name"/>
+                                            </div>
+                                            <div class="col-xs-4">
+                                                <select class="form-control select" id="event-type">
+                                                    <option>STRING</option>
+                                                    <option>LONG</option>
+                                                    <option>BOOL</option>
+                                                    <option>INT</option>
+                                                    <option>FLOAT</option>
+                                                    <option>DOUBLE</option>
+                                                </select>
+                                            </div>
+                                            <button type="button" class="wr-btn wr-btn-horizontal add_event_button"><i class="fa fa-plus"></i></button>
                                         </div>
-                                    {{/each}}
-                                {{/if}}
-                                <div class="row">
-                                    <div class="dontfloat event-wrapper" name="deviceEvent">
-                                        <div class="col-xs-3">
-                                            <input type="text" class="form-control" id="event-name" placeholder="name"/>
-                                        </div>
-                                        <div class="col-xs-4">
-                                            <select class="form-control select" id="event-type">
-                                                <option>STRING</option>
-                                                <option>LONG</option>
-                                                <option>BOOL</option>
-                                                <option>INT</option>
-                                                <option>FLOAT</option>
-                                                <option>DOUBLE</option>
-                                            </select>
-                                        </div>
-                                        <button type="button" class="wr-btn wr-btn-horizontal add_event_button"><i class="fa fa-plus"></i></button>
                                     </div>
                                 </div>
+
+                                <br>
+                            {{#if event}}
+                                <button id="add-event-btn" class="wr-btn">Update</button>
+                            {{else}}
+                                <button id="add-event-btn" class="wr-btn">Add</button>
+                            {{/if}}
+
+                                <div id="devicetype-create-success-msg" class="alert hidden" role="alert">
+                                    <i class="icon fw fw-success"></i><span></span>
+                                </div>
                             </div>
-
-                        <br>
-                        {{#if event}}
-                            <button id="add-event-btn" class="wr-btn">Update</button>
-                        {{else}}
-                            <button id="add-event-btn" class="wr-btn">Add</button>
-                        {{/if}}
-
-                        <div id="devicetype-create-success-msg" class="alert hidden" role="alert">
-                            <i class="icon fw fw-success"></i><span></span>
                         </div>
                     </div>
                 </div>
