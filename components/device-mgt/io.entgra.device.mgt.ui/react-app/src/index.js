@@ -31,6 +31,7 @@ import Users from "./pages/Dashboard/Users/Users";
 import Policies from "./pages/Dashboard/Policies/Policies";
 import Roles from "./pages/Dashboard/Roles/Roles";
 import DeviceTypes from "./pages/Dashboard/DeviceTypes/DeviceTypes";
+import DeviceEnroll from "./pages/Dashboard/Devices/DeviceEnroll";
 
 const routes = [
     {
@@ -46,6 +47,11 @@ const routes = [
             {
                 path: '/entgra/devices',
                 component: Devices,
+                exact: true
+            },
+            {
+                path: '/entgra/devices/enroll',
+                component: DeviceEnroll,
                 exact: true
             },
             {
