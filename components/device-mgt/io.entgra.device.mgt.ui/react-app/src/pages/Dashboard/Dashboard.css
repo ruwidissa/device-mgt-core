@@ -35,13 +35,7 @@
 }
 
 .layout .logo-image {
-    position: relative;
-    height: 64px;
-    padding-left: 8px;
-    overflow: hidden;
-    line-height: 64px;
-    background: #001529;
-    transition: all .3s;
+    float: left;
 }
 
 .layout .brand{
@@ -54,7 +48,7 @@
 }
 
 .layout .logo-image img {
-    height: 55px;
+    height: 45px;
     margin-top: 5px;
     margin-left: 16px;
     margin-right: 16px;
