@@ -25,9 +25,11 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterConfiguration;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.AdapterProperty;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.MessageFormat;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.SiddhiExecutionPlan;
+import org.wso2.carbon.device.mgt.jaxrs.exception.ArtifactAlreadyExistsException;
 import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
 import org.wso2.carbon.device.mgt.jaxrs.exception.ErrorDTO;
 import org.wso2.carbon.device.mgt.jaxrs.exception.InvalidExecutionPlanException;
+import org.wso2.carbon.device.mgt.jaxrs.exception.NotFoundException;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.AnalyticsArtifactsManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.Adapter;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventStream;
@@ -52,6 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.validation.Valid;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -76,36 +79,39 @@ public class AnalyticsArtifactsManagementServiceImpl
                                                   @QueryParam("isEdited") boolean isEdited,
                                                   @Valid EventStream stream) {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        EventStreamAdminServiceStub eventStreamAdminServiceStub = null;
         try {
             String streamDefinition = stream.getDefinition();
-            eventStreamAdminServiceStub = DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
-            if (!isEdited) {
-                eventStreamAdminServiceStub.addEventStreamDefinitionAsString(streamDefinition);
+            if (deployStream(id, streamDefinition, isEdited)) {
+                return Response.ok().build();
             } else {
-                if (eventStreamAdminServiceStub.getStreamDetailsForStreamId(id) != null) {
-                    eventStreamAdminServiceStub.editEventStreamDefinitionAsString(streamDefinition, id);
-                }
+                String errMsg = "Failed to create the Stream artifact of id: " + id +
+                                " for tenant domain: " + tenantDomain;
+                return Response.serverError().entity(errMsg).build();
             }
-            return Response.ok().build();
+        } catch (ArtifactAlreadyExistsException e) {
+            String errMsg = "Failed to create Stream artifact for tenant domain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
+        } catch (NotFoundException e) {
+            String errMsg = "Failed to edit Stream artifact for tenant domain: " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(errMsg).build();
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
         } catch (RemoteException e) {
             String errMsg = "Failed to connect with the remote services for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
         } catch (JWTClientException e) {
             String errMsg = "Failed to generate jwt token for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
         } catch (UserStoreException e) {
             String errMsg = "Failed to connect with the user store for tenantDomain: " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
-        } finally {
-            cleanup(eventStreamAdminServiceStub);
+            return Response.serverError().entity(errMsg).build();
         }
     }
 
@@ -116,8 +122,16 @@ public class AnalyticsArtifactsManagementServiceImpl
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         try {
             validateStreamProperties(stream);
-            deployStream(stream);
-            return Response.ok().build();
+            String name = stream.getName();
+            String version = stream.getVersion();
+            if (deployStream(stream)) {
+                return Response.ok().build();
+            } else {
+                String errMsg = String.format("Failed to create the Stream artifact of id: %s:%s " +
+                                              "for tenant domain: %s", name, version, tenantDomain);
+                log.error(errMsg);
+                return Response.serverError().entity(errMsg).build();
+            }
         } catch (BadRequestException e) {
             String errMsg = "Failed to deploy stream due to invalid payload";
             log.error(errMsg, e);
@@ -125,19 +139,58 @@ public class AnalyticsArtifactsManagementServiceImpl
         } catch (AxisFault e) {
             String errMsg = "Failed to create event definitions for tenant " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
         } catch (RemoteException e) {
             String errMsg = "Failed to connect with the remote services for tenant " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
         } catch (JWTClientException e) {
             String errMsg = "Failed to generate jwt token for tenant " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
         } catch (UserStoreException e) {
             String errMsg = "Failed to connect with the user store for tenant " + tenantDomain;
             log.error(errMsg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errMsg).build();
+            return Response.serverError().entity(errMsg).build();
+        }
+    }
+
+    @Override
+    @DELETE
+    @Path("/stream/{name}/{version}/delete")
+    public Response deleteStream(@PathParam("name") String name,
+                                 @PathParam("version") String version) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            if (undeployStream(name, version)) {
+                return Response.ok().build();
+            } else {
+                String errMsg = String.format("Failed to undeploy the Stream artifact of id: %s:%s " +
+                                              "for tenant domain: %s", name, version, tenantDomain);
+                log.error(errMsg);
+                return Response.serverError().entity(errMsg).build();
+            }
+        } catch (NotFoundException e) {
+            String errMsg = String.format("Failed to undeploy Stream with id %s:%s for tenant %s"
+                    , name, version, tenantDomain);
+            log.error(errMsg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(errMsg).build();
+        } catch (AxisFault e) {
+            String errMsg = "Failed to create event definitions for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (RemoteException e) {
+            String errMsg = "Failed to connect with the remote services for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (JWTClientException e) {
+            String errMsg = "Failed to generate jwt token for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (UserStoreException e) {
+            String errMsg = "Failed to connect with the user store for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
         }
     }
 
@@ -215,6 +268,39 @@ public class AnalyticsArtifactsManagementServiceImpl
     }
 
     @Override
+    @DELETE
+    @Path("/receiver/{name}/delete")
+    public Response deleteReceiver(@PathParam("name") String name) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            if (undeployAdapter(name, "Receiver")) {
+                return Response.ok().build();
+            } else {
+                String errMsg = String.format("Failed to undeploy the Receiver artifact of name: %s" +
+                                              "for tenant domain: %s", name, tenantDomain);
+                log.error(errMsg);
+                return Response.serverError().entity(errMsg).build();
+            }
+        } catch (AxisFault e) {
+            String errMsg = "Failed to delete event definitions for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (RemoteException e) {
+            String errMsg = "Failed to connect with the remote services for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (JWTClientException e) {
+            String errMsg = "Failed to generate jwt token for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (UserStoreException e) {
+            String errMsg = "Failed to connect with the user store for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        }
+    }
+
+    @Override
     @POST
     @Path("/publisher/{name}")
     public Response deployEventPublisherAsString(@PathParam("name") String name,
@@ -288,6 +374,39 @@ public class AnalyticsArtifactsManagementServiceImpl
     }
 
     @Override
+    @DELETE
+    @Path("/publisher/{name}/delete")
+    public Response deletePublisher(@PathParam("name") String name) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            if (undeployAdapter(name, "Publisher")) {
+                return Response.ok().build();
+            } else {
+                String errMsg = String.format("Failed to undeploy the Publisher artifact of name: %s" +
+                                              "for tenant domain: %s", name, tenantDomain);
+                log.error(errMsg);
+                return Response.serverError().entity(errMsg).build();
+            }
+        } catch (AxisFault e) {
+            String errMsg = "Failed to delete event definitions for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (RemoteException e) {
+            String errMsg = "Failed to connect with the remote services for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (JWTClientException e) {
+            String errMsg = "Failed to generate jwt token for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (UserStoreException e) {
+            String errMsg = "Failed to connect with the user store for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        }
+    }
+
+    @Override
     @POST
     @Path("/siddhi-script/{name}")
     public Response deploySiddhiExecutableScript(@PathParam("name") String name,
@@ -320,12 +439,77 @@ public class AnalyticsArtifactsManagementServiceImpl
         }
     }
 
+    @Override
+    @DELETE
+    @Path("/siddhi-script/{name}/delete")
+    public Response deleteSiddhiScript(@PathParam("name") String name) {
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        try {
+            undeploySiddhiScript(name);
+            return Response.ok().build();
+        } catch (AxisFault e) {
+            String errMsg = "Failed to delete event definitions for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (RemoteException e) {
+            String errMsg = "Failed to connect with the remote services for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (JWTClientException e) {
+            String errMsg = "Failed to generate jwt token for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        } catch (UserStoreException e) {
+            String errMsg = "Failed to connect with the user store for tenant " + tenantDomain;
+            log.error(errMsg, e);
+            return Response.serverError().entity(errMsg).build();
+        }
+    }
+
     /**
-     * Set data to a Stream dto and deploy dto through a stub
+     * Deploy Stream by passing a string to a stub
+     *
+     * @param streamId         Stream name:version
+     * @param streamDefinition Stream that should be deployed
+     * @param isEdited         Create a new stream or edit an existing one
+     * @return True if stream successfully created and false if not
+     * @throws RemoteException                Exception that may occur during a remote method call
+     * @throws UserStoreException             Exception that may occur during JWT token generation
+     * @throws JWTClientException             Exception that may occur during connecting to client store
+     * @throws NotFoundException              Exception that may occure if stream doesn't exist while editing
+     * @throws ArtifactAlreadyExistsException Exception that may occure if stream exist while creating
+     */
+    private boolean deployStream(String streamId, String streamDefinition, boolean isEdited)
+            throws UserStoreException, JWTClientException, RemoteException, NotFoundException,
+                   ArtifactAlreadyExistsException {
+
+        EventStreamAdminServiceStub eventStreamAdminServiceStub = null;
+        try {
+            eventStreamAdminServiceStub = DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
+            if (isEdited) {
+                validateStreamId(streamId, eventStreamAdminServiceStub, true);
+                return eventStreamAdminServiceStub
+                        .editEventStreamDefinitionAsString(streamDefinition, streamId);
+            } else {
+                validateStreamId(streamId, eventStreamAdminServiceStub, false);
+                return eventStreamAdminServiceStub.addEventStreamDefinitionAsString(streamDefinition);
+            }
+        } finally {
+            cleanup(eventStreamAdminServiceStub);
+        }
+    }
+
+    /**
+     * Deploy Stream by passing a DTO object to a stub
      *
      * @param stream Stream definition
+     * @return True if stream successfully created and false if not
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
+     * @throws NotFoundException  Exception that may occure if stream doesn't exist while editing
      */
-    private void deployStream(EventStream stream)
+    private boolean deployStream(EventStream stream)
             throws RemoteException, UserStoreException, JWTClientException {
         EventStreamAdminServiceStub eventStreamAdminServiceStub = null;
         List<Attribute> metaData = stream.getMetaData();
@@ -350,9 +534,41 @@ public class AnalyticsArtifactsManagementServiceImpl
             }
             String streamId = stream.getName() + ":" + stream.getVersion();
             if (eventStreamAdminServiceStub.getStreamDefinitionDto(streamId) != null) {
-                eventStreamAdminServiceStub.editEventStreamDefinitionAsDto(eventStreamDefinitionDto, streamId);
+                return eventStreamAdminServiceStub
+                        .editEventStreamDefinitionAsDto(eventStreamDefinitionDto, streamId);
             } else {
-                eventStreamAdminServiceStub.addEventStreamDefinitionAsDto(eventStreamDefinitionDto);
+                return eventStreamAdminServiceStub
+                        .addEventStreamDefinitionAsDto(eventStreamDefinitionDto);
+            }
+        } finally {
+            cleanup(eventStreamAdminServiceStub);
+        }
+    }
+
+    /**
+     * Undeploy a stream artifact
+     *
+     * @param name    Stream name
+     * @param version Stream version
+     * @return True if stream successfully created and false if not
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
+     * @throws NotFoundException Exception that may occure if stream doesn't exist
+     */
+    private boolean undeployStream(String name, String version)
+            throws RemoteException, UserStoreException, JWTClientException, NotFoundException {
+        EventStreamAdminServiceStub eventStreamAdminServiceStub = null;
+        try {
+            String streamId = String.format("%s:%s", name, version);
+            eventStreamAdminServiceStub = DeviceMgtAPIUtils.getEventStreamAdminServiceStub();
+            if (eventStreamAdminServiceStub.getStreamDefinitionDto(streamId) != null) {
+                return eventStreamAdminServiceStub.removeEventStreamDefinition(name, version);
+            } else {
+                ErrorDTO error = new ErrorDTO();
+                String msg = String.format("Stream wit id: %s not found", streamId);
+                error.setMessage(msg);
+                throw new NotFoundException(error);
             }
         } finally {
             cleanup(eventStreamAdminServiceStub);
@@ -614,6 +830,37 @@ public class AnalyticsArtifactsManagementServiceImpl
     }
 
     /**
+     * @param name Adapter name
+     * @param type Adapter type(Receiver or Publisher)
+     * @return True if Adapter successfully created and false if not
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
+     */
+    private boolean undeployAdapter(String name, String type)
+            throws RemoteException, UserStoreException, JWTClientException {
+        if (type.equals("Receiver")) {
+            EventReceiverAdminServiceStub eventReceiverAdminServiceStub = null;
+            try {
+                eventReceiverAdminServiceStub = DeviceMgtAPIUtils.getEventReceiverAdminServiceStub();
+                return eventReceiverAdminServiceStub
+                        .undeployActiveEventReceiverConfiguration(name);
+            } finally {
+                cleanup(eventReceiverAdminServiceStub);
+            }
+        } else {
+            EventPublisherAdminServiceStub eventPublisherAdminServiceStub = null;
+            try {
+                eventPublisherAdminServiceStub = DeviceMgtAPIUtils.getEventPublisherAdminServiceStub();
+                return eventPublisherAdminServiceStub
+                        .undeployActiveEventPublisherConfiguration(name);
+            } finally {
+                cleanup(eventPublisherAdminServiceStub);
+            }
+        }
+    }
+
+    /**
      * Publish a siddhi execution plan using a stub
      *
      * @param name     Plan name
@@ -646,9 +893,59 @@ public class AnalyticsArtifactsManagementServiceImpl
     }
 
     /**
+     * Undeploy a Siddhi artifact
+     *
+     * @param name Siddhi script name
+     * @throws RemoteException    Exception that may occur during a remote method call
+     * @throws UserStoreException Exception that may occur during JWT token generation
+     * @throws JWTClientException Exception that may occur during connecting to client store
+     */
+    private void undeploySiddhiScript(String name)
+            throws RemoteException, UserStoreException, JWTClientException {
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = null;
+        try {
+            eventProcessorAdminServiceStub = DeviceMgtAPIUtils.getEventProcessorAdminServiceStub();
+            eventProcessorAdminServiceStub.undeployActiveExecutionPlan(name);
+        } finally {
+            cleanup(eventProcessorAdminServiceStub);
+        }
+    }
+
+    /**
+     * @param streamId                    Stream name:version
+     * @param eventStreamAdminServiceStub stub used to mange Stream artifacts
+     * @param isEdited                    Create a new stream or edit an existing one
+     * @throws ArtifactAlreadyExistsException Exception that may occur if stream exist while creating
+     * @throws RemoteException                Exception that may occur during a remote method call
+     */
+    private void validateStreamId(String streamId,
+                                  EventStreamAdminServiceStub eventStreamAdminServiceStub,
+                                  boolean isEdited)
+            throws ArtifactAlreadyExistsException, RemoteException {
+        EventStreamDefinitionDto eventStreamDefinitionDto = eventStreamAdminServiceStub
+                .getStreamDefinitionDto(streamId);
+        if (isEdited) {
+            if (eventStreamDefinitionDto == null) {
+                String errMsg = String.format("Failed to edit Stream with id: %s. " +
+                                              "Stream not found", streamId);
+                ErrorDTO error = new ErrorDTO();
+                error.setMessage(errMsg);
+                throw new NotFoundException(error);
+            }
+        } else {
+            if (eventStreamDefinitionDto != null) {
+                String errMsg = String.format("Failed to create Stream with id: %s. " +
+                                              "Stream already exists.", streamId);
+                throw new ArtifactAlreadyExistsException(errMsg);
+            }
+        }
+    }
+
+    /**
      * Validate stream properties
      *
      * @param stream EventStream object
+     * @throws BadRequestException Exception that may occur if property attributes invalid
      */
     private void validateStreamProperties(EventStream stream) throws BadRequestException {
         if ((stream.getMetaData() == null || stream.getMetaData().isEmpty()) &&
@@ -665,6 +962,7 @@ public class AnalyticsArtifactsManagementServiceImpl
      * Validate adapter payload attributes
      *
      * @param adapterProperties Adapter payload attributes
+     * @throws BadRequestException Exception that may occur if adapter properties invalid
      */
     private void validateAdapterProperties(List<AdapterProperty> adapterProperties)
             throws BadRequestException {
@@ -684,6 +982,7 @@ public class AnalyticsArtifactsManagementServiceImpl
      * - else continue
      *
      * @param adapterMappingConfiguration Adapter mapping attributes
+     * @throws BadRequestException Exception that may occur if adapter mapping properties invalid
      */
     private void validateAdapterMapping(AdapterMappingConfiguration adapterMappingConfiguration)
             throws BadRequestException {
