@@ -38,6 +38,7 @@ class Dashboard extends React.Component {
         };
         this.config = this.props.context;
         this.Logo = this.config.theme.logo;
+        this.footerText = this.config.theme.footerText;
     }
 
     showMobileNavigationBar = () => {
@@ -217,7 +218,7 @@ class Dashboard extends React.Component {
                         </Switch>
                     </Content>
                     <Footer style={{textAlign: 'center'}}>
-                        ©2019 entgra.io
+                        {this.footerText}
                     </Footer>
                 </Layout>
             </div>
