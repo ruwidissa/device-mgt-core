@@ -45,6 +45,7 @@ class Dashboard extends React.Component {
             }
         };
         this.logo = this.props.context.theme.logo;
+        this.footerText = this.props.context.theme.footerText;
         this.config = this.props.context;
     }
 
@@ -228,7 +229,7 @@ class Dashboard extends React.Component {
                     </Content>
 
                     <Footer style={{textAlign: 'center'}}>
-                        ©2019 entgra.io
+                        {this.footerText}
                     </Footer>
                 </Layout>
             </div>

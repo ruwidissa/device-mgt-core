@@ -1,7 +1,8 @@
 {
   "theme": {
     "logo": "https://entgra.io/assets/images/svg/logo.svg",
-    "primaryColor": "rgb(24, 144, 255)"
+    "primaryColor": "rgb(24, 144, 255)",
+    "footerText": "©2019 entgra.io"
   },
   "serverConfig": {
     "invoker": {
