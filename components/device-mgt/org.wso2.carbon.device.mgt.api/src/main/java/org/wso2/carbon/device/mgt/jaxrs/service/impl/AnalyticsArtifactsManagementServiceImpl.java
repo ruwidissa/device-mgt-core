@@ -780,7 +780,6 @@ public class AnalyticsArtifactsManagementServiceImpl
                 deployPublisherWithoutMapping(publisherName, eventStreamWithVersion, adapterType
                         , eventPublisherAdminServiceStub, basicOutputAdapterPropertyDtos);
             }
-
         } finally {
             cleanup(eventPublisherAdminServiceStub);
         }

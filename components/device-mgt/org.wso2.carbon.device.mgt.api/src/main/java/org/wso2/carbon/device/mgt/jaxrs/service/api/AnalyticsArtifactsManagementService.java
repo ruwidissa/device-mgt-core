@@ -112,10 +112,10 @@ import javax.ws.rs.core.Response;
         description = "This API corresponds to services related to Analytics Artifacts management"
 )
 @Path("/analytics/artifacts")
-@Consumes(MediaType.APPLICATION_JSON)
 public interface AnalyticsArtifactsManagementService {
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/stream/{id}")
     @ApiOperation(
             httpMethod = "POST",
@@ -179,6 +179,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid EventStream stream);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/stream")
     @ApiOperation(
             httpMethod = "POST",
@@ -296,6 +297,7 @@ public interface AnalyticsArtifactsManagementService {
     );
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receiver/{name}")
     @ApiOperation(
             httpMethod = "POST",
@@ -360,6 +362,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid Adapter receiver);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receiver")
     @ApiOperation(
             httpMethod = "POST",
@@ -478,6 +481,7 @@ public interface AnalyticsArtifactsManagementService {
             @PathParam("name") String name);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/publisher/{name}")
     @ApiOperation(
             httpMethod = "POST",
@@ -542,6 +546,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid Adapter publisher);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/publisher")
     @ApiOperation(
             httpMethod = "POST",
