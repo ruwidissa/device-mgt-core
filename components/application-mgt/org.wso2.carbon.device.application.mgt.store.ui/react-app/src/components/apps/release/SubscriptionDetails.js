@@ -194,10 +194,9 @@ class SubscriptionDetails extends React.Component {
             `/admin/subscription/${this.props.uuid}?` + encodedExtraParams,
         ).then(res => {
             if (res.status === 200) {
-                console.log(res.data.data.data);
                 this.setState({
                     loading: false,
-                    data: res.data.data.data
+                    data: res.data.data
                 });
             }
 
@@ -213,6 +212,21 @@ class SubscriptionDetails extends React.Component {
                     loading: false
                 });
             }
+        });
+    };
+
+    handleTableChange = (pagination, filters, sorter) => {
+        const pager = {...this.state.pagination};
+        pager.current = pagination.current;
+        this.setState({
+            pagination: pager,
+        });
+        this.fetch({
+            results: pagination.pageSize,
+            page: pagination.current,
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            ...filters,
         });
     };
 
@@ -240,14 +254,16 @@ class SubscriptionDetails extends React.Component {
                 <Table
                     columns={columns}
                     rowKey={record => (record.device.deviceIdentifier + record.device.enrolmentInfo.owner + record.device.enrolmentInfo.ownership)}
-                    dataSource={data}
+                    dataSource={data.data}
                     pagination={{
                         ...pagination,
                         size: "small",
                         // position: "top",
+                        total: data.recordsTotal,
                         showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
                         // showQuickJumper: true
                     }}
+                    onChange={this.handleTableChange}
                     loading={loading}
                     scroll={{x: 1000}}
                 />

@@ -56,97 +56,91 @@ class Dashboard extends React.Component {
         return (
             <div>
                 <Layout className="layout" >
-
-                    <Sider
-                        trigger={null}
-                        collapsible
-                        collapsed={this.state.isNavBarCollapsed}
-                        collapsedWidth={this.state.mobileWidth}
-                    >
-
-                        <div className="logo-image">
-                            <Link to="/entgra/devices"><img alt="logo" src={this.logo}/></Link>
-                        </div>
-                        <Menu theme="dark" mode="inline" defaultSelectedKeys={['devices']}>
-                           <Menu.Item key="devices">
-                                <Link to="/entgra/devices">
-                                    <Icon type="appstore"/>
-                                    <span>Devices</span>
-                                </Link>
-                            </Menu.Item>
-                            <SubMenu
-                                    key="geo"
-                                    title={
-                                        <span>
-                                        <Icon type="environment"/>
-                                        <span>Geo</span>
-                                        </span>}
-                            >
-                                <Menu.Item key="singleDevice">
-                                    <Link to="/entgra/geo">
-                                    <span>Single Device View</span>
-                                    </Link>
-                                </Menu.Item>
-                                <Menu.Item key="deviceGroup">
-                                    <Link to="#">
-                                        <span>Device Group View</span>
-                                    </Link>
-                                </Menu.Item>
-                            </SubMenu>
-                            <Menu.Item key="reports">
-                                <Link to="/entgra/reports">
-                                    <Icon type="bar-chart"/>
-                                    <span>Reports</span>
-                                </Link>
-                            </Menu.Item>
-                            <Menu.Item key="groups">
-                                <Link to="/entgra/groups">
-                                    <Icon type="deployment-unit"/>
-                                    <span>Groups</span>
-                                </Link>
-                            </Menu.Item>
-                            <Menu.Item key="users">
-                                <Link to="/entgra/users">
-                                    <Icon type="user"/>
-                                    <span>Users</span>
-                                </Link>
-                            </Menu.Item>
-                            <Menu.Item key="policies">
-                                <Link to="/entgra/policies">
-                                    <Icon type="audit"/>
-                                    <span>Policies</span>
-                                </Link>
-                            </Menu.Item>
-                            <Menu.Item key="roles">
-                                <Link to="/entgra/roles">
-                                    <Icon type="book"/>
-                                    <span>Roles</span>
-                                </Link>
-                            </Menu.Item>
-                            <Menu.Item key="devicetypes">
-                                <Link to="/entgra/devicetypes">
-                                    <Icon type="desktop"/>
-                                    <span>Device Types</span>
-                                </Link>
-                            </Menu.Item>
-                        </Menu>
-
-                    </Sider>
-
                     <Layout>
                         <Header style={{background: '#fff', padding: 0}}>
-                            <div className="trigger">
-                            <Icon
-                                type={this.state.isNavBarCollapsed ? 'menu-unfold' : 'menu-fold'}
-                                onClick={this.toggle}
-                            />
-                            </div>
+                                <div className="logo-image">
+                                    <Link to="/entgra/devices"><img alt="logo" src={this.logo}/></Link>
+                                </div>
 
                             <Menu
                                 theme="light"
                                 mode="horizontal"
                                 style={{lineHeight: '64px'}}
                             >
+                                <SubMenu
+                                    key="devices"
+                                    title={
+                                        <span>
+                                        <Icon type="appstore"/>
+                                        <span>Devices</span>
+                                        </span>}
+                                >
+                                    <Menu.Item key="devices">
+                                        <Link to="/entgra/devices">
+                                            <span>View</span>
+                                        </Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="deviceEnroll">
+                                        <Link to="/entgra/devices/enroll">
+                                            <span>Enroll</span>
+                                        </Link>
+                                    </Menu.Item>
+                                </SubMenu>
+                                <SubMenu
+                                    key="geo"
+                                    title={
+                                        <span>
+                                        <Icon type="environment"/>
+                                        <span>Geo</span>
+                                        </span>}
+                                >
+                                    <Menu.Item key="singleDevice">
+                                        <Link to="/entgra/geo">
+                                            <span>Single Device View</span>
+                                        </Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="deviceGroup">
+                                        <Link to="#">
+                                            <span>Device Group View</span>
+                                        </Link>
+                                    </Menu.Item>
+                                </SubMenu>
+                                <Menu.Item key="reports">
+                                    <Link to="/entgra/reports">
+                                        <Icon type="bar-chart"/>
+                                        <span>Reports</span>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="groups">
+                                    <Link to="/entgra/groups">
+                                        <Icon type="deployment-unit"/>
+                                        <span>Groups</span>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="users">
+                                    <Link to="/entgra/users">
+                                        <Icon type="user"/>
+                                        <span>Users</span>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="policies">
+                                    <Link to="/entgra/policies">
+                                        <Icon type="audit"/>
+                                        <span>Policies</span>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="roles">
+                                    <Link to="/entgra/roles">
+                                        <Icon type="book"/>
+                                        <span>Roles</span>
+                                    </Link>
+                                </Menu.Item>
+                                <Menu.Item key="devicetypes">
+                                    <Link to="/entgra/devicetypes">
+                                        <Icon type="desktop"/>
+                                        <span>Device Types</span>
+                                    </Link>
+                                </Menu.Item>
                                 <Menu.Item key="trigger">
                                 </Menu.Item>
                                 <SubMenu className="profile"
@@ -161,7 +155,7 @@ class Dashboard extends React.Component {
                             </Menu>
                         </Header>
 
-                        <Content style={{marginTop: 2}}>
+                        <Content style={{marginTop: 10}}>
                             <Switch>
                                 <Redirect exact from="/entgra" to="/entgra/devices"/>
                                 {this.state.routes.map((route) => (
