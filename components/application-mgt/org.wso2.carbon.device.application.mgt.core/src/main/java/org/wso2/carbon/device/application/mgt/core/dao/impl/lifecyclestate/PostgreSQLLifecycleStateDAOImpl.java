@@ -15,23 +15,16 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.common.spi;
+package org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate;
 
-import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-
-import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * This implementation populates device type plugin management service.
+ * This handles App Lifecycle operations which are specific to MSSQL.
  */
-public interface DeviceTypePluginService {
+public class PostgreSQLLifecycleStateDAOImpl extends GenericLifecycleStateDAOImpl{
 
-    /**
-     * To get Enrollment QR code against Ownership type
-     *
-     * @return QR code Map, Key as Ownership Type and Value as QR string
-     * @throws DeviceManagementException if error occurred while generating the QR String for Ownership
-     */
-    Map<EnrolmentInfo.OwnerShip, String> getEnrollmentQRCode() throws DeviceManagementException;
+    private static final Log log = LogFactory.getLog(PostgreSQLLifecycleStateDAOImpl.class);
+
 }
