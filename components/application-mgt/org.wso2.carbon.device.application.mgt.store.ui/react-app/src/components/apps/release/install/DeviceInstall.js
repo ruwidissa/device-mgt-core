@@ -158,7 +158,7 @@ class DeviceInstall extends React.Component {
                 const pagination = {...this.state.pagination};
                 this.setState({
                     loading: false,
-                    data: res.data.data.devices,
+                    data: res.data.data,
                     pagination,
                 });
             }
@@ -224,11 +224,12 @@ class DeviceInstall extends React.Component {
                     style={{paddingTop: 20}}
                     columns={columns}
                     rowKey={record => record.deviceIdentifier}
-                    dataSource={data}
+                    dataSource={data.devices}
                     pagination={{
                         ...pagination,
                         size: "small",
                         // position: "top",
+                        total: data.count,
                         showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} devices`
                         // showQuickJumper: true
                     }}
