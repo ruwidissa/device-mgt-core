@@ -56,6 +56,7 @@ public class OperationManagementDAOFactory {
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MSSQL:
                     return new ConfigOperationMSSQLDAOImpl();
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new ConfigOperationPostgresDAOImpl();
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_ORACLE:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2:
                 case DeviceManagementConstants.DataBaseTypes.DB_TYPE_MYSQL:
