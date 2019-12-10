@@ -26,10 +26,13 @@ import org.wso2.carbon.device.application.mgt.core.dao.LifecycleStateDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.ReviewDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.application.PostgreSQLApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.SQLServerApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.OracleApplicationReleaseDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.PostgreSQLApplicationReleaseDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.SQLServerApplicationReleaseDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.OracleLifecycleStateDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.PostgreSQLLifecycleStateDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.SQLServerLifecycleStateDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.review.GenericReviewDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.GenericApplicationDAOImpl;
@@ -37,12 +40,15 @@ import org.wso2.carbon.device.application.mgt.core.dao.impl.application.release.
 import org.wso2.carbon.device.application.mgt.core.dao.impl.application.OracleApplicationDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.lifecyclestate.GenericLifecycleStateDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.review.OracleReviewDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.review.PostgreSQLReviewDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.review.SQLServerReviewDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.GenericSubscriptionDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.OracleSubscriptionDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.PostgreSQLSubscriptionDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.subscription.SQLServerSubscriptionDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.GenericVisibilityDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.OracleVisibilityDAOImpl;
+import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.PostgreSQLVisibilityDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.dao.impl.visibility.SQLServerVisibilityDAOImpl;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.application.mgt.core.util.Constants;
@@ -81,8 +87,9 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericApplicationDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLApplicationDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_MSSQL:
                     return new SQLServerApplicationDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
@@ -99,8 +106,9 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericLifecycleStateDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLLifecycleStateDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_MSSQL:
                     return new SQLServerLifecycleStateDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
@@ -122,8 +130,9 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericApplicationReleaseDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLApplicationReleaseDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new OracleApplicationReleaseDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_MSSQL:
@@ -144,8 +153,9 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericVisibilityDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLVisibilityDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new OracleVisibilityDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_MSSQL:
@@ -166,8 +176,9 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
                 case Constants.DataBaseTypes.DB_TYPE_H2:
                 case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                     return new GenericSubscriptionDAOImpl();
+                case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                    return new PostgreSQLSubscriptionDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                     return new OracleSubscriptionDAOImpl();
                 case Constants.DataBaseTypes.DB_TYPE_MSSQL:
@@ -184,8 +195,9 @@ public class ApplicationManagementDAOFactory {
             switch (databaseEngine) {
             case Constants.DataBaseTypes.DB_TYPE_H2:
             case Constants.DataBaseTypes.DB_TYPE_MYSQL:
-            case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
                 return new GenericReviewDAOImpl();
+            case Constants.DataBaseTypes.DB_TYPE_POSTGRESQL:
+                return new PostgreSQLReviewDAOImpl();
             case Constants.DataBaseTypes.DB_TYPE_ORACLE:
                 return new OracleReviewDAOImpl();
             case Constants.DataBaseTypes.DB_TYPE_MSSQL:
