@@ -26,11 +26,29 @@
     <jaxrs:server id="services-10" address="/">
         <jaxrs:serviceBeans>
             <ref bean="configManagementService"/>
+            <ref bean="swaggerResource"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <ref bean="jsonProvider"/>
+            <ref bean="swaggerWriter"/>
         </jaxrs:providers>
     </jaxrs:server>
+
+    <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
+    <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
+
+    <bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
+        <property name="resourcePackage" value="io.entgra.carbon.device.mgt.config.jaxrs"/>
+        <property name="version" value="1.0"/>
+        <property name="host" value="localhost:9443"/>
+        <property name="schemes" value="https" />
+        <property name="basePath" value="/api/device-mgt-config/v1.0"/>
+        <property name="title" value="Device Management Dynamic COnfiguration Service API Definitions"/>
+        <property name="contact" value="dev@entgra.io"/>
+        <property name="license" value="Apache 2.0"/>
+        <property name="licenseUrl" value="http://www.apache.org/licenses/LICENSE-2.0.html"/>
+        <property name="scan" value="true"/>
+    </bean>
 
     <bean id="configManagementService"
           class="io.entgra.carbon.device.mgt.config.jaxrs.service.impl.DeviceManagementConfigServiceImpl"/>
