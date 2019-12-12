@@ -32,6 +32,7 @@ import Policies from "./pages/Dashboard/Policies/Policies";
 import Roles from "./pages/Dashboard/Roles/Roles";
 import DeviceTypes from "./pages/Dashboard/DeviceTypes/DeviceTypes";
 import DeviceEnroll from "./pages/Dashboard/Devices/DeviceEnroll";
+import AddNewPolicy from "./pages/Dashboard/Policies/AddNewPolicy";
 
 const routes = [
     {
@@ -77,6 +78,11 @@ const routes = [
             {
                 path: '/entgra/policies',
                 component: Policies,
+                exact: true
+            },
+            {
+                path: '/entgra/policy/add',
+                component: AddNewPolicy,
                 exact: true
             },
             {

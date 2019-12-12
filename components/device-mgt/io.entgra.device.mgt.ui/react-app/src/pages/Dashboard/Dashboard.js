@@ -123,12 +123,25 @@ class Dashboard extends React.Component {
                                         <span>Users</span>
                                     </Link>
                                 </Menu.Item>
-                                <Menu.Item key="policies">
-                                    <Link to="/entgra/policies">
+                                <SubMenu
+                                    key="policies"
+                                    title={
+                                        <span>
                                         <Icon type="audit"/>
                                         <span>Policies</span>
-                                    </Link>
-                                </Menu.Item>
+                                        </span>}
+                                >
+                                    <Menu.Item key="policiesList">
+                                        <Link to="/entgra/policies">
+                                            <span>View</span>
+                                        </Link>
+                                    </Menu.Item>
+                                    <Menu.Item key="addPolicy">
+                                        <Link to="/entgra/policy/add">
+                                            <span>Add New Policy</span>
+                                        </Link>
+                                    </Menu.Item>
+                                </SubMenu>
                                 <Menu.Item key="roles">
                                     <Link to="/entgra/roles">
                                         <Icon type="book"/>
