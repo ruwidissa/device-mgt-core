@@ -1,0 +1,29 @@
+.ant-tabs-content {
+    /*height: 120px;*/
+    margin-top: -16px;
+}
+
+.ant-tabs-content > .ant-tabs-tabpane {
+    /*background: #000066;*/
+    /*color: #ffffff;*/
+    /*padding: 16px;*/
+}
+
+.ant-tabs-bar {
+    border-color: #3498db;
+}
+
+.ant-tabs-bar .ant-tabs-tab {
+    border-color: #3498db;
+    background: transparent;
+    /*color: #cc0000;*/
+
+}
+
+.ant-tabs-bar .ant-tabs-tab-active {
+
+    /*border-color: #1b3bcc;*/
+    /*background: #3498db;*/
+    /*color: #cc0000;*/
+
+}

@@ -18,25 +18,18 @@
 
 import React from "react";
 import axios from "axios";
-import {message, notification, Table, Typography} from "antd";
+import {Card, Col, Icon, message, notification, Row, Typography} from "antd";
 import TimeAgo from 'javascript-time-ago'
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
-import GroupActions from "./GroupActions";
-import AddGroup from "./AddGroup";
 
 const {Text} = Typography;
 
 let config = null;
 let apiUrl;
 
-const getTimeAgo = (time) => {
-    const timeAgo = new TimeAgo('en-US');
-    return timeAgo.format(time);
-};
-
-class GroupsTable extends React.Component {
+class SelectPlatform extends React.Component {
     constructor(props) {
         super(props);
         config =  this.props.context;
@@ -49,52 +42,17 @@ class GroupsTable extends React.Component {
         };
     }
 
-    columns = [
-        {
-            title: 'Group Name',
-            dataIndex: 'name',
-            width: 100,
-        },
-        {
-            title: 'Owner',
-            dataIndex: 'owner',
-            key: 'owner',
-            // render: enrolmentInfo => enrolmentInfo.owner
-            // todo add filtering options
-        },
-        {
-            title: 'Description',
-            dataIndex: 'description',
-            key: 'description',
-            //  render: enrolmentInfo => enrolmentInfo.ownership
-            // todo add filtering options
-        },
-        {
-            title: 'Action',
-            dataIndex: 'id',
-            key: 'action',
-            render: (id, row) => (
-                <span>
-                    <GroupActions data={row} fetchGroups={this.fetchGroups}/>
-                </span>
-            ),
-        },
-    ];
-
-    rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            this.setState({
-                selectedRows: selectedRows
-            })
-        }
-    };
-
     componentDidMount() {
-        this.fetchGroups();
+        this.fetchUsers();
     }
 
+    onClickCard = (data) =>{
+        console.log(data);
+        this.props.onClickType();
+    };
+
     //fetch data from api
-    fetchGroups = (params = {}) => {
+    fetchUsers = (params = {}) => {
         const config = this.props.context;
         this.setState({loading: true});
 
@@ -110,8 +68,8 @@ class GroupsTable extends React.Component {
             .map(key => key + '=' + extraParams[key]).join('&');
 
         apiUrl = window.location.origin + config.serverConfig.invoker.uri +
-                config.serverConfig.invoker.deviceMgt +
-                "/admin/groups?" + encodedExtraParams;
+            config.serverConfig.invoker.deviceMgt +
+            "/device-types";
 
         //send request to the invokerss
         axios.get(apiUrl).then(res => {
@@ -119,7 +77,7 @@ class GroupsTable extends React.Component {
                 const pagination = {...this.state.pagination};
                 this.setState({
                     loading: false,
-                    data: res.data.data,
+                    data: JSON.parse(res.data.data),
                     pagination,
                 });
             }
@@ -133,7 +91,7 @@ class GroupsTable extends React.Component {
                 notification["error"]({
                     message: "There was a problem",
                     duration: 0,
-                    description:"Error occurred while trying to load device groups.",
+                    description:"Error occurred while trying to load device types.",
                 });
             }
 
@@ -141,15 +99,13 @@ class GroupsTable extends React.Component {
         });
     };
 
-
-
     handleTableChange = (pagination, filters, sorter) => {
         const pager = {...this.state.pagination};
         pager.current = pagination.current;
         this.setState({
             pagination: pager,
         });
-        this.fetchGroups({
+        this.fetch({
             results: pagination.pageSize,
             page: pagination.current,
             sortField: sorter.field,
@@ -161,34 +117,32 @@ class GroupsTable extends React.Component {
     render() {
 
         const {data, pagination, loading, selectedRows} = this.state;
+        const { Meta } = Card;
+        const itemCard = data.map((data) =>
+            <Col span={5} key={data.id}>
+                <Card
+                    size="default"
+                    style={{ width: 150 }}
+                    bordered={true}
+                    onClick={this.onClickCard}
+                    cover={<Icon type="android" key="device-types" style={{color:'#ffffff',
+                        backgroundColor:'#4b92db', fontSize: '100px', padding:'20px'}}/>}
+                >
+                    <Meta
+                        title={data.name}
+                    />
 
+                </Card>
+            </Col>
+        );
         return (
             <div>
-                <div style={{background: '#f0f2f5'}}>
-                    <AddGroup fetchGroups={this.fetchGroups} style={{marginBottom:"10px"}}/>
-                </div>
-                <div>
-                    <Table
-                        columns={this.columns}
-                        rowKey={record => (record.id)}
-                        dataSource={data.deviceGroups}
-                        pagination={{
-                            ...pagination,
-                            size: "small",
-                            // position: "top",
-                            total: data.count,
-                            pageSize: 2,
-                            showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} groups`
-                            // showQuickJumper: true
-                        }}
-                        loading={loading}
-                        onChange={this.handleTableChange}
-                        rowSelection={this.rowSelection}
-                    />
-                </div>
+                <Row gutter={16}>
+                    {itemCard}
+                </Row>
             </div>
         );
     }
 }
 
-export default withConfigContext(GroupsTable);
+export default withConfigContext(SelectPlatform);
