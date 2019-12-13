@@ -3,6 +3,7 @@ import {Button, Form, Row, Col, Card, Steps, Input, message, Modal, notification
 import axios from "axios";
 import {withConfigContext} from "../../context/ConfigContext";
 import DeviceType from "../Devices/DeviceType";
+import SelectPlatform from "./SelectPlatform";
 import ConfigureProfile from "./ConfigureProfile";
 const {Step} = Steps;
 
@@ -22,6 +23,16 @@ class AddPolicy extends React.Component {
             current: 1,
         })
     };
+
+    next() {
+        const current = this.state.current + 1;
+        this.setState({ current });
+    }
+
+    prev() {
+        const current = this.state.current - 1;
+        this.setState({ current });
+    }
 
     openAddDeviceModal = () =>{
         this.setState({
@@ -46,10 +57,9 @@ class AddPolicy extends React.Component {
                         </Steps>
                     </Col>
                     <Col span={16} offset={4}>
-
                         <Card style={{marginTop: 24}}>
                             <div style={{display: (current === 0 ? 'unset' : 'none')}}>
-                                <DeviceType onClickType={this.onClickType}/>
+                                <SelectPlatform onClickType={this.onClickType}/>
                             </div>
                             <div style={{display: (current === 1 ? 'unset' : 'none')}}>
                                 <ConfigureProfile/>
@@ -64,7 +74,27 @@ class AddPolicy extends React.Component {
                             </div>
                         </Card>
                     </Col>
+                    <Col span={16} offset={4}>
+                        <div style={{marginTop: 24}}>
+                            {current > 0 && (
+                                <Button style={{ marginRight: 8 }} onClick={() => this.prev()}>
+                                    Previous
+                                </Button>
+                            )}
+                            {current < 5 && current > 0 && (
+                                <Button type="primary" onClick={() => this.next()}>
+                                    Next
+                                </Button>
+                            )}
+                            {current === 5 && (
+                                <Button type="primary">
+                                    Done
+                                </Button>
+                            )}
+                        </div>
+                    </Col>
                 </Row>
+
 
             </div>
         );
