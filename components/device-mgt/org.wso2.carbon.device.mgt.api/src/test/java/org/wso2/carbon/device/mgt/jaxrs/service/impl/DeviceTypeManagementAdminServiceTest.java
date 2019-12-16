@@ -216,4 +216,33 @@ public class DeviceTypeManagementAdminServiceTest {
                 "The Response Status code should be 500.");
         Mockito.reset(deviceManagementProviderService);
     }
+
+    @Test(description = "Test delete device type with correct request.")
+    public void testDeleteDeviceType() {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        Response response = this.deviceTypeManagementAdminService.deleteDeviceType(TEST_DEVICE_TYPE);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+    }
+
+    @Test(description = "Test delete device type when unavailable.")
+    public void testDeleteNonExistingDeviceType() throws DeviceManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        Mockito.when(deviceManagementProviderService.getDeviceType(Mockito.anyString())).thenReturn(null);
+        Response response = this.deviceTypeManagementAdminService.deleteDeviceType(TEST_DEVICE_TYPE);
+        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
+        Mockito.reset(this.deviceManagementProviderService);
+    }
+
+    @Test(description = "Test delete device type when DeviceManagementException is thrown.")
+    public void testDeleteDeviceTypeWithException() throws DeviceManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        Mockito.when(this.deviceManagementProviderService.deleteDeviceType(TEST_DEVICE_TYPE))
+                .thenThrow(new DeviceManagementException());
+        Response response = this.deviceTypeManagementAdminService.deleteDeviceType(TEST_DEVICE_TYPE);
+        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        Mockito.reset(this.deviceManagementProviderService);
+    }
 }

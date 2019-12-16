@@ -611,7 +611,7 @@ public interface DeviceManagementProviderService {
 
     boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
 
-    boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException;
+    boolean deleteDevices(List<String> deviceIdentifiers, boolean transactionAlreadyExists) throws DeviceManagementException, InvalidDeviceException;
 
     boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException;
 
@@ -708,7 +708,7 @@ public interface DeviceManagementProviderService {
      */
     boolean changeDeviceStatus(DeviceIdentifier deviceIdentifier, EnrolmentInfo.Status newStatus)
             throws DeviceManagementException;
-    
+
     /**
      * This will handle add and update of device type services.
      * @param deviceManagementService
@@ -771,6 +771,16 @@ public interface DeviceManagementProviderService {
 
     DeviceTypeVersion getDeviceTypeVersion(String deviceTypeName, String version) throws
             DeviceManagementException;
+
+    /**
+     * Permanently delete a device type
+     *
+     * @param deviceTypeName device type name
+     * @return True if device type successfully removed
+     * @throws DeviceManagementException
+     */
+    boolean deleteDeviceType(String deviceTypeName) throws DeviceManagementException;
+
     /**
      * Retrieves a list of configurations of a specific device
      * using the device's properties

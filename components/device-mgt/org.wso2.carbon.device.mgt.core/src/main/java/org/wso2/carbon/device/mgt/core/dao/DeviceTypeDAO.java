@@ -128,4 +128,13 @@ public interface DeviceTypeDAO {
 
 	DeviceTypeVersion getDeviceTypeVersion(int deviceTypeId, String version)
 			throws DeviceManagementDAOException;
+
+	/**
+	 * Permanently remove a device type
+	 *
+	 * @param tenantId   current tenant's id
+	 * @param deviceTypeId device type id
+	 * @throws DeviceManagementDAOException Might occur while executing database queries
+	 */
+	void deleteDeviceType(int tenantId, int deviceTypeId) throws DeviceManagementDAOException;
 }

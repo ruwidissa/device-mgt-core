@@ -169,7 +169,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
         DeviceManagementProviderService deviceManagementProviderService =
                 DeviceMgtAPIUtils.getDeviceManagementService();
         try {
-            if (!deviceManagementProviderService.deleteDevices(deviceIdentifiers)) {
+            if (!deviceManagementProviderService.deleteDevices(deviceIdentifiers, false)) {
                 String msg = "Found un-deployed device type.";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(

@@ -43,6 +43,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceTypeManagementAdminService;
@@ -63,16 +64,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Path("/admin/device-types")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagementAdminService {
 
     private static final Log log = LogFactory.getLog(DeviceTypeManagementAdminServiceImpl.class);
     private static final String DEVICETYPE_REGEX_PATTERN = "^[^ /]+$";
     private static final Pattern patternMatcher = Pattern.compile(DEVICETYPE_REGEX_PATTERN);
 
-    @GET
     @Override
+    @GET
     public Response getDeviceTypes() {
         try {
             List<DeviceType> deviceTypes = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceTypes();
@@ -188,8 +187,8 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
     }
 
     @Override
-    @Path("{deviceTypeName}/versions")
     @POST
+    @Path("{deviceTypeName}/versions")
     public Response addDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
                                          DeviceTypeVersionWrapper versionWrapper) {
         if (versionWrapper != null && deviceTypeName != null && !deviceTypeName.isEmpty()
@@ -229,9 +228,9 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
         }
     }
 
+    @Override
     @GET
     @Path("/{deviceTypeName}/versions")
-    @Override
     public Response getDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName) {
         try {
             List<DeviceTypeVersion> deviceTypes = DeviceMgtAPIUtils.getDeviceManagementService()
@@ -244,8 +243,8 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
         }
     }
 
-    @PUT
     @Override
+    @PUT
     @Path("{deviceTypeName}/versions")
     public Response updateDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
                                             DeviceTypeVersionWrapper deviceTypeVersion) {
@@ -284,8 +283,8 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
         }
     }
 
-    @DELETE
     @Override
+    @DELETE
     @Path("{deviceTypeName}/versions/{version}")
     public Response deleteDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
                                             @PathParam("version") String version) {
@@ -314,6 +313,27 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while updating device type: " + deviceTypeVersion.getDeviceTypeId() ;
+            log.error(msg, e);
+            return Response.serverError().entity(msg).build();
+        }
+    }
+
+    @Override
+    @DELETE
+    @Path("{deviceType}/delete")
+    public Response deleteDeviceType(@PathParam("deviceType") String deviceType) {
+        try {
+            DeviceManagementProviderService deviceManagementProviderService =
+                    DeviceMgtAPIUtils.getDeviceManagementService();
+            if (!deviceManagementProviderService.deleteDeviceType(deviceType)){
+                String msg = "Error occurred while deleting device of type: " + deviceType;
+                log.error(msg);
+                return Response.serverError().entity(msg).build();
+            }
+            return Response.status(Response.Status.ACCEPTED).entity(
+                    "Device of type: " + deviceType + " permanently deleted.").build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while deleting device of type: " + deviceType;
             log.error(msg, e);
             return Response.serverError().entity(msg).build();
         }
