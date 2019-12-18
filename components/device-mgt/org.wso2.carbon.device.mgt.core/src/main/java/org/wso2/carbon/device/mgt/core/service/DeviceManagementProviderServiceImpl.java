@@ -527,7 +527,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean deleteDevices(List<String> deviceIdentifiers, boolean transactionAlreadyExists) throws DeviceManagementException,
+    public boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException,
                                                                         InvalidDeviceException {
         if (deviceIdentifiers == null || deviceIdentifiers.isEmpty()) {
             String msg = "Required values of device identifiers are not set to permanently delete device/s.";
@@ -542,12 +542,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         List<DeviceCacheKey> deviceCacheKeyList = new ArrayList<>();
         int tenantId = this.getTenantId();
         try {
-            DeviceManagementDAOFactory.beginTransaction();
+            DeviceManagementDAOFactory.openConnection();
             List<Device> existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+            DeviceManagementDAOFactory.closeConnection();
             DeviceCacheKey deviceCacheKey;
             for (Device device : existingDevices) {
                 if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
-                    DeviceManagementDAOFactory.rollbackTransaction();
                     String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
                                  + " is not dis-enrolled to permanently delete the device";
                     log.error(msg);
@@ -583,6 +583,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             if (log.isDebugEnabled()) {
                 log.debug("Permanently deleting the details of devices : " + validDeviceIdentifiers);
             }
+            DeviceManagementDAOFactory.beginTransaction();
             //deleting device from the core
             deviceDAO.deleteDevices(validDeviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
             for (Map.Entry<String, DeviceManager> entry : deviceManagerMap.entrySet()) {
@@ -605,6 +606,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 log.debug("Successfully permanently deleted the details of devices : " + validDeviceIdentifiers);
             }
             return true;
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction";
             log.error(msg, e);
