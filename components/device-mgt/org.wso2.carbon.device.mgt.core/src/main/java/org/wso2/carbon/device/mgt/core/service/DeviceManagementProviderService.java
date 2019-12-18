@@ -611,7 +611,7 @@ public interface DeviceManagementProviderService {
 
     boolean disenrollDevice(DeviceIdentifier deviceId) throws DeviceManagementException;
 
-    boolean deleteDevices(List<String> deviceIdentifiers, boolean transactionAlreadyExists) throws DeviceManagementException, InvalidDeviceException;
+    boolean deleteDevices(List<String> deviceIdentifiers) throws DeviceManagementException, InvalidDeviceException;
 
     boolean isEnrolled(DeviceIdentifier deviceId) throws DeviceManagementException;
 
@@ -773,11 +773,11 @@ public interface DeviceManagementProviderService {
             DeviceManagementException;
 
     /**
-     * Permanently delete a device type
+     * Permanently delete a device type with all it's devices
      *
      * @param deviceTypeName device type name
      * @return True if device type successfully removed
-     * @throws DeviceManagementException
+     * @throws DeviceManagementException Will be thrown if any service level or DAO level error occurs
      */
     boolean deleteDeviceType(String deviceTypeName) throws DeviceManagementException;
 

@@ -3630,22 +3630,23 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     }
                     deviceIdentifiers.add(device.getDeviceIdentifier());
                 }
+                DeviceManagementDAOFactory.commitTransaction();
+                DeviceManagementDAOFactory.closeConnection();
                 // delete devices
-                deleteDevices(deviceIdentifiers, true);
+                deleteDevices(deviceIdentifiers);
+                DeviceManagementDAOFactory.beginTransaction();
             }
             // remove device type versions
-            deviceTypeVersions = deviceTypeDAO.getDeviceTypeVersions(
-                    deviceTypeObj.getId(), deviceTypeName);
+            deviceTypeVersions = deviceTypeDAO.getDeviceTypeVersions(deviceTypeObj.getId(), deviceTypeName);
             if (deviceTypeVersions.isEmpty()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Device type: " + deviceTypeName + "doesn't have any type versions");
+                    log.debug("Device of type: " + deviceTypeName + "doesn't have any type versions");
                 }
             } else {
                 for (DeviceTypeVersion deviceTypeVersion : deviceTypeVersions) {
                     result = deviceTypeDAO.isDeviceTypeVersionModifiable(deviceTypeObj.getId()
                             , deviceTypeVersion.getVersionName(), tenantId);
                     if (!result) {
-                        DeviceManagementDAOFactory.rollbackTransaction();
                         String msg = "Device type of: " + deviceTypeName + "is unauthorized to modify " +
                                      "version";
                         log.error(msg);
@@ -3653,7 +3654,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     }
                     result = deviceTypeDAO.updateDeviceTypeVersion(deviceTypeVersion);
                     if (!result) {
-                        DeviceManagementDAOFactory.rollbackTransaction();
                         String msg = "Could not delete the version of device type: " +
                                      deviceTypeName;
                         log.error(msg);
