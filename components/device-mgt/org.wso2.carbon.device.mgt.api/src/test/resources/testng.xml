@@ -32,7 +32,6 @@
             <class name="org.wso2.carbon.device.mgt.jaxrs.service.impl.NotificationManagementServiceImplTest"/>
             <class name="org.wso2.carbon.device.mgt.jaxrs.service.impl.ConfigurationServiceImplTest"/>
             <class name="org.wso2.carbon.device.mgt.jaxrs.service.impl.GroupManagementServiceImplTest"/>
-            <class name="org.wso2.carbon.device.mgt.jaxrs.service.impl.AnalyticsArtifactsManagementServiceImplTest"/>
         </classes>
     </test>
 </suite>
