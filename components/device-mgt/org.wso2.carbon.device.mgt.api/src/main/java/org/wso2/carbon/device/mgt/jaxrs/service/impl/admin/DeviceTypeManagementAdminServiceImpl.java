@@ -320,20 +320,27 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @DELETE
-    @Path("{deviceType}/delete")
-    public Response deleteDeviceType(@PathParam("deviceType") String deviceType) {
+    @Path("{deviceTypeName}/delete")
+    public Response deleteDeviceType(@PathParam("deviceTypeName") String deviceTypeName) {
         try {
             DeviceManagementProviderService deviceManagementProviderService =
                     DeviceMgtAPIUtils.getDeviceManagementService();
-            if (!deviceManagementProviderService.deleteDeviceType(deviceType)){
-                String msg = "Error occurred while deleting device of type: " + deviceType;
+            DeviceType deviceType = deviceManagementProviderService.getDeviceType(deviceTypeName);
+            if (deviceType == null) {
+                String msg = "Error, device of type: " + deviceTypeName + " does not exist";
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            if (!deviceManagementProviderService.deleteDeviceType(deviceTypeName, deviceType)){
+                String msg = "Error occurred while deleting device of type: " + deviceTypeName;
                 log.error(msg);
                 return Response.serverError().entity(msg).build();
             }
-            return Response.status(Response.Status.ACCEPTED).entity(
-                    "Device of type: " + deviceType + " permanently deleted.").build();
+            return Response.status(Response.Status.ACCEPTED)
+                    .entity("Device of type: " + deviceTypeName + " permanently deleted.")
+                    .build();
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while deleting device of type: " + deviceType;
+            String msg = "Error occurred while deleting device of type: " + deviceTypeName;
             log.error(msg, e);
             return Response.serverError().entity(msg).build();
         }

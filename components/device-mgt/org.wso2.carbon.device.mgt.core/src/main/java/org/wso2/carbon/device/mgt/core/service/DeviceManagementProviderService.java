@@ -775,11 +775,12 @@ public interface DeviceManagementProviderService {
     /**
      * Permanently delete a device type with all it's devices
      *
-     * @param deviceTypeName device type name
+     * @param deviceTypeName Device type name
+     * @param deviceType Device type object
      * @return True if device type successfully removed
      * @throws DeviceManagementException Will be thrown if any service level or DAO level error occurs
      */
-    boolean deleteDeviceType(String deviceTypeName) throws DeviceManagementException;
+    boolean deleteDeviceType(String deviceTypeName, DeviceType deviceType) throws DeviceManagementException;
 
     /**
      * Retrieves a list of configurations of a specific device

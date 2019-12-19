@@ -594,7 +594,7 @@ public interface DeviceTypeManagementAdminService {
 
 
     @DELETE
-    @Path("{deviceType}/delete")
+    @Path("{deviceTypeName}/delete")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete device type.",
@@ -628,8 +628,8 @@ public interface DeviceTypeManagementAdminService {
     })
     Response deleteDeviceType(
             @ApiParam(
-                    name = "deviceType",
+                    name = "deviceTypeName",
                     value = "Device type name.",
                     required = true)
-            @PathParam("deviceType") String deviceType);
+            @PathParam("deviceTypeName") String deviceTypeName);
 }

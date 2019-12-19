@@ -3589,25 +3589,20 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public boolean deleteDeviceType(String deviceTypeName) throws DeviceManagementException {
-        int tenantId = getTenantId();
+    public boolean deleteDeviceType(String deviceTypeName, DeviceType deviceType)
+            throws DeviceManagementException {
         List<String> deviceIdentifiers;
         List<DeviceTypeVersion> deviceTypeVersions;
         boolean result;
+        int tenantId = getTenantId();
 
         try {
-            if (deviceTypeName.isEmpty()) {
+            if (deviceTypeName.isEmpty() || deviceType == null) {
                 String msg = "Error, device type cannot be null or empty";
                 log.error(msg);
                 return false;
             }
             DeviceManagementDAOFactory.beginTransaction();
-            DeviceType deviceTypeObj = deviceTypeDAO.getDeviceType(deviceTypeName, tenantId);
-            if (deviceTypeObj == null) {
-                String msg = "Error, device of type: " + deviceTypeName + " does not exist";
-                log.error(msg);
-                return false;
-            }
             List<Device> devices = deviceDAO.getDevices(deviceTypeName, this.getTenantId());
             if (devices.isEmpty()) {
                 if (log.isDebugEnabled()) {
@@ -3637,14 +3632,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 DeviceManagementDAOFactory.beginTransaction();
             }
             // remove device type versions
-            deviceTypeVersions = deviceTypeDAO.getDeviceTypeVersions(deviceTypeObj.getId(), deviceTypeName);
+            deviceTypeVersions = deviceTypeDAO.getDeviceTypeVersions(deviceType.getId(), deviceTypeName);
             if (deviceTypeVersions.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Device of type: " + deviceTypeName + "doesn't have any type versions");
                 }
             } else {
                 for (DeviceTypeVersion deviceTypeVersion : deviceTypeVersions) {
-                    result = deviceTypeDAO.isDeviceTypeVersionModifiable(deviceTypeObj.getId()
+                    result = deviceTypeDAO.isDeviceTypeVersionModifiable(deviceType.getId()
                             , deviceTypeVersion.getVersionName(), tenantId);
                     if (!result) {
                         String msg = "Device type of: " + deviceTypeName + "is unauthorized to modify " +
@@ -3662,7 +3657,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             }
             // delete device type
-            deviceTypeDAO.deleteDeviceType(tenantId, deviceTypeObj.getId());
+            deviceTypeDAO.deleteDeviceType(tenantId, deviceType.getId());
             DeviceManagementDAOFactory.commitTransaction();
         } catch (InvalidDeviceException e) {
             String msg = "Error occurred while deleting devices of type: " + deviceTypeName;
