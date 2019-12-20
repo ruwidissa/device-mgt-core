@@ -59,13 +59,15 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
     private OAuthApplication oAuthApplication;
     private static Map<String, AccessTokenInfo> tenantUserTokenMap = new ConcurrentHashMap<>();
     private static final Log log = LogFactory.getLog(OAuthRequestInterceptor.class);
+    private String username;
+    private String password;
 
     /**
      * Creates an interceptor that authenticates all requests.
      */
     public OAuthRequestInterceptor() {
-        String username = APIMConfigReader.getInstance().getConfig().getUsername();
-        String password = APIMConfigReader.getInstance().getConfig().getPassword();
+        username = APIMConfigReader.getInstance().getConfig().getUsername();
+        password = APIMConfigReader.getInstance().getConfig().getPassword();
         dcrClient = Feign.builder().client(new OkHttpClient(Utils.getSSLClient())).logger(new Slf4jLogger())
                 .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .contract(new JAXRSContract()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
@@ -74,6 +76,8 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
     }
 
     public OAuthRequestInterceptor(String username, String password) {
+        this.username = username;
+        this.password = password;
         dcrClient = Feign.builder().client(new OkHttpClient(Utils.getSSLClient())).logger(new Slf4jLogger())
                 .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .contract(new JAXRSContract()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
@@ -89,10 +93,6 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
             clientProfile.setClientName(APPLICATION_NAME);
             clientProfile.setCallbackUrl("");
             clientProfile.setGrantType(GRANT_TYPES);
-            String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (username == null || username.isEmpty()) {
-                username = APIMConfigReader.getInstance().getConfig().getUsername();
-            }
             clientProfile.setOwner(username);
             clientProfile.setSaasApp(true);
             oAuthApplication = dcrClient.register(clientProfile);
