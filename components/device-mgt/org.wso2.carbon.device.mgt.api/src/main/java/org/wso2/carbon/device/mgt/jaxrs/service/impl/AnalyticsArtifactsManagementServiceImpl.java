@@ -89,11 +89,13 @@ public class AnalyticsArtifactsManagementServiceImpl
                 return Response.serverError().entity(errMsg).build();
             }
         } catch (ArtifactAlreadyExistsException e) {
-            String errMsg = "Failed to create Stream artifact for tenant domain: " + tenantDomain;
+            String errMsg = "Failed to create Stream artifact for tenant domain: " + tenantDomain +
+                            "Stream with id: "+ id + "already exists";
             log.error(errMsg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(errMsg).build();
         } catch (NotFoundException e) {
-            String errMsg = "Failed to edit Stream artifact for tenant domain: " + tenantDomain;
+            String errMsg = "Failed to edit Stream artifact for tenant domain: " + tenantDomain +
+                            "Stream with id: "+ id + "doesn't exist";
             log.error(errMsg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(errMsg).build();
         } catch (AxisFault e) {
