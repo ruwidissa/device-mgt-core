@@ -188,7 +188,7 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @POST
-    @Path("{deviceTypeName}/versions")
+    @Path("/{deviceTypeName}/versions")
     public Response addDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
                                          DeviceTypeVersionWrapper versionWrapper) {
         if (versionWrapper != null && deviceTypeName != null && !deviceTypeName.isEmpty()
@@ -245,7 +245,7 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @PUT
-    @Path("{deviceTypeName}/versions")
+    @Path("/{deviceTypeName}/versions")
     public Response updateDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
                                             DeviceTypeVersionWrapper deviceTypeVersion) {
         if (deviceTypeVersion != null && deviceTypeVersion.getVersionName() == null || deviceTypeVersion
@@ -285,7 +285,7 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @DELETE
-    @Path("{deviceTypeName}/versions/{version}")
+    @Path("/{deviceTypeName}/versions/{version}")
     public Response deleteDeviceTypeVersion(@PathParam("deviceTypeName") String deviceTypeName,
                                             @PathParam("version") String version) {
         if (version == null || version.isEmpty()) {
@@ -320,7 +320,7 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @DELETE
-    @Path("{deviceTypeName}/delete")
+    @Path("/{deviceTypeName}/delete")
     public Response deleteDeviceType(@PathParam("deviceTypeName") String deviceTypeName) {
         try {
             DeviceManagementProviderService deviceManagementProviderService =

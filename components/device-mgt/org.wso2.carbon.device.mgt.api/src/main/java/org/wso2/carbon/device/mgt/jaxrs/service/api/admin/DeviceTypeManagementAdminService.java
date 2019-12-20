@@ -487,7 +487,7 @@ public interface DeviceTypeManagementAdminService {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("{deviceTypeName}/versions")
+    @Path("/{deviceTypeName}/versions")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
@@ -541,7 +541,7 @@ public interface DeviceTypeManagementAdminService {
 
 
     @DELETE
-    @Path("{deviceTypeName}/versions/{version}")
+    @Path("/{deviceTypeName}/versions/{version}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "DELETE",
@@ -594,7 +594,7 @@ public interface DeviceTypeManagementAdminService {
 
 
     @DELETE
-    @Path("{deviceTypeName}/delete")
+    @Path("/{deviceTypeName}/delete")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete device type.",
