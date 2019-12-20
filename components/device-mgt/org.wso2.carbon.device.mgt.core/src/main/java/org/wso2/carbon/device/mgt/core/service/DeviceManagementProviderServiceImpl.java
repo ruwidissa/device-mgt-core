@@ -540,11 +540,27 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         Map<String, List<String>> deviceIdentifierMap = new HashMap<>();
         Map<String, DeviceManager> deviceManagerMap = new HashMap<>();
         List<DeviceCacheKey> deviceCacheKeyList = new ArrayList<>();
+        List<Device> existingDevices;
         int tenantId = this.getTenantId();
+
         try {
             DeviceManagementDAOFactory.openConnection();
-            List<Device> existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+            existingDevices = deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while permanently deleting '" + deviceIdentifiers +
+                         "' devices";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        }finally {
             DeviceManagementDAOFactory.closeConnection();
+        }
+
+        try {
             DeviceCacheKey deviceCacheKey;
             for (Device device : existingDevices) {
                 if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
@@ -606,10 +622,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 log.debug("Successfully permanently deleted the details of devices : " + validDeviceIdentifiers);
             }
             return true;
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while initiating transaction";
             log.error(msg, e);
@@ -3597,14 +3609,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         int tenantId = getTenantId();
 
         try {
-            if (deviceTypeName.isEmpty() || deviceType == null) {
+            if (deviceType == null || deviceTypeName.isEmpty()) {
                 String msg = "Error, device type cannot be null or empty";
                 log.error(msg);
                 return false;
             }
             DeviceManagementDAOFactory.beginTransaction();
             List<Device> devices = deviceDAO.getDevices(deviceTypeName, this.getTenantId());
-            if (devices.isEmpty()) {
+            if (devices == null || devices.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("No devices found for the device type: " + deviceTypeName);
                 }
@@ -3619,9 +3631,26 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     } else {
                         device.getEnrolmentInfo().setDateOfLastUpdate(new Date().getTime());
                         device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.REMOVED);
-                        enrollmentDAO.updateEnrollment(device.getId(), device.getEnrolmentInfo(),
-                                                       tenantId);
-                        deviceDAO.updateDevice(device, tenantId);
+                        // different try blocks are used to isolate transactions
+                        try {
+                            enrollmentDAO.updateEnrollment(device.getId(), device.getEnrolmentInfo(),
+                                                           tenantId);
+                        } catch (DeviceManagementDAOException e) {
+                            DeviceManagementDAOFactory.rollbackTransaction();
+                            String msg = "Error occurred while dis-enrolling device: " +
+                                         device.getName();
+                            log.error(msg, e);
+                            throw new DeviceManagementException(msg, e);
+                        }
+                        try {
+                            deviceDAO.updateDevice(device, tenantId);
+                        } catch (DeviceManagementDAOException e) {
+                            DeviceManagementDAOFactory.rollbackTransaction();
+                            String msg = "Error occurred while updating device: " +
+                                         device.getName();
+                            log.error(msg, e);
+                            throw new DeviceManagementException(msg, e);
+                        }
                     }
                     deviceIdentifiers.add(device.getDeviceIdentifier());
                 }
@@ -3629,11 +3658,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 DeviceManagementDAOFactory.closeConnection();
                 // delete devices
                 deleteDevices(deviceIdentifiers);
-                DeviceManagementDAOFactory.beginTransaction();
             }
             // remove device type versions
+            DeviceManagementDAOFactory.beginTransaction();
             deviceTypeVersions = deviceTypeDAO.getDeviceTypeVersions(deviceType.getId(), deviceTypeName);
-            if (deviceTypeVersions.isEmpty()) {
+            if (deviceTypeVersions == null || deviceTypeVersions.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Device of type: " + deviceTypeName + "doesn't have any type versions");
                 }
