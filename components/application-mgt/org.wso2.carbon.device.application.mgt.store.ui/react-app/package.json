@@ -90,6 +90,7 @@
     "build_prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
     "build_dev": "NODE_ENV=development webpack -d --watch ",
     "server": "node-env-run server --exec nodemon | pino-colada",
-    "dev2": "run-p server start"
+    "dev2": "run-p server start",
+    "lint": "eslint \"src/**/*.js\""
   }
 }
