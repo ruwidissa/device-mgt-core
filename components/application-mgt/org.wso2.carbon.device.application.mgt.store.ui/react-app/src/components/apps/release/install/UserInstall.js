@@ -16,124 +16,139 @@
  * under the License.
  */
 
-import React from "react";
-import {Typography, Select, Spin, message, notification, Button, Alert} from "antd";
+import React from 'react';
+import { Typography, Select, Spin, Alert } from 'antd';
 import debounce from 'lodash.debounce';
-import axios from "axios";
-import {withConfigContext} from "../../../../context/ConfigContext";
-import {handleApiError} from "../../../../js/Utils";
-import InstallModalFooter from "./installModalFooter/InstallModalFooter";
+import axios from 'axios';
+import { withConfigContext } from '../../../../context/ConfigContext';
+import { handleApiError } from '../../../../js/Utils';
+import InstallModalFooter from './installModalFooter/InstallModalFooter';
 
-const {Text} = Typography;
-const {Option} = Select;
-
+const { Text } = Typography;
+const { Option } = Select;
 
 class UserInstall extends React.Component {
+  constructor(props) {
+    super(props);
+    this.lastFetchId = 0;
+    this.fetchUser = debounce(this.fetchUser, 800);
+  }
 
-    constructor(props) {
-        super(props);
-        this.lastFetchId = 0;
-        this.fetchUser = debounce(this.fetchUser, 800);
-    }
+  state = {
+    data: [],
+    value: [],
+    fetching: false,
+  };
 
-    state = {
-        data: [],
-        value: [],
-        fetching: false,
-    };
+  fetchUser = value => {
+    const config = this.props.context;
+    this.lastFetchId += 1;
+    const fetchId = this.lastFetchId;
+    this.setState({ data: [], fetching: true });
 
-    fetchUser = value => {
-        const config = this.props.context;
-        this.lastFetchId += 1;
-        const fetchId = this.lastFetchId;
-        this.setState({data: [], fetching: true});
+    // send request to the invoker
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.deviceMgt +
+          '/users/search?username=' +
+          value,
+      )
+      .then(res => {
+        if (res.status === 200) {
+          if (fetchId !== this.lastFetchId) {
+            // for fetch callback order
+            return;
+          }
 
+          const data = res.data.data.users.map(user => ({
+            text: user.username,
+            value: user.username,
+          }));
 
-        //send request to the invoker
-        axios.get(
-            window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt+"/users/search?username=" + value,
-
-        ).then(res => {
-            if (res.status === 200) {
-                if (fetchId !== this.lastFetchId) {
-                    // for fetch callback order
-                    return;
-                }
-
-                const data = res.data.data.users.map(user => ({
-                    text: user.username,
-                    value: user.username,
-                }));
-
-                this.setState({data, fetching: false});
-            }
-
-        }).catch((error) => {
-            handleApiError(error,"Error occurred while trying to load users.", true);
-            if (error.hasOwnProperty("response") && error.response.status === 403) {
-                this.setState({
-                    isForbidden: true,
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    loading: false
-                });
-            }
-        });
-    };
-
-    handleChange = value => {
-        this.setState({
-            value,
-            data: [],
-            fetching: false,
-            isForbidden: false
-        });
-    };
-
-    install = (timestamp=null) => {
-        const {value} = this.state;
-        const data = [];
-        value.map(val => {
-            data.push(val.key);
-        });
-        this.props.onInstall("user", data, "install",timestamp);
-    };
-
-    render() {
-        const {fetching, data, value} = this.state;
-
-        return (
-            <div>
-                <Text>Start installing the application for one or more users by entering the corresponding user name. Select install to automatically start downloading the application for the respective user/users. </Text>
-                {(this.state.isForbidden) && (
-                    <Alert
-                        message="You don't have permission to view users."
-                        type="warning"
-                        banner
-                        closable/>
-                )}
-                <p>Select users</p>
-                <Select
-                    mode="multiple"
-                    labelInValue
-                    value={value}
-                    placeholder="Enter the username"
-                    notFoundContent={fetching ? <Spin size="small"/> : null}
-                    filterOption={false}
-                    onSearch={this.fetchUser}
-                    onChange={this.handleChange}
-                    style={{width: '100%'}}
-                >
-                    {data.map(d => (
-                        <Option key={d.value}>{d.text}</Option>
-                    ))}
-                </Select>
-                <InstallModalFooter type="Install" operation={this.install} disabled={value.length===0}/>
-            </div>
+          this.setState({ data, fetching: false });
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to load users.',
+          true,
         );
-    }
+        if (error.hasOwnProperty('response') && error.response.status === 403) {
+          this.setState({
+            isForbidden: true,
+            loading: false,
+          });
+        } else {
+          this.setState({
+            loading: false,
+          });
+        }
+      });
+  };
+
+  handleChange = value => {
+    this.setState({
+      value,
+      data: [],
+      fetching: false,
+      isForbidden: false,
+    });
+  };
+
+  install = (timestamp = null) => {
+    const { value } = this.state;
+    const data = [];
+    value.map(val => {
+      data.push(val.key);
+    });
+    this.props.onInstall('user', data, 'install', timestamp);
+  };
+
+  render() {
+    const { fetching, data, value } = this.state;
+
+    return (
+      <div>
+        <Text>
+          Start installing the application for one or more users by entering the
+          corresponding user name. Select install to automatically start
+          downloading the application for the respective user/users.{' '}
+        </Text>
+        {this.state.isForbidden && (
+          <Alert
+            message="You don't have permission to view users."
+            type="warning"
+            banner
+            closable
+          />
+        )}
+        <p>Select users</p>
+        <Select
+          mode="multiple"
+          labelInValue
+          value={value}
+          placeholder="Enter the username"
+          notFoundContent={fetching ? <Spin size="small" /> : null}
+          filterOption={false}
+          onSearch={this.fetchUser}
+          onChange={this.handleChange}
+          style={{ width: '100%' }}
+        >
+          {data.map(d => (
+            <Option key={d.value}>{d.text}</Option>
+          ))}
+        </Select>
+        <InstallModalFooter
+          type="Install"
+          operation={this.install}
+          disabled={value.length === 0}
+        />
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(UserInstall);

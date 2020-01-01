@@ -16,126 +16,143 @@
  * under the License.
  */
 
-import React from "react";
-import {Typography, Select, Spin, message, notification, Button, Alert} from "antd";
+import React from 'react';
+import { Typography, Select, Spin, Alert } from 'antd';
 import debounce from 'lodash.debounce';
-import axios from "axios";
-import {withConfigContext} from "../../../../context/ConfigContext";
-import {handleApiError} from "../../../../js/Utils";
-import InstallModalFooter from "./installModalFooter/InstallModalFooter";
+import axios from 'axios';
+import { withConfigContext } from '../../../../context/ConfigContext';
+import { handleApiError } from '../../../../js/Utils';
+import InstallModalFooter from './installModalFooter/InstallModalFooter';
 
-const {Text} = Typography;
-const {Option} = Select;
+const { Text } = Typography;
+const { Option } = Select;
 
 class GroupUninstall extends React.Component {
+  constructor(props) {
+    super(props);
+    this.lastFetchId = 0;
+    this.fetchUser = debounce(this.fetchUser, 800);
+  }
 
-    constructor(props) {
-        super(props);
-        this.lastFetchId = 0;
-        this.fetchUser = debounce(this.fetchUser, 800);
-    }
+  state = {
+    data: [],
+    value: [],
+    fetching: false,
+    isForbidden: false,
+  };
 
-    state = {
-        data: [],
-        value: [],
-        fetching: false,
-        isForbidden: false
-    };
+  fetchUser = value => {
+    this.lastFetchId += 1;
+    const fetchId = this.lastFetchId;
+    const config = this.props.context;
+    this.setState({ data: [], fetching: true });
 
-    fetchUser = value => {
-        this.lastFetchId += 1;
-        const fetchId = this.lastFetchId;
-        const config = this.props.context;
-        this.setState({data: [], fetching: true});
+    const uuid = this.props.uuid;
 
-        const uuid = this.props.uuid;
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.store +
+          '/subscription/' +
+          uuid +
+          '/' +
+          '/GROUP?',
+      )
+      .then(res => {
+        if (res.status === 200) {
+          if (fetchId !== this.lastFetchId) {
+            // for fetch callback order
+            return;
+          }
 
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.store + "/subscription/" + uuid + "/" +
-            "/GROUP?",
-        ).then(res => {
-            if (res.status === 200) {
-                if (fetchId !== this.lastFetchId) {
-                    // for fetch callback order
-                    return;
-                }
+          const data = res.data.data.deviceGroups.map(group => ({
+            text: group,
+            value: group,
+          }));
 
-                const data = res.data.data.deviceGroups.map(group => ({
-                    text: group,
-                    value: group,
-                }));
-
-                this.setState({data, fetching: false});
-            }
-
-        }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load groups.", true);
-            if (error.hasOwnProperty("response") && error.response.status === 403) {
-                this.setState({
-                    isForbidden: true,
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    loading: false
-                });
-            }
-        });
-    };
-
-    handleChange = value => {
-        this.setState({
-            value,
-            data: [],
-            fetching: false,
-        });
-    };
-
-    uninstall = (timestamp = null) => {
-        const {value} = this.state;
-        const data = [];
-        value.map(val => {
-            data.push(val.key);
-        });
-        this.props.onUninstall("group", data, "uninstall", timestamp);
-    };
-
-    render() {
-
-        const {fetching, data, value} = this.state;
-
-        return (
-            <div>
-                <Text>Start uninstalling the application for one or more groups by entering the corresponding group
-                    name. Select uninstall to automatically start uninstalling the application for the respective device
-                    group/ groups.</Text>
-                {(this.state.isForbidden) && (
-                    <Alert
-                        message="You don't have permission to view installed groups."
-                        type="warning"
-                        banner
-                        closable/>
-                )}
-                <br/>
-                <br/>
-                <Select
-                    mode="multiple"
-                    labelInValue
-                    value={value}
-                    placeholder="Search groups"
-                    notFoundContent={fetching ? <Spin size="small"/> : null}
-                    filterOption={false}
-                    onSearch={this.fetchUser}
-                    onChange={this.handleChange}
-                    style={{width: '100%'}}>
-                    {data.map(d => (
-                        <Option key={d.value}>{d.text}</Option>
-                    ))}
-                </Select>
-                <InstallModalFooter type="Uninstall" operation={this.uninstall} disabled={value.length === 0}/>
-            </div>
+          this.setState({ data, fetching: false });
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to load groups.',
+          true,
         );
-    }
+        if (error.hasOwnProperty('response') && error.response.status === 403) {
+          this.setState({
+            isForbidden: true,
+            loading: false,
+          });
+        } else {
+          this.setState({
+            loading: false,
+          });
+        }
+      });
+  };
+
+  handleChange = value => {
+    this.setState({
+      value,
+      data: [],
+      fetching: false,
+    });
+  };
+
+  uninstall = (timestamp = null) => {
+    const { value } = this.state;
+    const data = [];
+    value.map(val => {
+      data.push(val.key);
+    });
+    this.props.onUninstall('group', data, 'uninstall', timestamp);
+  };
+
+  render() {
+    const { fetching, data, value } = this.state;
+
+    return (
+      <div>
+        <Text>
+          Start uninstalling the application for one or more groups by entering
+          the corresponding group name. Select uninstall to automatically start
+          uninstalling the application for the respective device group/ groups.
+        </Text>
+        {this.state.isForbidden && (
+          <Alert
+            message="You don't have permission to view installed groups."
+            type="warning"
+            banner
+            closable
+          />
+        )}
+        <br />
+        <br />
+        <Select
+          mode="multiple"
+          labelInValue
+          value={value}
+          placeholder="Search groups"
+          notFoundContent={fetching ? <Spin size="small" /> : null}
+          filterOption={false}
+          onSearch={this.fetchUser}
+          onChange={this.handleChange}
+          style={{ width: '100%' }}
+        >
+          {data.map(d => (
+            <Option key={d.value}>{d.text}</Option>
+          ))}
+        </Select>
+        <InstallModalFooter
+          type="Uninstall"
+          operation={this.uninstall}
+          disabled={value.length === 0}
+        />
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(GroupUninstall);

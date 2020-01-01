@@ -16,49 +16,53 @@
  * under the License.
  */
 
-import React from "react";
-import {Modal, Spin, Tabs} from "antd";
-import UserInstall from "./UserInstall";
-import GroupInstall from "./GroupInstall";
-import RoleInstall from "./RoleInstall";
-import DeviceInstall from "./DeviceInstall";
+import React from 'react';
+import { Modal, Spin, Tabs } from 'antd';
+import UserInstall from './UserInstall';
+import GroupInstall from './GroupInstall';
+import RoleInstall from './RoleInstall';
+import DeviceInstall from './DeviceInstall';
 
-const {TabPane} = Tabs;
+const { TabPane } = Tabs;
 
 class AppInstallModal extends React.Component {
-    state = {
-        data: []
-    };
+  state = {
+    data: [],
+  };
 
-    render() {
-        const {deviceType} = this.props;
-        return (
-            <div>
-                <Modal
-                    title="Install App"
-                    visible={this.props.visible}
-                    onCancel={this.props.onClose}
-                    footer={null}>
-                    <Spin spinning={this.props.loading}>
-                        <Tabs defaultActiveKey="device">
-                            <TabPane tab="Device" key="device">
-                                <DeviceInstall deviceType={deviceType} onInstall={this.props.onInstall}/>
-                            </TabPane>
-                            <TabPane tab="User" key="user">
-                                <UserInstall onInstall={this.props.onInstall}/>
-                            </TabPane>
-                            <TabPane tab="Role" key="role">
-                                <RoleInstall onInstall={this.props.onInstall}/>
-                            </TabPane>
-                            <TabPane tab="Group" key="group">
-                                <GroupInstall onInstall={this.props.onInstall}/>
-                            </TabPane>
-                        </Tabs>
-                    </Spin>
-                </Modal>
-            </div>
-        );
-    }
+  render() {
+    const { deviceType } = this.props;
+    return (
+      <div>
+        <Modal
+          title="Install App"
+          visible={this.props.visible}
+          onCancel={this.props.onClose}
+          footer={null}
+        >
+          <Spin spinning={this.props.loading}>
+            <Tabs defaultActiveKey="device">
+              <TabPane tab="Device" key="device">
+                <DeviceInstall
+                  deviceType={deviceType}
+                  onInstall={this.props.onInstall}
+                />
+              </TabPane>
+              <TabPane tab="User" key="user">
+                <UserInstall onInstall={this.props.onInstall} />
+              </TabPane>
+              <TabPane tab="Role" key="role">
+                <RoleInstall onInstall={this.props.onInstall} />
+              </TabPane>
+              <TabPane tab="Group" key="group">
+                <GroupInstall onInstall={this.props.onInstall} />
+              </TabPane>
+            </Tabs>
+          </Spin>
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default AppInstallModal;
