@@ -153,6 +153,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class DeviceManagementProviderServiceImpl implements DeviceManagementProviderService,
         PluginInitializationListener {
@@ -3604,89 +3605,33 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     public boolean deleteDeviceType(String deviceTypeName, DeviceType deviceType)
             throws DeviceManagementException {
         List<String> deviceIdentifiers;
-        List<DeviceTypeVersion> deviceTypeVersions;
-        boolean result;
-        int tenantId = getTenantId();
 
         try {
-            if (deviceType == null || deviceTypeName.isEmpty()) {
+            if (deviceType == null || deviceTypeName == null || deviceTypeName.isEmpty()) {
                 String msg = "Error, device type cannot be null or empty";
                 log.error(msg);
                 return false;
             }
-            DeviceManagementDAOFactory.beginTransaction();
-            List<Device> devices = deviceDAO.getDevices(deviceTypeName, this.getTenantId());
+            List<Device> devices = getAllDevices(deviceTypeName, false);
             if (devices == null || devices.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("No devices found for the device type: " + deviceTypeName);
                 }
             } else {
                 // dis-enroll devices
-                deviceIdentifiers = new ArrayList<>();
-                for (Device device : devices) {
-                    if (device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Device: " + device.getName() + " has already dis-enrolled");
-                        }
-                    } else {
-                        device.getEnrolmentInfo().setDateOfLastUpdate(new Date().getTime());
-                        device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.REMOVED);
-                        // different try blocks are used to isolate transactions
-                        try {
-                            enrollmentDAO.updateEnrollment(device.getId(), device.getEnrolmentInfo(),
-                                                           tenantId);
-                        } catch (DeviceManagementDAOException e) {
-                            DeviceManagementDAOFactory.rollbackTransaction();
-                            String msg = "Error occurred while dis-enrolling device: " +
-                                         device.getName();
-                            log.error(msg, e);
-                            throw new DeviceManagementException(msg, e);
-                        }
-                        try {
-                            deviceDAO.updateDevice(device, tenantId);
-                        } catch (DeviceManagementDAOException e) {
-                            DeviceManagementDAOFactory.rollbackTransaction();
-                            String msg = "Error occurred while updating device: " +
-                                         device.getName();
-                            log.error(msg, e);
-                            throw new DeviceManagementException(msg, e);
-                        }
-                    }
-                    deviceIdentifiers.add(device.getDeviceIdentifier());
-                }
-                DeviceManagementDAOFactory.commitTransaction();
-                DeviceManagementDAOFactory.closeConnection();
+                disEnrollDevices(devices);
                 // delete devices
+                deviceIdentifiers = devices.stream()
+                        .map(Device::getDeviceIdentifier).collect(Collectors.toList());
                 deleteDevices(deviceIdentifiers);
             }
             // remove device type versions
-            DeviceManagementDAOFactory.beginTransaction();
-            deviceTypeVersions = deviceTypeDAO.getDeviceTypeVersions(deviceType.getId(), deviceTypeName);
-            if (deviceTypeVersions == null || deviceTypeVersions.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Device of type: " + deviceTypeName + "doesn't have any type versions");
-                }
-            } else {
-                for (DeviceTypeVersion deviceTypeVersion : deviceTypeVersions) {
-                    result = deviceTypeDAO.isDeviceTypeVersionModifiable(deviceType.getId()
-                            , deviceTypeVersion.getVersionName(), tenantId);
-                    if (!result) {
-                        String msg = "Device type of: " + deviceTypeName + "is unauthorized to modify " +
-                                     "version";
-                        log.error(msg);
-                        return false;
-                    }
-                    result = deviceTypeDAO.updateDeviceTypeVersion(deviceTypeVersion);
-                    if (!result) {
-                        String msg = "Could not delete the version of device type: " +
-                                     deviceTypeName;
-                        log.error(msg);
-                        return false;
-                    }
-                }
+            if (!deleteDeviceTypeVersions(deviceType)){
+                return false;
             }
             // delete device type
-            deviceTypeDAO.deleteDeviceType(tenantId, deviceType.getId());
+            DeviceManagementDAOFactory.beginTransaction();
+            deviceTypeDAO.deleteDeviceType(getTenantId(), deviceType.getId());
             DeviceManagementDAOFactory.commitTransaction();
         } catch (InvalidDeviceException e) {
             String msg = "Error occurred while deleting devices of type: " + deviceTypeName;
@@ -3706,6 +3651,103 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         return true;
     }
+
+    @Override
+    public void disEnrollDevices(List<Device> devices)
+            throws DeviceManagementException {
+        int tenantId = getTenantId();
+
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            for (Device device : devices) {
+                if (device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Device: " + device.getName() + " has already dis-enrolled");
+                    }
+                } else {
+                    device.getEnrolmentInfo().setDateOfLastUpdate(new Date().getTime());
+                    device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.REMOVED);
+                    // different try blocks are used to isolate transactions
+                    try {
+                        enrollmentDAO.updateEnrollment(device.getId(), device.getEnrolmentInfo(),
+                                                       tenantId);
+                    } catch (DeviceManagementDAOException e) {
+                        DeviceManagementDAOFactory.rollbackTransaction();
+                        String msg = "Error occurred while dis-enrolling device: " +
+                                     device.getName();
+                        log.error(msg, e);
+                        throw new DeviceManagementException(msg, e);
+                    }
+                    try {
+                        deviceDAO.updateDevice(device, tenantId);
+                    } catch (DeviceManagementDAOException e) {
+                        DeviceManagementDAOFactory.rollbackTransaction();
+                        String msg = "Error occurred while updating device: " +
+                                     device.getName();
+                        log.error(msg, e);
+                        throw new DeviceManagementException(msg, e);
+                    }
+                }
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public boolean deleteDeviceTypeVersions(DeviceType deviceType)
+            throws DeviceManagementException {
+        boolean result;
+        String deviceTypeName = deviceType.getName();
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            List<DeviceTypeVersion> deviceTypeVersions = deviceTypeDAO
+                    .getDeviceTypeVersions(deviceType.getId(), deviceTypeName);
+            if (deviceTypeVersions == null || deviceTypeVersions.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Device of type: " + deviceTypeName + "doesn't have any type " +
+                              "versions");
+                }
+            } else {
+                for (DeviceTypeVersion deviceTypeVersion : deviceTypeVersions) {
+                    result = deviceTypeDAO.isDeviceTypeVersionModifiable(deviceType.getId()
+                            , deviceTypeVersion.getVersionName(), getTenantId());
+                    if (!result) {
+                        String msg = "Device type of: " + deviceTypeName + "is unauthorized to " +
+                                     "modify version";
+                        log.error(msg);
+                        return false;
+                    }
+                    deviceTypeVersion.setVersionStatus("REMOVED");
+                    result = deviceTypeDAO.updateDeviceTypeVersion(deviceTypeVersion);
+                    if (!result) {
+                        String msg = "Could not delete the version of device type: " + deviceTypeName;
+                        log.error(msg);
+                        return false;
+                    }
+                }
+                DeviceManagementDAOFactory.commitTransaction();
+            }
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while initiating transaction";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while deleting device type of: " + deviceTypeName;
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+        return true;
+    }
+
 
     @Override
     public DeviceConfiguration getDeviceConfiguration(Map<String, String> deviceProps)
