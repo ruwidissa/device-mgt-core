@@ -154,6 +154,20 @@ class Dashboard extends React.Component {
                                         <span>Device Types</span>
                                     </Link>
                                 </Menu.Item>
+                                <SubMenu
+                                        key="configurations"
+                                        title={
+                                            <span>
+                                        <Icon type="setting"/>
+                                        <span>Configurations</span>
+                                        </span>}
+                                >
+                                    <Menu.Item key="certificates">
+                                        <Link to="/entgra/certificates">
+                                            <span>Certificates</span>
+                                        </Link>
+                                    </Menu.Item>
+                                </SubMenu>
                                 <Menu.Item key="trigger">
                                 </Menu.Item>
                                 <SubMenu className="profile"
