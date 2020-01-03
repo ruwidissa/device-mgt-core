@@ -1038,6 +1038,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 policy.setProfileId(resultSet.getInt("PROFILE_ID"));
                 policy.setCompliance(resultSet.getString("COMPLIANCE"));
                 policy.setDescription(resultSet.getString("DESCRIPTION"));
+                policy.setPolicyType(resultSet.getString("POLICY_TYPE"));
                 policy.setUpdated(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("UPDATED")));
                 policy.setActive(PolicyManagerUtil.convertIntToBoolean(resultSet.getInt("ACTIVE")));
             }
