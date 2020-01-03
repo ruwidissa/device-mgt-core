@@ -1077,7 +1077,7 @@ const jsonResponse = {
                     "Name": "COSU Profile Configurations",
                     "Panel": [{
                         "title": "COSU Profile Configurations",
-                        "description": "This policy can be used to configure the profile of COSU Devices.",
+                        "description": "This policy can be used to configure the profile of COSU Certificates.",
                         "PanelItem": [
                             {
                                 "Label": "Restrict Device Operation Time",
