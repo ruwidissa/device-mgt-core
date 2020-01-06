@@ -65,7 +65,10 @@ class Dashboard extends React.Component {
                             <Menu
                                 theme="light"
                                 mode="horizontal"
-                                style={{lineHeight: '64px'}}
+                                style={{
+                                    lineHeight: '64px',
+                                    marginRight: 110
+                                }}
                             >
                                 <SubMenu
                                     key="devices"
