@@ -306,8 +306,9 @@ public interface CertificateManagementAdminService {
 
     @DELETE
     @Path("/{serialNumber}")
+    @Consumes(MediaType.WILDCARD)
     @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
+            consumes = MediaType.WILDCARD,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "DELETE",
             value = "Deleting an SSL Certificate",
