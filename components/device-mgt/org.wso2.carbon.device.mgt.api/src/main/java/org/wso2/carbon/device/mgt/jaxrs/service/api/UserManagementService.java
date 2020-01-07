@@ -372,8 +372,10 @@ public interface UserManagementService {
 
     @DELETE
     @Path("/{username}")
+    @Consumes(MediaType.WILDCARD)
     @ApiOperation(
             httpMethod = "DELETE",
+            consumes = MediaType.WILDCARD,
             value = "Deleting a User",
             notes = "When an employee leaves the organization, you can remove the user details from WSO2 IoTS using " +
                     "this REST API.",
