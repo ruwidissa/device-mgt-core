@@ -183,7 +183,7 @@ public class UserManagementServiceImpl implements UserManagementService {
                              DEFAULT_SUBSCRIBER + "' is missing in the system");
                 }
             }
-            
+
             String[] roles = new String[tmpRoles.size()];
             tmpRoles.toArray(roles);
 
@@ -363,6 +363,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @DELETE
     @Path("/{username}")
+    @Consumes(MediaType.WILDCARD)
     @Override
     public Response removeUser(@PathParam("username") String username, @QueryParam("domain") String domain) {
         if (domain != null && !domain.isEmpty()) {
