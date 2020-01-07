@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.certificate.mgt.cert.jaxrs.api.impl;
 
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.certificate.mgt.cert.jaxrs.api.CertificateManagementAdminService;
@@ -145,6 +146,7 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
 
     @DELETE
     @Path("/{serialNumber}")
+    @Consumes(MediaType.WILDCARD)
     public Response removeCertificate(@PathParam("serialNumber") String serialNumber) {
         RequestValidationUtil.validateSerialNumber(serialNumber);
 

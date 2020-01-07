@@ -114,6 +114,7 @@ class CertificateTable extends React.Component {
             {headers: {'Content-Type': 'application/json'}}
         ).then(res => {
             if (res.status === 200) {
+                this.fetch();
                 notification["success"]({
                     message: "Done",
                     duration: 4,
@@ -201,8 +202,6 @@ class CertificateTable extends React.Component {
             )
         }
     ];
-
-
 
     render() {
         const {data, pagination, loading} = this.state;
