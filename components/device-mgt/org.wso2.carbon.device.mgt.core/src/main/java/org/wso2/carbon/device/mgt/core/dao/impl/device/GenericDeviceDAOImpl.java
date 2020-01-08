@@ -455,12 +455,12 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<Device> getDevicesByDuration(PaginationRequest request, int tenantId,
+    public List<Device> getDevicesByDuration(PaginationRequest request, List<String> statusList, int tenantId,
                                              String fromDate, String toDate)
             throws DeviceManagementDAOException {
         List<Device> devices;
-        String deviceStatus = request.getStatus();
         String ownership = request.getOwnership();
+        boolean isStatusProvided = false;
 
         String sql = "SELECT " +
                      "d.ID AS DEVICE_ID, " +
@@ -479,9 +479,15 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                      "e.TENANT_ID = ? AND " +
                      "e.DATE_OF_ENROLMENT BETWEEN ? AND ?";
 
-        if (deviceStatus != null) {
-            sql = sql + " AND e.STATUS = ?";
+        //Add the query for status
+        StringBuilder sqlBuilder = new StringBuilder(sql);
+        isStatusProvided = buildStatusQuery(statusList, sqlBuilder);
+        sql = sqlBuilder.toString();
+
+        if(statusList != null && !statusList.isEmpty()){
+            isStatusProvided = true;
         }
+
         if (ownership != null) {
             sql = sql + " AND e.OWNERSHIP = ?";
         }
@@ -494,8 +500,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             stmt.setInt(paramIdx++, tenantId);
             stmt.setString(paramIdx++, fromDate);
             stmt.setString(paramIdx++, toDate);
-            if (deviceStatus != null) {
-                stmt.setString(paramIdx++, deviceStatus);
+            if (isStatusProvided) {
+                for (String status : statusList) {
+                    stmt.setString(paramIdx++, status);
+                }
             }
             if (ownership != null) {
                 stmt.setString(paramIdx++, ownership);
@@ -517,6 +525,73 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
         return devices;
     }
+
+    @Override
+    public int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate, int tenantId) throws DeviceManagementDAOException {
+        int deviceCount = 0;
+        boolean isStatusProvided = false;
+
+            String sql = "SELECT " +
+                    "COUNT(d.ID) AS DEVICE_COUNT " +
+                    "FROM DM_DEVICE AS d , DM_ENROLMENT AS e , DM_DEVICE_TYPE AS t " +
+                    "WHERE d.ID = e.DEVICE_ID AND " +
+                    "d.DEVICE_TYPE_ID = t.ID AND " +
+                    "e.TENANT_ID = ? AND " +
+                    "e.DATE_OF_ENROLMENT BETWEEN ? AND ?";
+
+            //Add the query for status
+            StringBuilder sqlBuilder = new StringBuilder(sql);
+            isStatusProvided = buildStatusQuery(statusList, sqlBuilder);
+            sql = sqlBuilder.toString();
+
+            if (ownership != null) {
+                sql = sql + " AND e.OWNERSHIP = ?";
+            }
+
+            try (Connection conn = this.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, tenantId);
+                stmt.setString(paramIdx++, fromDate);
+                stmt.setString(paramIdx++, toDate);
+                if (isStatusProvided) {
+                    for (String status : statusList) {
+                        stmt.setString(paramIdx++, status);
+                    }
+                }
+                if (ownership != null) {
+                    stmt.setString(paramIdx++, ownership);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        deviceCount = rs.getInt("DEVICE_COUNT");
+                    }
+                }
+            } catch (SQLException e) {
+                String msg = "Error occurred while retrieving information of all " +
+                        "registered devices under tenant id " + tenantId;
+                log.error(msg, e);
+                throw new DeviceManagementDAOException(msg, e);
+            }
+            return deviceCount;
+    }
+
+    protected boolean buildStatusQuery(List<String> statusList, StringBuilder sqlBuilder) {
+        if (statusList != null && !statusList.isEmpty() && !statusList.get(0).isEmpty()) {
+            sqlBuilder.append(" AND e.STATUS IN(");
+            for (int i = 0; i < statusList.size(); i++) {
+                sqlBuilder.append("?");
+                if (i != statusList.size() - 1) {
+                    sqlBuilder.append(",");
+                }
+            }
+            sqlBuilder.append(")");
+            return true;
+        }else {
+            return false;
+        }
+    }
+
 
     /**
      * Get the list of devices that matches with the given device name and (or) device type.

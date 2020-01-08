@@ -21,6 +21,8 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 
+import java.util.List;
+
 /**
  * This is the service class for reports which connects with DAO layer
  */
@@ -36,6 +38,9 @@ public interface ReportManagementService {
      * @throws {@Link DeviceManagementException} When error occurred while validating device list page size
      * @throws {@Link ReportManagementException} When failed to retrieve devices.
      */
-    PaginationResult getDevicesByDuration(PaginationRequest request, String fromDate, String toDate)
+    PaginationResult getDevicesByDuration(PaginationRequest request, List<String> statusList, String fromDate, String toDate)
+            throws ReportManagementException;
+
+    int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate)
             throws ReportManagementException;
 }
