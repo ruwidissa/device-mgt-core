@@ -552,9 +552,14 @@ public interface DeviceDAO {
      *
      */
     List<Device> getDevicesByDuration(PaginationRequest request,
+                                      List<String> statusList,
                                       int tenantId,
                                       String fromDate,
                                       String toDate) throws DeviceManagementDAOException;
+
+    int getDevicesByDurationCount(
+            List<String> statusList, String ownership, String fromDate, String toDate, int tenantId)
+            throws DeviceManagementDAOException;
 
     /**
      * Retrieve device location information

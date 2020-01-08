@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -54,13 +55,13 @@ public class ReportManagementServiceImpl implements ReportManagementService {
     @Path("/devices")
     @Override
     public Response getDevicesByDuration(
-            @QueryParam("status") String status,
+            @QueryParam("status") List<String> status,
             @QueryParam("ownership") String ownership,
             @QueryParam("from") String fromDate,
             @QueryParam("to") String toDate,
             @DefaultValue("0")
             @QueryParam("offset") int offset,
-            @DefaultValue("5")
+            @DefaultValue("10")
             @QueryParam("limit") int limit) {
         try {
             RequestValidationUtil.validatePaginationParameters(offset, limit);
@@ -68,15 +69,12 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             PaginationResult result;
             DeviceList devices = new DeviceList();
 
-            if (!StringUtils.isBlank(status)) {
-                request.setStatus(status);
-            }
             if (!StringUtils.isBlank(ownership)) {
                 request.setOwnership(ownership);
             }
 
             result = DeviceMgtAPIUtils.getReportManagementService()
-                    .getDevicesByDuration(request, fromDate, toDate);
+                    .getDevicesByDuration(request, status, fromDate, toDate);
             if (result.getData().isEmpty()) {
                 String msg = "No devices have enrolled between " + fromDate + " to " + toDate +
                              " or doesn't match with" +
@@ -92,6 +90,26 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
+    @Path("/devices/count")
+    @Override
+    public Response getDevicesByDurationCount(
+            @QueryParam("status") List<String> status,
+            @QueryParam("ownership") String ownership,
+            @QueryParam("from") String fromDate,
+            @QueryParam("to") String toDate) {
+        int deviceCount;
+        try {
+            deviceCount = DeviceMgtAPIUtils.getReportManagementService().getDevicesByDurationCount(status, ownership, fromDate, toDate);
+            return Response.status(Response.Status.OK).entity(deviceCount).build();
+        } catch (ReportManagementException e) {
+            String errorMessage = "Error while retrieving device count.";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
         }
     }
 }
