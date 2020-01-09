@@ -138,24 +138,18 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
                             code = 400,
-                            message = "Bad Request."),
+                            message = "Bad Request. \n The resource to add already exists."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n The resource to edit not available."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while " +
@@ -202,24 +196,15 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
                             code = 400,
-                            message = "Bad Request."),
+                            message = "Bad Request. \n The payload is invalid."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -235,7 +220,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid EventStream stream);
 
     @DELETE
-    @Path("/stream/{name}/{version}/delete")
+    @Path("/stream/{name}/{version}")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete the Stream with id as {name}:{version}",
@@ -257,28 +242,18 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests.")
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request."),
+                            code = 404,
+                            message = "Not Found. \n The resource to delete not available."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n" +
-                                      "The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error.\nServer error occurred while " +
+                            message = "Internal Server Error. \nServer error occurred while " +
                                       "deleting the Stream Artifact.",
                             response = ErrorResponse.class)
             }
@@ -320,25 +295,12 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -385,25 +347,16 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
                             code = 400,
                             message =
-                                    "Bad Request."),
+                                    "Bad Request. \n The payload is invalid."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -419,7 +372,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid Adapter receiver);
 
     @DELETE
-    @Path("/receiver/{name}/delete")
+    @Path("/receiver/{name}")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete a Receiver with the given name",
@@ -442,32 +395,16 @@ public interface AnalyticsArtifactsManagementService {
                                     @ResponseHeader(
                                             name = "Content-Type",
                                             description = "The content type of the body"
-                                    ),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."
-                                    ),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."
                                     )
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request."
-                    ),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n" +
-                                      "The requested media type is not supported."
+                            message = "Not Acceptable. \n The requested media type is not supported."
                     ),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error.\nServer error occurred while " +
+                            message = "Internal Server Error.\n Server error occurred while " +
                                       "deleting the Receiver Artifact.",
                             response = ErrorResponse.class
                     )
@@ -504,25 +441,12 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -569,16 +493,7 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
@@ -587,7 +502,7 @@ public interface AnalyticsArtifactsManagementService {
                                     "Bad Request."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -603,7 +518,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid Adapter publisher);
 
     @DELETE
-    @Path("/publisher/{name}/delete")
+    @Path("/publisher/{name}")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete a Publisher with the given name",
@@ -625,28 +540,15 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests.")
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n" +
-                                      "The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error.\nServer error occurred while " +
+                            message = "Internal Server Error. \n Server error occurred while " +
                                       "deleting the Publisher Artifact.",
                             response = ErrorResponse.class)
             }
@@ -659,6 +561,7 @@ public interface AnalyticsArtifactsManagementService {
             @PathParam("name") String name);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/siddhi-script/{name}")
     @ApiOperation(
             httpMethod = "POST",
@@ -681,25 +584,12 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while " +
@@ -723,7 +613,7 @@ public interface AnalyticsArtifactsManagementService {
             @Valid SiddhiExecutionPlan plan);
 
     @DELETE
-    @Path("/siddhi-script/{name}/delete")
+    @Path("/siddhi-script/{name}")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete an already deployed Siddhi script",
@@ -742,32 +632,19 @@ public interface AnalyticsArtifactsManagementService {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully delete the Siddhi script Artifact.",
+                            message = "OK. \n Successfully deleted the Siddhi script Artifact.",
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests.")
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message = "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n" +
-                                      "The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error.\nServer error occurred while " +
+                            message = "Internal Server Error.\n Server error occurred while " +
                                       "deleting the Siddhi script Artifact.",
                             response = ErrorResponse.class)
             }
