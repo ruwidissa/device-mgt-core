@@ -3606,37 +3606,45 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throws DeviceManagementException {
         List<String> deviceIdentifiers;
 
-        try {
-            if (deviceType == null || deviceTypeName == null || deviceTypeName.isEmpty()) {
-                String msg = "Error, device type cannot be null or empty";
-                log.error(msg);
-                return false;
+        if (deviceType == null || StringUtils.isBlank(deviceTypeName)) {
+            String msg = "Error, device type cannot be null or empty or a blank space";
+            log.error(msg);
+            return false;
+        }
+        List<Device> devices = getAllDevices(deviceTypeName, false);
+        if (devices == null || devices.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No devices found for the device type: " + deviceTypeName);
             }
-            List<Device> devices = getAllDevices(deviceTypeName, false);
-            if (devices == null || devices.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No devices found for the device type: " + deviceTypeName);
+        } else {
+            // dis-enroll devices
+            disEnrollDevices(devices);
+            // delete devices
+            deviceIdentifiers = devices.stream()
+                    .map(Device::getDeviceIdentifier).collect(Collectors.toList());
+            try {
+                if(!deleteDevices(deviceIdentifiers)){
+                    log.error("Failed to delete devices of device type: " + deviceTypeName);
+                    return false;
                 }
-            } else {
-                // dis-enroll devices
-                disEnrollDevices(devices);
-                // delete devices
-                deviceIdentifiers = devices.stream()
-                        .map(Device::getDeviceIdentifier).collect(Collectors.toList());
-                deleteDevices(deviceIdentifiers);
+            } catch (InvalidDeviceException e) {
+                String msg = "Error occurred while deleting devices of type: " + deviceTypeName;
+                log.error(msg);
+                throw new DeviceManagementException(msg, e);
             }
-            // remove device type versions
-            if (!deleteDeviceTypeVersions(deviceType)){
-                return false;
-            }
+        }
+
+        // remove device type versions
+        if (!deleteDeviceTypeVersions(deviceType)) {
+            log.error("Failed to delete device type vesions for device type: " + deviceTypeName);
+            return false;
+        }
+
+        try {
             // delete device type
             DeviceManagementDAOFactory.beginTransaction();
             deviceTypeDAO.deleteDeviceType(getTenantId(), deviceType.getId());
             DeviceManagementDAOFactory.commitTransaction();
-        } catch (InvalidDeviceException e) {
-            String msg = "Error occurred while deleting devices of type: " + deviceTypeName;
-            log.error(msg);
-            throw new DeviceManagementException(msg, e);
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while deleting device type of: " + deviceTypeName;
