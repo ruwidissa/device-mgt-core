@@ -49,7 +49,7 @@ public class ReportManagementServiceImpl implements ReportManagementService {
     }
 
     @Override
-    public PaginationResult getDevicesByDuration(PaginationRequest request, String fromDate,
+    public PaginationResult getDevicesByDuration(PaginationRequest request, List<String> statusList, String fromDate,
                                                  String toDate)
             throws ReportManagementException {
         PaginationResult paginationResult = new PaginationResult();
@@ -64,6 +64,7 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             DeviceManagementDAOFactory.openConnection();
             List<Device> devices = deviceDAO.getDevicesByDuration(
                     request,
+                    statusList,
                     DeviceManagementDAOUtil.getTenantId(),
                     fromDate,
                     toDate
@@ -79,6 +80,25 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             throw new ReportManagementException(msg, e);
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving Tenant ID";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate)
+            throws ReportManagementException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDevicesByDurationCount(statusList, ownership, fromDate, toDate, DeviceManagementDAOUtil.getTenantId());
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred in while retrieving device count by status for " + statusList + "devices.";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
             log.error(msg, e);
             throw new ReportManagementException(msg, e);
         } finally {

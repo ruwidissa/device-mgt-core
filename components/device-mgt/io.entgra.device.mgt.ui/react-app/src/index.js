@@ -33,6 +33,10 @@ import Roles from "./pages/Dashboard/Roles/Roles";
 import DeviceTypes from "./pages/Dashboard/DeviceTypes/DeviceTypes";
 import DeviceEnroll from "./pages/Dashboard/Devices/DeviceEnroll";
 import AddNewPolicy from "./pages/Dashboard/Policies/AddNewPolicy";
+import Certificates from "./pages/Dashboard/Configurations/Certificates/Certificates";
+import ReportDurationItemList from "./pages/Dashboard/Reports/ReportDurationItemList";
+import EnrollmentsVsUnenrollmentsReport from "./components/Reports/Templates/EnrollmentsVsUnenrollmentsReport";
+import EnrollmentTypeReport from "./components/Reports/Templates/EnrollmentTypeReport";
 
 const routes = [
     {
@@ -93,6 +97,31 @@ const routes = [
             {
                 path: '/entgra/devicetypes',
                 component: DeviceTypes,
+                exact: true
+            },
+            {
+                path: '/entgra/certificates',
+                component: Certificates,
+                exact: true
+            },
+            {
+                path: '/entgra/reportList',
+                component: ReportDurationItemList,
+                exact: true
+            },
+            {
+                path: '/entgra/enrollmentsvsunenrollments',
+                component: EnrollmentsVsUnenrollmentsReport,
+                exact: true
+            },
+            {
+                path: '/entgra/enrollmenttype',
+                component: EnrollmentTypeReport,
+                exact: true
+            },
+            {
+                path: '/entgra/devicestatus',
+                component: DeviceStatusReport,
                 exact: true
             }
         ]

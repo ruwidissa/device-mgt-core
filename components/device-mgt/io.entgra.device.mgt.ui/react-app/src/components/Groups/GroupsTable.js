@@ -175,11 +175,9 @@ class GroupsTable extends React.Component {
                         pagination={{
                             ...pagination,
                             size: "small",
-                            // position: "top",
                             total: data.count,
-                            pageSize: 2,
+                            pageSize: 10,
                             showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} groups`
-                            // showQuickJumper: true
                         }}
                         loading={loading}
                         onChange={this.handleTableChange}

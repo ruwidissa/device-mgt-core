@@ -24,7 +24,7 @@ import {
     Redirect, Switch,
 } from 'react-router-dom';
 import axios from "axios";
-import {Layout, Spin, Result} from "antd";
+import {Layout, Spin, Result, message, notification} from "antd";
 import ConfigContext from "./context/ConfigContext";
 
 const {Content} = Layout;
@@ -93,6 +93,7 @@ class App extends React.Component {
                     config: config
                 });
             }
+            this.getDeviceTypes(config);
         }).catch((error) => {
             if (error.hasOwnProperty("response") && error.response.status === 401) {
                 const redirectUrl = encodeURI(window.location.href);
@@ -115,9 +116,30 @@ class App extends React.Component {
         });
     };
 
+    getDeviceTypes = (config) => {
+        axios.get(
+            window.location.origin + "/entgra-ui-request-handler/invoke/device-mgt/v1.0/device-types",
+        ).then(res => {
+            config.deviceTypes = JSON.parse(res.data.data);
+            this.setState({
+                config: config,
+                loading: false
+            });
+        }).catch((error) => {
+
+                notification["error"]({
+                    message: "There was a problem",
+                    duration: 0,
+                    description:"Error occurred while trying to load device types.",
+                });
+
+        });
+    };
+
     render() {
         const {loading, error} = this.state;
 
+        const abc = this.state.deviceTypes;
         const applicationView = (
             <Router>
                 <ConfigContext.Provider value={this.state.config}>

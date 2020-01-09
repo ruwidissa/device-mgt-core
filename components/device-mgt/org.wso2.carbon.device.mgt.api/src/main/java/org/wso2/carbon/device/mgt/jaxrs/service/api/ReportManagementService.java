@@ -42,6 +42,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @SwaggerDefinition(
         info = @Info(
@@ -127,7 +128,7 @@ public interface ReportManagementService {
             @ApiParam(
                     name = "status",
                     value = "Provide the device status details, such as active or inactive.")
-            @QueryParam("status") String status,
+            @QueryParam("status") List<String> status,
             @ApiParam(
                     name = "ownership",
                     allowableValues = "BYOD, COPE",
@@ -157,4 +158,76 @@ public interface ReportManagementService {
                     defaultValue = "5")
             @QueryParam("limit")
                     int limit) throws ReportManagementException;
+
+
+    @GET
+    @Path("/devices/count")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of Registered Devices",
+            notes = "Provides details of all the devices enrolled with WSO2 IoT Server.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the list of devices.",
+                            response = DeviceList.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid device status type received. \n" +
+                                    "Valid status types are NEW | CHECKED",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n There are no devices.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                    "\n Server error occurred while fetching the device list.",
+                            response = ErrorResponse.class)
+            })
+    Response getDevicesByDurationCount(
+            @ApiParam(
+                    name = "status",
+                    value = "Provide the device status details, such as active or inactive.")
+            @QueryParam("status") List<String> status,
+            @ApiParam(
+                    name = "ownership",
+                    allowableValues = "BYOD, COPE",
+                    value = "Provide the ownership status of the device. The following values can be assigned:\n" +
+                            "- BYOD: Bring Your Own Device\n" +
+                            "- COPE: Corporate-Owned, Personally-Enabled")
+            @QueryParam("ownership") String ownership,
+            @ApiParam(
+                    name = "fromDate",
+                    value = "Start date of the duration",
+                    required = true)
+            @QueryParam("from") String fromDate,
+            @ApiParam(
+                    name = "toDate",
+                    value = "end date of the duration",
+                    required = true)
+            @QueryParam("to") String toDate) throws ReportManagementException;
 }

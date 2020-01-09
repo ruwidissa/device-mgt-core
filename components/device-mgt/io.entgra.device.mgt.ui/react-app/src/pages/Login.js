@@ -101,7 +101,12 @@ class NormalLoginForm extends React.Component {
                 axios.post(window.location.origin+ config.serverConfig.loginUri, request
                 ).then(res => {
                     if (res.status === 200) {
-                        window.location = window.location.origin+ "/entgra";
+                        let redirectUrl = window.location.origin + "/entgra";
+                        const searchParams = new URLSearchParams(window.location.search);
+                        if (searchParams.has("redirect")) {
+                            redirectUrl = searchParams.get("redirect");
+                        }
+                        window.location = redirectUrl;
                     }
                 }).catch(function (error) {
                     if (error.response.status === 400) {

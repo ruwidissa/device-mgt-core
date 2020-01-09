@@ -438,7 +438,7 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
     }
 
     @Override
-    public List<Device> getDevicesByDuration(PaginationRequest request, int tenantId,
+    public List<Device> getDevicesByDuration(PaginationRequest request, List<String> statusList, int tenantId,
                                              String fromDate, String toDate)
             throws DeviceManagementDAOException {
         List<Device> devices;
@@ -499,6 +499,11 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
             throw new DeviceManagementDAOException(msg, e);
         }
         return devices;
+    }
+
+    @Override
+    public int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate, int tenantId) throws DeviceManagementDAOException {
+        return 0;
     }
 
     /**
