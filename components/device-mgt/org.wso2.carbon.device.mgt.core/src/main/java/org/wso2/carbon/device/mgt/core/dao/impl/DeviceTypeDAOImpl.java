@@ -431,23 +431,21 @@ public class DeviceTypeDAOImpl implements DeviceTypeDAO {
 	@Override
 	public void deleteDeviceType(int tenantID, int deviceTypeId) throws DeviceManagementDAOException {
 		Connection conn;
-		PreparedStatement stmt = null;
+		String sql = "DELETE FROM DM_DEVICE_TYPE" +
+		             " WHERE" +
+		             " ID = ?" +
+		             " AND PROVIDER_TENANT_ID = ?";
 		try {
 			conn = getConnection();
-			String sql = "DELETE FROM DM_DEVICE_TYPE" +
-			      " WHERE" +
-			      " ID = ?" +
-			      " AND PROVIDER_TENANT_ID = ?";
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, deviceTypeId);
-			stmt.setInt(2, tenantID);
-			stmt.execute();
+			try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+				stmt.setInt(1, deviceTypeId);
+				stmt.setInt(2, tenantID);
+				stmt.execute();
+			}
 		} catch (SQLException e) {
 			throw new DeviceManagementDAOException(
 					"Error occurred while deleting device type of id: " + deviceTypeId +
 					" for tenant: " + tenantID, e);
-		} finally {
-			DeviceManagementDAOUtil.cleanupResources(stmt, null);
 		}
 	}
 
