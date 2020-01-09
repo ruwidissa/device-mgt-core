@@ -25,8 +25,20 @@ import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
 import GroupActions from "./GroupActions";
 import AddGroup from "./AddGroup";
+import Filter from "../Utils/Filter/Filter";
 
 const {Text} = Typography;
+
+const searchFields = [
+    {
+        name: 'name',
+        placeholder: 'Name'
+    },
+    {
+        name: 'owner',
+        placeholder: 'Owner'
+    }
+];
 
 let config = null;
 let apiUrl;
@@ -94,7 +106,7 @@ class GroupsTable extends React.Component {
     }
 
     //fetch data from api
-    fetchGroups = (params = {}) => {
+    fetchGroups = (params = {}, filters = {}) => {
         const config = this.props.context;
         this.setState({loading: true});
 
@@ -104,6 +116,7 @@ class GroupsTable extends React.Component {
         const extraParams = {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
+            ...filters
         };
 
         const encodedExtraParams = Object.keys(extraParams)
@@ -167,7 +180,10 @@ class GroupsTable extends React.Component {
                 <div style={{background: '#f0f2f5'}}>
                     <AddGroup fetchGroups={this.fetchGroups} style={{marginBottom:"10px"}}/>
                 </div>
-                <div>
+                <div style={{textAlign: 'right'}}>
+                    <Filter fields={searchFields} callback={this.fetchGroups}/>
+                </div>
+                <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
                     <Table
                         columns={this.columns}
                         rowKey={record => (record.id)}

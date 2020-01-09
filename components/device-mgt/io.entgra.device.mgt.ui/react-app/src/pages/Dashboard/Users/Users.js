@@ -50,9 +50,7 @@ class Users extends React.Component {
                         <h3>Users</h3>
                         <Paragraph>All users for device management.</Paragraph>
                     </div>
-                    <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                        <UsersTable/>
-                    </div>
+                    <UsersTable/>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
 

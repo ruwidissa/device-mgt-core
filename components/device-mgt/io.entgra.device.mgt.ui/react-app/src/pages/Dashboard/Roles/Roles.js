@@ -50,12 +50,9 @@ class Roles extends React.Component {
                         <h3>Roles</h3>
                         <Paragraph>All user roles</Paragraph>
                     </div>
-                    <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                        <RolesTable/>
-                    </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
+                    <RolesTable/>
                 </div>
             </div>
         );
