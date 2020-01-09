@@ -26,11 +26,31 @@ import {withConfigContext} from "../../context/ConfigContext";
 import UsersDevices from "./UsersDevices";
 import AddUser from "./AddUser";
 import UserActions from "./UserActions";
-const ButtonGroup = Button.Group
+import Filter from "../Utils/Filter/Filter";
+const ButtonGroup = Button.Group;
 const {Text} = Typography;
 
 let config = null;
 let apiUrl;
+
+const searchFields = [
+    {
+        name: 'username',
+        placeholder: 'Username'
+    },
+    {
+        name: 'firstName',
+        placeholder: 'First Name'
+    },
+    {
+        name: 'lastName',
+        placeholder: 'Last Name'
+    },
+    {
+        name: 'emailAddress',
+        placeholder: 'Email Address'
+    },
+];
 
 class UsersTable extends React.Component {
     constructor(props) {
@@ -62,7 +82,7 @@ class UsersTable extends React.Component {
     }
 
     //fetch data from api
-    fetchUsers = (params = {}) => {
+    fetchUsers = (params = {}, filters = {}) => {
         const config = this.props.context;
         this.setState({loading: true});
 
@@ -72,6 +92,7 @@ class UsersTable extends React.Component {
         const extraParams = {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
+            ...filters
         };
 
         const encodedExtraParams = Object.keys(extraParams)
@@ -79,7 +100,7 @@ class UsersTable extends React.Component {
 
         apiUrl = window.location.origin + config.serverConfig.invoker.uri +
             config.serverConfig.invoker.deviceMgt +
-            "/users?" + encodedExtraParams;
+            "/users/search?" + encodedExtraParams;
 
         //send request to the invokerss
         axios.get(apiUrl).then(res => {
@@ -242,7 +263,10 @@ class UsersTable extends React.Component {
                 <div style={{background: '#f0f2f5'}}>
                     <AddUser fetchUsers={this.fetchUsers}/>
                 </div>
-                <div>
+                <div style={{textAlign: 'right'}}>
+                    <Filter fields={searchFields} callback={this.fetchUsers}/>
+                </div>
+                <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
                     <Table
                         columns={columns}
                         rowKey={record => (record.username)}

@@ -25,7 +25,6 @@ import {
 } from "antd";
 import {Link} from "react-router-dom";
 import GroupsTable from "../../../components/Groups/GroupsTable";
-import AddGroup from "../../../components/Groups/AddGroup";
 
 const {Paragraph} = Typography;
 
@@ -51,12 +50,9 @@ class Groups extends React.Component {
                         <h3>Groups</h3>
                         <Paragraph>All device groups.</Paragraph>
                     </div>
-                    <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                        <GroupsTable/>
-                    </div>
                 </PageHeader>
                 <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
+                    <GroupsTable/>
                 </div>
             </div>
         );

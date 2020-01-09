@@ -31,11 +31,15 @@ import en from 'javascript-time-ago/locale/en'
 import {withConfigContext} from "../../context/ConfigContext";
 import AddRole from "./AddRole";
 import RoleAction from "./RoleAction";
+import Filter from "../Utils/Filter/Filter";
 
-const getTimeAgo = (time) => {
-    const timeAgo = new TimeAgo('en-US');
-    return timeAgo.format(time);
-};
+const searchFields = [
+    {
+        name: 'filter',
+        placeholder: 'Name'
+    }
+];
+
 
 class RolesTable extends React.Component {
     constructor(props) {
@@ -108,7 +112,7 @@ class RolesTable extends React.Component {
     };
 
     //fetch data from api
-    fetchUsers = (params = {}) => {
+    fetchUsers = (params = {}, filters={}) => {
         // const config = this.props.context;
         this.setState({loading: true});
 
@@ -118,6 +122,7 @@ class RolesTable extends React.Component {
         const extraParams = {
             offset: 10 * (currentPage - 1), //calculate the offset
             limit: 10,
+            ...filters
         };
 
         const encodedExtraParams = Object.keys(extraParams)
@@ -125,7 +130,7 @@ class RolesTable extends React.Component {
 
         let apiUrl = window.location.origin + this.config.serverConfig.invoker.uri +
             this.config.serverConfig.invoker.deviceMgt +
-            "/roles";
+            "/roles?" + encodedExtraParams;
 
         //send request to the invokerss
         axios.get(apiUrl).then(res => {
@@ -208,7 +213,10 @@ class RolesTable extends React.Component {
                 <div style={{background: '#f0f2f5'}}>
                     <AddRole fetchUsers={this.fetchUsers}/>
                 </div>
-                <div>
+                <div style={{textAlign: 'right'}}>
+                    <Filter fields={searchFields} callback={this.fetchUsers}/>
+                </div>
+                <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
                     <Table
                         columns={columns}
                         rowKey={record => (record)}
