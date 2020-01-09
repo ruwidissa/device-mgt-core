@@ -594,7 +594,7 @@ public interface DeviceTypeManagementAdminService {
 
 
     @DELETE
-    @Path("/{deviceTypeName}/delete")
+    @Path("/{deviceTypeName}")
     @ApiOperation(
             httpMethod = "DELETE",
             value = "Delete device type.",
@@ -619,8 +619,11 @@ public interface DeviceTypeManagementAdminService {
                     message = "Unauthorized.\n The unauthorized access to the requested resource.",
                     response = ErrorResponse.class),
             @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n Device type trying to delete does not exist"),
+            @ApiResponse(
                     code = 406,
-                    message = "Not Acceptable.\n The requested media type is not supported"),
+                    message = "Not Acceptable. \n The requested media type is not supported"),
             @ApiResponse(
                     code = 500,
                     message = "Internal Server Error. \n Server error occurred while deleting device type.",

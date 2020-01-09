@@ -320,7 +320,7 @@ public class DeviceTypeManagementAdminServiceImpl implements DeviceTypeManagemen
 
     @Override
     @DELETE
-    @Path("/{deviceTypeName}/delete")
+    @Path("/{deviceTypeName}")
     public Response deleteDeviceType(@PathParam("deviceTypeName") String deviceTypeName) {
         try {
             DeviceManagementProviderService deviceManagementProviderService =
