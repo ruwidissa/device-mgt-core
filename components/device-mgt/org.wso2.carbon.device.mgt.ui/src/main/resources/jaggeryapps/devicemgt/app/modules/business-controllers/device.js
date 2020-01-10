@@ -435,5 +435,33 @@ deviceModule = function () {
 
 	};
 
+    /**
+     * Retrieve device info details of a device
+     * @param deviceType - Type of the device i.e ios, android
+     * @param deviceId - Device ID of te device
+     */
+	publicMethods.getDeviceInfo = function (deviceType, deviceId) {
+        try {
+            var url = devicemgtProps["httpsURL"] + devicemgtProps["backendRestEndpoints"]["deviceMgt"]
+                + "/devices/" + deviceType + "/" + deviceId + "/info";
+            var response = {};
+            return serviceInvokers.XMLHttp.get(
+                url,
+                function (backendResponse) {
+                    if (backendResponse.status === 200 && backendResponse.responseText) {
+                        response["status"] = "success";
+                        response["content"] = parse(backendResponse.responseText);
+                    } else {
+                        log.error("Error occurred while retrieving device info via " + url + ". Error code: "
+                            + backendResponse.status + ". Reason: " + backendResponse.responseText);
+                        response["status"] = "error";
+                    }
+                    return response;
+                });
+        } catch (e) {
+            log.error("Error occurred while retrieving device info via " + url, e);
+        }
+    };
+
     return publicMethods;
 }();
