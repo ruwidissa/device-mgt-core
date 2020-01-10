@@ -86,8 +86,6 @@ import javax.ws.rs.core.Response;
 @Api(value = "Device Type Management Administrative Service", description = "This an  API intended to be used by " +
         "'internal' components to log in as an admin user and do a selected number of operations. " +
         "Further, this is strictly restricted to admin users only ")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 @Scopes(
         scopes = {
                 @Scope(
@@ -113,6 +111,7 @@ import javax.ws.rs.core.Response;
 public interface DeviceTypeManagementAdminService {
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -164,6 +163,7 @@ public interface DeviceTypeManagementAdminService {
     Response getDeviceTypes();
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -217,6 +217,8 @@ public interface DeviceTypeManagementAdminService {
                     String type);
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
@@ -262,6 +264,8 @@ public interface DeviceTypeManagementAdminService {
             required = true)DeviceType deviceType);
 
     @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{type}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -317,6 +321,8 @@ public interface DeviceTypeManagementAdminService {
             required = true) DeviceType deviceType);
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{type}/configs")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -372,8 +378,10 @@ public interface DeviceTypeManagementAdminService {
                     PlatformConfiguration config);
 
 
-    @Path("/versions")
     @POST
+    @Path("/versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
@@ -425,8 +433,9 @@ public interface DeviceTypeManagementAdminService {
                     value = "The device type version details.",
                     required = true) DeviceTypeVersionWrapper deviceTypeVersion);
 
-    @Path("/{deviceTypeName}/versions")
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{deviceTypeName}/versions")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -475,8 +484,10 @@ public interface DeviceTypeManagementAdminService {
                     String deviceTypeName);
 
 
-    @Path("{deviceTypeName}/versions")
     @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/{deviceTypeName}/versions")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
@@ -529,8 +540,8 @@ public interface DeviceTypeManagementAdminService {
                     required = true) DeviceTypeVersionWrapper deviceTypeVersion);
 
 
-    @Path("{deviceTypeName}/versions/{version}")
     @DELETE
+    @Path("/{deviceTypeName}/versions/{version}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "DELETE",
@@ -581,4 +592,47 @@ public interface DeviceTypeManagementAdminService {
                                              required = true)
                                      @PathParam("version")String version);
 
+
+    @DELETE
+    @Path("/{deviceTypeName}")
+    @ApiOperation(
+            httpMethod = "DELETE",
+            value = "Delete device type.",
+            notes = "This api will permanently delete an existing device type with everything " +
+                    "it's related with.",
+            tags = "Device Type Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:admin:device-type")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 202, message = "ACCEPTED. \n Successfully deleted the device type.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body")
+                    }),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n Device type trying to delete does not exist"),
+            @ApiResponse(
+                    code = 406,
+                    message = "Not Acceptable. \n The requested media type is not supported"),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while deleting device type.",
+                    response = ErrorResponse.class)
+    })
+    Response deleteDeviceType(
+            @ApiParam(
+                    name = "deviceTypeName",
+                    value = "Device type name.",
+                    required = true)
+            @PathParam("deviceTypeName") String deviceTypeName);
 }

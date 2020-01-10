@@ -39,6 +39,7 @@ import io.swagger.annotations.Tag;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -67,36 +68,54 @@ import javax.ws.rs.core.Response;
                         name = "Create Event Stream Artifact",
                         description = "Create Event Stream Artifact",
                         key = "perm:analytics:artifacts:stream",
-                        permissions = {"/device-mgt/analytics/artifacts/stream/add"}
-                ),
+                        permissions = {"/device-mgt/analytics/artifacts/stream/add"}),
+                @Scope(
+                        name = "Delete Stream Artifact",
+                        description = "Delete Stream Artifact",
+                        key = "perm:analytics:artifacts:stream:delete",
+                        permissions = {"/device-mgt/analytics/artifacts/stream/delete"}),
                 @Scope(
                         name = "Create Event Receiver Artifact",
                         description = "Create Event Receiver Artifact",
                         key = "perm:analytics:artifacts:receiver",
-                        permissions = {"/device-mgt/analytics/artifacts/receiver/add"}
-                ),
+                        permissions = {"/device-mgt/analytics/artifacts/receiver/add"}),
+                @Scope(
+                        name = "Delete Receiver Artifact",
+                        description = "Delete Receiver Artifact",
+                        key = "perm:analytics:artifacts:receiver:delete",
+                        permissions = {"/device-mgt/analytics/artifacts/receiver/delete"}),
                 @Scope(
                         name = "Create Event Publisher Artifact",
                         description = "Create Event Publisher Artifact",
                         key = "perm:analytics:artifacts:publisher",
-                        permissions = {"/device-mgt/analytics/artifacts/publisher/add"}
-                ),
+                        permissions = {"/device-mgt/analytics/artifacts/publisher/add"}),
+                @Scope(
+                        name = "Delete Publisher Artifact",
+                        description = "Delete Publisher Artifact",
+                        key = "perm:analytics:artifacts:publisher:delete",
+                        permissions = {"/device-mgt/analytics/artifacts/publisher/delete"}),
                 @Scope(
                         name = "Create Siddhi Script Artifact",
                         description = "Create Siddhi Script Artifact",
                         key = "perm:analytics:artifacts:siddhi",
-                        permissions = {"/device-mgt/analytics/artifacts/siddhi-script/add"}
-                )
+                        permissions = {"/device-mgt/analytics/artifacts/siddhi-script/add"}),
+                @Scope(
+                        name = "Delete Siddhi Script Artifact",
+                        description = "Delete Siddhi Script Artifact",
+                        key = "perm:analytics:artifacts:siddhi:delete",
+                        permissions = {"/device-mgt/analytics/artifacts/siddhi-script/delete"})
         }
 )
 
-@Api(value = "Analytics Artifacts Management", description = "This API corresponds to services" +
-                                                             " related to Analytics Artifacts management")
+@Api(
+        value = "Analytics Artifacts Management",
+        description = "This API corresponds to services related to Analytics Artifacts management"
+)
 @Path("/analytics/artifacts")
-@Consumes(MediaType.APPLICATION_JSON)
 public interface AnalyticsArtifactsManagementService {
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/stream/{id}")
     @ApiOperation(
             httpMethod = "POST",
@@ -105,8 +124,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:stream")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:stream"
+                            )})
             }
     )
     @ApiResponses(
@@ -117,41 +138,42 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
                             code = 400,
-                            message = "Bad Request."),
+                            message = "Bad Request. \n The resource to add already exists."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n The resource to edit not available."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
-                            message = "Internal Server Error. \n Server error occurred while deploying the " +
-                                      "Stream Artifact.",
+                            message = "Internal Server Error. \n Server error occurred while " +
+                                      "deploying the Stream Artifact.",
                             response = ErrorResponse.class)
             }
     )
     Response deployEventDefinitionAsString(
-            @ApiParam(name = "id", value = "Stream id(name:version).")
+            @ApiParam(
+                    name = "id",
+                    value = "Stream id(name:version).")
             @PathParam("id") String id,
-            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @ApiParam(
+                    name = "isEdited",
+                    value = "This stream is being edited or created.")
             @QueryParam("isEdited") boolean isEdited,
-            @ApiParam(name = "stream", value = "Add the data to complete the EventStream object.",
+            @ApiParam(
+                    name = "stream",
+                    value = "Add the data to complete the EventStream object.",
                     required = true)
             @Valid EventStream stream);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/stream")
     @ApiOperation(
             httpMethod = "POST",
@@ -160,8 +182,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:stream")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:stream"
+                            )})
             }
     )
     @ApiResponses(
@@ -172,24 +196,15 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body")
                             }
                     ),
                     @ApiResponse(
                             code = 400,
-                            message = "Bad Request."),
+                            message = "Bad Request. \n The payload is invalid."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -198,11 +213,66 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deployEventDefinitionAsDto(
-            @ApiParam(name = "stream", value = "Add the data to complete the EventStream object.",
+            @ApiParam(
+                    name = "stream",
+                    value = "Add the data to complete the EventStream object.",
                     required = true)
             @Valid EventStream stream);
 
+    @DELETE
+    @Path("/stream/{name}/{version}")
+    @ApiOperation(
+            httpMethod = "DELETE",
+            value = "Delete the Stream with id as {name}:{version}",
+            notes = "Use this api to delete an already deployed Stream",
+            tags = "Analytics Artifacts Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:stream:delete"
+                            )})
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully deleted the Stream Artifact.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body")
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n The resource to delete not available."),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable. \n The requested media type is not supported."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \nServer error occurred while " +
+                                      "deleting the Stream Artifact.",
+                            response = ErrorResponse.class)
+            }
+    )
+    Response deleteStream(
+            @ApiParam(
+                    name = "name",
+                    value = "Stream name.",
+                    required = true)
+            @PathParam("name") String name,
+            @ApiParam(
+                    name = "version",
+                    value = "Stream version.",
+                    required = true)
+            @PathParam("version") String version
+    );
+
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receiver/{name}")
     @ApiOperation(
             httpMethod = "POST",
@@ -211,8 +281,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:receiver")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:receiver"
+                            )})
             }
     )
     @ApiResponses(
@@ -223,25 +295,12 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -250,15 +309,22 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deployEventReceiverAsString(
-            @ApiParam(name = "name", value = "Receiver name.")
+            @ApiParam(
+                    name = "name",
+                    value = "Receiver name.")
             @PathParam("name") String name,
-            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @ApiParam(
+                    name = "isEdited",
+                    value = "This stream is being edited or created.")
             @QueryParam("isEdited") boolean isEdited,
-            @ApiParam(name = "receiver", value = "Add the data to complete the EventReceiver object.",
+            @ApiParam(
+                    name = "receiver",
+                    value = "Add the data to complete the EventReceiver object.",
                     required = true)
             @Valid Adapter receiver);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/receiver")
     @ApiOperation(
             httpMethod = "POST",
@@ -267,8 +333,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:receiver")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:receiver"
+                            )})
             }
     )
     @ApiResponses(
@@ -279,25 +347,16 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
                             code = 400,
                             message =
-                                    "Bad Request."),
+                                    "Bad Request. \n The payload is invalid."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -306,11 +365,60 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deployEventReceiverAsDto(
-            @ApiParam(name = "receiver", value = "Add the data to complete the Adapter object.",
+            @ApiParam(
+                    name = "receiver",
+                    value = "Add the data to complete the Adapter object.",
                     required = true)
             @Valid Adapter receiver);
 
+    @DELETE
+    @Path("/receiver/{name}")
+    @ApiOperation(
+            httpMethod = "DELETE",
+            value = "Delete a Receiver with the given name",
+            notes = "Use this api to delete an already deployed active or inactive Receiver",
+            tags = "Analytics Artifacts Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:receiver:delete"
+                            )})
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully deleted the Receiver Artifact.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable. \n The requested media type is not supported."
+                    ),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error.\n Server error occurred while " +
+                                      "deleting the Receiver Artifact.",
+                            response = ErrorResponse.class
+                    )
+            }
+    )
+    Response deleteReceiver(
+            @ApiParam(
+                    name = "name",
+                    value = "Receiver name.",
+                    required = true)
+            @PathParam("name") String name);
+
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/publisher/{name}")
     @ApiOperation(
             httpMethod = "POST",
@@ -319,8 +427,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:publisher")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:publisher"
+                            )})
             }
     )
     @ApiResponses(
@@ -331,25 +441,12 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -358,15 +455,22 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deployEventPublisherAsString(
-            @ApiParam(name = "name", value = "Publisher name.")
+            @ApiParam(
+                    name = "name",
+                    value = "Publisher name.")
             @PathParam("name") String name,
-            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @ApiParam(
+                    name = "isEdited",
+                    value = "This stream is being edited or created.")
             @QueryParam("isEdited") boolean isEdited,
-            @ApiParam(name = "publisher", value = "Add the data to complete the EventPublisher object.",
+            @ApiParam(
+                    name = "publisher",
+                    value = "Add the data to complete the EventPublisher object.",
                     required = true)
             @Valid Adapter publisher);
 
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/publisher")
     @ApiOperation(
             httpMethod = "POST",
@@ -375,8 +479,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:publisher")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:publisher"
+                            )})
             }
     )
     @ApiResponses(
@@ -387,16 +493,7 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
@@ -405,7 +502,7 @@ public interface AnalyticsArtifactsManagementService {
                                     "Bad Request."),
                     @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while deploying the " +
@@ -414,11 +511,57 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deployEventPublisherAsDto(
-            @ApiParam(name = "publisher", value = "Add the data to complete the Adapter object.",
+            @ApiParam(
+                    name = "publisher",
+                    value = "Add the data to complete the Adapter object.",
                     required = true)
             @Valid Adapter publisher);
 
+    @DELETE
+    @Path("/publisher/{name}")
+    @ApiOperation(
+            httpMethod = "DELETE",
+            value = "Delete a Publisher with the given name",
+            notes = "Use this api to delete an already deployed active or inactive Publisher",
+            tags = "Analytics Artifacts Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:publisher:delete"
+                            )})
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully deleted the Publisher Artifact.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body")
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable. \n The requested media type is not supported."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Server error occurred while " +
+                                      "deleting the Publisher Artifact.",
+                            response = ErrorResponse.class)
+            }
+    )
+    Response deletePublisher(
+            @ApiParam(
+                    name = "name",
+                    value = "Publisher name.",
+                    required = true)
+            @PathParam("name") String name);
+
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/siddhi-script/{name}")
     @ApiOperation(
             httpMethod = "POST",
@@ -427,8 +570,10 @@ public interface AnalyticsArtifactsManagementService {
             tags = "Analytics Artifacts Management",
             extensions = {
                     @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:analytics:artifacts:siddhi")
-                    })
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:siddhi"
+                            )})
             }
     )
     @ApiResponses(
@@ -439,25 +584,12 @@ public interface AnalyticsArtifactsManagementService {
                             responseHeaders = {
                                     @ResponseHeader(
                                             name = "Content-Type",
-                                            description = "The content type of the body."),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                          "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                    "Used by caches, or in conditional requests."),
+                                            description = "The content type of the body.")
                             }
                     ),
                     @ApiResponse(
-                            code = 400,
-                            message =
-                                    "Bad Request."),
-                    @ApiResponse(
                             code = 406,
-                            message = "Not Acceptable.\n The requested media type is not supported."),
+                            message = "Not Acceptable. \n The requested media type is not supported."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Server error occurred while " +
@@ -466,11 +598,61 @@ public interface AnalyticsArtifactsManagementService {
             }
     )
     Response deploySiddhiExecutableScript(
-            @ApiParam(name = "name", value = "Siddhi Executable Script name.")
+            @ApiParam(
+                    name = "name",
+                    value = "Siddhi Executable Script name.")
             @PathParam("name") String name,
-            @ApiParam(name = "isEdited", value = "This stream is being edited or created.")
+            @ApiParam(
+                    name = "isEdited",
+                    value = "This stream is being edited or created.")
             @QueryParam("isEdited") boolean isEdited,
-            @ApiParam(name = "plan", value = "Add the data to complete the SiddhiExecutionPlan object.",
+            @ApiParam(
+                    name = "plan",
+                    value = "Add the data to complete the SiddhiExecutionPlan object.",
                     required = true)
             @Valid SiddhiExecutionPlan plan);
+
+    @DELETE
+    @Path("/siddhi-script/{name}")
+    @ApiOperation(
+            httpMethod = "DELETE",
+            value = "Delete an already deployed Siddhi script",
+            notes = "Use this api to delete an already deployed active or inactive Siddhi script",
+            tags = "Analytics Artifacts Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(
+                                    name = Constants.SCOPE,
+                                    value = "perm:analytics:artifacts:siddhi:delete"
+                            )
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully deleted the Siddhi script Artifact.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body")
+                            }
+                    ),
+                    @ApiResponse(
+                            code = 406,
+                            message = "Not Acceptable. \n The requested media type is not supported."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error.\n Server error occurred while " +
+                                      "deleting the Siddhi script Artifact.",
+                            response = ErrorResponse.class)
+            }
+    )
+    Response deleteSiddhiScript(
+            @ApiParam(
+                    name = "name",
+                    value = "Siddhi script name.",
+                    required = true)
+            @PathParam("name") String name);
 }

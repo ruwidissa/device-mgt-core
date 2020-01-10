@@ -15,6 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
@@ -214,6 +231,39 @@ public class DeviceTypeManagementAdminServiceTest {
         Assert.assertNotNull(response, "The response should not be null");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "The Response Status code should be 500.");
+        Mockito.reset(deviceManagementProviderService);
+    }
+
+    @Test(description = "Test delete device type with correct request.")
+    public void testDeleteDeviceType() throws DeviceManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(deviceManagementProviderService);
+        Mockito.when(deviceManagementProviderService.
+                deleteDeviceType(Mockito.anyString(), Mockito.any(DeviceType.class))).
+                thenReturn(true);
+        Response response = deviceTypeManagementAdminService.deleteDeviceType(TEST_DEVICE_TYPE);
+        Assert.assertEquals(response.getStatus(), Response.Status.ACCEPTED.getStatusCode());
+    }
+
+    @Test(description = "Test delete device type when unavailable.")
+    public void testDeleteNonExistingDeviceType() throws DeviceManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(deviceManagementProviderService);
+        Mockito.when(deviceManagementProviderService.getDeviceType(Mockito.anyString())).thenReturn(null);
+        Response response = deviceTypeManagementAdminService.deleteDeviceType(TEST_DEVICE_TYPE);
+        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
+        Mockito.reset(deviceManagementProviderService);
+    }
+
+    @Test(description = "Test delete device type when DeviceManagementException is thrown.")
+    public void testDeleteDeviceTypeWithException() throws DeviceManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(deviceManagementProviderService);
+        Mockito.when(deviceManagementProviderService.
+                deleteDeviceType(Mockito.anyString(), Mockito.any(DeviceType.class))).
+                thenThrow(new DeviceManagementException());
+        Response response = deviceTypeManagementAdminService.deleteDeviceType(TEST_DEVICE_TYPE);
+        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         Mockito.reset(deviceManagementProviderService);
     }
 }
