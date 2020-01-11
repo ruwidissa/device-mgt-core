@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.api.services.ConfigRetrieveAPI;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
-import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 

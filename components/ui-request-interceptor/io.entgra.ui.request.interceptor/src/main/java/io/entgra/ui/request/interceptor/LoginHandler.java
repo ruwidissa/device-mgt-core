@@ -56,14 +56,13 @@ public class LoginHandler extends HttpServlet {
 
     private static String username;
     private static String password;
-    private static String platform;
-    private static String serverUrl;
+    private static String gatewayUrl;
     private static String uiConfigUrl;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            validateLoginRequest(req, resp);
+            validateLoginRequest(req);
             HttpSession httpSession = req.getSession(false);
             if (httpSession != null) {
                 httpSession.invalidate();
@@ -79,14 +78,14 @@ public class LoginHandler extends HttpServlet {
             if (!StringUtils.isEmpty(executorResponse) && executorResponse
                     .contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 log.error("Error occurred while getting UI configurations by invoking " + uiConfigUrl);
-                HandlerUtil.handleError(req, resp, serverUrl, platform, uiConfigResponse);
+                HandlerUtil.handleError(resp, uiConfigResponse);
                 return;
             }
 
             String uiConfig = uiConfigResponse.getData();
             if (uiConfig == null){
                 log.error("UI config retrieval is failed, and didn't find UI configuration for App manager.");
-                HandlerUtil.handleError(req, resp, serverUrl, platform, null);
+                HandlerUtil.handleError(resp, null);
                 return;
             }
             JsonElement uiConfigJsonElement = jsonParser.parse(uiConfigResponse.getData());
@@ -94,12 +93,12 @@ public class LoginHandler extends HttpServlet {
             if (uiConfigJsonElement.isJsonObject()) {
                 uiConfigJsonObject = uiConfigJsonElement.getAsJsonObject();
                 httpSession.setAttribute(HandlerConstants.UI_CONFIG_KEY, uiConfigJsonObject);
-                httpSession.setAttribute(HandlerConstants.PLATFORM, serverUrl);
+                httpSession.setAttribute(HandlerConstants.PLATFORM, gatewayUrl);
             }
             if (uiConfigJsonObject == null) {
                 log.error(
                         "Either UI config json element is not an json object or converting rom json element to json object is failed.");
-                HandlerUtil.handleError(req, resp, serverUrl, platform, null);
+                HandlerUtil.handleError(resp, null);
                 return;
             }
 
@@ -111,7 +110,7 @@ public class LoginHandler extends HttpServlet {
                 log.debug("SSO is enabled");
             } else {
                 // default login
-                HttpPost apiRegEndpoint = new HttpPost(serverUrl + HandlerConstants.APP_REG_ENDPOINT);
+                HttpPost apiRegEndpoint = new HttpPost(gatewayUrl + HandlerConstants.APP_REG_ENDPOINT);
                 apiRegEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + Base64.getEncoder()
                         .encodeToString((username + HandlerConstants.COLON + password).getBytes()));
                 apiRegEndpoint.setHeader(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -120,18 +119,17 @@ public class LoginHandler extends HttpServlet {
                 ProxyResponse clientAppResponse = HandlerUtil.execute(apiRegEndpoint);
 
                 if (clientAppResponse.getCode() == HttpStatus.SC_UNAUTHORIZED){
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, clientAppResponse);
+                    HandlerUtil.handleError(resp, clientAppResponse);
                     return;
                 }
                 if (clientAppResponse.getCode() == HttpStatus.SC_CREATED && getTokenAndPersistInSession(req, resp,
                         clientAppResponse.getData(), scopes)) {
                     ProxyResponse proxyResponse = new ProxyResponse();
                     proxyResponse.setCode(HttpStatus.SC_OK);
-                    proxyResponse.setUrl(serverUrl + HandlerConstants.PATH_SEPARATOR + platform);
-                    HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+                    HandlerUtil.handleSuccess(resp, proxyResponse);
                     return;
                 }
-                HandlerUtil.handleError(req, resp, serverUrl, platform, null);
+                HandlerUtil.handleError(resp, null);
             }
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
@@ -165,13 +163,13 @@ public class LoginHandler extends HttpServlet {
 
                 if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     log.error("Error occurred while invoking the API to get token data.");
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, tokenResultResponse);
+                    HandlerUtil.handleError(resp, tokenResultResponse);
                     return false;
                 }
                 String tokenResult = tokenResultResponse.getData();
                 if (tokenResult == null){
                     log.error("Invalid token response is received.");
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, tokenResultResponse);
+                    HandlerUtil.handleError(resp, tokenResultResponse);
                     return false;
                 }
 
@@ -222,28 +220,21 @@ public class LoginHandler extends HttpServlet {
      * @param req - {@link HttpServletRequest}
      * Define username and password static parameters.
      */
-    private static void validateLoginRequest(HttpServletRequest req, HttpServletResponse resp) throws LoginException {
+    private static void validateLoginRequest(HttpServletRequest req) throws LoginException {
+        String gatewayCarbonPort = System.getProperty("iot.gateway.carbon.https.port");
+        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())){
+            gatewayCarbonPort = System.getProperty("iot.gateway.carbon.http.port");
+        }
         username = req.getParameter("username");
         password = req.getParameter("password");
-        platform = req.getParameter(HandlerConstants.PLATFORM);
-        serverUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
-                    + System.getProperty("iot.gateway.https.port");
+        gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+                + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
         uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
-                + System.getProperty("iot.gateway.carbon.https.port") + HandlerConstants.UI_CONFIG_ENDPOINT;
-
-        try {
-            if (platform == null) {
-                resp.sendRedirect(serverUrl + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-                throw new LoginException("Invalid login request. Platform parameter is Null.");
-            }
-            if (username == null || password == null) {
-                resp.sendRedirect(serverUrl + HandlerConstants.PATH_SEPARATOR + platform
-                        + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-                throw new LoginException(
-                        " Invalid login request. Username or Password is not received for login request.");
-            }
-        } catch (IOException e) {
-            throw new LoginException("Error occurred while redirecting to default error page.", e);
+                + gatewayCarbonPort + HandlerConstants.UI_CONFIG_ENDPOINT;
+        if (username == null || password == null) {
+            String msg = "Invalid login request. Username or Password is not received for login request.";
+            log.error(msg);
+            throw new LoginException(msg);
         }
     }
 
@@ -271,8 +262,7 @@ public class LoginHandler extends HttpServlet {
      * @throws IOException IO exception throws if an error occurred when invoking token endpoint
      */
     private ProxyResponse getTokenResult(String encodedClientApp, JsonArray scopes) throws IOException {
-
-        HttpPost tokenEndpoint = new HttpPost(serverUrl + HandlerConstants.TOKEN_ENDPOINT);
+        HttpPost tokenEndpoint = new HttpPost(gatewayUrl + HandlerConstants.TOKEN_ENDPOINT);
         tokenEndpoint.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BASIC + encodedClientApp);
         tokenEndpoint.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.toString());
         String scopeString = getScopeString(scopes);

@@ -25,7 +25,6 @@ import com.google.gson.JsonSyntaxException;
 import io.entgra.ui.request.interceptor.beans.AuthData;
 import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -52,24 +51,18 @@ public class UserHandler extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            String platform = req.getParameter(HandlerConstants.PLATFORM);
             String serverUrl =
-                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
-                            + System.getProperty("iot.gateway.https.port");
-            if (StringUtils.isBlank(platform)) {
-                sendUnAuthorizeResponse(req, resp, serverUrl, platform);
-                return;
-            }
-
+                    req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+                            + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
-                sendUnAuthorizeResponse(req, resp, serverUrl, platform);
+                sendUnAuthorizeResponse(resp);
                 return;
             }
 
             AuthData authData = (AuthData) httpSession.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
             if (authData == null) {
-                sendUnAuthorizeResponse(req, resp, serverUrl, platform);
+                sendUnAuthorizeResponse(resp);
                 return;
             }
 
@@ -84,13 +77,13 @@ public class UserHandler extends HttpServlet {
 
             if (tokenStatus.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 log.error("Error occurred while invoking the API to get token status.");
-                HandlerUtil.handleError(req, resp, serverUrl, platform, tokenStatus);
+                HandlerUtil.handleError(resp, tokenStatus);
                 return;
             }
             String tokenData = tokenStatus.getData();
             if (tokenData == null) {
                 log.error("Invalid token data is received.");
-                HandlerUtil.handleError(req, resp, serverUrl, platform, tokenStatus);
+                HandlerUtil.handleError(resp, tokenStatus);
                 return;
             }
             JsonParser jsonParser = new JsonParser();
@@ -98,14 +91,14 @@ public class UserHandler extends HttpServlet {
             if (jTokenResult.isJsonObject()) {
                 JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
                 if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
-                    sendUnAuthorizeResponse(req, resp, serverUrl, platform);
+                    sendUnAuthorizeResponse(resp);
                     return;
                 }
                 ProxyResponse proxyResponse = new ProxyResponse();
                 proxyResponse.setCode(HttpStatus.SC_OK);
                 proxyResponse.setData(
                         jTokenResultAsJsonObject.get("username").getAsString().replaceAll("@carbon.super", ""));
-                HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+                HandlerUtil.handleSuccess(resp, proxyResponse);
             }
         } catch (IOException e) {
             log.error("Error occurred while sending the response into the socket. ", e);
@@ -117,17 +110,14 @@ public class UserHandler extends HttpServlet {
     /**
      * Send UnAuthorized Response to the user
      * 
-     * @param req HttpServletRequest object
      * @param resp HttpServletResponse object
-     * @param serverUrl Url of the server
-     * @param platform Requested platform
      */
-    private void sendUnAuthorizeResponse(HttpServletRequest req, HttpServletResponse resp, String serverUrl, String platform)
+    private void sendUnAuthorizeResponse(HttpServletResponse resp)
             throws IOException {
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
         proxyResponse.setExecutorResponse(
                 HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
-        HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+        HandlerUtil.handleError(resp, proxyResponse);
     }
 }

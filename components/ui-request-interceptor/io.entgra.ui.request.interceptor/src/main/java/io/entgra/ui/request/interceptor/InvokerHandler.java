@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -91,10 +92,10 @@ public class InvokerHandler extends HttpServlet {
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     log.error("Error occurred while invoking the API endpoint.");
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                    HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
-                HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+                HandlerUtil.handleSuccess(resp, proxyResponse);
             }
         } catch (FileUploadException e) {
             log.error("Error occurred when processing Multipart POST request.", e);
@@ -119,10 +120,10 @@ public class InvokerHandler extends HttpServlet {
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     log.error("Error occurred while invoking the API endpoint.");
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                    HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
-                HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+                HandlerUtil.handleSuccess(resp, proxyResponse);
             }
         } catch (IOException e) {
             log.error("Error occurred when processing GET request.", e);
@@ -146,10 +147,10 @@ public class InvokerHandler extends HttpServlet {
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     log.error("Error occurred while invoking the API endpoint.");
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                    HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
-                HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+                HandlerUtil.handleSuccess(resp, proxyResponse);
             }
         } catch (FileUploadException e) {
             log.error("Error occurred when processing Multipart PUT request.", e);
@@ -174,10 +175,10 @@ public class InvokerHandler extends HttpServlet {
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                     log.error("Error occurred while invoking the API endpoint.");
-                    HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                    HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
-                HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+                HandlerUtil.handleSuccess(resp, proxyResponse);
             }
         } catch (IOException e) {
             log.error("Error occurred when processing DELETE request.", e);
@@ -228,7 +229,13 @@ public class InvokerHandler extends HttpServlet {
      */
     private String generateBackendRequestURL(HttpServletRequest req) {
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(serverUrl).append(HandlerConstants.API_COMMON_CONTEXT).append(req.getPathInfo());
+        String endpointUrl = Arrays.stream(HandlerConstants.SKIPPING_API_CONTEXT)
+                .anyMatch(contextPath -> contextPath.contains(req.getPathInfo())) ?
+                serverUrl :
+                req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
+
+        urlBuilder.append(endpointUrl).append(HandlerConstants.API_COMMON_CONTEXT).append(req.getPathInfo());
         if (StringUtils.isNotEmpty(req.getQueryString())) {
             urlBuilder.append("?").append(req.getQueryString());
         }
@@ -275,7 +282,7 @@ public class InvokerHandler extends HttpServlet {
 
         if (session == null) {
             log.error("Unauthorized, You are not logged in. Please log in to the portal");
-            handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
+            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
@@ -283,13 +290,13 @@ public class InvokerHandler extends HttpServlet {
         platform = (String) session.getAttribute(HandlerConstants.PLATFORM);
         if (authData == null) {
             log.error("Unauthorized, Access token not found in the current session");
-            handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
+            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
         if (req.getMethod() == null) {
             log.error("Bad Request, Request method is empty");
-            handleError(req, resp, HttpStatus.SC_BAD_REQUEST);
+            handleError(resp, HttpStatus.SC_BAD_REQUEST);
             return false;
         }
         return true;
@@ -311,7 +318,7 @@ public class InvokerHandler extends HttpServlet {
             ProxyResponse proxyResponse = HandlerUtil.execute(httpRequest);
             if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
                 log.error("Error occurred while invoking the API after refreshing the token.");
-                HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+                HandlerUtil.handleError(resp, proxyResponse);
                 return null;
             }
             return proxyResponse;
@@ -337,7 +344,7 @@ public class InvokerHandler extends HttpServlet {
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");
-            handleError(req, resp, HttpStatus.SC_UNAUTHORIZED);
+            handleError(resp, HttpStatus.SC_UNAUTHORIZED);
             return false;
         }
 
@@ -354,7 +361,7 @@ public class InvokerHandler extends HttpServlet {
         ProxyResponse tokenResultResponse = HandlerUtil.execute(tokenEndpoint);
         if (tokenResultResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
             log.error("Error occurred while refreshing access token.");
-            HandlerUtil.handleError(req, resp, serverUrl, platform, tokenResultResponse);
+            HandlerUtil.handleError(resp, tokenResultResponse);
             return false;
         }
 
@@ -378,24 +385,23 @@ public class InvokerHandler extends HttpServlet {
         }
 
         log.error("Error Occurred in token renewal process.");
-        handleError(req, resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         return false;
     }
 
     /**
      * Handle error requests
      *
-     * @param req {@link HttpServletRequest}
      * @param resp {@link HttpServletResponse}
      * @param errorCode HTTP error status code
      * @throws IOException If error occurred when trying to send the error response.
      */
-    private static void handleError(HttpServletRequest req, HttpServletResponse resp, int errorCode)
+    private static void handleError(HttpServletResponse resp, int errorCode)
             throws IOException {
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(errorCode);
         proxyResponse.setExecutorResponse(
                 HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(errorCode));
-        HandlerUtil.handleError(req, resp, serverUrl, platform, proxyResponse);
+        HandlerUtil.handleError(resp, proxyResponse);
     }
 }

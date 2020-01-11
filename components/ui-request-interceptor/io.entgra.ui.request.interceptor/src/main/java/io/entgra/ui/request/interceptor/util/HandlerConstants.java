@@ -34,15 +34,15 @@ public class HandlerConstants {
     public static final String PLATFORM = "platform";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
-    public static final String DEFAULT_ERROR_CALLBACK = "/pages/error/default";
-    public static final String ERROR_CALLBACK_KEY = "errorCallback";
     public static final String API_COMMON_CONTEXT = "/api";
     public static final String EXECUTOR_EXCEPTION_PREFIX = "ExecutorException-";
     public static final String TOKEN_IS_EXPIRED = "ACCESS_TOKEN_IS_EXPIRED";
 
     public static final String SCHEME_SEPARATOR = "://";
     public static final String COLON = ":";
-    public static final String PATH_SEPARATOR = "/";
+    public static final String HTTP_PROTOCOL = "http";
+
+    public static final String[] SKIPPING_API_CONTEXT = {"artifact", "conf"};
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;

@@ -38,9 +38,6 @@ public class LogoutHandler extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        String serverUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName()
-                + HandlerConstants.COLON + req.getServerPort();
-        String platform = req.getParameter(HandlerConstants.PLATFORM);
         HttpSession httpSession = req.getSession(false);
         if (httpSession != null) {
             httpSession.invalidate();
@@ -50,9 +47,8 @@ public class LogoutHandler extends HttpServlet {
 
         ProxyResponse proxyResponse = new ProxyResponse();
         proxyResponse.setCode(HttpStatus.SC_OK);
-        proxyResponse.setUrl(serverUrl + HandlerConstants.PATH_SEPARATOR + platform + HandlerConstants.LOGIN_PAGE);
         try {
-            HandlerUtil.handleSuccess(req, resp, serverUrl, platform, proxyResponse);
+            HandlerUtil.handleSuccess(resp, proxyResponse);
         } catch (IOException e) {
             log.error("Error occurred when processing logout request.", e);
         }
