@@ -20,17 +20,12 @@ package org.wso2.carbon.device.application.mgt.common;
 public class ProxyResponse {
 
     private int code;
-    private String url;
     private String data;
     private String executorResponse;
 
     public int getCode() { return code; }
 
     public void setCode(int code) { this.code = code; }
-
-    public String getUrl() { return url; }
-
-    public void setUrl(String url) { this.url = url; }
 
     public String getData() { return data; }
 

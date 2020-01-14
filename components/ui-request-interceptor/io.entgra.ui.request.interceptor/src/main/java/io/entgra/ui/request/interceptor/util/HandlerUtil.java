@@ -58,6 +58,8 @@ public class HandlerUtil {
             ProxyResponse proxyResponse = new ProxyResponse();
 
             if (response == null) {
+                log.error("Received null response for http request : " + httpRequest.getMethod() + " " + httpRequest
+                        .getURI().toString());
                 proxyResponse.setCode(HandlerConstants.INTERNAL_ERROR_CODE);
                 proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + getStatusKey(
                         HandlerConstants.INTERNAL_ERROR_CODE));
@@ -84,6 +86,9 @@ public class HandlerUtil {
                             proxyResponse.setExecutorResponse(HandlerConstants.TOKEN_IS_EXPIRED);
                             return proxyResponse;
                         } else {
+                            log.error(
+                                    "Received " + statusCode + " response for http request : " + httpRequest.getMethod()
+                                            + " " + httpRequest.getURI().toString() + ". Error message: " + jsonString);
                             proxyResponse.setCode(statusCode);
                             proxyResponse.setData(jsonString);
                             proxyResponse.setExecutorResponse(
@@ -91,6 +96,9 @@ public class HandlerUtil {
                             return proxyResponse;
                         }
                     }
+                    log.error("Received " + statusCode +
+                            " response for http request : " + httpRequest.getMethod() + " " + httpRequest.getURI()
+                            .toString() + ". Error message: " + jsonString);
                     proxyResponse.setCode(statusCode);
                     proxyResponse.setData(jsonString);
                     proxyResponse
@@ -147,10 +155,7 @@ public class HandlerUtil {
      * @param resp {@link HttpServletResponse}
      * Return Error Response.
      */
-    public static void handleError(HttpServletRequest req, HttpServletResponse resp, String serverUrl,
-            String platform, ProxyResponse proxyResponse) throws IOException {
-
-        HttpSession httpSession = req.getSession(true);
+    public static void handleError(HttpServletResponse resp, ProxyResponse proxyResponse) throws IOException {
         Gson gson = new Gson();
         if (proxyResponse == null){
             proxyResponse = new ProxyResponse();
@@ -158,26 +163,9 @@ public class HandlerUtil {
             proxyResponse.setExecutorResponse(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil
                     .getStatusKey(HandlerConstants.INTERNAL_ERROR_CODE));
         }
-        if (platform == null){
-            platform = "default";
-        }
-
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         resp.setCharacterEncoding(Consts.UTF_8.name());
-
-        if (httpSession != null) {
-            JsonObject uiConfig = (JsonObject) httpSession.getAttribute(HandlerConstants.UI_CONFIG_KEY);
-            if (uiConfig == null){
-                proxyResponse.setUrl(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-            } else{
-                proxyResponse.setUrl(serverUrl + uiConfig.get(HandlerConstants.ERROR_CALLBACK_KEY).getAsJsonObject()
-                        .get(proxyResponse.getExecutorResponse().split(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)[1])
-                        .getAsString());
-            }
-        } else {
-            proxyResponse.setUrl(serverUrl + "/" + platform + HandlerConstants.DEFAULT_ERROR_CALLBACK);
-        }
 
         proxyResponse.setExecutorResponse(null);
         try (PrintWriter writer = resp.getWriter()) {
@@ -190,24 +178,17 @@ public class HandlerUtil {
      * @param resp {@link HttpServletResponse}
      * Return Success Response.
      */
-    public static void handleSuccess(HttpServletRequest req, HttpServletResponse resp, String serverUrl,
-            String platform, ProxyResponse proxyResponse) throws IOException {
+    public static void handleSuccess(HttpServletResponse resp, ProxyResponse proxyResponse) throws IOException {
         if (proxyResponse == null){
-            handleError(req, resp, serverUrl, platform, null);
+            handleError(resp, null);
             return;
         }
-
         resp.setStatus(proxyResponse.getCode());
         resp.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         resp.setCharacterEncoding(Consts.UTF_8.name());
-
         JSONObject response = new JSONObject();
-        String redirectUrl = proxyResponse.getUrl();
         String responseData = proxyResponse.getData();
 
-        if (!StringUtils.isEmpty(redirectUrl)){
-            response.put("url", redirectUrl);
-        }
         if (!StringUtils.isEmpty(responseData)){
             try {
                 JSONObject responseDataJsonObj = new JSONObject(responseData);
@@ -221,6 +202,19 @@ public class HandlerUtil {
         try (PrintWriter writer = resp.getWriter()) {
             writer.write(response.toString());
         }
+    }
+
+    /**
+     * Get gatway port according to request recieved scheme
+     * @param scheme https or https
+     * @return {@link String} gateway port
+     */
+    public static String getGatewayPort(String scheme) {
+        String gatewayPort = System.getProperty("iot.gateway.https.port");
+        if (HandlerConstants.HTTP_PROTOCOL.equals(scheme)) {
+            gatewayPort = System.getProperty("iot.gateway.http.port");
+        }
+        return gatewayPort;
     }
 
 }
