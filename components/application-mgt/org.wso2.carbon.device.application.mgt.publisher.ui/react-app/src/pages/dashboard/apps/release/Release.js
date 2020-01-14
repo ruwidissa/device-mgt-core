@@ -56,13 +56,6 @@ class Release extends React.Component {
 
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevState.uuid !== this.state.uuid) {
-            const {uuid} = this.props.match.params;
-            this.fetchData(uuid);
-        }
-    }
-
     changeCurrentLifecycleStatus = (status) => {
         this.setState({
             currentLifecycleStatus: status
