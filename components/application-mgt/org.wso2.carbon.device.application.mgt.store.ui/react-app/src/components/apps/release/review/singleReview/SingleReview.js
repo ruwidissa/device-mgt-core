@@ -16,129 +16,155 @@
  * under the License.
  */
 
-import React from "react";
-import {Avatar, notification} from "antd";
-import {List, Typography, Popconfirm} from "antd";
-import StarRatings from "react-star-ratings";
-import Twemoji from "react-twemoji";
-import "./SingleReview.css";
-import EditReview from "./editReview/EditReview";
-import axios from "axios";
-import {withConfigContext} from "../../../../../context/ConfigContext";
-import {handleApiError} from "../../../../../js/Utils";
+import React from 'react';
+import { Avatar, notification } from 'antd';
+import { List, Typography, Popconfirm } from 'antd';
+import StarRatings from 'react-star-ratings';
+import Twemoji from 'react-twemoji';
+import './SingleReview.css';
+import EditReview from './editReview/EditReview';
+import axios from 'axios';
+import { withConfigContext } from '../../../../../context/ConfigContext';
+import { handleApiError } from '../../../../../js/Utils';
 
-const {Text, Paragraph} = Typography;
-const colorList = ['#f0932b', '#badc58', '#6ab04c', '#eb4d4b', '#0abde3', '#9b59b6', '#3498db', '#22a6b3', '#e84393', '#f9ca24'];
+const { Text, Paragraph } = Typography;
+const colorList = [
+  '#f0932b',
+  '#badc58',
+  '#6ab04c',
+  '#eb4d4b',
+  '#0abde3',
+  '#9b59b6',
+  '#3498db',
+  '#22a6b3',
+  '#e84393',
+  '#f9ca24',
+];
 
 class SingleReview extends React.Component {
+  static defaultProps = {
+    isPersonalReview: false,
+  };
 
-    static defaultProps = {
-        isPersonalReview: false
+  constructor(props) {
+    super(props);
+    const { username } = this.props.review;
+    const color = colorList[username.length % 10];
+    this.state = {
+      content: '',
+      rating: 0,
+      color: color,
+      review: props.review,
     };
+  }
 
-    constructor(props) {
-        super(props);
-        const {username} = this.props.review;
-        const color = colorList[username.length % 10];
-        this.state = {
-            content: '',
-            rating: 0,
-            color: color,
-            review: props.review
-        }
+  updateCallback = review => {
+    this.setState({
+      review,
+    });
+    this.props.onUpdateReview();
+  };
+
+  deleteReview = () => {
+    const { uuid } = this.props;
+    const { id } = this.state.review;
+    const config = this.props.context;
+
+    let url =
+      window.location.origin +
+      config.serverConfig.invoker.uri +
+      config.serverConfig.invoker.store;
+
+    // call as an admin api if the review is not a personal review
+    if (!this.props.isPersonalReview) {
+      url += '/admin';
     }
 
-    updateCallback = (review) => {
-        this.setState({
-            review
-        });
-        this.props.onUpdateReview();
-    };
+    url += '/reviews/' + uuid + '/' + id;
 
-    deleteReview = () => {
-        const {uuid} = this.props;
-        const {id} = this.state.review;
-        const config = this.props.context;
+    axios
+      .delete(url)
+      .then(res => {
+        if (res.status === 200) {
+          notification.success({
+            message: 'Done!',
+            description: 'The review has been deleted successfully.',
+          });
 
-        let url =window.location.origin+ config.serverConfig.invoker.uri + config.serverConfig.invoker.store;
-
-        // call as an admin api if the review is not a personal review
-        if (!this.props.isPersonalReview) {
-            url += "/admin";
+          this.props.deleteCallback(id);
         }
+      })
+      .catch(error => {
+        handleApiError(error, 'We were unable to delete the review..');
+      });
+  };
 
-        url += "/reviews/" + uuid + "/" + id;
+  render() {
+    const { isEditable, isDeletable, uuid } = this.props;
+    const { color, review } = this.state;
+    const { content, rating, username } = review;
+    const avatarLetter = username.charAt(0).toUpperCase();
+    const body = (
+      <div style={{ marginTop: -5 }}>
+        <StarRatings
+          rating={rating}
+          starRatedColor="#777"
+          starDimension="12px"
+          starSpacing="2px"
+          numberOfStars={5}
+          name="rating"
+        />
+        <Text style={{ fontSize: 12, color: '#aaa' }} type="secondary">
+          {' '}
+          {review.createdAt}
+        </Text>
+        <br />
+        <Paragraph style={{ color: '#777' }}>
+          <Twemoji options={{ className: 'twemoji' }}>{content}</Twemoji>
+        </Paragraph>
+      </div>
+    );
 
-        axios.delete(url).then(res => {
-            if (res.status === 200) {
-                notification["success"]({
-                    message: 'Done!',
-                    description:
-                        'The review has been deleted successfully.',
-                });
+    const title = (
+      <div>
+        {review.username}
+        {isEditable && (
+          <EditReview
+            uuid={uuid}
+            review={review}
+            updateCallback={this.updateCallback}
+          />
+        )}
+        {isDeletable && (
+          <Popconfirm
+            title="Are you sure delete this review?"
+            onConfirm={this.deleteReview}
+            okText="Yes"
+            cancelText="No"
+          >
+            <span className="delete-button">delete</span>
+          </Popconfirm>
+        )}
+      </div>
+    );
 
-                this.props.deleteCallback(id);
-            }
-        }).catch((error) => {
-            handleApiError(error,"We were unable to delete the review..");
-        });
-
-    };
-
-    render() {
-        const {isEditable, isDeletable, uuid} = this.props;
-        const {color, review} = this.state;
-        const {content, rating, username} = review;
-        const avatarLetter = username.charAt(0).toUpperCase();
-        const body = (
-            <div style={{marginTop: -5}}>
-                <StarRatings
-                    rating={rating}
-                    starRatedColor="#777"
-                    starDimension="12px"
-                    starSpacing="2px"
-                    numberOfStars={5}
-                    name='rating'
-                />
-                <Text style={{fontSize: 12, color: "#aaa"}} type="secondary"> {review.createdAt}</Text><br/>
-                <Paragraph style={{color: "#777"}}>
-                    <Twemoji options={{className: 'twemoji'}}>
-                        {content}
-                    </Twemoji>
-                </Paragraph>
-            </div>
-        );
-
-        const title = (
-            <div>
-                {review.username}
-                {isEditable && (<EditReview uuid={uuid} review={review} updateCallback={this.updateCallback}/>)}
-                {isDeletable && (
-                    <Popconfirm
-                        title="Are you sure delete this review?"
-                        onConfirm={this.deleteReview}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <span className="delete-button">delete</span>
-                    </Popconfirm>)}
-            </div>
-        );
-
-        return (
-            <div>
-                <List.Item.Meta
-                    avatar={
-                        <Avatar style={{backgroundColor: color, verticalAlign: 'middle'}} size="large">
-                            {avatarLetter}
-                        </Avatar>
-                    }
-                    title={title}
-                    description={body}
-                />
-            </div>
-        );
-    }
+    return (
+      <div>
+        <List.Item.Meta
+          avatar={
+            <Avatar
+              style={{ backgroundColor: color, verticalAlign: 'middle' }}
+              size="large"
+            >
+              {avatarLetter}
+            </Avatar>
+          }
+          title={title}
+          description={body}
+        />
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(SingleReview);

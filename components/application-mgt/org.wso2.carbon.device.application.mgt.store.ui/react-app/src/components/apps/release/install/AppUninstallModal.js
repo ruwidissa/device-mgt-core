@@ -15,50 +15,63 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from "react";
-import {Modal, Spin, Tabs} from "antd";
-import DeviceUninstall from "./DeviceUninstall";
-import UserUninstall from "./UserUninstall";
-import RoleUninstall from "./RoleUninstall";
-import GroupUninstall from "./GroupUninstall";
+import React from 'react';
+import { Modal, Spin, Tabs } from 'antd';
+import DeviceUninstall from './DeviceUninstall';
+import UserUninstall from './UserUninstall';
+import RoleUninstall from './RoleUninstall';
+import GroupUninstall from './GroupUninstall';
 
-const {TabPane} = Tabs;
+const { TabPane } = Tabs;
 
 class AppUninstallModal extends React.Component {
-    state = {
-        data: []
-    };
+  state = {
+    data: [],
+  };
 
-    render() {
-        const {deviceType} = this.props;
-        return (
-            <div>
-                <Modal
-                    title="Uninstall App"
-                    visible={this.props.visible}
-                    onCancel={this.props.onClose}
-                    footer={null}>
-                    <Spin spinning={this.props.loading}>
-                        <Tabs defaultActiveKey="device">
-                            <TabPane tab="Device" key="device">
-                                <DeviceUninstall deviceType={deviceType} onUninstall={this.props.onUninstall}
-                                                 uuid={this.props.uuid}/>
-                            </TabPane>
-                            <TabPane tab="User" key="user">
-                                <UserUninstall onUninstall={this.props.onUninstall} uuid={this.props.uuid}/>
-                            </TabPane>
-                            <TabPane tab="Role" key="role">
-                                <RoleUninstall onUninstall={this.props.onUninstall} uuid={this.props.uuid}/>
-                            </TabPane>
-                            <TabPane tab="Group" key="group">
-                                <GroupUninstall onUninstall={this.props.onUninstall} uuid={this.props.uuid}/>
-                            </TabPane>
-                        </Tabs>
-                    </Spin>
-                </Modal>
-            </div>
-        );
-    }
+  render() {
+    const { deviceType } = this.props;
+    return (
+      <div>
+        <Modal
+          title="Uninstall App"
+          visible={this.props.visible}
+          onCancel={this.props.onClose}
+          footer={null}
+        >
+          <Spin spinning={this.props.loading}>
+            <Tabs defaultActiveKey="device">
+              <TabPane tab="Device" key="device">
+                <DeviceUninstall
+                  deviceType={deviceType}
+                  onUninstall={this.props.onUninstall}
+                  uuid={this.props.uuid}
+                />
+              </TabPane>
+              <TabPane tab="User" key="user">
+                <UserUninstall
+                  onUninstall={this.props.onUninstall}
+                  uuid={this.props.uuid}
+                />
+              </TabPane>
+              <TabPane tab="Role" key="role">
+                <RoleUninstall
+                  onUninstall={this.props.onUninstall}
+                  uuid={this.props.uuid}
+                />
+              </TabPane>
+              <TabPane tab="Group" key="group">
+                <GroupUninstall
+                  onUninstall={this.props.onUninstall}
+                  uuid={this.props.uuid}
+                />
+              </TabPane>
+            </Tabs>
+          </Spin>
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default AppUninstallModal;

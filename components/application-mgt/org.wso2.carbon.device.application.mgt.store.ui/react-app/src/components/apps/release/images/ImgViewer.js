@@ -16,48 +16,47 @@
  * under the License.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import RcViewer from 'rc-viewer';
-import {Col} from "antd";
 
 class ImgViewer extends Component {
-    render() {
-        const options = {
-            title: false,
-            toolbar: {
-                zoomIn: 0,
-                zoomOut: 0,
-                oneToOne: 0,
-                reset: 0,
-                prev: 1,
-                play: {
-                    show: 0
-                },
-                next: 1,
-                rotateLeft: 0,
-                rotateRight: 0,
-                flipHorizontal: 0,
-                flipVertical: 0
-            },
-            rotatable: false,
-            transition: false,
-            movable : false
-        };
-        return (
-            <div className="release-images">
-                <RcViewer options={options} ref='viewer'>
-                    {this.props.images.map((screenshotUrl, index) => {
-                        return (
-                            <div key={index} className="release-screenshot">
-                                    <img alt="screenshot" key={screenshotUrl} src={screenshotUrl}/>
-                            </div>
-                        )
-                    })}
-                </RcViewer>
-            </div>
-        );
-
-    }
+  render() {
+    const options = {
+      title: false,
+      toolbar: {
+        zoomIn: 0,
+        zoomOut: 0,
+        oneToOne: 0,
+        reset: 0,
+        prev: 1,
+        play: {
+          show: 0,
+        },
+        next: 1,
+        rotateLeft: 0,
+        rotateRight: 0,
+        flipHorizontal: 0,
+        flipVertical: 0,
+      },
+      rotatable: false,
+      transition: false,
+      movable: false,
+    };
+    return (
+      <div className="release-images">
+        {/* eslint-disable-next-line react/no-string-refs */}
+        <RcViewer options={options} ref="viewer">
+          {this.props.images.map((screenshotUrl, index) => {
+            return (
+              <div key={index} className="release-screenshot">
+                <img alt="screenshot" key={screenshotUrl} src={screenshotUrl} />
+              </div>
+            );
+          })}
+        </RcViewer>
+      </div>
+    );
+  }
 }
 
 export default ImgViewer;

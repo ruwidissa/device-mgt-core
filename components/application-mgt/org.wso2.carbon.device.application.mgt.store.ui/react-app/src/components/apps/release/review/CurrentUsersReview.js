@@ -16,81 +16,84 @@
  * under the License.
  */
 
-import React from "react";
-import {List, message, Typography, Empty, Button, Row, Col, notification, Alert} from "antd";
-import SingleReview from "./singleReview/SingleReview";
-import axios from "axios";
-import AddReview from "./AddReview";
-import {withConfigContext} from "../../../../context/ConfigContext";
-import {handleApiError} from "../../../../js/Utils";
+import React from 'react';
+import { List, Typography, Empty, Alert } from 'antd';
+import SingleReview from './singleReview/SingleReview';
+import AddReview from './AddReview';
+import { withConfigContext } from '../../../../context/ConfigContext';
 
-const {Text, Paragraph} = Typography;
+const { Text } = Typography;
 
 class CurrentUsersReview extends React.Component {
+  render() {
+    const { uuid, currentUserReviews } = this.props;
+    return (
+      <div>
+        <Text>MY REVIEW</Text>
+        {this.props.forbidden && (
+          <Alert
+            message="You don't have permission to add reviews."
+            type="warning"
+            banner
+            closable
+          />
+        )}
+        {!this.props.forbidden && (
+          <div
+            style={{
+              overflow: 'auto',
+              paddingTop: 8,
+              paddingLeft: 24,
+            }}
+          >
+            {currentUserReviews.length > 0 && (
+              <div>
+                <List
+                  dataSource={currentUserReviews}
+                  renderItem={item => (
+                    <List.Item key={item.id}>
+                      <SingleReview
+                        uuid={uuid}
+                        review={item}
+                        isDeletable={true}
+                        isEditable={true}
+                        deleteCallback={this.props.deleteCallback}
+                        onUpdateReview={this.props.onUpdateReview}
+                        isPersonalReview={true}
+                      />
+                    </List.Item>
+                  )}
+                />
+              </div>
+            )}
 
-
-    render() {
-        const {uuid, currentUserReviews} = this.props;
-        return (
-            <div>
-                <Text>MY REVIEW</Text>
-                {(this.props.forbidden) && (
-                    <Alert
-                        message="You don't have permission to add reviews."
-                        type="warning"
-                        banner
-                        closable/>
-                )}
-                {(!this.props.forbidden) && (
-                    <div style={{
-                        overflow: "auto",
-                        paddingTop: 8,
-                        paddingLeft: 24
-                    }}>
-                        {currentUserReviews.length > 0 && (
-                            <div>
-                                <List
-                                    dataSource={currentUserReviews}
-                                    renderItem={item => (
-                                        <List.Item key={item.id}>
-                                            <SingleReview
-                                                uuid={uuid}
-                                                review={item}
-                                                isDeletable={true}
-                                                isEditable={true}
-                                                deleteCallback={this.props.deleteCallback}
-                                                onUpdateReview={this.props.onUpdateReview}
-                                                isPersonalReview={true}/>
-                                        </List.Item>
-                                    )}
-                                >
-                                </List>
-                            </div>
-                        )}
-
-                        {currentUserReviews.length === 0 && (
-                            <div>
-                                <Empty
-                                    image={Empty.PRESENTED_IMAGE_DEFAULT}
-                                    imagestyle={{
-                                        height: 60,
-                                    }}
-                                    description={
-                                        <span>Share your experience with your community by adding a review.</span>
-                                    }>
-                                    {/*<Button type="primary">Add review</Button>*/}
-                                    <AddReview
-                                        uuid={uuid}
-                                        onUpdateReview={this.props.onUpdateReview}/>
-                                </Empty>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-        );
-    }
-
+            {currentUserReviews.length === 0 && (
+              <div>
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_DEFAULT}
+                  imagestyle={{
+                    height: 60,
+                  }}
+                  description={
+                    <span>
+                      Share your experience with your community by adding a
+                      review.
+                    </span>
+                  }
+                >
+                  {/* <Button type="primary">Add review</Button>*/}
+                  <AddReview
+                    uuid={uuid}
+                    onUpdateReview={this.props.onUpdateReview}
+                  />
+                </Empty>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(CurrentUsersReview);
