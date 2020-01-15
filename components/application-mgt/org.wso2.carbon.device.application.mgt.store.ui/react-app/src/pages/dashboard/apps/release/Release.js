@@ -49,14 +49,6 @@ class Release extends React.Component {
     this.props.changeSelectedMenuItem(deviceType);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevState.uuid !== this.state.uuid) {
-      const { uuid, deviceType } = this.props.match.params;
-      this.fetchData(uuid);
-      this.props.changeSelectedMenuItem(deviceType);
-    }
-  }
-
   fetchData = uuid => {
     const config = this.props.context;
 
