@@ -16,64 +16,68 @@
  * under the License.
  */
 
-import React from "react";
-import {Modal, Button} from "antd";
-import {withConfigContext} from "../../../context/ConfigContext";
+import React from 'react';
+import { Modal, Button } from 'antd';
+import { withConfigContext } from '../../../context/ConfigContext';
 
 class GooglePlayIframe extends React.Component {
-    constructor(props) {
-        super(props);
-        this.config = this.props.context;
+  constructor(props) {
+    super(props);
+    this.config = this.props.context;
 
-        this.state = {
-            visible: false
-        };
-    }
-
-    showModal = () => {
-        this.setState({
-            visible: true,
-        });
+    this.state = {
+      visible: false,
     };
+  }
 
-    handleOk = e => {
-        this.setState({
-            visible: false,
-        });
-    };
+  showModal = () => {
+    this.setState({
+      visible: true,
+    });
+  };
 
-    handleCancel = e => {
-        this.setState({
-            visible: false,
-        });
-    };
+  handleOk = e => {
+    this.setState({
+      visible: false,
+    });
+  };
 
-    render() {
-        return (
-            <div style={{display: "inline-block", padding: 4}}>
-                <Button type="primary" onClick={this.showModal}>
-                    Approve Applications
-                </Button>
-                <Modal
-                    title={null}
-                    visible={this.state.visible}
-                    onOk={this.handleOk}
-                    onCancel={this.handleCancel}
-                    width = {740}
-                    footer={null}>
-                    <iframe
-                        style={{
-                            height: 720,
-                            border: 0,
-                            width: "100%"
-                        }}
-                        src={"https://play.google.com/work/embedded/search?token=" + this.config.androidEnterpriseToken +
-                        "&mode=APPROVE&showsearchbox=TRUE"}
-                    />
-                </Modal>
-            </div>
-        );
-    }
+  handleCancel = e => {
+    this.setState({
+      visible: false,
+    });
+  };
+
+  render() {
+    return (
+      <div style={{ display: 'inline-block', padding: 4 }}>
+        <Button type="primary" onClick={this.showModal}>
+          Approve Applications
+        </Button>
+        <Modal
+          title={null}
+          visible={this.state.visible}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+          width={740}
+          footer={null}
+        >
+          <iframe
+            style={{
+              height: 720,
+              border: 0,
+              width: '100%',
+            }}
+            src={
+              'https://play.google.com/work/embedded/search?token=' +
+              this.config.androidEnterpriseToken +
+              '&mode=APPROVE&showsearchbox=TRUE'
+            }
+          />
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(GooglePlayIframe);

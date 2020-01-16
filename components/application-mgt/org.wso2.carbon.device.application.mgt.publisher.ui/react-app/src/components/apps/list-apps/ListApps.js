@@ -16,89 +16,87 @@
  * under the License.
  */
 
-import React from "react";
-import {Card, Col, Row, Typography, Input, Divider, notification} from "antd";
-import AppsTable from "./appsTable/AppsTable";
-import Filters from "./Filters";
-import AppDetailsDrawer from "./AppDetailsDrawer/AppDetailsDrawer";
-import axios from "axios";
+import React from 'react';
+import { Card, Col, Row, Typography, Input, Divider } from 'antd';
+import AppsTable from './appsTable/AppsTable';
+import Filters from './Filters';
 
-const {Title} = Typography;
+const { Title } = Typography;
 const Search = Input.Search;
 
 class ListApps extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            filters: {}
-        };
-        this.appName = '';
+  constructor(props) {
+    super(props);
+    this.state = {
+      filters: {},
+    };
+    this.appName = '';
+  }
+
+  setFilters = filters => {
+    if (this.appName === '' && filters.hasOwnProperty('appName')) {
+      delete filters.appName;
+    } else {
+      filters.appName = this.appName;
     }
+    this.setState({
+      filters,
+    });
+  };
 
-    setFilters = (filters) => {
-        if (this.appName === '' && filters.hasOwnProperty("appName")) {
-            delete filters["appName"];
-        } else {
-            filters.appName = this.appName;
-        }
-        this.setState({
-            filters
-        });
-    };
-
-    setSearchText = (appName) => {
-        const filters = {...this.state.filters};
-        this.appName = appName;
-        if (appName === '' && filters.hasOwnProperty("appName")) {
-            delete filters["appName"];
-        } else {
-            filters.appName = appName;
-        }
-        this.setState({
-            filters
-        });
-    };
-
-    onChangeSearchText = (e) => {
-        const filters = {...this.state.filters};
-        const appName = e.target.value;
-        if (appName === '' && filters.hasOwnProperty("appName")) {
-            delete filters["appName"];
-            this.setState({
-                filters
-            });
-        }
-    };
-
-    render() {
-        const {isDrawerVisible, filters} = this.state;
-        return (
-            <Card>
-                <Row gutter={28}>
-                    <Col md={6}>
-                        <Filters setFilters={this.setFilters}/>
-                    </Col>
-                    <Col md={18}>
-                        <Row>
-                            <Col span={6}>
-                                <Title level={4}>Apps</Title>
-                            </Col>
-                            <Col span={18} style={{textAlign: "right"}}>
-                                <Search
-                                    placeholder="Search by app name"
-                                    onSearch={this.setSearchText}
-                                    onChange={this.onChangeSearchText}
-                                    style={{width: 240, zIndex: 0}}
-                                />
-                            </Col>
-                        </Row>
-                        <Divider dashed={true}/>
-                        <AppsTable filters={filters}/>
-                    </Col>
-                </Row>
-            </Card>
-        );
+  setSearchText = appName => {
+    const filters = { ...this.state.filters };
+    this.appName = appName;
+    if (appName === '' && filters.hasOwnProperty('appName')) {
+      delete filters.appName;
+    } else {
+      filters.appName = appName;
     }
+    this.setState({
+      filters,
+    });
+  };
+
+  onChangeSearchText = e => {
+    const filters = { ...this.state.filters };
+    const appName = e.target.value;
+    if (appName === '' && filters.hasOwnProperty('appName')) {
+      delete filters.appName;
+      this.setState({
+        filters,
+      });
+    }
+  };
+
+  render() {
+    const { filters } = this.state;
+    return (
+      <Card>
+        <Row gutter={28}>
+          <Col md={6}>
+            <Filters setFilters={this.setFilters} />
+          </Col>
+          <Col md={18}>
+            <Row>
+              <Col span={6}>
+                <Title level={4}>Apps</Title>
+              </Col>
+              <Col span={18} style={{ textAlign: 'right' }}>
+                <Search
+                  placeholder="Search by app name"
+                  onSearch={this.setSearchText}
+                  onChange={this.onChangeSearchText}
+                  style={{ width: 240, zIndex: 0 }}
+                />
+              </Col>
+            </Row>
+            <Divider dashed={true} />
+            <AppsTable filters={filters} />
+          </Col>
+        </Row>
+      </Card>
+    );
+  }
 }
 
 export default ListApps;

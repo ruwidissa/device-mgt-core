@@ -16,107 +16,107 @@
  * under the License.
  */
 
-import React from "react";
-import {Modal, Icon, Table, Avatar} from 'antd';
-import "../Cluster.css";
-import {withConfigContext} from "../../../../../../context/ConfigContext";
+import React from 'react';
+import { Modal, Icon, Table, Avatar } from 'antd';
+import '../Cluster.css';
+import { withConfigContext } from '../../../../../../context/ConfigContext';
 
 const columns = [
-    {
-        title: '',
-        dataIndex: 'iconUrl',
-        key: 'iconUrl',
-        render: (iconUrl) => (<Avatar shape="square" src={iconUrl}/>)
-    },
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name'
-    },
-    {
-        title: 'Page',
-        dataIndex: 'packageId',
-        key: 'packageId'
-    }
+  {
+    title: '',
+    dataIndex: 'iconUrl',
+    key: 'iconUrl',
+    // eslint-disable-next-line react/display-name
+    render: iconUrl => <Avatar shape="square" src={iconUrl} />,
+  },
+  {
+    title: 'Name',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: 'Page',
+    dataIndex: 'packageId',
+    key: 'packageId',
+  },
 ];
 
 class AddAppsToClusterModal extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            visible: false,
-            loading: false,
-            selectedProducts: [],
-            homePageId: null
-        };
-    }
-
-    showModal = () => {
-        this.setState({
-            visible: true,
-        });
+  constructor(props) {
+    super(props);
+    this.state = {
+      visible: false,
+      loading: false,
+      selectedProducts: [],
+      homePageId: null,
     };
+  }
 
-    handleOk = () => {
-        this.props.addSelectedProducts(this.state.selectedProducts);
-        this.handleCancel();
-    };
+  showModal = () => {
+    this.setState({
+      visible: true,
+    });
+  };
 
-    handleCancel = () => {
-        this.setState({
-            visible: false,
-        });
-    };
+  handleOk = () => {
+    this.props.addSelectedProducts(this.state.selectedProducts);
+    this.handleCancel();
+  };
 
-    rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            this.setState({
-                selectedProducts: selectedRows
-            })
-        },
-    };
+  handleCancel = () => {
+    this.setState({
+      visible: false,
+    });
+  };
 
-    render() {
-        const {pagination, loading} = this.state;
-        return (
-            <div>
-                <div className="btn-add-new-wrapper">
-                    <div className="btn-add-new">
-                        <button className="btn"
-                                onClick={this.showModal}>
-                            <Icon style={{position: "relative"}} type="plus"/>
-                        </button>
-                    </div>
-                    <div className="title">
-                        Add app
-                    </div>
-                </div>
-                <Modal
-                    title="Select Apps"
-                    width={640}
-                    visible={this.state.visible}
-                    onOk={this.handleOk}
-                    onCancel={this.handleCancel}>
-                    <Table
-                        columns={columns}
-                        rowKey={record => record.packageId}
-                        dataSource={this.props.unselectedProducts}
-                        scroll={{ x: 300 }}
-                        pagination={{
-                            ...pagination,
-                            size: "small",
-                            // position: "top",
-                            showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} pages`,
-                            showQuickJumper: true
-                        }}
-                        loading={loading}
-                        onChange={this.handleTableChange}
-                        rowSelection={this.rowSelection}
-                    />
-                </Modal>
-            </div>
-        );
-    }
+  rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      this.setState({
+        selectedProducts: selectedRows,
+      });
+    },
+  };
+
+  render() {
+    const { pagination, loading } = this.state;
+    return (
+      <div>
+        <div className="btn-add-new-wrapper">
+          <div className="btn-add-new">
+            <button className="btn" onClick={this.showModal}>
+              <Icon style={{ position: 'relative' }} type="plus" />
+            </button>
+          </div>
+          <div className="title">Add app</div>
+        </div>
+        <Modal
+          title="Select Apps"
+          width={640}
+          visible={this.state.visible}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+        >
+          <Table
+            columns={columns}
+            rowKey={record => record.packageId}
+            dataSource={this.props.unselectedProducts}
+            scroll={{ x: 300 }}
+            pagination={{
+              ...pagination,
+              size: 'small',
+              // position: "top",
+              showTotal: (total, range) =>
+                `showing ${range[0]}-${range[1]} of ${total} pages`,
+              showQuickJumper: true,
+            }}
+            loading={loading}
+            onChange={this.handleTableChange}
+            rowSelection={this.rowSelection}
+          />
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(AddAppsToClusterModal);
