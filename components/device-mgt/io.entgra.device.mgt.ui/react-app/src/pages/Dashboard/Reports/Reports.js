@@ -16,80 +16,69 @@
  * under the License.
  */
 
-import React from "react";
-import {
-    PageHeader,
-    Typography,
-    Breadcrumb,
-    Icon
-} from "antd";
-import {Link} from "react-router-dom";
-import ReportDurationItemList from "./ReportDurationItemList";
-
-const {Paragraph} = Typography;
+import React from 'react';
+import { PageHeader, Breadcrumb, Icon } from 'antd';
+import { Link } from 'react-router-dom';
+import ReportDurationItemList from './ReportDurationItemList';
 
 class Reports extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-        this.state = {
-            paramsObject:{},
-        }
-    }
-        //Get modified value from datepicker and set it to paramsObject
-    updateDurationValue = (modifiedFromDate,modifiedToDate) => {
-        let tempParamObj = this.state.paramsObject;
-        tempParamObj.from = modifiedFromDate;
-        tempParamObj.to = modifiedToDate;
-        this.setState({paramsObject:tempParamObj});
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+    this.state = {
+      paramsObject: {},
     };
+  }
+  // Get modified value from datepicker and set it to paramsObject
+  updateDurationValue = (modifiedFromDate, modifiedToDate) => {
+    let tempParamObj = this.state.paramsObject;
+    tempParamObj.from = modifiedFromDate;
+    tempParamObj.to = modifiedToDate;
+    this.setState({ paramsObject: tempParamObj });
+  };
 
-    //Get modified value from filters and set it to paramsObject
-    updateFiltersValue = (modifiedValue,filterType) => {
-            let tempParamObj = this.state.paramsObject;
-            if(filterType=="Device Status"){
-                tempParamObj.status = modifiedValue;
-                if(modifiedValue=="ALL" && tempParamObj.status){
-                    delete tempParamObj.status;
-                }
-            }else{
-                tempParamObj.ownership = modifiedValue;
-                if(modifiedValue=="ALL" && tempParamObj.ownership){
-                    delete tempParamObj.ownership;
-                }
-            }
-            this.setState({paramsObject:tempParamObj});
-    };
-
-    render() {
-        //Arrays for filters
-        const statusObj = ['ALL','ACTIVE','INACTIVE','REMOVED'];
-        const ownershipObj = ['ALL','BYOD','COPE'];
-
-        const params = {...this.state.paramsObject};
-
-        return (
-            <div>
-                <PageHeader style={{paddingTop: 0}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
-                        <Breadcrumb.Item>
-                            <Link to="/entgra"><Icon type="home"/> Home</Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>Reports</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div className="wrap">
-                        <h3>Reports</h3>
-                            <ReportDurationItemList/>
-                    </div>
-                </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
-                </div>
-            </div>
-        );
+  // Get modified value from filters and set it to paramsObject
+  updateFiltersValue = (modifiedValue, filterType) => {
+    let tempParamObj = this.state.paramsObject;
+    if (filterType == 'Device Status') {
+      tempParamObj.status = modifiedValue;
+      if (modifiedValue == 'ALL' && tempParamObj.status) {
+        delete tempParamObj.status;
+      }
+    } else {
+      tempParamObj.ownership = modifiedValue;
+      if (modifiedValue == 'ALL' && tempParamObj.ownership) {
+        delete tempParamObj.ownership;
+      }
     }
+    this.setState({ paramsObject: tempParamObj });
+  };
+
+  render() {
+    return (
+      <div>
+        <PageHeader style={{ paddingTop: 0 }}>
+          <Breadcrumb style={{ paddingBottom: 16 }}>
+            <Breadcrumb.Item>
+              <Link to="/entgra">
+                <Icon type="home" /> Home
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Reports</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="wrap">
+            <h3>Reports</h3>
+            <ReportDurationItemList />
+          </div>
+        </PageHeader>
+        <div
+          style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}
+        ></div>
+      </div>
+    );
+  }
 }
 
 export default Reports;

@@ -16,133 +16,126 @@
  * under the License.
  */
 
-import React from "react";
-import axios from "axios";
-import {Card, Col, Icon, message, notification, Row, Typography} from "antd";
-import TimeAgo from 'javascript-time-ago'
+import React from 'react';
+import axios from 'axios';
+import { Card, Col, Icon, message, notification, Row } from 'antd';
+import TimeAgo from 'javascript-time-ago';
 // Load locale-specific relative date/time formatting rules.
-import en from 'javascript-time-ago/locale/en'
-import {withConfigContext} from "../../context/ConfigContext";
+import en from 'javascript-time-ago/locale/en';
+import { withConfigContext } from '../../context/ConfigContext';
 
-const {Text} = Typography;
-
-let config = null;
 let apiUrl;
 
 class DeviceType extends React.Component {
-    constructor(props) {
-        super(props);
-        config =  this.props.context;
-        TimeAgo.addLocale(en);
-        this.state = {
-            data: [],
-            pagination: {},
+  constructor(props) {
+    super(props);
+    TimeAgo.addLocale(en);
+    this.state = {
+      data: [],
+      pagination: {},
+      loading: false,
+      selectedRows: [],
+    };
+  }
+
+  componentDidMount() {
+    this.fetchUsers();
+  }
+
+  onClickCard = data => {
+    console.log(data);
+    this.props.onClickType();
+  };
+
+  // fetch data from api
+  fetchUsers = (params = {}) => {
+    const config = this.props.context;
+    this.setState({ loading: true });
+
+    apiUrl =
+      window.location.origin +
+      config.serverConfig.invoker.uri +
+      config.serverConfig.invoker.deviceMgt +
+      '/device-types';
+
+    // send request to the invokerss
+    axios
+      .get(apiUrl)
+      .then(res => {
+        if (res.status === 200) {
+          const pagination = { ...this.state.pagination };
+          this.setState({
             loading: false,
-            selectedRows: []
-        };
-    }
+            data: JSON.parse(res.data.data),
+            pagination,
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to load device types.',
+          });
+        }
 
-    componentDidMount() {
-        this.fetchUsers();
-    }
+        this.setState({ loading: false });
+      });
+  };
 
-    onClickCard = (data) =>{
-      console.log(data);
-      this.props.onClickType();
-    };
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager,
+    });
+    this.fetch({
+      results: pagination.pageSize,
+      page: pagination.current,
+      sortField: sorter.field,
+      sortOrder: sorter.order,
+      ...filters,
+    });
+  };
 
-    //fetch data from api
-    fetchUsers = (params = {}) => {
-        const config = this.props.context;
-        this.setState({loading: true});
-
-        // get current page
-        const currentPage = (params.hasOwnProperty("page")) ? params.page : 1;
-
-        const extraParams = {
-            offset: 10 * (currentPage - 1), //calculate the offset
-            limit: 10,
-        };
-
-        const encodedExtraParams = Object.keys(extraParams)
-            .map(key => key + '=' + extraParams[key]).join('&');
-
-        apiUrl = window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
-            "/device-types";
-
-        //send request to the invokerss
-        axios.get(apiUrl).then(res => {
-            if (res.status === 200) {
-                const pagination = {...this.state.pagination};
-                this.setState({
-                    loading: false,
-                    data: JSON.parse(res.data.data),
-                    pagination,
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/entgra/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:"Error occurred while trying to load device types.",
-                });
-            }
-
-            this.setState({loading: false});
-        });
-    };
-
-    handleTableChange = (pagination, filters, sorter) => {
-        const pager = {...this.state.pagination};
-        pager.current = pagination.current;
-        this.setState({
-            pagination: pager,
-        });
-        this.fetch({
-            results: pagination.pageSize,
-            page: pagination.current,
-            sortField: sorter.field,
-            sortOrder: sorter.order,
-            ...filters,
-        });
-    };
-
-    render() {
-
-        const {data, pagination, loading, selectedRows} = this.state;
-        const { Meta } = Card;
-        const itemCard = data.map((data) =>
-            <Col span={5} key={data.id}>
-                <Card
-                    size="default"
-                    style={{ width: 150 }}
-                    bordered={true}
-                    onClick={this.onClickCard}
-                    cover={<Icon type="android" key="device-types" style={{color:'#ffffff',
-                        backgroundColor:'#4b92db', fontSize: '100px', padding:'20px'}}/>}
-                >
-                    <Meta
-                        title={data.name}
-                    />
-
-                </Card>
-            </Col>
-        );
-        return (
-            <div>
-                <Row gutter={16}>
-                    {itemCard}
-                </Row>
-            </div>
-        );
-    }
+  render() {
+    const { data } = this.state;
+    const { Meta } = Card;
+    const itemCard = data.map(data => (
+      <Col span={5} key={data.id}>
+        <Card
+          size="default"
+          style={{ width: 150 }}
+          bordered={true}
+          onClick={this.onClickCard}
+          cover={
+            <Icon
+              type="android"
+              key="device-types"
+              style={{
+                color: '#ffffff',
+                backgroundColor: '#4b92db',
+                fontSize: '100px',
+                padding: '20px',
+              }}
+            />
+          }
+        >
+          <Meta title={data.name} />
+        </Card>
+      </Col>
+    ));
+    return (
+      <div>
+        <Row gutter={16}>{itemCard}</Row>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(DeviceType);
