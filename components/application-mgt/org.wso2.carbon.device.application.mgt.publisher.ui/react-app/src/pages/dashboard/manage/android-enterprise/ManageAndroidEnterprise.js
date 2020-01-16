@@ -16,53 +16,50 @@
  * under the License.
  */
 
-import React from "react";
-import {PageHeader, Typography, Breadcrumb, Divider, Button, Icon} from "antd";
-import {Link} from "react-router-dom";
-import SyncAndroidApps from "../../../../components/manage/android-enterprise/SyncAndroidApps";
-import {withConfigContext} from "../../../../context/ConfigContext";
-import GooglePlayIframe from "../../../../components/manage/android-enterprise/GooglePlayIframe";
-import Pages from "../../../../components/manage/android-enterprise/Pages/Pages";
-
-const {Paragraph} = Typography;
+import React from 'react';
+import { PageHeader, Breadcrumb, Divider, Icon } from 'antd';
+import { Link } from 'react-router-dom';
+import SyncAndroidApps from '../../../../components/manage/android-enterprise/SyncAndroidApps';
+import { withConfigContext } from '../../../../context/ConfigContext';
+import GooglePlayIframe from '../../../../components/manage/android-enterprise/GooglePlayIframe';
+import Pages from '../../../../components/manage/android-enterprise/Pages/Pages';
 
 class ManageAndroidEnterprise extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-        this.config = this.props.context;
-    }
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+    this.config = this.props.context;
+  }
 
-    render() {
-        return (
-            <div>
-                <PageHeader style={{paddingTop:0, backgroundColor: "#fff"}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
-                        <Breadcrumb.Item>
-                            <Link to="/publisher/apps"><Icon type="home"/> Home</Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>
-                            Manage
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>Android Enterprise</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div className="wrap">
-                        <h3>Manage Android Enterprise</h3>
-                        {/*<Paragraph>Lorem ipsum</Paragraph>*/}
-                    </div>
-                </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-                   <SyncAndroidApps/>
-                   <GooglePlayIframe/>
-                   <Divider/>
-                   <Pages/>
-                </div>
-            </div>
-
-        );
-    }
+  render() {
+    return (
+      <div>
+        <PageHeader style={{ paddingTop: 0, backgroundColor: '#fff' }}>
+          <Breadcrumb style={{ paddingBottom: 16 }}>
+            <Breadcrumb.Item>
+              <Link to="/publisher/apps">
+                <Icon type="home" /> Home
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Manage</Breadcrumb.Item>
+            <Breadcrumb.Item>Android Enterprise</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="wrap">
+            <h3>Manage Android Enterprise</h3>
+            {/* <Paragraph>Lorem ipsum</Paragraph>*/}
+          </div>
+        </PageHeader>
+        <div style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}>
+          <SyncAndroidApps />
+          <GooglePlayIframe />
+          <Divider />
+          <Pages />
+        </div>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(ManageAndroidEnterprise);

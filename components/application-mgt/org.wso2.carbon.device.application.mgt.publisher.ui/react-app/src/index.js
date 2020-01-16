@@ -19,91 +19,87 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
-import App from "./App";
-import Login from "./pages/Login";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Apps from "./pages/dashboard/apps/Apps";
-import Release from "./pages/dashboard/apps/release/Release";
-import AddNewEnterpriseApp from "./pages/dashboard/add-new-app/AddNewEnterpriseApp";
-import Mange from "./pages/dashboard/manage/Manage";
+import App from './App';
+import Login from './pages/Login';
+import Dashboard from './pages/dashboard/Dashboard';
+import Apps from './pages/dashboard/apps/Apps';
+import Release from './pages/dashboard/apps/release/Release';
+import AddNewEnterpriseApp from './pages/dashboard/add-new-app/AddNewEnterpriseApp';
+import Mange from './pages/dashboard/manage/Manage';
 import './index.css';
-import AddNewPublicApp from "./pages/dashboard/add-new-app/AddNewPublicApp";
-import AddNewWebClip from "./pages/dashboard/add-new-app/AddNewWebClip";
-import AddNewRelease from "./pages/dashboard/add-new-release/AddNewRelease";
-import AddNewCustomApp from "./pages/dashboard/add-new-app/AddNewCustomApp";
-import ManageAndroidEnterprise from "./pages/dashboard/manage/android-enterprise/ManageAndroidEnterprise";
-import Page from "./pages/dashboard/manage/android-enterprise/page/Page";
-
+import AddNewPublicApp from './pages/dashboard/add-new-app/AddNewPublicApp';
+import AddNewWebClip from './pages/dashboard/add-new-app/AddNewWebClip';
+import AddNewRelease from './pages/dashboard/add-new-release/AddNewRelease';
+import AddNewCustomApp from './pages/dashboard/add-new-app/AddNewCustomApp';
+import ManageAndroidEnterprise from './pages/dashboard/manage/android-enterprise/ManageAndroidEnterprise';
+import Page from './pages/dashboard/manage/android-enterprise/page/Page';
 
 const routes = [
-    {
-        path: '/publisher/login',
+  {
+    path: '/publisher/login',
+    exact: true,
+    component: Login,
+  },
+  {
+    path: '/publisher/',
+    exact: false,
+    component: Dashboard,
+    routes: [
+      {
+        path: '/publisher/apps',
+        component: Apps,
         exact: true,
-        component: Login
-    },
-    {
-        path: '/publisher/',
-        exact: false,
-        component: Dashboard,
-        routes: [
-            {
-                path: '/publisher/apps',
-                component: Apps,
-                exact: true
-            },
-            {
-                path: '/publisher/apps/releases/:uuid',
-                exact: true,
-                component: Release
-            },
-            {
-                path: '/publisher/apps/:deviceType/:appId/add-release',
-                component: AddNewRelease,
-                exact: true
-            },
-            {
-                path: '/publisher/add-new-app/enterprise',
-                component: AddNewEnterpriseApp,
-                exact: true
-            },
-            {
-                path: '/publisher/add-new-app/public',
-                component: AddNewPublicApp,
-                exact: true
-            },
-            {
-                path: '/publisher/add-new-app/web-clip',
-                component: AddNewWebClip,
-                exact: true
-            },
-            {
-                path: '/publisher/add-new-app/custom-app',
-                component: AddNewCustomApp,
-                exact: true
-            },
-            {
-                path: '/publisher/manage',
-                component: Mange,
-                exact: true
-            },
-            {
-                path: '/publisher/manage/android-enterprise',
-                component: ManageAndroidEnterprise,
-                exact: true
-            },
-            {
-                path: '/publisher/manage/android-enterprise/pages/:pageName/:pageId',
-                component: Page,
-                exact: true
-            }
-        ]
-    }
+      },
+      {
+        path: '/publisher/apps/releases/:uuid',
+        exact: true,
+        component: Release,
+      },
+      {
+        path: '/publisher/apps/:deviceType/:appId/add-release',
+        component: AddNewRelease,
+        exact: true,
+      },
+      {
+        path: '/publisher/add-new-app/enterprise',
+        component: AddNewEnterpriseApp,
+        exact: true,
+      },
+      {
+        path: '/publisher/add-new-app/public',
+        component: AddNewPublicApp,
+        exact: true,
+      },
+      {
+        path: '/publisher/add-new-app/web-clip',
+        component: AddNewWebClip,
+        exact: true,
+      },
+      {
+        path: '/publisher/add-new-app/custom-app',
+        component: AddNewCustomApp,
+        exact: true,
+      },
+      {
+        path: '/publisher/manage',
+        component: Mange,
+        exact: true,
+      },
+      {
+        path: '/publisher/manage/android-enterprise',
+        component: ManageAndroidEnterprise,
+        exact: true,
+      },
+      {
+        path: '/publisher/manage/android-enterprise/pages/:pageName/:pageId',
+        component: Page,
+        exact: true,
+      },
+    ],
+  },
 ];
 
-
-ReactDOM.render(
-        <App routes={routes}/>,
-    document.getElementById('root'));
+ReactDOM.render(<App routes={routes} />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

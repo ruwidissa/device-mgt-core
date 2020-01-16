@@ -16,109 +16,112 @@
  * under the License.
  */
 
-import React from "react";
-import {Button, Divider, Form, Input, message, Modal, notification, Spin} from "antd";
-import axios from "axios";
-import {withConfigContext} from "../../../../context/ConfigContext";
-import {withRouter} from "react-router";
-import {handleApiError} from "../../../../js/Utils";
+import React from 'react';
+import { Button, Divider, Input, Modal, notification, Spin } from 'antd';
+import axios from 'axios';
+import { withConfigContext } from '../../../../context/ConfigContext';
+import { withRouter } from 'react-router';
+import { handleApiError } from '../../../../js/Utils';
 
 class AddNewPage extends React.Component {
+  state = {
+    visible: false,
+    pageName: '',
+  };
 
-    state = {
-        visible: false,
-        pageName: ''
-    };
+  showModal = () => {
+    this.setState({
+      visible: true,
+      loading: false,
+    });
+  };
 
-    showModal = () => {
-        this.setState({
-            visible: true,
-            loading: false
-        });
-    };
+  handleCancel = e => {
+    this.setState({
+      visible: false,
+    });
+  };
 
+  handlePageName = e => {
+    this.setState({
+      pageName: e.target.value,
+    });
+  };
 
-    handleCancel = e => {
-        this.setState({
-            visible: false,
-        });
-    };
+  createNewPage = () => {
+    const config = this.props.context;
+    this.setState({ loading: true });
 
-    handlePageName = (e) => {
-        this.setState({
-            pageName: e.target.value,
-        });
-    };
+    axios
+      .post(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          '/device-mgt/android/v1.0/enterprise/store-layout/page',
+        {
+          locale: 'en',
+          pageName: this.state.pageName,
+        },
+      )
+      .then(res => {
+        if (res.status === 200) {
+          const { pageId, pageName } = res.data.data;
 
-    createNewPage = () => {
-        const config = this.props.context;
-        this.setState({loading: true});
+          notification.success({
+            message: 'Saved!',
+            description: 'Page created successfully!',
+          });
 
-        axios.post(
-            window.location.origin + config.serverConfig.invoker.uri +
-            "/device-mgt/android/v1.0/enterprise/store-layout/page",
-            {
-                "locale": "en",
-                "pageName": this.state.pageName
-            }
-        ).then(res => {
-            if (res.status === 200) {
+          this.setState({ loading: false });
 
-                const {pageId, pageName} = res.data.data;
-
-                notification["success"]({
-                    message: 'Saved!',
-                    description: 'Page created successfully!'
-                });
-
-                this.setState({loading: false});
-
-                this.props.history.push(`/publisher/manage/android-enterprise/pages/${pageName}/${pageId}`);
-            }
-        }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to update the cluster.");
-            this.setState({loading: false});
-        });
-    };
-
-    render() {
-        return (
-            <div style={{marginTop: 24, marginBottom: 24}}>
-                <Button
-                    type="dashed"
-                    onClick={this.showModal}>
-                    Add new page
-                </Button>
-                <Modal
-                    title="Add new page"
-                    visible={this.state.visible}
-                    onOk={this.createNewPage}
-                    onCancel={this.handleCancel}
-                    okText="Create Page"
-                    footer={null}
-                >
-                    <Spin spinning={this.state.loading}>
-                        <p>Choose a name for the page</p>
-                        <Input onChange={this.handlePageName}/>
-                        <Divider/>
-                        <div>
-                            <Button
-                                onClick={this.handleCancel}>
-                                Cancel
-                            </Button>
-                            <Divider type="vertical"/>
-                            <Button
-                                onClick={this.createNewPage}
-                                htmlType="button" type="primary"
-                                disabled={this.state.pageName.length === 0}>
-                                Create Page
-                            </Button>
-                        </div>
-                    </Spin>
-                </Modal>
-            </div>
+          this.props.history.push(
+            `/publisher/manage/android-enterprise/pages/${pageName}/${pageId}`,
+          );
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to update the cluster.',
         );
-    }
+        this.setState({ loading: false });
+      });
+  };
+
+  render() {
+    return (
+      <div style={{ marginTop: 24, marginBottom: 24 }}>
+        <Button type="dashed" onClick={this.showModal}>
+          Add new page
+        </Button>
+        <Modal
+          title="Add new page"
+          visible={this.state.visible}
+          onOk={this.createNewPage}
+          onCancel={this.handleCancel}
+          okText="Create Page"
+          footer={null}
+        >
+          <Spin spinning={this.state.loading}>
+            <p>Choose a name for the page</p>
+            <Input onChange={this.handlePageName} />
+            <Divider />
+            <div>
+              <Button onClick={this.handleCancel}>Cancel</Button>
+              <Divider type="vertical" />
+              <Button
+                onClick={this.createNewPage}
+                htmlType="button"
+                type="primary"
+                disabled={this.state.pageName.length === 0}
+              >
+                Create Page
+              </Button>
+            </div>
+          </Spin>
+        </Modal>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(withRouter(AddNewPage));

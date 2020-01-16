@@ -16,193 +16,232 @@
  * under the License.
  */
 
-import React from "react";
+import React from 'react';
 import '../../../../App.css';
-import {Typography, Row, Col, message, Card, notification, Skeleton} from "antd";
+import { Typography, Row, Col, Card, Skeleton } from 'antd';
 import axios from 'axios';
-import ReleaseView from "../../../../components/apps/release/ReleaseView";
-import LifeCycle from "../../../../components/apps/release/lifeCycle/LifeCycle";
-import {withConfigContext} from "../../../../context/ConfigContext";
-import {handleApiError} from "../../../../js/Utils";
-import NewAppUploadForm from "../../../../components/new-app/subForms/NewAppUploadForm";
+import ReleaseView from '../../../../components/apps/release/ReleaseView';
+import LifeCycle from '../../../../components/apps/release/lifeCycle/LifeCycle';
+import { withConfigContext } from '../../../../context/ConfigContext';
+import { handleApiError } from '../../../../js/Utils';
 
-const {Title} = Typography;
+const { Title } = Typography;
 
 class Release extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-        this.state = {
-            loading: true,
-            app: null,
-            uuid: null,
-            release: null,
-            currentLifecycleStatus: null,
-            lifecycle: null,
-            supportedOsVersions: [],
-            forbiddenErrors: {
-                supportedOsVersions: false,
-                lifeCycle: false
-            }
-        };
-    }
-
-    componentDidMount() {
-        const {uuid} = this.props.match.params;
-        this.fetchData(uuid);
-        this.getLifecycle();
-
-    }
-
-    changeCurrentLifecycleStatus = (status) => {
-        this.setState({
-            currentLifecycleStatus: status
-        });
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+    this.state = {
+      loading: true,
+      app: null,
+      uuid: null,
+      release: null,
+      currentLifecycleStatus: null,
+      lifecycle: null,
+      supportedOsVersions: [],
+      forbiddenErrors: {
+        supportedOsVersions: false,
+        lifeCycle: false,
+      },
     };
+  }
 
-    updateRelease = (release) => {
-        this.setState({
-            release
-        });
-    };
+  componentDidMount() {
+    const { uuid } = this.props.match.params;
+    this.fetchData(uuid);
+    this.getLifecycle();
+  }
 
-    fetchData = (uuid) => {
-        const config = this.props.context;
+  changeCurrentLifecycleStatus = status => {
+    this.setState({
+      currentLifecycleStatus: status,
+    });
+  };
 
-        //send request to the invoker
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/release/" + uuid,
-        ).then(res => {
-            if (res.status === 200) {
-                const app = res.data.data;
-                const release = (app !== null) ? app.applicationReleases[0] : null;
-                const currentLifecycleStatus = (release !== null) ? release.currentStatus : null;
-                this.setState({
-                    app: app,
-                    release: release,
-                    currentLifecycleStatus: currentLifecycleStatus,
-                    loading: false,
-                    uuid: uuid
-                });
-                if (config.deviceTypes.mobileTypes.includes(app.deviceType)) {
-                    this.getSupportedOsVersions(app.deviceType);
-                }
-            }
+  updateRelease = release => {
+    this.setState({
+      release,
+    });
+  };
 
-        }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load the release.");
-            this.setState({loading: false});
-        });
-    };
+  fetchData = uuid => {
+    const config = this.props.context;
 
-    getLifecycle = () => {
-        const config = this.props.context;
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.publisher + "/applications/lifecycle-config"
-        ).then(res => {
-            if (res.status === 200) {
-                const lifecycle = res.data.data;
-                this.setState({
-                    lifecycle: lifecycle
-                })
-            }
-
-        }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load lifecycle configuration.", true);
-            if (error.hasOwnProperty("response") && error.response.status === 403) {
-                const {forbiddenErrors} = this.state;
-                forbiddenErrors.lifeCycle = true;
-                this.setState({
-                    forbiddenErrors
-                })
-            }
-        });
-    };
-
-    getSupportedOsVersions = (deviceType) => {
-        const config = this.props.context;
-        axios.get(
-            window.location.origin + config.serverConfig.invoker.uri + config.serverConfig.invoker.deviceMgt +
-            `/admin/device-types/${deviceType}/versions`
-        ).then(res => {
-            if (res.status === 200) {
-                let supportedOsVersions = JSON.parse(res.data.data);
-                this.setState({
-                    supportedOsVersions
-                });
-            }
-        }).catch((error) => {
-            handleApiError(error, "Error occurred while trying to load supported OS versions.", true);
-            if (error.hasOwnProperty("response") && error.response.status === 403) {
-                const {forbiddenErrors} = this.state;
-                forbiddenErrors.supportedOsVersions = true;
-                this.setState({
-                    forbiddenErrors,
-                    loading: false
-                })
-            } else {
-                this.setState({
-                    loading: false
-                });
-            }
-        });
-    };
-
-    render() {
-        const {app, release, currentLifecycleStatus, lifecycle, loading, forbiddenErrors} = this.state;
-
-        if (release == null && loading === false) {
-            return (
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 780}}>
-                    <Title level={3}>No Apps Found</Title>
-                </div>
-            );
+    // send request to the invoker
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.publisher +
+          '/applications/release/' +
+          uuid,
+      )
+      .then(res => {
+        if (res.status === 200) {
+          const app = res.data.data;
+          const release = app !== null ? app.applicationReleases[0] : null;
+          const currentLifecycleStatus =
+            release !== null ? release.currentStatus : null;
+          this.setState({
+            app: app,
+            release: release,
+            currentLifecycleStatus: currentLifecycleStatus,
+            loading: false,
+            uuid: uuid,
+          });
+          if (config.deviceTypes.mobileTypes.includes(app.deviceType)) {
+            this.getSupportedOsVersions(app.deviceType);
+          }
         }
-
-        //todo remove uppercase
-        return (
-            <div>
-                <div className="main-container">
-                    <Row style={{padding: 10}}>
-                        <Col lg={16} md={24} style={{padding: 3}}>
-                            <Card>
-                                <Skeleton loading={loading} avatar={{size: 'large'}} active paragraph={{rows: 18}}>
-                                    {(release !== null) && (
-                                        <ReleaseView
-                                            forbiddenErrors={forbiddenErrors}
-                                            app={app}
-                                            release={release}
-                                            currentLifecycleStatus={currentLifecycleStatus}
-                                            lifecycle={lifecycle}
-                                            updateRelease={this.updateRelease}
-                                            supportedOsVersions={[...this.state.supportedOsVersions]}
-                                        />)
-                                    }
-                                </Skeleton>
-                            </Card>
-                        </Col>
-                        <Col lg={8} md={24} style={{padding: 3}}>
-                            <Card lg={8} md={24}>
-                                <Skeleton loading={loading} active paragraph={{rows: 8}}>
-                                    {(release !== null) && (
-                                        <LifeCycle
-                                            uuid={release.uuid}
-                                            currentStatus={release.currentStatus.toUpperCase()}
-                                            changeCurrentLifecycleStatus={this.changeCurrentLifecycleStatus}
-                                            lifecycle={lifecycle}
-                                        />)
-                                    }
-                                </Skeleton>
-                            </Card>
-                        </Col>
-                    </Row>
-                </div>
-            </div>
-
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to load the release.',
         );
+        this.setState({ loading: false });
+      });
+  };
+
+  getLifecycle = () => {
+    const config = this.props.context;
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.publisher +
+          '/applications/lifecycle-config',
+      )
+      .then(res => {
+        if (res.status === 200) {
+          const lifecycle = res.data.data;
+          this.setState({
+            lifecycle: lifecycle,
+          });
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to load lifecycle configuration.',
+          true,
+        );
+        if (error.hasOwnProperty('response') && error.response.status === 403) {
+          const { forbiddenErrors } = this.state;
+          forbiddenErrors.lifeCycle = true;
+          this.setState({
+            forbiddenErrors,
+          });
+        }
+      });
+  };
+
+  getSupportedOsVersions = deviceType => {
+    const config = this.props.context;
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.deviceMgt +
+          `/admin/device-types/${deviceType}/versions`,
+      )
+      .then(res => {
+        if (res.status === 200) {
+          let supportedOsVersions = JSON.parse(res.data.data);
+          this.setState({
+            supportedOsVersions,
+          });
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to load supported OS versions.',
+          true,
+        );
+        if (error.hasOwnProperty('response') && error.response.status === 403) {
+          const { forbiddenErrors } = this.state;
+          forbiddenErrors.supportedOsVersions = true;
+          this.setState({
+            forbiddenErrors,
+            loading: false,
+          });
+        } else {
+          this.setState({
+            loading: false,
+          });
+        }
+      });
+  };
+
+  render() {
+    const {
+      app,
+      release,
+      currentLifecycleStatus,
+      lifecycle,
+      loading,
+      forbiddenErrors,
+    } = this.state;
+
+    if (release == null && loading === false) {
+      return (
+        <div style={{ background: '#f0f2f5', padding: 24, minHeight: 780 }}>
+          <Title level={3}>No Apps Found</Title>
+        </div>
+      );
     }
+
+    // todo remove uppercase
+    return (
+      <div>
+        <div className="main-container">
+          <Row style={{ padding: 10 }}>
+            <Col lg={16} md={24} style={{ padding: 3 }}>
+              <Card>
+                <Skeleton
+                  loading={loading}
+                  avatar={{ size: 'large' }}
+                  active
+                  paragraph={{ rows: 18 }}
+                >
+                  {release !== null && (
+                    <ReleaseView
+                      forbiddenErrors={forbiddenErrors}
+                      app={app}
+                      release={release}
+                      currentLifecycleStatus={currentLifecycleStatus}
+                      lifecycle={lifecycle}
+                      updateRelease={this.updateRelease}
+                      supportedOsVersions={[...this.state.supportedOsVersions]}
+                    />
+                  )}
+                </Skeleton>
+              </Card>
+            </Col>
+            <Col lg={8} md={24} style={{ padding: 3 }}>
+              <Card lg={8} md={24}>
+                <Skeleton loading={loading} active paragraph={{ rows: 8 }}>
+                  {release !== null && (
+                    <LifeCycle
+                      uuid={release.uuid}
+                      currentStatus={release.currentStatus.toUpperCase()}
+                      changeCurrentLifecycleStatus={
+                        this.changeCurrentLifecycleStatus
+                      }
+                      lifecycle={lifecycle}
+                    />
+                  )}
+                </Skeleton>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(Release);
