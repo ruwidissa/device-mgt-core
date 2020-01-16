@@ -16,47 +16,44 @@
  * under the License.
  */
 
-import React from "react";
-import {
-    PageHeader,
-    Typography,
-    Breadcrumb,
-    Icon
-} from "antd";
-import {Link} from "react-router-dom";
-import GroupsTable from "../../../components/Groups/GroupsTable";
+import React from 'react';
+import { PageHeader, Typography, Breadcrumb, Icon } from 'antd';
+import { Link } from 'react-router-dom';
+import GroupsTable from '../../../components/Groups/GroupsTable';
 
-const {Paragraph} = Typography;
+const { Paragraph } = Typography;
 
 class Groups extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-    }
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+  }
 
-    render() {
-        return (
-            <div>
-                <PageHeader style={{paddingTop: 0}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
-                        <Breadcrumb.Item>
-                            <Link to="/entgra"><Icon type="home"/> Home</Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>Groups</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div className="wrap">
-                        <h3>Groups</h3>
-                        <Paragraph>All device groups.</Paragraph>
-                    </div>
-                </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-                    <GroupsTable/>
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <PageHeader style={{ paddingTop: 0 }}>
+          <Breadcrumb style={{ paddingBottom: 16 }}>
+            <Breadcrumb.Item>
+              <Link to="/entgra">
+                <Icon type="home" /> Home
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Groups</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="wrap">
+            <h3>Groups</h3>
+            <Paragraph>All device groups.</Paragraph>
+          </div>
+        </PageHeader>
+        <div style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}>
+          <GroupsTable />
+        </div>
+      </div>
+    );
+  }
 }
 
 export default Groups;

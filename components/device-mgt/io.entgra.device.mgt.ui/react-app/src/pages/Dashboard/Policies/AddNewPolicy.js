@@ -16,50 +16,47 @@
  * under the License.
  */
 
-import React from "react";
-import {
-    PageHeader,
-    Typography,
-    Breadcrumb,
-    Icon
-} from "antd";
-import {Link} from "react-router-dom";
-import AddPolicy from "../../../components/Policies/AddPolicy";
+import React from 'react';
+import { PageHeader, Typography, Breadcrumb, Icon } from 'antd';
+import { Link } from 'react-router-dom';
+import AddPolicy from '../../../components/Policies/AddPolicy';
 
-const {Paragraph} = Typography;
+const { Paragraph } = Typography;
 
 class AddNewPolicy extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-    }
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+  }
 
-    render() {
-        return (
-            <div>
-                <PageHeader style={{paddingTop: 0}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
-                        <Breadcrumb.Item>
-                            <Link to="/entgra"><Icon type="home"/> Home</Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>Policies</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div className="wrap">
-                        <h3>Policies</h3>
-                        <Paragraph>Create new policy on IoT Server.</Paragraph>
-                    </div>
-                    <div style={{ borderRadius: 5}}>
-                        <AddPolicy/>
-                    </div>
-                </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <PageHeader style={{ paddingTop: 0 }}>
+          <Breadcrumb style={{ paddingBottom: 16 }}>
+            <Breadcrumb.Item>
+              <Link to="/entgra">
+                <Icon type="home" /> Home
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Policies</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="wrap">
+            <h3>Policies</h3>
+            <Paragraph>Create new policy on IoT Server.</Paragraph>
+          </div>
+          <div style={{ borderRadius: 5 }}>
+            <AddPolicy />
+          </div>
+        </PageHeader>
+        <div
+          style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}
+        ></div>
+      </div>
+    );
+  }
 }
 
 export default AddNewPolicy;

@@ -16,66 +16,64 @@
  * under the License.
  */
 
-import React, {Component, Fragment} from "react";
+import React, { Component, Fragment } from 'react';
 import {
-    Map,
-    TileLayer,
-    Marker,
-    Polyline, Popup, Tooltip
-} from "react-leaflet";
-import {withConfigContext} from "../../../context/ConfigContext";
+  Map,
+  TileLayer,
+  Marker,
+  Polyline,
+  Popup,
+  Tooltip,
+} from 'react-leaflet';
+import { withConfigContext } from '../../../context/ConfigContext';
 
 class GeoCustomMap extends Component {
+  constructor(props) {
+    super(props);
+  }
 
-    constructor(props) {
-        super(props);
-    }
+  /**
+   * Polyline draw for historical locations
+   * @param locationData - location data object
+   * @returns content
+   */
+  polylineMarker = locationData => {
+    const polyMarkers = locationData.map(locationPoint => {
+      return [locationPoint.latitude, locationPoint.longitude];
+    });
 
-    /**
-     * Polyline draw for historical locations
-     * @param locationData - location data object
-     * @returns content
-     */
-    polylineMarker = (locationData) => {
+    return (
+      <div style={{ display: 'none' }}>
+        {
+          <Polyline color="green" positions={polyMarkers}>
+            <Popup>on the way</Popup>
+          </Polyline>
+        }
+      </div>
+    );
+  };
 
-        const polyMarkers = locationData
-                .map(locationPoint => {
-                    return [locationPoint.latitude, locationPoint.longitude]
-                });
-
-        return (
-                <div style={{display: "none"}}>{
-                    <Polyline color="green" positions={polyMarkers}>
-                        <Popup>on the way</Popup>
-                    </Polyline>
-                }</div>
-        );
-    };
-
-    render() {
-        const locationData = this.props.locationData;
-        const config = this.props.context;
-        const attribution = config.geoMap.attribution;
-        const url = config.geoMap.url;
-        const startingPoint = [locationData[0].latitude, locationData[0].longitude];
-        const zoom = config.geoMap.defaultZoomLevel;
-        return (
-                <div style={{backgroundColor: "#ffffff", borderRadius: 5, padding: 5}}>
-                    <Map center={startingPoint} zoom={zoom}>
-                        <TileLayer
-                                url={url}
-                                attribution={attribution}
-                        />
-                        <Fragment>
-                            {this.polylineMarker(locationData)}
-                            <Marker position={startingPoint}>
-                                <Tooltip>Starting Location</Tooltip>
-                            </Marker>
-                        </Fragment>
-                    </Map>
-                </div>
-        );
-    }
+  render() {
+    const locationData = this.props.locationData;
+    const config = this.props.context;
+    const attribution = config.geoMap.attribution;
+    const url = config.geoMap.url;
+    const startingPoint = [locationData[0].latitude, locationData[0].longitude];
+    const zoom = config.geoMap.defaultZoomLevel;
+    return (
+      <div style={{ backgroundColor: '#ffffff', borderRadius: 5, padding: 5 }}>
+        <Map center={startingPoint} zoom={zoom}>
+          <TileLayer url={url} attribution={attribution} />
+          <Fragment>
+            {this.polylineMarker(locationData)}
+            <Marker position={startingPoint}>
+              <Tooltip>Starting Location</Tooltip>
+            </Marker>
+          </Fragment>
+        </Map>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(GeoCustomMap);

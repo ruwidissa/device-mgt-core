@@ -16,305 +16,322 @@
  * under the License.
  */
 
-import React from "react";
-import axios from "axios";
-import {Button, Collapse, Icon, List, message, Modal, notification, Table, Tabs, Typography} from "antd";
-import TimeAgo from 'javascript-time-ago'
+import React from 'react';
+import axios from 'axios';
+import { Button, List, message, Modal, notification, Table } from 'antd';
+import TimeAgo from 'javascript-time-ago';
 // Load locale-specific relative date/time formatting rules.
-import en from 'javascript-time-ago/locale/en'
-import {withConfigContext} from "../../context/ConfigContext";
-import UsersDevices from "./UsersDevices";
-import AddUser from "./AddUser";
-import UserActions from "./UserActions";
-import Filter from "../Utils/Filter/Filter";
+import en from 'javascript-time-ago/locale/en';
+import { withConfigContext } from '../../context/ConfigContext';
+import UsersDevices from './UsersDevices';
+import AddUser from './AddUser';
+import UserActions from './UserActions';
+import Filter from '../Utils/Filter/Filter';
 const ButtonGroup = Button.Group;
-const {Text} = Typography;
 
-let config = null;
 let apiUrl;
 
 const searchFields = [
-    {
-        name: 'username',
-        placeholder: 'Username'
-    },
-    {
-        name: 'firstName',
-        placeholder: 'First Name'
-    },
-    {
-        name: 'lastName',
-        placeholder: 'Last Name'
-    },
-    {
-        name: 'emailAddress',
-        placeholder: 'Email Address'
-    },
+  {
+    name: 'username',
+    placeholder: 'Username',
+  },
+  {
+    name: 'firstName',
+    placeholder: 'First Name',
+  },
+  {
+    name: 'lastName',
+    placeholder: 'Last Name',
+  },
+  {
+    name: 'emailAddress',
+    placeholder: 'Email Address',
+  },
 ];
 
 class UsersTable extends React.Component {
-    constructor(props) {
-        super(props);
-        config =  this.props.context;
-        TimeAgo.addLocale(en);
-        this.state = {
-            data: [],
-            pagination: {},
+  constructor(props) {
+    super(props);
+    TimeAgo.addLocale(en);
+    this.state = {
+      data: [],
+      pagination: {},
+      loading: false,
+      selectedRows: [],
+      rolesModalVisible: false,
+      devicesModalVisible: false,
+      rolesData: [],
+      user: '',
+    };
+  }
+
+  rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      this.setState({
+        selectedRows: selectedRows,
+      });
+    },
+  };
+
+  componentDidMount() {
+    this.fetchUsers();
+  }
+
+  // fetch data from api
+  fetchUsers = (params = {}, filters = {}) => {
+    const config = this.props.context;
+    this.setState({ loading: true });
+
+    // get current page
+    const currentPage = params.hasOwnProperty('page') ? params.page : 1;
+
+    const extraParams = {
+      offset: 10 * (currentPage - 1), // calculate the offset
+      limit: 10,
+      ...filters,
+    };
+
+    const encodedExtraParams = Object.keys(extraParams)
+      .map(key => key + '=' + extraParams[key])
+      .join('&');
+
+    apiUrl =
+      window.location.origin +
+      config.serverConfig.invoker.uri +
+      config.serverConfig.invoker.deviceMgt +
+      '/users/search?' +
+      encodedExtraParams;
+
+    // send request to the invokerss
+    axios
+      .get(apiUrl)
+      .then(res => {
+        if (res.status === 200) {
+          const pagination = { ...this.state.pagination };
+          this.setState({
             loading: false,
-            selectedRows: [],
-            rolesModalVisible: false,
-            devicesModalVisible: false,
-            rolesData: [],
-            user:''
-        };
-    }
+            data: res.data.data.users,
+            pagination,
+          });
 
-    rowSelection = {
-        onChange: (selectedRowKeys, selectedRows) => {
-            this.setState({
-                selectedRows: selectedRows
-            })
+          console.log(res.data.data);
         }
-    };
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to load users.',
+          });
+        }
 
-    componentDidMount() {
-        this.fetchUsers();
-    }
+        this.setState({ loading: false });
+      });
+  };
 
-    //fetch data from api
-    fetchUsers = (params = {}, filters = {}) => {
-        const config = this.props.context;
-        this.setState({loading: true});
+  fetchRoles = username => {
+    const config = this.props.context;
 
-        // get current page
-        const currentPage = (params.hasOwnProperty("page")) ? params.page : 1;
+    this.setState({
+      rolesModalVisible: true,
+      user: username,
+    });
 
-        const extraParams = {
-            offset: 10 * (currentPage - 1), //calculate the offset
-            limit: 10,
-            ...filters
-        };
+    apiUrl =
+      window.location.origin +
+      config.serverConfig.invoker.uri +
+      config.serverConfig.invoker.deviceMgt +
+      '/users/' +
+      username +
+      '/roles';
 
-        const encodedExtraParams = Object.keys(extraParams)
-            .map(key => key + '=' + extraParams[key]).join('&');
+    axios
+      .get(apiUrl)
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            rolesData: res.data.data.roles,
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to load roles.',
+          });
+        }
 
-        apiUrl = window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
-            "/users/search?" + encodedExtraParams;
+        this.setState({ loading: false });
+      });
+  };
 
-        //send request to the invokerss
-        axios.get(apiUrl).then(res => {
-            if (res.status === 200) {
-                const pagination = {...this.state.pagination};
-                this.setState({
-                    loading: false,
-                    data: res.data.data.users,
-                    pagination,
-                });
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager,
+    });
+    this.fetch({
+      results: pagination.pageSize,
+      page: pagination.current,
+      sortField: sorter.field,
+      sortOrder: sorter.order,
+      ...filters,
+    });
+  };
 
-                console.log(res.data.data)
-            }
+  handleOk = e => {
+    this.setState({
+      rolesModalVisible: false,
+      devicesModalVisible: false,
+    });
+  };
 
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/entgra/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:"Error occurred while trying to load users.",
-                });
-            }
+  handleCancel = e => {
+    this.setState({
+      rolesModalVisible: false,
+      devicesModalVisible: false,
+    });
+  };
 
-            this.setState({loading: false});
-        });
-    };
+  openDeviceListModal = e => {
+    this.setState({
+      devicesModalVisible: true,
+    });
+  };
 
-    fetchRoles = (username) => {
-        const config = this.props.context;
-
-        this.setState({
-            rolesModalVisible: true,
-            user: username
-        });
-
-        apiUrl = window.location.origin + config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
-            "/users/" + username + "/roles";
-
-        axios.get(apiUrl).then(res => {
-            if (res.status === 200) {
-                this.setState({
-                    rolesData: res.data.data.roles,
-                });
-            }
-
-        }).catch((error) => {
-            if (error.hasOwnProperty("response") && error.response.status === 401) {
-                //todo display a popop with error
-                message.error('You are not logged in');
-                window.location.href = window.location.origin + '/entgra/login';
-            } else {
-                notification["error"]({
-                    message: "There was a problem",
-                    duration: 0,
-                    description:"Error occurred while trying to load roles.",
-                });
-            }
-
-            this.setState({loading: false});
-        });
-    };
-
-    handleTableChange = (pagination, filters, sorter) => {
-        const pager = {...this.state.pagination};
-        pager.current = pagination.current;
-        this.setState({
-            pagination: pager,
-        });
-        this.fetch({
-            results: pagination.pageSize,
-            page: pagination.current,
-            sortField: sorter.field,
-            sortOrder: sorter.order,
-            ...filters,
-        });
-    };
-
-    handleOk = e => {
-        this.setState({
-            rolesModalVisible: false,
-            devicesModalVisible: false
-        });
-    };
-
-    handleCancel = e => {
-        this.setState({
-            rolesModalVisible: false,
-            devicesModalVisible: false
-        });
-    };
-
-    openDeviceListModal = e =>{
-        this.setState({
-            devicesModalVisible: true,
-        })
-    };
-
-    render() {
-        const {data, pagination, loading, selectedRows} = this.state;
-        const { Panel } = Collapse;
-        const { TabPane } = Tabs;
-        const columns = [
-            {
-                title: 'User Name',
-                dataIndex: 'username',
-                key: "username",
-            },
-            {
-                title: 'First Name',
-                dataIndex: 'firstname',
-                key: 'firstname',
-            },
-            {
-                title: 'Last Name',
-                dataIndex: 'lastname',
-                key: 'lastname',
-            },
-            {
-                title: 'Email',
-                dataIndex: 'emailAddress',
-                key: 'emailAddress',
-            },
-            {
-                title: 'View',
-                dataIndex: 'username',
-                key: 'roles',
-                render: (username) =>
-                    <ButtonGroup>
-                        <Button
-                            type="primary"
-                            size={"small"}
-                            icon="book"
-                            onClick={() => this.fetchRoles(username)}>Roles</Button>
-                        <Button
-                            type="primary"
-                            size={"small"}
-                            icon="desktop"
-                            onClick={this.openDeviceListModal}>Devices</Button>
-                    </ButtonGroup>
-            },
-            {
-                title: 'Action',
-                dataIndex: 'id',
-                key: 'action',
-                render: (id, row) => (
-                    <span>
-                    <UserActions data={row} fetchUsers={this.fetchUsers}/>
-                </span>
-                ),
-            },
-
-        ];
-        return (
+  render() {
+    const { data, pagination, loading } = this.state;
+    const columns = [
+      {
+        title: 'User Name',
+        dataIndex: 'username',
+        key: 'username',
+      },
+      {
+        title: 'First Name',
+        dataIndex: 'firstname',
+        key: 'firstname',
+      },
+      {
+        title: 'Last Name',
+        dataIndex: 'lastname',
+        key: 'lastname',
+      },
+      {
+        title: 'Email',
+        dataIndex: 'emailAddress',
+        key: 'emailAddress',
+      },
+      {
+        title: 'View',
+        dataIndex: 'username',
+        key: 'roles',
+        render: username => (
+          <ButtonGroup>
+            <Button
+              type="primary"
+              size={'small'}
+              icon="book"
+              onClick={() => this.fetchRoles(username)}
+            >
+              Roles
+            </Button>
+            <Button
+              type="primary"
+              size={'small'}
+              icon="desktop"
+              onClick={this.openDeviceListModal}
+            >
+              Devices
+            </Button>
+          </ButtonGroup>
+        ),
+      },
+      {
+        title: 'Action',
+        dataIndex: 'id',
+        key: 'action',
+        render: (id, row) => (
+          <span>
+            <UserActions data={row} fetchUsers={this.fetchUsers} />
+          </span>
+        ),
+      },
+    ];
+    return (
+      <div>
+        <div style={{ background: '#f0f2f5' }}>
+          <AddUser fetchUsers={this.fetchUsers} />
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <Filter fields={searchFields} callback={this.fetchUsers} />
+        </div>
+        <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
+          <Table
+            columns={columns}
+            rowKey={record => record.username}
+            dataSource={data}
+            pagination={{
+              ...pagination,
+              size: 'small',
+              // position: "top",
+              showTotal: (total, range) =>
+                `showing ${range[0]}-${range[1]} of ${total} groups`,
+              // showQuickJumper: true
+            }}
+            loading={loading}
+            onChange={this.handleTableChange}
+            rowSelection={this.rowSelection}
+          />
+        </div>
+        <div>
+          <Modal
+            title="ROLES"
+            width="900px"
+            visible={this.state.rolesModalVisible}
+            onOk={this.handleOk}
+            onCancel={this.handleCancel}
+          >
             <div>
-                <div style={{background: '#f0f2f5'}}>
-                    <AddUser fetchUsers={this.fetchUsers}/>
-                </div>
-                <div style={{textAlign: 'right'}}>
-                    <Filter fields={searchFields} callback={this.fetchUsers}/>
-                </div>
-                <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                    <Table
-                        columns={columns}
-                        rowKey={record => (record.username)}
-                        dataSource={data}
-                        pagination={{
-                            ...pagination,
-                            size: "small",
-                            // position: "top",
-                            showTotal: (total, range) => `showing ${range[0]}-${range[1]} of ${total} groups`
-                            // showQuickJumper: true
-                        }}
-                        loading={loading}
-                        onChange={this.handleTableChange}
-                        rowSelection={this.rowSelection}
-                    />
-                </div>
-                <div>
-                    <Modal
-                        title="ROLES"
-                        width="900px"
-                        visible={this.state.rolesModalVisible}
-                        onOk={this.handleOk}
-                        onCancel={this.handleCancel} >
-                        <div>
-                                <List
-                                    size="small"
-                                    bordered
-                                    dataSource={this.state.rolesData}
-                                    renderItem={item => <List.Item>{item}</List.Item>}/>
-                        </div>
-                    </Modal>
-                </div>
-
-                <div>
-                    <Modal
-                        title="DEVICES"
-                        width="900px"
-                        visible={this.state.devicesModalVisible}
-                        onOk={this.handleOk}
-                        onCancel={this.handleCancel}>
-                        <div>
-                            <UsersDevices user={this.state.user}/>
-                        </div>
-                    </Modal>
-                </div>
+              <List
+                size="small"
+                bordered
+                dataSource={this.state.rolesData}
+                renderItem={item => <List.Item>{item}</List.Item>}
+              />
             </div>
-        );
-    }
+          </Modal>
+        </div>
+
+        <div>
+          <Modal
+            title="DEVICES"
+            width="900px"
+            visible={this.state.devicesModalVisible}
+            onOk={this.handleOk}
+            onCancel={this.handleCancel}
+          >
+            <div>
+              <UsersDevices user={this.state.user} />
+            </div>
+          </Modal>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(UsersTable);

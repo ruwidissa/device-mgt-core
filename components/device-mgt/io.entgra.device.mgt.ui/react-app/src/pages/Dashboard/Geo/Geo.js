@@ -16,49 +16,51 @@
  * under the License.
  */
 
-import React from "react";
-import {
-    PageHeader,
-    Typography,
-    Breadcrumb,
-    Icon,
-    Card
-} from "antd";
-import {Link} from "react-router-dom";
-import GeoDashboard from "../../../components/Geo/geo-dashboard/GeoDashboard";
+import React from 'react';
+import { PageHeader, Typography, Breadcrumb, Icon } from 'antd';
+import { Link } from 'react-router-dom';
+import GeoDashboard from '../../../components/Geo/geo-dashboard/GeoDashboard';
 
-const {Paragraph} = Typography;
+const { Paragraph } = Typography;
 
 class Geo extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+  }
 
-    }
-
-    render() {
-        return (
-            <div>
-                <PageHeader style={{paddingTop: 0}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
-                        <Breadcrumb.Item>
-                            <Link to="/entgra"><Icon type="home"/> Home</Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>Geo</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div className="wrap">
-                        <h3>Geo</h3>
-                        <Paragraph>Geo Location Service</Paragraph>
-                    </div>
-                </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720, alignItems: "center"}}>
-                    <GeoDashboard/>
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div>
+        <PageHeader style={{ paddingTop: 0 }}>
+          <Breadcrumb style={{ paddingBottom: 16 }}>
+            <Breadcrumb.Item>
+              <Link to="/entgra">
+                <Icon type="home" /> Home
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Geo</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="wrap">
+            <h3>Geo</h3>
+            <Paragraph>Geo Location Service</Paragraph>
+          </div>
+        </PageHeader>
+        <div
+          style={{
+            background: '#f0f2f5',
+            padding: 24,
+            minHeight: 720,
+            alignItems: 'center',
+          }}
+        >
+          <GeoDashboard />
+        </div>
+      </div>
+    );
+  }
 }
 
 export default Geo;

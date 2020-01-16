@@ -16,52 +16,53 @@
  * under the License.
  */
 
-import React from "react";
+import React from 'react';
 import { Select } from 'antd';
 
 class Filter extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedItem: null,
+    };
+  }
 
-    constructor(props){
-        super(props);
-        const { Option } = Select;
-        this.state = {
-            selectedItem:null
+  // Send updated filter value to Reports.js
+  onChange = value => {
+    this.setState({ selectedItem: value }, () => {
+      if (this.props.dropDownName == 'Device Status') {
+        this.props.updateFiltersValue(this.state.selectedItem, 'Device Status');
+      } else {
+        this.props.updateFiltersValue(
+          this.state.selectedItem,
+          'Device Ownership',
+        );
+      }
+    });
+  };
+
+  render() {
+    // Dynamically generate dropdown items from dropDownItems array
+    let item = this.props.dropDownItems.map(data => (
+      <Select.Option value={data} key={data}>
+        {data}
+      </Select.Option>
+    ));
+    return (
+      <Select
+        showSearch
+        style={{ width: 200 }}
+        placeholder={this.props.dropDownName}
+        optionFilterProp="children"
+        onChange={this.onChange}
+        filterOption={(input, option) =>
+          option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
         }
-    }
-
-    //Send updated filter value to Reports.js
-    onChange = value => {
-        this.setState({selectedItem:value},() => {
-            if(this.props.dropDownName=="Device Status"){
-                this.props.updateFiltersValue(this.state.selectedItem,"Device Status");
-            }else{
-                this.props.updateFiltersValue(this.state.selectedItem, "Device Ownership");
-            }
-        });
-    }
-
-    render(){
-        //Dynamically generate dropdown items from dropDownItems array
-        let item = this.props.dropDownItems.map((data) => 
-            <Select.Option 
-                value={data} 
-                key={data}>
-                {data}
-            </Select.Option>);
-        return(
-            <Select
-                showSearch
-                style={{ width: 200 }}
-                placeholder={this.props.dropDownName}
-                optionFilterProp="children"
-                onChange={this.onChange}
-                filterOption={(input, option) =>
-                option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                }>
-                {item}
-            </Select>
-        )
-    }
+      >
+        {item}
+      </Select>
+    );
+  }
 }
 
 export default Filter;

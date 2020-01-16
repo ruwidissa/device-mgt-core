@@ -19,119 +19,117 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
-import App from "./App";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard/Dashboard";
+import App from './App';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard/Dashboard';
 import './index.css';
-import Devices from "./pages/Dashboard/Devices/Devices";
-import Reports from "./pages/Dashboard/Reports/Reports";
-import Geo from "./pages/Dashboard/Geo/Geo";
-import Groups from "./pages/Dashboard/Groups/Groups";
-import Users from "./pages/Dashboard/Users/Users";
-import Policies from "./pages/Dashboard/Policies/Policies";
-import Roles from "./pages/Dashboard/Roles/Roles";
-import DeviceTypes from "./pages/Dashboard/DeviceTypes/DeviceTypes";
-import DeviceEnroll from "./pages/Dashboard/Devices/DeviceEnroll";
-import AddNewPolicy from "./pages/Dashboard/Policies/AddNewPolicy";
-import Certificates from "./pages/Dashboard/Configurations/Certificates/Certificates";
-import ReportDurationItemList from "./pages/Dashboard/Reports/ReportDurationItemList";
-import EnrollmentsVsUnenrollmentsReport from "./components/Reports/Templates/EnrollmentsVsUnenrollmentsReport";
-import EnrollmentTypeReport from "./components/Reports/Templates/EnrollmentTypeReport";
+import Devices from './pages/Dashboard/Devices/Devices';
+import Reports from './pages/Dashboard/Reports/Reports';
+import Geo from './pages/Dashboard/Geo/Geo';
+import Groups from './pages/Dashboard/Groups/Groups';
+import Users from './pages/Dashboard/Users/Users';
+import Policies from './pages/Dashboard/Policies/Policies';
+import Roles from './pages/Dashboard/Roles/Roles';
+import DeviceTypes from './pages/Dashboard/DeviceTypes/DeviceTypes';
+import DeviceEnroll from './pages/Dashboard/Devices/DeviceEnroll';
+import AddNewPolicy from './pages/Dashboard/Policies/AddNewPolicy';
+import Certificates from './pages/Dashboard/Configurations/Certificates/Certificates';
+import ReportDurationItemList from './pages/Dashboard/Reports/ReportDurationItemList';
+import EnrollmentsVsUnenrollmentsReport from './components/Reports/Templates/EnrollmentsVsUnenrollmentsReport';
+import EnrollmentTypeReport from './components/Reports/Templates/EnrollmentTypeReport';
+import DeviceStatusReport from './components/Reports/Templates/DeviceStatusReport';
 
 const routes = [
-    {
-        path: '/entgra/login',
+  {
+    path: '/entgra/login',
+    exact: true,
+    component: Login,
+  },
+  {
+    path: '/entgra',
+    exact: false,
+    component: Dashboard,
+    routes: [
+      {
+        path: '/entgra/devices',
+        component: Devices,
         exact: true,
-        component: Login
-    },
-    {
-        path: '/entgra',
-        exact: false,
-        component: Dashboard,
-        routes: [
-            {
-                path: '/entgra/devices',
-                component: Devices,
-                exact: true
-            },
-            {
-                path: '/entgra/devices/enroll',
-                component: DeviceEnroll,
-                exact: true
-            },
-            {
-                path: '/entgra/geo',
-                component: Geo,
-                exact: true
-            },
-            {
-                path: '/entgra/reports',
-                component: Reports,
-                exact: true
-            },
-            {
-                path: '/entgra/groups',
-                component: Groups,
-                exact: true
-            },
-            {
-                path: '/entgra/users',
-                component: Users,
-                exact: true
-            },
-            {
-                path: '/entgra/policies',
-                component: Policies,
-                exact: true
-            },
-            {
-                path: '/entgra/policy/add',
-                component: AddNewPolicy,
-                exact: true
-            },
-            {
-                path: '/entgra/roles',
-                component: Roles,
-                exact: true
-            },
-            {
-                path: '/entgra/devicetypes',
-                component: DeviceTypes,
-                exact: true
-            },
-            {
-                path: '/entgra/certificates',
-                component: Certificates,
-                exact: true
-            },
-            {
-                path: '/entgra/reportList',
-                component: ReportDurationItemList,
-                exact: true
-            },
-            {
-                path: '/entgra/enrollmentsvsunenrollments',
-                component: EnrollmentsVsUnenrollmentsReport,
-                exact: true
-            },
-            {
-                path: '/entgra/enrollmenttype',
-                component: EnrollmentTypeReport,
-                exact: true
-            },
-            {
-                path: '/entgra/devicestatus',
-                component: DeviceStatusReport,
-                exact: true
-            }
-        ]
-    }
+      },
+      {
+        path: '/entgra/devices/enroll',
+        component: DeviceEnroll,
+        exact: true,
+      },
+      {
+        path: '/entgra/geo',
+        component: Geo,
+        exact: true,
+      },
+      {
+        path: '/entgra/reports',
+        component: Reports,
+        exact: true,
+      },
+      {
+        path: '/entgra/groups',
+        component: Groups,
+        exact: true,
+      },
+      {
+        path: '/entgra/users',
+        component: Users,
+        exact: true,
+      },
+      {
+        path: '/entgra/policies',
+        component: Policies,
+        exact: true,
+      },
+      {
+        path: '/entgra/policy/add',
+        component: AddNewPolicy,
+        exact: true,
+      },
+      {
+        path: '/entgra/roles',
+        component: Roles,
+        exact: true,
+      },
+      {
+        path: '/entgra/devicetypes',
+        component: DeviceTypes,
+        exact: true,
+      },
+      {
+        path: '/entgra/certificates',
+        component: Certificates,
+        exact: true,
+      },
+      {
+        path: '/entgra/reportList',
+        component: ReportDurationItemList,
+        exact: true,
+      },
+      {
+        path: '/entgra/enrollmentsvsunenrollments',
+        component: EnrollmentsVsUnenrollmentsReport,
+        exact: true,
+      },
+      {
+        path: '/entgra/enrollmenttype',
+        component: EnrollmentTypeReport,
+        exact: true,
+      },
+      {
+        path: '/entgra/devicestatus',
+        component: DeviceStatusReport,
+        exact: true,
+      },
+    ],
+  },
 ];
 
-
-ReactDOM.render(
-    <App routes={routes}/>,
-    document.getElementById('root'));
+ReactDOM.render(<App routes={routes} />, document.getElementById('root'));
 
 // If you want your app e and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -16,109 +16,118 @@
  * under the License.
  */
 
-import React from "react";
-import {Button, Tooltip, Popconfirm, Divider} from "antd";
+import React from 'react';
+import { Button, Tooltip, Popconfirm, Divider } from 'antd';
 
 class BulkActionBar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedMultiple: false,
+      selectedSingle: false,
+      canDelete: true,
+    };
+  }
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedMultiple: false,
-            selectedSingle: false,
-            canDelete: true,
-        }
+  // This method checks whether NON-REMOVED devices are selected
+  onDeleteDeviceCall = () => {
+    let tempDeleteState;
+    for (let i = 0; i < this.props.selectedRows.length; i++) {
+      if (this.props.selectedRows[i].enrolmentInfo.status != 'REMOVED') {
+        tempDeleteState = false;
+        break;
+      }
+      tempDeleteState = true;
     }
+    this.setState({ canDelete: tempDeleteState });
+  };
 
-    //This method checks whether NON-REMOVED devices are selected
-    onDeleteDeviceCall = () => {
-        let tempDeleteState;
-        for(let i=0; i < this.props.selectedRows.length; i++){
-            if(this.props.selectedRows[i].enrolmentInfo.status != "REMOVED"){
-                tempDeleteState = false;
-                break;
+  onConfirmDelete = () => {
+    if (this.state.canDelete) {
+      this.props.deleteDevice();
+    }
+  };
+
+  onConfirmDisenroll = () => {
+    this.props.disenrollDevice();
+  };
+
+  onDeviceGroupCall = () => {
+    this.props.getGroups();
+  };
+
+  render() {
+    const isSelected = this.props.selectedRows.length > 0;
+    const isSelectedSingle = this.props.selectedRows.length == 1;
+
+    return (
+      <div style={{ display: isSelected ? 'inline' : 'none', padding: '11px' }}>
+        <Tooltip
+          placement="bottom"
+          title={'Delete Device'}
+          autoAdjustOverflow={true}
+        >
+          <Popconfirm
+            placement="topLeft"
+            title={
+              this.state.canDelete
+                ? 'Are you sure you want to delete?'
+                : 'You can only delete disenrolled devices'
             }
-            tempDeleteState = true;
-        }
-        this.setState({canDelete:tempDeleteState})
-    };
-
-    onConfirmDelete = () => {
-        if (this.state.canDelete) {
-            this.props.deleteDevice();
-        }
-    };
-
-    onConfirmDisenroll = () => {
-        this.props.disenrollDevice();
-    };
-
-    onDeviceGroupCall = () => {
-        this.props.getGroups();
-    }
-
-    render() {
-        const isSelected = this.props.selectedRows.length > 0;
-        const isSelectedSingle = this.props.selectedRows.length == 1;
-
-        return (
-            <div style={{display: isSelected ? "inline" : "none", padding: '11px'}}>
-
-                <Tooltip
-                    placement="bottom"
-                    title={"Delete Device"}
-                    autoAdjustOverflow={true}>
-                    <Popconfirm
-                        placement="topLeft"
-                        title={
-                            this.state.canDelete ?
-                                "Are you sure you want to delete?" : "You can only delete disenrolled devices"}
-                        onConfirm={this.onConfirmDelete}
-                        okText="Ok"
-                        cancelText="Cancel">
-
-                        <Button
-                            type="link"
-                            shape="circle"
-                            icon="delete"
-                            size={'default'}
-                            onClick={this.onDeleteDeviceCall}
-                            disabled={isSelected ? false : true}
-                            style={{margin: "2px"}}/>
-                    </Popconfirm>
-                </Tooltip>
-                <Divider type="vertical"/>
-                <Tooltip placement="bottom" title={"Disenroll Device"}>
-                    <Popconfirm
-                        placement="topLeft"
-                        title={"Are you sure?"}
-                        onConfirm={this.onConfirmDisenroll}
-                        okText="Ok"
-                        disabled={isSelectedSingle ? false : true}
-                        cancelText="Cancel">
-                        <Button
-                            type="link"
-                            shape="circle"
-                            icon="close"
-                            size={'default'}
-                            style={{display:isSelectedSingle ? "inline" : "none", margin: "2px"}}/>
-                    </Popconfirm>
-                </Tooltip>
-                <Divider type="vertical" style={{display:isSelectedSingle ? "inline-block" : "none"}}/>
-                <Tooltip placement="bottom" title={"Add to group"}>
-
-                        <Button
-                            type="link"
-                            shape="circle"
-                            icon="deployment-unit"
-                            size={'default'}
-                            onClick={this.onDeviceGroupCall}
-                            style={{margin: "2px"}}/>
-
-                </Tooltip>
-            </div>
-        )
-    }
+            onConfirm={this.onConfirmDelete}
+            okText="Ok"
+            cancelText="Cancel"
+          >
+            <Button
+              type="link"
+              shape="circle"
+              icon="delete"
+              size={'default'}
+              onClick={this.onDeleteDeviceCall}
+              disabled={!isSelected}
+              style={{ margin: '2px' }}
+            />
+          </Popconfirm>
+        </Tooltip>
+        <Divider type="vertical" />
+        <Tooltip placement="bottom" title={'Disenroll Device'}>
+          <Popconfirm
+            placement="topLeft"
+            title={'Are you sure?'}
+            onConfirm={this.onConfirmDisenroll}
+            okText="Ok"
+            disabled={!isSelectedSingle}
+            cancelText="Cancel"
+          >
+            <Button
+              type="link"
+              shape="circle"
+              icon="close"
+              size={'default'}
+              style={{
+                display: isSelectedSingle ? 'inline' : 'none',
+                margin: '2px',
+              }}
+            />
+          </Popconfirm>
+        </Tooltip>
+        <Divider
+          type="vertical"
+          style={{ display: isSelectedSingle ? 'inline-block' : 'none' }}
+        />
+        <Tooltip placement="bottom" title={'Add to group'}>
+          <Button
+            type="link"
+            shape="circle"
+            icon="deployment-unit"
+            size={'default'}
+            onClick={this.onDeviceGroupCall}
+            style={{ margin: '2px' }}
+          />
+        </Tooltip>
+      </div>
+    );
+  }
 }
 
 export default BulkActionBar;

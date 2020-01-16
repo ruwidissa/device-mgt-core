@@ -16,110 +16,112 @@
  * under the License.
  */
 
-import React from "react";
-import {
-    PageHeader,
-    Typography,
-    Breadcrumb,
-    Icon,
-    Tag,
-    Radio, Select, Button, Card,
-    Row, Col, message, notification
-} from "antd";
+import React from 'react';
+import { PageHeader, Breadcrumb, Icon, Select, Button, Card } from 'antd';
 
-import {Link} from "react-router-dom";
-import PoliciesTable from "../../../components/Policies/PoliciesTable";
-import DevicesTable from "../../../components/Devices/DevicesTable";
-import DateRangePicker from "../../../components/Reports/DateRangePicker";
-import ReportDeviceTable from "../../../components/Devices/ReportDevicesTable";
-import PieChart from "../../../components/Reports/Widgets/PieChart";
-import axios from "axios";
-import CountWidget from "../../../components/Reports/Widgets/CountWidget";
-import {withConfigContext} from "../../../context/ConfigContext";
-const {Paragraph} = Typography;
-const { CheckableTag } = Tag;
+import { Link } from 'react-router-dom';
+import ReportDeviceTable from '../../../components/Devices/ReportDevicesTable';
+import PieChart from '../../../components/Reports/Widgets/PieChart';
+import { withConfigContext } from '../../../context/ConfigContext';
 
 const { Option } = Select;
-let config = null;
-
 
 class DeviceStatusReport extends React.Component {
-    routes;
+  routes;
 
-    constructor(props) {
-        super(props);
-        this.routes = props.routes;
-        config =  this.props.context;
-        const { reportData } = this.props.location;
-        this.state = {
-            selectedTags: ['Enrolled'],
-            paramsObject:{
-                from:reportData.duration[0],
-                to:reportData.duration[1]
-            },
-            statsObject:{},
-            statArray:[{item:"ACTIVE",count:0},{item:"INACTIVE",count:0},{item:"REMOVED",count:0}]
-        };
-    }
-
-    onClickPieChart = (value) => {
-        console.log(value.data.point.item);
-        const chartValue = value.data.point.item;
-        let tempParamObj = this.state.paramsObject;
-
-        tempParamObj.status = chartValue;
-
-
-        this.setState({paramsObject:tempParamObj});
-        console.log(this.state.paramsObject)
+  constructor(props) {
+    super(props);
+    this.routes = props.routes;
+    const { reportData } = this.props.location;
+    this.state = {
+      selectedTags: ['Enrolled'],
+      paramsObject: {
+        from: reportData.duration[0],
+        to: reportData.duration[1],
+      },
+      statsObject: {},
+      statArray: [
+        { item: 'ACTIVE', count: 0 },
+        { item: 'INACTIVE', count: 0 },
+        { item: 'REMOVED', count: 0 },
+      ],
     };
+  }
 
-    render() {
-        const { statArray } = this.state;
-        const { reportData } = this.props.location;
+  onClickPieChart = value => {
+    console.log(value.data.point.item);
+    const chartValue = value.data.point.item;
+    let tempParamObj = this.state.paramsObject;
 
-        const params = {...this.state.paramsObject};
-        return (
-            <div>
-                <PageHeader style={{paddingTop: 0}}>
-                    <Breadcrumb style={{paddingBottom: 16}}>
-                        <Breadcrumb.Item>
-                            <Link to="/entgra"><Icon type="home"/> Home</Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Item>Report</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div className="wrap" style={{marginBottom: '10px'}}>
-                        <h3>Summary of enrollments</h3>
-                        <div style={{marginBottom: '10px'}}>
-                            <Select defaultValue="android" style={{ width: 120 , marginRight:10}}>
-                                <Option value="android">Android</Option>
-                                <Option value="ios">IOS</Option>
-                                <Option value="windows">Windows</Option>
-                            </Select>
-                            <Button onClick={this.onSubmitReport} style={{marginLeft:10}} type="primary">Generate Report</Button>
-                        </div>
-                    </div>
+    tempParamObj.status = chartValue;
 
-                    <div>
-                        <Card
-                            bordered={true}
-                            hoverable={true}
-                            style={{borderRadius: 5, marginBottom: 10, height:window.innerHeight*0.5}}>
+    this.setState({ paramsObject: tempParamObj });
+    console.log(this.state.paramsObject);
+  };
 
-                            <PieChart onClickPieChart={this.onClickPieChart} reportData={reportData}/>
-                        </Card>
-                    </div>
+  render() {
+    const { reportData } = this.props.location;
 
-                    <div style={{backgroundColor:"#ffffff", borderRadius: 5}}>
-                        <ReportDeviceTable paramsObject={params}/>
-                    </div>
-                </PageHeader>
-                <div style={{background: '#f0f2f5', padding: 24, minHeight: 720}}>
-
-                </div>
+    const params = { ...this.state.paramsObject };
+    return (
+      <div>
+        <PageHeader style={{ paddingTop: 0 }}>
+          <Breadcrumb style={{ paddingBottom: 16 }}>
+            <Breadcrumb.Item>
+              <Link to="/entgra">
+                <Icon type="home" /> Home
+              </Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Report</Breadcrumb.Item>
+          </Breadcrumb>
+          <div className="wrap" style={{ marginBottom: '10px' }}>
+            <h3>Summary of enrollments</h3>
+            <div style={{ marginBottom: '10px' }}>
+              <Select
+                defaultValue="android"
+                style={{ width: 120, marginRight: 10 }}
+              >
+                <Option value="android">Android</Option>
+                <Option value="ios">IOS</Option>
+                <Option value="windows">Windows</Option>
+              </Select>
+              <Button
+                onClick={this.onSubmitReport}
+                style={{ marginLeft: 10 }}
+                type="primary"
+              >
+                Generate Report
+              </Button>
             </div>
-        );
-    }
+          </div>
+
+          <div>
+            <Card
+              bordered={true}
+              hoverable={true}
+              style={{
+                borderRadius: 5,
+                marginBottom: 10,
+                height: window.innerHeight * 0.5,
+              }}
+            >
+              <PieChart
+                onClickPieChart={this.onClickPieChart}
+                reportData={reportData}
+              />
+            </Card>
+          </div>
+
+          <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
+            <ReportDeviceTable paramsObject={params} />
+          </div>
+        </PageHeader>
+        <div
+          style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}
+        ></div>
+      </div>
+    );
+  }
 }
 
 export default withConfigContext(DeviceStatusReport);
