@@ -112,7 +112,7 @@ public class HTTPDeviceTypeManagerService extends DeviceTypeManagerService imple
             deviceTypeConfiguration.setPolicyMonitoring(policyMonitoring);
 
             ProvisioningConfig provisioningConfig = new ProvisioningConfig();
-            provisioningConfig.setSharedWithAllTenants(false);
+            provisioningConfig.setSharedWithAllTenants(deviceTypeMetaDefinition.isSharedWithAllTenants());
             deviceTypeConfiguration.setProvisioningConfig(provisioningConfig);
 
             PushNotificationConfig pushNotificationConfig = deviceTypeMetaDefinition.getPushNotificationConfig();

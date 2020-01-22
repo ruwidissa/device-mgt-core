@@ -120,6 +120,8 @@ public interface DeviceEventManagementService {
             @PathParam("type")String deviceType,
             @ApiParam(name = "skipPersist", value = "Is it required to persist the data or not")
             @QueryParam("skipPersist") boolean skipPersist,
+            @ApiParam(name = "isSharedWithAllTenants", value = "Should artifacts be available to all tenants")
+            @QueryParam("isSharedWithAllTenants") boolean isSharedWithAllTenants,
             @ApiParam(name = "deviceTypeEvent", value = "Add the data to complete the  DeviceTypeEvent object.",
                     required = true)
             @Valid DeviceTypeEvent deviceTypeEvent);
