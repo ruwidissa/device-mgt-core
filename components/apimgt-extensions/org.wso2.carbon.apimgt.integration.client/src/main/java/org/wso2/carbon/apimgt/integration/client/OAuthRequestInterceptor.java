@@ -39,7 +39,6 @@ import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,15 +58,13 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
     private OAuthApplication oAuthApplication;
     private static Map<String, AccessTokenInfo> tenantUserTokenMap = new ConcurrentHashMap<>();
     private static final Log log = LogFactory.getLog(OAuthRequestInterceptor.class);
-    private String username;
-    private String password;
 
     /**
      * Creates an interceptor that authenticates all requests.
      */
     public OAuthRequestInterceptor() {
-        username = APIMConfigReader.getInstance().getConfig().getUsername();
-        password = APIMConfigReader.getInstance().getConfig().getPassword();
+        String username = APIMConfigReader.getInstance().getConfig().getUsername();
+        String password = APIMConfigReader.getInstance().getConfig().getPassword();
         dcrClient = Feign.builder().client(new OkHttpClient(Utils.getSSLClient())).logger(new Slf4jLogger())
                 .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .contract(new JAXRSContract()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
@@ -76,8 +73,6 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
     }
 
     public OAuthRequestInterceptor(String username, String password) {
-        this.username = username;
-        this.password = password;
         dcrClient = Feign.builder().client(new OkHttpClient(Utils.getSSLClient())).logger(new Slf4jLogger())
                 .logLevel(Logger.Level.FULL).requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .contract(new JAXRSContract()).encoder(new GsonEncoder()).decoder(new GsonDecoder())
@@ -93,7 +88,7 @@ public class OAuthRequestInterceptor implements RequestInterceptor {
             clientProfile.setClientName(APPLICATION_NAME);
             clientProfile.setCallbackUrl("");
             clientProfile.setGrantType(GRANT_TYPES);
-            clientProfile.setOwner(username);
+            clientProfile.setOwner(APIMConfigReader.getInstance().getConfig().getUsername());
             clientProfile.setSaasApp(true);
             oAuthApplication = dcrClient.register(clientProfile);
         }

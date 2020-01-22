@@ -27,15 +27,13 @@ import org.wso2.carbon.apimgt.application.extension.exception.APIManagerExceptio
 import org.wso2.carbon.apimgt.application.extension.internal.APIApplicationManagerExtensionDataHolder;
 import org.wso2.carbon.apimgt.application.extension.util.APIManagerUtil;
 import org.wso2.carbon.apimgt.integration.client.OAuthRequestInterceptor;
-import org.wso2.carbon.apimgt.integration.client.store.*;
+import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
 import org.wso2.carbon.apimgt.integration.generated.client.store.model.*;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class represents an implementation of APIManagementProviderService.
@@ -53,24 +51,26 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext()
                 .getTenantDomain();
         try {
-
             storeClient.getIndividualTier().tiersTierLevelTierNameGet(ApiApplicationConstants.DEFAULT_TIER,
-                                                                      APP_TIER_TYPE,
-                                                                      tenantDomain, CONTENT_TYPE, null, null);
+                    APP_TIER_TYPE,
+                    tenantDomain, CONTENT_TYPE, null, null);
             return true;
         } catch (FeignException e) {
+            log.error("Feign Exception", e);
             if (e.status() == 401) {
                 OAuthRequestInterceptor oAuthRequestInterceptor = new OAuthRequestInterceptor();
                 String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
                 oAuthRequestInterceptor.removeToken(username, tenantDomain);
                 try {
                     storeClient.getIndividualTier().tiersTierLevelTierNameGet(ApiApplicationConstants.DEFAULT_TIER,
-                            APP_TIER_TYPE,tenantDomain, CONTENT_TYPE, null, null);
+                            APP_TIER_TYPE, tenantDomain, CONTENT_TYPE, null, null);
                 } catch (FeignException ex) {
                     log.error("Invalid Attempt : " + ex);
-                    return false;
                 }
-            } }
+            }
+        } catch (Exception e) {
+            log.error("APIs not ready", e);
+        }
         return false;
     }
 
@@ -84,7 +84,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
         if (applicationList.getList() != null && applicationList.getList().size() > 0) {
             ApplicationInfo applicationInfo = applicationList.getList().get(0);
             storeClient.getIndividualApplication().applicationsApplicationIdDelete(applicationInfo.getApplicationId(),
-                                                                                   null, null);
+                    null, null);
         }
     }
 
@@ -93,9 +93,9 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
      */
     @Override
     public synchronized ApiApplicationKey generateAndRetrieveApplicationKeys(String applicationName, String tags[],
-                                                                String keyType, String username,
-                                                                boolean isAllowedAllDomains, String validityTime,
-                                                                StoreClient sClient) throws APIManagerException {
+                                                                             String keyType, String username,
+                                                                             boolean isAllowedAllDomains, String validityTime,
+                                                                             StoreClient sClient) throws APIManagerException {
 
         StoreClient storeClient;
 
@@ -227,7 +227,7 @@ public class APIManagementProviderServiceImpl implements APIManagementProviderSe
                                                                              boolean isAllowedAllDomains,
                                                                              String validityTime)
             throws APIManagerException {
-            return this.generateAndRetrieveApplicationKeys(applicationName, tags, keyType, username,
-                                                           isAllowedAllDomains, validityTime, null);
+        return this.generateAndRetrieveApplicationKeys(applicationName, tags, keyType, username,
+                isAllowedAllDomains, validityTime, null);
     }
 }
