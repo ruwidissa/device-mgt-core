@@ -60,6 +60,8 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
@@ -89,6 +91,7 @@ import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
@@ -108,6 +111,7 @@ import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -196,18 +200,52 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 RequestValidationUtil.validateStatus(excludeStatus);
                 request.setExcludeStatus(excludeStatus);
             }
+            // this is the user who initiates the request
+            String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+
             if (groupId != 0) {
-                request.setGroupId(groupId);
+                try {
+                    int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+                    UserStoreManager userStoreManager = DeviceMgtAPIUtils.getRealmService()
+                            .getTenantUserRealm(tenantId).getUserStoreManager();
+                    String[] userRoles = userStoreManager.getRoleListOfUser(authorizedUser);
+                    boolean isPermitted = false;
+                    if (deviceAccessAuthorizationService.isDeviceAdminUser()) {
+                        isPermitted = true;
+                    } else {
+                        List<String> roles = DeviceMgtAPIUtils.getGroupManagementProviderService().getRoles(groupId);
+                        for (String userRole : userRoles) {
+                            if (roles.contains(userRole)) {
+                                isPermitted = true;
+                                break;
+                            }
+                        }
+                        if (!isPermitted) {
+                            DeviceGroup deviceGroup = DeviceMgtAPIUtils.getGroupManagementProviderService()
+                                    .getGroup(groupId, false);
+                            if (deviceGroup != null && authorizedUser.equals(deviceGroup.getOwner())) {
+                                isPermitted = true;
+                            }
+                        }
+                    }
+                    if (isPermitted) {
+                        request.setGroupId(groupId);
+                    } else {
+                        return Response.status(Response.Status.FORBIDDEN).entity(
+                                new ErrorResponse.ErrorResponseBuilder().setMessage("Current user '" + authorizedUser
+                                        + "' doesn't have enough privileges to list devices of group '"
+                                        + groupId + "'").build()).build();
+                    }
+                } catch (GroupManagementException | UserStoreException e) {
+                    throw new DeviceManagementException(e);
+                }
             }
             if (role != null && !role.isEmpty()) {
                 request.setOwnerRole(role);
             }
-
-            // this is the user who initiates the request
-            String authorizedUser = MultitenantUtils.getTenantAwareUsername(CarbonContext.getThreadLocalCarbonContext().getUsername());
-
+            authorizedUser = MultitenantUtils.getTenantAwareUsername(authorizedUser);
             // check whether the user is device-mgt admin
-            if (deviceAccessAuthorizationService.isDeviceAdminUser()) {
+            if (deviceAccessAuthorizationService.isDeviceAdminUser() || request.getGroupId() > 0) {
                 if (user != null && !user.isEmpty()) {
                     request.setOwner(MultitenantUtils.getTenantAwareUsername(user));
                 } else if (userPattern != null && !userPattern.isEmpty()) {
