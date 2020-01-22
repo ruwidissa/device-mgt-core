@@ -38,7 +38,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import java.util.Iterator;
 import java.util.List;
 
-
 /**
  * Implementation of DeviceAccessAuthorization service.
  */
@@ -69,21 +68,30 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
         }
         //check for group permissions
         try {
-            if (groupPermissions == null || groupPermissions.length == 0) {
-                return false;
-            }
-            for (String groupPermission : groupPermissions) {
-                if (!isAuthorizedViaGroup(username, deviceIdentifier, groupPermission)) {
-                    //if at least one fails, authorization fails
-                    return false;
+            return isSharedViaGroup(deviceIdentifier, username);
+        } catch (GroupManagementException | UserStoreException e) {
+            throw new DeviceAccessAuthorizationException("Unable to authorize the access to device : " +
+                    deviceIdentifier.getId() + " for the user : " +
+                    username, e);
+        }
+    }
+
+    private boolean isSharedViaGroup(DeviceIdentifier deviceIdentifier, String username)
+            throws GroupManagementException, UserStoreException {
+        List<DeviceGroup> groupsWithDevice = DeviceManagementDataHolder.getInstance()
+                .getGroupManagementProviderService().getGroups(deviceIdentifier, false);
+        String[] userRoles = DeviceManagementDataHolder.getInstance().getRealmService()
+                .getTenantUserRealm(getTenantId()).getUserStoreManager().getRoleListOfUser(username);
+        for (DeviceGroup deviceGroup : groupsWithDevice) {
+            List<String> sharingRoles = DeviceManagementDataHolder.getInstance()
+                    .getGroupManagementProviderService().getRoles(deviceGroup.getGroupId());
+            for (String role : userRoles) {
+                if (sharingRoles.contains(role)) {
+                    return true;
                 }
             }
-            return true;
-        } catch (GroupManagementException e) {
-            throw new DeviceAccessAuthorizationException("Unable to authorize the access to device : " +
-                                                         deviceIdentifier.getId() + " for the user : " +
-                                                         username, e);
         }
+        return false;
     }
 
     @Override
