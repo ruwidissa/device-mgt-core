@@ -47,6 +47,9 @@ import org.testng.IObjectFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.ObjectFactory;
 import org.testng.annotations.Test;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -66,8 +69,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * This class holds the unit tests for the class {@link DeviceTypeManagementAdminService}
  */
 @PowerMockIgnore({"javax.ws.rs.*", "org.apache.log4j.*"})
-@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils"})
-@PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class})
+@SuppressStaticInitializationFor({"org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils",
+                                  "org.wso2.carbon.context.PrivilegedCarbonContext"})
+@PrepareForTest({DeviceMgtAPIUtils.class, DeviceManagementProviderService.class, CarbonContext.class})
 public class DeviceTypeManagementAdminServiceTest {
 
     private static final Log log = LogFactory.getLog(DeviceTypeManagementAdminService.class);
@@ -77,6 +81,7 @@ public class DeviceTypeManagementAdminServiceTest {
     private static final int TEST_DEVICE_TYPE_ID = 12345;
     private static final int TEST_DEVICE_TYPE_ID_1 = 123452;
     private static final int TEST_DEVICE_TYPE_ID_2 = 121233452;
+    private PrivilegedCarbonContext context;
     private DeviceTypeManagementAdminService deviceTypeManagementAdminService;
     private DeviceManagementProviderService deviceManagementProviderService;
     private DeviceTypeGeneratorService deviceTypeGeneratorService;
@@ -94,6 +99,8 @@ public class DeviceTypeManagementAdminServiceTest {
                 .mock(DeviceManagementProviderServiceImpl.class, Mockito.RETURNS_MOCKS);
         this.deviceTypeGeneratorService = Mockito.mock(DeviceTypeGeneratorServiceImpl.class, Mockito.RETURNS_MOCKS);
         this.deviceTypeManagementAdminService = new DeviceTypeManagementAdminServiceImpl();
+        context = Mockito.mock(PrivilegedCarbonContext.class);
+        Mockito.doReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).when(context).getTenantDomain();
     }
 
     @Test(description = "Test get all the device types.")
@@ -122,6 +129,8 @@ public class DeviceTypeManagementAdminServiceTest {
     public void testAddDeviceTypeWithExistingName() throws DeviceManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(context);
         DeviceType deviceType = DeviceMgtAPITestHelper.getDummyDeviceType(TEST_DEVICE_TYPE_1, TEST_DEVICE_TYPE_ID_1);
         Response response = this.deviceTypeManagementAdminService.addDeviceType(deviceType);
         Assert.assertNotNull(response, "The response should not be null");
@@ -133,6 +142,8 @@ public class DeviceTypeManagementAdminServiceTest {
     public void testAddDeviceTypeWithUnqualifiedName() throws DeviceManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(context);
         Mockito.when(deviceManagementProviderService.getDeviceType(Mockito.anyString())).thenReturn(null);
         DeviceType deviceType = DeviceMgtAPITestHelper.getDummyDeviceType(TEST_DEVICE_TYPE_2, TEST_DEVICE_TYPE_ID_2);
         Response response = this.deviceTypeManagementAdminService.addDeviceType(deviceType);
@@ -148,6 +159,8 @@ public class DeviceTypeManagementAdminServiceTest {
                 .toReturn(this.deviceManagementProviderService);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceTypeGeneratorService"))
                 .toReturn(this.deviceTypeGeneratorService);
+        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(context);
         Mockito.when(deviceManagementProviderService.getDeviceType(Mockito.anyString())).thenReturn(null);
         DeviceType deviceType = DeviceMgtAPITestHelper.getDummyDeviceType(TEST_DEVICE_TYPE, TEST_DEVICE_TYPE_ID);
         Response response = this.deviceTypeManagementAdminService.addDeviceType(deviceType);
@@ -171,6 +184,8 @@ public class DeviceTypeManagementAdminServiceTest {
     public void testAddDeviceTypeWithException() throws DeviceManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext"))
+                .toReturn(context);
         Mockito.when(this.deviceManagementProviderService.getDeviceType(Mockito.anyString())).thenThrow(new
                 DeviceManagementException());
         DeviceType deviceType = DeviceMgtAPITestHelper.getDummyDeviceType(TEST_DEVICE_TYPE, TEST_DEVICE_TYPE_ID);

@@ -247,6 +247,10 @@ public interface DeviceTypeManagementAdminService {
                     message = "Unauthorized.\n The unauthorized access to the requested resource.",
                     response = ErrorResponse.class),
             @ApiResponse(
+                    code = 403,
+                    message = "Forbidden.\n The resource is unavailable for current tenant.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
                     code = 404,
                     message = "Not Found.\n The specified device does not exist",
                     response = ErrorResponse.class),

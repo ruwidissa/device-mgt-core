@@ -18,6 +18,7 @@ public class DeviceTypeMetaDefinition {
     private InitialOperationConfig initialOperationConfig;
     private License license;
     private String description;
+    private boolean isSharedWithAllTenants;
 
     public String getDescription() {
         return description;
@@ -82,5 +83,13 @@ public class DeviceTypeMetaDefinition {
 
     public void setLicense(License license) {
         this.license = license;
+    }
+
+    public boolean isSharedWithAllTenants() {
+        return isSharedWithAllTenants;
+    }
+
+    public void setSharedWithAllTenants(boolean sharedWithAllTenants) {
+        isSharedWithAllTenants = sharedWithAllTenants;
     }
 }

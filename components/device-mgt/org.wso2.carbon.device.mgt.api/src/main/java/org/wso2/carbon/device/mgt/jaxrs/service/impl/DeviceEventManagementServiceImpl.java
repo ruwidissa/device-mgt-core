@@ -200,6 +200,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
     @Override
     public Response deployDeviceTypeEventDefinition(@PathParam("type") String deviceType,
                                                     @QueryParam("skipPersist") boolean skipPersist,
+                                                    @QueryParam("isSharedWithAllTenants") boolean isSharedWithAllTenants,
                                                     @Valid DeviceTypeEvent deviceTypeEvent) {
         TransportType transportType = deviceTypeEvent.getTransportType();
         EventAttributeList eventAttributes = deviceTypeEvent.getEventAttributeList();
@@ -215,7 +216,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             String streamName = DeviceMgtAPIUtils.getStreamDefinition(deviceType, tenantDomain);
             String streamNameWithVersion = streamName + ":" + Constants.DEFAULT_STREAM_VERSION;
             publishStreamDefinitons(streamName, Constants.DEFAULT_STREAM_VERSION, deviceType, eventAttributes);
-            publishEventReceivers(streamNameWithVersion, transportType, tenantDomain, deviceType);
+            publishEventReceivers(streamNameWithVersion, transportType, tenantDomain, isSharedWithAllTenants, deviceType);
             if (!skipPersist) {
                 publishEventStore(streamName, Constants.DEFAULT_STREAM_VERSION, eventAttributes);
             }
@@ -226,7 +227,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
                         MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     publishStreamDefinitons(streamName, Constants.DEFAULT_STREAM_VERSION, deviceType, eventAttributes);
-                    publishEventReceivers(streamNameWithVersion, transportType, tenantDomain, deviceType);
+                    publishEventReceivers(streamNameWithVersion, transportType, tenantDomain, isSharedWithAllTenants, deviceType);
                 }
             } finally {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -520,7 +521,7 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
 
 
     private void publishEventReceivers(String streamNameWithVersion, TransportType transportType
-            , String requestedTenantDomain, String deviceType)
+            , String requestedTenantDomain, boolean isSharedWithAllTenants, String deviceType)
             throws RemoteException, UserStoreException, JWTClientException {
         EventReceiverAdminServiceStub receiverAdminServiceStub = DeviceMgtAPIUtils.getEventReceiverAdminServiceStub();
         try {
@@ -543,8 +544,13 @@ public class DeviceEventManagementServiceImpl implements DeviceEventManagementSe
             BasicInputAdapterPropertyDto basicInputAdapterPropertyDtos[];
             if (transportType == TransportType.MQTT) {
                 basicInputAdapterPropertyDtos = new BasicInputAdapterPropertyDto[3];
-                basicInputAdapterPropertyDtos[0] = getBasicInputAdapterPropertyDto("topic", requestedTenantDomain
-                        + "/" + deviceType + "/+/events");
+                String topic;
+                if (isSharedWithAllTenants) {
+                    topic = "+/" + deviceType + "/+/events";
+                } else {
+                    topic = requestedTenantDomain + "/" + deviceType + "/+/events";
+                }
+                basicInputAdapterPropertyDtos[0] = getBasicInputAdapterPropertyDto("topic", topic);
                 basicInputAdapterPropertyDtos[1] = getBasicInputAdapterPropertyDto(MQTT_CONTENT_TRANSFORMER_TYPE
                         , MQTT_CONTENT_TRANSFORMER);
                 basicInputAdapterPropertyDtos[2] = getBasicInputAdapterPropertyDto(MQTT_CONTENT_VALIDATOR_TYPE
