@@ -27,6 +27,8 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.impl.AbstractDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
+import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -713,5 +715,78 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
+    }
+
+    @Override
+    public List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
+            int geohashLength, int tenantId) throws DeviceManagementDAOException {
+        List<GeoCluster> geoClusters = new ArrayList<>();
+        try {
+            Connection conn = this.getConnection();
+            String sql = "SELECT "
+                    + "AVG(DEVICE_LOCATION.LATITUDE) AS LATITUDE, "
+                    + "AVG(DEVICE_LOCATION.LONGITUDE) AS LONGITUDE, "
+                    + "MIN(DEVICE_LOCATION.LATITUDE) AS MIN_LATITUDE, "
+                    + "MAX(DEVICE_LOCATION.LATITUDE) AS MAX_LATITUDE, "
+                    + "MIN(DEVICE_LOCATION.LONGITUDE) AS MIN_LONGITUDE, "
+                    + "MAX(DEVICE_LOCATION.LONGITUDE) AS MAX_LONGITUDE, "
+                    + "SUBSTRING(DEVICE_LOCATION.GEO_HASH,1,"
+                    + geohashLength
+                    + ") AS GEOHASH_PREFIX, "
+                    + "COUNT(*) AS COUNT, "
+                    + "MIN(DEVICE.DEVICE_IDENTIFICATION) AS DEVICE_IDENTIFICATION, "
+                    + "MIN(DEVICE_TYPE.NAME) AS TYPE, "
+                    + "MIN(DEVICE.LAST_UPDATED_TIMESTAMP) AS LAST_UPDATED_TIMESTAMP, "
+                    + "COUNT(DEVICE_LOCATION.GEO_HASH) "
+                    + "FROM "
+                    + "DM_DEVICE_LOCATION AS DEVICE_LOCATION, "
+                    + "DM_DEVICE AS DEVICE, "
+                    + "DM_DEVICE_TYPE AS DEVICE_TYPE "
+                    + "WHERE "
+                    + "DEVICE_LOCATION.LATITUDE BETWEEN "
+                    + southWest.getLatitude()
+                    + " AND "
+                    + northEast.getLatitude()
+                    + " AND "
+                    + "DEVICE_LOCATION.LONGITUDE BETWEEN "
+                    + southWest.getLongitude()
+                    + " AND "
+                    + northEast.getLongitude()
+                    +" AND "
+                    + "DEVICE.TENANT_ID = " + tenantId +" AND "
+                    + "DEVICE.ID = DEVICE_LOCATION.DEVICE_ID  AND "
+                    + "DEVICE.DEVICE_TYPE_ID = DEVICE_TYPE.ID ";
+            if (deviceType != null && !deviceType.isEmpty()) {
+                sql += "AND DEVICE_TYPE.NAME = " + deviceType;
+            }
+            sql += "GROUP BY SUBSTRING(DEVICE_LOCATION.GEO_HASH,1,"+ geohashLength + ")";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        double latitude = rs.getDouble("LATITUDE");
+                        double longitude = rs.getDouble("LONGITUDE");
+                        double min_latitude = rs.getDouble("MIN_LATITUDE");
+                        double max_latitude = rs.getDouble("MAX_LATITUDE");
+                        double min_longitude = rs.getDouble("MIN_LONGITUDE");
+                        double max_longitude = rs.getDouble("MAX_LONGITUDE");
+                        String device_identification = rs.getString("DEVICE_IDENTIFICATION");
+                        String device_type = rs.getString("TYPE");
+                        String last_seen = rs.getString("LAST_UPDATED_TIMESTAMP");
+                        long count = rs.getLong("COUNT");
+                        String geohashPrefix = rs.getString("GEOHASH_PREFIX");
+                        geoClusters.add(new GeoCluster(new GeoCoordinate(latitude, longitude),
+                                new GeoCoordinate(min_latitude, min_longitude),
+                                new GeoCoordinate(max_latitude, max_longitude), count, geohashPrefix,
+                                device_identification, device_type, last_seen));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "SQL Error(Ms SQL) occurred while retrieving information of  Geo Clusters";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return geoClusters;
     }
 }
