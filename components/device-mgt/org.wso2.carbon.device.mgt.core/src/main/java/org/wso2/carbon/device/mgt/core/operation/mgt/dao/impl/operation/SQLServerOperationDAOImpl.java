@@ -14,10 +14,29 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2020, Entgra Pvt Ltd. (https://entgra.io/) All Rights Reserved.
+ *
+ * Entgra Pvt Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl.operation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -47,6 +66,8 @@ import java.util.Map;
  * This class holds the implementation of OperationDAO which can be used to support SQLServer db syntax.
  */
 public class SQLServerOperationDAOImpl extends GenericOperationDAOImpl {
+
+    private static final Log log = LogFactory.getLog(GenericOperationDAOImpl.class);
 
     @Override
     public List<? extends Operation> getOperationsForDevice(int enrolmentId, PaginationRequest request)
@@ -360,5 +381,65 @@ public class SQLServerOperationDAOImpl extends GenericOperationDAOImpl {
             OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return operationMappingsTenantMap;
+    }
+
+    public Operation getNextOperation(int enrolmentId, Operation.Status status)
+            throws OperationManagementDAOException {
+        String sql =
+                "SELECT " +
+                    "o.ID, " +
+                    "TYPE, " +
+                    "o.CREATED_TIMESTAMP, " +
+                    "o.RECEIVED_TIMESTAMP, " +
+                    "OPERATION_CODE, " +
+                    "om.ID AS OM_MAPPING_ID, " +
+                    "om.UPDATED_TIMESTAMP " +
+                "FROM " +
+                    "DM_OPERATION o " +
+                    "INNER JOIN (" +
+                        "SELECT * " +
+                        "FROM " +
+                            "DM_ENROLMENT_OP_MAPPING dm " +
+                        "WHERE " +
+                            "dm.ENROLMENT_ID = ? AND " +
+                            "dm.STATUS = ?) om " +
+                    "ON o.ID = om.OPERATION_ID " +
+                "ORDER BY " +
+                    "om.UPDATED_TIMESTAMP ASC, " +
+                    "om.ID ASC " +
+                "OFFSET 0 " +
+                "ROWS FETCH NEXT 1 ROWS ONLY";
+
+        try {
+            Connection conn = OperationManagementDAOFactory.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, enrolmentId);
+                stmt.setString(2, status.toString());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    Operation operation = null;
+                    if (rs.next()) {
+                        operation = new Operation();
+                        operation.setType(OperationDAOUtil.getType(rs.getString("TYPE")));
+                        operation.setId(rs.getInt("ID"));
+                        operation.setCreatedTimeStamp(rs.getTimestamp("CREATED_TIMESTAMP").toString());
+                        if (rs.getLong("UPDATED_TIMESTAMP") == 0) {
+                            operation.setReceivedTimeStamp("");
+                        } else {
+                            operation.setReceivedTimeStamp(new java.sql.Timestamp((
+                                    rs.getLong("UPDATED_TIMESTAMP") * 1000)).toString());
+                        }
+                        operation.setCode(rs.getString("OPERATION_CODE"));
+                        operation.setStatus(Operation.Status.PENDING);
+                        OperationDAOUtil.setActivityId(operation, rs.getInt("ID"));
+                    }
+                    return operation;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while retrieving next operation for enrollment ID: " + enrolmentId +
+                    " having the status " + status.toString() + ".";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
     }
 }
