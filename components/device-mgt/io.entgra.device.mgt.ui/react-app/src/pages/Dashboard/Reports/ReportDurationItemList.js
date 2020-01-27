@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { Icon, Col, Row, Card } from 'antd';
+import { Icon, Col, Row, Card, PageHeader, Breadcrumb } from 'antd';
 
 import { Link } from 'react-router-dom';
 import moment from 'moment';
@@ -32,10 +32,11 @@ class ReportDurationItemList extends React.Component {
     };
   }
 
+  // Array for pre defined date durations
   durationItemArray = [
     {
       name: 'Daily Report',
-      description: 'Enrollments of today',
+      description: 'Report of today',
       duration: [
         moment().format('YYYY-MM-DD'),
         moment()
@@ -45,7 +46,7 @@ class ReportDurationItemList extends React.Component {
     },
     {
       name: 'Weekly Report',
-      description: 'Enrollments of last 7 days',
+      description: 'Report of last 7 days',
       duration: [
         moment()
           .subtract(6, 'days')
@@ -57,7 +58,7 @@ class ReportDurationItemList extends React.Component {
     },
     {
       name: 'Monthly Report',
-      description: 'Enrollments of last month',
+      description: 'Report of last month',
       duration: [
         moment()
           .subtract(29, 'days')
@@ -69,7 +70,104 @@ class ReportDurationItemList extends React.Component {
     },
   ];
 
+  // Map durationItemArray and additional parameters to antd cards
+  mapDurationCards = data => {
+    return this.durationItemArray.map(item => (
+      <Col key={item.name} span={6}>
+        <Link
+          to={{
+            // Path to respective report page
+            pathname: '/entgra/reports/policy',
+            reportData: {
+              duration: item.duration,
+              data: data,
+            },
+          }}
+        >
+          <Card
+            key={item.name}
+            bordered={true}
+            hoverable={true}
+            style={{ borderRadius: 10, marginBottom: 16 }}
+          >
+            <div align="center">
+              <Icon
+                type="desktop"
+                style={{ fontSize: '25px', color: '#08c' }}
+              />
+              <h2>
+                <b>{item.name}</b>
+              </h2>
+              <p>{item.description}</p>
+            </div>
+          </Card>
+        </Link>
+      </Col>
+    ));
+  };
+
+  itemAllPolicyCompliance = this.durationItemArray.map(data => (
+    <Col key={data.name} span={6}>
+      <Link
+        to={{
+          // Path to respective report page
+          pathname: '/entgra/policyreport',
+          reportData: {
+            duration: data.duration,
+          },
+        }}
+      >
+        <Card
+          key={data.name}
+          bordered={true}
+          hoverable={true}
+          style={{ borderRadius: 10, marginBottom: 16 }}
+        >
+          <div align="center">
+            <Icon type="desktop" style={{ fontSize: '25px', color: '#08c' }} />
+            <h2>
+              <b>{data.name}</b>
+            </h2>
+            <p>{data.description}</p>
+          </div>
+        </Card>
+      </Link>
+    </Col>
+  ));
+
+  itemPerPolicyCompliance = this.durationItemArray.map(data => (
+    <Col key={data.name} span={6}>
+      <Link
+        to={{
+          // Path to respective report page
+          pathname: '/entgra/policyreport',
+          reportData: {
+            duration: data.duration,
+            policyId: 6,
+          },
+        }}
+      >
+        <Card
+          key={data.name}
+          bordered={true}
+          hoverable={true}
+          style={{ borderRadius: 10, marginBottom: 16 }}
+        >
+          <div align="center">
+            <Icon type="desktop" style={{ fontSize: '25px', color: '#08c' }} />
+            <h2>
+              <b>{data.name}</b>
+            </h2>
+            <p>{data.description}</p>
+          </div>
+        </Card>
+      </Link>
+    </Col>
+  ));
+
   render() {
+    const { data } = this.props.location;
+
     let itemStatus = this.durationItemArray.map(data => (
       <Col key={data.name} span={6}>
         <Link
@@ -175,18 +273,53 @@ class ReportDurationItemList extends React.Component {
         </Link>
       </Col>
     ));
+
+    let cardItem = this.itemAllPolicyCompliance;
+
+    switch (data.name) {
+      case 'all_policy_compliance_report':
+        cardItem = this.itemAllPolicyCompliance;
+        // cardItem = this.mapDurationCards({});
+        break;
+      case 'per_policy_compliance_report':
+        cardItem = this.itemPerPolicyCompliance;
+        // cardItem = this.mapDurationCards({
+        //   policyId: 6,
+        // });
+        break;
+      case 'enrollments_vs_unenrollments_report':
+        cardItem = itemEnrollmentsVsUnenrollments;
+        break;
+      case 'enrollment_status_report':
+        cardItem = itemStatus;
+        break;
+      case 'enrollemt_type_report':
+        cardItem = itemEnrollmentType;
+        break;
+    }
+
     return (
       <div>
-        <div style={{ borderRadius: 5 }}>
-          <Row gutter={16}>{itemStatus}</Row>
-        </div>
-
-        <div style={{ borderRadius: 5 }}>
-          <Row gutter={16}>{itemEnrollmentsVsUnenrollments}</Row>
-        </div>
-
-        <div style={{ borderRadius: 5 }}>
-          <Row gutter={16}>{itemEnrollmentType}</Row>
+        <div>
+          <PageHeader style={{ paddingTop: 0 }}>
+            <Breadcrumb style={{ paddingBottom: 16 }}>
+              <Breadcrumb.Item>
+                <Link to="/entgra">
+                  <Icon type="home" /> Home
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Reports</Breadcrumb.Item>
+            </Breadcrumb>
+            <div className="wrap">
+              <h3>Reports</h3>
+              <div style={{ borderRadius: 5 }}>
+                <Row gutter={16}>{cardItem}</Row>
+              </div>
+            </div>
+          </PageHeader>
+          <div
+            style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}
+          ></div>
         </div>
       </div>
     );

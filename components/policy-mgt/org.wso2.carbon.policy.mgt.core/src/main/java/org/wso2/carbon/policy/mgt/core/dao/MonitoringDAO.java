@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.policy.mgt.core.dao;
 
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.policy.mgt.common.monitor.PolicyDeviceWrapper;
@@ -54,6 +56,10 @@ public interface MonitoringDAO {
     List<NonComplianceData> getCompliance(List<Integer> deviceIds) throws MonitoringDAOException;
 
     List<NonComplianceData> getCompliance() throws MonitoringDAOException;
+
+    List<ComplianceData> getAllComplianceDevices(
+            PaginationRequest paginationRequest, String policyId, boolean complianceStatus, boolean isPending, String fromDate, String toDate)
+            throws MonitoringDAOException;
 
     List<ComplianceFeature> getNoneComplianceFeatures(int policyComplianceStatusId) throws MonitoringDAOException;
 

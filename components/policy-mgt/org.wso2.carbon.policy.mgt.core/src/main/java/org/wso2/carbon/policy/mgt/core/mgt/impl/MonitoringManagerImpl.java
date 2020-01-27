@@ -22,11 +22,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
+import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
@@ -369,6 +372,52 @@ public class MonitoringManagerImpl implements MonitoringManager {
             throw new PolicyComplianceException("Error occurred while getting the device types.", e);
         }
         return deviceTypes;
+    }
+
+    @Override
+    public PaginationResult getPolicyCompliance(
+            PaginationRequest paginationRequest, String policyId,
+            boolean complianceStatus, boolean isPending, String fromDate, String toDate)
+            throws PolicyComplianceException {
+        PaginationResult paginationResult = new PaginationResult();
+        try {
+            PolicyManagementDAOFactory.openConnection();
+            List<ComplianceData> complianceDataList = monitoringDAO
+                    .getAllComplianceDevices(paginationRequest, policyId, complianceStatus, isPending, fromDate, toDate);
+            paginationResult.setData(complianceDataList);
+            paginationResult.setRecordsTotal(complianceDataList.size());
+        } catch (MonitoringDAOException e) {
+            String msg = "Unable to retrieve compliance data";
+            log.error(msg, e);
+            throw new PolicyComplianceException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new PolicyComplianceException(msg, e);
+        } finally {
+            PolicyManagementDAOFactory.closeConnection();
+        }
+        return paginationResult;
+    }
+
+    @Override
+    public List<ComplianceFeature> getNoneComplianceFeatures(int complianceStatusId) throws PolicyComplianceException {
+        List<ComplianceFeature> complianceFeatureList;
+        try {
+            PolicyManagementDAOFactory.openConnection();
+            complianceFeatureList = monitoringDAO.getNoneComplianceFeatures(complianceStatusId);
+        } catch (MonitoringDAOException e) {
+            String msg = "Unable to retrieve non compliance features";
+            log.error(msg, e);
+            throw new PolicyComplianceException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new PolicyComplianceException(msg, e);
+        } finally {
+            PolicyManagementDAOFactory.closeConnection();
+        }
+        return complianceFeatureList;
     }
 
     private void addMonitoringOperationsToDatabase(List<Device> devices)

@@ -66,6 +66,8 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceData;
+import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.common.search.PropertyMap;
@@ -84,6 +86,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -106,13 +109,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -1055,5 +1057,67 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
         }
         return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
+    @Override
+    @Path("/compliance/{compliance-status}")
+    public Response getPolicyCompliance(
+            @PathParam("compliance-status") boolean complianceStatus,
+            @QueryParam("policy") String policyId,
+            @DefaultValue("false")
+            @QueryParam("pending") boolean isPending,
+            @QueryParam("from") String fromDate,
+            @QueryParam("to") String toDate,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @DefaultValue("10")
+            @QueryParam("limit") int limit) {
+
+        PaginationRequest request = new PaginationRequest(offset, limit);
+        ComplianceDeviceList complianceDeviceList = new ComplianceDeviceList();
+        PaginationResult paginationResult;
+        try {
+
+            PolicyManagerService policyManagerService = DeviceMgtAPIUtils.getPolicyManagementService();
+            paginationResult = policyManagerService.getPolicyCompliance(request, policyId, complianceStatus, isPending, fromDate, toDate);
+
+            if (paginationResult.getData().isEmpty()) {
+                return Response.status(Response.Status.OK)
+                        .entity("No policy compliance or non compliance devices are available").build();
+            } else {
+                complianceDeviceList.setList((List<ComplianceData>) paginationResult.getData());
+                complianceDeviceList.setCount(paginationResult.getRecordsTotal());
+                return Response.status(Response.Status.OK).entity(complianceDeviceList).build();
+            }
+        } catch (PolicyComplianceException e) {
+            String msg = "Error occurred while retrieving compliance data";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/{id}/features")
+    public Response getNoneComplianceFeatures(
+            @PathParam("id") int id) {
+        List<ComplianceFeature> complianceFeatureList;
+        try {
+            PolicyManagerService policyManagerService = DeviceMgtAPIUtils.getPolicyManagementService();
+            complianceFeatureList = policyManagerService.getNoneComplianceFeatures(id);
+
+            if (complianceFeatureList.isEmpty()) {
+                return Response.status(Response.Status.OK).entity("No non compliance features are available").build();
+            } else {
+                return Response.status(Response.Status.OK).entity(complianceFeatureList).build();
+            }
+        } catch (PolicyComplianceException e) {
+            String msg = "Error occurred while retrieving non compliance features";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
     }
 }

@@ -19,7 +19,7 @@
 import React from 'react';
 import { PageHeader, Breadcrumb, Icon } from 'antd';
 import { Link } from 'react-router-dom';
-import ReportDurationItemList from './ReportDurationItemList';
+import PolicyReportHome from './PolicyReportHome';
 
 class Reports extends React.Component {
   routes;
@@ -70,7 +70,7 @@ class Reports extends React.Component {
           </Breadcrumb>
           <div className="wrap">
             <h3>Reports</h3>
-            <ReportDurationItemList />
+            <PolicyReportHome />
           </div>
         </PageHeader>
         <div

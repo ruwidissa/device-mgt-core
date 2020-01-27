@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,14 +17,16 @@
  */
 
 import React from 'react';
-import { PageHeader, Breadcrumb, Icon, Select, Button, Card } from 'antd';
+import { PageHeader, Breadcrumb, Icon, Radio, Popover, Button } from 'antd';
 
 import { Link } from 'react-router-dom';
-import ReportDeviceTable from '../../../components/Devices/ReportDevicesTable';
-import PieChart from '../../../components/Reports/Widgets/PieChart';
 import { withConfigContext } from '../../../context/ConfigContext';
-
-const { Option } = Select;
+import axios from 'axios';
+import DateRangePicker from '../DateRangePicker';
+import moment from 'moment';
+import { Chart, Geom, Axis, Tooltip, Legend } from 'bizcharts';
+import DataSet from '@antv/data-set';
+import { handleApiError } from '../../../js/Utils';
 
 class DeviceStatusReport extends React.Component {
   routes;
@@ -32,37 +34,145 @@ class DeviceStatusReport extends React.Component {
   constructor(props) {
     super(props);
     this.routes = props.routes;
-    const { reportData } = this.props.location;
     this.state = {
-      selectedTags: ['Enrolled'],
       paramsObject: {
-        from: reportData.duration[0],
-        to: reportData.duration[1],
+        from: moment()
+          .subtract(7, 'days')
+          .format('YYYY-MM-DD'),
+        to: moment().format('YYYY-MM-DD'),
       },
-      statsObject: {},
-      statArray: [
-        { item: 'ACTIVE', count: 0 },
-        { item: 'INACTIVE', count: 0 },
-        { item: 'REMOVED', count: 0 },
-      ],
+      data: [],
+      fields: [],
+      durationMode: 'weekly',
+      visible: false,
     };
   }
 
-  onClickPieChart = value => {
-    console.log(value.data.point.item);
-    const chartValue = value.data.point.item;
+  handleDurationModeChange = e => {
+    const durationMode = e.target.value;
+    switch (durationMode) {
+      case 'daily':
+        this.updateDurationValue(
+          moment().format('YYYY-MM-DD'),
+          moment()
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
+        );
+        break;
+      case 'weekly':
+        this.updateDurationValue(
+          moment()
+            .subtract(7, 'days')
+            .format('YYYY-MM-DD'),
+          moment().format('YYYY-MM-DD'),
+        );
+        break;
+      case 'monthly':
+        this.updateDurationValue(
+          moment()
+            .subtract(30, 'days')
+            .format('YYYY-MM-DD'),
+          moment().format('YYYY-MM-DD'),
+        );
+        break;
+    }
+    this.setState({ durationMode });
+  };
+
+  handlePopoverVisibleChange = visible => {
+    this.setState({ visible });
+  };
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  // Get modified value from datepicker and set it to paramsObject
+  updateDurationValue = (modifiedFromDate, modifiedToDate) => {
     let tempParamObj = this.state.paramsObject;
-
-    tempParamObj.status = chartValue;
-
+    tempParamObj.from = modifiedFromDate;
+    tempParamObj.to = modifiedToDate;
     this.setState({ paramsObject: tempParamObj });
-    console.log(this.state.paramsObject);
+    this.fetchData();
+  };
+
+  // Call count APIs and get count for given parameters, then create data object to build pie chart
+  fetchData = () => {
+    this.setState({ loading: true });
+
+    const { paramsObject } = this.state;
+    const config = this.props.context;
+
+    const encodedExtraParams = Object.keys(paramsObject)
+      .map(key => key + '=' + paramsObject[key])
+      .join('&');
+
+    axios
+      .all([
+        axios.get(
+          window.location.origin +
+            config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
+            '/reports/count?status=ACTIVE&' +
+            encodedExtraParams,
+          'Active',
+        ),
+        axios.get(
+          window.location.origin +
+            config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
+            '/reports/count?status=INACTIVE&' +
+            encodedExtraParams,
+          'Inactive',
+        ),
+        axios.get(
+          window.location.origin +
+            config.serverConfig.invoker.uri +
+            config.serverConfig.invoker.deviceMgt +
+            '/reports/count?status=REMOVED&' +
+            encodedExtraParams,
+          'Removed',
+        ),
+      ])
+      .then(res => {
+        let keys = Object.keys(res[0].data.data);
+        let active = res[0].data.data;
+        let inactive = res[1].data.data;
+        let removed = res[2].data.data;
+
+        if (Object.keys(active).length != 0) {
+          active.name = 'Active';
+          inactive.name = 'Inactive';
+          removed.name = 'Removed';
+        }
+
+        const finalData = [active, inactive, removed];
+
+        this.setState({
+          data: finalData,
+          fields: keys,
+        });
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to get device count.',
+        );
+      });
   };
 
   render() {
-    const { reportData } = this.props.location;
+    const { durationMode } = this.state;
 
-    const params = { ...this.state.paramsObject };
+    const ds = new DataSet();
+    const dv = ds.createView().source(this.state.data);
+    dv.transform({
+      type: 'fold',
+      fields: this.state.fields,
+      key: 'Time',
+      value: 'Number of Devices',
+    });
+
     return (
       <div>
         <PageHeader style={{ paddingTop: 0 }}>
@@ -75,45 +185,63 @@ class DeviceStatusReport extends React.Component {
             <Breadcrumb.Item>Report</Breadcrumb.Item>
           </Breadcrumb>
           <div className="wrap" style={{ marginBottom: '10px' }}>
-            <h3>Summary of enrollments</h3>
-            <div style={{ marginBottom: '10px' }}>
-              <Select
-                defaultValue="android"
-                style={{ width: 120, marginRight: 10 }}
-              >
-                <Option value="android">Android</Option>
-                <Option value="ios">IOS</Option>
-                <Option value="windows">Windows</Option>
-              </Select>
-              <Button
-                onClick={this.onSubmitReport}
-                style={{ marginLeft: 10 }}
-                type="primary"
-              >
-                Generate Report
-              </Button>
-            </div>
-          </div>
+            <h3>Device Status Report</h3>
 
-          <div>
-            <Card
-              bordered={true}
-              hoverable={true}
+            <Radio.Group
+              onChange={this.handleDurationModeChange}
+              defaultValue={'weekly'}
+              value={durationMode}
+              style={{ marginBottom: 8, marginRight: 5 }}
+            >
+              <Radio.Button value={'daily'}>Today</Radio.Button>
+              <Radio.Button value={'weekly'}>Last Week</Radio.Button>
+              <Radio.Button value={'monthly'}>Last Month</Radio.Button>
+            </Radio.Group>
+
+            <Popover
+              trigger="hover"
+              content={
+                <div>
+                  <DateRangePicker
+                    updateDurationValue={this.updateDurationValue}
+                  />
+                </div>
+              }
+              visible={this.state.visible}
+              onVisibleChange={this.handlePopoverVisibleChange}
+            >
+              <Button style={{ marginRight: 10 }}>Custom Date</Button>
+            </Popover>
+
+            <div
               style={{
+                backgroundColor: '#ffffff',
                 borderRadius: 5,
-                marginBottom: 10,
-                height: window.innerHeight * 0.5,
+                marginTop: 10,
               }}
             >
-              <PieChart
-                onClickPieChart={this.onClickPieChart}
-                reportData={reportData}
-              />
-            </Card>
-          </div>
-
-          <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
-            <ReportDeviceTable paramsObject={params} />
+              <Chart height={400} data={dv} forceFit>
+                <Axis name="Time" />
+                <Axis name="Number of Devices" />
+                <Legend />
+                <Tooltip
+                  crosshairs={{
+                    type: 'y',
+                  }}
+                />
+                <Geom
+                  type="interval"
+                  position="Time*Number of Devices"
+                  color={'name'}
+                  adjust={[
+                    {
+                      type: 'dodge',
+                      marginRatio: 1 / 32,
+                    },
+                  ]}
+                />
+              </Chart>
+            </div>
           </div>
         </PageHeader>
         <div

@@ -59,7 +59,7 @@ class Dashboard extends React.Component {
           <Layout>
             <Header style={{ background: '#fff', padding: 0 }}>
               <div className="logo-image">
-                <Link to="/entgra/devices">
+                <Link to="/entgra/reports">
                   <img alt="logo" src={this.logo} />
                 </Link>
               </div>
@@ -72,26 +72,26 @@ class Dashboard extends React.Component {
                   marginRight: 110,
                 }}
               >
-                <SubMenu
-                  key="devices"
-                  title={
-                    <span>
-                      <Icon type="appstore" />
-                      <span>Devices</span>
-                    </span>
-                  }
-                >
-                  <Menu.Item key="devices">
-                    <Link to="/entgra/devices">
-                      <span>View</span>
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="deviceEnroll">
-                    <Link to="/entgra/devices/enroll">
-                      <span>Enroll</span>
-                    </Link>
-                  </Menu.Item>
-                </SubMenu>
+                {/* <SubMenu*/}
+                {/*  key="devices"*/}
+                {/*  title={*/}
+                {/*    <span>*/}
+                {/*      <Icon type="appstore" />*/}
+                {/*      <span>Devices</span>*/}
+                {/*    </span>*/}
+                {/*  }*/}
+                {/* >*/}
+                {/*  <Menu.Item key="devices">*/}
+                {/*    <Link to="/entgra/devices">*/}
+                {/*      <span>View</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/*  <Menu.Item key="deviceEnroll">*/}
+                {/*    <Link to="/entgra/devices/enroll">*/}
+                {/*      <span>Enroll</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/* </SubMenu>*/}
                 <SubMenu
                   key="geo"
                   title={
@@ -118,65 +118,65 @@ class Dashboard extends React.Component {
                     <span>Reports</span>
                   </Link>
                 </Menu.Item>
-                <Menu.Item key="groups">
-                  <Link to="/entgra/groups">
-                    <Icon type="deployment-unit" />
-                    <span>Groups</span>
-                  </Link>
-                </Menu.Item>
-                <Menu.Item key="users">
-                  <Link to="/entgra/users">
-                    <Icon type="user" />
-                    <span>Users</span>
-                  </Link>
-                </Menu.Item>
-                <SubMenu
-                  key="policies"
-                  title={
-                    <span>
-                      <Icon type="audit" />
-                      <span>Policies</span>
-                    </span>
-                  }
-                >
-                  <Menu.Item key="policiesList">
-                    <Link to="/entgra/policies">
-                      <span>View</span>
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="addPolicy">
-                    <Link to="/entgra/policy/add">
-                      <span>Add New Policy</span>
-                    </Link>
-                  </Menu.Item>
-                </SubMenu>
-                <Menu.Item key="roles">
-                  <Link to="/entgra/roles">
-                    <Icon type="book" />
-                    <span>Roles</span>
-                  </Link>
-                </Menu.Item>
-                <Menu.Item key="devicetypes">
-                  <Link to="/entgra/devicetypes">
-                    <Icon type="desktop" />
-                    <span>Device Types</span>
-                  </Link>
-                </Menu.Item>
-                <SubMenu
-                  key="configurations"
-                  title={
-                    <span>
-                      <Icon type="setting" />
-                      <span>Configurations</span>
-                    </span>
-                  }
-                >
-                  <Menu.Item key="certificates">
-                    <Link to="/entgra/certificates">
-                      <span>Certificates</span>
-                    </Link>
-                  </Menu.Item>
-                </SubMenu>
+                {/* <Menu.Item key="groups">*/}
+                {/*  <Link to="/entgra/groups">*/}
+                {/*    <Icon type="deployment-unit" />*/}
+                {/*    <span>Groups</span>*/}
+                {/*  </Link>*/}
+                {/* </Menu.Item>*/}
+                {/* <Menu.Item key="users">*/}
+                {/*  <Link to="/entgra/users">*/}
+                {/*    <Icon type="user" />*/}
+                {/*    <span>Users</span>*/}
+                {/*  </Link>*/}
+                {/* </Menu.Item>*/}
+                {/* <SubMenu*/}
+                {/*  key="policies"*/}
+                {/*  title={*/}
+                {/*    <span>*/}
+                {/*      <Icon type="audit" />*/}
+                {/*      <span>Policies</span>*/}
+                {/*    </span>*/}
+                {/*  }*/}
+                {/* >*/}
+                {/*  <Menu.Item key="policiesList">*/}
+                {/*    <Link to="/entgra/policies">*/}
+                {/*      <span>View</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/*  <Menu.Item key="addPolicy">*/}
+                {/*    <Link to="/entgra/policy/add">*/}
+                {/*      <span>Add New Policy</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/* </SubMenu>*/}
+                {/* <Menu.Item key="roles">*/}
+                {/*  <Link to="/entgra/roles">*/}
+                {/*    <Icon type="book" />*/}
+                {/*    <span>Roles</span>*/}
+                {/*  </Link>*/}
+                {/* </Menu.Item>*/}
+                {/* <Menu.Item key="devicetypes">*/}
+                {/*  <Link to="/entgra/devicetypes">*/}
+                {/*    <Icon type="desktop" />*/}
+                {/*    <span>Device Types</span>*/}
+                {/*  </Link>*/}
+                {/* </Menu.Item>*/}
+                {/* <SubMenu*/}
+                {/*  key="configurations"*/}
+                {/*  title={*/}
+                {/*    <span>*/}
+                {/*      <Icon type="setting" />*/}
+                {/*      <span>Configurations</span>*/}
+                {/*    </span>*/}
+                {/*  }*/}
+                {/* >*/}
+                {/*  <Menu.Item key="certificates">*/}
+                {/*    <Link to="/entgra/certificates">*/}
+                {/*      <span>Certificates</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/* </SubMenu>*/}
                 <Menu.Item key="trigger"></Menu.Item>
                 <SubMenu
                   className="profile"
@@ -192,9 +192,9 @@ class Dashboard extends React.Component {
               </Menu>
             </Header>
 
-            <Content style={{ marginTop: 10 }}>
+            <Content>
               <Switch>
-                <Redirect exact from="/entgra" to="/entgra/devices" />
+                <Redirect exact from="/entgra/devices" to="/entgra/reports" />
                 {this.state.routes.map(route => (
                   <RouteWithSubRoutes key={route.path} {...route} />
                 ))}
