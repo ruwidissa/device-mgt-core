@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.common.report.mgt;
 
+import com.google.gson.JsonObject;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
@@ -42,5 +43,8 @@ public interface ReportManagementService {
             throws ReportManagementException;
 
     int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate)
+            throws ReportManagementException;
+
+    JsonObject getCountOfDevicesByDuration(PaginationRequest request, List<String> statusList, String fromDate, String toDate)
             throws ReportManagementException;
 }

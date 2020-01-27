@@ -1906,4 +1906,110 @@ public interface DeviceManagementService {
             @PathParam("status") String status,
             @ApiParam(name = "deviceList", value = "The payload containing the new name of the device.", required = true)
             @Valid List<String> deviceList);
+
+    @GET
+    @Path("/compliance/{compliance-status}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Policy Compliance Status of all devices",
+            notes = "A policy is enforced on the devices that register with Entgra IoTS. " +
+                    "The server checks if the settings in the device comply with the policy that is enforced on the device using this REST API.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:compliance-data")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK",
+                            response = NonComplianceData.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Error occurred while getting the compliance data.",
+                            response = ErrorResponse.class)
+            })
+    Response getPolicyCompliance(
+            @ApiParam(
+                    name = "compliance-status",
+                    value = "Compliance status for devices. If true, devices which are compliant with policies. " +
+                            "If false, devices which are not compliant",
+                    required = true)
+            @PathParam("compliance-status")
+                    boolean complianceStatus,
+            @ApiParam(
+                    name = "policy",
+                    value = "Policy ID")
+            @QueryParam("policy") String policyId,
+            @ApiParam(
+                    name = "is-pending",
+                    value = "Check for devices in pending status")
+            @QueryParam("pending") boolean isPending,
+            @ApiParam(
+                    name = "fromDate",
+                    value = "Start date of the duration")
+            @QueryParam("from") String fromDate,
+            @ApiParam(
+                    name = "toDate",
+                    value = "end date of the duration")
+            @QueryParam("to") String toDate,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    defaultValue = "0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination index/offset.",
+                    defaultValue = "5")
+            @QueryParam("limit")
+                    int limit);
+
+    @GET
+    @Path("/{id}/features")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Policy Compliance Status of all devices",
+            notes = "A policy is enforced on the devices that register with Entgra IoTS. " +
+                    "The server checks if the settings in the device comply with the policy that is enforced on the device using this REST API.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:compliance-data")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK",
+                            response = NonComplianceData.class),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Error occurred while getting the compliance data.",
+                            response = ErrorResponse.class)
+            })
+    Response getNoneComplianceFeatures(
+            @ApiParam(
+                    name = "id",
+                    value = "The device identifier of the device you wish to get details.\n" +
+                            "INFO: Make sure to add the ID of a device that is already registered with Entgra IoTS.",
+                    required = true)
+            @PathParam("id")
+                    int id);
 }

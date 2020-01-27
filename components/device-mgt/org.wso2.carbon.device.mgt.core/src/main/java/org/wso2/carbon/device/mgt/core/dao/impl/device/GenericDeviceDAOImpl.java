@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.core.dao.impl.device;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -529,7 +530,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
     @Override
     public int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate, int tenantId) throws DeviceManagementDAOException {
         int deviceCount = 0;
-        boolean isStatusProvided = false;
+        boolean isStatusProvided;
 
             String sql = "SELECT " +
                     "COUNT(d.ID) AS DEVICE_COUNT " +
@@ -574,6 +575,70 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 throw new DeviceManagementDAOException(msg, e);
             }
             return deviceCount;
+    }
+
+    @Override
+    public List<Count> getCountOfDevicesByDuration(PaginationRequest request, List<String> statusList, int tenantId,
+                                             String fromDate, String toDate)
+            throws DeviceManagementDAOException {
+        List<Count> countList = new ArrayList<>();
+        String ownership = request.getOwnership();
+        boolean isStatusProvided;
+
+        String sql =
+                "SELECT " +
+                    "SUBSTRING(e.DATE_OF_ENROLMENT, 1, 10) AS ENROLMENT_DATE, " +
+                    "COUNT(SUBSTRING(e.DATE_OF_ENROLMENT, 1, 10)) AS ENROLMENT_COUNT " +
+                "FROM DM_DEVICE AS d " +
+                    "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                    "INNER JOIN DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                    "AND e.TENANT_ID = ? " +
+                    "AND e.DATE_OF_ENROLMENT " +
+                    "BETWEEN ? AND ? ";
+
+        //Add the query for status
+        StringBuilder sqlBuilder = new StringBuilder(sql);
+        isStatusProvided = buildStatusQuery(statusList, sqlBuilder);
+        sql = sqlBuilder.toString();
+
+        if (ownership != null) {
+            sql = sql + " AND e.OWNERSHIP = ?";
+        }
+
+        sql = sql + " GROUP BY SUBSTRING(e.DATE_OF_ENROLMENT, 1, 10) LIMIT ?,?";
+
+        try (Connection conn = this.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int paramIdx = 1;
+            stmt.setInt(paramIdx++, tenantId);
+            stmt.setString(paramIdx++, fromDate);
+            stmt.setString(paramIdx++, toDate);
+            if (isStatusProvided) {
+                for (String status : statusList) {
+                    stmt.setString(paramIdx++, status);
+                }
+            }
+            if (ownership != null) {
+                stmt.setString(paramIdx++, ownership);
+            }
+            stmt.setInt(paramIdx++, request.getStartIndex());
+            stmt.setInt(paramIdx, request.getRowCount());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Count count = new Count(
+                            rs.getString("ENROLMENT_DATE"),
+                            rs.getInt("ENROLMENT_COUNT")
+                    );
+                    countList.add(count);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all " +
+                    "registered devices under tenant id " + tenantId + " between " + fromDate + " to " + toDate;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return countList;
     }
 
     protected boolean buildStatusQuery(List<String> statusList, StringBuilder sqlBuilder) {

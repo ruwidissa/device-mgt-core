@@ -33,8 +33,6 @@ class CountWidget extends React.Component {
               <b>{data.item}</b>
             </h2>
             <h1>{data.count}</h1>
-            {/* <p>{data.duration}</p>*/}
-            {/* <ReportFilterModal/>*/}
           </div>
         </Card>
       </Col>

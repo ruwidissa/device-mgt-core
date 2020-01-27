@@ -21,46 +21,49 @@ import { PageHeader, Breadcrumb, Icon, Radio, Popover, Button } from 'antd';
 
 import { Link } from 'react-router-dom';
 import { withConfigContext } from '../../../context/ConfigContext';
-import axios from 'axios';
-import DateRangePicker from '../DateRangePicker';
+import PolicyDevicesTable from '../Widgets/PolicyDevicesTable';
 import moment from 'moment';
-import { Chart, Geom, Axis, Tooltip, Legend } from 'bizcharts';
-import DataSet from '@antv/data-set';
-import { handleApiError } from '../../../js/Utils';
+import DateRangePicker from '../DateRangePicker';
+import SelectPolicyDropDown from '../Widgets/SelectPolicyDropDown';
 
-class EnrollmentsVsUnenrollmentsReport extends React.Component {
+// eslint-disable-next-line no-unused-vars
+let config = null;
+
+class PolicyReport extends React.Component {
   routes;
 
   constructor(props) {
     super(props);
     this.routes = props.routes;
+    config = this.props.context;
     this.state = {
-      paramsObject: {
+      durationMode: 'weekly',
+      isCompliant: true,
+      // This object contains parameters which pass into API endpoint
+      policyReportData: {
         from: moment()
           .subtract(7, 'days')
           .format('YYYY-MM-DD'),
         to: moment().format('YYYY-MM-DD'),
       },
-      data: [],
-      fields: [],
-      durationMode: 'weekly',
       visible: false,
     };
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
+  handleModeChange = e => {
+    const isCompliant = e.target.value;
+    this.setState({ isCompliant });
+  };
 
   handleDurationModeChange = e => {
     const durationMode = e.target.value;
     switch (durationMode) {
       case 'daily':
         this.updateDurationValue(
-          moment().format('YYYY-MM-DD'),
           moment()
-            .add(1, 'days')
+            .subtract(1, 'days')
             .format('YYYY-MM-DD'),
+          moment().format('YYYY-MM-DD'),
         );
         break;
       case 'weekly':
@@ -83,85 +86,37 @@ class EnrollmentsVsUnenrollmentsReport extends React.Component {
     this.setState({ durationMode });
   };
 
+  hidePopover = () => {
+    this.setState({
+      visible: false,
+    });
+  };
+
   handlePopoverVisibleChange = visible => {
     this.setState({ visible });
   };
 
-  // Get modified value from datepicker and set it to paramsObject
-  updateDurationValue = (modifiedFromDate, modifiedToDate) => {
-    let tempParamObj = this.state.paramsObject;
-    tempParamObj.from = modifiedFromDate;
-    tempParamObj.to = modifiedToDate;
-    this.setState({ paramsObject: tempParamObj });
-    this.fetchData();
+  getPolicyId = policyId => {
+    let tempParamObj = this.state.policyReportData;
+    if (policyId === 'all') {
+      delete tempParamObj.policy;
+    } else {
+      tempParamObj.policy = policyId;
+    }
+    this.setState({ policyReportData: tempParamObj });
   };
 
-  // Call count APIs and get count for given parameters, then create data object to build pie chart
-  fetchData = () => {
-    this.setState({ loading: true });
-
-    const { paramsObject } = this.state;
-    const config = this.props.context;
-
-    const encodedExtraParams = Object.keys(paramsObject)
-      .map(key => key + '=' + paramsObject[key])
-      .join('&');
-
-    axios
-      .all([
-        axios.get(
-          window.location.origin +
-            config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
-            '/reports/count?status=ACTIVE&status=INACTIVE&' +
-            encodedExtraParams,
-          'Enrollments',
-        ),
-        axios.get(
-          window.location.origin +
-            config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.deviceMgt +
-            '/reports/count?status=REMOVED&' +
-            encodedExtraParams,
-          'Unenrollments',
-        ),
-      ])
-      .then(res => {
-        let keys = Object.keys(res[0].data.data);
-        let enrollments = res[0].data.data;
-        let unenrollments = res[1].data.data;
-        if (Object.keys(enrollments).length != 0) {
-          enrollments.name = 'Enrollments';
-          unenrollments.name = 'Unenrollments';
-        }
-
-        const finalData = [enrollments, unenrollments];
-
-        this.setState({
-          data: finalData,
-          fields: keys,
-        });
-      })
-      .catch(error => {
-        handleApiError(
-          error,
-          'Error occurred while trying to get device count.',
-        );
-      });
+  // Get modified value from datepicker and set it to paramsObject
+  updateDurationValue = (modifiedFromDate, modifiedToDate) => {
+    let tempParamObj = this.state.policyReportData;
+    tempParamObj.from = modifiedFromDate;
+    tempParamObj.to = modifiedToDate;
+    this.setState({ policyReportData: tempParamObj });
   };
 
   render() {
-    const { durationMode } = this.state;
-
-    const ds = new DataSet();
-    const dv = ds.createView().source(this.state.data);
-    dv.transform({
-      type: 'fold',
-      fields: this.state.fields,
-      key: 'Time',
-      value: 'Number of Devices',
-    });
-
+    const { isCompliant, durationMode } = this.state;
+    const policyData = { ...this.state.policyReportData };
     return (
       <div>
         <PageHeader style={{ paddingTop: 0 }}>
@@ -174,7 +129,19 @@ class EnrollmentsVsUnenrollmentsReport extends React.Component {
             <Breadcrumb.Item>Report</Breadcrumb.Item>
           </Breadcrumb>
           <div className="wrap" style={{ marginBottom: '10px' }}>
-            <h3>Enrollments vs Unenrollments Report</h3>
+            <h3>Policy Report</h3>
+
+            <Radio.Group
+              onChange={this.handleModeChange}
+              defaultValue={true}
+              value={isCompliant}
+              style={{ marginBottom: 8, marginRight: 10 }}
+            >
+              <Radio.Button value={true}>Policy Compliant Devices</Radio.Button>
+              <Radio.Button value={false}>
+                Policy Non-Compliant Devices
+              </Radio.Button>
+            </Radio.Group>
 
             <Radio.Group
               onChange={this.handleDurationModeChange}
@@ -186,7 +153,6 @@ class EnrollmentsVsUnenrollmentsReport extends React.Component {
               <Radio.Button value={'weekly'}>Last Week</Radio.Button>
               <Radio.Button value={'monthly'}>Last Month</Radio.Button>
             </Radio.Group>
-
             <Popover
               trigger="hover"
               content={
@@ -202,34 +168,13 @@ class EnrollmentsVsUnenrollmentsReport extends React.Component {
               <Button style={{ marginRight: 10 }}>Custom Date</Button>
             </Popover>
 
-            <div
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: 5,
-                marginTop: 10,
-              }}
-            >
-              <Chart height={400} data={dv} forceFit>
-                <Axis name="Time" />
-                <Axis name="Number of Devices" />
-                <Legend />
-                <Tooltip
-                  crosshairs={{
-                    type: 'y',
-                  }}
-                />
-                <Geom
-                  type="interval"
-                  position="Time*Number of Devices"
-                  color={'name'}
-                  adjust={[
-                    {
-                      type: 'dodge',
-                      marginRatio: 1 / 32,
-                    },
-                  ]}
-                />
-              </Chart>
+            <SelectPolicyDropDown getPolicyId={this.getPolicyId} />
+
+            <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
+              <PolicyDevicesTable
+                policyReportData={policyData}
+                isCompliant={isCompliant}
+              />
             </div>
           </div>
         </PageHeader>
@@ -241,4 +186,4 @@ class EnrollmentsVsUnenrollmentsReport extends React.Component {
   }
 }
 
-export default withConfigContext(EnrollmentsVsUnenrollmentsReport);
+export default withConfigContext(PolicyReport);

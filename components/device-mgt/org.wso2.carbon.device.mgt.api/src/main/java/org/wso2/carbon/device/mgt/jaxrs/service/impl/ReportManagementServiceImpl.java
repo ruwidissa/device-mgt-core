@@ -15,15 +15,16 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
+
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -103,13 +104,49 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             @QueryParam("to") String toDate) {
         int deviceCount;
         try {
-            deviceCount = DeviceMgtAPIUtils.getReportManagementService().getDevicesByDurationCount(status, ownership, fromDate, toDate);
+            deviceCount = DeviceMgtAPIUtils.getReportManagementService()
+                    .getDevicesByDurationCount(status, ownership, fromDate, toDate);
             return Response.status(Response.Status.OK).entity(deviceCount).build();
         } catch (ReportManagementException e) {
             String errorMessage = "Error while retrieving device count.";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(errorMessage).build()).build();
+        }
+    }
+
+    @GET
+    @Path("/count")
+    @Override
+    public Response getCountOfDevicesByDuration(
+            @QueryParam("status") List<String> status,
+            @QueryParam("ownership") String ownership,
+            @QueryParam("from") String fromDate,
+            @QueryParam("to") String toDate,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @QueryParam("limit") int limit) {
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            PaginationRequest request = new PaginationRequest(offset, limit);
+
+            if (!StringUtils.isBlank(ownership)) {
+                request.setOwnership(ownership);
+            }
+
+            JsonObject countList = DeviceMgtAPIUtils.getReportManagementService()
+                    .getCountOfDevicesByDuration(request, status, fromDate, toDate);
+            if (countList.isJsonNull()) {
+                return Response.status(Response.Status.OK)
+                        .entity("No devices have been enrolled between the given date range").build();
+            } else {
+                return Response.status(Response.Status.OK).entity(countList).build();
+            }
+        } catch (ReportManagementException e) {
+            String msg = "Error occurred while retrieving device list";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
     }
 }

@@ -21,6 +21,8 @@ package org.wso2.carbon.policy.mgt.core.mgt;
 
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
@@ -40,5 +42,12 @@ public interface MonitoringManager {
     void addMonitoringOperation(List<Device> devices) throws PolicyComplianceException;
 
     List<String> getDeviceTypes() throws PolicyComplianceException;
+
+    PaginationResult getPolicyCompliance(
+            PaginationRequest paginationRequest, String policyId, boolean complianceStatus, boolean isPending, String fromDate, String toDate)
+            throws PolicyComplianceException;
+
+    List<ComplianceFeature> getNoneComplianceFeatures(int complianceStatusId)
+            throws PolicyComplianceException;
 
 }

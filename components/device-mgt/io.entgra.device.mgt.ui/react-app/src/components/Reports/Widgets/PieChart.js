@@ -39,8 +39,6 @@ class PieChart extends React.Component {
       duration: reportData.duration,
     };
 
-    console.log(urlSet);
-
     if (reportData.params[0] === 'Enrollments') {
       this.getEnrollmentsVsUnenrollmentsCount(params, urlSet);
     } else if (reportData.params[0] === 'BYOD') {
@@ -49,10 +47,6 @@ class PieChart extends React.Component {
       this.getCount(params, urlSet);
     }
   }
-
-  clicked = () => {
-    console.log('Clicked...!!');
-  };
 
   onChartChange = data => {
     this.props.onClickPieChart(data);
@@ -66,8 +60,6 @@ class PieChart extends React.Component {
 
     let { statArray } = this.state;
 
-    console.log(urlSet);
-
     const urlArray = [];
 
     urlSet.paramsList.map(data => {
@@ -76,7 +68,6 @@ class PieChart extends React.Component {
         from: urlSet.duration[0],
         to: urlSet.duration[1],
       };
-      // console.log(paramsObj)
       const encodedExtraParams = Object.keys(paramsObj)
         .map(key => key + '=' + paramsObj[key])
         .join('&');
@@ -89,8 +80,6 @@ class PieChart extends React.Component {
 
       urlArray.push(axios.get(apiUrl, data));
     });
-
-    console.log(urlArray);
 
     axios
       .all(urlArray)
@@ -128,8 +117,6 @@ class PieChart extends React.Component {
 
     let { statArray } = this.state;
 
-    console.log(urlSet);
-
     const urlArray = [];
 
     urlSet.paramsList.map(data => {
@@ -160,8 +147,6 @@ class PieChart extends React.Component {
 
       urlArray.push(axios.get(apiUrl, data));
     });
-
-    console.log(urlArray);
 
     axios
       .all(urlArray)
@@ -199,8 +184,6 @@ class PieChart extends React.Component {
 
     let { statArray } = this.state;
 
-    console.log(urlSet);
-
     const urlArray = [];
 
     urlSet.paramsList.map(data => {
@@ -221,8 +204,6 @@ class PieChart extends React.Component {
 
       urlArray.push(axios.get(apiUrl, data));
     });
-
-    console.log(urlArray);
 
     axios
       .all(urlArray)
