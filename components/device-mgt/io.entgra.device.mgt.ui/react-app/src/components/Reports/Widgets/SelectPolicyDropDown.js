@@ -60,7 +60,7 @@ class SelectPolicyDropDown extends React.Component {
         if (res.status === 200) {
           this.setState({
             loading: false,
-            data: JSON.parse(res.data.data),
+            data: res.data.data.policies,
           });
         }
       })

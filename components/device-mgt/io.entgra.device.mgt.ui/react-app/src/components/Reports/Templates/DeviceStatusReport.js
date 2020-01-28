@@ -37,9 +37,11 @@ class DeviceStatusReport extends React.Component {
     this.state = {
       paramsObject: {
         from: moment()
-          .subtract(7, 'days')
+          .subtract(6, 'days')
           .format('YYYY-MM-DD'),
-        to: moment().format('YYYY-MM-DD'),
+        to: moment()
+          .add(1, 'days')
+          .format('YYYY-MM-DD'),
       },
       data: [],
       fields: [],
@@ -62,17 +64,21 @@ class DeviceStatusReport extends React.Component {
       case 'weekly':
         this.updateDurationValue(
           moment()
-            .subtract(7, 'days')
+            .subtract(6, 'days')
             .format('YYYY-MM-DD'),
-          moment().format('YYYY-MM-DD'),
+          moment()
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
         );
         break;
       case 'monthly':
         this.updateDurationValue(
           moment()
-            .subtract(30, 'days')
+            .subtract(29, 'days')
             .format('YYYY-MM-DD'),
-          moment().format('YYYY-MM-DD'),
+          moment()
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
         );
         break;
     }

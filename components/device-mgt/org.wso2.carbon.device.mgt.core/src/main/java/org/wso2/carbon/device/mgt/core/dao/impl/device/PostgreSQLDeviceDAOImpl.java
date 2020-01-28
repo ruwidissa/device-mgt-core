@@ -536,29 +536,31 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
 
         sql = sql + " GROUP BY SUBSTRING(e.DATE_OF_ENROLMENT, 1, 10) LIMIT ? OFFSET ?";
 
-        try (Connection conn = this.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            int paramIdx = 1;
-            stmt.setInt(paramIdx++, tenantId);
-            stmt.setString(paramIdx++, fromDate);
-            stmt.setString(paramIdx++, toDate);
-            if (isStatusProvided) {
-                for (String status : statusList) {
-                    stmt.setString(paramIdx++, status);
+        try {
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setInt(paramIdx++, tenantId);
+                stmt.setString(paramIdx++, fromDate);
+                stmt.setString(paramIdx++, toDate);
+                if (isStatusProvided) {
+                    for (String status : statusList) {
+                        stmt.setString(paramIdx++, status);
+                    }
                 }
-            }
-            if (ownership != null) {
-                stmt.setString(paramIdx++, ownership);
-            }
-            stmt.setInt(paramIdx++, request.getStartIndex());
-            stmt.setInt(paramIdx, request.getRowCount());
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Count count = new Count(
-                            rs.getString("ENROLMENT_DATE"),
-                            rs.getInt("ENROLMENT_COUNT")
-                    );
-                    countList.add(count);
+                if (ownership != null) {
+                    stmt.setString(paramIdx++, ownership);
+                }
+                stmt.setInt(paramIdx++, request.getStartIndex());
+                stmt.setInt(paramIdx, request.getRowCount());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        Count count = new Count(
+                                rs.getString("ENROLMENT_DATE"),
+                                rs.getInt("ENROLMENT_COUNT")
+                        );
+                        countList.add(count);
+                    }
                 }
             }
         } catch (SQLException e) {

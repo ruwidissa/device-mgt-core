@@ -42,9 +42,11 @@ class PolicyReport extends React.Component {
       // This object contains parameters which pass into API endpoint
       policyReportData: {
         from: moment()
-          .subtract(7, 'days')
+          .subtract(6, 'days')
           .format('YYYY-MM-DD'),
-        to: moment().format('YYYY-MM-DD'),
+        to: moment()
+          .add(1, 'days')
+          .format('YYYY-MM-DD'),
       },
       visible: false,
     };
@@ -60,26 +62,30 @@ class PolicyReport extends React.Component {
     switch (durationMode) {
       case 'daily':
         this.updateDurationValue(
-          moment()
-            .subtract(1, 'days')
-            .format('YYYY-MM-DD'),
           moment().format('YYYY-MM-DD'),
+          moment()
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
         );
         break;
       case 'weekly':
         this.updateDurationValue(
           moment()
-            .subtract(7, 'days')
+            .subtract(6, 'days')
             .format('YYYY-MM-DD'),
-          moment().format('YYYY-MM-DD'),
+          moment()
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
         );
         break;
       case 'monthly':
         this.updateDurationValue(
           moment()
-            .subtract(30, 'days')
+            .subtract(29, 'days')
             .format('YYYY-MM-DD'),
-          moment().format('YYYY-MM-DD'),
+          moment()
+            .add(1, 'days')
+            .format('YYYY-MM-DD'),
         );
         break;
     }

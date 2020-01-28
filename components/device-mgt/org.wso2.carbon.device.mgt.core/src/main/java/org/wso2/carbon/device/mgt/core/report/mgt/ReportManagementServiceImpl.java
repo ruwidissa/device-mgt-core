@@ -203,7 +203,7 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             }
         } else {
             for (Count count : countList) {
-                resultObject.addProperty(count.getDate(), count.getCount());
+                resultObject.addProperty(count.getDate() + " - " + count.getDate(), count.getCount());
             }
         }
         return resultObject;

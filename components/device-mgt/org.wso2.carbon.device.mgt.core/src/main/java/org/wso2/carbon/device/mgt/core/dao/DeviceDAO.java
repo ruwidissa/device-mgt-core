@@ -35,8 +35,12 @@
 
 package org.wso2.carbon.device.mgt.core.dao;
 
-import org.wso2.carbon.device.mgt.common.*;
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
@@ -250,7 +254,7 @@ public interface DeviceDAO {
      * @return returns the device object.
      * @throws DeviceManagementDAOException
      */
-    Device getDevice(DeviceIdentifier deviceIdentifier, EnrolmentInfo.Status status,int tenantId)
+    Device getDevice(DeviceIdentifier deviceIdentifier, EnrolmentInfo.Status status, int tenantId)
             throws DeviceManagementDAOException;
 
     /**
