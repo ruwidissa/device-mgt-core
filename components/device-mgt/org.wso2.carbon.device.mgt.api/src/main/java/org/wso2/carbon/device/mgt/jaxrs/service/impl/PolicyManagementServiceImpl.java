@@ -170,12 +170,12 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             PolicyAdministratorPoint policyAdministratorPoint = policyManagementService.getPAP();
             policies = policyAdministratorPoint.getPolicies();
             if(offset == 0 && limit == 0){
-                return Response.status(Response.Status.OK).entity(policies).build();
+                targetPolicies.setCount(policies.size());
+                targetPolicies.setList(policies);
             }else{
                 targetPolicies.setCount(policies.size());
                 filteredPolicies = FilteringUtil.getFilteredList(policies, offset, limit);
                 targetPolicies.setList(filteredPolicies);
-                return Response.status(Response.Status.OK).entity(targetPolicies).build();
             }
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving all available policies";
@@ -183,8 +183,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
-
-
+        return Response.status(Response.Status.OK).entity(targetPolicies).build();
     }
 
     @GET
