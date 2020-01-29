@@ -138,7 +138,6 @@ class DeviceInstall extends React.Component {
     const extraParams = {
       offset: 10 * (currentPage - 1), // calculate the offset
       limit: 10,
-      status: 'ACTIVE',
       requireDeviceInfo: true,
     };
 
@@ -146,11 +145,11 @@ class DeviceInstall extends React.Component {
       extraParams.type = deviceType;
     }
 
-    // note: encode with '%26' not '&'
-    const encodedExtraParams = Object.keys(extraParams)
+    let encodedExtraParams = Object.keys(extraParams)
       .map(key => key + '=' + extraParams[key])
       .join('&');
 
+    encodedExtraParams += '&status=ACTIVE&status=INACTIVE'; // fetch only active and inactive devices
     // send request to the invoker
     axios
       .get(
