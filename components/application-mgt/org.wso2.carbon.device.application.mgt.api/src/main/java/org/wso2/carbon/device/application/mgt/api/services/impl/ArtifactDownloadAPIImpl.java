@@ -110,4 +110,44 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
+
+    @GET
+    @Override
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Path("/{deviceType}/agent/{tenantId}")
+    public Response getAndroidAgent(@PathParam("deviceType") String deviceType,
+                                    @PathParam("tenantId") int tenantId) {
+        AppmDataHandler dataHandler = APIUtil.getDataHandler();
+        try (InputStream fileInputStream = dataHandler.getAgentStream(tenantId, deviceType)) {
+            byte[] content = IOUtils.toByteArray(fileInputStream);
+            try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
+                Response.ResponseBuilder response = Response
+                        .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
+                response.status(Response.Status.OK);
+                response.header("Content-Disposition", "attachment; filename=\"" + deviceType + " agent\"");
+                response.header("Content-Length", content.length);
+                return response.build();
+            } catch (IOException e) {
+                String msg = "Error occurred while creating input stream from buffer array. ";
+                log.error(msg, e);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+        } catch (NotFoundException e) {
+            String msg = "Couldn't find an agent for device type: " + deviceType;
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (BadRequestException e){
+            String msg = "Invalid device type received: " + deviceType + ".Valid device type is android";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while getting the application release artifact file. ";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (IOException e) {
+            String msg = "Error occurred while getting the byte array of application release artifact file. ";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
 }

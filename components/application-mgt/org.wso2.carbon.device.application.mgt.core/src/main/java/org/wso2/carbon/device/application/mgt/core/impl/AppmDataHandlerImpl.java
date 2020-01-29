@@ -24,11 +24,13 @@ import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
+import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -76,7 +78,7 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
             InputStream inputStream = applicationStorageManager
                     .getFileStream(appReleaseHashValue, folderName, artifactName, tenantId);
             if (inputStream == null) {
-                String msg = "Couldn't file the file in the file system.";
+                String msg = "Couldn't find the file in the file system.";
                 log.error(msg);
                 throw new ApplicationManagementException(msg);
             }
@@ -92,6 +94,30 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public InputStream getAgentStream(int tenantId, String deviceType)
+            throws ApplicationManagementException {
+        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        try {
+            InputStream inputStream = applicationStorageManager
+                    .getFileStream(deviceType, tenantId);
+            if (inputStream == null) {
+                String msg = "Couldn't find the file in the file system for device type: " + deviceType;
+                log.error(msg);
+                throw new NotFoundException(msg);
+            }
+            return inputStream;
+        } catch (ApplicationStorageManagementException e) {
+            String msg = "Error occurred when getting input stream of the " + deviceType + " agent.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (RequestValidatingException e) {
+            String msg = "Error invalid request received with device type: " + deviceType;
+            log.error(msg, e);
+            throw new BadRequestException(msg, e);
         }
     }
 }
