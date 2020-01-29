@@ -34,6 +34,7 @@
  */
 package org.wso2.carbon.device.mgt.core.dao;
 
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 
@@ -154,4 +155,13 @@ public interface DeviceTypeDAO {
 	 * @throws DeviceManagementDAOException Might occur while executing database queries
 	 */
 	void deleteDeviceType(int tenantId, int deviceTypeId) throws DeviceManagementDAOException;
+
+	/**
+	 *
+	 * @param tenantId current tenant's ID
+	 * @param paginationRequest request object for filter data. Using only offset limit and filter
+	 * @return List of filtered device types
+	 */
+	List<DeviceType> getDeviceTypes(int tenantId, PaginationRequest paginationRequest)
+			throws DeviceManagementDAOException;
 }

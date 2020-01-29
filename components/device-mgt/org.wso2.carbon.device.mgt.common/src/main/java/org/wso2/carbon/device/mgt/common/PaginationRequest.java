@@ -40,6 +40,7 @@ public class PaginationRequest {
     private String ownerRole;
     private Map<String, Object> property = new HashMap<>();
     private Date since;
+    private String filter;
 
     public PaginationRequest(int start, int rowCount) {
         this.startIndex = start;
@@ -150,6 +151,14 @@ public class PaginationRequest {
         Map<String, Object> temp = new HashMap<>();
         temp.putAll(property);
         return temp;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
     }
 
     @Override

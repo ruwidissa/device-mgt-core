@@ -35,6 +35,10 @@
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -42,6 +46,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -59,6 +64,8 @@ import java.util.Date;
 import java.util.List;
 
 public class DeviceTypeDAOImpl implements DeviceTypeDAO {
+
+	private static Log log = LogFactory.getLog(DeviceTypeDAOImpl.class);
 
 	@Override
 	public void addDeviceType(DeviceType deviceType, int providerTenantId, boolean isSharedWithAllTenants)
@@ -309,6 +316,64 @@ public class DeviceTypeDAOImpl implements DeviceTypeDAO {
 	}
 
 	@Override
+	public List<DeviceType> getDeviceTypes(int tenantId, PaginationRequest paginationRequest) throws
+			DeviceManagementDAOException {
+		List<DeviceType> deviceTypes = new ArrayList<>();
+		boolean isFilterProvided = false;
+		boolean isPaginationRangeProvided = false;
+		try {
+			Connection conn = this.getConnection();
+			String sql = "SELECT ID AS DEVICE_TYPE_ID, " +
+					"NAME AS DEVICE_TYPE_NAME, " +
+					"DEVICE_TYPE_META " +
+					"FROM DM_DEVICE_TYPE " +
+					"WHERE (PROVIDER_TENANT_ID =? OR " +
+					"SHARED_WITH_ALL_TENANTS = ?) ";
+
+			if (!StringUtils.isEmpty(paginationRequest.getFilter())) {
+				sql += "AND NAME LIKE ? ";
+				isFilterProvided = true;
+			}
+
+			if (paginationRequest.getStartIndex() >= 0 && paginationRequest.getRowCount() > 0) {
+				sql += "LIMIT ?, ?";
+				isPaginationRangeProvided = true;
+			}
+			try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+				int paramIndex = 1;
+				stmt.setInt(paramIndex++, tenantId);
+				stmt.setBoolean(paramIndex++, true);
+				if (isFilterProvided) {
+					stmt.setString(paramIndex++, paginationRequest.getFilter());
+				}
+				if (isPaginationRangeProvided) {
+					stmt.setInt(paramIndex++, paginationRequest.getStartIndex());
+					stmt.setInt(paramIndex, paginationRequest.getRowCount());
+				}
+				try (ResultSet rs = stmt.executeQuery()) {
+					while (rs.next()) {
+						DeviceType deviceType = new DeviceType();
+						deviceType.setId(rs.getInt("DEVICE_TYPE_ID"));
+						deviceType.setName(rs.getString("DEVICE_TYPE_NAME"));
+						String devicetypeMeta = rs.getString("DEVICE_TYPE_META");
+						if (devicetypeMeta != null && devicetypeMeta.length() > 0) {
+							Gson gson = new Gson();
+							deviceType.setDeviceTypeMetaDefinition
+									(gson.fromJson(devicetypeMeta, DeviceTypeMetaDefinition.class));
+						}
+						deviceTypes.add(deviceType);
+					}
+				}
+			}
+			return deviceTypes;
+		} catch (SQLException e) {
+			String msg = "Error occurred while fetching device types";
+			log.error(msg, e);
+			throw new DeviceManagementDAOException(msg, e);
+		}
+	}
+
+	@Override
 	public void removeDeviceType(String type, int tenantId) throws DeviceManagementDAOException {
 
 	}
@@ -452,5 +517,4 @@ public class DeviceTypeDAOImpl implements DeviceTypeDAO {
 	private Connection getConnection() throws SQLException {
 		return DeviceManagementDAOFactory.getConnection();
 	}
-
 }

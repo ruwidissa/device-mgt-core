@@ -167,7 +167,27 @@ public interface DeviceTypeManagementService {
                             "Example: Mon, 05 Jan 2014 15:10:00 +0200"
             )
             @HeaderParam("If-Modified-Since")
-                    String ifModifiedSince);
+                    String ifModifiedSince,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.",
+                    required = false)
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting " +
+                            "pagination index/offset.",
+                    required = false)
+            @QueryParam("limit")
+                    int limit,
+            @ApiParam(
+                    name = "filter",
+                    value = "Provide criteria for filter device type name",
+                    required = false)
+            @QueryParam("filter")
+                    String filter
+            );
 
     @GET
     @Path("/{type}")
