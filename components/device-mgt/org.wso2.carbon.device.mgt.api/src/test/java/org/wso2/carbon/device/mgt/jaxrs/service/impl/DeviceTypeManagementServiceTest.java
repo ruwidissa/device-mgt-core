@@ -78,7 +78,8 @@ public class DeviceTypeManagementServiceTest {
     public void testExistingDeviceType() throws Exception {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Response response = this.deviceTypeManagementService.getDeviceTypes("");
+        Response response = this.deviceTypeManagementService
+                .getDeviceTypes("", 0, 0, null);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "The response states should be 200.");
@@ -89,7 +90,8 @@ public class DeviceTypeManagementServiceTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.getDeviceTypes()).thenThrow(new DeviceManagementException());
-        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
+        Response response = this.deviceTypeManagementService
+                .getDeviceTypes(MODIFIED_SINCE, 0, 0, null);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "The response status should be 500.");
@@ -102,7 +104,8 @@ public class DeviceTypeManagementServiceTest {
                 .toReturn(this.deviceManagementProviderService);
         Mockito.when(this.deviceManagementProviderService.getDeviceTypes()).thenThrow(new
                 DeviceManagementException());
-        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
+        Response response = this.deviceTypeManagementService
+                .getDeviceTypes(MODIFIED_SINCE, 0, 0, null);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "The response status should be 500.");
@@ -152,7 +155,8 @@ public class DeviceTypeManagementServiceTest {
     public void testGetDeviceTypes() throws Exception {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
-        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
+        Response response = this.deviceTypeManagementService
+                .getDeviceTypes(MODIFIED_SINCE, 0, 0, null);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "The response status should be 200.");
@@ -164,7 +168,8 @@ public class DeviceTypeManagementServiceTest {
                 .toReturn(this.deviceManagementProviderService);
         List<DeviceType> deviceTypes = DeviceMgtAPITestHelper.getDummyDeviceTypeList(5);
         Mockito.when(this.deviceManagementProviderService.getDeviceTypes()).thenReturn(deviceTypes);
-        Response response = this.deviceTypeManagementService.getDeviceTypes(MODIFIED_SINCE);
+        Response response = this.deviceTypeManagementService
+                .getDeviceTypes(MODIFIED_SINCE, 0, 0, null);
         Assert.assertNotNull(response, "The response object is null.");
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "The response state should be 200");

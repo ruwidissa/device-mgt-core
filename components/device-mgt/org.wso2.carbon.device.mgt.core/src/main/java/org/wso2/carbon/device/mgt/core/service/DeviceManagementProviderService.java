@@ -722,11 +722,21 @@ public interface DeviceManagementProviderService {
      */
     DeviceType getDeviceType(String deviceType) throws DeviceManagementException;
 
+
     /**
-     * This retrieves the device type info for the given type
-     * @throws DeviceManagementException
+     * This method will return device type list without filtering or limiting
+     * @return DeviceTypeList
+     * @throws DeviceManagementException will be thrown when Error in Backend occurs
      */
     List<DeviceType> getDeviceTypes() throws DeviceManagementException;
+
+    /**
+     * This method will return device type list using limit and filtering provided
+     * @param paginationRequest request parameters to filter devices
+     * @return filterd device types
+     * @throws DeviceManagementException
+     */
+    List<DeviceType> getDeviceTypes(PaginationRequest paginationRequest) throws DeviceManagementException;
 
     /**
      * This retrieves the device location histories
