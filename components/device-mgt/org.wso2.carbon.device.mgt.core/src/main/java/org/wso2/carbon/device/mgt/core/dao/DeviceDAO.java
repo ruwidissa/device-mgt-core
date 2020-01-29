@@ -294,7 +294,6 @@ public interface DeviceDAO {
      */
     List<Device> getDevices(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
-
     /**
      * This method is used to search for devices within a specific group.
      *
@@ -553,7 +552,6 @@ public interface DeviceDAO {
      *
      */
     List<Device> getDevicesByDuration(PaginationRequest request,
-                                      List<String> statusList,
                                       int tenantId,
                                       String fromDate,
                                       String toDate) throws DeviceManagementDAOException;

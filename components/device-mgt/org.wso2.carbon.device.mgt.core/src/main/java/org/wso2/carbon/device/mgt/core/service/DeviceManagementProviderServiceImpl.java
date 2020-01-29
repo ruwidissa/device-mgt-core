@@ -2528,10 +2528,31 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("Get devices by status " + request.toString() + " and requiredDeviceInfo: "
                     + requireDeviceInfo);
         }
+        List<String> statusList = request.getStatusList();
+        if (statusList == null || statusList.isEmpty()) {
+            String msg = "Invalid enrollment status type received. Status can't be null or empty" +
+                         "Valid status types are ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE " +
+                         "| SUSPENDED | DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        if (statusList.size() > 1) {
+            String msg = "Invalid enrollment status received. Devices can only be filtered by one " +
+                         "type of status, more than one are not allowed";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
+        String status = statusList.get(0);
+        if (StringUtils.isBlank(status)){
+            String msg = "Invalid enrollment status type received. Status can't be null or empty" +
+                         "Valid status types are ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE " +
+                         "| SUSPENDED | DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        }
         PaginationResult result = new PaginationResult();
         List<Device> allDevices;
         int tenantId = this.getTenantId();
-        String status = request.getStatus();
         request = DeviceManagerUtil.validateDeviceListPageSize(request);
         try {
             DeviceManagementDAOFactory.openConnection();
@@ -2540,7 +2561,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             result.setRecordsTotal(deviceCount);
             result.setRecordsFiltered(deviceCount);
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while fetching the list of devices that matches to status: '" + status + "'";
+            String msg = "Error occurred while fetching the list of devices that matches to status: " +
+                         status;
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         } catch (SQLException e) {

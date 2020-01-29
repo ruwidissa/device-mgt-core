@@ -78,7 +78,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -676,7 +678,8 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     public void testGetAllDevicesByStatus() throws DeviceManagementException, NoSuchFieldException,
             IllegalAccessException {
         PaginationRequest request = new PaginationRequest(0, 100);
-        request.setStatus(EnrolmentInfo.Status.ACTIVE.toString());
+        List<String> statusList = new ArrayList<>(Collections.singletonList("ACTIVE"));
+        request.setStatusList(statusList);
         MockDataSource dataSource = setDatasourceForGetDevice();
         if (dataSource != null) {
             setMockDeviceCount(dataSource.getConnection(0));
@@ -842,7 +845,8 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     public void testGetDeviesByStatus() throws DeviceManagementException, NoSuchFieldException,
             IllegalAccessException {
         PaginationRequest request = new PaginationRequest(0, 100);
-        request.setStatus("ACTIVE");
+        List<String> statusList = new ArrayList<>(Collections.singletonList("ACTIVE"));
+        request.setStatusList(statusList);
         MockDataSource dataSource = setDatasourceForGetDevice();
         if (dataSource != null) {
             setMockDeviceCount(dataSource.getConnection(0));
