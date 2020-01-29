@@ -99,7 +99,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -107,7 +106,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
@@ -119,8 +117,6 @@ import java.util.Date;
 import java.util.List;
 
 @Path("/devices")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     public static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
@@ -155,8 +151,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @QueryParam("userPattern") String userPattern,
             @QueryParam("role") String role,
             @QueryParam("ownership") String ownership,
-            @QueryParam("status") String status,
-            @QueryParam("excludeStatus") String excludeStatus,
+            @QueryParam("status") List<String> status,
             @QueryParam("groupId") int groupId,
             @QueryParam("since") String since,
             @HeaderParam("If-Modified-Since") String ifModifiedSince,
@@ -175,11 +170,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             DeviceAccessAuthorizationService deviceAccessAuthorizationService =
                     DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
-            if (deviceAccessAuthorizationService == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setMessage("Device access authorization service is " +
-                                "failed").build()).build();
-            }
             PaginationRequest request = new PaginationRequest(offset, limit);
             PaginationResult result;
             DeviceList devices = new DeviceList();
@@ -195,12 +185,17 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                 request.setOwnership(ownership);
             }
             if (status != null && !status.isEmpty()) {
-                RequestValidationUtil.validateStatus(status);
-                request.setStatus(status);
-            }
-            if (excludeStatus != null && !excludeStatus.isEmpty()) {
-                RequestValidationUtil.validateStatus(excludeStatus);
-                request.setExcludeStatus(excludeStatus);
+                boolean isStatusEmpty = true;
+                for (String statusString : status){
+                    if (StringUtils.isNotBlank(statusString)){
+                        isStatusEmpty = false;
+                        break;
+                    }
+                }
+                if (!isStatusEmpty) {
+                    RequestValidationUtil.validateStatus(status);
+                    request.setStatusList(status);
+                }
             }
             // this is the user who initiates the request
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -263,7 +258,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                 + "' user";
                         log.error(msg);
                         return Response.status(Response.Status.UNAUTHORIZED).entity(
-                                new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(msg).build()).build();
+                                new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
                     }
                 } else {
                     request.setOwner(authorizedUser);
@@ -373,7 +368,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     }
 
     @DELETE
-    @Consumes(MediaType.WILDCARD)
     @Override
     @Path("/type/{device-type}/id/{device-id}")
     public Response deleteDevice(@PathParam("device-type") String deviceType,
@@ -496,8 +490,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
 
     @Path("/{deviceType}/{deviceId}/location-history")
     @GET
-    @Consumes("application/json")
-    @Produces("application/json")
     public Response getDeviceLocationInfo(@PathParam("deviceType") String deviceType,
                                           @PathParam("deviceId") String deviceId,
                                           @QueryParam("from") long from, @QueryParam("to") long to) {
@@ -515,12 +507,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             deviceIdentifier.setId(deviceId);
             deviceIdentifier.setType(deviceType);
 
-            if (deviceAccessAuthorizationService == null) {
-                errorMessage = "Device access authorization service is failed";
-                log.error(errorMessage);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
-            }
             if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
                 String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" +
                         deviceId + "'";

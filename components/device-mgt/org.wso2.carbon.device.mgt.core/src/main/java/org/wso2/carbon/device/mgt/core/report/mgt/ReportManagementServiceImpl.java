@@ -57,7 +57,7 @@ public class ReportManagementServiceImpl implements ReportManagementService {
     }
 
     @Override
-    public PaginationResult getDevicesByDuration(PaginationRequest request, List<String> statusList, String fromDate,
+    public PaginationResult getDevicesByDuration(PaginationRequest request, String fromDate,
                                                  String toDate)
             throws ReportManagementException {
         PaginationResult paginationResult = new PaginationResult();
@@ -72,7 +72,6 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             DeviceManagementDAOFactory.openConnection();
             List<Device> devices = deviceDAO.getDevicesByDuration(
                     request,
-                    statusList,
                     DeviceManagementDAOUtil.getTenantId(),
                     fromDate,
                     toDate

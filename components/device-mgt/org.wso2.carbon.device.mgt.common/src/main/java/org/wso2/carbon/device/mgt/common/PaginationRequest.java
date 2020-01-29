@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.common;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,8 +33,7 @@ public class PaginationRequest {
     private int groupId;
     private String owner;
     private String ownerPattern;
-    private String status;
-    private String excludeStatus;
+    private List<String> statusList;
     private String deviceType;
     private String deviceName;
     private String ownership;
@@ -78,20 +78,12 @@ public class PaginationRequest {
         this.owner = owner;
     }
 
-    public String getStatus() {
-        return status;
+    public List<String> getStatusList() {
+        return statusList;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getExcludeStatus() {
-        return excludeStatus;
-    }
-
-    public void setExcludeStatus(String excludeStatus) {
-        this.excludeStatus = excludeStatus;
+    public void setStatusList(List<String> statusList) {
+        this.statusList = statusList;
     }
 
     public String getDeviceType() {
@@ -164,7 +156,7 @@ public class PaginationRequest {
     public String toString() {
         return "Device type '" + this.deviceType + "' Device Name '" + this.deviceName + "' row count: " + this.rowCount
                 + " Owner role '" + this.ownerRole + "' owner pattern '" + this.ownerPattern + "' ownership "
-                + this.ownership + "' Status '" + this.status + "' owner '" + this.owner + "' groupId: " + this.groupId
+                + this.ownership + "' Status '" + this.statusList + "' owner '" + this.owner + "' groupId: " + this.groupId
                 + " start index: " + this.startIndex;
     }
 }

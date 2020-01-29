@@ -74,8 +74,22 @@ public class ReportManagementServiceImpl implements ReportManagementService {
                 request.setOwnership(ownership);
             }
 
+            if (status != null && !status.isEmpty()) {
+                boolean isStatusEmpty = true;
+                for (String statusString : status){
+                    if (StringUtils.isNotBlank(statusString)){
+                        isStatusEmpty = false;
+                        break;
+                    }
+                }
+                if (!isStatusEmpty) {
+                    RequestValidationUtil.validateStatus(status);
+                    request.setStatusList(status);
+                }
+            }
+
             result = DeviceMgtAPIUtils.getReportManagementService()
-                    .getDevicesByDuration(request, status, fromDate, toDate);
+                    .getDevicesByDuration(request, fromDate, toDate);
             if (result.getData().isEmpty()) {
                 String msg = "No devices have enrolled between " + fromDate + " to " + toDate +
                              " or doesn't match with" +

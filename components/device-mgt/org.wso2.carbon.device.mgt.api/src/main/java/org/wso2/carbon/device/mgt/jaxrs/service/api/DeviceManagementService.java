@@ -173,11 +173,10 @@ import java.util.Map;
 @Path("/devices")
 @Api(value = "Device Management", description = "This API carries all device management related operations " +
         "such as get all the available devices, etc.")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public interface DeviceManagementService {
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -270,19 +269,11 @@ public interface DeviceManagementService {
             @Size(max = 45)
                     String ownership,
             @ApiParam(
-                    name = "excludeStatus",
-                    value = "Provide the devices that excludes the given status",
-                    required = false)
-            @QueryParam("excludeStatus")
-            @Size(max = 45)
-                    String excludeStatus,
-            @ApiParam(
                     name = "status",
                     value = "Provide the device status details, such as active or inactive.",
                     required = false)
             @QueryParam("status")
-            @Size(max = 45)
-                    String status,
+                    List<String> status,
             @ApiParam(
                     name = "groupId",
                     value = "Id of the group which device belongs",
@@ -328,6 +319,7 @@ public interface DeviceManagementService {
                     int limit);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -401,6 +393,7 @@ public interface DeviceManagementService {
                     int limit);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -488,9 +481,9 @@ public interface DeviceManagementService {
                     String ifModifiedSince);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{deviceType}/{deviceId}/location-history")
     @ApiOperation(
-            consumes = "application/json",
             produces = "application/json",
             httpMethod = "GET",
             value = "Getting the Location Details of a Device",
@@ -560,6 +553,7 @@ public interface DeviceManagementService {
             @QueryParam("to") long to);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/type/any/id/{id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -636,6 +630,7 @@ public interface DeviceManagementService {
 
 
     @PUT
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -691,6 +686,7 @@ public interface DeviceManagementService {
                         @PathParam("id") String deviceId);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/location")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -767,6 +763,7 @@ public interface DeviceManagementService {
 
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/info")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -844,6 +841,8 @@ public interface DeviceManagementService {
     //device rename request would looks like follows
     //POST devices/type/virtual_firealarm/id/us06ww93auzp/rename
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/type/{device-type}/id/{device-id}/rename")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -919,11 +918,10 @@ public interface DeviceManagementService {
     //device remove request would looks like follows
     //DELETE devices/type/virtual_firealarm/id/us06ww93auzp
     @DELETE
-    @Consumes(MediaType.WILDCARD)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/type/{device-type}/id/{device-id}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
-            consumes = MediaType.WILDCARD,
             httpMethod = "DELETE",
             value = "Remove the Device Specified by the Device ID",
             notes = "Returns the status of the deleted device operation and the details of the deleted device.",
@@ -988,9 +986,9 @@ public interface DeviceManagementService {
                     String deviceId);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/features")
     @ApiOperation(
-            consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
             value = "Getting Feature Details of a Device",
@@ -1078,6 +1076,8 @@ public interface DeviceManagementService {
                     String ifModifiedSince);
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/search-devices")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1156,6 +1156,8 @@ public interface DeviceManagementService {
                     SearchContext searchContext);
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/query-devices")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1234,6 +1236,7 @@ public interface DeviceManagementService {
             PropertyMap map);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/applications")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1336,6 +1339,7 @@ public interface DeviceManagementService {
 
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/operations")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1446,6 +1450,7 @@ public interface DeviceManagementService {
                     String ownership);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/effective-policy")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1535,6 +1540,7 @@ public interface DeviceManagementService {
 
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{type}/{id}/compliance-data")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1582,6 +1588,8 @@ public interface DeviceManagementService {
                     String id);
 
     @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{type}/{id}/changestatus")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1656,6 +1664,8 @@ public interface DeviceManagementService {
                     EnrolmentInfo.Status newStatus);
 
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{type}/operations")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1713,6 +1723,7 @@ public interface DeviceManagementService {
                           @Valid OperationRequest operationRequest);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/type/{type}/status/{status}/count")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1781,6 +1792,7 @@ public interface DeviceManagementService {
 
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/type/{type}/status/{status}/ids")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1848,6 +1860,8 @@ public interface DeviceManagementService {
                     String status);
 
     @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/type/{type}/status/{status}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1908,6 +1922,7 @@ public interface DeviceManagementService {
             @Valid List<String> deviceList);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/compliance/{compliance-status}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
@@ -1975,6 +1990,7 @@ public interface DeviceManagementService {
                     int limit);
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/features")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,

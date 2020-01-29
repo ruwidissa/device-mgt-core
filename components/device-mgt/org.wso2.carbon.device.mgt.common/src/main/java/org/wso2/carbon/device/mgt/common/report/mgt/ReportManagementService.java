@@ -39,7 +39,7 @@ public interface ReportManagementService {
      * @throws {@Link DeviceManagementException} When error occurred while validating device list page size
      * @throws {@Link ReportManagementException} When failed to retrieve devices.
      */
-    PaginationResult getDevicesByDuration(PaginationRequest request, List<String> statusList, String fromDate, String toDate)
+    PaginationResult getDevicesByDuration(PaginationRequest request, String fromDate, String toDate)
             throws ReportManagementException;
 
     int getDevicesByDurationCount(List<String> statusList, String ownership, String fromDate, String toDate)

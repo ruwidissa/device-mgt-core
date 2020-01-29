@@ -19,6 +19,10 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.impl.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
@@ -29,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequestValidationUtil {
+
+    private static final Log log = LogFactory.getLog(RequestValidationUtil.class);
 
     /**
      * Checks if multiple criteria are specified in a conditional request.
@@ -95,29 +101,28 @@ public class RequestValidationUtil {
         }
     }
 
-    public static void validateStatus(String status) {
-        if (status == null) {
-            throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(
-                            "Enrollment status type cannot be null").build());
-        }
-        switch (status) {
-            case "ACTIVE":
-            case "INACTIVE":
-            case "UNCLAIMED":
-            case "UNREACHABLE":
-            case "SUSPENDED":
-            case "DISENROLLMENT_REQUESTED":
-            case "REMOVED":
-            case "BLOCKED":
-            case "CREATED":
-                return;
-            default:
-                throw new InputValidationException(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Invalid enrollment status type " +
-                                "received. Valid status types are ACTIVE | INACTIVE | " +
-                                "UNCLAIMED | UNREACHABLE | SUSPENDED | DISENROLLMENT_REQUESTED | REMOVED | " +
-                                "BLOCKED | CREATED").build());
+    public static void validateStatus(List<String> statusList) {
+        for (String status : statusList) {
+            switch (status) {
+                case "ACTIVE":
+                case "INACTIVE":
+                case "UNCLAIMED":
+                case "UNREACHABLE":
+                case "SUSPENDED":
+                case "DISENROLLMENT_REQUESTED":
+                case "REMOVED":
+                case "BLOCKED":
+                case "CREATED":
+                    break;
+                default:
+                    String msg = "Invalid enrollment status type: " + status + ". \nValid status types are " +
+                                 "ACTIVE | INACTIVE | UNCLAIMED | UNREACHABLE | SUSPENDED | " +
+                                 "DISENROLLMENT_REQUESTED | REMOVED | BLOCKED | CREATED";
+                    log.error(msg);
+                    throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                                                               .setCode(HttpStatus.SC_BAD_REQUEST)
+                                                               .setMessage(msg).build());
+            }
         }
     }
 

@@ -183,7 +183,8 @@ class GeoDashboard extends React.Component {
         window.location.origin +
           config.serverConfig.invoker.uri +
           config.serverConfig.invoker.deviceMgt +
-          '/devices?excludeStatus=REMOVED',
+          '/devices?status=ACTIVE&status=INACTIVE&status=UNCLAIMED&status=UNREACHABLE&status=SUSPENDED&' +
+          'status=DISENROLLMENT_REQUESTED&status=BLOCKED&status=CREATED',
       )
       .then(res => {
         if (res.status === 200) {
