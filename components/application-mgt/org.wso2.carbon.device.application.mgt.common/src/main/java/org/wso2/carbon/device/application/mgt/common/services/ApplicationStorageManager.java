@@ -20,6 +20,7 @@ package org.wso2.carbon.device.application.mgt.common.services;
 import org.wso2.carbon.device.application.mgt.common.ApplicationInstaller;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
+import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.exception.ResourceManagementException;
 
 import java.io.InputStream;
@@ -110,4 +111,15 @@ public interface ApplicationStorageManager {
      */
     InputStream getFileStream(String hashVal, String folderName, String fileName, int tenantId)
             throws ApplicationStorageManagementException;
+
+    /**
+     * Get the InputStream of the file which is located in filePath
+     *
+     * @param deviceType device type name
+     * @param tenantId   local tenant's id
+     * @return {@link InputStream}
+     * @throws ApplicationStorageManagementException throws if an error occurs when accessing the file.
+     */
+    InputStream getFileStream(String deviceType, int tenantId)
+            throws ApplicationStorageManagementException, RequestValidatingException;
 }

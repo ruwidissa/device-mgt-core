@@ -61,6 +61,8 @@ public class Constants {
     public  static final String SUBSCRIBED = "SUBSCRIBED";
     public  static final String UNSUBSCRIBED = "UNSUBSCRIBED";
 
+    public static final String ANDROID_AGENT = "android-agent.apk";
+
 
     /**
      * Database types supported by Application Management.

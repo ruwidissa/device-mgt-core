@@ -131,4 +131,41 @@ public interface ArtifactDownloadAPI {
                     value = "UUID of the application release.",
                     required = true)
             @PathParam("uuid") String uuid);
+
+    @GET
+    @Path("/{deviceType}/agent/{tenantId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ApiOperation(
+            produces = MediaType.APPLICATION_OCTET_STREAM,
+            httpMethod = "GET",
+            value = "get the agent of a device type",
+            notes = "This will download an agent depending on the device type"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully got the agent.",
+                            response = ApplicationList.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. There doesn't have an defined agent for the resource." +
+                                      "query."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting the agent.",
+                            response = ErrorResponse.class)
+            })
+    Response getAndroidAgent(
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Device type of the agent.",
+                    example = "android",
+                    required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "tenantId",
+                    value = "Tenant Id of the application artifact belongs.",
+                    required = true)
+            @PathParam("tenantId") int tenantId);
 }

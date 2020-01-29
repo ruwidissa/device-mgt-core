@@ -37,4 +37,15 @@ public interface AppmDataHandler {
 
     InputStream getArtifactStream(int tenantId, String uuid, String folderName, String artifactName)
             throws ApplicationManagementException;
+
+    /**
+     * Get agent apk
+     *
+     * @param tenantId   local tenant
+     * @param deviceType device type name
+     * @return {@link InputStream}
+     * @throws ApplicationManagementException throws if an error occurs when accessing the file.
+     */
+    InputStream getAgentStream(int tenantId, String deviceType)
+            throws ApplicationManagementException;
 }
