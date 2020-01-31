@@ -24,12 +24,11 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { withConfigContext } from '../../context/ConfigContext';
 
-let apiUrl;
-
 class SelectPlatform extends React.Component {
   constructor(props) {
     super(props);
     TimeAgo.addLocale(en);
+    this.config = this.props.context;
     this.state = {
       data: [],
       pagination: {},
@@ -42,20 +41,18 @@ class SelectPlatform extends React.Component {
     this.fetchUsers();
   }
 
-  onClickCard = data => {
-    console.log(data);
-    this.props.onClickType();
+  onClickCard = (e, type) => {
+    this.props.getPolicyConfigJson(type);
   };
 
   // fetch data from api
   fetchUsers = (params = {}) => {
-    const config = this.props.context;
     this.setState({ loading: true });
 
-    apiUrl =
+    let apiUrl =
       window.location.origin +
-      config.serverConfig.invoker.uri +
-      config.serverConfig.invoker.deviceMgt +
+      this.config.serverConfig.invoker.uri +
+      this.config.serverConfig.invoker.deviceMgt +
       '/device-types';
 
     // send request to the invokerss
@@ -108,26 +105,28 @@ class SelectPlatform extends React.Component {
     const { Meta } = Card;
     const itemCard = data.map(data => (
       <Col span={5} key={data.id}>
-        <Card
-          size="default"
-          style={{ width: 150 }}
-          bordered={true}
-          onClick={this.onClickCard}
-          cover={
-            <Icon
-              type="android"
-              key="device-types"
-              style={{
-                color: '#ffffff',
-                backgroundColor: '#4b92db',
-                fontSize: '100px',
-                padding: '20px',
-              }}
-            />
-          }
-        >
-          <Meta title={data.name} />
-        </Card>
+        <a>
+          <Card
+            size="default"
+            style={{ width: 150 }}
+            bordered={true}
+            onClick={e => this.onClickCard(e, data.name)}
+            cover={
+              <Icon
+                type="android"
+                key="device-types"
+                style={{
+                  color: '#ffffff',
+                  backgroundColor: '#4b92db',
+                  fontSize: '100px',
+                  padding: '20px',
+                }}
+              />
+            }
+          >
+            <Meta title={data.name} />
+          </Card>
+        </a>
       </Col>
     ));
     return (

@@ -57,6 +57,7 @@ import java.util.List;
  *       &lt;sequence>
  *         &lt;element name="DeviceDetails" type="{}DeviceDetails"/>
  *         &lt;element name="Features" type="{}Features"/>
+ *         &lt;element name="PolicyUIConfigurations" type="{}PolicyUIConfigurations"/>
  *         &lt;element name="ProvisioningConfig" type="{}ProvisioningConfig"/>
  *         &lt;element name="PushNotificationProviderConfig" type="{}PushNotificationProviderConfig"/>
  *         &lt;element name="License" type="{}License"/>
@@ -81,6 +82,8 @@ public class DeviceTypeConfiguration {
     protected Claimable claimable;
     @XmlElement(name = "Features", required = true)
     protected Features features;
+    @XmlElement(name = "PolicyUIConfigurations", required = true)
+    protected PolicyUIConfigurations policies;
     @XmlElement(name = "ProvisioningConfig", required = true)
     protected ProvisioningConfig provisioningConfig;
     @XmlElement(name = "PushNotificationProviderConfig", required = true)
@@ -256,6 +259,25 @@ public class DeviceTypeConfiguration {
         this.features = value;
     }
 
+    /**
+     * Gets the value of the policies property.
+     *
+     * @return possible object is
+     * {@link PolicyUIConfigurations }
+     */
+    public PolicyUIConfigurations getPolicyUIConfigurations() {
+        return policies;
+    }
+
+    /**
+     * Sets the value of the features property.
+     *
+     * @param value allowed object is
+     *              {@link PolicyUIConfigurations }
+     */
+    public void setPolicyUIConfigurations(PolicyUIConfigurations value) {
+        this.policies = value;
+    }
     /**
      * Gets the value of the provisioningConfig property.
      *

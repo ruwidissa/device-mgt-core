@@ -16,13 +16,12 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.device.mgt.common.policy.mgt;
 
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
-
 
 public interface PolicyMonitoringManager {
 
