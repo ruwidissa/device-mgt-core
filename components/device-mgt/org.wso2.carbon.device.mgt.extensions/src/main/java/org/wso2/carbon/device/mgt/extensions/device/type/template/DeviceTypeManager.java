@@ -40,27 +40,30 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.DeviceManager;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DataSource;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
+import org.wso2.carbon.device.mgt.common.ui.policy.mgt.PolicyConfigurationManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Feature;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Table;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DataSource;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.TableConfig;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Table;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Feature;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Policy;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceDAODefinition;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeMgtPluginException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypePluginExtensionException;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.feature.ConfigurationBasedFeatureManager;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.policy.mgt.ConfigurationBasedPolicyManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypePluginConstants;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.util.DeviceTypeUtils;
 import org.wso2.carbon.device.mgt.extensions.license.mgt.registry.RegistryBasedLicenseManager;
@@ -103,6 +106,7 @@ public class DeviceTypeManager implements DeviceManager {
                     + "mobile";
 
     private FeatureManager featureManager;
+    private PolicyConfigurationManager policyManager;
 
     public DeviceTypeManager(DeviceTypeConfigIdentifier deviceTypeConfigIdentifier,
                              DeviceTypeConfiguration deviceTypeConfiguration) {
@@ -112,6 +116,12 @@ public class DeviceTypeManager implements DeviceManager {
             List<Feature> features = deviceTypeConfiguration.getFeatures().getFeature();
             featureManager = new ConfigurationBasedFeatureManager(features);
         }
+        if (deviceTypeConfiguration.getPolicyUIConfigurations() != null && deviceTypeConfiguration.getPolicyUIConfigurations().
+                getPolicies() != null) {
+            List<Policy> policies = deviceTypeConfiguration.getPolicyUIConfigurations().getPolicies();
+            policyManager = new ConfigurationBasedPolicyManager(policies);
+        }
+
         if (deviceTypeConfiguration.getDeviceAuthorizationConfig() != null) {
             requiredDeviceTypeAuthorization = deviceTypeConfiguration.getDeviceAuthorizationConfig().
                     isAuthorizationRequired();
@@ -250,6 +260,11 @@ public class DeviceTypeManager implements DeviceManager {
     @Override
     public FeatureManager getFeatureManager() {
         return featureManager;
+    }
+
+    @Override
+    public PolicyConfigurationManager getPolicyUIConfigurationManager(){
+        return policyManager;
     }
 
     @Override
