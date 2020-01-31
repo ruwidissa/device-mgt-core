@@ -136,17 +136,17 @@ class DeviceUninstall extends React.Component {
     const extraParams = {
       offset: 10 * (currentPage - 1), // calculate the offset
       limit: 10,
-      status: 'ACTIVE',
     };
 
     if (deviceType !== 'ANY') {
       extraParams.type = deviceType;
     }
 
-    // note: encode with '%26' not '&'
-    const encodedExtraParams = Object.keys(extraParams)
+    let encodedExtraParams = Object.keys(extraParams)
       .map(key => key + '=' + extraParams[key])
       .join('&');
+
+    encodedExtraParams += '&status=ACTIVE&status=INACTIVE'; // fetch only active and inactive devices
 
     const uuid = this.props.uuid;
     axios
