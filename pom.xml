@@ -1683,11 +1683,11 @@
 				<artifactId>jackson-datatype-joda</artifactId>
 				<version>${jackson.datatype.joda.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>javassist</groupId>
-				<artifactId>javassist</artifactId>
-				<version>${javassist.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>${javassist.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.analytics-common</groupId>
                 <artifactId>org.wso2.carbon.event.receiver.stub</artifactId>
@@ -2234,7 +2234,7 @@
 		<jackson.datatype.joda.version>2.1.5</jackson.datatype.joda.version>
 		<commons.codec.verision>1.9</commons.codec.verision>
 		<commons.codec.verision.range>(1.9,2.0]</commons.codec.verision.range>
-		<javassist.version>3.12.1.GA</javassist.version>
+		<javassist.version>3.26.0-GA</javassist.version>
         <maven.javadoc.skip>true</maven.javadoc.skip>
 
         <!-- jacoco plugin version -->
