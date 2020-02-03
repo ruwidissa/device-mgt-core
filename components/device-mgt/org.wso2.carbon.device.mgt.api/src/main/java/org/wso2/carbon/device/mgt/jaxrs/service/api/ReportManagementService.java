@@ -38,6 +38,7 @@ import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -309,4 +310,63 @@ public interface ReportManagementService {
                     value = "Provide how many device details you require from the starting pagination index/offset.")
             @QueryParam("limit")
                     int limit) throws ReportManagementException;
+
+    @GET
+    @Path("expired-devices/{deviceType}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of Registered Devices filtered by OS version build date",
+            notes = "Provides details of devices that have a version build date older than the provided date.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the list of devices.",
+                            response = DeviceList.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body")}),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. " +
+                                      "\n Device type does not exist",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                      "\n Server error occurred while fetching the devices.",
+                            response = ErrorResponse.class)
+            })
+    Response getExpiredDevicesByOSVersion(
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Name of the device type.",
+                    required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "osBuildDate",
+                    value = "Minimum OS version build date which is used to filter the devices.",
+                    required = true)
+            @QueryParam("osBuildDate") Long osBuildDate,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the list of filtered devices.",
+                    defaultValue = "0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Limit of the number of deices that should be returned.",
+                    defaultValue = "5")
+            @QueryParam("limit")
+                    int limit);
 }
