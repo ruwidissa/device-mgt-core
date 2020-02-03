@@ -18,6 +18,7 @@
 package org.wso2.carbon.device.mgt.core.report.mgt;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
@@ -25,12 +26,14 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 
 import java.sql.SQLException;
@@ -150,6 +153,67 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             throw new ReportManagementException(msg, e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public PaginationResult getDevicesExpiredByOSVersion(PaginationRequest request)
+            throws ReportManagementException, DeviceTypeNotFoundException {
+        if (request == null ||
+            StringUtils.isBlank(request.getDeviceType()) ||
+            StringUtils.isBlank(request.getDeviceType()) ||
+            !request.getProperties().containsKey(Constants.OS_BUILD_DATE) ||
+            (Long) request.getProperty(Constants.OS_BUILD_DATE) == 0) {
+
+            String msg = "Error Invalid data received from the request.\n" +
+                         "osBuildDate cannot be null or 0 and device type cannot be null or empty";
+            log.error(msg);
+            throw new ReportManagementException(msg);
+        }
+        try {
+            int tenantId = DeviceManagementDAOUtil.getTenantId();
+            String deviceType = request.getDeviceType();
+            PaginationResult paginationResult = new PaginationResult();
+
+            DeviceManagerUtil.validateDeviceListPageSize(request);
+
+            DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
+                    deviceType, tenantId);
+            if (deviceTypeObj == null) {
+                String msg = "Error, device of type: " + deviceType + " does not exist";
+                log.error(msg);
+                throw new DeviceTypeNotFoundException(msg);
+            }
+
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                List<Device> devices = deviceDAO.getDevicesExpiredByOSVersion(request, tenantId);
+                int deviceCount = deviceDAO.getCountOfDeviceExpiredByOSVersion(
+                        deviceType,
+                        (Long) request.getProperty(Constants.OS_BUILD_DATE),
+                        tenantId);
+                paginationResult.setData(devices);
+                paginationResult.setRecordsFiltered(devices.size());
+                paginationResult.setRecordsTotal(deviceCount);
+
+                return paginationResult;
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the data source";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving expired devices by a OS build date " +
+                         "for the tenant";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while validating the request";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
         }
     }
 
