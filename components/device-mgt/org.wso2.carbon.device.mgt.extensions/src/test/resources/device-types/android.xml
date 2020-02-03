@@ -202,7 +202,7 @@
                     </uiParams>
                 </params>
                 <metadata>
-                    <uri>/api/device-mgt/android/v1.0/admin/devices/reboot</uri>
+                    <uri>/api/device-mgt/android/v1.0/admin/devices/upgrade-firmware</uri>
                     <method>POST</method>
                     <contentType>application/json</contentType>
                     <permission>/device-mgt/devices/owning-device/operations/android/upgrade-firmware</permission>
