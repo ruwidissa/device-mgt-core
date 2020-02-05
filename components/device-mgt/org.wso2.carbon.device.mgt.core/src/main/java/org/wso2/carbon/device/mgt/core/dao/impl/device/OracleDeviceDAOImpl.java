@@ -894,6 +894,70 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
         }
     }
 
+    @Override
+    public List<Device> getDevicesByEncryptionStatus(PaginationRequest request, int tenantId, boolean isEncrypted)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = getConnection();
+            String sql = "" +
+                    "SELECT e1.owner, " +
+                    "e1.ownership, " +
+                    "e1.enrolment_id, " +
+                    "e1.device_id, " +
+                    "e1.status, " +
+                    "e1.date_of_last_update, " +
+                    "e1.date_of_enrolment, " +
+                    "d.description, " +
+                    "d.NAME AS DEVICE_NAME, " +
+                    "d.device_identification, " +
+                    "t.NAME AS DEVICE_TYPE " +
+                    "FROM dm_device d, " +
+                    "(SELECT e.owner, " +
+                    "e.ownership, " +
+                    "e.id AS ENROLMENT_ID, " +
+                    "e.device_id, " +
+                    "e.status, " +
+                    "e.date_of_last_update, " +
+                    "e.date_of_enrolment " +
+                    "FROM dm_enrolment e " +
+                    "INNER JOIN " +
+                    "(SELECT DEVICE_ID " +
+                    "FROM DM_DEVICE_INFO " +
+                    "WHERE " +
+                    "KEY_FIELD = 'encryptionEnabled' " +
+                    "AND VALUE_FIELD = ?) AS di " +
+                    "ON di.DEVICE_ID = e.DEVICE_ID " +
+                    "WHERE e.tenant_id = ?) e1, " +
+                    "dm_device_type t " +
+                    "WHERE d.id = e1.device_id " +
+                    "AND t.id = d.device_type_id " +
+                    "ORDER BY e1.date_of_last_update DESC " +
+                    "OFFSET ? ROWS " +
+                    "FETCH NEXT ? ROWS ONLY";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setBoolean(1, isEncrypted);
+                ps.setInt(2, tenantId);
+                ps.setInt(3, request.getStartIndex());
+                ps.setInt(4, request.getRowCount());
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Device> devices = new ArrayList<>();
+                    if (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while building or executing queries to retrieve information " +
+                    "of devices filtered by encryption status: " + isEncrypted;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
     private Connection getConnection() throws SQLException {
         return DeviceManagementDAOFactory.getConnection();
     }

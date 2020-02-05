@@ -238,4 +238,30 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
+
+    @GET
+    @Path("/encryption-status")
+    @Override
+    public Response getDevicesByEncryptionStatus(@QueryParam("isEncrypted") boolean isEncrypted,
+                                                 @DefaultValue("0")
+                                                 @QueryParam("offset") int offset,
+                                                 @DefaultValue("5")
+                                                 @QueryParam("limit") int limit) {
+        try {
+            PaginationRequest request = new PaginationRequest(offset, limit);
+
+            PaginationResult paginationResult = DeviceMgtAPIUtils
+                    .getReportManagementService()
+                    .getDevicesByEncryptionStatus(request, isEncrypted);
+
+            DeviceList deviceList = new DeviceList();
+            deviceList.setList((List<Device>) paginationResult.getData());
+            deviceList.setCount(paginationResult.getRecordsTotal());
+            return Response.status(Response.Status.OK).entity(deviceList).build();
+        } catch (ReportManagementException e) {
+            String msg = "Error occurred while retrieving devices list with provided encryption status";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
 }
