@@ -1837,7 +1837,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 try (ResultSet rs = ps.executeQuery()) {
                     List<Device> devices = new ArrayList<>();
                     DeviceInfo deviceInfo = new DeviceInfo();
-                    if (rs.next()) {
+                    while (rs.next()) {
                         Device device = DeviceManagementDAOUtil.loadDevice(rs);
                         deviceInfo.setOsVersion(rs.getString(Constants.OS_VERSION));
                         deviceInfo.setOsBuildDate(rs.getString(Constants.OS_BUILD_DATE));

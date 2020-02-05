@@ -161,7 +161,6 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             throws ReportManagementException, DeviceTypeNotFoundException {
         if (request == null ||
             StringUtils.isBlank(request.getDeviceType()) ||
-            StringUtils.isBlank(request.getDeviceType()) ||
             !request.getProperties().containsKey(Constants.OS_BUILD_DATE) ||
             (Long) request.getProperty(Constants.OS_BUILD_DATE) == 0) {
 
