@@ -834,52 +834,57 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
     public List<Device> getDevicesExpiredByOSVersion(PaginationRequest request, int tenantId)
             throws DeviceManagementDAOException {
         try {
-            Long osBuildDate = (Long) request.getProperty(Constants.OS_BUILD_DATE);
+            Long osValue = (Long) request.getProperty(Constants.OS_VALUE);
             Connection conn = getConnection();
-            String sql = "SELECT " +
-                         "dt.NAME AS DEVICE_TYPE, " +
-                         "d.ID AS DEVICE_ID, " +
-                         "d.NAME AS DEVICE_NAME, " +
-                         "d.DESCRIPTION, " +
-                         "d.DEVICE_IDENTIFICATION, " +
-                         "dd.OS_VERSION, " +
-                         "dd.OS_BUILD_DATE, " +
-                         "e.ID AS ENROLMENT_ID, " +
-                         "e.OWNER, " +
-                         "e.OWNERSHIP, " +
-                         "e.STATUS, " +
-                         "e.DATE_OF_LAST_UPDATE, " +
-                         "e.DATE_OF_ENROLMENT " +
-                         "FROM DM_DEVICE d, " +
-                         "DM_DEVICE_DETAIL dd, " +
-                         "DM_ENROLMENT e, " +
-                         "(SELECT ID, NAME " +
-                         "FROM DM_DEVICE_TYPE " +
-                         "WHERE NAME = ? " +
-                         "AND PROVIDER_TENANT_ID = ?) dt " +
-                         "WHERE dt.ID = d.DEVICE_TYPE_ID " +
-                         "AND d.ID = e.DEVICE_ID " +
-                         "AND d.ID = dd.DEVICE_ID " +
-                         "AND dd.OS_BUILD_DATE < ? " +
-                         "ORDER BY ENROLMENT_ID " +
-                         "OFFSET ? ROWS " +
-                         "FETCH NEXT ? ROWS ONLY";
+            String sql="SELECT " +
+                       "d1.DEVICE_TYPE, " +
+                       "d1.DEVICE_ID, " +
+                       "d1.DEVICE_NAME, " +
+                       "d1.DESCRIPTION, " +
+                       "d1.DEVICE_IDENTIFICATION, " +
+                       "ddd.OS_VERSION, " +
+                       "e.ID AS ENROLMENT_ID, " +
+                       "e.OWNER, " +
+                       "e.OWNERSHIP, " +
+                       "e.STATUS, " +
+                       "e.DATE_OF_LAST_UPDATE, " +
+                       "e.DATE_OF_ENROLMENT " +
+                       "FROM DM_DEVICE_INFO ddi, " +
+                       "DM_DEVICE_DETAIL ddd, " +
+                       "DM_ENROLMENT e, " +
+                       "(SELECT dt.NAME AS DEVICE_TYPE, " +
+                       "d.ID AS DEVICE_ID, " +
+                       "d.NAME AS DEVICE_NAME, " +
+                       "DESCRIPTION, " +
+                       "DEVICE_IDENTIFICATION " +
+                       " FROM DM_DEVICE_TYPE dt, " +
+                       "DM_DEVICE d " +
+                       "WHERE dt.NAME = ? " +
+                       "AND PROVIDER_TENANT_ID = ? " +
+                       "AND dt.ID = d.DEVICE_TYPE_ID " +
+                       ") d1 " +
+                       "WHERE d1.DEVICE_ID = e.DEVICE_ID " +
+                       "AND d1.DEVICE_ID = ddi.DEVICE_ID " +
+                       "AND ddi.KEY_FIELD = ? " +
+                       "AND CAST( ddi.VALUE_FIELD AS BIGINT ) < ? " +
+                       "ORDER BY ENROLMENT_ID " +
+                       "OFFSET ? ROWS " +
+                       "FETCH NEXT ? ROWS ONLY";
 
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                int paramIDx = 1;
-                ps.setString(paramIDx++, request.getDeviceType());
-                ps.setInt(paramIDx++, tenantId);
-                ps.setLong(paramIDx++, osBuildDate);
-                ps.setInt(paramIDx++, request.getStartIndex());
-                ps.setInt(paramIDx, request.getRowCount());
+                ps.setString(1, request.getDeviceType());
+                ps.setInt(2, tenantId);
+                ps.setString(3, Constants.OS_VALUE);
+                ps.setLong(4, osValue);
+                ps.setInt(5, request.getStartIndex());
+                ps.setInt(6, request.getRowCount());
 
                 try (ResultSet rs = ps.executeQuery()) {
                     List<Device> devices = new ArrayList<>();
-                    DeviceInfo deviceInfo = new DeviceInfo();
                     while (rs.next()) {
                         Device device = DeviceManagementDAOUtil.loadDevice(rs);
-                        deviceInfo.setOsVersion(rs.getString(Constants.OS_VERSION));
-                        deviceInfo.setOsBuildDate(rs.getString(Constants.OS_BUILD_DATE));
+                        DeviceInfo deviceInfo = new DeviceInfo();
+                        deviceInfo.setOsVersion(rs.getString("OS_VERSION"));
                         device.setDeviceInfo(deviceInfo);
                         devices.add(device);
                     }
@@ -887,8 +892,49 @@ public class OracleDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 }
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while retrieving information of devices with an older OS date " +
-                         "than the minimum date";
+            String msg = "Error occurred while building or executing queries to retrieve information " +
+                         "of devices with an older OS build date";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getCountOfDeviceExpiredByOSVersion(String deviceType, Long osValue, int tenantId)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = getConnection();
+            String sql = "SELECT " +
+                         "COUNT(ddi.DEVICE_ID) AS DEVICE_COUNT " +
+                         "FROM DM_DEVICE_INFO ddi, " +
+                         "(SELECT d.ID    AS DEVICE_ID " +
+                         "FROM DM_DEVICE_TYPE dt, " +
+                         "DM_DEVICE d " +
+                         "WHERE dt.NAME = ? " +
+                         "AND PROVIDER_TENANT_ID = ? " +
+                         "AND dt.ID = d.DEVICE_TYPE_ID " +
+                         ") d1 " +
+                         "WHERE d1.DEVICE_ID = ddi.DEVICE_ID " +
+                         "AND ddi.KEY_FIELD = ? " +
+                         "AND CAST( ddi.VALUE_FIELD AS BIGINT ) < ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, deviceType);
+                ps.setInt(2, tenantId);
+                ps.setString(3, Constants.OS_VALUE);
+                ps.setLong(4, osValue);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    int deviceCount = 0;
+                    if (rs.next()) {
+                        deviceCount = rs.getInt("DEVICE_COUNT");
+                    }
+                    return deviceCount;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while building or executing queries to retrieve the count " +
+                         "of devices with an older OS build date";
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }

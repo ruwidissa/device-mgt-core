@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.device.details.mgt.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -39,6 +40,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManag
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 
@@ -98,6 +100,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             } else {
                 Map<String, String> updatableProps = new HashMap<>();
                 Map<String, String> injectableProps = new HashMap<>();
+                // generate a default value depending on the devices OS version
+                addOSVersionValue(device, newDeviceInfo);
                 for (String key : newDeviceInfo.getDeviceDetailsMap().keySet()) {
                     if (previousDeviceProperties.containsKey(key)) {
                         updatableProps.put(key, newDeviceInfo.getDeviceDetailsMap().get(key));
@@ -420,5 +424,39 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         return newDeviceInfo;
     }
 
+    /**
+     * Generate and add a value depending on the device's OS version included in device info
+     *
+     * @param device        device data
+     * @param newDeviceInfo device info data
+     */
+    private void addOSVersionValue(Device device, DeviceInfo newDeviceInfo) {
+        String deviceTypeName = device.getType();
+        if (StringUtils.isBlank(device.getType())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to generate a OS version value for device type: " +
+                          deviceTypeName + ". Device type cannot be null or empty");
+            }
+        } else {
+            if (!deviceTypeName.equals("android") && !deviceTypeName.equals("ios")) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Unable to generate a OS version value for device type: " +
+                              deviceTypeName + ". OS version value is only generatable for " +
+                              "android and ios");
+                }
+            } else {
+                String osVersion = newDeviceInfo.getOsVersion();
+                String osValue = String.valueOf(DeviceManagerUtil.generateOSVersionValue(osVersion));
+                if (StringUtils.isBlank(osValue)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Unable to generate a OS version value for OS version: " +
+                                  osVersion + " for device type: " + deviceTypeName);
+                    }
+                } else {
+                    newDeviceInfo.getDeviceDetailsMap().put(Constants.OS_VALUE, osValue);
+                }
+            }
+        }
+    }
 }
 

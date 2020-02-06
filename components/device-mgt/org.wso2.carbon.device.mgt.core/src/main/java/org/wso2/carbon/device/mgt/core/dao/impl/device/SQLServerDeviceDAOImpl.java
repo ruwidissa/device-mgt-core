@@ -24,12 +24,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.impl.AbstractDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -625,6 +627,114 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
         } catch (SQLException e) {
             String msg = "Error occurred while retrieving information of all registered devices " +
                          "according to device ids and the limit area.";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public List<Device> getDevicesExpiredByOSVersion(PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException {
+        try {
+            Long osValue = (Long) request.getProperty(Constants.OS_VALUE);
+            Connection conn = getConnection();
+            String sql="SELECT " +
+                       "d1.DEVICE_TYPE, " +
+                       "d1.DEVICE_ID, " +
+                       "d1.DEVICE_NAME, " +
+                       "d1.DESCRIPTION, " +
+                       "d1.DEVICE_IDENTIFICATION, " +
+                       "ddd.OS_VERSION, " +
+                       "e.ID AS ENROLMENT_ID, " +
+                       "e.OWNER, " +
+                       "e.OWNERSHIP, " +
+                       "e.STATUS, " +
+                       "e.DATE_OF_LAST_UPDATE, " +
+                       "e.DATE_OF_ENROLMENT " +
+                       "FROM DM_DEVICE_INFO ddi, " +
+                       "DM_DEVICE_DETAIL ddd, " +
+                       "DM_ENROLMENT e, " +
+                       "(SELECT dt.NAME AS DEVICE_TYPE, " +
+                       "d.ID AS DEVICE_ID, " +
+                       "d.NAME AS DEVICE_NAME, " +
+                       "DESCRIPTION, " +
+                       "DEVICE_IDENTIFICATION " +
+                       " FROM DM_DEVICE_TYPE dt, " +
+                       "DM_DEVICE d " +
+                       "WHERE dt.NAME = ? " +
+                       "AND PROVIDER_TENANT_ID = ? " +
+                       "AND dt.ID = d.DEVICE_TYPE_ID " +
+                       ") d1 " +
+                       "WHERE d1.DEVICE_ID = e.DEVICE_ID " +
+                       "AND d1.DEVICE_ID = ddi.DEVICE_ID " +
+                       "AND ddi.KEY_FIELD = ? " +
+                       "AND CAST( ddi.VALUE_FIELD AS BIGINT ) < ? " +
+                       "LIMIT ? OFFSET ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, request.getDeviceType());
+                ps.setInt(2, tenantId);
+                ps.setString(3, Constants.OS_VALUE);
+                ps.setLong(4, osValue);
+                ps.setInt(5, request.getRowCount());
+                ps.setInt(6, request.getStartIndex());
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Device> devices = new ArrayList<>();
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        DeviceInfo deviceInfo = new DeviceInfo();
+                        deviceInfo.setOsVersion(rs.getString("OS_VERSION"));
+                        device.setDeviceInfo(deviceInfo);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while building or executing queries to retrieve information " +
+                         "of devices with an older OS build date";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getCountOfDeviceExpiredByOSVersion(String deviceType, Long osValue, int tenantId)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = getConnection();
+            String sql = "SELECT " +
+                         "COUNT(ddi.DEVICE_ID) AS DEVICE_COUNT " +
+                         "FROM DM_DEVICE_INFO ddi, " +
+                         "(SELECT d.ID    AS DEVICE_ID " +
+                         "FROM DM_DEVICE_TYPE dt, " +
+                         "DM_DEVICE d " +
+                         "WHERE dt.NAME = ? " +
+                         "AND PROVIDER_TENANT_ID = ? " +
+                         "AND dt.ID = d.DEVICE_TYPE_ID " +
+                         ") d1 " +
+                         "WHERE d1.DEVICE_ID = ddi.DEVICE_ID " +
+                         "AND ddi.KEY_FIELD = ? " +
+                         "AND CAST( ddi.VALUE_FIELD AS BIGINT ) < ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, deviceType);
+                ps.setInt(2, tenantId);
+                ps.setString(3, Constants.OS_VALUE);
+                ps.setLong(4, osValue);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    int deviceCount = 0;
+                    if (rs.next()) {
+                        deviceCount = rs.getInt("DEVICE_COUNT");
+                    }
+                    return deviceCount;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while building or executing queries to retrieve the count " +
+                         "of devices with an older OS build date";
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }

@@ -18,18 +18,29 @@
  *
  */
 
+package org.wso2.carbon.device.mgt.common.exceptions;
 
-package org.wso2.carbon.device.mgt.core.report.mgt;
+public class BadRequestException extends Exception {
+    private static final long serialVersionUID = 2304023531260840549L;
 
-public class Constants {
-    // device types
-    public static final String ANDROID = "android";
-    public static final String IOS = "ios";
-    // device properties
-    public static final String OS_BUILD_DATE = "OS_BUILD_DATE";
-    public static final String OS_VERSION = "OS_VERSION";
-    public static final String OS_VALUE = "OS_VALUE";
-    // OS version value generating properties
-    public static final int NUM_OF_OS_VERSION_DIGITS= 5;
-    public static final int NUM_OF_OS_VERSION_POSITIONS = 3;
+    public BadRequestException() {
+        super();
+    }
+
+    public BadRequestException(String msg) {
+        super(msg);
+    }
+
+    public BadRequestException(Throwable cause) {
+        super(cause);
+    }
+
+    public BadRequestException(String msg, Exception nestedEx) {
+        super(msg, nestedEx);
+    }
+
+    public BadRequestException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

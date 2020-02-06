@@ -313,12 +313,12 @@ public interface ReportManagementService {
                     int limit) throws ReportManagementException;
 
     @GET
-    @Path("expired-devices/{deviceType}")
+    @Path("/expired-devices/{deviceType}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
-            value = "Getting Details of Registered Devices filtered by OS version build date",
-            notes = "Provides details of devices that have a version build date older than the provided date.",
+            value = "Getting Details of Registered Devices filtered by OS version",
+            notes = "Provides details of devices that have a OS version older than the provided version.",
             tags = "Device Management",
             extensions = {
                     @Extension(properties = {
@@ -337,9 +337,9 @@ public interface ReportManagementService {
                                             name = "Content-Type",
                                             description = "The content type of the body")}),
                     @ApiResponse(
-                            code = 404,
-                            message = "Not Found. " +
-                                      "\n Device type does not exist",
+                            code = 400,
+                            message = "Bad Request. " +
+                                      "\n Contents of the request are invalid",
                             response = ErrorResponse.class),
                     @ApiResponse(
                             code = 500,
@@ -354,10 +354,10 @@ public interface ReportManagementService {
                     required = true)
             @PathParam("deviceType") String deviceType,
             @ApiParam(
-                    name = "osBuildDate",
-                    value = "Minimum OS version build date which is used to filter the devices.",
+                    name = "osVersion",
+                    value = "Minimum OS version which is used to filter the devices.",
                     required = true)
-            @QueryParam("osBuildDate") Long osBuildDate,
+            @QueryParam("osVersion") String osVersion,
             @ApiParam(
                     name = "offset",
                     value = "The starting pagination index for the list of filtered devices.",

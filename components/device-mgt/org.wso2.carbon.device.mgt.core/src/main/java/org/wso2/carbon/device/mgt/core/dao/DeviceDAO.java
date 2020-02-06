@@ -637,12 +637,12 @@ public interface DeviceDAO {
      * Count the number of devices older than the given OS version of a device type
      *
      * @param deviceType Device type name
-     * @param osBuildDate BUild date off the current OS version
+     * @param osValue Generated value for the OS version
      * @param tenantId Id of the current tenant.
      * @return {@link Integer}
      * @throws DeviceManagementDAOException Thrown if error occurs while database transactions
      */
-    int getCountOfDeviceExpiredByOSVersion(String deviceType, long osBuildDate, int tenantId)
+    int getCountOfDeviceExpiredByOSVersion(String deviceType, Long osValue, int tenantId)
             throws DeviceManagementDAOException;
 
     /**
