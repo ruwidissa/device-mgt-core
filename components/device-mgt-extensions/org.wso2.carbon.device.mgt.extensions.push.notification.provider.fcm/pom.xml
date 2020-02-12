@@ -139,7 +139,7 @@
                             org.wso2.carbon.device.mgt.common.operation.mgt,
                             org.wso2.carbon.device.mgt.common.push.notification,
                             org.apache.commons.logging,
-                            org.wso2.carbon.device.mgt.common,
+                            org.wso2.carbon.device.mgt.common.*,
                             org.wso2.carbon.device.mgt.core.service
                         </Import-Package>
                     </instructions>
