@@ -85,9 +85,11 @@ const columns = [
     key: 'imei',
     render: properties => {
       let imei = 'not-found';
-      for (let i = 0; i < properties.length; i++) {
-        if (properties[i].name === 'IMEI') {
-          imei = properties[i].value;
+      if (properties) {
+        for (let i = 0; i < properties.length; i++) {
+          if (properties[i].name === 'IMEI') {
+            imei = properties[i].value;
+          }
         }
       }
       return imei;
