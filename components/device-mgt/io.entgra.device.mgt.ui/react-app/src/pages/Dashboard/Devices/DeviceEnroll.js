@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageHeader, Typography, Breadcrumb, Icon } from 'antd';
 import { Link } from 'react-router-dom';
-import AddDevice from '../../../components/Devices/AddDevice';
+import AddDevice from '../../../components/Devices/Enroll-Device/AddDevice';
 
 const { Paragraph } = Typography;
 

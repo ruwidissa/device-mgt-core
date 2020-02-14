@@ -17,90 +17,27 @@
  */
 
 import React from 'react';
-import axios from 'axios';
-import { Card, Col, Icon, message, notification, Row } from 'antd';
+import { Card, Col, Icon, Row } from 'antd';
 import TimeAgo from 'javascript-time-ago';
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en';
 import { withConfigContext } from '../../context/ConfigContext';
 
-let apiUrl;
-
 class DeviceType extends React.Component {
   constructor(props) {
     super(props);
     TimeAgo.addLocale(en);
+    this.config = this.props.context;
     this.state = {
-      data: [],
+      data: this.config.deviceTypes,
       pagination: {},
       loading: false,
       selectedRows: [],
     };
   }
 
-  componentDidMount() {
-    this.fetchUsers();
-  }
-
-  onClickCard = data => {
-    console.log(data);
-    this.props.onClickType();
-  };
-
-  // fetch data from api
-  fetchUsers = (params = {}) => {
-    const config = this.props.context;
-    this.setState({ loading: true });
-
-    apiUrl =
-      window.location.origin +
-      config.serverConfig.invoker.uri +
-      config.serverConfig.invoker.deviceMgt +
-      '/device-types';
-
-    // send request to the invokerss
-    axios
-      .get(apiUrl)
-      .then(res => {
-        if (res.status === 200) {
-          const pagination = { ...this.state.pagination };
-          this.setState({
-            loading: false,
-            data: JSON.parse(res.data.data),
-            pagination,
-          });
-        }
-      })
-      .catch(error => {
-        if (error.hasOwnProperty('response') && error.response.status === 401) {
-          // todo display a popop with error
-          message.error('You are not logged in');
-          window.location.href = window.location.origin + '/entgra/login';
-        } else {
-          notification.error({
-            message: 'There was a problem',
-            duration: 0,
-            description: 'Error occurred while trying to load device types.',
-          });
-        }
-
-        this.setState({ loading: false });
-      });
-  };
-
-  handleTableChange = (pagination, filters, sorter) => {
-    const pager = { ...this.state.pagination };
-    pager.current = pagination.current;
-    this.setState({
-      pagination: pager,
-    });
-    this.fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
+  onClickCard = (e, deviceType) => {
+    this.props.getDeviceType(deviceType);
   };
 
   render() {
@@ -112,7 +49,7 @@ class DeviceType extends React.Component {
           size="default"
           style={{ width: 150 }}
           bordered={true}
-          onClick={this.onClickCard}
+          onClick={e => this.onClickCard(e, data.name)}
           cover={
             <Icon
               type="android"

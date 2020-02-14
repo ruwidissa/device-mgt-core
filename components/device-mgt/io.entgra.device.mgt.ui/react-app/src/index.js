@@ -32,6 +32,8 @@ import DeviceStatusReport from './components/Reports/Templates/DeviceStatusRepor
 import PolicyReportHome from './pages/Dashboard/Reports/PolicyReportHome';
 import ReportDurationItemList from './pages/Dashboard/Reports/ReportDurationItemList';
 import AppNotInstalledDevicesReport from './components/Reports/Templates/AppNotInstalledDevicesReport';
+import Devices from './pages/Dashboard/Devices/Devices';
+import DeviceEnroll from './pages/Dashboard/Devices/DeviceEnroll';
 
 const routes = [
   {
@@ -44,16 +46,16 @@ const routes = [
     exact: false,
     component: Dashboard,
     routes: [
-      // {
-      //   path: '/entgra/devices',
-      //   component: Devices,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/devices/enroll',
-      //   component: DeviceEnroll,
-      //   exact: true,
-      // },
+      {
+        path: '/entgra/devices',
+        component: Devices,
+        exact: true,
+      },
+      {
+        path: '/entgra/devices/enroll',
+        component: DeviceEnroll,
+        exact: true,
+      },
       {
         path: '/entgra/geo',
         component: Geo,
