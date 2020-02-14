@@ -23,12 +23,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.app.mgt.Application;
+import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
+import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -39,7 +42,6 @@ import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Calendar;
@@ -54,9 +56,11 @@ public class ReportManagementServiceImpl implements ReportManagementService {
     private static final Log log = LogFactory.getLog(ReportManagementServiceImpl.class);
 
     private DeviceDAO deviceDAO;
+    private ApplicationDAO applicationDAO;
 
     public ReportManagementServiceImpl() {
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
+        this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
     }
 
     @Override
@@ -269,5 +273,63 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             }
         }
         return resultObject;
+    }
+
+    @Override
+    public PaginationResult getAppNotInstalledDevices(PaginationRequest request, String packageName, String version)
+            throws ReportManagementException, DeviceTypeNotFoundException {
+        PaginationResult paginationResult = new PaginationResult();
+        if(StringUtils.isBlank(packageName)){
+            String msg = "Error, application package name is not given";
+            log.error(msg);
+            throw new ReportManagementException(msg);
+        }
+        try {
+            int tenantId = DeviceManagementDAOUtil.getTenantId();
+            request = DeviceManagerUtil.validateDeviceListPageSize(request);
+
+            String deviceType = request.getDeviceType();
+            DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
+                    deviceType, tenantId);
+            if (deviceTypeObj == null) {
+                String msg = "Error, device of type: " + deviceType + " does not exist";
+                log.error(msg);
+                throw new DeviceTypeNotFoundException(msg);
+            }
+
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                List<Device> devices = deviceDAO.getAppNotInstalledDevices(
+                        request,
+                        tenantId,
+                        packageName,
+                        version
+                );
+                paginationResult.setData(devices);
+                int deviceCount = deviceDAO.getCountOfAppNotInstalledDevices(
+                        request,
+                        tenantId,
+                        packageName,
+                        version);
+                paginationResult.setRecordsTotal(deviceCount);
+                return paginationResult;
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection " +
+                        "to the data source";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            }  finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while validating device list page size";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving Tenant ID";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        }
     }
 }

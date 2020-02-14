@@ -45,6 +45,7 @@ import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
+import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -855,4 +856,23 @@ public interface DeviceManagementProviderService {
      */
     PaginationResult getAppSubscribedDevices(int offsetValue, int limitValue,
                                              List<Integer> devicesIds, String status) throws DeviceManagementException;
+
+    /**
+     * This method is used to get a list of applications installed in all enrolled devices
+     *
+     * @param request Request object with limit and offset
+     * @return {@link PaginationResult}
+     * @throws ApplicationManagementException if any service level or DAO level error occurs.
+     */
+    PaginationResult getApplications(PaginationRequest request)
+            throws ApplicationManagementException, DeviceTypeNotFoundException;
+
+    /**
+     * This method is used to get a list of app versions when app package name is given.
+     *
+     * @param packageName Package name of the application
+     * @return String list of app versions
+     * @throws ApplicationManagementException if any service level or DAO level error occurs.
+     */
+    List<String> getAppVersions(String packageName) throws ApplicationManagementException;
 }

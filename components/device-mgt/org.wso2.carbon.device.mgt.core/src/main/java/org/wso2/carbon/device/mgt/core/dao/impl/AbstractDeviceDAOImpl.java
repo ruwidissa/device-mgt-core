@@ -1894,6 +1894,123 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
+    @Override
+    public List<Device> getAppNotInstalledDevices(
+            PaginationRequest request, int tenantId, String packageName, String version)
+            throws DeviceManagementDAOException {
+        List<Device> devices;
+        String deviceType = request.getDeviceType();
+        boolean isVersionProvided = false;
+
+        String sql = "SELECT " +
+                "d.ID AS DEVICE_ID, " +
+                "d.DESCRIPTION,d.NAME AS DEVICE_NAME, " +
+                "t.NAME AS DEVICE_TYPE, " +
+                "d.DEVICE_IDENTIFICATION, " +
+                "e.OWNER, " +
+                "e.OWNERSHIP, " +
+                "e.STATUS, " +
+                "e.DATE_OF_LAST_UPDATE, " +
+                "e.DATE_OF_ENROLMENT, " +
+                "e.ID AS ENROLMENT_ID " +
+                "FROM DM_DEVICE AS d " +
+                "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                "WHERE t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
+                "NOT IN (SELECT m.DEVICE_ID " +
+                "FROM DM_DEVICE_APPLICATION_MAPPING AS m " +
+                "INNER JOIN DM_APPLICATION AS a ON m.APPLICATION_ID=a.ID " +
+                "WHERE a.APP_IDENTIFIER = ?";
+
+        if (!StringUtils.isBlank(version)) {
+            sql = sql + " AND a.VERSION = ? ";
+            isVersionProvided = true;
+        }
+
+        sql = sql + ") LIMIT ? OFFSET ?";
+
+        try {
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setString(paramIdx++, deviceType);
+                stmt.setInt(paramIdx++, tenantId);
+                stmt.setString(paramIdx++, packageName);
+                if (isVersionProvided) {
+                    stmt.setString(paramIdx++, version);
+                }
+                stmt.setInt(paramIdx++, request.getRowCount());
+                stmt.setInt(paramIdx, request.getStartIndex());
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    devices = new ArrayList<>();
+                    while (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all " +
+                    "registered devices under tenant id " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getCountOfAppNotInstalledDevices(
+            PaginationRequest request, int tenantId, String packageName, String version)
+            throws DeviceManagementDAOException {
+        String deviceType = request.getDeviceType();
+        boolean isVersionProvided = false;
+
+        String sql = "SELECT " +
+                        "COUNT(d.ID) AS DEVICE_COUNT " +
+                    "FROM DM_DEVICE AS d " +
+                    "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                    "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                    "WHERE t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
+                    "NOT IN " +
+                    "(SELECT m.DEVICE_ID " +
+                        "FROM DM_DEVICE_APPLICATION_MAPPING AS m " +
+                        "INNER JOIN DM_APPLICATION AS a ON m.APPLICATION_ID=a.ID " +
+                        "WHERE a.APP_IDENTIFIER = ?";
+
+        if (!StringUtils.isBlank(version)) {
+            sql = sql + " AND a.VERSION = ? ";
+            isVersionProvided = true;
+        }
+
+        sql = sql + ")";
+
+        try {
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIdx = 1;
+                stmt.setString(paramIdx++, deviceType);
+                stmt.setInt(paramIdx++, tenantId);
+                stmt.setString(paramIdx++, packageName);
+                if (isVersionProvided) {
+                    stmt.setString(paramIdx, version);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    int deviceCount = 0;
+                    if (rs.next()) {
+                        deviceCount = rs.getInt("DEVICE_COUNT");
+                    }
+                    return deviceCount;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all " +
+                    "registered devices under tenant id " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
     /***
      * This method removes records of a given list of devices from the DM_DEVICE_DETAIL table
      * @param conn Connection object

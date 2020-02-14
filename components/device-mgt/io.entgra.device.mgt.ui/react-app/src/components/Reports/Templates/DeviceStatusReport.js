@@ -188,7 +188,10 @@ class DeviceStatusReport extends React.Component {
                 <Icon type="home" /> Home
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Report</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="/entgra/reports">Reports</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Device Status Report</Breadcrumb.Item>
           </Breadcrumb>
           <div className="wrap" style={{ marginBottom: '10px' }}>
             <h3>Device Status Report</h3>
