@@ -89,12 +89,8 @@ class App extends React.Component {
         if (lastURLSegment === 'login') {
           window.location.href = window.location.origin + '/entgra/';
         } else {
-          this.setState({
-            loading: false,
-            config: config,
-          });
+          this.getDeviceTypes(config);
         }
-        this.getDeviceTypes(config);
       })
       .catch(error => {
         if (error.hasOwnProperty('response') && error.response.status === 401) {
