@@ -63,6 +63,7 @@ import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
+import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -114,6 +115,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
+import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
@@ -3965,6 +3967,76 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         paginationResult.setData(getAllDeviceInfo(subscribedDeviceDetails));
         return paginationResult;
+    }
+
+    @Override
+    public PaginationResult getApplications(PaginationRequest request)
+            throws ApplicationManagementException, DeviceTypeNotFoundException {
+        PaginationResult paginationResult = new PaginationResult();
+        try {
+            int tenantId = DeviceManagementDAOUtil.getTenantId();
+            request = DeviceManagerUtil.validateDeviceListPageSize(request);
+
+            String deviceType = request.getDeviceType();
+            DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
+                    deviceType, tenantId);
+            if (deviceTypeObj == null) {
+                String msg = "Error, device of type (application platform): " + deviceType + " does not exist";
+                log.error(msg);
+                throw new DeviceTypeNotFoundException(msg);
+            }
+
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                List<Application> applicationList = applicationDAO.getApplications(
+                        request,
+                        tenantId
+                );
+                paginationResult.setData(applicationList);
+                paginationResult.setRecordsTotal(applicationList.size());
+                return paginationResult;
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection " +
+                        "to the data source";
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            }  finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while validating device list page size";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving Tenant ID";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public List<String> getAppVersions(String packageName)
+            throws ApplicationManagementException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            List<String> versions = applicationDAO.getAppVersions(
+                    DeviceManagementDAOUtil.getTenantId(),
+                    packageName
+            );
+            return versions;
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection " +
+                    "to the data source";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving Tenant ID";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }  finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
     }
 
     /**

@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -269,6 +270,81 @@ public abstract class AbstractApplicationDAOImpl implements ApplicationDAO {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return applications;
+    }
+
+    @Override
+    public List<Application> getApplications(PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException {
+        List<Application> applications = new ArrayList<>();
+        Application application;
+        String sql = "Select " +
+                        "ID," +
+                        " NAME, " +
+                        "APP_IDENTIFIER, " +
+                        "PLATFORM, " +
+                        "CATEGORY, " +
+                        "VERSION, " +
+                        "TYPE, " +
+                        "LOCATION_URL, " +
+                        "IMAGE_URL, " +
+                        "APP_PROPERTIES, " +
+                        "MEMORY_USAGE, " +
+                        "IS_ACTIVE, " +
+                        "TENANT_ID " +
+                     "From DM_APPLICATION " +
+                     "WHERE PLATFORM = ? " +
+                     "AND TENANT_ID = ? LIMIT ? OFFSET ?";
+        try {
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, request.getDeviceType());
+                stmt.setInt(2, tenantId);
+                stmt.setInt(3, request.getRowCount());
+                stmt.setInt(4, request.getStartIndex());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        application = loadApplication(rs);
+                        applications.add(application);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "SQL Error occurred while retrieving the list of Applications " +
+                    "installed in all enrolled devices for device type " + request.getDeviceType() +
+                    " under tenant id " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+        return applications;
+    }
+
+    @Override
+    public List<String> getAppVersions(int tenantId, String packageName) throws DeviceManagementDAOException {
+        String sql = "SELECT " +
+                        "VERSION " +
+                     "FROM DM_APPLICATION " +
+                     "WHERE TENANT_ID=? " +
+                     "AND APP_IDENTIFIER=?";
+        try {
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, tenantId);
+                stmt.setString(2, packageName);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    List<String> versions = new ArrayList<>();
+                    while (rs.next()) {
+                        versions.add(rs.getString("VERSION"));
+                    }
+                    return versions;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving information of all " +
+                    "registered apps under tenant id " + tenantId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
     }
 
     private Application loadApplication(ResultSet rs) throws DeviceManagementDAOException {

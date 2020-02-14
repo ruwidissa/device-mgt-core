@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.common.report.mgt;
 import com.google.gson.JsonObject;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 
@@ -58,5 +59,18 @@ public interface ReportManagementService {
      * @throws DeviceTypeNotFoundException Might occur while validating the device type
      */
     PaginationResult getDevicesExpiredByOSVersion(PaginationRequest request)
+            throws ReportManagementException, DeviceTypeNotFoundException;
+
+    /**
+     * This method is used to get devices which have not installed the app with the given package name
+     *
+     * @param request Request object with device type
+     * @param packageName Package name of the application
+     * @param version Version of the application
+     * @return {@link PaginationResult}
+     * @throws ReportManagementException
+     * @throws DeviceTypeNotFoundException
+     */
+    PaginationResult getAppNotInstalledDevices(PaginationRequest request, String packageName, String version)
             throws ReportManagementException, DeviceTypeNotFoundException;
 }

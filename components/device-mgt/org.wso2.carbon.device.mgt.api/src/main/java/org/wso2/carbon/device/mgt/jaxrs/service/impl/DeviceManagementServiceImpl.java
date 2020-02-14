@@ -87,6 +87,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -108,7 +109,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -1104,6 +1104,60 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @GET
+    @Override
+    @Path("/{device-type}/applications")
+    public Response getApplications(
+            @PathParam("device-type") String deviceType,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @DefaultValue("10")
+            @QueryParam("limit") int limit) {
+        PaginationRequest request = new PaginationRequest(offset, limit);
+        ApplicationList applicationList = new ApplicationList();
+        request.setDeviceType(deviceType);
+        try {
+            PaginationResult paginationResult = DeviceMgtAPIUtils
+                    .getDeviceManagementService()
+                    .getApplications(request);
+
+            if (paginationResult.getData().isEmpty()) {
+                return Response.status(Response.Status.OK)
+                        .entity("No applications are available under " + deviceType + " platform.").build();
+            } else {
+                applicationList.setList((List<Application>) paginationResult.getData());
+                applicationList.setCount(paginationResult.getRecordsTotal());
+                return Response.status(Response.Status.OK).entity(applicationList).build();
+            }
+        } catch (DeviceTypeNotFoundException e) {
+            String msg = "Error occurred while retrieving application list." +
+                    " Device type (Application Platform): " + deviceType +
+                    "is not valid";
+            log.error(msg);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while retrieving application list";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Path("/application/{package-name}/versions")
+    @Override
+    public Response getAppVersions(
+            @PathParam("package-name") String packageName) {
+        try {
+            List<String> versions = DeviceMgtAPIUtils.getDeviceManagementService()
+                    .getAppVersions(packageName);
+            return Response.status(Response.Status.OK).entity(versions).build();
+        } catch (ApplicationManagementException e) {
+            String msg = "Error occurred while retrieving version list for app with package name " + packageName;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 }

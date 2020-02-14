@@ -31,6 +31,7 @@ import PolicyReport from './components/Reports/Templates/PolicyReport';
 import DeviceStatusReport from './components/Reports/Templates/DeviceStatusReport';
 import PolicyReportHome from './pages/Dashboard/Reports/PolicyReportHome';
 import ReportDurationItemList from './pages/Dashboard/Reports/ReportDurationItemList';
+import AppNotInstalledDevicesReport from './components/Reports/Templates/AppNotInstalledDevicesReport';
 
 const routes = [
   {
@@ -126,6 +127,11 @@ const routes = [
       {
         path: '/entgra/reports/device-status',
         component: DeviceStatusReport,
+        exact: true,
+      },
+      {
+        path: '/entgra/reports/app-not-installed',
+        component: AppNotInstalledDevicesReport,
         exact: true,
       },
     ],

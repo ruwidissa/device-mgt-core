@@ -132,7 +132,10 @@ class PolicyReport extends React.Component {
                 <Icon type="home" /> Home
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Report</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="/entgra/reports">Reports</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Policy Compliance Report</Breadcrumb.Item>
           </Breadcrumb>
           <div className="wrap" style={{ marginBottom: '10px' }}>
             <h3>Policy Report</h3>
