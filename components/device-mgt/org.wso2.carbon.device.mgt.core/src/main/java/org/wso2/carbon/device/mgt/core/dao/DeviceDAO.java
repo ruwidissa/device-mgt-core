@@ -305,6 +305,16 @@ public interface DeviceDAO {
     List<Device> searchDevicesInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
 
     /**
+     * This method is used to get device count within a specific group.
+     *
+     * @param request PaginationRequest object holding the data for pagination
+     * @param tenantId tenant id
+     * @return Device count
+     * @throws DeviceManagementDAOException
+     */
+    int getCountOfDevicesInGroup(PaginationRequest request, int tenantId) throws DeviceManagementDAOException;
+
+    /**
      * This method is used to retrieve all the devices of a given tenant and device type.
      *
      * @param type device type.

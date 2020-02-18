@@ -72,26 +72,26 @@ class Dashboard extends React.Component {
                   marginRight: 110,
                 }}
               >
-                <SubMenu
-                  key="devices"
-                  title={
-                    <span>
-                      <Icon type="appstore" />
-                      <span>Devices</span>
-                    </span>
-                  }
-                >
-                  <Menu.Item key="devices">
-                    <Link to="/entgra/devices">
-                      <span>View</span>
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="deviceEnroll">
-                    <Link to="/entgra/devices/enroll">
-                      <span>Enroll</span>
-                    </Link>
-                  </Menu.Item>
-                </SubMenu>
+                {/* <SubMenu*/}
+                {/*  key="devices"*/}
+                {/*  title={*/}
+                {/*    <span>*/}
+                {/*      <Icon type="appstore" />*/}
+                {/*      <span>Devices</span>*/}
+                {/*    </span>*/}
+                {/*  }*/}
+                {/* >*/}
+                {/*  <Menu.Item key="devices">*/}
+                {/*    <Link to="/entgra/devices">*/}
+                {/*      <span>View</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/*  <Menu.Item key="deviceEnroll">*/}
+                {/*    <Link to="/entgra/devices/enroll">*/}
+                {/*      <span>Enroll</span>*/}
+                {/*    </Link>*/}
+                {/*  </Menu.Item>*/}
+                {/* </SubMenu>*/}
                 <SubMenu
                   key="geo"
                   title={
