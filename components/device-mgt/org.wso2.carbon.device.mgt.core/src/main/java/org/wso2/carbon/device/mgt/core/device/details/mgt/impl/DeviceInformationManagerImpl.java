@@ -25,10 +25,13 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceDetailsWrapper;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.EventPublishingException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -38,6 +41,7 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -90,6 +94,18 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     device.getEnrolmentInfo().getId());
             DeviceManagementDAOFactory.commitTransaction();
 
+            String reportingHost = System.getProperty(DeviceManagementConstants.Report
+                    .REPORTING_EVENT_HOST);
+            if (reportingHost != null && !reportingHost.isEmpty()) {
+                DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
+                deviceDetailsWrapper.setDevice(device);
+                deviceDetailsWrapper.setDeviceInfo(deviceInfo);
+                deviceDetailsWrapper.getJSONString();
+
+                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
+                        reportingHost + DeviceManagementConstants.Report.DEVICE_INFO_ENDPOINT);
+            }
+
             //TODO :: This has to be fixed by adding the enrollment ID.
             if (DeviceManagerUtil.isPublishDeviceInfoResponseEnabled()) {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getType()};
@@ -135,6 +151,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DataPublisherConfigurationException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
+        } catch (EventPublishingException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            throw new DeviceDetailsMgtException("Error occurred while sending events", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }

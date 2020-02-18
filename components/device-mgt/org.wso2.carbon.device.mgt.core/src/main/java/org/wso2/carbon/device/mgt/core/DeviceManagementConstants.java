@@ -139,4 +139,13 @@ public final class DeviceManagementConstants {
                 new Permission("/permission/admin/manage/portal", "ui.execute")
         };
     }
+
+    public static final class Report {
+        private Report() {
+            throw new AssertionError();
+        }
+        public static final String REPORTING_CONTEXT = "/event";
+        public static final String DEVICE_INFO_ENDPOINT = REPORTING_CONTEXT + "/device-info";
+        public static final String REPORTING_EVENT_HOST = "iot.reporting.event.host";
+    }
 }
