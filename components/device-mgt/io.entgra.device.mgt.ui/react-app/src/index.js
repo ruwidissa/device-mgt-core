@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,20 +18,18 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as serviceWorker from './serviceWorker';
+import * as serviceWorker from './services/serviceWorkers/serviceWorker';
 import App from './App';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard/Dashboard';
+import Login from './scenes/Login';
+import Home from './scenes/Home';
 import './index.css';
-import Reports from './pages/Dashboard/Reports/Reports';
-import Geo from './pages/Dashboard/Geo/Geo';
-import EnrollmentsVsUnenrollmentsReport from './components/Reports/Templates/EnrollmentsVsUnenrollmentsReport';
-import EnrollmentTypeReport from './components/Reports/Templates/EnrollmentTypeReport';
-import PolicyReport from './components/Reports/Templates/PolicyReport';
-import DeviceStatusReport from './components/Reports/Templates/DeviceStatusReport';
-import PolicyReportHome from './pages/Dashboard/Reports/PolicyReportHome';
-import ReportDurationItemList from './pages/Dashboard/Reports/ReportDurationItemList';
-import AppNotInstalledDevicesReport from './components/Reports/Templates/AppNotInstalledDevicesReport';
+import Reports from './scenes/Home/scenes/Reports';
+import EnrollmentsVsUnenrollmentsReport from './scenes/Home/scenes/Reports/scenes/EnrolmentVsUnenrollments';
+import EnrollmentTypeReport from './scenes/Home/scenes/Reports/scenes/EnrollmentType';
+import PolicyReport from './scenes/Home/scenes/Reports/scenes/PolicyCompliance';
+import DeviceStatusReport from './scenes/Home/scenes/Reports/scenes/DeviceStatus';
+import AppNotInstalledDevicesReport from './scenes/Home/scenes/Reports/scenes/AppNotInstalledDevices';
+import Geo from './scenes/Home/scenes/Geo';
 
 const routes = [
   {
@@ -42,8 +40,23 @@ const routes = [
   {
     path: '/entgra',
     exact: false,
-    component: Dashboard,
+    component: Home,
     routes: [
+      // {
+      //   path: '/entgra/devices',
+      //   component: Devices,
+      //   exact: true,
+      // },
+      // {
+      //   path: '/entgra/devices/enroll',
+      //   component: DeviceEnroll,
+      //   exact: true,
+      // },
+      // {
+      //   path: '/entgra/geo',
+      //   component: Geo,
+      //   exact: true,
+      // },
       // {
       //   path: '/entgra/devices',
       //   component: Devices,
@@ -100,11 +113,6 @@ const routes = [
       //   exact: true,
       // },
       {
-        path: '/entgra/reports/list',
-        component: ReportDurationItemList,
-        exact: true,
-      },
-      {
         path: '/entgra/reports/enrollments',
         component: EnrollmentsVsUnenrollmentsReport,
         exact: true,
@@ -112,11 +120,6 @@ const routes = [
       {
         path: '/entgra/reports/enrollment-type',
         component: EnrollmentTypeReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/policy',
-        component: PolicyReportHome,
         exact: true,
       },
       {
