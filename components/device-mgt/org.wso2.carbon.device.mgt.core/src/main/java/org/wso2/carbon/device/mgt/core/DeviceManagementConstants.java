@@ -146,5 +146,6 @@ public final class DeviceManagementConstants {
         }
         public static final String REPORTING_CONTEXT = "/event";
         public static final String DEVICE_INFO_ENDPOINT = REPORTING_CONTEXT + "/device-info";
+        public static final String REPORTING_EVENT_HOST = "iot.reporting.event.host";
     }
 }

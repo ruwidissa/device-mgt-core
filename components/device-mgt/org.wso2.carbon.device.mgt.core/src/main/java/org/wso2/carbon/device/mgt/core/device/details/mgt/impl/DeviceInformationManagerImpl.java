@@ -94,12 +94,17 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     device.getEnrolmentInfo().getId());
             DeviceManagementDAOFactory.commitTransaction();
 
-            DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
-            deviceDetailsWrapper.setDevice(device);
-            deviceDetailsWrapper.setDeviceInfo(deviceInfo);
-            deviceDetailsWrapper.getJSONString();
-            HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
-                    "http://localhost:8081" + DeviceManagementConstants.Report.DEVICE_INFO_ENDPOINT);
+            String reportingHost = System.getProperty(DeviceManagementConstants.Report
+                    .REPORTING_EVENT_HOST);
+            if (reportingHost != null && !reportingHost.isEmpty()) {
+                DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
+                deviceDetailsWrapper.setDevice(device);
+                deviceDetailsWrapper.setDeviceInfo(deviceInfo);
+                deviceDetailsWrapper.getJSONString();
+
+                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
+                        reportingHost + DeviceManagementConstants.Report.DEVICE_INFO_ENDPOINT);
+            }
 
             //TODO :: This has to be fixed by adding the enrollment ID.
             if (DeviceManagerUtil.isPublishDeviceInfoResponseEnabled()) {
