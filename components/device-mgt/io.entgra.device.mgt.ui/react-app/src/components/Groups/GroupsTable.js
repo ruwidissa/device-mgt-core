@@ -26,6 +26,7 @@ import { withConfigContext } from '../../context/ConfigContext';
 import GroupActions from './GroupActions';
 import AddGroup from './AddGroup';
 import Filter from '../Utils/Filter/Filter';
+import GroupDevicesModal from './GroupDevicesModal';
 
 const searchFields = [
   {
@@ -81,6 +82,12 @@ class GroupsTable extends React.Component {
           <GroupActions data={row} fetchGroups={this.fetchGroups} />
         </span>
       ),
+    },
+    {
+      title: 'Devices',
+      dataIndex: 'id',
+      key: 'details',
+      render: (id, row) => <GroupDevicesModal groupData={row} />,
     },
   ];
 
