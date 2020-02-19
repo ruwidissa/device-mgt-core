@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ * Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  * Entgra (pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -39,7 +39,7 @@
     font-variant: normal;
     speak: none;
     text-decoration: inherit;
-    
+
     /* Better Font Rendering =========== */
     text-transform: none;
     text-rendering: auto;
@@ -275,7 +275,7 @@
 }
 .fw-stroke:before,
 .fw-helper-stroke:after {
-    text-shadow: -2px -2px 0 #ffffff,  
+    text-shadow: -2px -2px 0 #ffffff,
                  2px -2px 0 #ffffff,
                  -2px 2px 0 #ffffff,
                  2px 2px 0 #ffffff;
