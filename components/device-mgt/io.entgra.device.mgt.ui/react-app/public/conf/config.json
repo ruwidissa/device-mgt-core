@@ -1,12 +1,12 @@
 {
   "theme": {
-    "logo" : "https://entgra.io/assets/images/svg/logo.svg",
+    "logo": "https://entgra.io/assets/images/svg/logo.svg",
     "primaryColor": "rgb(24, 144, 255)"
   },
   "serverConfig": {
     "invoker": {
       "uri": "/entgra-ui-request-handler/invoke",
-      "deviceMgt" : "/device-mgt/v1.0"
+      "deviceMgt": "/device-mgt/v1.0"
     },
     "loginUri": "/entgra-ui-request-handler/login",
     "logoutUri": "/entgra-ui-request-handler/logout",
@@ -37,6 +37,7 @@
   "geoMap": {
     "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     "attribution": "&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors",
-    "defaultZoomLevel": 16
+    "defaultZoomLevel": 16,
+    "timeout": 120
   }
 }
