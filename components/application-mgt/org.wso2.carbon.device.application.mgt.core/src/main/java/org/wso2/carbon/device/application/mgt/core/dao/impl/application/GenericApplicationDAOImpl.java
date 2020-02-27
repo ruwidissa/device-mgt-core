@@ -99,7 +99,6 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             log.debug("Getting application data from the database");
             log.debug(String.format("Filter: limit=%s, offset=%s", filter.getLimit(), filter.getOffset()));
         }
-        int paramIndex = 1;
         String sql = "SELECT "
                 + "AP_APP.ID AS APP_ID, "
                 + "AP_APP.NAME AS APP_NAME, "
@@ -132,7 +131,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
-                + "INNER JOIN (SELECT ID FROM AP_APP LIMIT ? OFFSET ? ) AS app_data ON app_data.ID = AP_APP.ID "
+                + "INNER JOIN (SELECT ID FROM AP_APP WHERE AP_APP.TENANT_ID = ? LIMIT ? OFFSET ? ) AS app_data ON app_data.ID = AP_APP.ID "
                 + "WHERE AP_APP.TENANT_ID = ?";
 
         if (filter == null) {
@@ -183,8 +182,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
 
         try {
             Connection conn = this.getDBConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(sql);
-            ){
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+                int paramIndex = 1;
+                stmt.setInt(paramIndex++, tenantId);
                 if (filter.getLimit() != -1) {
                     if (filter.getLimit() == 0) {
                         stmt.setInt(paramIndex++, 100);
