@@ -1165,4 +1165,41 @@ public class OperationManagerImpl implements OperationManager {
     private boolean isSameUser(String user, String owner) {
         return user.equalsIgnoreCase(owner);
     }
+
+    private List<? extends Operation> getOperations(DeviceIdentifier deviceId, Operation.Status status, int enrolmentId)
+            throws OperationManagementException {
+        List<Operation> operations = new ArrayList<>();
+        List<org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation> dtoOperationList = new ArrayList<>();
+
+        org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Status internalStatus =
+                org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Status.valueOf(status.name());
+
+        try {
+            OperationManagementDAOFactory.openConnection();
+            dtoOperationList.addAll(commandOperationDAO.getOperationsByDeviceAndStatus(
+                    enrolmentId, internalStatus));
+            dtoOperationList.addAll(configOperationDAO.getOperationsByDeviceAndStatus(
+                    enrolmentId, internalStatus));
+            dtoOperationList.addAll(profileOperationDAO.getOperationsByDeviceAndStatus(
+                    enrolmentId, internalStatus));
+            dtoOperationList.addAll(policyOperationDAO.getOperationsByDeviceAndStatus(
+                    enrolmentId, internalStatus));
+            Operation operation;
+            for (org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation dtoOperation : dtoOperationList) {
+                operation = OperationDAOUtil.convertOperation(dtoOperation);
+                operations.add(operation);
+            }
+            operations.sort(new OperationIdComparator());
+        } catch (OperationManagementDAOException e) {
+            throw new OperationManagementException("Error occurred while retrieving the list of " +
+                    "pending operations assigned for '" + deviceId.getType() +
+                    "' device '" + deviceId.getId() + "'", e);
+        } catch (SQLException e) {
+            throw new OperationManagementException(
+                    "Error occurred while opening a connection to the data source", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+        return operations;
+    }
 }

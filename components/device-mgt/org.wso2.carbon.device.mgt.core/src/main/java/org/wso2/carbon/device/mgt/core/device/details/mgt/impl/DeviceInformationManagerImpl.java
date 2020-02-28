@@ -315,9 +315,13 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                     getDeviceManagementProvider().getAllDevices(deviceIdentifiers.get(0).getType(), false);
             List<DeviceLocation> deviceLocations = new ArrayList<>();
             DeviceManagementDAOFactory.openConnection();
+            DeviceLocation deviceLocation;
             for (Device device : devices) {
-                deviceLocations.add(deviceDetailsDAO.getDeviceLocation(device.getId(),
-                        device.getEnrolmentInfo().getId()));
+                deviceLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
+                        device.getEnrolmentInfo().getId());
+                if (deviceLocation != null) {
+                    deviceLocations.add(deviceLocation);
+                }
             }
             return deviceLocations;
         } catch (DeviceManagementException e) {

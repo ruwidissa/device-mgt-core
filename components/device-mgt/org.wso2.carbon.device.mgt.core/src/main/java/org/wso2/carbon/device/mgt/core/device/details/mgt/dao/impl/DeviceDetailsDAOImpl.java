@@ -273,7 +273,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        DeviceLocation location = new DeviceLocation();
+        DeviceLocation location = null;
         try {
             conn = this.getConnection();
             String sql = "SELECT * FROM  DM_DEVICE_LOCATION WHERE DEVICE_ID = ? AND ENROLMENT_ID = ?";
@@ -282,7 +282,8 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setInt(2, enrollmentId);
             rs = stmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
+                location = new DeviceLocation();
                 location.setDeviceId(deviceId);
                 location.setLatitude(rs.getDouble("LATITUDE"));
                 location.setLongitude(rs.getDouble("LONGITUDE"));
@@ -294,7 +295,6 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
                 location.setCountry(rs.getString("COUNTRY"));
                 location.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
             }
-            location.setDeviceId(deviceId);
 
             return location;
         } catch (SQLException e) {

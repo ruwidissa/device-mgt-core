@@ -100,7 +100,7 @@ public class DeviceStatusTaskManagerServiceImpl implements DeviceStatusTaskManag
         try {
             TaskService taskService = DeviceManagementDataHolder.getInstance().getTaskService();
             String taskName = DEVICE_STATUS_MONITORING_TASK_TYPE + "_" + deviceType.getName() + "_" + deviceType.getId();
-            if (taskService.isServerInit()) {
+            if (taskService != null && taskService.isServerInit()) {
                 TaskManager taskManager = taskService.getTaskManager(DEVICE_STATUS_MONITORING_TASK_TYPE);
                 taskManager.deleteTask(taskName);
             }
