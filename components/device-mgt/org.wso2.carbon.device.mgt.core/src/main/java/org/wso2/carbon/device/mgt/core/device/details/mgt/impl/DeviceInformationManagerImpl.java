@@ -16,7 +16,6 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.device.mgt.core.device.details.mgt.impl;
 
 import org.apache.commons.logging.Log;
@@ -68,30 +67,50 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         try {
             Device device = DeviceManagementDataHolder.getInstance().
                     getDeviceManagementProvider().getDevice(deviceId, false);
+            addDeviceInfo(device, deviceInfo);
+        } catch (DeviceManagementException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            throw new DeviceDetailsMgtException("Error occurred while retrieving the device information.", e);
+        }
+    }
 
+    @Override
+    public void addDeviceInfo(Device device, DeviceInfo deviceInfo) throws DeviceDetailsMgtException {
+        try {
             DeviceManagementDAOFactory.beginTransaction();
             DeviceInfo newDeviceInfo;
             DeviceInfo previousDeviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
                     device.getEnrolmentInfo().getId());
             Map<String, String> previousDeviceProperties = deviceDetailsDAO.getDeviceProperties(device.getId(),
                     device.getEnrolmentInfo().getId());
-            if (previousDeviceInfo != null && previousDeviceProperties != null) {
-                previousDeviceInfo.setDeviceDetailsMap(previousDeviceProperties);
+            if (previousDeviceInfo != null) {
+                previousDeviceInfo.setDeviceDetailsMap(new HashMap<>());
                 newDeviceInfo = processDeviceInfo(previousDeviceInfo, deviceInfo);
-            } else if (previousDeviceInfo == null && previousDeviceProperties != null) {
-                previousDeviceInfo = new DeviceInfo();
-                previousDeviceInfo.setDeviceDetailsMap(previousDeviceProperties);
-                newDeviceInfo = processDeviceInfo(previousDeviceInfo, deviceInfo);
+                deviceDetailsDAO.updateDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(),
+                        newDeviceInfo);
             } else {
+                deviceDetailsDAO.addDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(), deviceInfo);
                 newDeviceInfo = deviceInfo;
             }
-
+            if (previousDeviceProperties == null) {
+                deviceDetailsDAO.addDeviceProperties(newDeviceInfo.getDeviceDetailsMap(), device.getId(),
+                        device.getEnrolmentInfo().getId());
+            } else {
+                Map<String, String> updatableProps = new HashMap<>();
+                Map<String, String> injectableProps = new HashMap<>();
+                for (String key : newDeviceInfo.getDeviceDetailsMap().keySet()) {
+                    if (previousDeviceProperties.containsKey(key)) {
+                        updatableProps.put(key, newDeviceInfo.getDeviceDetailsMap().get(key));
+                    } else {
+                        injectableProps.put(key, newDeviceInfo.getDeviceDetailsMap().get(key));
+                    }
+                }
+                deviceDetailsDAO.updateDeviceProperties(updatableProps, device.getId(),
+                        device.getEnrolmentInfo().getId());
+                deviceDetailsDAO.addDeviceProperties(injectableProps, device.getId(),
+                        device.getEnrolmentInfo().getId());
+            }
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
-            deviceDetailsDAO.deleteDeviceInformation(device.getId(), device.getEnrolmentInfo().getId());
-            deviceDetailsDAO.deleteDeviceProperties(device.getId(), device.getEnrolmentInfo().getId());
-            deviceDetailsDAO.addDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(), newDeviceInfo);
-            deviceDetailsDAO.addDeviceProperties(newDeviceInfo.getDeviceDetailsMap(), device.getId(),
-                    device.getEnrolmentInfo().getId());
             DeviceManagementDAOFactory.commitTransaction();
 
             String reportingHost = System.getProperty(DeviceManagementConstants.Report
@@ -223,17 +242,28 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
     @Override
     public void addDeviceLocation(DeviceLocation deviceLocation) throws DeviceDetailsMgtException {
-
         try {
             Device device = DeviceManagementDataHolder.getInstance().
                     getDeviceManagementProvider().getDevice(deviceLocation.getDeviceIdentifier(), false);
+            addDeviceLocation(device, deviceLocation);
+        } catch (DeviceManagementException e) {
+            throw new DeviceDetailsMgtException("Error occurred while updating the last updated timestamp of " +
+                    "the device", e);
+        }
+    }
+
+    @Override
+    public void addDeviceLocation(Device device, DeviceLocation deviceLocation) throws DeviceDetailsMgtException {
+        try {
             deviceLocation.setDeviceId(device.getId());
             DeviceManagementDAOFactory.beginTransaction();
-            deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
-            deviceDetailsDAO.addDeviceLocationInfo(device, deviceLocation,
-                    CarbonContext.getThreadLocalCarbonContext().getTenantId());
-            deviceDetailsDAO.deleteDeviceLocation(deviceLocation.getDeviceId(), device.getEnrolmentInfo().getId());
-            deviceDetailsDAO.addDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
+            DeviceLocation previousLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            if (previousLocation == null) {
+                deviceDetailsDAO.addDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
+            } else {
+                deviceDetailsDAO.updateDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
+            }
             if (DeviceManagerUtil.isPublishLocationResponseEnabled()) {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getEnrolmentInfo().getOwner(), device.getType()};
                 Object[] payload = new Object[]{
@@ -259,10 +289,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DeviceManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while getting the device information.", e);
-        } catch (DeviceManagementDAOException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            throw new DeviceDetailsMgtException("Error occurred while updating the last updated timestamp of " +
-                    "the device", e);
         } catch (DataPublisherConfigurationException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
@@ -383,9 +409,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         }
         if (newDeviceInfo.getAvailableRAMMemory() == -1D) {
             newDeviceInfo.setAvailableRAMMemory(previousDeviceInfo.getAvailableRAMMemory());
-        }
-        if (!newDeviceInfo.isPluggedIn()) {
-            newDeviceInfo.setPluggedIn(previousDeviceInfo.isPluggedIn());
         }
         Map<String, String> newDeviceDetailsMap = newDeviceInfo.getDeviceDetailsMap();
         Map<String, String> previousDeviceDetailsMap = previousDeviceInfo.getDeviceDetailsMap();

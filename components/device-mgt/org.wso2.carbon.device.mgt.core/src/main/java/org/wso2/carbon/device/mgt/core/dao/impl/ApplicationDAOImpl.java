@@ -41,95 +41,101 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public abstract class AbstractApplicationDAOImpl implements ApplicationDAO {
+public class ApplicationDAOImpl implements ApplicationDAO {
 
-    private static final Log log = LogFactory.getLog(AbstractApplicationDAOImpl.class);
+    private static final Log log = LogFactory.getLog(ApplicationDAOImpl.class);
 
     @Override
-    public int addApplication(Application application, int tenantId) throws DeviceManagementDAOException {
+    public void addApplications(List<Application> applications, int deviceId, int enrolmentId,
+                                         int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
-        ByteArrayOutputStream bao = null;
-        ObjectOutputStream oos = null;
-        int applicationId = -1;
         try {
             conn = this.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO DM_APPLICATION (NAME, PLATFORM, CATEGORY, " +
-                    "VERSION, TYPE, LOCATION_URL, IMAGE_URL, TENANT_ID, APP_PROPERTIES, APP_IDENTIFIER, MEMORY_USAGE, IS_ACTIVE) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt = conn.prepareStatement("INSERT INTO DM_APPLICATION (NAME, PLATFORM, " +
+                    "CATEGORY, VERSION, TYPE, LOCATION_URL, IMAGE_URL, TENANT_ID, " +
+                    "APP_IDENTIFIER, MEMORY_USAGE, IS_ACTIVE, DEVICE_ID, ENROLMENT_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-            stmt.setString(1, application.getName());
-            stmt.setString(2, application.getPlatform());
-            stmt.setString(3, application.getCategory());
-            stmt.setString(4, application.getVersion());
-            stmt.setString(5, application.getType());
-            stmt.setString(6, application.getLocationUrl());
-            stmt.setString(7, application.getImageUrl());
-            stmt.setInt(8, tenantId);
-
-            bao = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream(bao);
-            oos.writeObject(application.getAppProperties());
-            stmt.setBytes(9, bao.toByteArray());
-
-            stmt.setString(10, application.getApplicationIdentifier());
-            stmt.setInt(11, application.getMemoryUsage());
-            stmt.setBoolean(12, application.isActive());
-            stmt.execute();
-
-            rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                applicationId = rs.getInt(1);
+            for (Application application : applications) {
+                stmt.setString(1, application.getName());
+                stmt.setString(2, application.getPlatform());
+                stmt.setString(3, application.getCategory());
+                stmt.setString(4, application.getVersion());
+                stmt.setString(5, application.getType());
+                stmt.setString(6, application.getLocationUrl());
+                stmt.setString(7, application.getImageUrl());
+                stmt.setInt(8, tenantId);
+                stmt.setString(9, application.getApplicationIdentifier());
+                stmt.setInt(10, application.getMemoryUsage());
+                stmt.setBoolean(11, application.isActive());
+                stmt.setInt(12, deviceId);
+                stmt.setInt(13, enrolmentId);
+                stmt.addBatch();
             }
-            return applicationId;
+            stmt.executeBatch();
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while adding application '" +
-                    application.getName() + "'", e);
-        } catch (IOException e) {
-            throw new DeviceManagementDAOException("Error occurred while serializing application properties object", e);
+            throw new DeviceManagementDAOException("Error occurred while adding bulk application list", e);
         } finally {
-            if (bao != null) {
-                try {
-                    bao.close();
-                } catch (IOException e) {
-                    log.error("Error occurred while closing ByteArrayOutputStream", e);
-                }
-            }
-            if (oos != null) {
-                try {
-                    oos.close();
-                } catch (IOException e) {
-                    log.error("Error occurred while closing ObjectOutputStream", e);
-                }
-            }
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public List<Integer> removeApplications(List<Application> apps, int tenantId) throws DeviceManagementDAOException {
-        Connection conn = null;
+    public void updateApplications(List<Application> applications, int deviceId, int enrolmentId,
+                                int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
         PreparedStatement stmt = null;
-        ResultSet rs = null;
-        List<Integer> applicationIds = new ArrayList<>();
         try {
             conn = this.getConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.prepareStatement("DELETE DM_APPLICATION WHERE APP_IDENTIFIER = ? AND TENANT_ID = ?",
-                    new String[]{"id"});
+            stmt = conn.prepareStatement("UPDATE DM_APPLICATION SET NAME = ?, PLATFORM = ?, CATEGORY = ?, " +
+                    "VERSION = ?, TYPE = ?, LOCATION_URL = ?, IMAGE_URL = ?, MEMORY_USAGE = ?, IS_ACTIVE = ? " +
+                    "WHERE APP_IDENTIFIER = ? AND DEVICE_ID = ? AND ENROLMENT_ID = ? AND TENANT_ID = ?");
 
-            for (Application app : apps) {
-                stmt.setString(1, app.getApplicationIdentifier());
-                stmt.setInt(2, tenantId);
+            for (Application application : applications) {
+                stmt.setString(1, application.getName());
+                stmt.setString(2, application.getPlatform());
+                stmt.setString(3, application.getCategory());
+                stmt.setString(4, application.getVersion());
+                stmt.setString(5, application.getType());
+                stmt.setString(6, application.getLocationUrl());
+                stmt.setString(7, application.getImageUrl());
+                stmt.setInt(8, application.getMemoryUsage());
+                stmt.setBoolean(9, application.isActive());
+                stmt.setString(10, application.getApplicationIdentifier());
+                stmt.setInt(11, deviceId);
+                stmt.setInt(12, enrolmentId);
+                stmt.setInt(13, tenantId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
-            rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                applicationIds.add(rs.getInt(1));
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while adding bulk application list", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void removeApplications(List<Application> apps, int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = this.getConnection();
+            conn.setAutoCommit(false);
+            stmt = conn.prepareStatement("DELETE FROM DM_APPLICATION WHERE APP_IDENTIFIER = ? AND DEVICE_ID = ? " +
+                    "AND ENROLMENT_ID = ? AND TENANT_ID = ?");
+
+            for (Application app : apps) {
+                stmt.setString(1, app.getApplicationIdentifier());
+                stmt.setInt(2, deviceId);
+                stmt.setInt(3, enrolmentId);
+                stmt.setInt(4, tenantId);
+                stmt.addBatch();
             }
-            return applicationIds;
+            stmt.executeBatch();
         } catch (SQLException e) {
             try {
                 if (conn != null) {
@@ -210,11 +216,9 @@ public abstract class AbstractApplicationDAOImpl implements ApplicationDAO {
         try {
             conn = this.getConnection();
             stmt = conn.prepareStatement("SELECT ID,  NAME, APP_IDENTIFIER, PLATFORM, CATEGORY, VERSION, TYPE, " +
-                    "LOCATION_URL, IMAGE_URL, appmap.APP_PROPERTIES, appmap.MEMORY_USAGE, appmap.IS_ACTIVE, TENANT_ID " +
-                    "FROM DM_APPLICATION app INNER JOIN (SELECT  APPLICATION_ID, APP_PROPERTIES, MEMORY_USAGE, " +
-                    "IS_ACTIVE FROM DM_DEVICE_APPLICATION_MAPPING WHERE  DEVICE_ID = ? AND ENROLMENT_ID = ?) appmap " +
-                    "WHERE app.APP_IDENTIFIER = ? AND app.VERSION = ? AND  " +
-                    "appmap.APPLICATION_ID = app.id  AND TENANT_ID = ?");
+                    "LOCATION_URL, IMAGE_URL, APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE, TENANT_ID " +
+                    "FROM DM_APPLICATION WHERE DEVICE_ID = ? AND ENROLMENT_ID = ? AND APP_IDENTIFIER = ? AND " +
+                    "VERSION = ? AND TENANT_ID = ?");
             stmt.setInt(1, deviceId);
             stmt.setInt(2, enrolmentId);
             stmt.setString(3, identifier);
@@ -239,7 +243,8 @@ public abstract class AbstractApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public List<Application> getInstalledApplications(int deviceId, int enrolmentId) throws DeviceManagementDAOException {
+    public List<Application> getInstalledApplications(int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         List<Application> applications = new ArrayList<>();
@@ -247,16 +252,13 @@ public abstract class AbstractApplicationDAOImpl implements ApplicationDAO {
         ResultSet rs = null;
         try {
             conn = this.getConnection();
-            stmt = conn.prepareStatement("Select ID, NAME, APP_IDENTIFIER, PLATFORM, CATEGORY, VERSION, TYPE, " +
-                    "LOCATION_URL, IMAGE_URL, APPMAP.APP_PROPERTIES, APPMAP.MEMORY_USAGE, APPMAP.IS_ACTIVE, " +
-                    "TENANT_ID From DM_APPLICATION app INNER JOIN " +
-                    "(Select APPLICATION_ID,  APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE" +
-                    " From DM_DEVICE_APPLICATION_MAPPING WHERE  DEVICE_ID=? AND ENROLMENT_ID = ?) APPMAP " +
-                    "ON " +
-                    "app.ID = APPMAP.APPLICATION_ID ");
+            stmt = conn.prepareStatement("SELECT ID, NAME, APP_IDENTIFIER, PLATFORM, CATEGORY, VERSION, TYPE, " +
+                    "LOCATION_URL, IMAGE_URL, APP_PROPERTIES, MEMORY_USAGE, IS_ACTIVE, TENANT_ID FROM DM_APPLICATION " +
+                    "WHERE DEVICE_ID = ? AND ENROLMENT_ID = ? AND TENANT_ID = ?");
 
             stmt.setInt(1, deviceId);
             stmt.setInt(2, enrolmentId);
+            stmt.setInt(3, tenantId);
             rs = stmt.executeQuery();
 
             while (rs.next()) {

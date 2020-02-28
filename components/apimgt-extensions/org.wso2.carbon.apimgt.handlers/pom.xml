@@ -97,7 +97,7 @@
                             org.apache.synapse,
                             org.apache.synapse.core.axis2,
                             org.apache.synapse.rest,
-                            org.wso2.carbon.certificate.mgt.core.impl
+                            org.wso2.carbon.certificate.mgt.core.*
                         </Import-Package>
                     </instructions>
                 </configuration>

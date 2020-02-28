@@ -29,6 +29,7 @@ import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOU
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
@@ -37,27 +38,38 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
 
     @Override
     public int addOperation(Operation operation) throws OperationManagementDAOException {
-        int operationId;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         ByteArrayOutputStream bao = null;
         ObjectOutputStream oos = null;
+        int operationId = -1;
         try {
-            operationId = super.addOperation(operation);
+
             operation.setCreatedTimeStamp(new Timestamp(new java.util.Date().getTime()).toString());
-            operation.setId(operationId);
             operation.setEnabled(true);
-            PolicyOperation policyOperation = (PolicyOperation) operation;
-            Connection conn = OperationManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO DM_POLICY_OPERATION(OPERATION_ID, OPERATION_DETAILS) " +
-                    "VALUES(?, ?)");
+            Connection connection = OperationManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
+                         "INITIATED_BY, OPERATION_DETAILS, ENABLED) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(sql, new String[]{"id"});
+            stmt.setString(1, operation.getType().toString());
+            stmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+            stmt.setTimestamp(3, null);
+            stmt.setString(4, operation.getCode());
+            stmt.setString(5, operation.getInitiatedBy());
 
             bao = new ByteArrayOutputStream();
             oos = new ObjectOutputStream(bao);
             oos.writeObject(operation);
 
-            stmt.setInt(1, operationId);
-            stmt.setBytes(2, bao.toByteArray());
+            stmt.setObject(6, operation);
+            stmt.setBoolean(7, operation.isEnabled());
             stmt.executeUpdate();
+
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                operationId = rs.getInt(1);
+            }
+            return operationId;
         } catch (SQLException e) {
             throw new OperationManagementDAOException("Error occurred while adding policy operation", e);
         } catch (IOException e) {
@@ -77,9 +89,8 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
                     log.warn("Error occurred while closing ObjectOutputStream", e);
                 }
             }
-            OperationManagementDAOUtil.cleanupResources(stmt);
+            OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
-        return operationId;
     }
 
     @Override
@@ -92,7 +103,7 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
         ObjectInputStream ois;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT OPERATION_ID, ENABLED, OPERATION_DETAILS FROM DM_POLICY_OPERATION WHERE OPERATION_ID=?";
+            String sql = "SELECT ID, ENABLED, OPERATION_DETAILS FROM DM_OPERATION WHERE ID=? AND TYPE='POLICY'";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, operationId);
             rs = stmt.executeQuery();
@@ -102,6 +113,7 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
                 bais = new ByteArrayInputStream(operationDetails);
                 ois = new ObjectInputStream(bais);
                 policyOperation = (PolicyOperation) ois.readObject();
+                policyOperation.setId(rs.getInt("ID"));
             }
         } catch (IOException e) {
             throw new OperationManagementDAOException("IO Error occurred while de serialize the policy operation " +
@@ -130,9 +142,9 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
         ObjectInputStream ois = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT po.OPERATION_ID, ENABLED, OPERATION_DETAILS FROM DM_POLICY_OPERATION po " +
+            String sql = "SELECT po.ID, ENABLED, OPERATION_DETAILS FROM DM_OPERATION po " +
                     "INNER JOIN (SELECT * FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ? " +
-                    "AND STATUS = ?) dm ON dm.OPERATION_ID = po.OPERATION_ID";
+                    "AND STATUS = ?) dm ON dm.OPERATION_ID = po.ID WHERE po.TYPE='POLICY'";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, enrolmentId);
@@ -145,6 +157,7 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
                 ois = new ObjectInputStream(bais);
                 policyOperation = (PolicyOperation) ois.readObject();
                 policyOperation.setStatus(status);
+                policyOperation.setId(rs.getInt("ID"));
                 operations.add(policyOperation);
             }
         } catch (IOException e) {

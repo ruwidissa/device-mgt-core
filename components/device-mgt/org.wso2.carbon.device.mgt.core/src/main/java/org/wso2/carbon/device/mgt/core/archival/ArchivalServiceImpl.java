@@ -171,8 +171,6 @@ public class ArchivalServiceImpl implements ArchivalService {
                 openConnection();
                 operationResponses = archivalDAO.selectOperationResponses();
                 notification = archivalDAO.selectNotifications();
-                commandOperations = archivalDAO.selectCommandOperations();
-                profileOperations = archivalDAO.selectProfileOperations();
                 enrollmentMapping = archivalDAO.selectEnrolmentMappings();
                 operations = archivalDAO.selectOperations();
 
@@ -198,18 +196,6 @@ public class ArchivalServiceImpl implements ArchivalService {
                     log.debug("## Archiving notifications");
                 }
                 archivalDAO.moveNotifications(notification);
-
-                //Purge the command operations table, DM_COMMAND_OPERATION
-                if (log.isDebugEnabled()) {
-                    log.debug("## Archiving command operations");
-                }
-                archivalDAO.moveCommandOperations(commandOperations);
-
-                //Purge the profile operation table, DM_PROFILE_OPERATION
-                if (log.isDebugEnabled()) {
-                    log.debug("## Archiving profile operations");
-                }
-                archivalDAO.moveProfileOperations(profileOperations);
 
                 //Purge the enrolment mappings table, DM_ENROLMENT_OP_MAPPING
                 if (log.isDebugEnabled()) {

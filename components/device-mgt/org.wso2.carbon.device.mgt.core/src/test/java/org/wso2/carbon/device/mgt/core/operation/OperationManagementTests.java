@@ -266,19 +266,6 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
         }
     }
 
-    @Test(dependsOnMethods = "getOperations", expectedExceptions = OperationManagementException.class)
-    public void getPendingOperationsAsNonAdmin() throws DeviceManagementException, OperationManagementException,
-            InvalidDeviceException {
-        try {
-            startTenantFlowAsNonAdmin();
-            for (DeviceIdentifier deviceIdentifier : deviceIds) {
-                this.operationMgtService.getPendingOperations(deviceIdentifier);
-            }
-        } finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-    }
-
     @Test(dependsOnMethods = "getPendingOperations")
     public void getPaginatedRequestAsAdmin() throws OperationManagementException {
         PrivilegedCarbonContext.startTenantFlow();
@@ -339,7 +326,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
         Assert.assertEquals(pendingOperations.size(), 3);
     }
 
-    @Test(dependsOnMethods = "updateOperation", expectedExceptions = OperationManagementException.class)
+    @Test(dependsOnMethods = "updateOperation")
     public void updateOperationAsNonAdmin() throws OperationManagementException {
         //This is required to introduce a delay for the update operation of the device.
         try {
@@ -356,7 +343,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
             operation.setOperationResponse("The operation is successfully completed, and updated by non admin!");
             this.operationMgtService.updateOperation(deviceIdentifier, operation);
             List pendingOperations = this.operationMgtService.getPendingOperations(deviceIdentifier);
-            Assert.assertEquals(pendingOperations.size(), 3);
+            Assert.assertEquals(pendingOperations.size(), 2);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -442,7 +429,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
         DeviceIdentifier deviceIdentifier = this.deviceIds.get(0);
         List operation = this.operationMgtService.getOperationsByDeviceAndStatus(deviceIdentifier,
                 Operation.Status.PENDING);
-        Assert.assertEquals(operation.size(), 2);
+        Assert.assertEquals(operation.size(), 1);
     }
 
     @Test(dependsOnMethods = "getOperationByDeviceAndOperationId", expectedExceptions = OperationManagementException.class)
@@ -515,8 +502,8 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     public void getActivityCountUpdatedAfter() throws OperationManagementException, ParseException {
         int activityCount = this.operationMgtService.getActivityCountUpdatedAfter
                 (this.commandActivityBeforeUpdatedTimestamp / 1000);
-        Assert.assertTrue(activityCount == 2,
-                "The activities updated after the created should be 2");
+        Assert.assertEquals(activityCount, 3,
+                "The activities updated after the created should be 3");
     }
 
     @Test

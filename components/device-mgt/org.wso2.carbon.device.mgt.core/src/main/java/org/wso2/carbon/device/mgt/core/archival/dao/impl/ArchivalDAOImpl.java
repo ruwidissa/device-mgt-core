@@ -399,56 +399,6 @@ public class ArchivalDAOImpl implements ArchivalDAO {
     }
 
     @Override
-    public void moveCommandOperations(List<ArchiveCommandOperation> commandOperations) throws ArchivalDAOException {
-        Statement stmt = null;
-        PreparedStatement stmt2 = null;
-        Statement stmt3 = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-
-            String sql = "INSERT INTO DM_COMMAND_OPERATION_ARCH VALUES(?,?,?)";
-            stmt2 = conn2.prepareStatement(sql);
-
-            int count = 0;
-            for (ArchiveCommandOperation rs : commandOperations) {
-                stmt2.setInt(1, rs.getOperationId());
-                stmt2.setInt(2, rs.getEnabled());
-                stmt2.setTimestamp(3, this.currentTimestamp);
-                stmt2.addBatch();
-
-                if (++count % batchSize == 0) {
-                    stmt2.executeBatch();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Executing Command Operations batch " + count);
-                    }
-                }
-            }
-            stmt2.executeBatch();
-            if (log.isDebugEnabled()) {
-                log.debug(count + " [COMMAND_OPERATION] Records copied to the archival table. Starting deletion");
-            }
-            sql = "DELETE o.* FROM DM_COMMAND_OPERATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID \n" +
-                    "WHERE\n" +
-                    "    o.OPERATION_ID = da.ID;";
-            stmt3 = conn.createStatement();
-            int affected = stmt3.executeUpdate(sql);
-            if (log.isDebugEnabled()) {
-                log.debug(affected + " Rows deleted");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the command operation";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt2);
-            ArchivalDAOUtil.cleanupResources(stmt3);
-        }
-    }
-
-    @Override
     public List<ArchiveProfileOperation> selectProfileOperations() throws ArchivalDAOException {
         Statement stmt = null;
         ResultSet rs = null;
@@ -487,57 +437,6 @@ public class ArchivalDAOImpl implements ArchivalDAO {
         return profileOperations;
     }
 
-    @Override
-    public void moveProfileOperations(List<ArchiveProfileOperation> profileOperations) throws ArchivalDAOException {
-        Statement stmt = null;
-        PreparedStatement stmt2 = null;
-        Statement stmt3 = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-
-            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-
-            String sql = "INSERT INTO DM_PROFILE_OPERATION_ARCH VALUES(?, ?, ?, ?)";
-            stmt2 = conn2.prepareStatement(sql);
-
-            int count = 0;
-            for (ArchiveProfileOperation rs : profileOperations) {
-                stmt2.setInt(1, rs.getOperationId());
-                stmt2.setInt(2, rs.getEnabled());
-                stmt2.setBytes(3, (byte[]) rs.getOperationDetails());
-                stmt2.setTimestamp(4, this.currentTimestamp);
-                stmt2.addBatch();
-
-                if (++count % batchSize == 0) {
-                    stmt2.executeBatch();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Executing Profile Operations batch " + count);
-                    }
-                }
-            }
-            stmt2.executeBatch();
-            if (log.isDebugEnabled()) {
-                log.debug(count + " [PROFILE_OPERATION] Records copied to the archival table. Starting deletion");
-            }
-            sql = "DELETE o.* FROM DM_PROFILE_OPERATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID \n" +
-                    "WHERE\n" +
-                    "    o.OPERATION_ID = da.ID;";
-            stmt3 = conn.createStatement();
-            int affected = stmt3.executeUpdate(sql);
-            if (log.isDebugEnabled()) {
-                log.debug(affected + " Rows deleted");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the profile operation";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt2);
-            ArchivalDAOUtil.cleanupResources(stmt3);
-        }
-    }
 
     @Override
     public List<ArchiveEnrolmentOperationMap> selectEnrolmentMappings() throws ArchivalDAOException {
@@ -652,7 +551,10 @@ public class ArchivalDAOImpl implements ArchivalDAO {
                     "    o.TYPE,\n" +
                     "    o.CREATED_TIMESTAMP,\n" +
                     "    o.RECEIVED_TIMESTAMP,\n" +
-                    "    o.OPERATION_CODE\n" +
+                    "    o.OPERATION_CODE,\n" +
+                    "    o.INITIATED_BY,\n" +
+                    "    o.OPERATION_DETAILS,\n" +
+                    "    o.ENABLED \n" +
                     "FROM\n" +
                     "    DM_OPERATION o\n" +
                     "        INNER JOIN\n" +
@@ -668,6 +570,9 @@ public class ArchivalDAOImpl implements ArchivalDAO {
                 op.setCreatedTimeStamp(rs.getTimestamp("CREATED_TIMESTAMP"));
                 op.setRecievedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP"));
                 op.setOperationCode(rs.getString("OPERATION_CODE"));
+                op.setInitiatedBy(rs.getString("INITIATED_BY"));
+                op.setOperationDetails(rs.getObject("OPERATION_DETAILS"));
+                op.setEnabled(rs.getBoolean("ENABLED"));
 
                 operations.add(op);
 
@@ -694,7 +599,7 @@ public class ArchivalDAOImpl implements ArchivalDAO {
         try {
             Connection conn = ArchivalSourceDAOFactory.getConnection();
             Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_OPERATION_ARCH VALUES(?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO DM_OPERATION_ARCH VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
             stmt2 = conn2.prepareStatement(sql);
 
             int count = 0;
@@ -704,7 +609,11 @@ public class ArchivalDAOImpl implements ArchivalDAO {
                 stmt2.setTimestamp(3, rs.getCreatedTimeStamp());
                 stmt2.setTimestamp(4, rs.getRecievedTimeStamp());
                 stmt2.setString(5, rs.getOperationCode());
-                stmt2.setTimestamp(6, this.currentTimestamp);
+                stmt2.setString(6, rs.getInitiatedBy());
+                stmt2.setBytes(7, (byte[]) rs.getOperationDetails());
+                stmt2.setBoolean(8, rs.isEnabled());
+
+                stmt2.setTimestamp(9, this.currentTimestamp);
                 stmt2.addBatch();
 
                 if (++count % batchSize == 0) {

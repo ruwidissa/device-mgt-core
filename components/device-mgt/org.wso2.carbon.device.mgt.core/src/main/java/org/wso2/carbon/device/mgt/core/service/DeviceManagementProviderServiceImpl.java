@@ -1818,6 +1818,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public List<? extends Operation> getPendingOperations(Device device) throws OperationManagementException {
+        return pluginRepository.getOperationManager(device.getType(), this.getTenantId())
+                .getPendingOperations(device);
+    }
+
+    @Override
     public Operation getNextPendingOperation(DeviceIdentifier deviceId) throws OperationManagementException {
         // // setting notNowOperationFrequency to -1 to avoid picking notnow operations
         return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId())
@@ -1840,6 +1846,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 if (permittedOperations.contains(operation.getCode())
                         || permittedOperations.contains("*")) {
                     Object[] metaData = {deviceId.getId(), deviceId.getType()};
+                    Object[] payload = new Object[]{
+                            Calendar.getInstance().getTimeInMillis(),
+                            operation.getId(),
+                            operation.getCode(),
+                            operation.getType() != null ? operation.getType().toString() : null,
+                            operation.getStatus() != null ? operation.getStatus().toString() : null,
+                            operation.getOperationResponse()
+                    };
+                    DeviceManagerUtil.getEventPublisherService().publishEvent(
+                            OPERATION_RESPONSE_EVENT_STREAM_DEFINITION, "1.0.0", metaData, new Object[0], payload
+                    );
+                }
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while reading configs.";
+            log.error(msg, e);
+            throw new OperationManagementException(msg, e);
+        } catch (DataPublisherConfigurationException e) {
+            String msg = "Error occurred while publishing event.";
+            log.error(msg, e);
+            throw new OperationManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateOperation(Device device, Operation operation) throws OperationManagementException {
+        EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
+        if (enrolmentInfo == null) {
+            throw new OperationManagementException(
+                    "Device not found for device id:" + device.getDeviceIdentifier() + " " + "type:" +
+                            device.getType());
+        }
+        pluginRepository.getOperationManager(device.getType(), this.getTenantId())
+                .updateOperation(enrolmentInfo.getId(), operation);
+        try {
+            if (DeviceManagerUtil.isPublishOperationResponseEnabled()) {
+                List<String> permittedOperations = DeviceManagerUtil.getEnabledOperationsForResponsePublish();
+                if (permittedOperations.contains(operation.getCode())
+                        || permittedOperations.contains("*")) {
+                    Object[] metaData = {device.getDeviceIdentifier(), device.getType()};
                     Object[] payload = new Object[]{
                             Calendar.getInstance().getTimeInMillis(),
                             operation.getId(),
@@ -3062,7 +3108,9 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         List<Application> applications;
         try {
             DeviceManagementDAOFactory.openConnection();
-            applications = applicationDAO.getInstalledApplications(device.getId(), device.getEnrolmentInfo().getId());
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+            applications = applicationDAO.getInstalledApplications(device.getId(),
+                    device.getEnrolmentInfo().getId(), tenantId);
             device.setApplications(applications);
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while retrieving the application list of '" + device.getType() + "', " +
@@ -3367,7 +3415,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     deviceLocation.setSpeed(Float.parseFloat(speed));
                     deviceLocation.setBearing(Float.parseFloat(bearing));
                     DeviceInformationManager deviceInformationManager = new DeviceInformationManagerImpl();
-                    deviceInformationManager.addDeviceLocation(deviceLocation);
+                    deviceInformationManager.addDeviceLocation(device, deviceLocation);
                 } catch (Exception e) {
                     //We are not failing the execution since this is not critical for the functionality. But logging as
                     // a warning for reference.
