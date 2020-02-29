@@ -156,7 +156,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        DeviceInfo deviceInfo = null;
+        DeviceInfo deviceInfo = new DeviceInfo();
         try {
             conn = this.getConnection();
 
@@ -167,7 +167,6 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-                deviceInfo = new DeviceInfo();
 //                deviceInfo.setIMEI(rs.getString("IMEI"));
 //                deviceInfo.setIMSI(rs.getString("IMSI"));
                 deviceInfo.setDeviceModel(rs.getString("DEVICE_MODEL"));

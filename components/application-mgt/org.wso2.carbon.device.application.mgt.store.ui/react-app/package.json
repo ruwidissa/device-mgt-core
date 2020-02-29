@@ -44,6 +44,7 @@
     "babel-loader": "^8.0.6",
     "body-parser": "^1.19.0",
     "chai": "^4.1.2",
+    "cross-env": "^7.0.0",
     "css-loader": "^0.28.11",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "4.3.0",
@@ -87,8 +88,8 @@
     "watch": "webpack --watch --mode development",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "build_prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
-    "build_dev": "NODE_ENV=development webpack -d --watch ",
+    "build_prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+    "build_dev": "cross-env NODE_ENV=development webpack -d --watch ",
     "server": "node-env-run server --exec nodemon | pino-colada",
     "dev2": "run-p server start",
     "lint": "eslint \"src/**/*.js\""
