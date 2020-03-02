@@ -109,9 +109,9 @@ public class DeviceTaskManagerServiceImpl implements DeviceTaskManagerService {
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             TaskService taskService = DeviceManagementDataHolder.getInstance().getTaskService();
-            if (taskService.isServerInit()) {
+            if (taskService != null && taskService.isServerInit()) {
                 TaskManager taskManager = taskService.getTaskManager(TASK_TYPE);
-                String taskName = deviceType +  String.valueOf(tenantId);
+                String taskName = deviceType +  tenantId;
                 taskManager.deleteTask(taskName);
             }
         } catch (TaskException e) {
@@ -133,7 +133,7 @@ public class DeviceTaskManagerServiceImpl implements DeviceTaskManagerService {
             TaskManager taskManager = taskService.getTaskManager(TASK_TYPE);
 
             if (taskManager.isTaskScheduled(deviceType)) {
-                String taskName = deviceType +  String.valueOf(tenantId);
+                String taskName = deviceType + tenantId;
                 taskManager.deleteTask(taskName);
                 TaskInfo.TriggerInfo triggerInfo = new TaskInfo.TriggerInfo();
                 triggerInfo.setIntervalMillis(operationMonitoringTaskConfig.getFrequency());

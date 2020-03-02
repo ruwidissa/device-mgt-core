@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.core.search.mgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
@@ -210,9 +211,10 @@ public class ProcessorImpl implements Processor {
     private void setApplicationListOfDevices(List<Device> devices) throws SearchMgtException {
         try {
             DeviceManagementDAOFactory.openConnection();
+            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
             for (Device device : devices) {
                 device.setApplications(applicationDAO.getInstalledApplications(device.getId(),
-                        device.getEnrolmentInfo().getId()));
+                        device.getEnrolmentInfo().getId(), tenantId));
             }
         } catch (DeviceManagementDAOException e) {
             throw new SearchMgtException("Error occurred while fetching the Application List of devices ", e);

@@ -28,29 +28,41 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class CommandOperationDAOImpl extends GenericOperationDAOImpl {
 
     @Override
     public int addOperation(Operation operation) throws OperationManagementDAOException {
-        int operationId;
-        CommandOperation commandOp = (CommandOperation) operation;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            operationId = super.addOperation(operation);
-            Connection conn = OperationManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO DM_COMMAND_OPERATION(OPERATION_ID, ENABLED) VALUES(?, ?)");
-            stmt.setInt(1, operationId);
-            stmt.setBoolean(2, commandOp.isEnabled());
+            Connection connection = OperationManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
+                         "INITIATED_BY, ENABLED) VALUES (?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(sql, new String[]{"id"});
+            stmt.setString(1, operation.getType().toString());
+            stmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+            stmt.setTimestamp(3, null);
+            stmt.setString(4, operation.getCode());
+            stmt.setString(5, operation.getInitiatedBy());
+            stmt.setBoolean(6, operation.isEnabled());
             stmt.executeUpdate();
+
+            rs = stmt.getGeneratedKeys();
+            int id = -1;
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+            return id;
         } catch (SQLException e) {
             throw new OperationManagementDAOException("Error occurred while adding command operation", e);
         } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt);
+            OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
-        return operationId;
     }
 
     public CommandOperation getOperation(int id) throws OperationManagementDAOException {
@@ -59,13 +71,14 @@ public class CommandOperationDAOImpl extends GenericOperationDAOImpl {
         CommandOperation commandOperation = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT OPERATION_ID, ENABLED FROM DM_COMMAND_OPERATION WHERE OPERATION_ID = ?";
+            String sql = "SELECT ID, ENABLED FROM DM_OPERATION WHERE ID = ? AND TYPE='COMMAND'";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
 
             if (rs.next()) {
                 commandOperation = new CommandOperation();
+                commandOperation.setId(rs.getInt("ID"));
                 commandOperation.setEnabled(rs.getBoolean("ENABLED"));
             }
         } catch (SQLException e) {
@@ -87,11 +100,11 @@ public class CommandOperationDAOImpl extends GenericOperationDAOImpl {
         List<CommandOperation> commandOperations = new ArrayList<>();
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT o.ID, co1.ENABLED, co1.STATUS, o.TYPE, o.CREATED_TIMESTAMP, o.RECEIVED_TIMESTAMP, " +
-                    "o.OPERATION_CODE FROM (SELECT co.OPERATION_ID, co.ENABLED, dm.STATUS " +
-                    "FROM DM_COMMAND_OPERATION co INNER JOIN (SELECT ENROLMENT_ID, OPERATION_ID, STATUS " +
+            String sql = "SELECT co1.ID, co1.ENABLED, co1.STATUS, co1.TYPE, co1.CREATED_TIMESTAMP, co1.RECEIVED_TIMESTAMP, " +
+                    "co1.OPERATION_CODE FROM (SELECT co.ID, co.TYPE, co.CREATED_TIMESTAMP, co.RECEIVED_TIMESTAMP, co.OPERATION_CODE, co.ENABLED, dm.STATUS " +
+                    "FROM DM_OPERATION co INNER JOIN (SELECT ENROLMENT_ID, OPERATION_ID, STATUS " +
                     "FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ? AND STATUS = ?) dm " +
-                    "ON dm.OPERATION_ID = co.OPERATION_ID) co1 INNER JOIN DM_OPERATION o ON co1.OPERATION_ID = o.ID";
+                    "ON dm.OPERATION_ID = co.ID and co.TYPE='COMMAND') co1";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, enrolmentId);

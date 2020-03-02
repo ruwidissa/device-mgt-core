@@ -34,6 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ConfigOperationDAOImpl extends GenericOperationDAOImpl {
@@ -42,22 +43,33 @@ public class ConfigOperationDAOImpl extends GenericOperationDAOImpl {
 
     @Override
     public int addOperation(Operation operation) throws OperationManagementDAOException {
-        int operationId;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            operationId = super.addOperation(operation);
             operation.setCreatedTimeStamp(new Timestamp(new java.util.Date().getTime()).toString());
-            Connection conn = OperationManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO DM_CONFIG_OPERATION(OPERATION_ID, OPERATION_CONFIG) VALUES(?, ?)");
-            stmt.setInt(1, operationId);
-            stmt.setObject(2, operation);
+            Connection connection = OperationManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
+                         "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(sql, new String[]{"id"});
+            stmt.setString(1, operation.getType().toString());
+            stmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+            stmt.setTimestamp(3, null);
+            stmt.setString(4, operation.getCode());
+            stmt.setString(5, operation.getInitiatedBy());
+            stmt.setObject(6, operation);
             stmt.executeUpdate();
+
+            rs = stmt.getGeneratedKeys();
+            int id = -1;
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+            return id;
         } catch (SQLException e) {
             throw new OperationManagementDAOException("Error occurred while adding command operation", e);
         } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt);
+            OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
-        return operationId;
     }
 
     @Override
@@ -70,17 +82,17 @@ public class ConfigOperationDAOImpl extends GenericOperationDAOImpl {
         ObjectInputStream ois;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT OPERATION_ID, ENABLED, OPERATION_CONFIG FROM DM_CONFIG_OPERATION WHERE OPERATION_ID = ?";
+            String sql = "SELECT ID, ENABLED, OPERATION_DETAILS FROM DM_OPERATION WHERE ID = ? AND TYPE='CONFIG'";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, operationId);
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-                byte[] operationDetails = rs.getBytes("OPERATION_CONFIG");
+                byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
                 bais = new ByteArrayInputStream(operationDetails);
                 ois = new ObjectInputStream(bais);
                 configOperation = (ConfigOperation) ois.readObject();
-                configOperation.setId(rs.getInt("OPERATION_ID"));
+                configOperation.setId(rs.getInt("ID"));
                 configOperation.setEnabled(rs.getBoolean("ENABLED"));
             }
         } catch (IOException e) {
@@ -111,9 +123,9 @@ public class ConfigOperationDAOImpl extends GenericOperationDAOImpl {
         ObjectInputStream ois = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT co.OPERATION_ID, co.OPERATION_CONFIG FROM DM_CONFIG_OPERATION co " +
+            String sql = "SELECT co.ID, co.OPERATION_DETAILS FROM DM_OPERATION co " +
                     "INNER JOIN (SELECT * FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ? " +
-                    "AND STATUS = ?) dm ON dm.OPERATION_ID = co.OPERATION_ID";
+                    "AND STATUS = ?) dm ON dm.OPERATION_ID = co.ID WHERE co.TYPE = 'CONFIG'";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, enrolmentId);
@@ -121,12 +133,12 @@ public class ConfigOperationDAOImpl extends GenericOperationDAOImpl {
             rs = stmt.executeQuery();
 
             while (rs.next()) {
-                byte[] operationDetails = rs.getBytes("OPERATION_CONFIG");
+                byte[] operationDetails = rs.getBytes("OPERATION_DETAILS");
                 bais = new ByteArrayInputStream(operationDetails);
                 ois = new ObjectInputStream(bais);
                 configOperation = (ConfigOperation) ois.readObject();
                 configOperation.setStatus(status);
-                configOperation.setId(rs.getInt("OPERATION_ID"));
+                configOperation.setId(rs.getInt("ID"));
                 operations.add(configOperation);
             }
         } catch (IOException e) {

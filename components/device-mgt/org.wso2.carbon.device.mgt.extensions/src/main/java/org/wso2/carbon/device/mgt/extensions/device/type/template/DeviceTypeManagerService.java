@@ -183,7 +183,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
             PlatformConfiguration deviceTypeConfig = deviceManager.getConfiguration();
             if (deviceTypeConfig != null) {
                 List<ConfigurationEntry> configuration = deviceTypeConfig.getConfiguration();
-                if (!configuration.isEmpty()) {
+                if (configuration != null && !configuration.isEmpty()) {
                     Map<String, String> properties = this.getConfigProperty(configuration);
                     String notifierValue = properties.get(NOTIFIER_PROPERTY);
                     String enabledNotifierType = notifierType;
