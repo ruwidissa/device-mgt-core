@@ -92,7 +92,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 deviceDetailsDAO.addDeviceInformation(device.getId(), device.getEnrolmentInfo().getId(), deviceInfo);
                 newDeviceInfo = deviceInfo;
             }
-            if (previousDeviceProperties == null) {
+            if (previousDeviceProperties.isEmpty()) {
                 deviceDetailsDAO.addDeviceProperties(newDeviceInfo.getDeviceDetailsMap(), device.getId(),
                         device.getEnrolmentInfo().getId());
             } else {

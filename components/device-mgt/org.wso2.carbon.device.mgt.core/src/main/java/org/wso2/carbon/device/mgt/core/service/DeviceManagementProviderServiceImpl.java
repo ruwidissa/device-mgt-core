@@ -116,6 +116,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
 import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
+import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
@@ -169,9 +170,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     private EnrollmentDAO enrollmentDAO;
     private ApplicationDAO applicationDAO;
     private DeviceManagementPluginRepository pluginRepository;
+    private DeviceInformationManager deviceInformationManager;
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
+        this.deviceInformationManager = new DeviceInformationManagerImpl();
         initDataAccessObjects();
         /* Registering a listener to retrieve events when some device management service plugin is installed after
          * the component is done getting initialized */
@@ -386,6 +389,16 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             sendNotification(device);
         }
         extractDeviceLocationToUpdate(device);
+        try {
+            if (device.getDeviceInfo() != null) {
+                deviceInformationManager.addDeviceInfo(device, device.getDeviceInfo());
+            }
+        } catch (DeviceDetailsMgtException e) {
+            //This is not logging as error, neither throwing an exception as this is not an exception in main
+            // business logic.
+            String msg = "Error occurred while adding device info";
+            log.warn(msg, e);
+        }
         return status;
     }
 
@@ -3414,7 +3427,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     deviceLocation.setDistance(Double.parseDouble(distance));
                     deviceLocation.setSpeed(Float.parseFloat(speed));
                     deviceLocation.setBearing(Float.parseFloat(bearing));
-                    DeviceInformationManager deviceInformationManager = new DeviceInformationManagerImpl();
                     deviceInformationManager.addDeviceLocation(device, deviceLocation);
                 } catch (Exception e) {
                     //We are not failing the execution since this is not critical for the functionality. But logging as

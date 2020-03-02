@@ -88,7 +88,7 @@ public class ProcessorImplTest extends BaseDeviceManagementTest {
         context.setConditions(conditions);
         ProcessorImpl processor = new ProcessorImpl();
         List<Device> devices = processor.execute(context);
-        Assert.assertEquals(5, devices.size(), "There should be exactly 5 devices with matching search criteria");
+        Assert.assertEquals(devices.size(), 5, "There should be exactly 5 devices with matching search criteria");
     }
 
     @Test (description = "Search for device with or condition")
@@ -106,7 +106,7 @@ public class ProcessorImplTest extends BaseDeviceManagementTest {
         context.setConditions(conditions);
         ProcessorImpl processor = new ProcessorImpl();
         List<Device> devices = processor.execute(context);
-        Assert.assertEquals(5, devices.size(), "There should be exactly 5 devices with matching search criteria");
+        Assert.assertEquals(devices.size(), 5, "There should be exactly 5 devices with matching search criteria");
     }
 
     @Test (description = "Search for device with wrong condition")
