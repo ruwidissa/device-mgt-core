@@ -29,6 +29,10 @@ public class ArchiveOperation {
     private Timestamp recievedTimeStamp;
     private String operationCode;
 
+    private Object operationDetails;
+    private String initiatedBy;
+    private boolean enabled;
+
     public int getId() {
         return id;
     }
@@ -67,6 +71,30 @@ public class ArchiveOperation {
 
     public void setOperationCode(String operationCode) {
         this.operationCode = operationCode;
+    }
+
+    public Object getOperationDetails() {
+        return operationDetails;
+    }
+
+    public void setOperationDetails(Object operationDetails) {
+        this.operationDetails = operationDetails;
+    }
+
+    public String getInitiatedBy() {
+        return initiatedBy;
+    }
+
+    public void setInitiatedBy(String initiatedBy) {
+        this.initiatedBy = initiatedBy;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
 

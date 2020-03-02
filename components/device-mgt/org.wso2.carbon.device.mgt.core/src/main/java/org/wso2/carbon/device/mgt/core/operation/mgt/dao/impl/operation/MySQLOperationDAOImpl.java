@@ -44,40 +44,6 @@ import java.util.List;
 public class MySQLOperationDAOImpl extends GenericOperationDAOImpl {
 
     @Override
-    public boolean updateOperationStatus(int enrolmentId, int operationId, Operation.Status status)
-            throws OperationManagementDAOException {
-        PreparedStatement stmt = null;
-        boolean isUpdated = false;
-        try {
-            long time = System.currentTimeMillis() / 1000;
-            Connection connection = OperationManagementDAOFactory.getConnection();
-            stmt = connection.prepareStatement("SELECT STATUS, UPDATED_TIMESTAMP FROM DM_ENROLMENT_OP_MAPPING " +
-                                               "WHERE ENROLMENT_ID=? and OPERATION_ID=? FOR UPDATE");
-            stmt.setString(1, status.toString());
-            stmt.setLong(2, time);
-            if (stmt.execute()) {
-                OperationManagementDAOUtil.cleanupResources(stmt);
-                stmt = connection.prepareStatement("UPDATE DM_ENROLMENT_OP_MAPPING SET STATUS=?, UPDATED_TIMESTAMP=? " +
-                                                   "WHERE ENROLMENT_ID=? and OPERATION_ID=?");
-                stmt.setString(1, status.toString());
-                stmt.setLong(2, time);
-                stmt.setInt(3, enrolmentId);
-                stmt.setInt(4, operationId);
-                int numOfRecordsUpdated = stmt.executeUpdate();
-                if (numOfRecordsUpdated != 0) {
-                    isUpdated = true;
-                }
-            }
-        } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while update device mapping operation status " +
-                                                      "metadata", e);
-        } finally {
-            OperationManagementDAOUtil.cleanupResources(stmt);
-        }
-        return isUpdated;
-    }
-
-    @Override
     public List<Activity> getActivityList(List<Integer> activityIds) throws OperationManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs = null;

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.common.operation.mgt;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
@@ -74,7 +75,10 @@ public interface OperationManager {
      * @throws OperationManagementException If some unusual behaviour is observed while fetching the
      *                                      operation list.
      */
+    @Deprecated
     List<? extends Operation> getPendingOperations(DeviceIdentifier deviceId) throws OperationManagementException;
+
+    List<? extends Operation> getPendingOperations(Device device) throws OperationManagementException;
 
     Operation getNextPendingOperation(DeviceIdentifier deviceId, long notNowOperationFrequency)
             throws OperationManagementException;
@@ -82,6 +86,8 @@ public interface OperationManager {
     Operation getNextPendingOperation(DeviceIdentifier deviceId) throws OperationManagementException;
 
     void updateOperation(DeviceIdentifier deviceId, Operation operation) throws OperationManagementException;
+
+    void updateOperation(int enrolmentId, Operation operation) throws OperationManagementException;
 
     Operation getOperationByDeviceAndOperationId(DeviceIdentifier deviceId, int operationId)
             throws OperationManagementException;

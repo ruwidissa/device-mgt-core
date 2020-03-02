@@ -46,6 +46,8 @@ import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
+import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
@@ -57,6 +59,8 @@ import org.wso2.carbon.device.mgt.core.privacy.impl.PrivacyComplianceProviderImp
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.PushNotificationProviderRepository;
 import org.wso2.carbon.device.mgt.core.push.notification.mgt.task.PushNotificationSchedulerTask;
 import org.wso2.carbon.device.mgt.core.report.mgt.ReportManagementServiceImpl;
+import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
+import org.wso2.carbon.device.mgt.core.search.mgt.impl.SearchManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
@@ -325,6 +329,9 @@ public class DeviceManagementServiceComponent {
         /* Registering PermissionManager Service */
         PermissionManagerService permissionManagerService = PermissionManagerServiceImpl.getInstance();
         bundleContext.registerService(PermissionManagerService.class.getName(), permissionManagerService, null);
+
+        bundleContext.registerService(DeviceInformationManager.class, new DeviceInformationManagerImpl(), null);
+        bundleContext.registerService(SearchManagerService.class, new SearchManagerServiceImpl(), null);
     }
 
     private void setupDeviceManagementSchema(DataSourceConfig config) throws DeviceManagementException {

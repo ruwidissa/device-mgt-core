@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.handlers.invoker.RESTInvoker;
 import org.wso2.carbon.apimgt.handlers.invoker.RESTResponse;
 import org.wso2.carbon.apimgt.handlers.utils.AuthConstants;
 import org.wso2.carbon.apimgt.handlers.utils.Utils;
+import org.wso2.carbon.certificate.mgt.core.dto.CertificateResponse;
+import org.wso2.carbon.certificate.mgt.core.exception.KeystoreException;
 import org.wso2.carbon.certificate.mgt.core.impl.CertificateGenerator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
@@ -57,6 +59,7 @@ public class AuthenticationHandler extends AbstractHandler {
     private static final String AUTHORIZATION = "Authorization";
     private static final String BEARER = "Basic ";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final boolean USE_INTERNAL_CERT_VERIFIER = true;
 
     private IOTServerConfiguration iotServerConfiguration;
 
@@ -125,19 +128,29 @@ public class AuthenticationHandler extends AbstractHandler {
                     log.debug("Verify subject DN: " + subjectDN);
                 }
 
-                String deviceType = this.getDeviceType(messageContext.getTo().getAddress().trim());
-                URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + deviceType);
-                Map<String, String> certVerifyHeaders = this.setHeaders();
-                Certificate certificate = new Certificate();
-                certificate.setPem(subjectDN);
-                certificate.setTenantId(tenantId);
-                certificate.setSerial(AuthConstants.PROXY_MUTUAL_AUTH_HEADER);
+                if (USE_INTERNAL_CERT_VERIFIER) {
+                    CertificateResponse certificateResponse = Utils.getCertificateManagementService()
+                            .verifySubjectDN(subjectDN);
+                    if (certificateResponse != null && certificateResponse.getCommonName() != null
+                            && !certificateResponse.getCommonName().isEmpty()) {
+                        return true;
+                    }
+                } else {
+                    String deviceType = this.getDeviceType(messageContext.getTo().getAddress().trim());
+                    URI certVerifyUrl = new URI(iotServerConfiguration.getVerificationEndpoint() + deviceType);
+                    Map<String, String> certVerifyHeaders = this.setHeaders();
 
-                Gson gson = new Gson();
-                String certVerifyContent = gson.toJson(certificate);
-                response = restInvoker.invokePOST(certVerifyUrl, certVerifyHeaders, certVerifyContent);
-                if (log.isDebugEnabled()) {
-                    log.debug("Verify response:" + response.getContent());
+                    Certificate certificate = new Certificate();
+                    certificate.setPem(subjectDN);
+                    certificate.setTenantId(tenantId);
+                    certificate.setSerial(AuthConstants.PROXY_MUTUAL_AUTH_HEADER);
+
+                    Gson gson = new Gson();
+                    String certVerifyContent = gson.toJson(certificate);
+                    response = restInvoker.invokePOST(certVerifyUrl, certVerifyHeaders, certVerifyContent);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Verify response:" + response.getContent());
+                    }
                 }
             } else if (headers.containsKey(AuthConstants.MUTUAL_AUTH_HEADER)) {
                 javax.security.cert.X509Certificate[] certs =
@@ -189,6 +202,9 @@ public class AuthenticationHandler extends AbstractHandler {
             return false;
         } catch (CertificateEncodingException e) {
             log.error("Error while attempting to encode certificate.", e);
+            return false;
+        } catch (KeystoreException e) {
+            log.error("Error while attempting to validate certificate.", e);
             return false;
         }
     }

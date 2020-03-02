@@ -46,11 +46,7 @@ public interface ArchivalDAO {
 
     List<ArchiveCommandOperation> selectCommandOperations() throws ArchivalDAOException;
 
-    void moveCommandOperations(List<ArchiveCommandOperation> rs) throws ArchivalDAOException;
-
     List<ArchiveProfileOperation> selectProfileOperations() throws ArchivalDAOException;
-
-    void moveProfileOperations(List<ArchiveProfileOperation> rs) throws ArchivalDAOException;
 
     List<ArchiveEnrolmentOperationMap> selectEnrolmentMappings() throws ArchivalDAOException;
 

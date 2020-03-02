@@ -628,7 +628,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             deviceIdentifier.setType(type);
             informationManager = DeviceMgtAPIUtils.getDeviceInformationManagerService();
             deviceLocation = informationManager.getDeviceLocation(deviceIdentifier);
-
         } catch (DeviceDetailsMgtException e) {
             String msg = "Error occurred while getting the device location.";
             log.error(msg, e);
