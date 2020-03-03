@@ -2134,6 +2134,108 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
+    @Override
+    public List<Device> getDevicesByEncryptionStatus(PaginationRequest request, int tenantId, boolean isEncrypted)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = getConnection();
+            String sql = "" +
+                    "SELECT e1.owner," +
+                    "e1.ownership," +
+                    "e1.enrolment_id," +
+                    "e1.device_id," +
+                    "e1.status," +
+                    "e1.date_of_last_update," +
+                    "e1.date_of_enrolment," +
+                    "d.description," +
+                    "d.NAME AS DEVICE_NAME," +
+                    "d.device_identification," +
+                    "t.NAME AS DEVICE_TYPE " +
+                    "FROM dm_device d," +
+                    "(SELECT e.owner," +
+                    "e.ownership," +
+                    "e.id AS ENROLMENT_ID," +
+                    "e.device_id," +
+                    "e.status, " +
+                    "e.date_of_last_update, " +
+                    "e.date_of_enrolment " +
+                    "FROM dm_enrolment e " +
+                    "INNER JOIN " +
+                    "(SELECT DEVICE_ID " +
+                    "FROM DM_DEVICE_INFO " +
+                    "WHERE " +
+                    "KEY_FIELD = 'encryptionEnabled' " +
+                    "AND VALUE_FIELD = ?) AS di " +
+                    "ON di.DEVICE_ID = e.DEVICE_ID " +
+                    "WHERE e.tenant_id = ?) e1, " +
+                    "dm_device_type t " +
+                    "WHERE d.id = e1.device_id " +
+                    "AND t.id = d.device_type_id " +
+                    "ORDER BY e1.date_of_last_update DESC " +
+                    "LIMIT ? OFFSET ?";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setBoolean(1, isEncrypted);
+                ps.setInt(2, tenantId);
+                ps.setInt(3, request.getRowCount());
+                ps.setInt(4, request.getStartIndex());
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Device> devices = new ArrayList<>();
+                    if (rs.next()) {
+                        Device device = DeviceManagementDAOUtil.loadDevice(rs);
+                        devices.add(device);
+                    }
+                    return devices;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while building or executing queries to retrieve information " +
+                    "of devices filtered by encryption status: " + isEncrypted;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public int getCountOfDevicesByEncryptionStatus(int tenantId, boolean isEncrypted)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = getConnection();
+            String sql = "" +
+                    "SELECT " +
+                    "COUNT(e1.DEVICE_ID) AS DEVICE_COUNT " +
+                    "FROM dm_device d," +
+                    "(SELECT e.id AS ENROLMENT_ID, " +
+                    "e.device_id " +
+                    "FROM dm_enrolment e " +
+                    "INNER JOIN " +
+                    "(SELECT DEVICE_ID " +
+                    "FROM DM_DEVICE_INFO " +
+                    "WHERE KEY_FIELD = 'encryptionEnabled' " +
+                    "AND VALUE_FIELD = ?) AS di " +
+                    "ON di.DEVICE_ID = e.DEVICE_ID " +
+                    "WHERE e.tenant_id = ?) e1, " +
+                    "dm_device_type t " +
+                    "WHERE d.id = e1.device_id " +
+                    "AND t.id = d.device_type_id ";
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setBoolean(1, isEncrypted);
+                ps.setInt(2, tenantId);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getInt("DEVICE_COUNT") : 0;
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while building or executing queries to retrieve the count of devices " +
+                    "in the provided encryption status: " + isEncrypted;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
     /***
      * This method removes records of a given list of devices from the DM_DEVICE_DETAIL table
      * @param conn Connection object
