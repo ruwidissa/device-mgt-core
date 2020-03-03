@@ -244,6 +244,16 @@ public interface GroupManagementProviderService {
     List<DeviceGroup> getGroups(DeviceIdentifier deviceIdentifier, boolean requireGroupProps) throws GroupManagementException;
 
     /**
+     * Get groups which contains particular device.
+     *
+     * @param device interested devoce.
+     * @return groups contain the device.
+     * @throws GroupManagementException
+     */
+    public List<DeviceGroup> getGroups(Device device, boolean requireGroupProps)
+            throws GroupManagementException;
+
+    /**
      * Checks for the default group existence and create group based on device ownership.
      * @param groupName of the group
      * @return DeviceGroup object
