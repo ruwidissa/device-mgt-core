@@ -2617,4 +2617,25 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
         return joiner.toString();
     }
+
+    public int getFunctioningDevicesInSystem() throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        int deviceCount = 0;
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT COUNT(e.DEVICE_ID) AS DEVICE_COUNT FROM DM_ENROLMENT e WHERE STATUS != 'REMOVED'";
+            stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                deviceCount = rs.getInt("DEVICE_COUNT");
+            }
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while fetching count of functioning devices", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+        return deviceCount;
+    }
 }

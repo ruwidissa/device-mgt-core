@@ -882,4 +882,6 @@ public interface DeviceManagementProviderService {
      * @throws ApplicationManagementException if any service level or DAO level error occurs.
      */
     List<String> getAppVersions(String packageName) throws ApplicationManagementException;
+
+    int getFunctioningDevicesInSystem() throws DeviceManagementException;
 }

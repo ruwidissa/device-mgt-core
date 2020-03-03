@@ -674,4 +674,6 @@ public interface DeviceDAO {
                                            int tenantId,
                                            String packageName,
                                            String version) throws DeviceManagementDAOException;
+
+    int getFunctioningDevicesInSystem() throws DeviceManagementDAOException;
 }

@@ -4120,4 +4120,28 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         deviceConfiguration.setDeviceOwner(deviceOwner);
         return deviceConfiguration;
     }
+
+    public int getFunctioningDevicesInSystem() throws DeviceManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Get functioning devices count");
+        }
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getFunctioningDevicesInSystem();
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving the device count";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getDeviceCount";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
 }
