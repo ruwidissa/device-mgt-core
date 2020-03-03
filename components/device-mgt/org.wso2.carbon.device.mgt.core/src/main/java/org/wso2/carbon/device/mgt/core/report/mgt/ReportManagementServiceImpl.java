@@ -215,6 +215,48 @@ public class ReportManagementServiceImpl implements ReportManagementService {
         }
     }
 
+    @Override
+    public PaginationResult getDevicesByEncryptionStatus(PaginationRequest request, boolean isEncrypted)
+            throws ReportManagementException {
+        if (request == null) {
+            String msg = "Error. The request must be a not null value.";
+            log.error(msg);
+            throw new ReportManagementException(msg);
+        }
+        try {
+            int tenantId = DeviceManagementDAOUtil.getTenantId();
+            PaginationResult paginationResult = new PaginationResult();
+
+            DeviceManagerUtil.validateDeviceListPageSize(request);
+
+            try {
+                DeviceManagementDAOFactory.openConnection();
+                List<Device> devices = deviceDAO.getDevicesByEncryptionStatus(request, tenantId, isEncrypted);
+                int deviceCount = deviceDAO.getCountOfDevicesByEncryptionStatus(tenantId, isEncrypted);
+                paginationResult.setData(devices);
+                paginationResult.setRecordsFiltered(devices.size());
+                paginationResult.setRecordsTotal(deviceCount);
+
+                return paginationResult;
+            } catch (SQLException e) {
+                String msg = "Error occurred while opening a connection to the data source";
+                log.error(msg, e);
+                throw new ReportManagementException(msg, e);
+            } finally {
+                DeviceManagementDAOFactory.closeConnection();
+            }
+
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving expired devices by encryption status for the tenant";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while validating the request";
+            log.error(msg, e);
+            throw new ReportManagementException(msg, e);
+        }
+    }
+
     //NOTE: This is just a temporary method for retrieving device counts
     public JsonObject buildCount(String start, String end, List<Count> countList) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

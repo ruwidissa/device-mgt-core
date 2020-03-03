@@ -372,6 +372,56 @@ public interface ReportManagementService {
                     int limit);
 
     @GET
+    @Path("/encryption-status")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of Registered Devices filtered by encryption status",
+            notes = "Provides details of devices which is in provided encryption status",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the list of devices.",
+                            response = DeviceList.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body")}),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. " +
+                                      "\n Server error occurred while fetching the devices.",
+                            response = ErrorResponse.class)
+            })
+    Response getDevicesByEncryptionStatus(
+            @ApiParam(
+                    name = "isEncrypted",
+                    value = "The encryption states which used to filter the devices",
+                    required = true)
+            @QueryParam("isEncrypted")
+                    boolean isEncrypted,
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the list of filtered devices.",
+                    defaultValue = "0")
+            @QueryParam("offset")
+                    int offset,
+            @ApiParam(
+                    name = "limit",
+                    value = "Limit of the number of deices that should be returned.",
+                    defaultValue = "5")
+            @QueryParam("limit")
+                    int limit);
+
+    @GET
     @Path("/devices/{device-type}/{package-name}/not-installed")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
