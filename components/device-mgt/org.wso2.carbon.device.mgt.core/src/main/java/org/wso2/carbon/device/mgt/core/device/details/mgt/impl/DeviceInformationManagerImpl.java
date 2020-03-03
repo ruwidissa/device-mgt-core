@@ -124,18 +124,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             DeviceManagementDAOFactory.commitTransaction();
 
-            String reportingHost = System.getProperty(DeviceManagementConstants.Report
-                    .REPORTING_EVENT_HOST);
-            if (reportingHost != null && !reportingHost.isEmpty()) {
-                DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
-                deviceDetailsWrapper.setDevice(device);
-                deviceDetailsWrapper.setDeviceInfo(deviceInfo);
-                deviceDetailsWrapper.getJSONString();
-
-                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
-                        reportingHost + DeviceManagementConstants.Report.DEVICE_INFO_ENDPOINT);
-            }
-
             //TODO :: This has to be fixed by adding the enrollment ID.
             if (DeviceManagerUtil.isPublishDeviceInfoResponseEnabled()) {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getType()};
@@ -181,9 +169,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DataPublisherConfigurationException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
-        } catch (EventPublishingException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            throw new DeviceDetailsMgtException("Error occurred while sending events", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
