@@ -42,8 +42,15 @@ public interface DeviceInformationManager {
      * @param deviceInfo - Device info object.
      * @throws DeviceDetailsMgtException
      */
-    //void addDeviceInfo(DeviceInfo deviceInfo) throws DeviceDetailsMgtException;
+    @Deprecated
     void addDeviceInfo(DeviceIdentifier deviceId, DeviceInfo deviceInfo) throws DeviceDetailsMgtException;
+
+    /**
+     * This method will manage the storing of the device information as key value pairs.
+     * @param deviceInfo - Device info object.
+     * @throws DeviceDetailsMgtException
+     */
+    void addDeviceInfo(Device device, DeviceInfo deviceInfo) throws DeviceDetailsMgtException;
 
     /**
      * This method will return the device information.
@@ -67,6 +74,8 @@ public interface DeviceInformationManager {
      * @throws DeviceDetailsMgtException
      */
     void addDeviceLocation(DeviceLocation deviceLocation) throws DeviceDetailsMgtException;
+
+    void addDeviceLocation(Device device, DeviceLocation deviceLocation) throws DeviceDetailsMgtException;
 
     /**
      * This method will return the device location with latitude, longitude, address etc..

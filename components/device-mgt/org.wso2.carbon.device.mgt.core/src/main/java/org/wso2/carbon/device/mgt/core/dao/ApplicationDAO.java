@@ -26,11 +26,14 @@ import java.util.List;
 
 public interface ApplicationDAO {
 
-    int addApplication(Application application, int tenantId) throws DeviceManagementDAOException;
+    void addApplications(List<Application> applications, int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException;
 
-    List<Integer> addApplications(List<Application> applications, int tenantId) throws DeviceManagementDAOException;
+    void updateApplications(List<Application> applications, int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException;
 
-    List<Integer> removeApplications(List<Application> apps, int tenantId) throws DeviceManagementDAOException;
+    void removeApplications(List<Application> apps, int deviceId, int enrolmentId, int tenantId)
+            throws DeviceManagementDAOException;
 
     Application getApplication(String identifier, int tenantId) throws DeviceManagementDAOException;
 
@@ -39,7 +42,7 @@ public interface ApplicationDAO {
     Application getApplication(String identifier, String version, int deviceId, int enrolmentId, int tenantId)
             throws DeviceManagementDAOException;
 
-    List<Application> getInstalledApplications(int deviceId, int enrolmentId) throws DeviceManagementDAOException;
+    List<Application> getInstalledApplications(int deviceId, int enrolmentId, int tenantId) throws DeviceManagementDAOException;
 
     /**
      * This method is used to get a list of applications installed in all enrolled devices

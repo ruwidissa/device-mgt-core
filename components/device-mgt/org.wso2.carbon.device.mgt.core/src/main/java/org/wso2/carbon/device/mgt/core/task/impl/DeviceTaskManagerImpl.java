@@ -119,12 +119,18 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
         DeviceManagementProviderService deviceManagementProviderService = DeviceManagementDataHolder.getInstance().
                 getDeviceManagementProvider();
         try {
-            List<Device> devices;
-            List<String> operations;
+            //list operations for device type
+            List<String> operations = this.getValidOperationNames();
+            if (operations.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("No operations are available.");
+                }
+                return;
+            }
             List<DeviceIdentifier> validDeviceIdentifiers;
             List<String> startupOperations;
-            operations = this.getValidOperationNames(); //list operations for each device type
-            devices = deviceManagementProviderService.getAllDevices(deviceType, false);//list devices for each type
+            //list devices of device type
+            List<Device> devices = deviceManagementProviderService.getAllDevices(deviceType, false);
 
             if (!devices.isEmpty()) {
                 if (log.isDebugEnabled() && deviceType != null) {
@@ -150,7 +156,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
                     }
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("No operations are available.");
+                        log.debug("No valid devices are available.");
                     }
                 }
             } else {

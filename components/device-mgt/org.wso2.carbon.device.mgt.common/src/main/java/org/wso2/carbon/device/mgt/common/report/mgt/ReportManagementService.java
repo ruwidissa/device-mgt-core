@@ -62,6 +62,16 @@ public interface ReportManagementService {
             throws ReportManagementException, DeviceTypeNotFoundException;
 
     /**
+     * Get a paginated list of devices which is filtered by given encryption status
+     *
+     * @param request {@link PaginationRequest}
+     * @return {@link PaginationResult}
+     * @throws ReportManagementException Might occur during the business logic or building database query
+     */
+    PaginationResult getDevicesByEncryptionStatus(PaginationRequest request, boolean isEncrypted)
+            throws ReportManagementException;
+
+    /**
      * This method is used to get devices which have not installed the app with the given package name
      *
      * @param request Request object with device type

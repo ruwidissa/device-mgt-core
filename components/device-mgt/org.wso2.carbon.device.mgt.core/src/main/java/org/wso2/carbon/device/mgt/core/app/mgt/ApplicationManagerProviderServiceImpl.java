@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.app.mgt;
 
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,38 +36,31 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.app.mgt.config.AppManagementConfig;
 import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.device.mgt.core.dao.ApplicationMappingDAO;
-import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements Application Manager interface
  */
 public class ApplicationManagerProviderServiceImpl implements ApplicationManagementProviderService {
 
-    private DeviceDAO deviceDAO;
     private ApplicationDAO applicationDAO;
-    private ApplicationMappingDAO applicationMappingDAO;
 
-    private static final String GET_APP_LIST_URL = "store/apis/assets/mobileapp?domain=carbon.super&page=1";
     private static final Log log = LogFactory.getLog(ApplicationManagerProviderServiceImpl.class);
 
     public ApplicationManagerProviderServiceImpl(AppManagementConfig appManagementConfig) {
-        this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
         this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
-        this.applicationMappingDAO = DeviceManagementDAOFactory.getApplicationMappingDAO();
     }
 
     ApplicationManagerProviderServiceImpl() {
-        this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
         this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
-        this.applicationMappingDAO = DeviceManagementDAOFactory.getApplicationMappingDAO();
     }
 
     @Override
@@ -146,10 +140,8 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
         } catch (DeviceManagementException e) {
             throw new ApplicationManagementException("Error in get devices for user: " + userName +
                     " in app installation", e);
-
         } catch (OperationManagementException e) {
             throw new ApplicationManagementException("Error in add operation at app installation", e);
-
         }
     }
 
@@ -190,103 +182,114 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
 
         } catch (OperationManagementException e) {
             throw new ApplicationManagementException("Error in add operation at app installation", e);
-
         }
     }
 
     @Override
-    public void updateApplicationListInstalledInDevice(
-            DeviceIdentifier deviceIdentifier,
+    public void updateApplicationListInstalledInDevice(DeviceIdentifier deviceIdentifier,
             List<Application> applications) throws ApplicationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Updating application list for device: " + deviceIdentifier.toString());
         }
-        List<Application> installedAppList = getApplicationListForDevice(deviceIdentifier);
         try {
-            Device device = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider().getDevice(deviceIdentifier,
-                    false);
-            int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Number of apps installed:" + installedAppList.size());
-            }
-            List<Application> appsToAdd = new ArrayList<>();
-            List<Integer> appIdsToRemove = new ArrayList<>(installedAppList.size());
-
-            for (Application installedApp : installedAppList) {
-                if (!applications.contains(installedApp)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Remove app Id:" + installedApp.getId());
-                    }
-                    appIdsToRemove.add(installedApp.getId());
-                }
-            }
-            DeviceManagementDAOFactory.beginTransaction();
-            applicationMappingDAO.removeApplicationMapping(device.getId(), device.getEnrolmentInfo().getId(),
-                    appIdsToRemove, tenantId);
-            Application installedApp;
-            List<Integer> applicationIds = new ArrayList<>();
-            List<Application> applicationsToMap = new ArrayList<>();
-
-            for (Application application : applications) {
-                // Adding N/A if application doesn't have a version. Also truncating the application version,
-                // if length of the version is greater than maximum allowed length.
-                if (application.getVersion() == null) {
-                    application.setVersion("N/A");
-                } else if (application.getVersion().length() >
-                        DeviceManagementConstants.OperationAttributes.APPLIST_VERSION_MAX_LENGTH) {
-                    application.setVersion(StringUtils.abbreviate(application.getVersion(),
-                            DeviceManagementConstants.OperationAttributes.APPLIST_VERSION_MAX_LENGTH));
-                }
-                if (!installedAppList.contains(application)) {
-                    installedApp = applicationDAO.getApplication(application.getApplicationIdentifier(),
-                            application.getVersion(), tenantId);
-                    if (installedApp == null) {
-                        appsToAdd.add(application);
-                    } else {
-                        application.setId(installedApp.getId());
-                        applicationsToMap.add(application);
-                    }
-                }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("num of apps add:" + appsToAdd.size());
-            }
-            applicationIds.addAll(applicationDAO.addApplications(appsToAdd, tenantId));
-            // Getting the applications ids for the second time
-            for (Application application : appsToAdd) {
-                installedApp = applicationDAO.getApplication(application.getApplicationIdentifier(),
-                        application.getVersion(), tenantId);
-                application.setId(installedApp.getId());
-                applicationsToMap.add(application);
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("num of app Ids:" + applicationIds.size());
-            }
-            applicationMappingDAO.addApplicationMappingsWithApps(device.getId(), device.getEnrolmentInfo().getId(),
-                    applicationsToMap, tenantId);
-
-            if (log.isDebugEnabled()) {
-                log.debug("num of remove app Ids:" + appIdsToRemove.size());
-            }
-            DeviceManagementDAOFactory.commitTransaction();
-        } catch (DeviceManagementDAOException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            String msg = "Error occurred saving application list of the device " + deviceIdentifier.toString();
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (TransactionManagementException e) {
-            String msg = "Error occurred while initializing transaction for saving application list to the device "
-                    + deviceIdentifier.toString();
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
+            Device device = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
+                    .getDevice(deviceIdentifier, false);
+            updateApplicationListInstalledInDevice(device, applications);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred obtaining the device object for device " + deviceIdentifier.toString();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
+        }
+    }
+
+    @Override
+    public void updateApplicationListInstalledInDevice(Device device, List<Application> newApplications)
+            throws ApplicationManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating application list for device: " + device.getDeviceIdentifier());
+            log.debug("Apps in device: " + new Gson().toJson(newApplications));
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            List<Application> installedAppList = applicationDAO
+                    .getInstalledApplications(device.getId(), device.getEnrolmentInfo().getId(), tenantId);
+            if (log.isDebugEnabled()) {
+                log.debug("Previous app list: " + new Gson().toJson(installedAppList));
+            }
+
+            Map<String, Application> appsToRemove = new HashMap<>();
+            Map<String, Application> appsToUpdate = new HashMap<>();
+            Map<String, Application> appsToInsert = new HashMap<>();
+
+            Map<String, Application> installedApps = new HashMap<>();
+            boolean removable;
+            for (Application installedApp: installedAppList) {
+                removable = true;
+                for (Application newApp : newApplications) {
+                    if (newApp.getApplicationIdentifier().equals(installedApp.getApplicationIdentifier())) {
+                        removable = false;
+                        break;
+                    }
+                }
+                if (removable) {
+                    appsToRemove.put(installedApp.getApplicationIdentifier(), installedApp);
+                } else {
+                    installedApps.put(installedApp.getApplicationIdentifier(), installedApp);
+                }
+            }
+
+            for (Application newApp : newApplications) {
+                if (newApp.getVersion() == null) {
+                    newApp.setVersion("N/A");
+                } else if (newApp.getVersion().length()
+                        > DeviceManagementConstants.OperationAttributes.APPLIST_VERSION_MAX_LENGTH) {
+                    newApp.setVersion(StringUtils.abbreviate(newApp.getVersion(),
+                            DeviceManagementConstants.OperationAttributes.APPLIST_VERSION_MAX_LENGTH));
+                }
+                if (installedApps.containsKey(newApp.getApplicationIdentifier())) {
+                    Application oldApp = installedApps.get(newApp.getApplicationIdentifier());
+                    if (oldApp.isActive() != newApp.isActive() || oldApp.getMemoryUsage() != newApp.getMemoryUsage()
+                            || !newApp.getVersion().equals(oldApp.getVersion())) {
+                        newApp.setId(oldApp.getId());
+                        appsToUpdate.put(newApp.getApplicationIdentifier(), newApp);
+                    }
+                } else {
+                    appsToInsert.put(newApp.getApplicationIdentifier(), newApp);
+                }
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Apps to remove: " + new Gson().toJson(appsToRemove.values()));
+                log.debug("Apps to update: " + new Gson().toJson(appsToUpdate.values()));
+                log.debug("Apps to insert: " + new Gson().toJson(appsToInsert.values()));
+            }
+            if (!appsToRemove.isEmpty()) {
+                applicationDAO.removeApplications(new ArrayList<>(appsToRemove.values()), device.getId(),
+                        device.getEnrolmentInfo().getId(), tenantId);
+            }
+            if (!appsToUpdate.isEmpty()) {
+                applicationDAO.updateApplications(new ArrayList<>(appsToUpdate.values()), device.getId(),
+                        device.getEnrolmentInfo().getId(), tenantId);
+            }
+            if (!appsToInsert.isEmpty()) {
+                applicationDAO.addApplications(new ArrayList<>(appsToInsert.values()), device.getId(),
+                        device.getEnrolmentInfo().getId(), tenantId);
+            }
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred saving application list of the device " + device.getDeviceIdentifier();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg =
+                    "Error occurred while initializing transaction for saving application list to the device " + device
+                            .getDeviceIdentifier();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
         } catch (Exception e) {
-            String msg = "Exception occurred saving application list of the device " + deviceIdentifier.toString();
+            String msg = "Exception occurred saving application list of the device " + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -312,20 +315,26 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
             }
             return new ArrayList<>();
         }
+        return getApplicationListForDevice(device);
+    }
+
+    @Override
+    public List<Application> getApplicationListForDevice(Device device) throws ApplicationManagementException {
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             DeviceManagementDAOFactory.openConnection();
-            return applicationDAO.getInstalledApplications(device.getId(), device.getEnrolmentInfo().getId());
+            return applicationDAO.getInstalledApplications(device.getId(), device.getEnrolmentInfo().getId(), tenantId);
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while fetching the Application List of device " + deviceId.toString();
+            String msg = "Error occurred while fetching the Application List of device " + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (SQLException e) {
             String msg = "Error occurred while opening a connection to the data source to get application " +
-                    "list of the device " + deviceId.toString();
+                    "list of the device " + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (Exception e) {
-            String msg = "Exception occurred getting application list of the device " + deviceId.toString();
+            String msg = "Exception occurred getting application list of the device " + device.getDeviceIdentifier();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {

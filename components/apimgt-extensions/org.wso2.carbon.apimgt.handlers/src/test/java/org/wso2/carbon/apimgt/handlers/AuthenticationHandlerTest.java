@@ -99,21 +99,8 @@ public class AuthenticationHandlerTest extends BaseAPIHandlerTest {
         this.mockClient.reset();
     }
 
-    @Test(description = "Handle request with device type URI with Proxy Mutual Auth Header",
-            dependsOnMethods = "testHandleSuccessfulRequestMDMCertificate")
-    public void testHandleSuccessRequestProxyMutualAuthHeader() throws Exception {
-        HashMap<String, String> transportHeaders = new HashMap<>();
-        transportHeaders.put(AuthConstants.PROXY_MUTUAL_AUTH_HEADER, "Test Header");
-        setMockClient();
-        this.mockClient.setResponse(getValidationResponse());
-        boolean response = this.handler.handleRequest(createSynapseMessageContext("<empty/>", this.synapseConfiguration,
-                transportHeaders, "https://test.com/testservice/device-mgt/testdevice"));
-        Assert.assertTrue(response);
-        this.mockClient.reset();
-    }
-
     @Test(description = "Handle request with device type URI with Mutual Auth Header",
-            dependsOnMethods = "testHandleSuccessRequestProxyMutualAuthHeader")
+            dependsOnMethods = "testHandleSuccessfulRequestMDMCertificate")
     public void testHandleSuccessRequestMutualAuthHeader() throws Exception {
         HashMap<String, String> transportHeaders = new HashMap<>();
         transportHeaders.put(AuthConstants.MUTUAL_AUTH_HEADER, "Test Header");

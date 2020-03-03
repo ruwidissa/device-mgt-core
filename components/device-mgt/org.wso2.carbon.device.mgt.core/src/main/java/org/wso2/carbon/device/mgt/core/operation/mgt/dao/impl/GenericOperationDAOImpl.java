@@ -64,13 +64,14 @@ public class GenericOperationDAOImpl implements OperationDAO {
         try {
             Connection connection = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
-                    "INITIATED_BY) VALUES (?, ?, ?, ?, ?)";
+                    "INITIATED_BY, OPERATION_DETAILS) VALUES (?, ?, ?, ?, ?, ?)";
             stmt = connection.prepareStatement(sql, new String[]{"id"});
             stmt.setString(1, operation.getType().toString());
             stmt.setTimestamp(2, new Timestamp(new Date().getTime()));
             stmt.setTimestamp(3, null);
             stmt.setString(4, operation.getCode());
             stmt.setString(5, operation.getInitiatedBy());
+            stmt.setObject(6, operation);
             stmt.executeUpdate();
 
             rs = stmt.getGeneratedKeys();

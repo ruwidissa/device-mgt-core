@@ -656,15 +656,22 @@ public interface DeviceManagementProviderService {
     PaginationResult getOperations(DeviceIdentifier deviceId,
                                    PaginationRequest request) throws OperationManagementException;
 
+    @Deprecated
     List<? extends Operation> getPendingOperations(
             DeviceIdentifier deviceId) throws OperationManagementException;
+
+    List<? extends Operation> getPendingOperations(
+            Device device) throws OperationManagementException;
 
     Operation getNextPendingOperation(DeviceIdentifier deviceId) throws OperationManagementException;
 
     Operation getNextPendingOperation(DeviceIdentifier deviceId, long notNowOperationFrequency)
             throws OperationManagementException;
 
+    @Deprecated
     void updateOperation(DeviceIdentifier deviceId, Operation operation) throws OperationManagementException;
+
+    void updateOperation(Device device, Operation operation) throws OperationManagementException;
 
     boolean updateProperties(DeviceIdentifier deviceId, List<Device.Property> properties) throws DeviceManagementException;
 
@@ -875,4 +882,6 @@ public interface DeviceManagementProviderService {
      * @throws ApplicationManagementException if any service level or DAO level error occurs.
      */
     List<String> getAppVersions(String packageName) throws ApplicationManagementException;
+
+    int getFunctioningDevicesInSystem() throws DeviceManagementException;
 }

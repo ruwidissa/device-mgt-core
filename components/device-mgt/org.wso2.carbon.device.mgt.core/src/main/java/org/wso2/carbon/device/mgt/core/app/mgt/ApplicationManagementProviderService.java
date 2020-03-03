@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.device.mgt.core.app.mgt;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
@@ -24,10 +25,17 @@ import java.util.List;
 
 public interface ApplicationManagementProviderService extends ApplicationManager{
 
-    void updateApplicationListInstalledInDevice(DeviceIdentifier deviceIdentifier,
-            List<Application> applications) throws ApplicationManagementException;
+    @Deprecated
+    void updateApplicationListInstalledInDevice(DeviceIdentifier deviceIdentifier, List<Application> applications)
+            throws ApplicationManagementException;
 
+    void updateApplicationListInstalledInDevice(Device device, List<Application> applications)
+            throws ApplicationManagementException;
+
+    @Deprecated
     List<Application> getApplicationListForDevice(DeviceIdentifier deviceIdentifier)
             throws ApplicationManagementException;
 
+    List<Application> getApplicationListForDevice(Device device)
+            throws ApplicationManagementException;
 }

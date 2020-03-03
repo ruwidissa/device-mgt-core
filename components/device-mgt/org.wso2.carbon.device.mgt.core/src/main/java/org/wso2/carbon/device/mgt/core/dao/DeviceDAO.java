@@ -646,6 +646,29 @@ public interface DeviceDAO {
             throws DeviceManagementDAOException;
 
     /**
+     * Get a paginated list of devices filtered by given encryption status
+     *
+     * @param request  Object with device type and OS version info
+     * @param tenantId Id of the current tenant.
+     * @param isEncrypted Encryption status to be filtered.
+     * @return {@link List<Device>}
+     * @throws DeviceManagementDAOException Thrown if error occurs while database transactions
+     */
+    List<Device> getDevicesByEncryptionStatus(PaginationRequest request, int tenantId, boolean isEncrypted)
+            throws DeviceManagementDAOException;
+
+    /**
+     * Count the number of devices devices in the given encryption status
+     *
+     * @param tenantId Id of the current tenant.
+     * @param isEncrypted Encryption status to be filtered.
+     * @return {@link Integer}
+     * @throws DeviceManagementDAOException Thrown if error occurs while database transactions
+     */
+    int getCountOfDevicesByEncryptionStatus(int tenantId, boolean isEncrypted)
+            throws DeviceManagementDAOException;
+
+    /**
      * This method is used to get devices which have not installed the app with the given package name
      *
      * @param request Request object with device type
@@ -674,4 +697,6 @@ public interface DeviceDAO {
                                            int tenantId,
                                            String packageName,
                                            String version) throws DeviceManagementDAOException;
+
+    int getFunctioningDevicesInSystem() throws DeviceManagementDAOException;
 }

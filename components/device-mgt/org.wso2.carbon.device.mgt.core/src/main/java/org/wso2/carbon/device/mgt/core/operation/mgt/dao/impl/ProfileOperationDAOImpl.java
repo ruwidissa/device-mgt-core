@@ -29,6 +29,7 @@ import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOU
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
@@ -37,27 +38,36 @@ public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
 
     public int addOperation(Operation operation) throws OperationManagementDAOException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         ByteArrayOutputStream bao = null;
         ObjectOutputStream oos = null;
-
-        int operationId;
         try {
-            operationId = super.addOperation(operation);
             operation.setCreatedTimeStamp(new Timestamp(new java.util.Date().getTime()).toString());
-            operation.setId(operationId);
             operation.setEnabled(true);
-            //ProfileOperation profileOp = (ProfileOperation) operation;
-            Connection conn = OperationManagementDAOFactory.getConnection();
-            stmt = conn.prepareStatement("INSERT INTO DM_PROFILE_OPERATION(OPERATION_ID, OPERATION_DETAILS) " +
-                    "VALUES(?, ?)");
+            Connection connection = OperationManagementDAOFactory.getConnection();
+            String sql = "INSERT INTO DM_OPERATION(TYPE, CREATED_TIMESTAMP, RECEIVED_TIMESTAMP, OPERATION_CODE, " +
+                         "INITIATED_BY, OPERATION_DETAILS, ENABLED) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            stmt = connection.prepareStatement(sql, new String[]{"id"});
+            stmt.setString(1, operation.getType().toString());
+            stmt.setTimestamp(2, new Timestamp(new Date().getTime()));
+            stmt.setTimestamp(3, null);
+            stmt.setString(4, operation.getCode());
+            stmt.setString(5, operation.getInitiatedBy());
 
             bao = new ByteArrayOutputStream();
             oos = new ObjectOutputStream(bao);
             oos.writeObject(operation.getPayLoad());
 
-            stmt.setInt(1, operationId);
-            stmt.setBytes(2, bao.toByteArray());
+            stmt.setBytes(6, bao.toByteArray());
+            stmt.setBoolean(7, operation.isEnabled());
             stmt.executeUpdate();
+
+            rs = stmt.getGeneratedKeys();
+            int id = -1;
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+            return id;
         } catch (SQLException e) {
             throw new OperationManagementDAOException("Error occurred while adding profile operation", e);
         } catch (IOException e) {
@@ -79,7 +89,6 @@ public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
             }
             OperationManagementDAOUtil.cleanupResources(stmt);
         }
-        return operationId;
     }
 
     public Operation getOperation(int id) throws OperationManagementDAOException {
@@ -91,9 +100,8 @@ public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
         ObjectInputStream ois;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT o.ID, po.ENABLED, po.OPERATION_DETAILS, o.CREATED_TIMESTAMP, o.OPERATION_CODE " +
-                    "FROM DM_PROFILE_OPERATION po INNER JOIN DM_OPERATION o ON po.OPERATION_ID = o.ID WHERE po" +
-                    ".OPERATION_ID=?";
+            String sql = "SELECT po.ID, po.ENABLED, po.OPERATION_DETAILS, po.CREATED_TIMESTAMP, po.OPERATION_CODE " +
+                    "FROM DM_OPERATION po WHERE po.ID=? AND po.TYPE='PROFILE'";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
@@ -114,6 +122,9 @@ public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
                     profileOperation.setPayLoad(obj);
                 } else {
                     profileOperation = (ProfileOperation) obj;
+                    profileOperation.setCode(rs.getString("OPERATION_CODE"));
+                    profileOperation.setId(rs.getInt("ID"));
+                    profileOperation.setCreatedTimeStamp(rs.getString("CREATED_TIMESTAMP"));
                 }
             }
         } catch (IOException e) {
@@ -145,12 +156,11 @@ public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
 
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT o.ID, po1.ENABLED, po1.STATUS, o.TYPE, o.CREATED_TIMESTAMP, o.RECEIVED_TIMESTAMP, " +
-                    "o.OPERATION_CODE, po1.OPERATION_DETAILS " +
-                    "FROM (SELECT po.OPERATION_ID, po.ENABLED, po.OPERATION_DETAILS, dm.STATUS " +
-                    "FROM DM_PROFILE_OPERATION po INNER JOIN (SELECT ENROLMENT_ID, OPERATION_ID, STATUS FROM DM_ENROLMENT_OP_MAPPING " +
-                    "WHERE ENROLMENT_ID = ? AND STATUS = ?) dm ON dm.OPERATION_ID = po.OPERATION_ID) po1 " +
-                    "INNER JOIN DM_OPERATION o ON po1.OPERATION_ID = o.ID ";
+            String sql = "SELECT po1.ID, po1.ENABLED, po1.STATUS, po1.TYPE, po1.CREATED_TIMESTAMP, po1.RECEIVED_TIMESTAMP, " +
+                    "po1.OPERATION_CODE, po1.OPERATION_DETAILS " +
+                    "FROM (SELECT po.ID, po.ENABLED, po.OPERATION_DETAILS, po.TYPE, po.OPERATION_CODE, po.CREATED_TIMESTAMP, po.RECEIVED_TIMESTAMP, dm.STATUS " +
+                    "FROM DM_OPERATION po INNER JOIN (SELECT ENROLMENT_ID, OPERATION_ID, STATUS FROM DM_ENROLMENT_OP_MAPPING " +
+                    "WHERE ENROLMENT_ID = ? AND STATUS = ?) dm ON dm.OPERATION_ID = po.ID WHERE po.TYPE='PROFILE') po1";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, enrolmentId);
@@ -174,6 +184,9 @@ public class ProfileOperationDAOImpl extends GenericOperationDAOImpl {
                 } else {
                     profileOperation = (ProfileOperation) obj;
                     profileOperation.setStatus(status);
+                    profileOperation.setCode(rs.getString("OPERATION_CODE"));
+                    profileOperation.setId(rs.getInt("ID"));
+                    profileOperation.setCreatedTimeStamp(rs.getString("CREATED_TIMESTAMP"));
                     operationList.add(profileOperation);
                 }
             }

@@ -34,7 +34,7 @@ public class SimpleEvaluationImpl implements SimpleEvaluation {
 
     private static final Log log = LogFactory.getLog(SimpleEvaluationImpl.class);
     private PolicyManagerService policyManagerService;
-    private List<Policy> policyList = new ArrayList<Policy>();
+    private volatile List<Policy> policyList = new ArrayList<Policy>();
 
     @Override
     public Policy getEffectivePolicy(DeviceIdentifier deviceIdentifier) throws PolicyEvaluationException {
@@ -71,7 +71,7 @@ public class SimpleEvaluationImpl implements SimpleEvaluation {
     }
 
     @Override
-    public void sortPolicies() throws PolicyEvaluationException {
+    public synchronized void sortPolicies() throws PolicyEvaluationException {
         Collections.sort(policyList);
     }
 

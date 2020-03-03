@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.handlers.beans.DCR;
 import org.wso2.carbon.apimgt.handlers.config.IOTServerConfiguration;
 import org.wso2.carbon.apimgt.handlers.invoker.RESTInvoker;
 import org.wso2.carbon.apimgt.handlers.invoker.RESTResponse;
+import org.wso2.carbon.certificate.mgt.core.service.CertificateManagementService;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import javax.xml.XMLConstants;
@@ -182,6 +184,21 @@ public class Utils {
             throw new APIMCertificateMGTException("Error occurred while trying to call DCR endpoint", e);
         }
 
+    }
+
+    public static CertificateManagementService getCertificateManagementService() {
+
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        CertificateManagementService certificateManagementService = (CertificateManagementService)
+                ctx.getOSGiService(CertificateManagementService.class, null);
+
+        if (certificateManagementService == null) {
+            String msg = "CertificateManagementAdminServiceImpl Management service not initialized.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+
+        return certificateManagementService;
     }
 
 }

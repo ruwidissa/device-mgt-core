@@ -759,7 +759,7 @@ public class DeviceAgentServiceTest {
         List<String> deviceTypes = new ArrayList<>();
         deviceTypes.add(TEST_DEVICE_TYPE);
         Mockito.when(this.deviceManagementProviderService.getAvailableDeviceTypes()).thenReturn(deviceTypes);
-        Mockito.when(this.deviceManagementProviderService.getPendingOperations(Mockito.any())).thenThrow(new
+        Mockito.when(this.deviceManagementProviderService.getPendingOperations(Mockito.any(DeviceIdentifier.class))).thenThrow(new
                 OperationManagementException());
         Response response = this.deviceAgentService.getPendingOperations(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
         Assert.assertNotNull(response, "Response should not be null");
@@ -973,7 +973,7 @@ public class DeviceAgentServiceTest {
         deviceTypes.add(TEST_DEVICE_TYPE);
         Mockito.when(this.deviceManagementProviderService.getAvailableDeviceTypes()).thenReturn(deviceTypes);
         Mockito.doThrow(new OperationManagementException()).when(this.deviceManagementProviderService)
-                .updateOperation(Mockito.any(), Mockito.any());
+                .updateOperation(Mockito.any(DeviceIdentifier.class), Mockito.any());
         Response response = this.deviceAgentService.updateOperation(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER,
                 operation);
         Assert.assertNotNull(response, "The response should not be null");

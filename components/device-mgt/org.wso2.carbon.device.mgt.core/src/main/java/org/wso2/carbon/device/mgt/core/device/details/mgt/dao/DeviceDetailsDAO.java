@@ -50,6 +50,9 @@ public interface DeviceDetailsDAO {
     void addDeviceProperties(Map<String, String> propertyMap, int deviceId, int enrolmentId)
             throws DeviceDetailsMgtDAOException;
 
+    void updateDeviceProperties(Map<String, String> propertyMap, int deviceId, int enrolmentId)
+            throws DeviceDetailsMgtDAOException;
+
     /**
      * This method will return the device information when device id is provided.
      * @param deviceId - device Id
@@ -111,6 +114,10 @@ public interface DeviceDetailsDAO {
      */
     void addDeviceLocationInfo(Device device, DeviceLocation deviceLocation, int tenantId)
             throws DeviceDetailsMgtDAOException;
+
+    void updateDeviceInformation(int deviceId, int enrollmentId, DeviceInfo newDeviceInfo) throws DeviceDetailsMgtDAOException;
+
+    void updateDeviceLocation(DeviceLocation deviceLocation, int enrollmentId) throws DeviceDetailsMgtDAOException;
 
 //    /**
 //     * This method will add device application to database.

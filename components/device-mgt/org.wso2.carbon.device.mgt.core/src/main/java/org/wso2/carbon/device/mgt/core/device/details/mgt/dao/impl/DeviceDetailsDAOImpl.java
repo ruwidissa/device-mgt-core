@@ -120,6 +120,38 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
     }
 
     @Override
+    public void updateDeviceProperties(Map<String, String> propertyMap, int deviceId, int enrolmentId)
+            throws DeviceDetailsMgtDAOException {
+
+        if (propertyMap.isEmpty()) {
+            if(log.isDebugEnabled()) {
+                log.debug("Property map of device id :" + deviceId + " is empty.");
+            }
+            return;
+        }
+        Connection conn;
+        PreparedStatement stmt = null;
+        try {
+            conn = this.getConnection();
+            stmt = conn.prepareStatement("UPDATE DM_DEVICE_INFO SET VALUE_FIELD = ? WHERE DEVICE_ID = ?" +
+                    " AND KEY_FIELD = ? AND ENROLMENT_ID = ?");
+
+            for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
+                stmt.setString(1, entry.getValue());
+                stmt.setInt(2, deviceId);
+                stmt.setString(3, entry.getKey());
+                stmt.setInt(4, enrolmentId);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (SQLException e) {
+            throw new DeviceDetailsMgtDAOException("Error occurred while updating device properties to database.", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
     public DeviceInfo getDeviceInformation(int deviceId, int enrolmentId) throws DeviceDetailsMgtDAOException {
         Connection conn;
         PreparedStatement stmt = null;
@@ -135,9 +167,9 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-                deviceInfo = new DeviceInfo();
 //                deviceInfo.setIMEI(rs.getString("IMEI"));
 //                deviceInfo.setIMSI(rs.getString("IMSI"));
+                deviceInfo = new DeviceInfo();
                 deviceInfo.setDeviceModel(rs.getString("DEVICE_MODEL"));
                 deviceInfo.setVendor(rs.getString("VENDOR"));
                 deviceInfo.setOsVersion(rs.getString("OS_VERSION"));
@@ -268,12 +300,42 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
     }
 
     @Override
+    public void updateDeviceLocation(DeviceLocation deviceLocation, int enrollmentId)
+            throws DeviceDetailsMgtDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        try {
+            conn = this.getConnection();
+            stmt = conn.prepareStatement("UPDATE DM_DEVICE_LOCATION SET LATITUDE = ?, LONGITUDE = ?, " +
+                    "STREET1 = ?, STREET2 = ?, CITY = ?, ZIP = ?, STATE = ?, COUNTRY = ?, GEO_HASH = ?, " +
+                    "UPDATE_TIMESTAMP = ? WHERE DEVICE_ID = ? AND ENROLMENT_ID = ?");
+            stmt.setDouble(1, deviceLocation.getLatitude());
+            stmt.setDouble(2, deviceLocation.getLongitude());
+            stmt.setString(3, deviceLocation.getStreet1());
+            stmt.setString(4, deviceLocation.getStreet2());
+            stmt.setString(5, deviceLocation.getCity());
+            stmt.setString(6, deviceLocation.getZip());
+            stmt.setString(7, deviceLocation.getState());
+            stmt.setString(8, deviceLocation.getCountry());
+            stmt.setString(9, GeoHashGenerator.encodeGeohash(deviceLocation));
+            stmt.setLong(10, System.currentTimeMillis());
+            stmt.setInt(11, deviceLocation.getDeviceId());
+            stmt.setInt(12, enrollmentId);
+            stmt.execute();
+        } catch (SQLException e) {
+            throw new DeviceDetailsMgtDAOException("Error occurred while adding the device location to database.", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
     public DeviceLocation getDeviceLocation(int deviceId, int enrollmentId) throws DeviceDetailsMgtDAOException {
 
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        DeviceLocation location = new DeviceLocation();
+        DeviceLocation location = null;
         try {
             conn = this.getConnection();
             String sql = "SELECT * FROM  DM_DEVICE_LOCATION WHERE DEVICE_ID = ? AND ENROLMENT_ID = ?";
@@ -282,7 +344,8 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             stmt.setInt(2, enrollmentId);
             rs = stmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
+                location = new DeviceLocation();
                 location.setDeviceId(deviceId);
                 location.setLatitude(rs.getDouble("LATITUDE"));
                 location.setLongitude(rs.getDouble("LONGITUDE"));
@@ -294,7 +357,6 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
                 location.setCountry(rs.getString("COUNTRY"));
                 location.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
             }
-            location.setDeviceId(deviceId);
 
             return location;
         } catch (SQLException e) {
@@ -358,6 +420,47 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             errMessage = "Error occurred while updating the device location information to database.";
             log.error(errMessage);
             throw new DeviceDetailsMgtDAOException(errMessage, e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void updateDeviceInformation(int deviceId, int enrollmentId, DeviceInfo newDeviceInfo) throws DeviceDetailsMgtDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        try {
+            conn = this.getConnection();
+
+            stmt = conn.prepareStatement("UPDATE DM_DEVICE_DETAIL SET DEVICE_MODEL = ?, VENDOR = ?, " +
+                    "OS_VERSION = ?, OS_BUILD_DATE = ?, BATTERY_LEVEL = ?, INTERNAL_TOTAL_MEMORY = ?, " +
+                    "INTERNAL_AVAILABLE_MEMORY = ?, EXTERNAL_TOTAL_MEMORY = ?, EXTERNAL_AVAILABLE_MEMORY = ?, " +
+                    "CONNECTION_TYPE = ?, SSID = ?, CPU_USAGE = ?, TOTAL_RAM_MEMORY = ?, AVAILABLE_RAM_MEMORY = ?, " +
+                    "PLUGGED_IN = ?, UPDATE_TIMESTAMP = ? WHERE DEVICE_ID = ? AND ENROLMENT_ID = ?");
+
+            stmt.setString(1, newDeviceInfo.getDeviceModel());
+            stmt.setString(2, newDeviceInfo.getVendor());
+            stmt.setString(3, newDeviceInfo.getOsVersion());
+            stmt.setString(4, newDeviceInfo.getOsBuildDate());
+            stmt.setDouble(5, newDeviceInfo.getBatteryLevel());
+            stmt.setDouble(6, newDeviceInfo.getInternalTotalMemory());
+            stmt.setDouble(7, newDeviceInfo.getInternalAvailableMemory());
+            stmt.setDouble(8, newDeviceInfo.getExternalTotalMemory());
+            stmt.setDouble(9, newDeviceInfo.getExternalAvailableMemory());
+            stmt.setString(10, newDeviceInfo.getConnectionType());
+            stmt.setString(11, newDeviceInfo.getSsid());
+            stmt.setDouble(12, newDeviceInfo.getCpuUsage());
+            stmt.setDouble(13, newDeviceInfo.getTotalRAMMemory());
+            stmt.setDouble(14, newDeviceInfo.getAvailableRAMMemory());
+            stmt.setBoolean(15, newDeviceInfo.isPluggedIn());
+            stmt.setLong(16, System.currentTimeMillis());
+            stmt.setInt(17, deviceId);
+            stmt.setInt(18, enrollmentId);
+
+            stmt.execute();
+
+        } catch (SQLException e) {
+            throw new DeviceDetailsMgtDAOException("Error occurred while updating device details.", e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
