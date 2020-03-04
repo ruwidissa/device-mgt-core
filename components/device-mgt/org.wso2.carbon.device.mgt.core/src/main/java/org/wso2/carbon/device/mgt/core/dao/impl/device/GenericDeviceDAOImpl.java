@@ -867,6 +867,8 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
         try {
             Long osValue = (Long) request.getProperty(Constants.OS_VALUE);
             Connection conn = getConnection();
+             /* following variable is used to identify the datasource type.This is due to a
+             convert function performed in the query which will depend on the datasource */
             String dataSourceType = conn.getMetaData().getDatabaseProductName();
             String sql="SELECT " +
                        "d1.DEVICE_TYPE, " +
@@ -938,6 +940,8 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
             throws DeviceManagementDAOException {
         try {
             Connection conn = getConnection();
+            /* following variable is used to identify the datasource type.This is due to a
+             convert function performed in the query which will depend on the datasource */
             String dataSourceType = conn.getMetaData().getDatabaseProductName();
             String sql = "SELECT " +
                          "COUNT(ddi.DEVICE_ID) AS DEVICE_COUNT " +
@@ -964,11 +968,10 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 ps.setLong(4, osValue);
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    int deviceCount = 0;
                     if (rs.next()) {
-                        deviceCount = rs.getInt("DEVICE_COUNT");
+                        return rs.getInt("DEVICE_COUNT");
                     }
-                    return deviceCount;
+                    return 0;
                 }
             }
         } catch (SQLException e) {

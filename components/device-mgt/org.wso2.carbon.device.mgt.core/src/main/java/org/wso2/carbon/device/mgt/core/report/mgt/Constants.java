@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  *  Entgra (pvt) Ltd. licenses this file to you under the Apache License,
@@ -15,9 +14,7 @@
  *  KIND, either express or implied. See the License for the
  *  specific language governing permissions and limitations
  *  under the License.
- *
  */
-
 
 package org.wso2.carbon.device.mgt.core.report.mgt;
 
@@ -33,3 +30,4 @@ public class Constants {
     public static final int NUM_OF_OS_VERSION_DIGITS= 5;
     public static final int NUM_OF_OS_VERSION_POSITIONS = 3;
 }
+

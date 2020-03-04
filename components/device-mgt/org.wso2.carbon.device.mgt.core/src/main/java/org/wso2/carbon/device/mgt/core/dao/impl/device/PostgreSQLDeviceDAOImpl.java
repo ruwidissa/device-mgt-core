@@ -909,11 +909,10 @@ public class PostgreSQLDeviceDAOImpl extends AbstractDeviceDAOImpl {
                 ps.setLong(4, osValue);
 
                 try (ResultSet rs = ps.executeQuery()) {
-                    int deviceCount = 0;
                     if (rs.next()) {
-                        deviceCount = rs.getInt("DEVICE_COUNT");
+                        return rs.getInt("DEVICE_COUNT");
                     }
-                    return deviceCount;
+                    return 0;
                 }
             }
         } catch (SQLException e) {

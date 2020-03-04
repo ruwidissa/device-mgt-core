@@ -731,7 +731,18 @@ public final class DeviceManagerUtil {
         int osVersionsLength = osVersions.length;
 
         /*
-         * <h1>Following loop will work for the value generation</h1>
+         * <h1>Equation explanation</h1>
+         *
+         * <p>
+          Eg: {@code osVersion == "5.1.1"} will generate an array of {@code ["5","1","1"]}
+              Following loop for the above result can be broken down as below
+              * Iteration 1 : {@code Math.pow} result = 5 00000 00000, {@code sum} = 5 00000 00000
+              * Iteration 2 : {@code Math.pow} result = 1 00000, {@code sum} = 5 00001 00000
+              * Iteration 3 : {@code Math.pow} result = 1, {@code sum} = 5 00001 00001
+          To generate the above results I have multiplied the array values with powers of 10.
+          The constraints used to generate the power of 10 is explained below,
+         * </p>
+         *
          * <p>
          {@code Constants.NUM_OF_OS_VERSION_POSITIONS - (i + 1)} was done in-order to identify
          which position of the OS version is been used for generation process, so correct number
@@ -742,7 +753,7 @@ public final class DeviceManagerUtil {
          {@code Constants.NUM_OF_OS_VERSION_DIGITS} this multiplication will make sure that the
          values generated will reduce in following order main OS version, minor OS version, Revision.
          * </p>
-         */
+        */
         return IntStream
                 .range(0, osVersionsLength)
                 .mapToLong(i -> (long) (Math.pow(10, (Constants.NUM_OF_OS_VERSION_POSITIONS - (i + 1))
@@ -762,7 +773,19 @@ public final class DeviceManagerUtil {
         StringJoiner joiner = new StringJoiner(".");
 
         /*
-        * <h1>Following loop will break the generated value into parts and will recreate the OS version</h1>
+        * <h1>Equation explanation</h1>
+        *
+        * <p>
+        Eg: {@code osVersionValue == "5 00001 00001"}
+              Following loop will divide to break down the above number to regenerate the os version
+              * Iteration 1 : {@code osVersion} = 5 , {@code osVersionValue} = 00001 00001
+              * Iteration 2 : {@code osVersion} = 1 , {@code osVersionValue} = 00001
+              * Iteration 3 : {@code osVersion} = 1 , {@code osVersionValue} = 0
+          Final array = {@code ["5","1","1"]}
+          To generate the above results I have divided the generated value with powers of 10.
+          The constraints used to generate the power of 10 is explained below,
+        * </p>
+        *
         * <p>
         {@code 10, (i - 1) * Constants.NUM_OF_OS_VERSION_DIGITS} this will break the generated value
         creating each OS version position in following order main OS version, minor OS version,

@@ -57,6 +57,7 @@ public interface ReportManagementService {
      * @param request {@link PaginationRequest}
      * @return {@link PaginationResult}
      * @throws ReportManagementException Might occur during the business logic or building database query
+     * @throws BadRequestException Might occur if the given os version or the device type doesn't match
      */
     PaginationResult getDevicesExpiredByOSVersion(PaginationRequest request)
             throws ReportManagementException, BadRequestException;

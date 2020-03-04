@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  *  Entgra (pvt) Ltd. licenses this file to you under the Apache License,
@@ -42,5 +41,5 @@ public class BadRequestException extends Exception {
     public BadRequestException(String message, Throwable cause) {
         super(message, cause);
     }
-
 }
+
