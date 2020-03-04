@@ -176,9 +176,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     }
 
     private void publishEvents(Device device, DeviceInfo deviceInfo)  {
-        String reportingHost = System.getProperty(DeviceManagementConstants.Report
-                .REPORTING_EVENT_HOST);
-        if (reportingHost != null && !reportingHost.isEmpty() && isPublishingEnabledForTenant()) {
+        String reportingHost = HttpReportingUtil.getReportingHost();
+        if (!StringUtils.isBlank(reportingHost) && isPublishingEnabledForTenant()) {
             try {
                 DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
                 deviceDetailsWrapper.setDevice(device);
