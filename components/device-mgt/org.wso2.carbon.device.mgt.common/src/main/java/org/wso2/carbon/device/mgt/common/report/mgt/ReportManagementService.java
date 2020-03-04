@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 
@@ -56,10 +57,10 @@ public interface ReportManagementService {
      * @param request {@link PaginationRequest}
      * @return {@link PaginationResult}
      * @throws ReportManagementException Might occur during the business logic or building database query
-     * @throws DeviceTypeNotFoundException Might occur while validating the device type
+     * @throws BadRequestException Might occur if the given os version or the device type doesn't match
      */
     PaginationResult getDevicesExpiredByOSVersion(PaginationRequest request)
-            throws ReportManagementException, DeviceTypeNotFoundException;
+            throws ReportManagementException, BadRequestException;
 
     /**
      * Get a paginated list of devices which is filtered by given encryption status
