@@ -355,6 +355,11 @@ import java.util.stream.IntStream;
         }
     }
 
+    public static int getTenantId() {
+        return PrivilegedCarbonContext
+                .getThreadLocalCarbonContext().getTenantId();
+    }
+
     public static int validateActivityListPageSize(int limit) throws OperationManagementException {
         if (limit == 0) {
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().
