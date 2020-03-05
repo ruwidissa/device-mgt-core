@@ -25,6 +25,7 @@ import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationException;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationInfo;
+import org.wso2.carbon.webapp.authenticator.framework.Constants;
 import org.wso2.carbon.webapp.authenticator.framework.Utils.Utils;
 import org.wso2.carbon.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
 import org.wso2.carbon.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
@@ -77,6 +78,11 @@ public class OAuthAuthenticator implements WebappAuthenticator {
             String resource = requestUri + ":" + requestMethod;
             OAuthValidationResponse oAuthValidationResponse = this.tokenValidator.validateToken(bearerToken, resource);
             authenticationInfo = Utils.setAuthenticationInfo(oAuthValidationResponse, authenticationInfo);
+            if (authenticationInfo.getTenantId() == -1234 && properties.getProperty("Username")
+                    .equals(authenticationInfo.getUsername())
+                    && request.getHeader(Constants.PROXY_TENANT_ID) != null) {
+                authenticationInfo.setSuperTenantAdmin(true);
+            }
         } catch (AuthenticationException e) {
             log.error("Failed to authenticate the incoming request", e);
         } catch (OAuthTokenValidationException e) {
