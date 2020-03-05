@@ -182,7 +182,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
                 deviceDetailsWrapper.setDevice(device);
                 deviceDetailsWrapper.setDeviceInfo(deviceInfo);
-                deviceDetailsWrapper.getJSONString();
+                deviceDetailsWrapper.setTenantId(DeviceManagerUtil.getTenantId());
                 GroupManagementProviderService groupManagementService = DeviceManagementDataHolder
                         .getInstance().getGroupManagementProviderService();
 
@@ -205,6 +205,11 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 log.error("Error occurred while getting group list", e);
             } catch (UserStoreException e) {
                 log.error("Error occurred while getting role list", e);
+            }
+        } else {
+            if(log.isTraceEnabled()) {
+                log.trace("Event publishing is not enabled for tenant "
+                        + DeviceManagerUtil.getTenantId());
             }
         }
     }
