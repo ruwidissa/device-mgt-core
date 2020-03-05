@@ -161,6 +161,35 @@ class Reports extends React.Component {
                   <Link
                     to={{
                       // Path to respective report page
+                      pathname: '/entgra/reports/expired-devices',
+                      data: {
+                        name: 'expired_devices_report',
+                      },
+                    }}
+                  >
+                    <Card
+                      bordered={true}
+                      hoverable={true}
+                      style={{ borderRadius: 10, marginBottom: 16 }}
+                    >
+                      <div align="center">
+                        <Icon
+                          type="desktop"
+                          style={{ fontSize: '25px', color: '#08c' }}
+                        />
+                        <h2>
+                          <b>Expired Devices Report</b>
+                        </h2>
+                        <p>Report based on device OS version</p>
+                      </div>
+                    </Card>
+                  </Link>
+                </Col>
+
+                <Col span={8}>
+                  <Link
+                    to={{
+                      // Path to respective report page
                       pathname: '/entgra/reports/enrollment-type',
                       data: {
                         name: 'enrollemt_type_report',
