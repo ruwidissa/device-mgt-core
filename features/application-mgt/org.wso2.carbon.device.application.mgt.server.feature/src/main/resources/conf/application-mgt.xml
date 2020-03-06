@@ -258,6 +258,8 @@
             <Scope>perm:geo-service:alerts-manage</Scope>
             <Scope>appm:read</Scope>
 	    <Scope>perm:devices:permanent-delete</Scope>
+	    <Scope>perm:android:manage-configuration</Scope>
+	    <Scope>perm:android:view-configuration</Scope>
         </Scopes>
         <SSOConfiguration>
             <Issuer>app-mgt</Issuer>
