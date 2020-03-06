@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceDetailsWrapper;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
@@ -39,6 +40,7 @@ import org.wso2.carbon.device.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -277,6 +279,17 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
                         device.getEnrolmentInfo().getId(), tenantId);
             }
             DeviceManagementDAOFactory.commitTransaction();
+
+            String reportingHost = HttpReportingUtil.getReportingHost();
+            if (!StringUtils.isBlank(reportingHost)) {
+                DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
+                deviceDetailsWrapper.setTenantId(tenantId);
+                deviceDetailsWrapper.setDevice(device);
+                deviceDetailsWrapper.setApplications(newApplications);
+                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
+                                            reportingHost + DeviceManagementConstants.Report.APP_USAGE_ENDPOINT);
+            }
+
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred saving application list of the device " + device.getDeviceIdentifier();
