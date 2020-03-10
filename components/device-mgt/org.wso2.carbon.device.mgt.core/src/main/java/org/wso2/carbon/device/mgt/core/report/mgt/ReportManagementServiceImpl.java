@@ -23,6 +23,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Count;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.app.mgt.Application;
+import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
@@ -157,46 +160,55 @@ public class ReportManagementServiceImpl implements ReportManagementService {
 
     @Override
     public PaginationResult getDevicesExpiredByOSVersion(PaginationRequest request)
-            throws ReportManagementException, DeviceTypeNotFoundException {
+            throws ReportManagementException, BadRequestException {
         if (request == null ||
             StringUtils.isBlank(request.getDeviceType()) ||
-            !request.getProperties().containsKey(Constants.OS_BUILD_DATE) ||
-            (Long) request.getProperty(Constants.OS_BUILD_DATE) == 0) {
-
+            request.getProperties() == null ||
+            !request.getProperties().containsKey(Constants.OS_VERSION) ||
+            StringUtils.isBlank((String) request.getProperty(Constants.OS_VERSION))) {
             String msg = "Error Invalid data received from the request.\n" +
-                         "osBuildDate cannot be null or 0 and device type cannot be null or empty";
+                         "osVersion and device type cannot be null or empty.";
             log.error(msg);
-            throw new ReportManagementException(msg);
+            throw new BadRequestException(msg);
         }
+
+        String deviceType = request.getDeviceType();
+        if (!deviceType.equals(Constants.ANDROID) && !deviceType.equals(Constants.IOS)) {
+            String msg = "Error Invalid device type:" + deviceType + " received. Valid device types " +
+                         "are android and ios.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
         try {
             int tenantId = DeviceManagementDAOUtil.getTenantId();
-            String deviceType = request.getDeviceType();
             PaginationResult paginationResult = new PaginationResult();
-
             DeviceManagerUtil.validateDeviceListPageSize(request);
 
-            DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
-                    deviceType, tenantId);
-            if (deviceTypeObj == null) {
-                String msg = "Error, device of type: " + deviceType + " does not exist";
+            String osVersion = (String) request.getProperty(Constants.OS_VERSION);
+            Long osVersionValue = DeviceManagerUtil.generateOSVersionValue(osVersion);
+            if (osVersionValue == null){
+                String msg = "Failed to generate OS value, received OS version: " + osVersion +
+                             " is in incorrect format([0-9]+([.][0-9]+)*) or version is invalid.";
                 log.error(msg);
-                throw new DeviceTypeNotFoundException(msg);
+                throw new BadRequestException(msg);
             }
+            request.setProperty(Constants.OS_VALUE, osVersionValue);
 
             try {
                 DeviceManagementDAOFactory.openConnection();
-                List<Device> devices = deviceDAO.getDevicesExpiredByOSVersion(request, tenantId);
+
+                List<Device> devices = deviceDAO.getDevicesExpiredByOSVersion(
+                        request, tenantId);
                 int deviceCount = deviceDAO.getCountOfDeviceExpiredByOSVersion(
-                        deviceType,
-                        (Long) request.getProperty(Constants.OS_BUILD_DATE),
-                        tenantId);
+                        deviceType, osVersionValue, tenantId);
                 paginationResult.setData(devices);
                 paginationResult.setRecordsFiltered(devices.size());
                 paginationResult.setRecordsTotal(deviceCount);
 
                 return paginationResult;
             } catch (SQLException e) {
-                String msg = "Error occurred while opening a connection to the data source";
+                String msg = "Error occurred while opening a connection to the data source.";
                 log.error(msg, e);
                 throw new ReportManagementException(msg, e);
             } finally {
@@ -204,12 +216,12 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             }
 
         } catch (DeviceManagementDAOException e) {
-            String msg = "Error occurred while retrieving expired devices by a OS build date " +
-                         "for the tenant";
+            String msg = "Error occurred while retrieving expired devices by a OS version " +
+                         "for the tenant.";
             log.error(msg, e);
             throw new ReportManagementException(msg, e);
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while validating the request";
+            String msg = "Error occurred while validating the request.";
             log.error(msg, e);
             throw new ReportManagementException(msg, e);
         }

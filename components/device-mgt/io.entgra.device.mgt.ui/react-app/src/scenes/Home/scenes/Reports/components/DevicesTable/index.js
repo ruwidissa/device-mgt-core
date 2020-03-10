@@ -116,6 +116,12 @@ const columns = [
     },
     // todo add filtering options
   },
+  {
+    title: 'OS Version',
+    dataIndex: 'deviceInfo',
+    key: 'osVersion',
+    render: deviceInfo => deviceInfo.osVersion,
+  },
 ];
 
 const getTimeAgo = time => {

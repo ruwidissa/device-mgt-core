@@ -123,6 +123,12 @@ class App extends React.Component {
       )
       .then(res => {
         config.deviceTypes = JSON.parse(res.data.data);
+        config.supportedOStypes = [];
+        config.deviceTypes.forEach(type => {
+          if (['ios', 'android'].includes(type.name)) {
+            config.supportedOStypes.push(type);
+          }
+        });
         this.setState({
           config: config,
           loading: false,
