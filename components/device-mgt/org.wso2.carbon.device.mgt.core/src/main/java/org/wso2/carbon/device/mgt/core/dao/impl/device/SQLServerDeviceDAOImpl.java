@@ -667,6 +667,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                        ") d1 " +
                        "WHERE d1.DEVICE_ID = e.DEVICE_ID " +
                        "AND d1.DEVICE_ID = ddi.DEVICE_ID " +
+                       "AND d1.DEVICE_ID = ddd.DEVICE_ID " +
                        "AND ddi.KEY_FIELD = ? " +
                        "AND CAST( ddi.VALUE_FIELD AS BIGINT ) < ? " +
                        "LIMIT ? OFFSET ?";
