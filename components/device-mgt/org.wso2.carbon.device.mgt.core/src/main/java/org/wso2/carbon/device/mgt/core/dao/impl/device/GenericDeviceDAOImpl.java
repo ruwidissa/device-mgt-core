@@ -899,6 +899,7 @@ public class GenericDeviceDAOImpl extends AbstractDeviceDAOImpl {
                        ") d1 " +
                        "WHERE d1.DEVICE_ID = e.DEVICE_ID " +
                        "AND d1.DEVICE_ID = ddi.DEVICE_ID " +
+                       "AND d1.DEVICE_ID = ddd.DEVICE_ID " +
                        "AND ddi.KEY_FIELD = ? ";
             if (dataSourceType.contains(DeviceManagementConstants.DataBaseTypes.DB_TYPE_H2)) {
                 sql += "AND CAST( ddi.VALUE_FIELD AS BIGINT ) < ? ";
