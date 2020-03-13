@@ -1867,11 +1867,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device notification data of devices: " + deviceIdentifiers);
                 }
-                removeDeviceApplicationMapping(conn, deviceIds);
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully removed device application mapping data of devices: "
-                            + deviceIdentifiers);
-                }
                 removeDevicePolicyApplied(conn, deviceIds);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device applied policy data of devices: " + deviceIdentifiers);
@@ -1887,7 +1882,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 removeEnrollmentDeviceDetail(conn, enrollmentIds);
                 removeEnrollmentDeviceLocation(conn, enrollmentIds);
                 removeEnrollmentDeviceInfo(conn, enrollmentIds);
-                removeEnrollmentDeviceApplicationMapping(conn, enrollmentIds);
                 removeDeviceOperationResponse(conn, enrollmentIds);
                 removeEnrollmentOperationMapping(conn, enrollmentIds);
                 if (log.isDebugEnabled()) {
@@ -1915,7 +1909,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throw new DeviceManagementDAOException(msg, e);
         }
     }
-    
+
     @Override
     public List<Device> getAppNotInstalledDevices(
             PaginationRequest request, int tenantId, String packageName, String version)
@@ -2224,29 +2218,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     }
 
-    /***
-     * This method removes records of a given list of devices from the DM_DEVICE_APPLICATION_MAPPING table
-     * @param conn Connection object
-     * @param deviceIds list of device ids (primary keys)
-     * @throws DeviceManagementDAOException if deletion fails
-     */
-    private void removeDeviceApplicationMapping(Connection conn, List<Integer> deviceIds)
-            throws DeviceManagementDAOException {
-        String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE DEVICE_ID = ?";
-        try {
-            if (!executeBatchOperation(conn, sql, deviceIds)) {
-                String msg = "Failed to remove device application mapping of of devices with deviceIds : " + deviceIds +
-                        " while executing batch operation";
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
-            }
-        } catch (SQLException e) {
-            String msg = "SQL error occurred while removing device application mapping of devices with deviceIds : "
-                    + deviceIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
 
     /***
      * This method removes records of a given list of devices from the DM_DEVICE_POLICY_APPLIED table
@@ -2365,29 +2336,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
-    /***
-     * This method removes records of a given list of enrollments from the DM_DEVICE_APPLICATION_MAPPING table
-     * @param conn Connection object
-     * @param enrollmentIds list of enrollment ids (primary keys)
-     * @throws DeviceManagementDAOException if deletion fails
-     */
-    private void removeEnrollmentDeviceApplicationMapping(Connection conn, List<Integer> enrollmentIds)
-            throws DeviceManagementDAOException {
-        String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE ENROLMENT_ID = ?";
-        try {
-            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
-                String msg = "Failed to remove enrollment device application mapping of devices with enrollmentIds : "
-                        + enrollmentIds + " while executing batch operation";
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
-            }
-        } catch (SQLException e) {
-            String msg = "SQL error occurred while removing enrollment device application mapping of devices with " +
-                    "enrollmentIds : " + enrollmentIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
 
     /***
      * This method removes records of a given list of enrollments from the DM_DEVICE_OPERATION_RESPONSE table
