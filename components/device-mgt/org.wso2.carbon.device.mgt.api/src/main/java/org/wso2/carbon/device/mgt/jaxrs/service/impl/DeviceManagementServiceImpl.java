@@ -36,6 +36,8 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -46,6 +48,8 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
+import org.wso2.carbon.device.mgt.common.MonitoringOperation;
+import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
@@ -56,6 +60,7 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
@@ -494,8 +499,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                                           @PathParam("deviceId") String deviceId,
                                           @QueryParam("from") long from, @QueryParam("to") long to) {
 
-        List<DeviceLocationHistory> deviceLocationHistory;
         String errorMessage;
+        DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
 
         try {
             RequestValidationUtil.validateDeviceIdentifier(deviceType, deviceId);
@@ -521,7 +526,46 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                         new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
             }
 
-            deviceLocationHistory = dms.getDeviceLocationInfo(deviceIdentifier, from, to);
+            List<List<DeviceLocationHistorySnapshot>> locationHistorySnapshotList = new ArrayList<>();
+            // Get the location history snapshots for the given period
+            List<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshots = dms.getDeviceLocationInfo(deviceIdentifier, from, to);
+
+            OperationMonitoringTaskConfig operationMonitoringTaskConfig = dms.getDeviceMonitoringConfig(deviceType);
+            int taskFrequency = operationMonitoringTaskConfig.getFrequency();
+            int operationRecurrentTimes = 0;
+
+            List<MonitoringOperation> monitoringOperations = operationMonitoringTaskConfig.getMonitoringOperation();
+            for (MonitoringOperation monitoringOperation :
+                    monitoringOperations) {
+                if (monitoringOperation.getTaskName().equals("DEVICE_LOCATION")) {
+                    operationRecurrentTimes = monitoringOperation.getRecurrentTimes();
+                    break;
+                }
+            }
+            // Device Location operation frequency in milliseconds. Adding 100000 ms as an error
+            long operationFrequency = taskFrequency * operationRecurrentTimes + 100000;
+
+            Queue<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshotsQueue = new LinkedList<>(deviceLocationHistorySnapshots);
+
+            while (deviceLocationHistorySnapshotsQueue.size() > 0) {
+                List<DeviceLocationHistorySnapshot> snapshots = new ArrayList<>();
+                // Make a copy of remaining snapshots
+                List<DeviceLocationHistorySnapshot> cachedSnapshots = new ArrayList<>(deviceLocationHistorySnapshotsQueue);
+
+                for (int i = 0; i < cachedSnapshots.size(); i++) {
+                    DeviceLocationHistorySnapshot currentSnapshot = deviceLocationHistorySnapshotsQueue.poll();
+                    snapshots.add(currentSnapshot);
+                    if (deviceLocationHistorySnapshotsQueue.size() > 0) {
+                        DeviceLocationHistorySnapshot nextSnapshot = deviceLocationHistorySnapshotsQueue.peek();
+                        if (nextSnapshot.getUpdatedTime().getTime() - currentSnapshot.getUpdatedTime().getTime() > operationFrequency) {
+                            break;
+                        }
+                    }
+                }
+                locationHistorySnapshotList.add(snapshots);
+            }
+            deviceLocationHistory.setLocationHistorySnapshots(locationHistorySnapshotList);
+
 
         } catch (DeviceManagementException e) {
             errorMessage = "Error occurred while fetching the device information.";

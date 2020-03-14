@@ -150,7 +150,7 @@ class App extends React.Component {
         <ConfigContext.Provider value={this.state.config}>
           <div>
             <Switch>
-              <Redirect exact from="/entgra" to="/entgra/reports" />
+              <Redirect exact from="/entgra" to="/entgra/devices" />
               {this.props.routes.map(route => (
                 <RouteWithSubRoutes key={route.path} {...route} />
               ))}

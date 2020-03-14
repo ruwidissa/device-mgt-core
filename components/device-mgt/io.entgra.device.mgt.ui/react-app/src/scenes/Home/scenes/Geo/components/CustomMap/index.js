@@ -57,60 +57,42 @@ class CustomMap extends Component {
 
   /**
    * Polyline draw for historical locations
-   * @param locationData - location data object
+   * @param locationHistorySnapshots - location data object
    * @returns content
    */
-  polylineMarker = locationData => {
-    const locationPoints = [...locationData];
+  polylineMarker = locationHistorySnapshots => {
     const polyLines = [];
-
-    while (locationPoints.length > 0) {
-      // Array to store positions for next polyline
-      const positions = [];
-      // Make a copy of remaining location points
-      const cachedLocationPoints = [...locationPoints];
-      // Iterate the remaining cached locations
-      for (let i = 0; i < cachedLocationPoints.length; i++) {
-        positions.push([
-          cachedLocationPoints[i].latitude,
-          cachedLocationPoints[i].longitude,
-        ]);
-        const currentPoint = cachedLocationPoints[i];
-        // Remove the current location from the locationPoints
-        locationPoints.shift();
-        if (i < cachedLocationPoints.length - 1) {
-          const nextPoint = cachedLocationPoints[i + 1];
-          // Draw a dashed line for long for location points with long interval
-          if (
-            nextPoint.timestamp - currentPoint.timestamp >
-            this.props.context.geoMap.timeout * 1000
-          ) {
-            // Create a dashed line
-            polyLines.push(
-              <Polyline
-                key={polyLines.length}
-                color="#414042"
-                positions={[
-                  [currentPoint.latitude, currentPoint.longitude],
-                  [nextPoint.latitude, nextPoint.longitude],
-                ]}
-                smoothFactor={10}
-                weight={5}
-                dashArray="7"
-              />,
-            );
-            break;
-          }
-        }
-      }
-      // Create a polyline from provided positions
+    locationHistorySnapshots.forEach(locationHistorySnapshots => {
       polyLines.push(
         <Polyline
           key={polyLines.length}
           color="#414042"
-          positions={positions}
+          positions={locationHistorySnapshots.map(snapshot => {
+            return [snapshot.latitude, snapshot.longitude];
+          })}
           smoothFactor={10}
           weight={5}
+        />,
+      );
+    });
+
+    for (let i = 1; i < locationHistorySnapshots.length; i++) {
+      const startPosition = locationHistorySnapshots[i][0];
+      const endingPosition =
+        locationHistorySnapshots[i - 1][
+          locationHistorySnapshots[i - 1].length - 1
+        ];
+      polyLines.push(
+        <Polyline
+          key={polyLines.length}
+          color="#414042"
+          positions={[
+            [startPosition.latitude, startPosition.longitude],
+            [endingPosition.latitude, endingPosition.longitude],
+          ]}
+          smoothFactor={10}
+          weight={5}
+          dashArray="7"
         />,
       );
     }
@@ -125,22 +107,23 @@ class CustomMap extends Component {
   };
 
   render() {
-    const locationData = this.props.locationData;
+    const locationHistorySnapshots = this.props.locationHistorySnapshots;
     const config = this.props.context;
     const attribution = config.geoMap.attribution;
     const url = config.geoMap.url;
-    const startingPoint = [locationData[0].latitude, locationData[0].longitude];
-    const endPoint = [
-      locationData[locationData.length - 1].latitude,
-      locationData[locationData.length - 1].longitude,
-    ];
+    const firstSnapshot = locationHistorySnapshots[0][0];
+    const lastSnapshotList =
+      locationHistorySnapshots[locationHistorySnapshots.length - 1];
+    const lastSnapshot = lastSnapshotList[lastSnapshotList.length - 1];
+    const startingPoint = [firstSnapshot.latitude, firstSnapshot.longitude];
+    const endPoint = [lastSnapshot.latitude, lastSnapshot.longitude];
     const zoom = config.geoMap.defaultZoomLevel;
     return (
       <div style={{ backgroundColor: '#ffffff', borderRadius: 5, padding: 5 }}>
         <Map center={startingPoint} zoom={zoom}>
           <TileLayer url={url} attribution={attribution} />
           <Fragment>
-            {this.polylineMarker(locationData)}
+            {this.polylineMarker(locationHistorySnapshots)}
             <Marker icon={pinStart} position={startingPoint}>
               <Popup keepInView={true}>Start</Popup>
               <Tooltip direction="top" permanent={true}>
