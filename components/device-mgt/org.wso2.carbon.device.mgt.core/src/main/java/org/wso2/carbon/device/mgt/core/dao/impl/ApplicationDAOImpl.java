@@ -29,9 +29,7 @@ import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -322,7 +320,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     @Override
     public List<String> getAppVersions(int tenantId, String packageName) throws DeviceManagementDAOException {
-        String sql = "SELECT " +
+        String sql = "SELECT DISTINCT " +
                         "VERSION " +
                      "FROM DM_APPLICATION " +
                      "WHERE TENANT_ID=? " +
