@@ -45,7 +45,6 @@ import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -54,7 +53,6 @@ import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
-import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1919,24 +1917,24 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isVersionProvided = false;
 
         String sql = "SELECT " +
-                "d.ID AS DEVICE_ID, " +
-                "d.DESCRIPTION,d.NAME AS DEVICE_NAME, " +
-                "t.NAME AS DEVICE_TYPE, " +
-                "d.DEVICE_IDENTIFICATION, " +
-                "e.OWNER, " +
-                "e.OWNERSHIP, " +
-                "e.STATUS, " +
-                "e.DATE_OF_LAST_UPDATE, " +
-                "e.DATE_OF_ENROLMENT, " +
-                "e.ID AS ENROLMENT_ID " +
-                "FROM DM_DEVICE AS d " +
-                "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
-                "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
-                "WHERE t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
-                "NOT IN (SELECT m.DEVICE_ID " +
-                "FROM DM_DEVICE_APPLICATION_MAPPING AS m " +
-                "INNER JOIN DM_APPLICATION AS a ON m.APPLICATION_ID=a.ID " +
-                "WHERE a.APP_IDENTIFIER = ?";
+                        "d.ID AS DEVICE_ID, " +
+                        "d.DESCRIPTION, " +
+                        "d.NAME AS DEVICE_NAME, " +
+                        "t.NAME AS DEVICE_TYPE, " +
+                        "d.DEVICE_IDENTIFICATION, " +
+                        "e.OWNER, " +
+                        "e.OWNERSHIP, " +
+                        "e.STATUS, " +
+                        "e.DATE_OF_LAST_UPDATE, " +
+                        "e.DATE_OF_ENROLMENT, " +
+                        "e.ID AS ENROLMENT_ID " +
+                    "FROM DM_DEVICE AS d " +
+                        "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                        "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                    "WHERE " +
+                        "t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
+                    "NOT IN " +
+                        "(SELECT a.DEVICE_ID FROM DM_APPLICATION AS a WHERE a.APP_IDENTIFIER = ?";
 
         if (!StringUtils.isBlank(version)) {
             sql = sql + " AND a.VERSION = ? ";
@@ -1985,14 +1983,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         String sql = "SELECT " +
                         "COUNT(d.ID) AS DEVICE_COUNT " +
                     "FROM DM_DEVICE AS d " +
-                    "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
-                    "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
-                    "WHERE t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
+                        "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                        "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                    "WHERE " +
+                        "t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
                     "NOT IN " +
-                    "(SELECT m.DEVICE_ID " +
-                        "FROM DM_DEVICE_APPLICATION_MAPPING AS m " +
-                        "INNER JOIN DM_APPLICATION AS a ON m.APPLICATION_ID=a.ID " +
-                        "WHERE a.APP_IDENTIFIER = ?";
+                        "(SELECT a.DEVICE_ID FROM DM_APPLICATION AS a WHERE a.APP_IDENTIFIER = ?";
 
         if (!StringUtils.isBlank(version)) {
             sql = sql + " AND a.VERSION = ? ";
