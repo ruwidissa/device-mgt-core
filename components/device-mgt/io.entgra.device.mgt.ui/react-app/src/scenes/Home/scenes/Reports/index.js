@@ -178,7 +178,7 @@ class Reports extends React.Component {
                           style={{ fontSize: '25px', color: '#08c' }}
                         />
                         <h2>
-                          <b>Expired Devices Report</b>
+                          <b>Outdated OS Version Report</b>
                         </h2>
                         <p>Report based on device OS version</p>
                       </div>
