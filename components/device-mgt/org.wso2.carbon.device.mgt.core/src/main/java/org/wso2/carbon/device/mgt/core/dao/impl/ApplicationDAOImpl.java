@@ -277,9 +277,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throws DeviceManagementDAOException {
         List<Application> applications = new ArrayList<>();
         Application application;
-        String sql = "Select " +
-                        "ID," +
-                        " NAME, " +
+        String sql = "SELECT " +
+                        "ID, " +
+                        "NAME, " +
                         "APP_IDENTIFIER, " +
                         "PLATFORM, " +
                         "CATEGORY, " +
@@ -291,9 +291,15 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         "MEMORY_USAGE, " +
                         "IS_ACTIVE, " +
                         "TENANT_ID " +
-                     "From DM_APPLICATION " +
-                     "WHERE PLATFORM = ? " +
-                     "AND TENANT_ID = ? LIMIT ? OFFSET ?";
+                    "FROM DM_APPLICATION  " +
+                    "WHERE NOT EXISTS " +
+                        "(SELECT " +
+                            "ID " +
+                        "FROM DM_APPLICATION A " +
+                        "WHERE A.NAME = DM_APPLICATION.NAME " +
+                        "AND A.ID < DM_APPLICATION.ID) " +
+                    "AND PLATFORM = ? " +
+                    "AND TENANT_ID = ?  LIMIT ? OFFSET ?";
         try {
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
