@@ -1873,6 +1873,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device policy data of devices: " + deviceIdentifiers);
                 }
+                removeDeviceApplication(conn, deviceIds);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully removed device application data of devices: " + deviceIdentifiers);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Starting to remove " + enrollmentIds.size() + " enrollment data of devices with " +
                             "identifiers: " + deviceIdentifiers);
@@ -2255,6 +2259,29 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             String msg = "SQL error occurred while removing policies of devices with deviceIds : " + deviceIds;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    /***
+     * This method removes records of a given list of devices from the DM_APPLICATION table
+     * @param conn Connection object
+     * @param deviceIds list of device ids (primary keys)
+     * @throws DeviceManagementDAOException if deletion fails
+     */
+    private void removeDeviceApplication(Connection conn, List<Integer> deviceIds)
+            throws DeviceManagementDAOException {
+        String sql = "DELETE FROM DM_APPLICATION WHERE DEVICE_ID = ?";
+        try {
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove applications of devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while removing applications of devices devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
