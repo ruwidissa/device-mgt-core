@@ -32,6 +32,16 @@ import AppNotInstalledDevicesReport from './scenes/Home/scenes/Reports/scenes/Ap
 import Geo from './scenes/Home/scenes/Geo';
 import EncryptionStatus from './scenes/Home/scenes/Reports/scenes/EncryptionStatus';
 import OutdatedOSversionReport from './scenes/Home/scenes/Reports/scenes/OutdatedOSVersion';
+import Notifications from './scenes/Home/scenes/Notifications';
+import DeviceEnroll from './scenes/Home/scenes/Devices/scenes/Enroll';
+import Groups from './scenes/Home/scenes/Groups';
+import Users from './scenes/Home/scenes/Users';
+import Policies from './scenes/Home/scenes/Policies';
+import AddNewPolicy from './scenes/Home/scenes/Policies/scenes/AddNewPolicy';
+import Roles from './scenes/Home/scenes/Roles';
+import DeviceTypes from './scenes/Home/scenes/DeviceTypes';
+import Certificates from './scenes/Home/scenes/Certificates';
+import Devices from './scenes/Home/scenes/Devices';
 
 const routes = [
   {
@@ -44,26 +54,16 @@ const routes = [
     exact: false,
     component: Home,
     routes: [
-      // {
-      //   path: '/entgra/devices',
-      //   component: Devices,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/devices/enroll',
-      //   component: DeviceEnroll,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/devices',
-      //   component: Devices,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/devices/enroll',
-      //   component: DeviceEnroll,
-      //   exact: true,
-      // },
+      {
+        path: '/entgra/devices',
+        component: Devices,
+        exact: true,
+      },
+      {
+        path: '/entgra/devices/enroll',
+        component: DeviceEnroll,
+        exact: true,
+      },
       {
         path: '/entgra/geo',
         component: Geo,
@@ -74,41 +74,46 @@ const routes = [
         component: Reports,
         exact: true,
       },
-      // {
-      //   path: '/entgra/groups',
-      //   component: Groups,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/users',
-      //   component: Users,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/policies',
-      //   component: Policies,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/policy/add',
-      //   component: AddNewPolicy,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/roles',
-      //   component: Roles,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/devicetypes',
-      //   component: DeviceTypes,
-      //   exact: true,
-      // },
-      // {
-      //   path: '/entgra/certificates',
-      //   component: Certificates,
-      //   exact: true,
-      // },
+      {
+        path: '/entgra/groups',
+        component: Groups,
+        exact: true,
+      },
+      {
+        path: '/entgra/users',
+        component: Users,
+        exact: true,
+      },
+      {
+        path: '/entgra/policies',
+        component: Policies,
+        exact: true,
+      },
+      {
+        path: '/entgra/policy/add',
+        component: AddNewPolicy,
+        exact: true,
+      },
+      {
+        path: '/entgra/roles',
+        component: Roles,
+        exact: true,
+      },
+      {
+        path: '/entgra/devicetypes',
+        component: DeviceTypes,
+        exact: true,
+      },
+      {
+        path: '/entgra/certificates',
+        component: Certificates,
+        exact: true,
+      },
+      {
+        path: '/entgra/notifications',
+        component: Notifications,
+        exact: true,
+      },
       {
         path: '/entgra/reports/enrollments',
         component: EnrollmentsVsUnenrollmentsReport,
