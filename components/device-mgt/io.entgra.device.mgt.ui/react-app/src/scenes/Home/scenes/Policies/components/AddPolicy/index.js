@@ -17,19 +17,13 @@
  */
 
 import React from 'react';
-import {
-  Button,
-  Form,
-  Row,
-  Col,
-  Card,
-  Steps,
-  message,
-  notification,
-} from 'antd';
+import { Form, Row, Col, Card, Steps, message, notification } from 'antd';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import SelectPlatform from './components/SelectPlatform';
 import ConfigureProfile from './components/ConfigureProfile';
+import SelectPolicyType from './components/SelectPolicyType';
+import AssignGroups from './components/AssignGroups';
+import PublishDevices from './components/PublishDevices';
 import axios from 'axios';
 const { Step } = Steps;
 
@@ -82,12 +76,12 @@ class AddPolicy extends React.Component {
       });
   };
 
-  onHandleNext = () => {
+  getNextStep = () => {
     const currentStepIndex = this.state.currentStepIndex + 1;
     this.setState({ currentStepIndex });
   };
 
-  onHandlePrev = () => {
+  getPrevStep = () => {
     const currentStepIndex = this.state.currentStepIndex - 1;
     this.setState({ currentStepIndex });
   };
@@ -104,7 +98,6 @@ class AddPolicy extends React.Component {
               <Step key="PolicyType" title="Select policy type" />
               <Step key="AssignGroups" title="Assign to groups" />
               <Step key="Publish" title="Publish to devices" />
-              <Step key="Result" title="Result" />
             </Steps>
           </Col>
           <Col span={16} offset={4}>
@@ -121,39 +114,32 @@ class AddPolicy extends React.Component {
               >
                 <ConfigureProfile
                   policyUIConfigurationsList={policyUIConfigurationsList}
+                  getPrevStep={this.getPrevStep}
+                  getNextStep={this.getNextStep}
                 />
               </div>
               <div
                 style={{ display: currentStepIndex === 2 ? 'unset' : 'none' }}
-              ></div>
+              >
+                <SelectPolicyType
+                  getPrevStep={this.getPrevStep}
+                  getNextStep={this.getNextStep}
+                />
+              </div>
               <div
                 style={{ display: currentStepIndex === 3 ? 'unset' : 'none' }}
-              ></div>
+              >
+                <AssignGroups
+                  getPrevStep={this.getPrevStep}
+                  getNextStep={this.getNextStep}
+                />
+              </div>
               <div
                 style={{ display: currentStepIndex === 4 ? 'unset' : 'none' }}
-              ></div>
-              <div
-                style={{ display: currentStepIndex === 5 ? 'unset' : 'none' }}
-              ></div>
+              >
+                <PublishDevices getPrevStep={this.getPrevStep} />
+              </div>
             </Card>
-          </Col>
-          <Col span={16} offset={4}>
-            <div style={{ marginTop: 24 }}>
-              {currentStepIndex > 0 && (
-                <Button
-                  style={{ marginRight: 8 }}
-                  onClick={() => this.onHandlePrev()}
-                >
-                  Previous
-                </Button>
-              )}
-              {currentStepIndex > 0 && currentStepIndex < 5 && (
-                <Button type="primary" onClick={() => this.onHandleNext()}>
-                  Next
-                </Button>
-              )}
-              {currentStepIndex === 5 && <Button type="primary">Done</Button>}
-            </div>
           </Col>
         </Row>
       </div>
