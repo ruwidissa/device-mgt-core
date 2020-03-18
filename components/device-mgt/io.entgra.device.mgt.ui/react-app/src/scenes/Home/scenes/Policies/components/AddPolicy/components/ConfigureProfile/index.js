@@ -62,8 +62,6 @@ class ConfigureProfile extends React.Component {
     };
   }
 
-  componentDidMount() {}
-
   // convert time from 24h format to 12h format
   timeConverter = time => {
     time = time
@@ -673,11 +671,6 @@ class ConfigureProfile extends React.Component {
     const { policyUIConfigurationsList } = this.props;
     return (
       <div className="tab-container">
-        {/* <div>*/}
-        {/*  <Select style={{ width: 200 }}>*/}
-        {/*    {this.getOptionForTimeSelectors(1440, 1410, 30)}*/}
-        {/*  </Select>*/}
-        {/* </div>*/}
         <Tabs tabPosition={'left'} size={'large'}>
           {policyUIConfigurationsList.map((element, i) => {
             return (
@@ -729,6 +722,16 @@ class ConfigureProfile extends React.Component {
             );
           })}
         </Tabs>
+        <Col span={16} offset={20}>
+          <div style={{ marginTop: 24 }}>
+            <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
+              Back
+            </Button>
+            <Button type="primary" onClick={this.props.getNextStep}>
+              Continue
+            </Button>
+          </div>
+        </Col>
       </div>
     );
   }
