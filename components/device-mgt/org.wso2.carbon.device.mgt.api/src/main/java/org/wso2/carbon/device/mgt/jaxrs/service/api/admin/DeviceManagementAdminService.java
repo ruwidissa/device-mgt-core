@@ -49,6 +49,7 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.general.TenantDetail;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -100,6 +101,12 @@ import java.util.List;
                         description = "Permanently Delete the device specified by device id",
                         key = "perm:devices:permanent-delete",
                         permissions = {"/device-mgt/admin/devices/permanent-delete"}
+                ),
+                @Scope(
+                        name = "Getting Details of Device tenants",
+                        description = "Getting Details of Device tenants",
+                        key = "perm:admin:tenant:view",
+                        permissions = {"/device-mgt/devices/tenants/view"}
                 )
         }
 )
@@ -353,4 +360,54 @@ public interface DeviceManagementAdminService {
                     value = "List of device identifiers.",
                     required = true)
                     List<String> deviceIdentifiers);
+
+    @GET
+    @Path("/tenants")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of tenants",
+            notes = "Get the details of tenants.",
+            response = TenantDetail.class,
+            responseContainer = "List",
+            tags = "Device Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value =
+                                    "perm:admin:tenant:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of tenants.",
+                    response = TenantDetail.class,
+                    responseContainer = "List",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the" +
+                            " tenant list.",
+                    response = ErrorResponse.class)
+    })
+    Response getTenants();
 }

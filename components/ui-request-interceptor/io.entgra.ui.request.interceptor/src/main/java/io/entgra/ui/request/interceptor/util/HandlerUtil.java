@@ -27,6 +27,7 @@ import org.apache.http.Consts;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -53,7 +54,7 @@ public class HandlerUtil {
      * @throws IOException IO exception returns if error occurs when executing the httpMethod
      */
     public static ProxyResponse execute(HttpRequestBase httpRequest) throws IOException {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
+        try (CloseableHttpClient client = getHttpClient()) {
             HttpResponse response = client.execute(httpRequest);
             ProxyResponse proxyResponse = new ProxyResponse();
 
@@ -215,6 +216,20 @@ public class HandlerUtil {
             gatewayPort = System.getProperty("iot.gateway.http.port");
         }
         return gatewayPort;
+    }
+
+    /**
+     * Retrieve Http client based on hostname verification.
+     * @return {@link CloseableHttpClient} http client
+     */
+    public static CloseableHttpClient getHttpClient() {
+        boolean isIgnoreHostnameVerification = Boolean.parseBoolean(System.
+                getProperty("org.wso2.ignoreHostnameVerification"));
+        if (isIgnoreHostnameVerification) {
+            return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+        } else {
+            return HttpClients.createDefault();
+        }
     }
 
 }

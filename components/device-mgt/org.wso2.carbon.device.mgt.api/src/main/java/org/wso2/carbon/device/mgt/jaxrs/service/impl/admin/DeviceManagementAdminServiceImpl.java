@@ -45,13 +45,19 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.general.TenantDetail;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.admin.DeviceManagementAdminService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -62,6 +68,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("/admin/devices")
@@ -187,6 +194,53 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+    }
+
+    @Override
+    @Path("/tenants")
+    @GET
+    public Response getTenants() {
+        List<TenantDetail> tenantDetails;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            RealmService realmService = (RealmService) PrivilegedCarbonContext
+                    .getThreadLocalCarbonContext().getOSGiService(RealmService.class, null);
+            if (realmService == null) {
+                String msg = "RealmService is not initialized";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+
+            try {
+                Tenant[] tenants = realmService.getTenantManager().getAllTenants();
+                tenantDetails = new ArrayList<>();
+                if (tenants != null && tenants.length > 0) {
+                    for (Tenant tenant : tenants) {
+                        TenantDetail tenantDetail = new TenantDetail();
+                        tenantDetail.setId(tenant.getId());
+                        tenantDetail.setAdminFirstName(tenant.getAdminFirstName());
+                        tenantDetail.setAdminFullName(tenant.getAdminFullName());
+                        tenantDetail.setAdminLastName(tenant.getAdminLastName());
+                        tenantDetail.setAdminName(tenant.getAdminName());
+                        tenantDetail.setDomain(tenant.getDomain());
+                        tenantDetail.setEmail(tenant.getEmail());
+                        tenantDetails.add(tenantDetail);
+                    }
+                    return Response.status(Response.Status.OK).entity(tenantDetails).build();
+                } else {
+                    return Response.status(Response.Status.NOT_FOUND).entity("No tenants found")
+                            .build();
+                }
+            } catch (UserStoreException e) {
+                String msg = "Error occurred while fetching tenant list";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("This API is available " +
+                    "for super tenant admin only.").build();
         }
     }
 }

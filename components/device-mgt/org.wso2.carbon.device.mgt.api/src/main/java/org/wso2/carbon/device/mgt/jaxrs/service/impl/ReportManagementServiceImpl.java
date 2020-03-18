@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.ReportManagementException;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
@@ -169,10 +170,10 @@ public class ReportManagementServiceImpl implements ReportManagementService {
     }
 
     @GET
-    @Path("expired-devices/{deviceType}")
+    @Path("/expired-devices/{deviceType}")
     @Override
     public Response getExpiredDevicesByOSVersion(@PathParam("deviceType") String deviceType,
-                                                 @QueryParam("osBuildDate") Long osBuildDate,
+                                                 @QueryParam("osVersion") String osVersion,
                                                  @DefaultValue("0")
                                                  @QueryParam("offset") int offset,
                                                  @DefaultValue("5")
@@ -180,20 +181,23 @@ public class ReportManagementServiceImpl implements ReportManagementService {
         try {
             PaginationRequest request = new PaginationRequest(offset, limit);
             request.setDeviceType(deviceType);
-            request.setProperty(Constants.OS_BUILD_DATE, osBuildDate);
+            request.setProperty(Constants.OS_VERSION, osVersion);
 
             PaginationResult paginationResult = DeviceMgtAPIUtils
                     .getReportManagementService()
                     .getDevicesExpiredByOSVersion(request);
 
-            return Response.status(Response.Status.OK).entity(paginationResult).build();
-        } catch (DeviceTypeNotFoundException e) {
-            String msg = "Error occurred while retrieving devices list. Device type: " + deviceType +
-                         "is not valid";
-            log.error(msg);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            DeviceList devices = new DeviceList();
+            devices.setList((List<Device>) paginationResult.getData());
+            devices.setCount(paginationResult.getRecordsTotal());
+
+            return Response.status(Response.Status.OK).entity(devices).build();
+        } catch (BadRequestException e) {
+            String msg = "Error occurred while validating device type or the OS version.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ReportManagementException e) {
-            String msg = "Error occurred while retrieving devices list with out-dated OS build versions";
+            String msg = "Error occurred while retrieving list of devices with out-dated OS versions.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
