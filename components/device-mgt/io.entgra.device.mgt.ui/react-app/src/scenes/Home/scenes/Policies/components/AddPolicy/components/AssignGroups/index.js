@@ -48,6 +48,22 @@ class AssignGroups extends React.Component {
     }
   };
 
+  // generate payload by adding Assign Groups
+  onHandleContinue = (e, formName) => {
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        if (!values.users) {
+          delete values.users;
+        }
+        if (values.deviceGroups === 'NONE') {
+          delete values.deviceGroups;
+        }
+        this.props.getPolicyPayloadData(formName, values);
+        this.props.getNextStep();
+      }
+    });
+  };
+
   getRolesList = () => {
     let apiURL =
       window.location.origin +
@@ -164,7 +180,9 @@ class AssignGroups extends React.Component {
             style={{ display: 'block' }}
           >
             <Form.Item>
-              {getFieldDecorator('roles', {})(
+              {getFieldDecorator('roles', {
+                initialValue: 'ANY',
+              })(
                 <Select
                   mode="multiple"
                   style={{ width: '100%' }}
@@ -203,7 +221,9 @@ class AssignGroups extends React.Component {
           </div>
         </div>
         <Form.Item label={'Select Groups'} style={{ display: 'block' }}>
-          {getFieldDecorator('deviceGroups', {})(
+          {getFieldDecorator('deviceGroups', {
+            initialValue: 'NONE',
+          })(
             <Select mode="multiple" style={{ width: '100%' }}>
               <Option value={'NONE'}>NONE</Option>
               {this.state.groups.map(group => (
@@ -219,7 +239,10 @@ class AssignGroups extends React.Component {
             <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
               Back
             </Button>
-            <Button type="primary" onClick={this.props.getNextStep}>
+            <Button
+              type="primary"
+              onClick={e => this.onHandleContinue(e, 'groupData')}
+            >
               Continue
             </Button>
           </div>

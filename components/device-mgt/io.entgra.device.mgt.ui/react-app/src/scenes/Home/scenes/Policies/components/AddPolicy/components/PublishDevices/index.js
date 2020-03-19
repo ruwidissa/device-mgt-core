@@ -26,6 +26,17 @@ class PublishDevices extends React.Component {
     this.config = this.props.context;
   }
 
+  onClickSavePolicy = (event, isPublish, formName) => {
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        if (isPublish) {
+          Object.assign(values, { active: isPublish });
+        }
+        this.props.getPolicyPayloadData(formName, values);
+      }
+    });
+  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     return (
@@ -51,10 +62,23 @@ class PublishDevices extends React.Component {
             <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
               Back
             </Button>
-            <Button type="primary" style={{ marginRight: 8 }}>
+            <Button
+              type="primary"
+              style={{ marginRight: 8 }}
+              onClick={e =>
+                this.onClickSavePolicy(e, true, 'publishDevicesData')
+              }
+            >
               Save & Publish
             </Button>
-            <Button type="primary">Save</Button>
+            <Button
+              type="primary"
+              onClick={e =>
+                this.onClickSavePolicy(e, false, 'publishDevicesData')
+              }
+            >
+              Save
+            </Button>
           </div>
         </Col>
       </div>
