@@ -35,6 +35,8 @@ class AddPolicy extends React.Component {
       currentStepIndex: 0,
       isLoading: false,
       policyUIConfigurationsList: [],
+      newPolicyPayload: { compliance: 'enforce' },
+      policyProfile: {},
     };
   }
 
@@ -107,6 +109,8 @@ class AddPolicy extends React.Component {
               >
                 <SelectPlatform
                   getPolicyConfigJson={this.getPolicyConfigJson}
+                  newPolicyPayload={this.state.newPolicyPayload}
+                  policyProfile={this.state.policyProfile}
                 />
               </div>
               <div
@@ -114,6 +118,7 @@ class AddPolicy extends React.Component {
               >
                 <ConfigureProfile
                   policyUIConfigurationsList={policyUIConfigurationsList}
+                  policyProfile={this.state.policyProfile}
                   getPrevStep={this.getPrevStep}
                   getNextStep={this.getNextStep}
                 />
@@ -122,6 +127,7 @@ class AddPolicy extends React.Component {
                 style={{ display: currentStepIndex === 2 ? 'unset' : 'none' }}
               >
                 <SelectPolicyType
+                  newPolicyPayload={this.state.newPolicyPayload}
                   getPrevStep={this.getPrevStep}
                   getNextStep={this.getNextStep}
                 />
@@ -130,6 +136,7 @@ class AddPolicy extends React.Component {
                 style={{ display: currentStepIndex === 3 ? 'unset' : 'none' }}
               >
                 <AssignGroups
+                  newPolicyPayload={this.state.newPolicyPayload}
                   getPrevStep={this.getPrevStep}
                   getNextStep={this.getNextStep}
                 />
@@ -137,7 +144,11 @@ class AddPolicy extends React.Component {
               <div
                 style={{ display: currentStepIndex === 4 ? 'unset' : 'none' }}
               >
-                <PublishDevices getPrevStep={this.getPrevStep} />
+                <PublishDevices
+                  newPolicyPayload={this.state.newPolicyPayload}
+                  policyProfile={this.state.policyProfile}
+                  getPrevStep={this.getPrevStep}
+                />
               </div>
             </Card>
           </Col>

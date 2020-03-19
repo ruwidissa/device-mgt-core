@@ -19,15 +19,11 @@
 import React from 'react';
 import axios from 'axios';
 import { Card, Col, Icon, message, notification, Row } from 'antd';
-import TimeAgo from 'javascript-time-ago';
-// Load locale-specific relative date/time formatting rules.
-import en from 'javascript-time-ago/locale/en';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 
 class SelectPlatform extends React.Component {
   constructor(props) {
     super(props);
-    TimeAgo.addLocale(en);
     this.config = this.props.context;
     this.state = {
       data: [],
@@ -41,6 +37,10 @@ class SelectPlatform extends React.Component {
 
   onClickCard = (e, type) => {
     this.props.getPolicyConfigJson(type);
+    let deviceType = {
+      deviceType: type,
+    };
+    Object.assign(this.props.policyProfile, deviceType);
   };
 
   // fetch data from api

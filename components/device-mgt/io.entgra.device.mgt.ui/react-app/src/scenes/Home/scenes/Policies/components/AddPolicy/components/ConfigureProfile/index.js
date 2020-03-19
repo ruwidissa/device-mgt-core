@@ -295,6 +295,16 @@ class ConfigureProfile extends React.Component {
     return columns;
   };
 
+  // generate payload by adding policy configurations
+  onHandleContinue = () => {
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        console.log(values);
+      }
+    });
+    this.props.getNextStep();
+  };
+
   // generate form items
   getPanelItems = panel => {
     const { getFieldDecorator } = this.props.form;
@@ -710,9 +720,24 @@ class ConfigureProfile extends React.Component {
                             </div>
                           }
                         >
-                          <div>
-                            <Form>{this.getPanelItems(panel.panelItem)}</Form>
-                          </div>
+                          {panel.hasOwnProperty('panelItem') && (
+                            <div>
+                              <Form>{this.getPanelItems(panel.panelItem)}</Form>
+                            </div>
+                          )}
+                          {panel.hasOwnProperty('subFormLists') && (
+                            <div>
+                              {Object.values(panel.subFormLists).map(
+                                (form, i) => {
+                                  return (
+                                    <Form key={i}>
+                                      {this.getPanelItems(form.panelItem)}
+                                    </Form>
+                                  );
+                                },
+                              )}
+                            </div>
+                          )}
                         </Collapse.Panel>
                       </Collapse>
                     </div>
@@ -727,7 +752,7 @@ class ConfigureProfile extends React.Component {
             <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
               Back
             </Button>
-            <Button type="primary" onClick={this.props.getNextStep}>
+            <Button type="primary" onClick={this.onHandleContinue}>
               Continue
             </Button>
           </div>
