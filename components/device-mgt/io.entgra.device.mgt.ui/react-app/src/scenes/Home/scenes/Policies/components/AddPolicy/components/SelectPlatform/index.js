@@ -35,12 +35,12 @@ class SelectPlatform extends React.Component {
     this.getDeviceTypes();
   }
 
-  onClickCard = (e, type) => {
+  onClickCard = (e, type, formname) => {
     this.props.getPolicyConfigJson(type);
     let deviceType = {
       deviceType: type,
     };
-    Object.assign(this.props.policyProfile, deviceType);
+    this.props.getPolicyPayloadData(formname, deviceType);
   };
 
   // fetch data from api
@@ -91,7 +91,9 @@ class SelectPlatform extends React.Component {
             size="default"
             style={{ width: 150 }}
             bordered={true}
-            onClick={e => this.onClickCard(e, data.name)}
+            onClick={e =>
+              this.onClickCard(e, data.name, 'selectedPlatformData')
+            }
             cover={
               <Icon
                 type="android"

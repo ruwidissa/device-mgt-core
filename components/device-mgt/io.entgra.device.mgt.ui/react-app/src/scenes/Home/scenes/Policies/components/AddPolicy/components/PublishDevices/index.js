@@ -26,19 +26,13 @@ class PublishDevices extends React.Component {
     this.config = this.props.context;
   }
 
-  onClickSavePolicy = (event, isPublish) => {
+  onClickSavePolicy = (event, isPublish, formName) => {
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        let policyProfile = Object.assign(this.props.policyProfile, {
-          profileName: values.policyName,
-        });
-        Object.assign(values, { profile: policyProfile });
-        Object.assign(this.props.newPolicyPayload, values);
         if (isPublish) {
-          Object.assign(this.props.newPolicyPayload, {
-            active: isPublish,
-          });
+          Object.assign(values, { active: isPublish });
         }
+        this.props.getPolicyPayloadData(formName, values);
       }
     });
   };
@@ -71,11 +65,18 @@ class PublishDevices extends React.Component {
             <Button
               type="primary"
               style={{ marginRight: 8 }}
-              onClick={() => this.onClickSavePolicy(true)}
+              onClick={e =>
+                this.onClickSavePolicy(e, true, 'publishDevicesData')
+              }
             >
               Save & Publish
             </Button>
-            <Button type="primary" onClick={this.onClickSavePolicy}>
+            <Button
+              type="primary"
+              onClick={e =>
+                this.onClickSavePolicy(e, false, 'publishDevicesData')
+              }
+            >
               Save
             </Button>
           </div>

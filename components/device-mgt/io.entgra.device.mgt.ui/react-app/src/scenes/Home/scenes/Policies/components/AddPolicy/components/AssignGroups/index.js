@@ -49,7 +49,7 @@ class AssignGroups extends React.Component {
   };
 
   // generate payload by adding Assign Groups
-  onHandleContinue = () => {
+  onHandleContinue = (e, formName) => {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         if (!values.users) {
@@ -58,10 +58,10 @@ class AssignGroups extends React.Component {
         if (values.deviceGroups === 'NONE') {
           delete values.deviceGroups;
         }
-        Object.assign(this.props.newPolicyPayload, values);
+        this.props.getPolicyPayloadData(formName, values);
+        this.props.getNextStep();
       }
     });
-    this.props.getNextStep();
   };
 
   getRolesList = () => {
@@ -239,7 +239,10 @@ class AssignGroups extends React.Component {
             <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
               Back
             </Button>
-            <Button type="primary" onClick={this.onHandleContinue}>
+            <Button
+              type="primary"
+              onClick={e => this.onHandleContinue(e, 'groupData')}
+            >
               Continue
             </Button>
           </div>

@@ -37,8 +37,44 @@ class AddPolicy extends React.Component {
       policyUIConfigurationsList: [],
       newPolicyPayload: { compliance: 'enforce' },
       policyProfile: {},
+      payloadData: {},
     };
   }
+
+  getPolicyPayloadData = (dataName, dataValue) => {
+    Object.defineProperty(this.state.payloadData, dataName, {
+      value: dataValue,
+      writable: true,
+    });
+    if (dataName === 'publishDevicesData') {
+      this.createPayload();
+    }
+  };
+
+  createPayload = () => {
+    const { newPolicyPayload } = this.state;
+    const {
+      publishDevicesData,
+      selectedPlatformData,
+      policyProfile,
+      policyTypeData,
+      groupData,
+    } = this.state.payloadData;
+    let profile = {
+      policyName: publishDevicesData.policyName,
+      devicetype: selectedPlatformData.deviceType,
+    };
+
+    let payload = Object.assign(
+      newPolicyPayload,
+      publishDevicesData,
+      policyProfile,
+      policyTypeData,
+      groupData,
+      { profile: profile },
+    );
+    console.log(payload);
+  };
 
   getPolicyConfigJson = type => {
     this.setState({ isLoading: true });
@@ -109,8 +145,7 @@ class AddPolicy extends React.Component {
               >
                 <SelectPlatform
                   getPolicyConfigJson={this.getPolicyConfigJson}
-                  newPolicyPayload={this.state.newPolicyPayload}
-                  policyProfile={this.state.policyProfile}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
                 />
               </div>
               <div
@@ -118,7 +153,7 @@ class AddPolicy extends React.Component {
               >
                 <ConfigureProfile
                   policyUIConfigurationsList={policyUIConfigurationsList}
-                  policyProfile={this.state.policyProfile}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
                   getPrevStep={this.getPrevStep}
                   getNextStep={this.getNextStep}
                 />
@@ -127,7 +162,7 @@ class AddPolicy extends React.Component {
                 style={{ display: currentStepIndex === 2 ? 'unset' : 'none' }}
               >
                 <SelectPolicyType
-                  newPolicyPayload={this.state.newPolicyPayload}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
                   getPrevStep={this.getPrevStep}
                   getNextStep={this.getNextStep}
                 />
@@ -136,7 +171,7 @@ class AddPolicy extends React.Component {
                 style={{ display: currentStepIndex === 3 ? 'unset' : 'none' }}
               >
                 <AssignGroups
-                  newPolicyPayload={this.state.newPolicyPayload}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
                   getPrevStep={this.getPrevStep}
                   getNextStep={this.getNextStep}
                 />
@@ -145,8 +180,7 @@ class AddPolicy extends React.Component {
                 style={{ display: currentStepIndex === 4 ? 'unset' : 'none' }}
               >
                 <PublishDevices
-                  newPolicyPayload={this.state.newPolicyPayload}
-                  policyProfile={this.state.policyProfile}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
                   getPrevStep={this.getPrevStep}
                 />
               </div>

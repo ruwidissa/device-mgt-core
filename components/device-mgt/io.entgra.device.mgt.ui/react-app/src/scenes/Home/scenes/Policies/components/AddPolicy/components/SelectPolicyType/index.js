@@ -45,17 +45,16 @@ class SelectPolicyType extends React.Component {
   }
 
   // generate payload using Select policy type
-  onHandleContinue = () => {
+  onHandleContinue = (e, formName) => {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         if (values.correctiveActions === 'NONE') {
           values.correctiveActions = [];
         }
-        Object.assign(this.props.newPolicyPayload, values);
+        this.props.getPolicyPayloadData(formName, values);
+        this.props.getNextStep();
       }
-      console.log('aaaaaaa');
     });
-    this.props.getNextStep();
   };
 
   fetchPolicies = () => {
@@ -156,7 +155,10 @@ class SelectPolicyType extends React.Component {
             <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
               Back
             </Button>
-            <Button type="primary" onClick={this.onHandleContinue}>
+            <Button
+              type="primary"
+              onClick={e => this.onHandleContinue(e, 'policyTypeData')}
+            >
               Continue
             </Button>
           </div>

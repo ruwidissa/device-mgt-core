@@ -296,13 +296,13 @@ class ConfigureProfile extends React.Component {
   };
 
   // generate payload by adding policy configurations
-  onHandleContinue = () => {
+  onHandleContinue = (e, formname) => {
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log(values);
+        this.props.getPolicyPayloadData(formname, values);
+        this.props.getNextStep();
       }
     });
-    this.props.getNextStep();
   };
 
   // generate form items
@@ -752,7 +752,10 @@ class ConfigureProfile extends React.Component {
             <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
               Back
             </Button>
-            <Button type="primary" onClick={this.onHandleContinue}>
+            <Button
+              type="primary"
+              onClick={e => this.onHandleContinue(e, 'configureProfileData')}
+            >
               Continue
             </Button>
           </div>
