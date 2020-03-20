@@ -32,6 +32,7 @@ class Geo extends React.Component {
   }
 
   render() {
+    const { deviceIdentifier, deviceType } = this.props.match.params;
     return (
       <div>
         <PageHeader style={{ paddingTop: 0 }}>
@@ -41,11 +42,14 @@ class Geo extends React.Component {
                 <Icon type="home" /> Home
               </Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Geo</Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link to="/entgra">Devices</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>{`Location History - ${deviceType} / ${deviceIdentifier}`}</Breadcrumb.Item>
           </Breadcrumb>
           <div className="wrap">
-            <h3>Geo</h3>
-            <Paragraph>Geo Location Service</Paragraph>
+            <h3>Location History </h3>
+            <Paragraph>{`${deviceType} / ${deviceIdentifier}`}</Paragraph>
           </div>
         </PageHeader>
         <div
@@ -56,7 +60,10 @@ class Geo extends React.Component {
             alignItems: 'center',
           }}
         >
-          <GeoDashboard />
+          <GeoDashboard
+            deviceIdentifier={deviceIdentifier}
+            deviceType={deviceType}
+          />
         </div>
       </div>
     );

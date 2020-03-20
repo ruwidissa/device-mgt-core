@@ -268,6 +268,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             } else {
                 deviceDetailsDAO.updateDeviceLocation(deviceLocation, device.getEnrolmentInfo().getId());
             }
+            deviceDetailsDAO.addDeviceLocationInfo(device, deviceLocation,
+                    CarbonContext.getThreadLocalCarbonContext().getTenantId());
             if (DeviceManagerUtil.isPublishLocationResponseEnabled()) {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getEnrolmentInfo().getOwner(), device.getType()};
                 Object[] payload = new Object[]{

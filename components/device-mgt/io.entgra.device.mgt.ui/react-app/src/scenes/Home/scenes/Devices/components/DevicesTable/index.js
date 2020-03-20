@@ -33,6 +33,7 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import BulkActionBar from './components/BulkActionBar';
+import { Link } from 'react-router-dom';
 
 let config = null;
 
@@ -125,6 +126,20 @@ const columns = [
       );
     },
     // todo add filtering options
+  },
+  {
+    title: '',
+    dataIndex: 'deviceIdentifier',
+    key: 'actions',
+    // eslint-disable-next-line react/display-name
+    render: (data, row) => {
+      const { type, deviceIdentifier } = row;
+      return (
+        <Link to={`/entgra/geo/history/${type}/${deviceIdentifier}`}>
+          <Icon type="environment" /> Location History
+        </Link>
+      );
+    },
   },
 ];
 

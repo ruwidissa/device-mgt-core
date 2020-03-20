@@ -20,7 +20,6 @@ import React from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import { Switch, Link } from 'react-router-dom';
 import RouteWithSubRoutes from '../../components/RouteWithSubRoutes';
-import { Redirect } from 'react-router';
 import './styles.css';
 import { withConfigContext } from '../../components/ConfigContext';
 import Logout from './components/Logout';
@@ -89,26 +88,6 @@ class Home extends React.Component {
                   <Menu.Item key="deviceEnroll">
                     <Link to="/entgra/devices/enroll">
                       <span>Enroll</span>
-                    </Link>
-                  </Menu.Item>
-                </SubMenu>
-                <SubMenu
-                  key="geo"
-                  title={
-                    <span>
-                      <Icon type="environment" />
-                      <span>Geo</span>
-                    </span>
-                  }
-                >
-                  <Menu.Item key="singleDevice">
-                    <Link to="/entgra/geo">
-                      <span>Single Device View</span>
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="deviceGroup">
-                    <Link to="#">
-                      <span>Device Group View</span>
                     </Link>
                   </Menu.Item>
                 </SubMenu>
@@ -198,7 +177,6 @@ class Home extends React.Component {
 
             <Content>
               <Switch>
-                <Redirect exact from="/entgra/devices" to="/entgra/reports" />
                 {this.state.routes.map(route => (
                   <RouteWithSubRoutes key={route.path} {...route} />
                 ))}
