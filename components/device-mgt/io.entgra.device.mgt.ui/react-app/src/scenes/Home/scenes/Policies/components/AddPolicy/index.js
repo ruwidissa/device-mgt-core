@@ -65,14 +65,14 @@ class AddPolicy extends React.Component {
       devicetype: selectedPlatformData.deviceType,
     };
 
-    let payload = Object.assign(
-      newPolicyPayload,
-      publishDevicesData,
-      policyProfile,
-      policyTypeData,
-      groupData,
-      { profile: profile },
-    );
+    let payload = {
+      ...newPolicyPayload,
+      ...publishDevicesData,
+      ...policyProfile,
+      ...policyTypeData,
+      ...groupData,
+      ...{ profile: profile },
+    };
     console.log(payload);
   };
 

@@ -30,7 +30,7 @@ class PublishDevices extends React.Component {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         if (isPublish) {
-          Object.assign(values, { active: isPublish });
+          values = { ...values, ...{ active: isPublish } };
         }
         this.props.getPolicyPayloadData(formName, values);
       }
