@@ -23,7 +23,6 @@ import RouteWithSubRoutes from '../../components/RouteWithSubRoutes';
 import { Redirect } from 'react-router';
 import './styles.css';
 import { withConfigContext } from '../../components/ConfigContext';
-import NotificationsDrawer from './components/NotificationsDrawer';
 import Logout from './components/Logout';
 
 const { Header, Content, Footer } = Layout;
@@ -179,7 +178,9 @@ class Home extends React.Component {
                   </Menu.Item>
                 </SubMenu>
                 <Menu.Item className="profile" key="Notifications">
-                  <NotificationsDrawer />
+                  <Link to="/entgra/notifications">
+                    <span>Notifications</span>
+                  </Link>
                 </Menu.Item>
                 <SubMenu
                   className="profile"

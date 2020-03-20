@@ -183,8 +183,7 @@ class NotificationsTable extends React.Component {
             // position: "top",
             total: data.count,
             showTotal: (total, range) =>
-              `showing ${range[0]}-${range[1]} of ${total} devices`,
-            // showQuickJumper: true
+              `showing ${range[0]}-${range[1]} of ${total} notifications`,
           }}
           loading={loading}
           onChange={this.handleTableChange}
