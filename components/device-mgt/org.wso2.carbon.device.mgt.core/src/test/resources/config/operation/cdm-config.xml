@@ -31,10 +31,10 @@
         <SchedulerTaskInitialDelay>2000</SchedulerTaskInitialDelay>
         <SchedulerTaskEnabled>true</SchedulerTaskEnabled>
         <PushNotificationProviders>
-            <Provider>io.entgra.proprietary.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider</Provider>
-            <Provider>io.entgra.proprietary.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider</Provider>
-            <Provider>io.entgra.proprietary.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider</Provider>
-            <Provider>io.entgra.proprietary.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.fcm.FCMBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.mqtt.MQTTBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.http.HTTPBasedPushNotificationProvider</Provider>
+            <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
         </PushNotificationProviders>
     </PushNotificationConfiguration>
 	<PullNotificationConfiguration>
