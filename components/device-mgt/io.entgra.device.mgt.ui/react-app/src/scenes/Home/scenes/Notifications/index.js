@@ -32,16 +32,9 @@ import { Link } from 'react-router-dom';
 
 import NotificationsTable from './Components/NotificationsTable';
 
-// eslint-disable-next-line no-unused-vars
-let config = null;
-
 class Notifications extends React.Component {
-  routes;
-
   constructor(props) {
     super(props);
-    this.routes = props.routes;
-    config = this.props.context;
     this.state = {
       visible: false,
       data: [],
