@@ -140,7 +140,6 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
         policy.setPolicyName(policyWrapper.getPolicyName());
         policy.setDescription(policyWrapper.getDescription());
         policy.setProfile(DeviceMgtUtil.convertProfile(policyWrapper.getProfile()));
-        policy.setCorrectiveActions(policyWrapper.getCorrectiveActions());
         policy.setOwnershipType(policyWrapper.getOwnershipType());
         policy.setActive(policyWrapper.isActive());
         policy.setRoles(policyWrapper.getRoles());

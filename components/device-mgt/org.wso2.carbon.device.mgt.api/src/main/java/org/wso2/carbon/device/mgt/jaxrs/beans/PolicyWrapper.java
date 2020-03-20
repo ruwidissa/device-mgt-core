@@ -126,12 +126,6 @@ public class PolicyWrapper {
     @NotNull
     private String policyType;
 
-    @ApiModelProperty(
-            name = "correctiveActions",
-            value = "List of corrective actions to be applied when the policy is violated"
-    )
-    private List<CorrectiveAction> correctiveActions;
-
     public String getPolicyType() {
         return policyType;
     }
@@ -218,13 +212,5 @@ public class PolicyWrapper {
 
     public void setDeviceGroups(List<DeviceGroupWrapper> deviceGroups) {
         this.deviceGroups = deviceGroups;
-    }
-
-    public List<CorrectiveAction> getCorrectiveActions() {
-        return correctiveActions;
-    }
-
-    public void setCorrectiveActions(List<CorrectiveAction> correctiveActions) {
-        this.correctiveActions = correctiveActions;
     }
 }

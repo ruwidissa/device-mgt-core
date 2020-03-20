@@ -35,6 +35,7 @@
 
 package org.wso2.carbon.policy.mgt.core.mgt.impl;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
@@ -101,6 +102,18 @@ public class PolicyManagerImpl implements PolicyManager {
 
                 profileDAO.addProfile(profile);
                 featureDAO.addProfileFeatures(profile.getProfileFeaturesList(), profile.getProfileId());
+                List<ProfileFeature> profileFeaturesList = profile.getProfileFeaturesList();
+                for (ProfileFeature profileFeature : profileFeaturesList) {
+                    if (profileFeature.getCorrectiveActions() != null &&
+                            !profileFeature.getCorrectiveActions().isEmpty()) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Adding corrective actions for policy " + policy.getPolicyName() +
+                                    " having policy id " + policy.getId());
+                        }
+                        policyDAO.addCorrectiveActionsOfPolicy(profileFeature.getCorrectiveActions(),
+                                policy.getId(), profileFeature.getId());
+                    }
+                }
             }
             policy = policyDAO.addPolicy(policy);
 
@@ -140,13 +153,13 @@ public class PolicyManagerImpl implements PolicyManager {
                 policyDAO.addPolicyCriteriaProperties(policy.getPolicyCriterias());
             }
 
-            if (policy.getCorrectiveActions() != null && !policy.getCorrectiveActions().isEmpty()) {
+            /*if (policy.getCorrectiveActions() != null && !policy.getCorrectiveActions().isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Adding corrective actions for policy " + policy.getPolicyName() +
                             " having policy id " + policy.getId());
                 }
                 policyDAO.addCorrectiveActionsOfPolicy(policy.getCorrectiveActions(), policy.getId());
-            }
+            }*/
 
             if (policy.isActive()) {
                 policyDAO.activatePolicy(policy.getId());
@@ -189,6 +202,8 @@ public class PolicyManagerImpl implements PolicyManager {
             List<ProfileFeature> featuresToDelete = new ArrayList<>();
             List<String> temp = new ArrayList<>();
             List<String> updateDFes = new ArrayList<>();
+            Map<Integer, List<CorrectiveAction>> updatedCorrectiveActionsMap = new HashMap<>();
+            Map<Integer, List<CorrectiveAction>> existingCorrectiveActionsMap = new HashMap<>();
 
             List<ProfileFeature> updatedFeatureList = policy.getProfile().getProfileFeaturesList();
 
@@ -196,7 +211,9 @@ public class PolicyManagerImpl implements PolicyManager {
 
             // Checks for the existing features
             for (ProfileFeature feature : updatedFeatureList) {
+                updatedCorrectiveActionsMap.put(feature.getId(), feature.getCorrectiveActions());
                 for (ProfileFeature fe : existingProfileFeaturesList) {
+                    existingCorrectiveActionsMap.put(fe.getId(), fe.getCorrectiveActions());
                     if (feature.getFeatureCode().equalsIgnoreCase(fe.getFeatureCode())) {
                         existingFeaturesList.add(feature);
                         temp.add(feature.getFeatureCode());
@@ -272,23 +289,39 @@ public class PolicyManagerImpl implements PolicyManager {
                 policyDAO.addPolicyCriteriaProperties(policy.getPolicyCriterias());
             }
 
-            List<CorrectiveAction> updatedCorrectiveActions = policy.getCorrectiveActions();
-            List<CorrectiveAction> existingCorrectiveActions = previousPolicy.getCorrectiveActions();
-            List<CorrectiveAction> correctiveActionsToUpdate = new ArrayList<>();
-            List<CorrectiveAction> correctiveActionsToDelete = new ArrayList<>();
-            List<CorrectiveAction> correctiveActionsToAdd = new ArrayList<>();
-            List<String> correctiveActionTypesToUpdate = new ArrayList<>();
-            List<String> existingCorrectiveActionTypes = new ArrayList<>();
+            /*List<CorrectiveAction> updatedCorrectiveActions = policy.getCorrectiveActions();
+            List<CorrectiveAction> existingCorrectiveActions = previousPolicy.getCorrectiveActions();*/
 
-            if (updatedCorrectiveActions != null) {
-                for (CorrectiveAction updatedCorrectiveAction : updatedCorrectiveActions) {
+            //Iterate all corrective actions in the new policy payload against it's features
+            for (Integer featureId : updatedCorrectiveActionsMap.keySet()) {
+                List<CorrectiveAction> correctiveActionsToUpdate = new ArrayList<>();
+                List<CorrectiveAction> correctiveActionsToDelete = new ArrayList<>();
+                List<CorrectiveAction> correctiveActionsToAdd = new ArrayList<>();
+
+                List<String> correctiveActionTypesToUpdate = new ArrayList<>();
+                List<String> existingCorrectiveActionTypes = new ArrayList<>();
+                List<CorrectiveAction> updatedCorrectiveActions = updatedCorrectiveActionsMap.get(featureId);
+                //Check this feature already have a corrective action
+                if (existingCorrectiveActionsMap.containsKey(featureId)) {
+                    //Existing corrective actions of the selected feature
+                    List<CorrectiveAction> existingCorrectiveActions = existingCorrectiveActionsMap.get(featureId);
+                    for (CorrectiveAction updatedCorrectiveAction : updatedCorrectiveActions) {
+                        for (CorrectiveAction existingCorrectiveAction : existingCorrectiveActions) {
+                            if (updatedCorrectiveAction.getActionType().equals(existingCorrectiveAction.getActionType())) {
+                                //If old action type is same as new action type, put them into
+                                // updating list
+                                correctiveActionsToUpdate.add(updatedCorrectiveAction);
+                                existingCorrectiveActionTypes.add(updatedCorrectiveAction.getActionType());
+                            }
+                        }
+                        //Newly added action types added to this list
+                        correctiveActionTypesToUpdate.add(updatedCorrectiveAction.getActionType());
+                    }
                     for (CorrectiveAction existingCorrectiveAction : existingCorrectiveActions) {
-                        if (updatedCorrectiveAction.getActionType().equals(existingCorrectiveAction.getActionType())) {
-                            correctiveActionsToUpdate.add(updatedCorrectiveAction);
-                            existingCorrectiveActionTypes.add(updatedCorrectiveAction.getActionType());
+                        if (!correctiveActionTypesToUpdate.contains(existingCorrectiveAction.getActionType())) {
+                            correctiveActionsToDelete.add(existingCorrectiveAction);
                         }
                     }
-                    correctiveActionTypesToUpdate.add(updatedCorrectiveAction.getActionType());
                 }
 
                 for (CorrectiveAction updatedCorrectiveAction : updatedCorrectiveActions) {
@@ -296,30 +329,42 @@ public class PolicyManagerImpl implements PolicyManager {
                         correctiveActionsToAdd.add(updatedCorrectiveAction);
                     }
                 }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Updating corrective actions for policy " + policy.getPolicyName() +
+                            " having policy id " + policy.getId());
+                }
+
+                if (!correctiveActionsToUpdate.isEmpty()) {
+                    policyDAO.updateCorrectiveActionsOfPolicy(correctiveActionsToUpdate,
+                            previousPolicy.getId(), featureId);
+                }
+
+                if (!correctiveActionsToAdd.isEmpty()) {
+                    policyDAO.addCorrectiveActionsOfPolicy(correctiveActionsToAdd,
+                            previousPolicy.getId(), featureId);
+                }
+
+                if (!correctiveActionsToDelete.isEmpty()) {
+                    policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActionsToDelete,
+                            previousPolicy.getId(), featureId);
+                }
+            }
+
+
+            /*for (CorrectiveAction updatedCorrectiveAction : updatedCorrectiveActions) {
+                if (!existingCorrectiveActionTypes.contains(updatedCorrectiveAction.getActionType())) {
+                    correctiveActionsToAdd.add(updatedCorrectiveAction);
+                }
             }
 
             for (CorrectiveAction existingCorrectiveAction : existingCorrectiveActions) {
                 if (!correctiveActionTypesToUpdate.contains(existingCorrectiveAction.getActionType())) {
                     correctiveActionsToDelete.add(existingCorrectiveAction);
                 }
-            }
+            }*/
 
-            if (log.isDebugEnabled()) {
-                log.debug("Updating corrective actions for policy " + policy.getPolicyName() +
-                        " having policy id " + policy.getId());
-            }
 
-            if (!correctiveActionsToUpdate.isEmpty()) {
-                policyDAO.updateCorrectiveActionsOfPolicy(correctiveActionsToUpdate, previousPolicy.getId());
-            }
-
-            if (!correctiveActionsToAdd.isEmpty()) {
-                policyDAO.addCorrectiveActionsOfPolicy(correctiveActionsToAdd, previousPolicy.getId());
-            }
-
-            if (!correctiveActionsToDelete.isEmpty()) {
-                policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActionsToDelete, previousPolicy.getId());
-            }
 
             PolicyManagementDAOFactory.commitTransaction();
         } catch (PolicyManagerDAOException e) {
@@ -656,7 +701,6 @@ public class PolicyManagerImpl implements PolicyManager {
                 log.debug("Retrieving corrective actions of policy " + policy.getPolicyName() +
                         " having policy id " + policy.getId());
             }
-            policy.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policyId));
 
         } catch (PolicyManagerDAOException e) {
             throw new PolicyManagementException("Error occurred while getting the policy related to policy ID (" +
@@ -681,6 +725,10 @@ public class PolicyManagerImpl implements PolicyManager {
             //   PolicyManagementDAOFactory.openConnection();
             Profile profile = profileManager.getProfile(policy.getProfileId());
             policy.setProfile(profile);
+
+            for (ProfileFeature profileFeature : policy.getProfile().getProfileFeaturesList()) {
+                profileFeature.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policyId, profileFeature.getId()));
+            }
         } catch (ProfileManagementException e) {
             throw new PolicyManagementException("Error occurred while getting the profile related to policy ID (" +
                     policyId + ")", e);
@@ -688,7 +736,11 @@ public class PolicyManagerImpl implements PolicyManager {
 //            throw new PolicyManagementException("Error occurred while opening a connection to the data source", e);
 //        } finally {
 //            PolicyManagementDAOFactory.closeConnection();
+        } catch (PolicyManagerDAOException e) {
+            throw new PolicyManagementException("Error occurred while getting the corrective " +
+                    "actions related to policy ID (" + policyId + ")", e);
         }
+
 
         return policy;
     }
@@ -1278,6 +1330,10 @@ public class PolicyManagerImpl implements PolicyManager {
             for (Profile profile : profileList) {
                 if (policy.getProfileId() == profile.getProfileId()) {
                     policy.setProfile(profile);
+                    for (ProfileFeature profileFeature : profile.getProfileFeaturesList()) {
+                        profileFeature.setCorrectiveActions(policyDAO
+                                .getCorrectiveActionsOfPolicy(policy.getId(), profileFeature.getId()));
+                    }
                 }
             }
             policy.setRoles(policyDAO.getPolicyAppliedRoles(policy.getId()));
@@ -1293,7 +1349,6 @@ public class PolicyManagerImpl implements PolicyManager {
                 log.debug("Retrieving corrective actions for policy " + policy.getPolicyName() +
                         " having policy id " + policy.getId());
             }
-            policy.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policy.getId()));
         }
         Collections.sort(policyList);
     }

@@ -201,13 +201,6 @@ public class Policy implements Comparable<Policy>, Serializable {
             example = "GENERAL")
     private String policyType;
 
-    @ApiModelProperty(
-            name = "correctiveActions",
-            value = "List of corrective actions to be applied when the policy is violated",
-            example = "[{'actionType': 'POLICY', 'policyId': 1}]"
-    )
-    private List<CorrectiveAction> correctiveActions;
-
     @XmlElement
     public int getId() {
         return id;
@@ -377,16 +370,6 @@ public class Policy implements Comparable<Policy>, Serializable {
 
     public void setPolicyType(String policyType) {
         this.policyType = policyType;
-    }
-
-    @XmlElement
-    public List<CorrectiveAction> getCorrectiveActions() {
-        return correctiveActions;
-    }
-
-    public void setCorrectiveActions(
-            List<CorrectiveAction> correctiveActions) {
-        this.correctiveActions = correctiveActions;
     }
 
     @Override

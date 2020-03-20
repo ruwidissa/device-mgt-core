@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
+import java.util.List;
 
 @ApiModel(value = "ProfileFeature", description = "This class carries all information related to profile "
         + "features")
@@ -64,6 +65,11 @@ public class ProfileFeature implements Serializable {
             example = "{\\\"enabled\\\":false}")
     private Object content;
 
+    @ApiModelProperty(name = "correctiveActions",
+            value = "List of corrective actions to be applied when the policy is violated",
+            required = true)
+    private List<CorrectiveAction> correctiveActions;
+
     public int getId() {
         return id;
     }
@@ -102,5 +108,13 @@ public class ProfileFeature implements Serializable {
 
     public void setContent(Object content) {
         this.content = content;
+    }
+
+    public List<CorrectiveAction> getCorrectiveActions() {
+        return correctiveActions;
+    }
+
+    public void setCorrectiveActions(List<CorrectiveAction> correctiveActions) {
+        this.correctiveActions = correctiveActions;
     }
 }
