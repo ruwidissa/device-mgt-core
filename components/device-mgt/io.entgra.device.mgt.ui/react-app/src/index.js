@@ -40,7 +40,7 @@ import Policies from './scenes/Home/scenes/Policies';
 import AddNewPolicy from './scenes/Home/scenes/Policies/scenes/AddNewPolicy';
 import Roles from './scenes/Home/scenes/Roles';
 import DeviceTypes from './scenes/Home/scenes/DeviceTypes';
-import Certificates from './scenes/Home/scenes/Certificates';
+import Certificates from './scenes/Home/scenes/Configurations/scenes/Certificates';
 import Devices from './scenes/Home/scenes/Devices';
 
 const routes = [
@@ -105,7 +105,7 @@ const routes = [
         exact: true,
       },
       {
-        path: '/entgra/certificates',
+        path: '/entgra/configurations/certificates',
         component: Certificates,
         exact: true,
       },
