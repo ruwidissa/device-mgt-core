@@ -257,7 +257,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             // Get the permission nodes and hand picking only device management and login perms
             final UIPermissionNode rolePermissions = this.getUIPermissionNode(roleName, userRealm);
             List<String> permList = new ArrayList<>();
-            this.iteratePermissions(rolePermissions, permList);
+            DeviceMgtAPIUtils.iteratePermissions(rolePermissions, permList);
             roleInfo.setPermissionList(rolePermissions);
             String[] permListAr = new String[permList.size()];
             roleInfo.setPermissions(permList.toArray(permListAr));
@@ -277,24 +277,6 @@ public class RoleManagementServiceImpl implements RoleManagementService {
                     .build();
         }
     }
-
-    private List<String> iteratePermissions(UIPermissionNode uiPermissionNode, List<String> list) {
-        //To prevent NullPointer exceptions
-        if (uiPermissionNode == null) {
-            return list;
-        }
-        for (UIPermissionNode permissionNode : uiPermissionNode.getNodeList()) {
-            if (permissionNode != null) {
-                list.add(permissionNode.getResourcePath());
-                if (permissionNode.getNodeList() != null
-                        && permissionNode.getNodeList().length > 0) {
-                    iteratePermissions(permissionNode, list);
-                }
-            }
-        }
-        return list;
-    }
-
 
     private List<String> getAuthorizedPermissions(UIPermissionNode uiPermissionNode, List<String> list) {
         for (UIPermissionNode permissionNode : uiPermissionNode.getNodeList()) {
