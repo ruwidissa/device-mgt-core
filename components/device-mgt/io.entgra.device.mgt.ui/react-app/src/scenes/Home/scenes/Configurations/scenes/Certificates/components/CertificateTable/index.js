@@ -30,7 +30,7 @@ import {
 import TimeAgo from 'javascript-time-ago';
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en';
-import { withConfigContext } from '../../../../../../components/ConfigContext';
+import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import Moment from 'react-moment';
 
 const { Paragraph, Text } = Typography;
