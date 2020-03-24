@@ -19,8 +19,11 @@
 package org.wso2.carbon.device.mgt.core.operation.mgt;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileOperation extends ConfigOperation implements Serializable {
+    private List<Integer> correctiveActionIds = new ArrayList<>();
 
     public Type getType() {
         return Type.PROFILE;
@@ -30,4 +33,11 @@ public class ProfileOperation extends ConfigOperation implements Serializable {
         return Control.REPEAT;
     }
 
+    public List<Integer> getCorrectiveActionIds() {
+        return correctiveActionIds;
+    }
+
+    public void setCorrectiveActionIds(List<Integer> correctiveActionIds) {
+        this.correctiveActionIds = correctiveActionIds;
+    }
 }

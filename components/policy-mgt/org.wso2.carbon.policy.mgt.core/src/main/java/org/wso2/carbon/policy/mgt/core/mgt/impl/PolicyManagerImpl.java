@@ -211,9 +211,13 @@ public class PolicyManagerImpl implements PolicyManager {
 
             // Checks for the existing features
             for (ProfileFeature feature : updatedFeatureList) {
-                updatedCorrectiveActionsMap.put(feature.getId(), feature.getCorrectiveActions());
+                if (feature.getCorrectiveActions() != null) {
+                    updatedCorrectiveActionsMap.put(feature.getId(), feature.getCorrectiveActions());
+                }
                 for (ProfileFeature fe : existingProfileFeaturesList) {
-                    existingCorrectiveActionsMap.put(fe.getId(), fe.getCorrectiveActions());
+                    if (fe.getCorrectiveActions() != null) {
+                        existingCorrectiveActionsMap.put(fe.getId(), fe.getCorrectiveActions());
+                    }
                     if (feature.getFeatureCode().equalsIgnoreCase(fe.getFeatureCode())) {
                         existingFeaturesList.add(feature);
                         temp.add(feature.getFeatureCode());
@@ -722,12 +726,16 @@ public class PolicyManagerImpl implements PolicyManager {
         policy.setDevices(deviceList);
 
         try {
-            //   PolicyManagementDAOFactory.openConnection();
             Profile profile = profileManager.getProfile(policy.getProfileId());
             policy.setProfile(profile);
 
+            PolicyManagementDAOFactory.openConnection();
             for (ProfileFeature profileFeature : policy.getProfile().getProfileFeaturesList()) {
-                profileFeature.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policyId, profileFeature.getId()));
+                List<CorrectiveAction> correctiveActionsOfPolicy = policyDAO
+                        .getCorrectiveActionsOfPolicy(policyId, profileFeature.getId());
+                if (correctiveActionsOfPolicy != null) {
+                    profileFeature.setCorrectiveActions(correctiveActionsOfPolicy);
+                }
             }
         } catch (ProfileManagementException e) {
             throw new PolicyManagementException("Error occurred while getting the profile related to policy ID (" +
@@ -739,6 +747,10 @@ public class PolicyManagerImpl implements PolicyManager {
         } catch (PolicyManagerDAOException e) {
             throw new PolicyManagementException("Error occurred while getting the corrective " +
                     "actions related to policy ID (" + policyId + ")", e);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            PolicyManagementDAOFactory.closeConnection();
         }
 
 

@@ -66,6 +66,7 @@ public final class PolicyManagementConstants {
     public static final String CORRECTIVE_POLICY_TYPE = "CORRECTIVE";
     public static final String POLICY_CORRECTIVE_ACTION_TYPE = "POLICY";
     public static final String CORRECTIVE_POLICY_FEATURE_CODE = "CORRECTIVE_POLICY";
+    public static final String CORRECTIVE_POLICY_LIST = "CORRECTIVE_ACTIONS";
 
     /**
      Caller would reference the constants using PolicyManagementConstants.DEVICE_CONFIG_XML_NAME,
