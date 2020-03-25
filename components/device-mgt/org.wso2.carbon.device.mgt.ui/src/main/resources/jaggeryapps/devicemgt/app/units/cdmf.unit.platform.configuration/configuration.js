@@ -34,6 +34,7 @@
  */
 
 function onRequest(context) {
+    var log = new Log("configuration.js");
     var utility = require("/app/modules/utility.js").utility;
     var deviceModule = require("/app/modules/business-controllers/device.js")["deviceModule"];
     var devicemgtProps = require("/app/modules/conf-reader/main.js")["conf"];
@@ -50,7 +51,7 @@ function onRequest(context) {
         if (data) {
             for (var i = 0; i < data.length; i++) {
                 var deviceTypeName = data[i].name;
-                var deviceTypeLabel = deviceTypeName.charAt(0).toUpperCase() + deviceTypeName.slice(1);;
+                var deviceTypeLabel = deviceTypeName.charAt(0).toUpperCase() + deviceTypeName.slice(1);
                 var configUnitName = utility.getTenantedDeviceUnitName(deviceTypeName, "platform.configuration");
                 if (configUnitName) {
                     var deviceTypeConfig = utility.getDeviceTypeConfig(deviceTypeName);
