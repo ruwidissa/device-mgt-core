@@ -18,9 +18,11 @@
  */
 package org.wso2.carbon.webapp.authenticator.framework;
 
+import com.google.gson.Gson;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.owasp.encoder.Encode;
@@ -42,6 +44,8 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
     private static TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
+    private static final String PERMISSION_PREFIX = "/permission/admin";
+    public static final String AUTHORIZE_PERMISSION = "Authorize-Permission";
 
     @Override
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
@@ -62,6 +66,39 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
                 authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
             WebappAuthenticator.Status status = WebappTenantAuthorizer.authorize(request, authenticationInfo);
             authenticationInfo.setStatus(status);
+        }
+
+        // This section will allow to validate a given access token is authenticated to access given
+        // resource(permission)
+        if (request.getCoyoteRequest() != null
+                && StringUtils.isNotEmpty(request.getHeader(AUTHORIZE_PERMISSION))
+                && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
+                authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
+            boolean isAllowed;
+            try {
+                isAllowed = AuthenticationFrameworkUtil.isUserAuthorized(
+                        authenticationInfo.getTenantId(), authenticationInfo.getTenantDomain(),
+                        authenticationInfo.getUsername(),
+                        PERMISSION_PREFIX + request.getHeader (AUTHORIZE_PERMISSION));
+            } catch (AuthenticationException e) {
+                String msg = "Could not authorize permission";
+                log.error(msg);
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
+                return;
+            }
+
+            if (isAllowed) {
+                Gson gson = new Gson();
+                AuthenticationFrameworkUtil.handleResponse(request, response, HttpServletResponse.SC_OK,
+                        gson.toJson(authenticationInfo));
+                return;
+            } else {
+                log.error("Unauthorized message from user " + authenticationInfo.getUsername());
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_FORBIDDEN, "Unauthorized to access the API");
+                return;
+            }
         }
 
         Tenant tenant = null;

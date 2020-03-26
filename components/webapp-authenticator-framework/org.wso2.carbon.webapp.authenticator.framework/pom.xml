@@ -86,6 +86,7 @@
                             org.wso2.carbon.utils,
                             org.wso2.carbon.utils.multitenancy,
                             org.xml.sax,
+                            com.google.gson.*,
                             javax.servlet,
                             javax.servlet.http,
                             javax.xml,
@@ -214,6 +215,10 @@
         <dependency>
             <groupId>org.wso2.carbon.devicemgt</groupId>
             <artifactId>org.wso2.carbon.device.mgt.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
