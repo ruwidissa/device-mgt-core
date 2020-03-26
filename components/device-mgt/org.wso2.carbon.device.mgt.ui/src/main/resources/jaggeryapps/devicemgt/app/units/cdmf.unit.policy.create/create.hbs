@@ -9,7 +9,7 @@
             <div class="col-md-12">
 
                 <div class="wr-steps hidden">
-                    <div class="col-md-2 col-xs-2 col-md-offset-1">
+                    <div class="col-md-2 col-xs-2 col-md-offset-2">
                         <div class="itm-wiz itm-wiz-current" data-step="policy-platform">
                             <div class="wiz-no">1</div>
                             <div class="wiz-lbl hidden-xs"><span>Select a platform</span></div>
@@ -24,15 +24,8 @@
                         <br class="c-both"/>
                     </div>
                     <div class="col-md-2 col-xs-2">
-                        <div class="itm-wiz" data-step="policy-type">
-                            <div class="wiz-no">3</div>
-                            <div class="wiz-lbl hidden-xs"><span>Select policy type</span></div>
-                        </div>
-                        <br class="c-both"/>
-                    </div>
-                    <div class="col-md-2 col-xs-2">
                         <div class="itm-wiz" data-step="policy-criteria">
-                            <div class="wiz-no">4</div>
+                            <div class="wiz-no">3</div>
                             <div class="wiz-lbl hidden-xs"><span>Assign to groups</span></div>
                         </div>
                         <br class="c-both"/>
@@ -209,48 +202,9 @@
                                 </div>
                                 <div class="wr-input-control wr-btn-grp">
                                     <a href="javascript:void(0)" class="wr-btn wizard-stepper" data-is-back-btn="true"
-                                       data-current="policy-criteria" data-next="policy-type">Back</a>
+                                       data-current="policy-criteria" data-next="policy-profile">Back</a>
                                     <a href="javascript:void(0)" class="wr-btn wizard-stepper"
                                        data-current="policy-criteria" data-next="policy-naming" data-validate="true">Continue</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-centered wr-content policy-type hidden">
-                    <div class="wr-form">
-                        <h1 id="policy-type-page-wizard-title" class="page-sub-title">ADD POLICY</h1>
-                        <hr>
-                        <div id="policy-type-wizard-steps" class="row wr-wizard"></div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <h4 class="hidden-xs"> Step 3: Select policy type</h4>
-                                <br>
-                                <div id="policy-type-main-error-msg" class="alert alert-danger hidden" role="alert">
-                                    <i class="icon fw fw-error"></i><span></span>
-                                </div>
-                                <div>
-                                    <div class="wr-input-control">
-                                        <label class="wr-input-control radio light">
-                                            <input type="radio" id="policy-type-general" name="policy-type-radio-btn"
-                                                   value="GENERAL" checked/>
-                                            <span class="helper">General Policy</span>
-                                        </label>
-                                        <label class="wr-input-control radio light">
-                                            <input type="radio" id="policy-type-corrective" name="policy-type-radio-btn"
-                                                   value="CORRECTIVE"/>
-                                            <span class="helper">Corrective Policy</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div id="select-general-policy-type"></div>
-                                <div class="wr-input-control wr-btn-grp">
-                                    <a href="javascript:void(0)" class="wr-btn wizard-stepper" data-is-back-btn="true"
-                                       data-current="policy-type" data-next="policy-profile">Back</a>
-                                    <a href="javascript:void(0)" class="wr-btn wizard-stepper"
-                                       data-current="policy-type"
-                                       data-next="policy-criteria" data-validate="false">Continue</a>
                                 </div>
                             </div>
                         </div>
@@ -288,7 +242,7 @@
                                        data-current="policy-profile" data-next="policy-platform">Back</a>
                                     <a href="javascript:void(0)" class="wr-btn wizard-stepper"
                                        data-current="policy-profile"
-                                       data-next="policy-type" data-validate="true">Continue</a>
+                                       data-next="policy-criteria" data-validate="true">Continue</a>
                                 </div>
                             </div>
                         </div>

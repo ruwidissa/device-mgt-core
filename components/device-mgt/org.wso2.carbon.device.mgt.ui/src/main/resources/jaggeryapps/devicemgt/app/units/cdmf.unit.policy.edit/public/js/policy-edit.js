@@ -280,72 +280,10 @@ stepForwardFrom["policy-profile"] = function () {
         policy["profile"] = generatePolicyProfile();
     }
 
-    var policyType = currentlyEffected.policyType;
-    $("input[name=policy-type-radio-btn][value=" + policyType + "]").prop("checked", true).trigger('change');
-
-    // add policy correction action page
-    var policyCorrectiveActionTemplateSrc =
-            "/public/cdmf.unit.policy.corrective-action/templates/policy-corrective-action.hbs";
-    var policyCorrectiveActionScriptSrc =
-            "/public/cdmf.unit.policy.corrective-action/js/policy-corrective-action.js";
-    var policyCorrectiveActionTemplateCacheKey = "policy-corrective-action";
-
-    $.template(policyCorrectiveActionTemplateCacheKey, context + policyCorrectiveActionTemplateSrc,
-               function (template) {
-                   var content = template(
-                           {
-                               "deviceType": policy["platform"],
-                               "correctivePolicies": $("#logged-in-user").data("corrective-policies")
-                           }
-                   );
-                   $("#select-general-policy-type").html(content);
-                   if ("GENERAL" === policyType && currentlyEffected.correctiveActions &&
-                        currentlyEffected.correctiveActions.length > 0) {
-                       currentlyEffected.correctiveActions.forEach(function (correctiveAction) {
-                          if ("POLICY" === correctiveAction.actionType) {
-                              if ($("#corrective-policy-input option[value=" + correctiveAction.policyId + "]").length > 0) {
-                                  $("#corrective-policy-input").val(correctiveAction.policyId);
-                              } else {
-                                  $("#corrective-action-policy-id-missing-msg").removeClass("hidden");
-                              }
-                              // returned from for each since currently only supported corrective action type is
-                              // POLICY.
-                              return true;
-                          }
-                       });
-                   }
-                   var script = document.createElement('script');
-                   script.type = 'text/javascript';
-                   script.src = context + policyCorrectiveActionScriptSrc;
-                   document.head.prepend(script);
-               });
-
-    $(".policy-type-loading-corrective-actions").addClass("hidden");
-
     // updating next-page wizard title with selected platform
     $("#policy-type-page-wizard-title").text("EDIT " + policy["platform"] + " POLICY - " + policy["name"]);
 };
 
-/**
- * Forward action of policy type page.
- */
-stepForwardFrom["policy-type"] = function () {
-    policy["type"] = $("input[name=policy-type-radio-btn]:checked").val();
-    var correctiveActionList = [];
-    if (policy.type === "GENERAL") {
-        var selectedCorrectivePolicyId = $("#corrective-policy-input").val();
-        if (selectedCorrectivePolicyId && selectedCorrectivePolicyId !== "none") {
-            var correctiveAction = {
-                "actionType": "POLICY",
-                "policyId": selectedCorrectivePolicyId
-            };
-            correctiveActionList.push(correctiveAction);
-        }
-    }
-    policy["correctiveActionList"] = correctiveActionList;
-    // updating next-page wizard title with selected platform
-    $("#policy-criteria-page-wizard-title").text("EDIT " + policy["platform"] + " POLICY - " + policy["name"]);
-};
 
 /**
  * Forward action of policy criteria page.
@@ -556,8 +494,7 @@ var updatePolicy = function (policy, state) {
         "description": policy["description"],
         "compliance": policy["selectedNonCompliantAction"],
         "ownershipType": null,
-        "policyType": policy["type"],
-        "correctiveActions": policy["correctiveActionList"],
+        "policyType": "GENERAL",
         "profile": {
             "profileName": policy["policyName"],
             "deviceType": policy["platform"],

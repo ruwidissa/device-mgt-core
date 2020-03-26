@@ -55,6 +55,8 @@ public class CorrectiveAction implements Serializable {
     )
     private List<ProfileFeature> operations;
 
+    private int featureId;
+
     public String getActionType() {
         return actionType;
     }
@@ -77,5 +79,13 @@ public class CorrectiveAction implements Serializable {
 
     public void setOperations(List<ProfileFeature> operations) {
         this.operations = operations;
+    }
+
+    public int getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(int featureId) {
+        this.featureId = featureId;
     }
 }

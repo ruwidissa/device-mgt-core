@@ -90,7 +90,6 @@ public class PolicyManagerImpl implements PolicyManager {
 
     @Override
     public Policy addPolicy(Policy policy) throws PolicyManagementException {
-
         try {
             PolicyManagementDAOFactory.beginTransaction();
             if (policy.getProfile() != null && policy.getProfile().getProfileId() == 0) {
@@ -102,6 +101,10 @@ public class PolicyManagerImpl implements PolicyManager {
 
                 profileDAO.addProfile(profile);
                 featureDAO.addProfileFeatures(profile.getProfileFeaturesList(), profile.getProfileId());
+            }
+            policy = policyDAO.addPolicy(policy);
+            if (policy.getProfile() != null) {
+                Profile profile = policy.getProfile();
                 List<ProfileFeature> profileFeaturesList = profile.getProfileFeaturesList();
                 for (ProfileFeature profileFeature : profileFeaturesList) {
                     if (profileFeature.getCorrectiveActions() != null &&
@@ -115,7 +118,6 @@ public class PolicyManagerImpl implements PolicyManager {
                     }
                 }
             }
-            policy = policyDAO.addPolicy(policy);
 
             if (policy.getUsers() != null) {
                 policyDAO.addPolicyToUser(policy.getUsers(), policy);
@@ -728,14 +730,17 @@ public class PolicyManagerImpl implements PolicyManager {
         try {
             Profile profile = profileManager.getProfile(policy.getProfileId());
             policy.setProfile(profile);
-
             PolicyManagementDAOFactory.openConnection();
+            List<CorrectiveAction> correctiveActionsOfPolicy = policyDAO
+                    .getCorrectiveActionsOfPolicy(policyId);
             for (ProfileFeature profileFeature : policy.getProfile().getProfileFeaturesList()) {
-                List<CorrectiveAction> correctiveActionsOfPolicy = policyDAO
-                        .getCorrectiveActionsOfPolicy(policyId, profileFeature.getId());
-                if (correctiveActionsOfPolicy != null) {
-                    profileFeature.setCorrectiveActions(correctiveActionsOfPolicy);
+                List<CorrectiveAction> correctiveActions = new ArrayList<>();
+                for (CorrectiveAction correctiveAction : correctiveActionsOfPolicy) {
+                    if (correctiveAction.getFeatureId() == profileFeature.getId()) {
+                        correctiveActions.add(correctiveAction);
+                    }
                 }
+                profileFeature.setCorrectiveActions(correctiveActions);
             }
         } catch (ProfileManagementException e) {
             throw new PolicyManagementException("Error occurred while getting the profile related to policy ID (" +
@@ -1339,12 +1344,19 @@ public class PolicyManagerImpl implements PolicyManager {
     private void buildPolicyList(List<Policy> policyList, List<Profile> profileList)
             throws PolicyManagerDAOException, GroupManagementException {
         for (Policy policy : policyList) {
+            List<CorrectiveAction> correctiveActionsOfPolicy = policyDAO
+                    .getCorrectiveActionsOfPolicy(policy.getId());
             for (Profile profile : profileList) {
                 if (policy.getProfileId() == profile.getProfileId()) {
                     policy.setProfile(profile);
                     for (ProfileFeature profileFeature : profile.getProfileFeaturesList()) {
-                        profileFeature.setCorrectiveActions(policyDAO
-                                .getCorrectiveActionsOfPolicy(policy.getId(), profileFeature.getId()));
+                        List<CorrectiveAction> correctiveActionList = new ArrayList<>();
+                        for (CorrectiveAction correctiveAction : correctiveActionsOfPolicy) {
+                            if (profileFeature.getId() == correctiveAction.getFeatureId()) {
+                                correctiveActionList.add(correctiveAction);
+                            }
+                        }
+                        profileFeature.setCorrectiveActions(correctiveActionList);
                     }
                 }
             }

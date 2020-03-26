@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileOperation extends ConfigOperation implements Serializable {
-    private List<Integer> correctiveActionIds = new ArrayList<>();
+    private List<Integer> correctiveActionIds;
 
     public Type getType() {
         return Type.PROFILE;

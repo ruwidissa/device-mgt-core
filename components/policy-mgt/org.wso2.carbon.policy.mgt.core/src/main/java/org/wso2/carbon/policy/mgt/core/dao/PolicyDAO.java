@@ -87,7 +87,7 @@ public interface PolicyDAO {
      * @return list of retrieved {@link CorrectiveAction}
      * @throws PolicyManagerDAOException is thrown when there is an error in retrieving corrective actions to database
      */
-    List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId, int featureId) throws PolicyManagerDAOException;
+    List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId) throws PolicyManagerDAOException;
 
     /**
      * This method is used to update corrective actions of policy in the database based on the policy ID

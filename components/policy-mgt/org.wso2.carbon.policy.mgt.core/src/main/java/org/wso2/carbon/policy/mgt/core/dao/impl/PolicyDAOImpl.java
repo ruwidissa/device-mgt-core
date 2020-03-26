@@ -290,24 +290,25 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId, int featureId) throws PolicyManagerDAOException {
+    public List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId) throws PolicyManagerDAOException {
         try {
             Connection conn = this.getConnection();
             String query = "SELECT " +
                            "ACTION_TYPE, " +
-                           "CORRECTIVE_POLICY_ID " +
+                           "CORRECTIVE_POLICY_ID, " +
+                           "FEATURE_ID "+
                            "FROM DM_POLICY_CORRECTIVE_ACTION " +
-                           "WHERE POLICY_ID = ? AND FEATURE_ID = ?";
+                           "WHERE POLICY_ID = ?";
             try (PreparedStatement selectStmt = conn.prepareStatement(query)) {
                 List<CorrectiveAction> correctiveActions = new ArrayList<>();
                 selectStmt.setInt(1, policyId);
-                selectStmt.setInt(2, featureId);
                 try (ResultSet rs = selectStmt.executeQuery()) {
                     CorrectiveAction correctiveAction;
                     while (rs.next()) {
                         correctiveAction = new CorrectiveAction();
                         correctiveAction.setActionType(rs.getString("ACTION_TYPE"));
                         correctiveAction.setPolicyId(rs.getInt("CORRECTIVE_POLICY_ID"));
+                        correctiveAction.setFeatureId(rs.getInt("FEATURE_ID"));
                         correctiveActions.add(correctiveAction);
                     }
                 }
