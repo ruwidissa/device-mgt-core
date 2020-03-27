@@ -96,7 +96,7 @@ class SelectPlatform extends React.Component {
             }
             cover={
               <Icon
-                type="android"
+                type={data.name === 'ios' ? 'apple' : data.name}
                 key="device-types"
                 style={{
                   color: '#ffffff',

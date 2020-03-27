@@ -53,18 +53,36 @@ class ConfigureProfile extends React.Component {
     this.config = this.props.context;
     this.state = {
       loading: false,
-      isDisplayMain: 'none',
       activePanelKeys: [],
       activeSubPanelKeys: [],
       subFormList: [],
       subPanelpayloadAttributes: {},
-      count: 0,
-      dataArray: [],
       customInputDataArray: [],
       inputTableDataSources: {},
-      addPolicyForms: null,
     };
   }
+
+  setProfileInfo = e => {
+    let activePolicies = [];
+    let activePolicyFields = {};
+    const allFields = this.props.form.getFieldsValue();
+    this.props.policyFeatureList.map(element => {
+      activePolicies.push(element.featureCode);
+      let featureData = JSON.parse(element.content);
+      Object.keys(featureData).map(key => {
+        let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
+        Object.keys(allFields).map(fieldName => {
+          if (fieldName.match(regex) != null) {
+            activePolicyFields[fieldName] = featureData[key];
+          }
+        });
+      });
+    });
+    this.props.form.setFieldsValue(activePolicyFields);
+    this.setState({
+      activePanelKeys: activePolicies,
+    });
+  };
 
   // convert time from 24h format to 12h format
   timeConverter = time => {
@@ -329,8 +347,12 @@ class ConfigureProfile extends React.Component {
         }
       });
     }
+    this.onFieldValidate(activeFields, formname);
+  };
+
+  onFieldValidate = (fields, formName) => {
     // validate fields and get profile features list
-    this.props.form.validateFields(activeFields, (err, values) => {
+    this.props.form.validateFields(fields, (err, values) => {
       if (!err) {
         let profileFeaturesList = [];
         for (let i = 0; i < this.state.activePanelKeys.length; i++) {
@@ -344,12 +366,12 @@ class ConfigureProfile extends React.Component {
           });
           let feature = {
             featureCode: this.state.activePanelKeys[i],
-            deviceType: 'android',
+            deviceType: this.props.deviceType,
             content: content,
           };
           profileFeaturesList.push(feature);
         }
-        this.props.getPolicyPayloadData(formname, profileFeaturesList);
+        this.props.getPolicyPayloadData(formName, profileFeaturesList);
         this.props.getNextStep();
       }
     });
@@ -745,7 +767,11 @@ class ConfigureProfile extends React.Component {
     const { getFieldDecorator } = this.props.form;
     return (
       <div className="tab-container">
-        <Tabs tabPosition={'left'} size={'large'}>
+        <Tabs
+          tabPosition={'left'}
+          size={'large'}
+          onTabClick={this.setProfileInfo}
+        >
           {policyUIConfigurationsList.map((element, i) => {
             return (
               <TabPane tab={<span>{element.name}</span>} key={i}>

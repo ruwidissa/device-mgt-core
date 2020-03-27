@@ -24,42 +24,16 @@ import TimeAgo from 'javascript-time-ago';
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
+import PolicyAction from './component/PolicyAction';
+import PolicyBulkActionBar from './component/PolicyBulkActionBar';
 
 let apiUrl;
-
-const columns = [
-  {
-    title: 'Policy Name',
-    dataIndex: 'policyName',
-    width: 100,
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-    key: 'description',
-    // render: enrolmentInfo => enrolmentInfo.owner
-    // todo add filtering options
-  },
-  {
-    title: 'Compilance',
-    dataIndex: 'compliance',
-    key: 'compliance',
-    //  render: enrolmentInfo => enrolmentInfo.ownership
-    // todo add filtering options
-  },
-  {
-    title: 'Policy Type',
-    dataIndex: 'policyType',
-    key: 'policyType',
-    //  render: enrolmentInfo => enrolmentInfo.ownership
-    // todo add filtering options
-  },
-];
 
 class PoliciesTable extends React.Component {
   constructor(props) {
     super(props);
     TimeAgo.addLocale(en);
+    this.config = this.props.context;
     this.state = {
       data: [],
       pagination: {},
@@ -149,10 +123,203 @@ class PoliciesTable extends React.Component {
     });
   };
 
+  unpublishPolicy = () => {
+    const policyIDs = this.state.selectedRows.map(obj => obj.id);
+    // send request to the invoker
+    axios
+      .post(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/policies/deactivate-policy',
+        policyIDs,
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+      .then(res => {
+        if (res.status === 200) {
+          this.fetchGroups();
+          notification.success({
+            message: 'Done',
+            duration: 4,
+            description: 'Selected policy(s) was successfully unpublished',
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to unpublish policy(s).',
+          });
+        }
+      });
+  };
+
+  publishPolicy = () => {
+    const policyIDs = this.state.selectedRows.map(obj => obj.id);
+    // send request to the invoker
+    axios
+      .post(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/policies/activate-policy',
+        policyIDs,
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+      .then(res => {
+        if (res.status === 200) {
+          this.fetchGroups();
+          notification.success({
+            message: 'Done',
+            duration: 4,
+            description: 'Selected policy(s) was successfully unpublished',
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to unpublish policy(s).',
+          });
+        }
+      });
+  };
+
+  removePolicy = () => {
+    const policyIDs = this.state.selectedRows.map(obj => obj.id);
+    // send request to the invoker
+    axios
+      .post(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/policies/remove-policy',
+        policyIDs,
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+      .then(res => {
+        if (res.status === 200) {
+          this.fetchGroups();
+          notification.success({
+            message: 'Done',
+            duration: 4,
+            description: 'Selected policy(s) was successfully removed.',
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to remove policy(s).',
+          });
+        }
+      });
+  };
+
+  applyChanges = () => {
+    // send request to the invoker
+    axios
+      .put(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/policies/apply-changes',
+        'null',
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+      .then(res => {
+        if (res.status === 200) {
+          this.fetchGroups();
+          notification.success({
+            message: 'Done',
+            duration: 4,
+            description: 'Changes applied successfully.',
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description:
+              'Error occurred while trying to apply changes to device.',
+          });
+        }
+      });
+  };
+
   render() {
-    const { data, pagination, loading } = this.state;
+    const { data, pagination, loading, selectedRows } = this.state;
+    const columns = [
+      {
+        title: 'Policy Name',
+        dataIndex: 'policyName',
+        width: 100,
+      },
+      {
+        title: 'Description',
+        dataIndex: 'description',
+        key: 'description',
+        // render: enrolmentInfo => enrolmentInfo.owner
+        // todo add filtering options
+      },
+      {
+        title: 'Compilance',
+        dataIndex: 'compliance',
+        key: 'compliance',
+        //  render: enrolmentInfo => enrolmentInfo.ownership
+        // todo add filtering options
+      },
+      {
+        title: 'Policy Type',
+        dataIndex: 'policyType',
+        key: 'policyType',
+        //  render: enrolmentInfo => enrolmentInfo.ownership
+        // todo add filtering options
+      },
+      {
+        title: 'Action',
+        dataIndex: 'id',
+        key: 'action',
+        render: (id, row) => (
+          <span>
+            <PolicyAction selectedPolicyData={row} />
+          </span>
+        ),
+      },
+    ];
     return (
       <div>
+        <PolicyBulkActionBar
+          selectedRows={selectedRows}
+          unpublishPolicy={this.unpublishPolicy}
+          publishPolicy={this.publishPolicy}
+          removePolicy={this.removePolicy}
+          applyChanges={this.applyChanges}
+        />
         <Table
           columns={columns}
           rowKey={record => record.id}

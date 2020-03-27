@@ -26,16 +26,16 @@ class PublishDevices extends React.Component {
     this.config = this.props.context;
   }
 
-  onClickSavePolicy = (event, isPublish, formName) => {
+  onClickSavePolicy = (event, formName) => {
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        values.active = isPublish;
         this.props.getPolicyPayloadData(formName, values);
       }
     });
   };
 
   render() {
+    const { policyData } = this.props;
     const { getFieldDecorator } = this.props.form;
     return (
       <div>
@@ -44,6 +44,7 @@ class PublishDevices extends React.Component {
           style={{ display: 'block' }}
         >
           {getFieldDecorator('policyName', {
+            initialValue: policyData.policyName,
             rules: [
               {
                 pattern: new RegExp('^.{1,30}$'),
@@ -53,7 +54,9 @@ class PublishDevices extends React.Component {
           })(<Input placeholder={'Should be 1 to 30 characters long'} />)}
         </Form.Item>
         <Form.Item label={'Add a Description'} style={{ display: 'block' }}>
-          {getFieldDecorator('description', {})(<TextArea rows={8} />)}
+          {getFieldDecorator('description', {
+            initialValue: policyData.description,
+          })(<TextArea rows={8} />)}
         </Form.Item>
         <Col span={16} offset={18}>
           <div style={{ marginTop: 24 }}>
@@ -63,17 +66,13 @@ class PublishDevices extends React.Component {
             <Button
               type="primary"
               style={{ marginRight: 8 }}
-              onClick={e =>
-                this.onClickSavePolicy(e, true, 'publishDevicesData')
-              }
+              onClick={e => this.onClickSavePolicy(e, 'publishDevicesData')}
             >
               Save & Publish
             </Button>
             <Button
               type="primary"
-              onClick={e =>
-                this.onClickSavePolicy(e, false, 'publishDevicesData')
-              }
+              onClick={e => this.onClickSavePolicy(e, 'publishDevicesData')}
             >
               Save
             </Button>

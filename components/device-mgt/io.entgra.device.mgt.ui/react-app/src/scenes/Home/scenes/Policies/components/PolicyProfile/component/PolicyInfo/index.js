@@ -18,53 +18,71 @@
 
 import React from 'react';
 import {
-  Tabs,
-  Row,
-  Col,
-  Switch,
-  Input,
-  Typography,
-  Form,
-  Collapse,
-  Checkbox,
-  Select,
-  Tooltip,
-  Icon,
-  Table,
   Alert,
-  Upload,
-  Popconfirm,
   Button,
+  Checkbox,
+  Col,
+  Collapse,
+  Form,
+  Icon,
+  Input,
+  Popconfirm,
   Radio,
+  Row,
+  Select,
+  Table,
+  Tabs,
+  Tooltip,
+  Typography,
+  Upload,
 } from 'antd';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
-import '../../../../styles.css';
 import moment from 'moment';
+
 const { Text, Title, Paragraph } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 const { TextArea } = Input;
 
 const subPanelpayloadAttributes = {};
+const fieldKeys = [];
 
-class ConfigureProfile extends React.Component {
+class PolicyInfo extends React.Component {
   constructor(props) {
     super(props);
     this.config = this.props.context;
     this.state = {
-      loading: false,
-      isDisplayMain: 'none',
+      data: {},
+      policyFeatureList: [],
       activePanelKeys: [],
-      activeSubPanelKeys: [],
-      subFormList: [],
-      subPanelpayloadAttributes: {},
-      count: 0,
-      dataArray: [],
+      profilePreviewKey: '',
       customInputDataArray: [],
       inputTableDataSources: {},
-      addPolicyForms: null,
+      isInfoPreview: false,
     };
   }
+
+  setProfileInfo = e => {
+    let activePolicies = [];
+    let activePolicyFields = {};
+    const allFields = this.props.form.getFieldsValue();
+    this.props.policyFeatureList.map(element => {
+      activePolicies.push(element.featureCode);
+      let featureData = JSON.parse(element.content);
+      Object.keys(featureData).map(key => {
+        let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
+        Object.keys(allFields).map(fieldName => {
+          if (fieldName.match(regex) != null) {
+            activePolicyFields[fieldName] = featureData[key];
+          }
+        });
+      });
+    });
+    this.props.form.setFieldsValue(activePolicyFields);
+    this.setState({
+      activePanelKeys: activePolicies,
+    });
+  };
 
   // convert time from 24h format to 12h format
   timeConverter = time => {
@@ -152,68 +170,6 @@ class ConfigureProfile extends React.Component {
     }
   };
 
-  // handle items which handle from checkbox
-  handleSubPanel = e => {
-    if (e.target.checked) {
-      let joined = this.state.activeSubPanelKeys.concat(e.target.id);
-      this.setState({ activeSubPanelKeys: joined });
-    } else {
-      let index = this.state.activeSubPanelKeys.indexOf(e.target.id);
-      if (index !== -1) {
-        this.state.activeSubPanelKeys.splice(index, 1);
-        let removed = this.state.activeSubPanelKeys;
-        this.setState({ activeSubPanelKeys: removed });
-      }
-    }
-  };
-
-  // handle Switch on off button
-  handleMainPanel = (e, ref) => {
-    if (e) {
-      let joined = this.state.activePanelKeys.concat(ref);
-      this.setState({ activePanelKeys: joined });
-    } else {
-      let index = this.state.activePanelKeys.indexOf(ref);
-      if (index !== -1) {
-        this.state.activePanelKeys.splice(index, 1);
-        let removed = this.state.activePanelKeys;
-        this.setState({ activePanelKeys: removed });
-      }
-    }
-  };
-
-  handleCustomInputTable = event => {
-    const { count, customInputDataArray } = this.state;
-
-    const newData = [
-      {
-        key: count,
-        CERT_NAME: `${event.file.name}`,
-      },
-    ];
-    this.setState({
-      customInputDataArray: [...customInputDataArray, newData],
-      count: count + 1,
-    });
-  };
-
-  handleAdd = array => {
-    const { count, inputTableDataSources } = this.state;
-    const newData = [
-      {
-        key: count,
-      },
-    ];
-    inputTableDataSources[array].push(newData);
-    Object.defineProperty(inputTableDataSources, array, {
-      value: inputTableDataSources[array],
-    });
-    this.setState({
-      inputTableDataSources,
-      count: count + 1,
-    });
-  };
-
   getColumns = ({ getFieldDecorator }, arr) => {
     const columnArray = [];
     const actionColumn = [
@@ -299,67 +255,12 @@ class ConfigureProfile extends React.Component {
     return columns;
   };
 
-  // generate payload by adding policy configurations
-  onHandleContinue = (e, formname) => {
-    const allFields = this.props.form.getFieldsValue();
-    let activeFields = [];
-    // get currently active field list
-    for (let i = 0; i < this.state.activePanelKeys.length; i++) {
-      Object.keys(allFields).map(key => {
-        if (key.includes(`${this.state.activePanelKeys[i]}-`)) {
-          if (
-            subPanelpayloadAttributes.hasOwnProperty(
-              `${this.state.activePanelKeys[i]}`,
-            )
-          ) {
-            Object.keys(
-              subPanelpayloadAttributes[this.state.activePanelKeys[i]],
-            ).map(subPanel => {
-              if (`${this.state.activePanelKeys[i]}-${subPanel}` === true) {
-                if (key.includes(`-${subPanel}-`)) {
-                  activeFields.push(key);
-                }
-              } else if (!key.includes(`-${subPanel}-`)) {
-                activeFields.push(key);
-              }
-            });
-          } else {
-            activeFields.push(key);
-          }
-        }
-      });
-    }
-    // validate fields and get profile features list
-    this.props.form.validateFields(activeFields, (err, values) => {
-      if (!err) {
-        let profileFeaturesList = [];
-        for (let i = 0; i < this.state.activePanelKeys.length; i++) {
-          let content = {};
-          Object.entries(values).map(([key, value]) => {
-            if (key.includes(`${this.state.activePanelKeys[i]}-`)) {
-              content[
-                key.replace(`${this.state.activePanelKeys[i]}-`, '')
-              ] = value;
-            }
-          });
-          let feature = {
-            featureCode: this.state.activePanelKeys[i],
-            deviceType: 'android',
-            content: content,
-          };
-          profileFeaturesList.push(feature);
-        }
-        this.props.getPolicyPayloadData(formname, profileFeaturesList);
-        this.props.getNextStep();
-      }
-    });
-  };
-
   // generate form items
   getPanelItems = (panel, panelId) => {
     const { getFieldDecorator } = this.props.form;
     const subPanelList = {};
     return panel.map((item, k) => {
+      fieldKeys.push(item.id);
       switch (item.type) {
         case 'select':
           if (item.optional.hasOwnProperty('subPanel')) {
@@ -491,7 +392,7 @@ class ConfigureProfile extends React.Component {
                     message: `${item.optional.rules.validationMsg}`,
                   },
                 ],
-              })(<Input placeholder={item.optional.placeholder} />)}
+              })(<Input placeholder={item.optional.placeholder} disabled />)}
             </Form.Item>
           );
         case 'checkbox':
@@ -512,7 +413,7 @@ class ConfigureProfile extends React.Component {
                           valuePropName: 'checked',
                           initialValue: item.optional.ischecked,
                         })(
-                          <Checkbox onChange={this.handleSubPanel}>
+                          <Checkbox>
                             <span>
                               {item.label}&nbsp;
                               <Tooltip title={item.tooltip} placement="right">
@@ -589,6 +490,7 @@ class ConfigureProfile extends React.Component {
                 <TextArea
                   placeholder={item.optional.placeholder}
                   rows={item.optional.row}
+                  disabled
                 />,
               )}
             </Form.Item>
@@ -695,14 +597,6 @@ class ConfigureProfile extends React.Component {
           }
           return (
             <div key={k}>
-              <Button
-                onClick={() => this.handleAdd(item.optional.dataSource)}
-                type="primary"
-                style={{ marginBottom: 16 }}
-              >
-                <Icon type="plus-circle" />
-                {item.optional.button.name}
-              </Button>
               <Table
                 id={item.id}
                 dataSource={
@@ -718,12 +612,6 @@ class ConfigureProfile extends React.Component {
         case 'customInputTable':
           return (
             <div key={k}>
-              <Upload onChange={this.handleCustomInputTable}>
-                <Button type="primary" style={{ marginBottom: 16 }}>
-                  <Icon type="plus-circle" />
-                  {item.optional.button.name}
-                </Button>
-              </Upload>
               <Table
                 id={item.id}
                 dataSource={this.state.customInputDataArray}
@@ -740,108 +628,129 @@ class ConfigureProfile extends React.Component {
     });
   };
 
+  onPreview = e => {
+    this.setState({
+      profilePreviewKey: 'profileInfo',
+      isInfoPreview: true,
+    });
+  };
+
   render() {
     const { policyUIConfigurationsList } = this.props;
     const { getFieldDecorator } = this.props.form;
     return (
-      <div className="tab-container">
-        <Tabs tabPosition={'left'} size={'large'}>
-          {policyUIConfigurationsList.map((element, i) => {
-            return (
-              <TabPane tab={<span>{element.name}</span>} key={i}>
-                {Object.values(element.panels).map((panel, j) => {
-                  panel = panel.panel;
+      <div style={{ marginTop: 20 }}>
+        <Row>
+          <Col span={4}>
+            <Title level={4}>Profile Information</Title>
+          </Col>
+          <Col span={16}>
+            <Button type="link" icon="eye" onClick={this.onPreview}>
+              <Text
+                style={{
+                  fontSize: 'small',
+                  display: this.state.isInfoPreview ? 'none' : 'inline',
+                }}
+              >
+                (Click to view policy information)
+              </Text>
+            </Button>
+          </Col>
+        </Row>
+        <Collapse
+          bordered={false}
+          activeKey={this.state.profilePreviewKey}
+          style={{ display: this.state.isInfoPreview ? 'block' : 'none' }}
+        >
+          <Collapse.Panel
+            key={'profileInfo'}
+            showArrow={false}
+            style={{
+              border: 0,
+            }}
+          >
+            <div className="tab-container">
+              <Tabs
+                tabPosition={'left'}
+                size={'large'}
+                onChange={this.setProfileInfo}
+              >
+                {policyUIConfigurationsList.map((element, i) => {
                   return (
-                    <div key={j}>
-                      <Collapse
-                        bordered={false}
-                        activeKey={this.state.activePanelKeys}
-                      >
-                        <Collapse.Panel
-                          key={panel.panelId}
-                          showArrow={false}
-                          style={{ border: 0 }}
-                          header={
-                            <div>
-                              <Row>
-                                <Col offset={0} span={14}>
-                                  <Title level={4}> {panel.title} </Title>
-                                </Col>
-                                <Col offset={8} span={1}>
-                                  <Switch
-                                    checkedChildren="ON"
-                                    unCheckedChildren="OFF"
-                                    onChange={e =>
-                                      this.handleMainPanel(
-                                        e,
-                                        `${panel.panelId}`,
-                                      )
-                                    }
-                                  />
-                                </Col>
-                              </Row>
-                              <Row>{panel.description}</Row>
-                            </div>
-                          }
-                        >
-                          {panel.hasOwnProperty('panelItem') && (
-                            <div>
-                              <Form name={panel.panelId}>
-                                <Form.Item style={{ display: 'none' }}>
-                                  {getFieldDecorator(`${panel.panelId}`, {
-                                    initialValue: ' ',
-                                  })(<Input />)}
-                                </Form.Item>
-                                {this.getPanelItems(
-                                  panel.panelItem,
-                                  panel.panelId,
-                                )}
-                              </Form>
-                            </div>
-                          )}
-                          {panel.hasOwnProperty('subFormLists') && (
-                            <div>
-                              {Object.values(panel.subFormLists).map(
-                                (form, i) => {
-                                  return (
-                                    <Form name={form.id} key={i}>
+                    <TabPane tab={<span>{element.name}</span>} key={i}>
+                      {Object.values(element.panels).map((panel, j) => {
+                        panel = panel.panel;
+                        return (
+                          <div key={j}>
+                            <Collapse
+                              bordered={false}
+                              activeKey={this.state.activePanelKeys}
+                            >
+                              <Collapse.Panel
+                                key={panel.panelId}
+                                showArrow={false}
+                                style={{ border: 0 }}
+                                header={
+                                  <div>
+                                    <Row>
+                                      <Col offset={0} span={14}>
+                                        <Title level={4}> {panel.title} </Title>
+                                      </Col>
+                                    </Row>
+                                    <Row>{panel.description}</Row>
+                                  </div>
+                                }
+                              >
+                                {panel.hasOwnProperty('panelItem') && (
+                                  <div>
+                                    <Form name={panel.panelId}>
                                       <Form.Item style={{ display: 'none' }}>
-                                        {getFieldDecorator(`${form.id}`, {
+                                        {getFieldDecorator(`${panel.panelId}`, {
                                           initialValue: ' ',
                                         })(<Input />)}
                                       </Form.Item>
-                                      {this.getPanelItems(form.panelItem)}
+                                      {this.getPanelItems(
+                                        panel.panelItem,
+                                        panel.panelId,
+                                      )}
                                     </Form>
-                                  );
-                                },
-                              )}
-                            </div>
-                          )}
-                        </Collapse.Panel>
-                      </Collapse>
-                    </div>
+                                  </div>
+                                )}
+                                {panel.hasOwnProperty('subFormLists') && (
+                                  <div>
+                                    {Object.values(panel.subFormLists).map(
+                                      (form, i) => {
+                                        return (
+                                          <Form name={form.id} key={i}>
+                                            <Form.Item
+                                              style={{ display: 'none' }}
+                                            >
+                                              {getFieldDecorator(`${form.id}`, {
+                                                initialValue: ' ',
+                                              })(<Input />)}
+                                            </Form.Item>
+                                            {this.getPanelItems(form.panelItem)}
+                                          </Form>
+                                        );
+                                      },
+                                    )}
+                                  </div>
+                                )}
+                              </Collapse.Panel>
+                            </Collapse>
+                          </div>
+                        );
+                      })}
+                    </TabPane>
                   );
                 })}
-              </TabPane>
-            );
-          })}
-        </Tabs>
-        <Col span={16} offset={20}>
-          <div style={{ marginTop: 24 }}>
-            <Button style={{ marginRight: 8 }} onClick={this.props.getPrevStep}>
-              Back
-            </Button>
-            <Button
-              type="primary"
-              onClick={e => this.onHandleContinue(e, 'configureProfileData')}
-            >
-              Continue
-            </Button>
-          </div>
-        </Col>
+              </Tabs>
+            </div>
+          </Collapse.Panel>
+        </Collapse>
       </div>
     );
   }
 }
 
-export default withConfigContext(Form.create()(ConfigureProfile));
+export default withConfigContext(Form.create()(PolicyInfo));

@@ -168,7 +168,14 @@ class AssignGroups extends React.Component {
   };
 
   render() {
+    const { policyData } = this.props;
     const { getFieldDecorator } = this.props.form;
+    let deviceGroups = null;
+    if (policyData.deviceGroups.length > 0) {
+      deviceGroups = policyData.deviceGroups;
+    } else {
+      deviceGroups = 'NONE';
+    }
     return (
       <div>
         <div>
@@ -186,7 +193,7 @@ class AssignGroups extends React.Component {
           >
             <Form.Item>
               {getFieldDecorator('roles', {
-                initialValue: 'ANY',
+                initialValue: policyData.roles,
               })(
                 <Select
                   mode="multiple"
@@ -209,7 +216,9 @@ class AssignGroups extends React.Component {
             style={{ display: 'none' }}
           >
             <Form.Item>
-              {getFieldDecorator('users', {})(
+              {getFieldDecorator('users', {
+                initialValue: policyData.users,
+              })(
                 <Select
                   mode="multiple"
                   style={{ width: '100%' }}
@@ -227,7 +236,7 @@ class AssignGroups extends React.Component {
         </div>
         <Form.Item label={'Select Groups'} style={{ display: 'block' }}>
           {getFieldDecorator('deviceGroups', {
-            initialValue: 'NONE',
+            initialValue: deviceGroups,
           })(
             <Select mode="multiple" style={{ width: '100%' }}>
               <Option value={'NONE'}>NONE</Option>
