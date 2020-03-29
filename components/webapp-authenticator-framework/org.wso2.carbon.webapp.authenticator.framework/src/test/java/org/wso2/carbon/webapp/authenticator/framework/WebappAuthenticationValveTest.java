@@ -55,8 +55,9 @@ public class WebappAuthenticationValveTest {
 
     @Test(description = "This method tests the invoke method of the WebAppAuthenticationValve with the context path "
             + "starting with carbon")
-    public void testInvokeWithContextSkippedScenario1() {
+    public void testInvokeWithContextSkippedScenario1() throws NoSuchFieldException, IllegalAccessException {
         Request request = new Request();
+        getCoyoteRequest(request);
         Context context = new StandardContext();
         context.setPath("carbon");
         CompositeValve compositeValve = Mockito.mock(CompositeValve.class);
@@ -64,6 +65,7 @@ public class WebappAuthenticationValveTest {
         request.setContext(context);
         webappAuthenticationValve.invoke(request, null, compositeValve);
         request = new TestRequest("", "test");
+        getCoyoteRequest(request);
         context = new StandardContext();
         compositeValve = Mockito.mock(CompositeValve.class);
         Mockito.doNothing().when(compositeValve).continueInvocation(Mockito.any(), Mockito.any());
@@ -73,8 +75,9 @@ public class WebappAuthenticationValveTest {
 
     @Test(description = "This method tests the behaviour of the invoke method of WebAuthenticationValve when "
             + "un-secured endpoints are invoked.")
-    public void testInvokeUnSecuredEndpoints() {
+    public void testInvokeUnSecuredEndpoints() throws IllegalAccessException, NoSuchFieldException {
         Request request = new TestRequest("", "test");
+        getCoyoteRequest(request);
         Context context = new StandardContext();
         context.setPath("carbon1");
         context.addParameter("doAuthentication", String.valueOf(true));
@@ -83,6 +86,22 @@ public class WebappAuthenticationValveTest {
         Mockito.doNothing().when(compositeValve).continueInvocation(Mockito.any(), Mockito.any());
         request.setContext(context);
         webappAuthenticationValve.invoke(request, null, compositeValve);
+    }
+
+    private void getCoyoteRequest(Request request) throws
+            IllegalAccessException,
+            NoSuchFieldException {
+
+        Field headersField = org.apache.coyote.Request.class.getDeclaredField("headers");
+        headersField.setAccessible(true);
+        org.apache.coyote.Request coyoteRequest = new org.apache.coyote.Request();
+
+        MimeHeaders mimeHeaders = new MimeHeaders();
+        MessageBytes bytes = mimeHeaders.addValue("content-type");
+        bytes.setString("test");
+
+        headersField.set(coyoteRequest, mimeHeaders);
+        request.setCoyoteRequest(coyoteRequest);
     }
 
     @Test(description = "This method tests the behaviour of the invoke method of WebAuthenticationValve when "
