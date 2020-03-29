@@ -50,8 +50,9 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
     @Override
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
 
-        if (this.isContextSkipped(request) ||  this.skipAuthentication(request)) {
-            this.getNext().invoke(request, response, compositeValve);
+        if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))
+                && (StringUtils.isEmpty(request.getHeader(AUTHORIZE_PERMISSION)))) {
+                this.getNext().invoke(request, response, compositeValve);
             return;
         }
 
@@ -109,7 +110,8 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
                 privilegedCarbonContext.setTenantId(authenticationInfo.getTenantId());
                 privilegedCarbonContext.setTenantDomain(authenticationInfo.getTenantDomain());
                 privilegedCarbonContext.setUsername(authenticationInfo.getUsername());
-                if (authenticationInfo.isSuperTenantAdmin()) {
+                if (authenticationInfo.isSuperTenantAdmin() && request.getHeader(Constants
+                        .PROXY_TENANT_ID) != null) {
                     // If this is a call from super admin to an API and the ProxyTenantId is also
                     // present, this is a call that is made with super admin credentials to call
                     // an API on behalf of another tenant. Hence the actual tenants, details are
