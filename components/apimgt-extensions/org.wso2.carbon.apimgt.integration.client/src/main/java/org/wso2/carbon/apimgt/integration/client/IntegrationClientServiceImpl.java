@@ -18,14 +18,13 @@
 
 package org.wso2.carbon.apimgt.integration.client;
 
-import feign.RequestInterceptor;
 import org.wso2.carbon.apimgt.integration.client.publisher.PublisherClient;
 import org.wso2.carbon.apimgt.integration.client.service.IntegrationClientService;
 import org.wso2.carbon.apimgt.integration.client.store.StoreClient;
 
 public class IntegrationClientServiceImpl implements IntegrationClientService {
 
-    private static IntegrationClientServiceImpl instance;
+    private static volatile IntegrationClientServiceImpl instance;
     private StoreClient storeClient;
     private PublisherClient publisherClient;
     private OAuthRequestInterceptor oAuthRequestInterceptor;

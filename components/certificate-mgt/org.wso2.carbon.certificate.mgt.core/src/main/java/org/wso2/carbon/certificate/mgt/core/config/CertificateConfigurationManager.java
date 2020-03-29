@@ -35,7 +35,7 @@ import java.io.File;
 public class CertificateConfigurationManager {
 
     private CertificateManagementConfig certificateManagementConfig;
-    private static CertificateConfigurationManager certificateConfigurationManager;
+    private static volatile CertificateConfigurationManager certificateConfigurationManager;
 
     private final String certMgtConfigXMLPath = CarbonUtils.getCarbonConfigDirPath() + File.separator +
                                                 CertificateManagementConstants.CERTIFICATE_CONFIG_XML_FILE;

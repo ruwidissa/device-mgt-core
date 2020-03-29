@@ -54,19 +54,32 @@ public class NotificationManagementServiceImpl implements NotificationManagement
     }
 
     @Override
+    @Deprecated
     public boolean addNotification(DeviceIdentifier deviceId,
+                                   Notification notification) throws NotificationManagementException {
+        Device device;
+        try {
+            device = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
+                    .getDevice(deviceId, false);
+        } catch (DeviceManagementException e) {
+            throw new NotificationManagementException("Error occurred while retrieving device data for " +
+                    " adding notification", e);
+        }
+        if (device == null) {
+            throw new EntityDoesNotExistException("No device is found with type '" + deviceId.getType() +
+                    "' and id '" + deviceId.getId() + "'");
+        }
+        return addNotification(device, notification);
+    }
+
+    @Override
+    public boolean addNotification(Device device,
                                    Notification notification) throws NotificationManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Adding a Notification : [" + notification.toString() + "]");
         }
         int notificationId;
         int tenantId = NotificationDAOUtil.getTenantId();
-
-        Device device = this.getDevice(deviceId);
-        if (device == null) {
-            throw new EntityDoesNotExistException("No device is found with type '" + deviceId.getType() +
-                    "' and id '" + deviceId.getId() + "'");
-        }
 
         try {
             NotificationManagementDAOFactory.beginTransaction();
@@ -82,17 +95,6 @@ public class NotificationManagementServiceImpl implements NotificationManagement
             log.debug("Notification id : " + notificationId + " was added to the table.");
         }
         return true;
-    }
-
-    private Device getDevice(DeviceIdentifier deviceId) throws NotificationManagementException {
-        Device device;
-        try {
-            device = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider().getDevice(deviceId, false);
-        } catch (DeviceManagementException e) {
-            throw new NotificationManagementException("Error occurred while retrieving device data for " +
-                    " adding notification", e);
-        }
-        return device;
     }
 
     @Override

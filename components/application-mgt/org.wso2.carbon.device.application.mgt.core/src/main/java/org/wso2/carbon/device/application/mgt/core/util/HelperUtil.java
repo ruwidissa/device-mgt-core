@@ -37,23 +37,15 @@ public class HelperUtil {
     private static DeviceManagementProviderService deviceManagementProviderService;
     private static GroupManagementProviderService groupManagementProviderService;
 
-    public static String generateApplicationUuid() {
-        return UUID.randomUUID().toString();
-    }
-
     public static DeviceManagementProviderService getDeviceManagementProviderService() {
         if (deviceManagementProviderService == null) {
-            synchronized (HelperUtil.class) {
-                if (deviceManagementProviderService == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    deviceManagementProviderService = (DeviceManagementProviderService) ctx
-                            .getOSGiService(DeviceManagementProviderService.class, null);
-                    if (deviceManagementProviderService == null) {
-                        String msg = "Device management provider service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            deviceManagementProviderService = (DeviceManagementProviderService) ctx
+                    .getOSGiService(DeviceManagementProviderService.class, null);
+            if (deviceManagementProviderService == null) {
+                String msg = "Device management provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
             }
         }
         return deviceManagementProviderService;
@@ -61,17 +53,13 @@ public class HelperUtil {
 
     public static GroupManagementProviderService getGroupManagementProviderService() {
         if (groupManagementProviderService == null) {
-            synchronized (HelperUtil.class) {
-                if (groupManagementProviderService == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    groupManagementProviderService = (GroupManagementProviderService) ctx
-                            .getOSGiService(GroupManagementProviderService.class, null);
-                    if (groupManagementProviderService == null) {
-                        String msg = "Group management provider service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            groupManagementProviderService = (GroupManagementProviderService) ctx
+                    .getOSGiService(GroupManagementProviderService.class, null);
+            if (groupManagementProviderService == null) {
+                String msg = "Group management provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
             }
         }
         return groupManagementProviderService;

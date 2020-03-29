@@ -38,7 +38,7 @@ public class CertificateCacheManagerImpl implements CertificateCacheManager {
     private static String SERIAL_PRE = "S_";
     private static String COMMON_NAME_PRE = "C_";
 
-    private static CertificateCacheManager certificateCacheManager;
+    private static volatile CertificateCacheManager certificateCacheManager;
 
 
     private CertificateCacheManagerImpl() {
@@ -89,10 +89,10 @@ public class CertificateCacheManagerImpl implements CertificateCacheManager {
                 initializeCertificateCache();
             }
             if (manager != null) {
-                certificateCache = manager.<String, CertificateResponse>getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
+                certificateCache = manager.getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
             } else {
-                certificateCache = Caching.getCacheManager(CertificateCacheManagerImpl.CERTIFICATE_CACHE_MANAGER).
-                        <String, CertificateResponse>getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
+                certificateCache = Caching.getCacheManager(CertificateCacheManagerImpl.CERTIFICATE_CACHE_MANAGER)
+                        .getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
             }
         }
         return certificateCache;
@@ -107,22 +107,22 @@ public class CertificateCacheManagerImpl implements CertificateCacheManager {
                 isCertificateCacheInitialized = true;
                 if (manager != null) {
                     if (certificateCacheExpiry > 0) {
-                        manager.<String, CertificateResponse>createCacheBuilder(CertificateCacheManagerImpl.CERTIFICATE_CACHE).
+                        manager.createCacheBuilder(CertificateCacheManagerImpl.CERTIFICATE_CACHE).
                                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                                         certificateCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
                                 Duration(TimeUnit.SECONDS, certificateCacheExpiry)).setStoreByValue(true).build();
                     } else {
-                        manager.<String, CertificateResponse>getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
+                        manager.getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
                     }
                 } else {
                     if (certificateCacheExpiry > 0) {
-                        Caching.getCacheManager().
-                                <String, CertificateResponse>createCacheBuilder(CertificateCacheManagerImpl.CERTIFICATE_CACHE).
+                        Caching.getCacheManager()
+                                .createCacheBuilder(CertificateCacheManagerImpl.CERTIFICATE_CACHE).
                                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                                         certificateCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
                                 Duration(TimeUnit.SECONDS, certificateCacheExpiry)).setStoreByValue(true).build();
                     } else {
-                        Caching.getCacheManager().<String, CertificateResponse>getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
+                        Caching.getCacheManager().getCache(CertificateCacheManagerImpl.CERTIFICATE_CACHE);
                     }
                 }
             }

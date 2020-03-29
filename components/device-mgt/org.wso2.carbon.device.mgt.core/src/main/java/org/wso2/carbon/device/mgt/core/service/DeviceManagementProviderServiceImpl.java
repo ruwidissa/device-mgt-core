@@ -1193,7 +1193,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     log.debug("No device is found upon the type '" + deviceIdentifier.getType() + "' and id '" +
                             deviceIdentifier.getId() + "'");
                 }
-                return null;
+                return new HashMap<>();
             }
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while obtaining the device for id '" + deviceIdentifier.getId() + "'";
@@ -1214,6 +1214,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    @Deprecated
     public Device getDevice(DeviceIdentifier deviceId) throws DeviceManagementException {
         return this.getDevice(deviceId, true);
     }
@@ -3043,15 +3044,15 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public void notifyPullNotificationSubscriber(DeviceIdentifier deviceIdentifier, Operation operation)
+    public void notifyPullNotificationSubscriber(Device device, Operation operation)
             throws PullNotificationExecutionFailedException {
         if (log.isDebugEnabled()) {
             log.debug("Notify pull notification subscriber");
         }
         DeviceManagementService dms =
-                pluginRepository.getDeviceManagementService(deviceIdentifier.getType(), this.getTenantId());
+                pluginRepository.getDeviceManagementService(device.getType(), this.getTenantId());
         if (dms == null) {
-            String message = "Device type '" + deviceIdentifier.getType() + "' does not have an associated " +
+            String message = "Device type '" + device.getType() + "' does not have an associated " +
                     "device management plugin registered within the framework";
             log.error(message);
             throw new PullNotificationExecutionFailedException(message);
@@ -3059,11 +3060,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         PullNotificationSubscriber pullNotificationSubscriber = dms.getPullNotificationSubscriber();
         if (pullNotificationSubscriber == null) {
             String message = "Pull Notification Subscriber is not configured " +
-                    "for device type" + deviceIdentifier.getType();
+                    "for device type" + device.getType();
             log.error(message);
             throw new PullNotificationExecutionFailedException(message);
         }
-        pullNotificationSubscriber.execute(deviceIdentifier, operation);
+        pullNotificationSubscriber.execute(device, operation);
     }
 
     /**
@@ -3427,7 +3428,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     deviceLocation.setDistance(Double.parseDouble(distance));
                     deviceLocation.setSpeed(Float.parseFloat(speed));
                     deviceLocation.setBearing(Float.parseFloat(bearing));
-                    deviceInformationManager.addDeviceLocation(deviceLocation);
+                    deviceInformationManager.addDeviceLocation(device, deviceLocation);
                 } catch (Exception e) {
                     //We are not failing the execution since this is not critical for the functionality. But logging as
                     // a warning for reference.

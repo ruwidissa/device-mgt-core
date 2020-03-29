@@ -38,7 +38,7 @@ public class ConfigurationManager {
 
     private static String configPath;
 
-    private static ConfigurationManager configurationManager;
+    private static volatile ConfigurationManager configurationManager;
 
     private ConfigurationManager() {
 

@@ -621,6 +621,8 @@ public class DeviceManagementServiceImplTest {
                 .mock(ApplicationManagementProviderService.class, Mockito.RETURNS_MOCKS);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAppManagementService"))
                 .toReturn(applicationManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
         Response response = this.deviceManagementService
                 .getInstalledApplications(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), "", 10, 5);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
@@ -633,8 +635,10 @@ public class DeviceManagementServiceImplTest {
                 .mock(ApplicationManagementProviderService.class, Mockito.RETURNS_MOCKS);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAppManagementService"))
                 .toReturn(applicationManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
         Mockito.when(
-                applicationManagementProviderService.getApplicationListForDevice(Mockito.any(DeviceIdentifier.class)))
+                applicationManagementProviderService.getApplicationListForDevice(Mockito.any(Device.class)))
                 .thenThrow(new ApplicationManagementException());
         Response response = this.deviceManagementService
                 .getInstalledApplications(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), "", 10, 5);
@@ -671,6 +675,8 @@ public class DeviceManagementServiceImplTest {
         PolicyManagerService policyManagerService = Mockito.mock(PolicyManagerService.class, Mockito.RETURNS_MOCKS);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getPolicyManagementService"))
                 .toReturn(policyManagerService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
         Response response = this.deviceManagementService
                 .getEffectivePolicyOfDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), null);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
@@ -682,7 +688,9 @@ public class DeviceManagementServiceImplTest {
         PolicyManagerService policyManagerService = Mockito.mock(PolicyManagerService.class, Mockito.RETURNS_MOCKS);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getPolicyManagementService"))
                 .toReturn(policyManagerService);
-        Mockito.when(policyManagerService.getAppliedPolicyToDevice(Mockito.any(DeviceIdentifier.class)))
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(this.deviceManagementProviderService);
+        Mockito.when(policyManagerService.getAppliedPolicyToDevice(Mockito.any(Device.class)))
                 .thenThrow(new PolicyManagementException());
         Response response = this.deviceManagementService
                 .getEffectivePolicyOfDevice(TEST_DEVICE_TYPE, UUID.randomUUID().toString(), null);
