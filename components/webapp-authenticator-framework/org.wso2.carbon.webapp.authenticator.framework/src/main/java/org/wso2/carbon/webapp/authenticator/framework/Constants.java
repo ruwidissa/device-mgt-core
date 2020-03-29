@@ -22,7 +22,7 @@ public final class Constants {
 
     public static final String AUTHORIZATION_HEADER_PREFIX_BEARER = "Bearer";
     public static final String NO_MATCHING_AUTH_SCHEME = "noMatchedAuthScheme";
-    public static final String PROXY_TENANT_ID = "ProxyTenantId";
+    public static final String PROXY_TENANT_ID = "Proxy-Tenant-Id";
 
     public static final class HTTPHeaders {
         private HTTPHeaders() {
