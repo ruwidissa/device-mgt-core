@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 
 import AppListDropDown from './components/AppListDropDown';
-import ReportDevicesTable from '../../components/DevicesTable';
+import DevicesTable from './../../components/DevicesTable';
 import AppVersionDropDown from './components/AppVersionDropDown';
 
 // eslint-disable-next-line no-unused-vars
@@ -121,7 +121,7 @@ class AppNotInstalledDevicesReport extends React.Component {
               </Button>
             </div>
             <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
-              <ReportDevicesTable apiUrl={apiUrl} />
+              <DevicesTable apiUrl={apiUrl} />
             </div>
           </div>
         </PageHeader>

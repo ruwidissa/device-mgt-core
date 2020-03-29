@@ -18,12 +18,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as serviceWorker from './serviceWorker';
+import * as serviceWorker from './services/serviceWorkers/serviceWorker';
 import App from './App';
-import Login from './pages/Login';
-import Dashboard from './pages/dashboard/Dashboard';
-import Apps from './pages/dashboard/apps/Apps';
-import Release from './pages/dashboard/apps/release/Release';
+import Login from './scenes/Login';
+import Dashboard from './scenes/Home';
+import Apps from './scenes/Home/scenes/Apps';
+import Release from './scenes/Home/scenes/Apps/scenes/Release';
 import './index.css';
 
 const routes = [

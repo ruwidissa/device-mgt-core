@@ -67,6 +67,10 @@ public class DataPanel {
     @XmlElement(name = "PanelItem")
     private List<PanelItem> panelItem;
 
+    @XmlElementWrapper(name = "SubFormsList")
+    @XmlElement(name = "SubForm")
+    private List<SubFormList> subFormLists;
+
     public String getPaneId() {
         return panelId;
     }
@@ -99,4 +103,11 @@ public class DataPanel {
         this.panelItem = panelItem;
     }
 
+    public List<SubFormList> getSubPanelLists() {
+        return subFormLists;
+    }
+
+    public void setSubPanelLists(List<SubFormList> subFormLists) {
+        this.subFormLists = subFormLists;
+    }
 }

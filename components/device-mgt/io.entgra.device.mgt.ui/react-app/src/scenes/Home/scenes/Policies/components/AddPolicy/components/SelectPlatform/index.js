@@ -19,34 +19,32 @@
 import React from 'react';
 import axios from 'axios';
 import { Card, Col, Icon, message, notification, Row } from 'antd';
-import TimeAgo from 'javascript-time-ago';
-// Load locale-specific relative date/time formatting rules.
-import en from 'javascript-time-ago/locale/en';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 
 class SelectPlatform extends React.Component {
   constructor(props) {
     super(props);
-    TimeAgo.addLocale(en);
     this.config = this.props.context;
     this.state = {
       data: [],
-      pagination: {},
       loading: false,
-      selectedRows: [],
     };
   }
 
   componentDidMount() {
-    this.fetchUsers();
+    this.getDeviceTypes();
   }
 
-  onClickCard = (e, type) => {
+  onClickCard = (e, type, formname) => {
     this.props.getPolicyConfigJson(type);
+    let deviceType = {
+      deviceType: type,
+    };
+    this.props.getPolicyPayloadData(formname, deviceType);
   };
 
   // fetch data from api
-  fetchUsers = (params = {}) => {
+  getDeviceTypes() {
     this.setState({ loading: true });
 
     let apiUrl =
@@ -55,16 +53,14 @@ class SelectPlatform extends React.Component {
       this.config.serverConfig.invoker.deviceMgt +
       '/device-types';
 
-    // send request to the invokerss
+    // send request to the invokers
     axios
       .get(apiUrl)
       .then(res => {
         if (res.status === 200) {
-          const pagination = { ...this.state.pagination };
           this.setState({
             loading: false,
             data: JSON.parse(res.data.data),
-            pagination,
           });
         }
       })
@@ -83,22 +79,7 @@ class SelectPlatform extends React.Component {
 
         this.setState({ loading: false });
       });
-  };
-
-  handleTableChange = (pagination, filters, sorter) => {
-    const pager = { ...this.state.pagination };
-    pager.current = pagination.current;
-    this.setState({
-      pagination: pager,
-    });
-    this.fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
+  }
 
   render() {
     const { data } = this.state;
@@ -110,10 +91,12 @@ class SelectPlatform extends React.Component {
             size="default"
             style={{ width: 150 }}
             bordered={true}
-            onClick={e => this.onClickCard(e, data.name)}
+            onClick={e =>
+              this.onClickCard(e, data.name, 'selectedPlatformData')
+            }
             cover={
               <Icon
-                type="android"
+                type={data.name === 'ios' ? 'apple' : data.name}
                 key="device-types"
                 style={{
                   color: '#ffffff',

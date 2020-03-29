@@ -17,19 +17,13 @@
  */
 
 import React from 'react';
-import {
-  Button,
-  Form,
-  Row,
-  Col,
-  Card,
-  Steps,
-  message,
-  notification,
-} from 'antd';
+import { Form, Row, Col, Card, Steps, message, notification } from 'antd';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import SelectPlatform from './components/SelectPlatform';
 import ConfigureProfile from './components/ConfigureProfile';
+import SelectPolicyType from './components/SelectPolicyType';
+import AssignGroups from './components/AssignGroups';
+import PublishDevices from './components/PublishDevices';
 import axios from 'axios';
 const { Step } = Steps;
 
@@ -41,8 +35,48 @@ class AddPolicy extends React.Component {
       currentStepIndex: 0,
       isLoading: false,
       policyUIConfigurationsList: [],
+      newPolicyPayload: { compliance: 'enforce' },
+      policyProfile: {},
+      payloadData: {},
     };
   }
+
+  getPolicyPayloadData = (dataName, dataValue) => {
+    Object.defineProperty(this.state.payloadData, dataName, {
+      value: dataValue,
+      writable: true,
+    });
+    if (dataName === 'publishDevicesData') {
+      this.createPayload();
+    }
+  };
+
+  createPayload = () => {
+    const {
+      publishDevicesData,
+      selectedPlatformData,
+      configureProfileData,
+      policyTypeData,
+      groupData,
+    } = this.state.payloadData;
+    const profile = {
+      profileName: publishDevicesData.policyName,
+      deviceType: selectedPlatformData.deviceType,
+      profileFeaturesList: configureProfileData,
+    };
+
+    const payload = {
+      policyName: publishDevicesData.policyName,
+      description: publishDevicesData.description,
+      compliance: 'enforce',
+      ownershipType: null,
+      active: publishDevicesData.active,
+      ...policyTypeData,
+      profile: profile,
+      ...groupData,
+    };
+    this.onAddNewPolicy(JSON.stringify(payload));
+  };
 
   getPolicyConfigJson = type => {
     this.setState({ isLoading: true });
@@ -82,12 +116,46 @@ class AddPolicy extends React.Component {
       });
   };
 
-  onHandleNext = () => {
+  onAddNewPolicy = value => {
+    axios
+      .post(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/policies/',
+        value,
+        { headers: { 'Content-Type': 'application-json' } },
+      )
+      .then(res => {
+        if (res.status === 201) {
+          notification.success({
+            message: 'Done',
+            duration: 4,
+            description: 'Successfully added new Policy.',
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to add New Policy.',
+          });
+        }
+      });
+  };
+
+  getNextStep = () => {
     const currentStepIndex = this.state.currentStepIndex + 1;
     this.setState({ currentStepIndex });
   };
 
-  onHandlePrev = () => {
+  getPrevStep = () => {
     const currentStepIndex = this.state.currentStepIndex - 1;
     this.setState({ currentStepIndex });
   };
@@ -104,7 +172,6 @@ class AddPolicy extends React.Component {
               <Step key="PolicyType" title="Select policy type" />
               <Step key="AssignGroups" title="Assign to groups" />
               <Step key="Publish" title="Publish to devices" />
-              <Step key="Result" title="Result" />
             </Steps>
           </Col>
           <Col span={16} offset={4}>
@@ -114,6 +181,7 @@ class AddPolicy extends React.Component {
               >
                 <SelectPlatform
                   getPolicyConfigJson={this.getPolicyConfigJson}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
                 />
               </div>
               <div
@@ -121,39 +189,38 @@ class AddPolicy extends React.Component {
               >
                 <ConfigureProfile
                   policyUIConfigurationsList={policyUIConfigurationsList}
+                  getPolicyPayloadData={this.getPolicyPayloadData}
+                  getPrevStep={this.getPrevStep}
+                  getNextStep={this.getNextStep}
                 />
               </div>
               <div
                 style={{ display: currentStepIndex === 2 ? 'unset' : 'none' }}
-              ></div>
+              >
+                <SelectPolicyType
+                  getPolicyPayloadData={this.getPolicyPayloadData}
+                  getPrevStep={this.getPrevStep}
+                  getNextStep={this.getNextStep}
+                />
+              </div>
               <div
                 style={{ display: currentStepIndex === 3 ? 'unset' : 'none' }}
-              ></div>
+              >
+                <AssignGroups
+                  getPolicyPayloadData={this.getPolicyPayloadData}
+                  getPrevStep={this.getPrevStep}
+                  getNextStep={this.getNextStep}
+                />
+              </div>
               <div
                 style={{ display: currentStepIndex === 4 ? 'unset' : 'none' }}
-              ></div>
-              <div
-                style={{ display: currentStepIndex === 5 ? 'unset' : 'none' }}
-              ></div>
+              >
+                <PublishDevices
+                  getPolicyPayloadData={this.getPolicyPayloadData}
+                  getPrevStep={this.getPrevStep}
+                />
+              </div>
             </Card>
-          </Col>
-          <Col span={16} offset={4}>
-            <div style={{ marginTop: 24 }}>
-              {currentStepIndex > 0 && (
-                <Button
-                  style={{ marginRight: 8 }}
-                  onClick={() => this.onHandlePrev()}
-                >
-                  Previous
-                </Button>
-              )}
-              {currentStepIndex > 0 && currentStepIndex < 5 && (
-                <Button type="primary" onClick={() => this.onHandleNext()}>
-                  Next
-                </Button>
-              )}
-              {currentStepIndex === 5 && <Button type="primary">Done</Button>}
-            </div>
           </Col>
         </Row>
       </div>

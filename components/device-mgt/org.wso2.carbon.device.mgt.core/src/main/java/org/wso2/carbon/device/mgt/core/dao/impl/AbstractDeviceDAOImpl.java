@@ -45,8 +45,8 @@ import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -54,7 +54,6 @@ import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
-import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1802,13 +1801,13 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public List<DeviceLocationHistory> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
             throws DeviceManagementDAOException {
 
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<DeviceLocationHistory> deviceLocationHistories = new ArrayList<>();
+        List<DeviceLocationHistorySnapshot> deviceLocationHistories = new ArrayList<>();
         try {
             conn = this.getConnection();
 
@@ -1867,11 +1866,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device notification data of devices: " + deviceIdentifiers);
                 }
-                removeDeviceApplicationMapping(conn, deviceIds);
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully removed device application mapping data of devices: "
-                            + deviceIdentifiers);
-                }
                 removeDevicePolicyApplied(conn, deviceIds);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device applied policy data of devices: " + deviceIdentifiers);
@@ -1880,6 +1874,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully removed device policy data of devices: " + deviceIdentifiers);
                 }
+                removeDeviceApplication(conn, deviceIds);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully removed device application data of devices: " + deviceIdentifiers);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Starting to remove " + enrollmentIds.size() + " enrollment data of devices with " +
                             "identifiers: " + deviceIdentifiers);
@@ -1887,7 +1885,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 removeEnrollmentDeviceDetail(conn, enrollmentIds);
                 removeEnrollmentDeviceLocation(conn, enrollmentIds);
                 removeEnrollmentDeviceInfo(conn, enrollmentIds);
-                removeEnrollmentDeviceApplicationMapping(conn, enrollmentIds);
                 removeDeviceOperationResponse(conn, enrollmentIds);
                 removeEnrollmentOperationMapping(conn, enrollmentIds);
                 if (log.isDebugEnabled()) {
@@ -1915,7 +1912,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             throw new DeviceManagementDAOException(msg, e);
         }
     }
-    
+
     @Override
     public List<Device> getAppNotInstalledDevices(
             PaginationRequest request, int tenantId, String packageName, String version)
@@ -1925,24 +1922,24 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         boolean isVersionProvided = false;
 
         String sql = "SELECT " +
-                "d.ID AS DEVICE_ID, " +
-                "d.DESCRIPTION,d.NAME AS DEVICE_NAME, " +
-                "t.NAME AS DEVICE_TYPE, " +
-                "d.DEVICE_IDENTIFICATION, " +
-                "e.OWNER, " +
-                "e.OWNERSHIP, " +
-                "e.STATUS, " +
-                "e.DATE_OF_LAST_UPDATE, " +
-                "e.DATE_OF_ENROLMENT, " +
-                "e.ID AS ENROLMENT_ID " +
-                "FROM DM_DEVICE AS d " +
-                "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
-                "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
-                "WHERE t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
-                "NOT IN (SELECT m.DEVICE_ID " +
-                "FROM DM_DEVICE_APPLICATION_MAPPING AS m " +
-                "INNER JOIN DM_APPLICATION AS a ON m.APPLICATION_ID=a.ID " +
-                "WHERE a.APP_IDENTIFIER = ?";
+                        "d.ID AS DEVICE_ID, " +
+                        "d.DESCRIPTION, " +
+                        "d.NAME AS DEVICE_NAME, " +
+                        "t.NAME AS DEVICE_TYPE, " +
+                        "d.DEVICE_IDENTIFICATION, " +
+                        "e.OWNER, " +
+                        "e.OWNERSHIP, " +
+                        "e.STATUS, " +
+                        "e.DATE_OF_LAST_UPDATE, " +
+                        "e.DATE_OF_ENROLMENT, " +
+                        "e.ID AS ENROLMENT_ID " +
+                    "FROM DM_DEVICE AS d " +
+                        "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                        "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                    "WHERE " +
+                        "t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
+                    "NOT IN " +
+                        "(SELECT a.DEVICE_ID FROM DM_APPLICATION AS a WHERE a.APP_IDENTIFIER = ?";
 
         if (!StringUtils.isBlank(version)) {
             sql = sql + " AND a.VERSION = ? ";
@@ -1991,14 +1988,12 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         String sql = "SELECT " +
                         "COUNT(d.ID) AS DEVICE_COUNT " +
                     "FROM DM_DEVICE AS d " +
-                    "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
-                    "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
-                    "WHERE t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
+                        "INNER JOIN DM_ENROLMENT AS e ON d.ID = e.DEVICE_ID " +
+                        "INNER JOIN  DM_DEVICE_TYPE AS t ON d.DEVICE_TYPE_ID = t.ID " +
+                    "WHERE " +
+                        "t.NAME = ? AND e.TENANT_ID = ? AND d.ID " +
                     "NOT IN " +
-                    "(SELECT m.DEVICE_ID " +
-                        "FROM DM_DEVICE_APPLICATION_MAPPING AS m " +
-                        "INNER JOIN DM_APPLICATION AS a ON m.APPLICATION_ID=a.ID " +
-                        "WHERE a.APP_IDENTIFIER = ?";
+                        "(SELECT a.DEVICE_ID FROM DM_APPLICATION AS a WHERE a.APP_IDENTIFIER = ?";
 
         if (!StringUtils.isBlank(version)) {
             sql = sql + " AND a.VERSION = ? ";
@@ -2224,29 +2219,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     }
 
-    /***
-     * This method removes records of a given list of devices from the DM_DEVICE_APPLICATION_MAPPING table
-     * @param conn Connection object
-     * @param deviceIds list of device ids (primary keys)
-     * @throws DeviceManagementDAOException if deletion fails
-     */
-    private void removeDeviceApplicationMapping(Connection conn, List<Integer> deviceIds)
-            throws DeviceManagementDAOException {
-        String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE DEVICE_ID = ?";
-        try {
-            if (!executeBatchOperation(conn, sql, deviceIds)) {
-                String msg = "Failed to remove device application mapping of of devices with deviceIds : " + deviceIds +
-                        " while executing batch operation";
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
-            }
-        } catch (SQLException e) {
-            String msg = "SQL error occurred while removing device application mapping of devices with deviceIds : "
-                    + deviceIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
 
     /***
      * This method removes records of a given list of devices from the DM_DEVICE_POLICY_APPLIED table
@@ -2288,6 +2260,29 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
         } catch (SQLException e) {
             String msg = "SQL error occurred while removing policies of devices with deviceIds : " + deviceIds;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    /***
+     * This method removes records of a given list of devices from the DM_APPLICATION table
+     * @param conn Connection object
+     * @param deviceIds list of device ids (primary keys)
+     * @throws DeviceManagementDAOException if deletion fails
+     */
+    private void removeDeviceApplication(Connection conn, List<Integer> deviceIds)
+            throws DeviceManagementDAOException {
+        String sql = "DELETE FROM DM_APPLICATION WHERE DEVICE_ID = ?";
+        try {
+            if (!executeBatchOperation(conn, sql, deviceIds)) {
+                String msg = "Failed to remove applications of devices with deviceIds : " + deviceIds +
+                        " while executing batch operation";
+                log.error(msg);
+                throw new DeviceManagementDAOException(msg);
+            }
+        } catch (SQLException e) {
+            String msg = "SQL error occurred while removing applications of devices devices with deviceIds : " + deviceIds;
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }
@@ -2365,29 +2360,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         }
     }
 
-    /***
-     * This method removes records of a given list of enrollments from the DM_DEVICE_APPLICATION_MAPPING table
-     * @param conn Connection object
-     * @param enrollmentIds list of enrollment ids (primary keys)
-     * @throws DeviceManagementDAOException if deletion fails
-     */
-    private void removeEnrollmentDeviceApplicationMapping(Connection conn, List<Integer> enrollmentIds)
-            throws DeviceManagementDAOException {
-        String sql = "DELETE FROM DM_DEVICE_APPLICATION_MAPPING WHERE ENROLMENT_ID = ?";
-        try {
-            if (!executeBatchOperation(conn, sql, enrollmentIds)) {
-                String msg = "Failed to remove enrollment device application mapping of devices with enrollmentIds : "
-                        + enrollmentIds + " while executing batch operation";
-                log.error(msg);
-                throw new DeviceManagementDAOException(msg);
-            }
-        } catch (SQLException e) {
-            String msg = "SQL error occurred while removing enrollment device application mapping of devices with " +
-                    "enrollmentIds : " + enrollmentIds;
-            log.error(msg, e);
-            throw new DeviceManagementDAOException(msg, e);
-        }
-    }
 
     /***
      * This method removes records of a given list of enrollments from the DM_DEVICE_OPERATION_RESPONSE table

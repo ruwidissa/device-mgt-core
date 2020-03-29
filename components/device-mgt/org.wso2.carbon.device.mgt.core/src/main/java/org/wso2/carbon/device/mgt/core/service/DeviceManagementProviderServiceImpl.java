@@ -64,6 +64,7 @@ import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -81,7 +82,6 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotificationConfiguration;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifierException;
@@ -3013,14 +3013,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<DeviceLocationHistory> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
             throws DeviceManagementException {
 
         if (log.isDebugEnabled()) {
             log.debug("Get device location information");
         }
 
-        List<DeviceLocationHistory> deviceLocationHistory;
+        List<DeviceLocationHistorySnapshot> deviceLocationHistory;
         String errMessage;
 
         try {

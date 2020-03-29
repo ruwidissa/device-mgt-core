@@ -25,6 +25,9 @@ public class SubPanel {
     @XmlElement(name = "PanelKey", required = true)
     protected String id;
 
+    @XmlElement(name = "SubPanelValues")
+    private SubPanelValuesList others;
+
     @XmlElementWrapper(name = "PanelItems")
     @XmlElement(name = "PanelItem")
     private List<PanelItem> panelItem;
@@ -35,6 +38,14 @@ public class SubPanel {
 
     public void setPanelKey(String id) {
         this.id = id;
+    }
+
+    public SubPanelValuesList getPayloadAttributes() {
+        return others;
+    }
+
+    public void setPayloadAttributes(SubPanelValuesList others) {
+        this.others = others;
     }
 
     public List<PanelItem> getPanelItemList1() {

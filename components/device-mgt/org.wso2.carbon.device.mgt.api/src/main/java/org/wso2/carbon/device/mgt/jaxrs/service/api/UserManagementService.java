@@ -34,6 +34,8 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.ExtensionProperty;
@@ -1009,4 +1011,161 @@ public interface UserManagementService {
                             "Provide the value in the following format: EEE, d MMM yyyy HH:mm:ss Z\n." +
                             "Example: Mon, 05 Jan 2014 15:10:00 +0200")
             @HeaderParam("If-Modified-Since") String ifModifiedSince);
+
+    @PUT
+    @Path("/claims/{username}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Updating external device claims of user",
+            notes = "Update external device claims of a user registered with Entgra IoTS using the REST API.",
+            response = BasicUserInfo.class,
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully updated external device claims of user.",
+                    response = BasicUserInfo.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server ErrorResponse. \n Server error occurred while" +
+                            " fetching the user details.",
+                    response = ErrorResponse.class)
+    })
+    Response updateUserClaimsForDevices(
+            @ApiParam(
+                    name = "username",
+                    value = "Provide the username of the user.",
+                    required = true,
+                    defaultValue = "admin")
+            @PathParam("username") String username,
+            @ApiParam(
+                    name = "device list",
+                    value = "Array of objects with device details",
+                    required = true) JsonArray deviceList);
+
+    @GET
+    @Path("/claims/{username}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting external device claims of user",
+            notes = "Get external device claims of a user registered with Entgra IoTS using the REST API.",
+            response = BasicUserInfo.class,
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched external device claims of user.",
+                    response = BasicUserInfo.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server ErrorResponse. \n Server error occurred while" +
+                            " fetching the ruser details.",
+                    response = ErrorResponse.class)
+    })
+    Response getUserClaimsForDevices(
+            @ApiParam(
+                    name = "username",
+                    value = "Provide the username of the user.",
+                    required = true,
+                    defaultValue = "admin")
+            @PathParam("username") String username);
+
+    @DELETE
+    @Path("/claims/{username}")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "DELETE",
+            value = "Deleting external device claims of user",
+            notes = "Delete external device claims of user registered with Entgra IoTS using the REST API.",
+            response = BasicUserInfo.class,
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:users:details")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully deleted external device claims of user.",
+                    response = BasicUserInfo.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server ErrorResponse. \n Server error occurred while" +
+                            " fetching the ruser details.",
+                    response = ErrorResponse.class)
+    })
+    Response deleteUserClaimsForDevices(
+            @ApiParam(
+                    name = "username",
+                    value = "Provide the username of the user.",
+                    required = true,
+                    defaultValue = "admin")
+            @PathParam("username") String username);
 }

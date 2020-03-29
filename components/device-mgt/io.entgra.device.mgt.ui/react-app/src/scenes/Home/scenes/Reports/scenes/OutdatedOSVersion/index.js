@@ -121,10 +121,14 @@ class OutdatedOSversionReport extends React.Component {
             <Breadcrumb.Item>
               <Link to="/entgra/reports">Reports</Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Expired Devices</Breadcrumb.Item>
+            <Breadcrumb.Item>Outdated OS Version</Breadcrumb.Item>
           </Breadcrumb>
           <div className="wrap" style={{ marginBottom: '10px' }}>
-            <h3>Expired Devices Report</h3>
+            <h3>Outdated OS Version Report</h3>
+            <p>
+              This report displays devices with an OS Version below the
+              specified version.
+            </p>
             <div className="wrap" style={{ marginBottom: '10px' }}>
               <Select
                 showSearch

@@ -29,9 +29,7 @@ import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -279,9 +277,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throws DeviceManagementDAOException {
         List<Application> applications = new ArrayList<>();
         Application application;
-        String sql = "Select " +
-                        "ID," +
-                        " NAME, " +
+        String sql = "SELECT " +
+                        "ID, " +
+                        "NAME, " +
                         "APP_IDENTIFIER, " +
                         "PLATFORM, " +
                         "CATEGORY, " +
@@ -293,9 +291,15 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         "MEMORY_USAGE, " +
                         "IS_ACTIVE, " +
                         "TENANT_ID " +
-                     "From DM_APPLICATION " +
-                     "WHERE PLATFORM = ? " +
-                     "AND TENANT_ID = ? LIMIT ? OFFSET ?";
+                    "FROM DM_APPLICATION  " +
+                    "WHERE NOT EXISTS " +
+                        "(SELECT " +
+                            "ID " +
+                        "FROM DM_APPLICATION A " +
+                        "WHERE A.NAME = DM_APPLICATION.NAME " +
+                        "AND A.ID < DM_APPLICATION.ID) " +
+                    "AND PLATFORM = ? " +
+                    "AND TENANT_ID = ?  LIMIT ? OFFSET ?";
         try {
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -322,7 +326,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     @Override
     public List<String> getAppVersions(int tenantId, String packageName) throws DeviceManagementDAOException {
-        String sql = "SELECT " +
+        String sql = "SELECT DISTINCT " +
                         "VERSION " +
                      "FROM DM_APPLICATION " +
                      "WHERE TENANT_ID=? " +
