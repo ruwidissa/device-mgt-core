@@ -58,7 +58,7 @@ class Home extends React.Component {
           <Layout>
             <Header style={{ background: '#fff', padding: 0 }}>
               <div className="logo-image">
-                <Link to="/entgra/reports">
+                <Link to="/entgra">
                   <img alt="logo" src={this.logo} />
                 </Link>
               </div>
@@ -91,12 +91,6 @@ class Home extends React.Component {
                     </Link>
                   </Menu.Item>
                 </SubMenu>
-                <Menu.Item key="reports">
-                  <Link to="/entgra/reports">
-                    <Icon type="bar-chart" />
-                    <span>Reports</span>
-                  </Link>
-                </Menu.Item>
                 <Menu.Item key="groups">
                   <Link to="/entgra/groups">
                     <Icon type="deployment-unit" />

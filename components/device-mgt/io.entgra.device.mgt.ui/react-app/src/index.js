@@ -23,15 +23,7 @@ import App from './App';
 import Login from './scenes/Login';
 import Home from './scenes/Home';
 import './index.css';
-import Reports from './scenes/Home/scenes/Reports';
-import EnrollmentsVsUnenrollmentsReport from './scenes/Home/scenes/Reports/scenes/EnrolmentVsUnenrollments';
-import EnrollmentTypeReport from './scenes/Home/scenes/Reports/scenes/EnrollmentType';
-import PolicyReport from './scenes/Home/scenes/Reports/scenes/PolicyCompliance';
-import DeviceStatusReport from './scenes/Home/scenes/Reports/scenes/DeviceStatus';
-import AppNotInstalledDevicesReport from './scenes/Home/scenes/Reports/scenes/AppNotInstalledDevices';
 import Geo from './scenes/Home/scenes/Geo';
-import EncryptionStatus from './scenes/Home/scenes/Reports/scenes/EncryptionStatus';
-import OutdatedOSversionReport from './scenes/Home/scenes/Reports/scenes/OutdatedOSVersion';
 import Notifications from './scenes/Home/scenes/Notifications';
 import DeviceEnroll from './scenes/Home/scenes/Devices/scenes/Enroll';
 import Groups from './scenes/Home/scenes/Groups';
@@ -69,11 +61,6 @@ const routes = [
       {
         path: '/entgra/geo/history/:deviceType/:deviceIdentifier',
         component: Geo,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports',
-        component: Reports,
         exact: true,
       },
       {
@@ -124,41 +111,6 @@ const routes = [
       {
         path: '/entgra/notifications',
         component: Notifications,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/enrollments',
-        component: EnrollmentsVsUnenrollmentsReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/expired-devices',
-        component: OutdatedOSversionReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/enrollment-type',
-        component: EnrollmentTypeReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/policy/compliance',
-        component: PolicyReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/device-status',
-        component: DeviceStatusReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/app-not-installed',
-        component: AppNotInstalledDevicesReport,
-        exact: true,
-      },
-      {
-        path: '/entgra/reports/encryption-status',
-        component: EncryptionStatus,
         exact: true,
       },
     ],
