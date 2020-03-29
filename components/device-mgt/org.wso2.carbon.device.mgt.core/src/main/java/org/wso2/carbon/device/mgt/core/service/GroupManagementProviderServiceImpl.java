@@ -938,6 +938,42 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
         }
     }
 
+    @Override
+    public List<DeviceGroup> getGroups(Device device, boolean requireGroupProps)
+            throws GroupManagementException {
+        if (device.getDeviceIdentifier() == null) {
+            String msg = "Received empty device identifier for getGroups";
+            log.error(msg);
+            throw new GroupManagementException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Get groups of device " + device.getDeviceIdentifier());
+        }
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            GroupManagementDAOFactory.openConnection();
+            List<DeviceGroup> deviceGroups = groupDAO.getGroups(device.getId(), tenantId);
+            if (requireGroupProps) {
+                if (deviceGroups != null && !deviceGroups.isEmpty()) {
+                    for (DeviceGroup group : deviceGroups) {
+                        populateGroupProperties(group, tenantId);
+                    }
+                }
+            }
+            return deviceGroups;
+        } catch (GroupManagementDAOException | SQLException e) {
+            String msg = "Error occurred while retrieving device groups.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } catch (Exception e) {
+            String msg = "Error occurred in getGroups";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        } finally {
+            GroupManagementDAOFactory.closeConnection();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */

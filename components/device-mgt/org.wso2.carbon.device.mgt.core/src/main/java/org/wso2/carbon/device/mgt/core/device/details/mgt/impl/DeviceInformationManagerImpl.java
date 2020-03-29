@@ -31,6 +31,8 @@ import org.wso2.carbon.device.mgt.common.exceptions.EventPublishingException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
+import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -41,8 +43,11 @@ import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
+import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -58,6 +63,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     private static final Log log = LogFactory.getLog(DeviceInformationManagerImpl.class);
     private static final String LOCATION_EVENT_STREAM_DEFINITION = "org.wso2.iot.LocationStream";
     private static final String DEVICE_INFO_EVENT_STREAM_DEFINITION = "org.wso2.iot.DeviceInfoStream";
+    private static final String IS_EVENT_PUBLISHING_ENABED = "isEventPublishingEnabled";
 
     public DeviceInformationManagerImpl() {
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
@@ -79,6 +85,9 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     @Override
     public void addDeviceInfo(Device device, DeviceInfo deviceInfo) throws DeviceDetailsMgtException {
         try {
+
+            publishEvents(device, deviceInfo);
+
             DeviceManagementDAOFactory.beginTransaction();
             DeviceInfo newDeviceInfo;
             DeviceInfo previousDeviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
@@ -116,18 +125,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             DeviceManagementDAOFactory.commitTransaction();
-
-            String reportingHost = System.getProperty(DeviceManagementConstants.Report
-                    .REPORTING_EVENT_HOST);
-            if (reportingHost != null && !reportingHost.isEmpty()) {
-                DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
-                deviceDetailsWrapper.setDevice(device);
-                deviceDetailsWrapper.setDeviceInfo(deviceInfo);
-                deviceDetailsWrapper.getJSONString();
-
-                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
-                        reportingHost + DeviceManagementConstants.Report.DEVICE_INFO_ENDPOINT);
-            }
 
             //TODO :: This has to be fixed by adding the enrollment ID.
             if (DeviceManagerUtil.isPublishDeviceInfoResponseEnabled()) {
@@ -174,12 +171,52 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         } catch (DataPublisherConfigurationException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
-        } catch (EventPublishingException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
-            throw new DeviceDetailsMgtException("Error occurred while sending events", e);
-        } finally {
+        }finally {
             DeviceManagementDAOFactory.closeConnection();
         }
+    }
+
+    private void publishEvents(Device device, DeviceInfo deviceInfo)  {
+        String reportingHost = System.getProperty(DeviceManagementConstants.Report
+                .REPORTING_EVENT_HOST);
+        if (reportingHost != null && !reportingHost.isEmpty() && isPublishingEnabledForTenant()) {
+            try {
+                DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
+                deviceDetailsWrapper.setDevice(device);
+                deviceDetailsWrapper.setDeviceInfo(deviceInfo);
+                deviceDetailsWrapper.getJSONString();
+                GroupManagementProviderService groupManagementService = DeviceManagementDataHolder
+                        .getInstance().getGroupManagementProviderService();
+
+                List<DeviceGroup> groups = groupManagementService.getGroups(device, false);
+                if (groups != null && groups.size() > 0) {
+                    deviceDetailsWrapper.setGroups(groups);
+                }
+
+                String[] rolesOfUser = getRolesOfUser(CarbonContext.getThreadLocalCarbonContext()
+                        .getUsername());
+                if (rolesOfUser != null && rolesOfUser.length > 0) {
+                    deviceDetailsWrapper.setRole(rolesOfUser);
+                }
+
+                HttpReportingUtil.invokeApi(deviceDetailsWrapper.getJSONString(),
+                        reportingHost + DeviceManagementConstants.Report.DEVICE_INFO_ENDPOINT);
+            } catch (EventPublishingException e) {
+                log.error("Error occurred while sending events", e);
+            } catch (GroupManagementException e) {
+                log.error("Error occurred while getting group list", e);
+            } catch (UserStoreException e) {
+                log.error("Error occurred while getting role list", e);
+            }
+        }
+    }
+
+    private boolean isPublishingEnabledForTenant() {
+        Object configuration = DeviceManagerUtil.getConfiguration(IS_EVENT_PUBLISHING_ENABED);
+        if (configuration != null) {
+            return Boolean.valueOf(configuration.toString());
+        }
+        return false;
     }
 
     @Override
@@ -426,6 +463,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         return newDeviceInfo;
     }
 
+
     /**
      * Generate and add a value depending on the device's OS version included in device info
      *
@@ -460,5 +498,20 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
         }
     }
+
+    private String[] getRolesOfUser(String userName) throws UserStoreException {
+        UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+        String[] roleList;
+        if (userRealm != null) {
+            userRealm.getUserStoreManager().getRoleNames();
+            roleList = userRealm.getUserStoreManager().getRoleListOfUser(userName);
+        } else {
+            String msg = "User realm is not initiated. Logged in user: " + userName;
+            log.error(msg);
+            throw new UserStoreException(msg);
+        }
+        return roleList;
+    }
+
 }
 
