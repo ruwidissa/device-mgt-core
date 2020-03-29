@@ -42,6 +42,8 @@ import Roles from './scenes/Home/scenes/Roles';
 import DeviceTypes from './scenes/Home/scenes/DeviceTypes';
 import Certificates from './scenes/Home/scenes/Configurations/scenes/Certificates';
 import Devices from './scenes/Home/scenes/Devices';
+import ViewPolicy from './scenes/Home/scenes/Policies/scenes/ViewPolicy';
+import EditSelectedPolicy from './scenes/Home/scenes/Policies/scenes/EditSelectedPolicy';
 
 const routes = [
   {
@@ -92,6 +94,16 @@ const routes = [
       {
         path: '/entgra/policy/add',
         component: AddNewPolicy,
+        exact: true,
+      },
+      {
+        path: '/entgra/policy/view/:policyId',
+        component: ViewPolicy,
+        exact: true,
+      },
+      {
+        path: '/entgra/policy/edit/:policyId',
+        component: EditSelectedPolicy,
         exact: true,
       },
       {

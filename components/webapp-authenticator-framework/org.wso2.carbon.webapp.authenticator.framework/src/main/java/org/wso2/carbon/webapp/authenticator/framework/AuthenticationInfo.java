@@ -30,6 +30,7 @@ public class AuthenticationInfo {
     private String username;
     private String tenantDomain;
     private int tenantId = -1;
+    private boolean isSuperTenantAdmin;
 
     public WebappAuthenticator.Status getStatus() {
         return status;
@@ -70,5 +71,13 @@ public class AuthenticationInfo {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public boolean isSuperTenantAdmin() {
+        return isSuperTenantAdmin;
+    }
+
+    public void setSuperTenantAdmin(boolean superTenantAdmin) {
+        isSuperTenantAdmin = superTenantAdmin;
     }
 }

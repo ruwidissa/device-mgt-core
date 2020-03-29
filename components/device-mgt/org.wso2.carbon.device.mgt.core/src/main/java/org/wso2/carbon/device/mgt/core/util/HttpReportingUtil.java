@@ -25,10 +25,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
 import org.wso2.carbon.device.mgt.common.exceptions.EventPublishingException;
+import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 
 import java.io.IOException;
 
 public class HttpReportingUtil {
+
+    public static String getReportingHost() {
+        return System.getProperty(DeviceManagementConstants.Report.REPORTING_EVENT_HOST);
+    }
 
     public static int invokeApi(String payload, String endpoint) throws EventPublishingException {
         try (CloseableHttpClient client = HttpClients.createDefault()) {

@@ -18,15 +18,20 @@
  */
 package org.wso2.carbon.webapp.authenticator.framework;
 
+import com.google.gson.Gson;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.owasp.encoder.Encode;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.tomcat.ext.valves.CarbonTomcatValve;
 import org.wso2.carbon.tomcat.ext.valves.CompositeValve;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.webapp.authenticator.framework.authenticator.WebappAuthenticator;
 import org.wso2.carbon.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 
@@ -39,12 +44,15 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
     private static TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
+    private static final String PERMISSION_PREFIX = "/permission/admin";
+    public static final String AUTHORIZE_PERMISSION = "Authorize-Permission";
 
     @Override
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
 
-        if (this.isContextSkipped(request) ||  this.skipAuthentication(request)) {
-            this.getNext().invoke(request, response, compositeValve);
+        if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))
+                && (StringUtils.isEmpty(request.getHeader(AUTHORIZE_PERMISSION)))) {
+                this.getNext().invoke(request, response, compositeValve);
             return;
         }
 
@@ -60,6 +68,41 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
             WebappAuthenticator.Status status = WebappTenantAuthorizer.authorize(request, authenticationInfo);
             authenticationInfo.setStatus(status);
         }
+
+        // This section will allow to validate a given access token is authenticated to access given
+        // resource(permission)
+        if (request.getCoyoteRequest() != null
+                && StringUtils.isNotEmpty(request.getHeader(AUTHORIZE_PERMISSION))
+                && (authenticationInfo.getStatus() == WebappAuthenticator.Status.CONTINUE ||
+                authenticationInfo.getStatus() == WebappAuthenticator.Status.SUCCESS)) {
+            boolean isAllowed;
+            try {
+                isAllowed = AuthenticationFrameworkUtil.isUserAuthorized(
+                        authenticationInfo.getTenantId(), authenticationInfo.getTenantDomain(),
+                        authenticationInfo.getUsername(),
+                        PERMISSION_PREFIX + request.getHeader (AUTHORIZE_PERMISSION));
+            } catch (AuthenticationException e) {
+                String msg = "Could not authorize permission";
+                log.error(msg);
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
+                return;
+            }
+
+            if (isAllowed) {
+                Gson gson = new Gson();
+                AuthenticationFrameworkUtil.handleResponse(request, response, HttpServletResponse.SC_OK,
+                        gson.toJson(authenticationInfo));
+                return;
+            } else {
+                log.error("Unauthorized message from user " + authenticationInfo.getUsername());
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                        HttpServletResponse.SC_FORBIDDEN, "Unauthorized to access the API");
+                return;
+            }
+        }
+
+        Tenant tenant = null;
         if (authenticationInfo.getTenantId() != -1) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
@@ -67,9 +110,48 @@ public class WebappAuthenticationValve extends CarbonTomcatValve {
                 privilegedCarbonContext.setTenantId(authenticationInfo.getTenantId());
                 privilegedCarbonContext.setTenantDomain(authenticationInfo.getTenantDomain());
                 privilegedCarbonContext.setUsername(authenticationInfo.getUsername());
-                this.processRequest(request, response, compositeValve, authenticationInfo);
+                if (authenticationInfo.isSuperTenantAdmin() && request.getHeader(Constants
+                        .PROXY_TENANT_ID) != null) {
+                    // If this is a call from super admin to an API and the ProxyTenantId is also
+                    // present, this is a call that is made with super admin credentials to call
+                    // an API on behalf of another tenant. Hence the actual tenants, details are
+                    // resolved instead of calling processRequest.
+                    int tenantId = Integer.valueOf(request.getHeader(Constants.PROXY_TENANT_ID));
+                    RealmService realmService = (RealmService) PrivilegedCarbonContext
+                            .getThreadLocalCarbonContext().getOSGiService(RealmService.class, null);
+                    if (realmService == null) {
+                        String msg = "RealmService is not initialized";
+                        log.error(msg);
+                        AuthenticationFrameworkUtil.handleResponse(request, response,
+                                HttpServletResponse.SC_BAD_REQUEST, msg);
+                        return;
+                    }
+                    tenant = realmService.getTenantManager().getTenant(tenantId);
+                } else {
+                    this.processRequest(request, response, compositeValve, authenticationInfo);
+                }
+            } catch (UserStoreException e) {
+                String msg = "Could not locate the tenant";
+                log.error(msg);
+                AuthenticationFrameworkUtil.handleResponse(request, response,
+                            HttpServletResponse.SC_BAD_REQUEST, msg);
             } finally {
                 PrivilegedCarbonContext.endTenantFlow();
+            }
+
+            // A call from super admin to a child tenant. Start a new tenant flow of the target
+            // tenant and pass to the API.
+            if (tenant != null) {
+                try {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext privilegedCarbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    privilegedCarbonContext.setTenantId(tenant.getId());
+                    privilegedCarbonContext.setTenantDomain(tenant.getDomain());
+                    privilegedCarbonContext.setUsername(tenant.getAdminName());
+                    this.processRequest(request, response, compositeValve, authenticationInfo);
+                } finally {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
             }
         } else {
             this.processRequest(request, response, compositeValve, authenticationInfo);

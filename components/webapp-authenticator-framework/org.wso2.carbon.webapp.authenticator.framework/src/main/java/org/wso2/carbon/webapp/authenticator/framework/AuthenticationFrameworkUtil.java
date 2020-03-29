@@ -22,6 +22,13 @@ import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -32,6 +39,7 @@ import java.io.IOException;
 public class AuthenticationFrameworkUtil {
 
     private static final Log log = LogFactory.getLog(AuthenticationFrameworkUtil.class);
+    private static final String UI_EXECUTE = "ui.execute";
 
     static void handleResponse(Request request, Response response, int statusCode, String payload) {
         response.setStatus(statusCode);
@@ -62,6 +70,45 @@ public class AuthenticationFrameworkUtil {
         } catch (Exception e) {
             throw new AuthenticatorFrameworkException("Error occurred while parsing file, while converting " +
                     "to a org.w3c.dom.Document", e);
+        }
+    }
+
+    static boolean isUserAuthorized(int tenantId, String tenantDomain, String username, String
+            permission) throws
+            AuthenticationException {
+        boolean tenantFlowStarted = false;
+
+        try{
+            //If this is a tenant user
+            if(tenantId != MultitenantConstants.SUPER_TENANT_ID){
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
+                tenantFlowStarted = true;
+            }
+
+            RealmService realmService = AuthenticatorFrameworkDataHolder.getInstance().getRealmService();
+            if (realmService == null) {
+                String msg = "RealmService is not initialized";
+                log.error(msg);
+                throw new AuthenticationException(msg);
+            }
+            UserRealm userRealm = realmService.getTenantUserRealm(tenantId);
+
+            return userRealm.getAuthorizationManager()
+                    .isUserAuthorized(MultitenantUtils
+                            .getTenantAwareUsername(username), permission, UI_EXECUTE);
+
+        } catch (UserStoreException e) {
+            String msg = "Error while getting username";
+            log.error(msg, e);
+            throw new AuthenticationException(msg, e);
+        }
+        finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 

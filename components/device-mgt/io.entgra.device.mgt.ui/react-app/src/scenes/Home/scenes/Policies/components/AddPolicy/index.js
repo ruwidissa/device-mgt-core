@@ -52,28 +52,30 @@ class AddPolicy extends React.Component {
   };
 
   createPayload = () => {
-    const { newPolicyPayload } = this.state;
     const {
       publishDevicesData,
       selectedPlatformData,
-      policyProfile,
+      configureProfileData,
       policyTypeData,
       groupData,
     } = this.state.payloadData;
-    let profile = {
-      policyName: publishDevicesData.policyName,
-      devicetype: selectedPlatformData.deviceType,
+    const profile = {
+      profileName: publishDevicesData.policyName,
+      deviceType: selectedPlatformData.deviceType,
+      profileFeaturesList: configureProfileData,
     };
 
-    let payload = {
-      ...newPolicyPayload,
-      ...publishDevicesData,
-      ...policyProfile,
+    const payload = {
+      policyName: publishDevicesData.policyName,
+      description: publishDevicesData.description,
+      compliance: 'enforce',
+      ownershipType: null,
+      active: publishDevicesData.active,
       ...policyTypeData,
+      profile: profile,
       ...groupData,
-      ...{ profile: profile },
     };
-    console.log(payload);
+    this.onAddNewPolicy(JSON.stringify(payload));
   };
 
   getPolicyConfigJson = type => {
@@ -111,6 +113,40 @@ class AddPolicy extends React.Component {
           });
         }
         this.setState({ isLoading: false });
+      });
+  };
+
+  onAddNewPolicy = value => {
+    axios
+      .post(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/policies/',
+        value,
+        { headers: { 'Content-Type': 'application-json' } },
+      )
+      .then(res => {
+        if (res.status === 201) {
+          notification.success({
+            message: 'Done',
+            duration: 4,
+            description: 'Successfully added new Policy.',
+          });
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          // todo display a popop with error
+          message.error('You are not logged in');
+          window.location.href = window.location.origin + '/entgra/login';
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 0,
+            description: 'Error occurred while trying to add New Policy.',
+          });
+        }
       });
   };
 
