@@ -22,7 +22,8 @@ $(document).ready(function () {
 
     var configParams = {
         "NOTIFIER_TYPE": "notifierType",
-        "NOTIFIER_FREQUENCY": "notifierFrequency"
+        "NOTIFIER_FREQUENCY": "notifierFrequency",
+        "IS_EVENT_PUBLISHING_ENABLED": "isEventPublishingEnabled"
     };
 
     var responseCodes = {
@@ -51,6 +52,8 @@ $(document).ready(function () {
                     var config = data.configuration[i];
                     if (config.name == configParams["NOTIFIER_FREQUENCY"]) {
                         $("input#monitoring-config-frequency").val(config.value / 1000);
+                    } else if (config.name == configParams["IS_EVENT_PUBLISHING_ENABLED"]) {
+                        $("select#publish-for-analytics").val(config.value);
                     }
                 }
             }
@@ -65,6 +68,7 @@ $(document).ready(function () {
      */
     $("button#save-general-btn").click(function () {
         var notifierFrequency = $("input#monitoring-config-frequency").val();
+        var publishEvents = $("select#publish-for-analytics").val();
         var errorMsgWrapper = "#email-config-error-msg";
         var errorMsg = "#email-config-error-msg span";
 
@@ -84,6 +88,13 @@ $(document).ready(function () {
                 "contentType": "text"
             };
 
+            var publishEventsDetails = {
+                "name": configParams["IS_EVENT_PUBLISHING_ENABLED"],
+                "value": publishEvents,
+                "contentType": "text"
+            };
+
+            configList.push(publishEventsDetails);
             configList.push(monitorFrequency);
             addConfigFormData.configuration = configList;
 

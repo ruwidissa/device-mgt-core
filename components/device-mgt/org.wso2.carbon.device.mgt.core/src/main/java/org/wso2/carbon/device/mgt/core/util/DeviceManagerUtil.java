@@ -38,6 +38,10 @@ import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
@@ -53,6 +57,8 @@ import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
+import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
+import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.DeviceTypeDAO;
@@ -100,6 +106,7 @@ import java.util.stream.IntStream;
 public final class DeviceManagerUtil {
 
     private static final Log log = LogFactory.getLog(DeviceManagerUtil.class);
+    public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
 
     private  static boolean isDeviceCacheInitialized = false;
 
@@ -346,6 +353,11 @@ public final class DeviceManagerUtil {
         } catch (UserStoreException e) {
             throw new DeviceManagementException("invalid tenant Domain :" + tenantDomain);
         }
+    }
+
+    public static int getTenantId() {
+        return PrivilegedCarbonContext
+                .getThreadLocalCarbonContext().getTenantId();
     }
 
     public static int validateActivityListPageSize(int limit) throws OperationManagementException {
@@ -698,6 +710,30 @@ public final class DeviceManagerUtil {
                 .getOSGiService(JWTClientManagerService.class, null);
         JWTClient jwtClient = jwtClientManagerService.getJWTClient();
         return jwtClient.getAccessToken(clientId, clientSecret, deviceOwner, scopes);
+    }
+
+    public static Object getConfiguration(String key) {
+
+        PlatformConfigurationManagementService configMgtService =
+                new PlatformConfigurationManagementServiceImpl();
+
+        try {
+            PlatformConfiguration tenantConfiguration = configMgtService.getConfiguration
+                    (GENERAL_CONFIG_RESOURCE_PATH);
+            List<ConfigurationEntry> configuration = tenantConfiguration.getConfiguration();
+
+            if (configuration != null && !configuration.isEmpty()) {
+                for (ConfigurationEntry cEntry : configuration) {
+                    if (key.equalsIgnoreCase(cEntry.getName())) {
+                        return cEntry.getValue();
+                    }
+                }
+            }
+        } catch (ConfigurationManagementException e) {
+            log.error("Error while getting the configurations from registry.", e);
+            return null;
+        }
+        return null;
     }
 
     /**

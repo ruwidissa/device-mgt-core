@@ -53,6 +53,10 @@ public class Application implements Serializable {
     private int memoryUsage;
     @ApiModelProperty(name = "isActive", value = "Is the application actively running", required = true)
     private boolean isActive;
+    @ApiModelProperty(name = "hourlyUsage", value = "App hourly usage")
+    private long hourlyUsage;
+    @ApiModelProperty(name = "dailyUsage", value = "App daily usage")
+    private long dailyUsage;
 
 
     public String getType() {
@@ -178,5 +182,21 @@ public class Application implements Serializable {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public long getHourlyUsage() {
+        return hourlyUsage;
+    }
+
+    public void setHourlyUsage(long hourlyUsage) {
+        this.hourlyUsage = hourlyUsage;
+    }
+
+    public long getDailyUsage() {
+        return dailyUsage;
+    }
+
+    public void setDailyUsage(long dailyUsage) {
+        this.dailyUsage = dailyUsage;
     }
 }
