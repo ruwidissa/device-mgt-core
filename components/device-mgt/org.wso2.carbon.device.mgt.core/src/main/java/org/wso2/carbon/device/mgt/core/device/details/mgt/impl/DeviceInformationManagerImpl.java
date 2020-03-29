@@ -48,6 +48,7 @@ import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
+import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.core.util.HttpReportingUtil;
 import org.wso2.carbon.user.api.UserRealm;
@@ -90,6 +91,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     @Override
     public void addDeviceInfo(Device device, DeviceInfo deviceInfo) throws DeviceDetailsMgtException {
         try {
+
             publishEvents(device, deviceInfo);
             DeviceManagementDAOFactory.beginTransaction();
             DeviceInfo newDeviceInfo;
@@ -471,21 +473,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     }
 
 
-    private String[] getRolesOfUser(String userName) throws UserStoreException {
-        UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
-        String[] roleList;
-        if (userRealm != null) {
-            userRealm.getUserStoreManager().getRoleNames();
-            roleList = userRealm.getUserStoreManager().getRoleListOfUser(userName);
-        } else {
-            String msg = "User realm is not initiated. Logged in user: " + userName;
-            log.error(msg);
-            throw new UserStoreException(msg);
-        }
-        return roleList;
-    }
-
-
     /**
      * Generate and add a value depending on the device's OS version included in device info
      *
@@ -520,5 +507,20 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             }
         }
     }
+
+    private String[] getRolesOfUser(String userName) throws UserStoreException {
+        UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+        String[] roleList;
+        if (userRealm != null) {
+            userRealm.getUserStoreManager().getRoleNames();
+            roleList = userRealm.getUserStoreManager().getRoleListOfUser(userName);
+        } else {
+            String msg = "User realm is not initiated. Logged in user: " + userName;
+            log.error(msg);
+            throw new UserStoreException(msg);
+        }
+        return roleList;
+    }
+
 }
 

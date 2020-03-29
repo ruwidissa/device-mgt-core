@@ -103,7 +103,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 
-public final class DeviceManagerUtil {
+    public final class DeviceManagerUtil {
 
     private static final Log log = LogFactory.getLog(DeviceManagerUtil.class);
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
@@ -712,30 +712,6 @@ public final class DeviceManagerUtil {
         return jwtClient.getAccessToken(clientId, clientSecret, deviceOwner, scopes);
     }
 
-    public static Object getConfiguration(String key) {
-
-        PlatformConfigurationManagementService configMgtService =
-                new PlatformConfigurationManagementServiceImpl();
-
-        try {
-            PlatformConfiguration tenantConfiguration = configMgtService.getConfiguration
-                    (GENERAL_CONFIG_RESOURCE_PATH);
-            List<ConfigurationEntry> configuration = tenantConfiguration.getConfiguration();
-
-            if (configuration != null && !configuration.isEmpty()) {
-                for (ConfigurationEntry cEntry : configuration) {
-                    if (key.equalsIgnoreCase(cEntry.getName())) {
-                        return cEntry.getValue();
-                    }
-                }
-            }
-        } catch (ConfigurationManagementException e) {
-            log.error("Error while getting the configurations from registry.", e);
-            return null;
-        }
-        return null;
-    }
-
     /**
      * <h1>Generate a value for the passed os version</h1>
      *
@@ -839,5 +815,29 @@ public final class DeviceManagerUtil {
             joiner.add(String.valueOf(osVersion));
         }
         return joiner.toString();
+    }
+
+    public static Object getConfiguration(String key) {
+
+        PlatformConfigurationManagementService configMgtService =
+                new PlatformConfigurationManagementServiceImpl();
+
+        try {
+            PlatformConfiguration tenantConfiguration = configMgtService.getConfiguration
+                    (GENERAL_CONFIG_RESOURCE_PATH);
+            List<ConfigurationEntry> configuration = tenantConfiguration.getConfiguration();
+
+            if (configuration != null && !configuration.isEmpty()) {
+                for (ConfigurationEntry cEntry : configuration) {
+                    if (key.equalsIgnoreCase(cEntry.getName())) {
+                        return cEntry.getValue();
+                    }
+                }
+            }
+        } catch (ConfigurationManagementException e) {
+            log.error("Error while getting the configurations from registry.", e);
+            return null;
+        }
+        return null;
     }
 }
