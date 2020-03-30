@@ -1147,7 +1147,6 @@ public class OperationManagerImpl implements OperationManager {
         try {
             DeviceManagementDAOFactory.beginTransaction();
             int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-            String user = this.getUser();
             updateStatus = enrollmentDAO.setStatus(enrolmentId, status, tenantId);
             DeviceManagementDAOFactory.commitTransaction();
         } catch (DeviceManagementDAOException e) {
@@ -1172,10 +1171,6 @@ public class OperationManagerImpl implements OperationManager {
             }
         }
         return false;
-    }
-
-    private boolean isSameUser(String user, String owner) {
-        return user.equalsIgnoreCase(owner);
     }
 
     private List<? extends Operation> getOperations(DeviceIdentifier deviceId, Operation.Status status, int enrolmentId)

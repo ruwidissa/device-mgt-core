@@ -215,14 +215,11 @@ public class DeviceMgtAPIUtils {
     }
 
     public static boolean isValidDeviceIdentifier(DeviceIdentifier deviceIdentifier) throws DeviceManagementException {
-        Device device = getDeviceManagementService().getDevice(deviceIdentifier);
+        Device device = getDeviceManagementService().getDevice(deviceIdentifier, false);
         if (device == null || device.getDeviceIdentifier() == null ||
                 device.getDeviceIdentifier().isEmpty() || device.getEnrolmentInfo() == null) {
             return false;
-        } else if (EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
-            return false;
-        }
-        return true;
+        } else return !EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus());
     }
 
 

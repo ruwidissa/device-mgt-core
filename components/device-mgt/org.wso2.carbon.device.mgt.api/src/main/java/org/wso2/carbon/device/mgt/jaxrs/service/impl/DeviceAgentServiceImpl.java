@@ -29,11 +29,11 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.exception.DataPublisherConfigurationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
@@ -84,7 +84,8 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 String errorMessage = "The payload of the device enrollment is incorrect.";
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
             }
-            Device existingDevice = dms.getDevice(new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()));
+            Device existingDevice = dms.getDevice(new DeviceIdentifier(device.getDeviceIdentifier(), device.getType()),
+                    false);
             if (existingDevice != null && existingDevice.getEnrolmentInfo() != null && existingDevice
                     .getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.ACTIVE)) {
                 String errorMessage = "An active enrolment exists";
@@ -136,7 +137,7 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
         deviceIdentifier.setId(id);
         deviceIdentifier.setType(type);
         try {
-            device = DeviceMgtAPIUtils.getDeviceManagementService().getDevice(deviceIdentifier);
+            device = DeviceMgtAPIUtils.getDeviceManagementService().getDevice(deviceIdentifier, false);
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while getting enrollment details of the device that carries the id '" +
                     id + "'";
@@ -489,16 +490,16 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
                 log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
             }
+            Device device = DeviceMgtAPIUtils.getDeviceManagementService().getDevice(deviceIdentifier, false);
             if (!Operation.Status.ERROR.equals(operation.getStatus()) && operation.getCode() != null &&
                     POLICY_MONITOR.equals(operation.getCode())) {
                 if (log.isDebugEnabled()) {
                     log.info("Received compliance status from POLICY_MONITOR operation ID: " + operation.getId());
                 }
                 List<ComplianceFeature> features = getComplianceFeatures(operation.getPayLoad());
-                DeviceMgtAPIUtils.getPolicyManagementService().checkCompliance(deviceIdentifier, features);
-
+                DeviceMgtAPIUtils.getPolicyManagementService().checkCompliance(device, features);
             } else {
-                DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(deviceIdentifier, operation);
+                DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
             }
             return Response.status(Response.Status.OK).build();
         } catch (OperationManagementException e) {
@@ -506,11 +507,11 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
         } catch (DeviceManagementException e) {
-            String errorMessage = "Issue in retrieving deivce management service instance";
+            String errorMessage = "Issue in retrieving device management service instance";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
         } catch (PolicyComplianceException e) {
-            String errorMessage = "Issue in retrieving deivce management service instance";
+            String errorMessage = "Issue in retrieving policy management service instance";
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
         }
@@ -596,7 +597,7 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
         JsonArray jsonArray = jsonElement.getAsJsonArray();
         Gson gson = new Gson();
         ComplianceFeature complianceFeature;
-        List<ComplianceFeature> complianceFeatures = new ArrayList<ComplianceFeature>(jsonArray.size());
+        List<ComplianceFeature> complianceFeatures = new ArrayList<>(jsonArray.size());
 
         for (JsonElement element : jsonArray) {
             complianceFeature = gson.fromJson(element, ComplianceFeature.class);

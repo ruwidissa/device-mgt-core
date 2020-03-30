@@ -31,7 +31,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
-*/
+ */
 
 package org.wso2.carbon.policy.mgt.core.mgt.impl;
 
@@ -145,7 +145,7 @@ public class PolicyManagerImpl implements PolicyManager {
             if (policy.getCorrectiveActions() != null && !policy.getCorrectiveActions().isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Adding corrective actions for policy " + policy.getPolicyName() +
-                              " having policy id " + policy.getId());
+                            " having policy id " + policy.getId());
                 }
                 policyDAO.addCorrectiveActionsOfPolicy(policy.getCorrectiveActions(), policy.getId());
             }
@@ -308,7 +308,7 @@ public class PolicyManagerImpl implements PolicyManager {
 
             if (log.isDebugEnabled()) {
                 log.debug("Updating corrective actions for policy " + policy.getPolicyName() +
-                          " having policy id " + policy.getId());
+                        " having policy id " + policy.getId());
             }
 
             if (!correctiveActionsToUpdate.isEmpty()) {
@@ -348,7 +348,7 @@ public class PolicyManagerImpl implements PolicyManager {
         boolean bool;
         try {
 //            List<Policy> existingPolicies = this.getPolicies();
-            List<Policy> existingPolicies; 
+            List<Policy> existingPolicies;
             if (policyConfiguration.getCacheEnable()) {
                 existingPolicies = PolicyCacheManagerImpl.getInstance().getAllPolicies();
             } else {
@@ -655,7 +655,7 @@ public class PolicyManagerImpl implements PolicyManager {
 
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving corrective actions of policy " + policy.getPolicyName() +
-                          " having policy id " + policy.getId());
+                        " having policy id " + policy.getId());
             }
             policy.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policyId));
 
@@ -986,7 +986,7 @@ public class PolicyManagerImpl implements PolicyManager {
             PolicyManagementDAOFactory.rollbackTransaction();
             throw new PolicyManagementException("Error occurred while applying the changes to policy operations.", e);
         } finally {
-            if(transactionDone) {
+            if (transactionDone) {
                 PolicyManagementDAOFactory.closeConnection();
             }
         }
@@ -1113,8 +1113,8 @@ public class PolicyManagerImpl implements PolicyManager {
     }
 
     @Override
+    @Deprecated
     public Policy getAppliedPolicyToDevice(DeviceIdentifier deviceId) throws PolicyManagementException {
-        Policy policy;
         DeviceManagementProviderService service = new DeviceManagementProviderServiceImpl();
         Device device;
         try {
@@ -1129,6 +1129,12 @@ public class PolicyManagerImpl implements PolicyManager {
         } catch (DeviceManagementException e) {
             throw new PolicyManagementException("Error occurred while getting device id.", e);
         }
+        return getAppliedPolicyToDevice(device);
+    }
+
+    @Override
+    public Policy getAppliedPolicyToDevice(Device device) throws PolicyManagementException {
+        Policy policy;
         try {
             //int policyId = policyDAO.getAppliedPolicyId(device.getId());
             PolicyManagementDAOFactory.openConnection();
@@ -1262,7 +1268,7 @@ public class PolicyManagerImpl implements PolicyManager {
             policy.setDeviceGroups(deviceGroupWrappers);
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving corrective actions for policy " + policy.getPolicyName() +
-                          " having policy id " + policy.getId());
+                        " having policy id " + policy.getId());
             }
             policy.setCorrectiveActions(policyDAO.getCorrectiveActionsOfPolicy(policy.getId()));
         }

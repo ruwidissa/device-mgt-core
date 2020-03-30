@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.common.notification.mgt;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
@@ -38,7 +39,11 @@ public interface NotificationManagementService {
      * @throws NotificationManagementException
      *          if something goes wrong while adding the Notification.
      */
+    @Deprecated
     boolean addNotification(DeviceIdentifier deviceId,
+                            Notification notification) throws NotificationManagementException;
+
+    boolean addNotification(Device device,
                             Notification notification) throws NotificationManagementException;
 
     /**

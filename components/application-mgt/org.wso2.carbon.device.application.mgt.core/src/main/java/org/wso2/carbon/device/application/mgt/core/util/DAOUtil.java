@@ -311,9 +311,9 @@ public class DAOUtil {
         }
     }
 
-    private static ApplicationManager applicationManager;
-    private static ApplicationStorageManager applicationStorageManager;
-    private static SubscriptionManager subscriptionManager;
+    private static volatile ApplicationManager applicationManager;
+    private static volatile ApplicationStorageManager applicationStorageManager;
+    private static volatile SubscriptionManager subscriptionManager;
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {

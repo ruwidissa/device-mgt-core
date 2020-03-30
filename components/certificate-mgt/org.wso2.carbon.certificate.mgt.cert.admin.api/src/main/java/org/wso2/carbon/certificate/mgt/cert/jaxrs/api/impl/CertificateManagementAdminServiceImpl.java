@@ -18,6 +18,14 @@
 
 package org.wso2.carbon.certificate.mgt.cert.jaxrs.api.impl;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +39,6 @@ import org.wso2.carbon.certificate.mgt.cert.jaxrs.api.util.RequestValidationUtil
 import org.wso2.carbon.certificate.mgt.core.dto.CertificateResponse;
 import org.wso2.carbon.certificate.mgt.core.exception.CertificateManagementException;
 import org.wso2.carbon.certificate.mgt.core.exception.KeystoreException;
-import org.wso2.carbon.certificate.mgt.core.impl.CertificateGenerator;
 import org.wso2.carbon.certificate.mgt.core.scep.SCEPException;
 import org.wso2.carbon.certificate.mgt.core.scep.SCEPManager;
 import org.wso2.carbon.certificate.mgt.core.scep.TenantedDeviceWrapper;
@@ -43,7 +50,6 @@ import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
 
-import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -170,71 +176,6 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
         }
     }
 
-//    @POST
-//    @Path("/verify/ios")
-//    public Response verifyIOSCertificate(@ApiParam(name = "certificate", value = "Mdm-Signature of the " +
-//            "certificate that needs to be verified", required = true) EnrollmentCertificate certificate) {
-//        try {
-//            CertificateManagementService certMgtService = CertificateMgtAPIUtils.getCertificateManagementService();
-//            X509Certificate cert = certMgtService.extractCertificateFromSignature(certificate.getPem());
-//            String challengeToken = certMgtService.extractChallengeToken(cert);
-//
-//            if (challengeToken != null) {
-//                challengeToken = challengeToken.substring(challengeToken.indexOf("(") + 1).trim();
-//
-//                SCEPManager scepManager = CertificateMgtAPIUtils.getSCEPManagerService();
-//                DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
-//                deviceIdentifier.setId(challengeToken);
-//                deviceIdentifier.setType(DeviceManagementConstants.MobileDeviceTypes.MOBILE_DEVICE_TYPE_IOS);
-//                TenantedDeviceWrapper tenantedDeviceWrapper = scepManager.getValidatedDevice(deviceIdentifier);
-//
-//                if (tenantedDeviceWrapper != null) {
-//                    return Response.status(Response.Status.OK).entity("valid").build();
-//                }
-//            }
-//        } catch (SCEPException e) {
-//            String msg = "Error occurred while extracting information from certificate.";
-//            log.error(msg, e);
-//            return Response.serverError().entity(
-//                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build()).build();
-//        } catch (KeystoreException e) {
-//            String msg = "Error occurred while converting PEM file to X509Certificate.";
-//            log.error(msg, e);
-//            return Response.serverError().entity(
-//                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build()).build();
-//        }
-//        return Response.status(Response.Status.OK).entity("invalid").build();
-//    }
-//
-//    @POST
-//    @Path("/verify/android")
-//    public Response verifyAndroidCertificate(@ApiParam(name = "certificate", value = "Base64 encoded .pem file of the " +
-//            "certificate that needs to be verified", required = true) EnrollmentCertificate certificate) {
-//        CertificateResponse certificateResponse = null;
-//        try {
-//            CertificateManagementService certMgtService = CertificateMgtAPIUtils.getCertificateManagementService();
-//            if (certificate.getSerial().toLowerCase().contains(PROXY_AUTH_MUTUAL_HEADER)) {
-//                certificateResponse = certMgtService.verifySubjectDN(certificate.getPem());
-//            } else {
-//                X509Certificate clientCertificate = certMgtService.pemToX509Certificate(certificate.getPem());
-//                if (clientCertificate != null) {
-//                    certificateResponse = certMgtService.verifyPEMSignature(clientCertificate);
-//                }
-//            }
-//
-//            if (certificateResponse != null && certificateResponse.getCommonName() != null && !certificateResponse
-//                    .getCommonName().isEmpty()) {
-//                return Response.status(Response.Status.OK).entity("valid").build();
-//            }
-//        } catch (KeystoreException e) {
-//            String msg = "Error occurred while converting PEM file to X509Certificate.";
-//            log.error(msg, e);
-//            return Response.serverError().entity(
-//                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build()).build();
-//        }
-//        return Response.status(Response.Status.OK).entity("invalid").build();
-//    }
-
     @POST
     @Path("/verify/{type}")
     public Response verifyCertificate(@PathParam("type") String type, EnrollmentCertificate certificate) {
@@ -323,7 +264,7 @@ public class CertificateManagementAdminServiceImpl implements CertificateManagem
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build()).build();
         } catch (JWTClientException e) {
-            String msg = "Error occurred while converting PEM file to X509Certificate.";
+            String msg = "Error occurred while getting jwt token.";
             log.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build()).build();

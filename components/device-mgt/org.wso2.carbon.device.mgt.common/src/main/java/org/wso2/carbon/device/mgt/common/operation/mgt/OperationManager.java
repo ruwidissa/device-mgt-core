@@ -75,7 +75,6 @@ public interface OperationManager {
      * @throws OperationManagementException If some unusual behaviour is observed while fetching the
      *                                      operation list.
      */
-    @Deprecated
     List<? extends Operation> getPendingOperations(DeviceIdentifier deviceId) throws OperationManagementException;
 
     List<? extends Operation> getPendingOperations(Device device) throws OperationManagementException;

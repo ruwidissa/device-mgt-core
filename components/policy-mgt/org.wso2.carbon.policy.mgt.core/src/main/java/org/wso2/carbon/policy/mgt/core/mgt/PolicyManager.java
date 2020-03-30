@@ -80,7 +80,10 @@ public interface PolicyManager {
 
     int getPolicyCount() throws PolicyManagementException;
 
+    @Deprecated
     Policy getAppliedPolicyToDevice(DeviceIdentifier deviceIdentifier) throws PolicyManagementException;
+
+    Policy getAppliedPolicyToDevice(Device device) throws PolicyManagementException;
 
     HashMap<Integer, Integer> getAppliedPolicyIdsDeviceIds() throws PolicyManagementException;
 

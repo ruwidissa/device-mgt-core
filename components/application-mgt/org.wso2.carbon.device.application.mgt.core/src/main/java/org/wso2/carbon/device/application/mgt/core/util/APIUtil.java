@@ -58,11 +58,11 @@ public class APIUtil {
 
     private static Log log = LogFactory.getLog(APIUtil.class);
 
-    private static ApplicationManager applicationManager;
-    private static ApplicationStorageManager applicationStorageManager;
-    private static SubscriptionManager subscriptionManager;
-    private static ReviewManager reviewManager;
-    private static AppmDataHandler appmDataHandler;
+    private static volatile ApplicationManager applicationManager;
+    private static volatile ApplicationStorageManager applicationStorageManager;
+    private static volatile SubscriptionManager subscriptionManager;
+    private static volatile ReviewManager reviewManager;
+    private static volatile AppmDataHandler appmDataHandler;
 
     public static ApplicationManager getApplicationManager() {
         if (applicationManager == null) {

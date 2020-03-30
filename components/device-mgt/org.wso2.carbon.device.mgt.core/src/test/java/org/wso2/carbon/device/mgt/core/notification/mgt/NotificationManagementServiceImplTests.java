@@ -125,8 +125,7 @@ public class NotificationManagementServiceImplTests {
         Notification notification = TestDataHolder.getNotification(1, Notification.Status.NEW.toString(),
                 testDeviceIdentifier.toString(), TEST_NOTIFICATION_DESCRIPTION, DEVICE_ID_PREFIX + 123,
                 NOTIFICATION_OPERATION_ID, DEVICE_TYPE);
-        notificationManagementService.addNotification(new DeviceIdentifier(DEVICE_ID_PREFIX + 123,
-                DEVICE_TYPE), notification);
+        notificationManagementService.addNotification(testDeviceIdentifier, notification);
     }
 
     @Test(expectedExceptions = NotificationManagementException.class, description = "This tests the method getDevice which" +
@@ -136,7 +135,7 @@ public class NotificationManagementServiceImplTests {
         Notification notification = TestDataHolder.getNotification(1, Notification.Status.NEW.toString(),
                 testDeviceIdentifier.toString(), TEST_NOTIFICATION_DESCRIPTION, DEVICE_ID_PREFIX + 123,
                 NOTIFICATION_OPERATION_ID, DEVICE_TYPE);
-        notificationManagementService.addNotification(null, notification);
+        notificationManagementService.addNotification((DeviceIdentifier) null, notification);
     }
 
     @Test(dependsOnMethods = "addNotification", description = "This tests the updateNotification Method" +
