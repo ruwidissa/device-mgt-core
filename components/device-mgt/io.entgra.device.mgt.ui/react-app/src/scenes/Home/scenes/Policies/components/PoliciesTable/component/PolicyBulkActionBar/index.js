@@ -65,7 +65,7 @@ class BulkActionBar extends React.Component {
 
     return (
       <div>
-        <div style={{ padding: '8px' }}>
+        <div style={{ padding: '5px' }}>
           <Tooltip placement="bottom" title={'Apply Changes to Device'}>
             <Popconfirm
               placement="topLeft"
@@ -80,7 +80,9 @@ class BulkActionBar extends React.Component {
                 icon="check-circle"
                 size={'default'}
                 style={{ margin: '2px' }}
-              />
+              >
+                APPLY CHANGES TO DEVICES
+              </Button>
             </Popconfirm>
           </Tooltip>
         </div>
@@ -110,7 +112,9 @@ class BulkActionBar extends React.Component {
                 size={'default'}
                 onClick={this.onCheckPolicyStatus}
                 style={{ margin: '2px' }}
-              />
+              >
+                Remove
+              </Button>
             </Popconfirm>
           </Tooltip>
           <Divider type="vertical" />
@@ -135,7 +139,9 @@ class BulkActionBar extends React.Component {
                 style={{
                   margin: '2px',
                 }}
-              />
+              >
+                Publish
+              </Button>
             </Popconfirm>
           </Tooltip>
           <Divider type="vertical" />
@@ -158,7 +164,9 @@ class BulkActionBar extends React.Component {
                 onClick={this.onCheckPolicyStatus}
                 size={'default'}
                 style={{ margin: '2px' }}
-              />
+              >
+                Unpublish
+              </Button>
             </Popconfirm>
           </Tooltip>
         </div>

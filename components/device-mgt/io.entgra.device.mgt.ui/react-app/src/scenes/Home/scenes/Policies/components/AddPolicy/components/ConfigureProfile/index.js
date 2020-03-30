@@ -46,6 +46,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const subPanelpayloadAttributes = {};
+let formContainers = {};
 
 class ConfigureProfile extends React.Component {
   constructor(props) {
@@ -303,7 +304,7 @@ class ConfigureProfile extends React.Component {
   onHandleContinue = (e, formname) => {
     const allFields = this.props.form.getFieldsValue();
     let activeFields = [];
-    // get currently active field list
+    let subContentsList = {};
     for (let i = 0; i < this.state.activePanelKeys.length; i++) {
       Object.keys(allFields).map(key => {
         if (key.includes(`${this.state.activePanelKeys[i]}-`)) {
@@ -312,14 +313,16 @@ class ConfigureProfile extends React.Component {
               `${this.state.activePanelKeys[i]}`,
             )
           ) {
-            Object.keys(
+            Object.entries(
               subPanelpayloadAttributes[this.state.activePanelKeys[i]],
-            ).map(subPanel => {
-              if (`${this.state.activePanelKeys[i]}-${subPanel}` === true) {
-                if (key.includes(`-${subPanel}-`)) {
-                  activeFields.push(key);
-                }
-              } else if (!key.includes(`-${subPanel}-`)) {
+            ).map(([subPanel, subContent]) => {
+              subContentsList[subContent] = {};
+              if (
+                allFields[`${this.state.activePanelKeys[i]}-${subPanel}`] ===
+                true
+              ) {
+                activeFields.push(key);
+              } else if (!key.includes(`-${subPanel}`)) {
                 activeFields.push(key);
               }
             });
@@ -337,17 +340,67 @@ class ConfigureProfile extends React.Component {
           let content = {};
           Object.entries(values).map(([key, value]) => {
             if (key.includes(`${this.state.activePanelKeys[i]}-`)) {
-              content[
-                key.replace(`${this.state.activePanelKeys[i]}-`, '')
-              ] = value;
+              if (
+                subPanelpayloadAttributes.hasOwnProperty(
+                  `${this.state.activePanelKeys[i]}`,
+                )
+              ) {
+                Object.entries(
+                  subPanelpayloadAttributes[this.state.activePanelKeys[i]],
+                ).map(([subPanel, contentKey]) => {
+                  if (key.includes(`-${subPanel}-`)) {
+                    subContentsList[contentKey][
+                      key.replace(
+                        `${this.state.activePanelKeys[i]}-${subPanel}-`,
+                        '',
+                      )
+                    ] = value;
+                    content = { ...content, ...subContentsList };
+                  } else {
+                    content[
+                      key.replace(`${this.state.activePanelKeys[i]}-`, '')
+                    ] = value;
+                  }
+                });
+              } else if (this.state.activePanelKeys[i] in formContainers) {
+                formContainers[this.state.activePanelKeys[i]].forEach(
+                  subFeature => {
+                    if (
+                      key.includes(
+                        `${this.state.activePanelKeys[i]}-${subFeature}-`,
+                      )
+                    ) {
+                      let subFormContent = {};
+                      subFormContent[
+                        key.replace(
+                          `${this.state.activePanelKeys[i]}-${subFeature}-`,
+                          '',
+                        )
+                      ] = value;
+                      let feature = {
+                        featureCode: subFeature,
+                        deviceType: 'android',
+                        content: subFormContent,
+                      };
+                      profileFeaturesList.push(feature);
+                    }
+                  },
+                );
+              } else {
+                content[
+                  key.replace(`${this.state.activePanelKeys[i]}-`, '')
+                ] = value;
+              }
             }
           });
-          let feature = {
-            featureCode: this.state.activePanelKeys[i],
-            deviceType: 'android',
-            content: content,
-          };
-          profileFeaturesList.push(feature);
+          if (!(this.state.activePanelKeys[i] in formContainers)) {
+            let feature = {
+              featureCode: this.state.activePanelKeys[i],
+              deviceType: 'android',
+              content: content,
+            };
+            profileFeaturesList.push(feature);
+          }
         }
         this.props.getPolicyPayloadData(formname, profileFeaturesList);
         this.props.getNextStep();
@@ -751,6 +804,7 @@ class ConfigureProfile extends React.Component {
               <TabPane tab={<span>{element.name}</span>} key={i}>
                 {Object.values(element.panels).map((panel, j) => {
                   panel = panel.panel;
+                  let subForms = [];
                   return (
                     <div key={j}>
                       <Collapse
@@ -803,6 +857,8 @@ class ConfigureProfile extends React.Component {
                             <div>
                               {Object.values(panel.subFormLists).map(
                                 (form, i) => {
+                                  subForms.push(form.id);
+                                  formContainers[`${panel.panelId}`] = subForms;
                                   return (
                                     <Form name={form.id} key={i}>
                                       <Form.Item style={{ display: 'none' }}>
