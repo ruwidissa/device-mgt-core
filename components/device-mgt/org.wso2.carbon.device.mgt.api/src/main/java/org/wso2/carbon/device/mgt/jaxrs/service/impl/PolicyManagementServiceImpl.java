@@ -406,7 +406,17 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
             deviceIdentifier.setId(deviceId);
             deviceIdentifier.setType(deviceType);
-            policy = policyManagementService.getAppliedPolicyToDevice(deviceIdentifier);
+            Device device;
+            try {
+                device = DeviceMgtAPIUtils.getDeviceManagementService().getDevice(deviceIdentifier, false);
+            } catch (DeviceManagementException e) {
+                String msg = "Error occurred while retrieving '" + deviceType + "' device, which carries the id '"
+                        + deviceId + "'";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+            policy = policyManagementService.getAppliedPolicyToDevice(device);
             if (policy == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity(
                         new ErrorResponse.ErrorResponseBuilder().setMessage(

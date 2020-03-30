@@ -291,6 +291,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     }
 
     @Override
+    @Deprecated
     public void addDeviceLocation(DeviceLocation deviceLocation) throws DeviceDetailsMgtException {
         try {
             Device device = DeviceManagementDataHolder.getInstance().

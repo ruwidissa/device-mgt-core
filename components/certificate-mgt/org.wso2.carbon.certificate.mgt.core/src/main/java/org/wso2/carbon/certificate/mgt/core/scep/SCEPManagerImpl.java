@@ -46,7 +46,7 @@ public class SCEPManagerImpl implements SCEPManager {
             HashMap<Integer, Device> deviceHashMap = dms.getTenantedDevice(deviceIdentifier);
             Object[] keySet = deviceHashMap.keySet().toArray();
 
-            if (keySet == null || keySet.length == 0) {
+            if (keySet.length == 0) {
                 throw new SCEPException("Lookup device not found for the device identifier");
             }
 

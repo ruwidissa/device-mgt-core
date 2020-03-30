@@ -85,7 +85,7 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
             identifier.setId(device.getDeviceIdentifier());
             identifier.setType(device.getType());
 
-            Policy devicePolicy = this.getAppliedPolicyToDevice(identifier);
+            Policy devicePolicy = this.getAppliedPolicyToDevice(device);
             Policy policy = this.getEffectivePolicy(identifier);
             List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
             deviceIdentifiers.add(identifier);
@@ -193,14 +193,14 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
     /**
      * Provides the applied policy for give device
      *
-     * @param identifier Device Identifier
+     * @param device Device
      * @return Applied Policy
      * @throws PolicyDelegationException exception throws when retrieving applied policy for given device
      */
-    public Policy getAppliedPolicyToDevice(DeviceIdentifier identifier) throws PolicyDelegationException {
+    public Policy getAppliedPolicyToDevice(Device device) throws PolicyDelegationException {
         try {
             PolicyManagerService policyManagerService = new PolicyManagerServiceImpl();
-            return policyManagerService.getAppliedPolicyToDevice(identifier);
+            return policyManagerService.getAppliedPolicyToDevice(device);
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving the applied policy for devices.";
             log.error(msg, e);

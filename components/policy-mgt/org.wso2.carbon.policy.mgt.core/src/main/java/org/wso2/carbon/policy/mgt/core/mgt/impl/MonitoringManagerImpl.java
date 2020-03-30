@@ -28,20 +28,23 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
+import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.NonComplianceData;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
-import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
-import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
-import org.wso2.carbon.device.mgt.common.policy.mgt.ProfileFeature;
-import org.wso2.carbon.policy.mgt.common.monitor.*;
-import org.wso2.carbon.policy.mgt.core.dao.*;
+import org.wso2.carbon.policy.mgt.common.monitor.ComplianceDecisionPoint;
+import org.wso2.carbon.policy.mgt.common.monitor.PolicyDeviceWrapper;
+import org.wso2.carbon.policy.mgt.core.dao.MonitoringDAO;
+import org.wso2.carbon.policy.mgt.core.dao.MonitoringDAOException;
+import org.wso2.carbon.policy.mgt.core.dao.PolicyDAO;
+import org.wso2.carbon.policy.mgt.core.dao.PolicyManagementDAOFactory;
+import org.wso2.carbon.policy.mgt.core.dao.PolicyManagerDAOException;
 import org.wso2.carbon.policy.mgt.core.impl.ComplianceDecisionPointImpl;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.mgt.MonitoringManager;
@@ -58,7 +61,6 @@ public class MonitoringManagerImpl implements MonitoringManager {
     private PolicyDAO policyDAO;
     private MonitoringDAO monitoringDAO;
     private ComplianceDecisionPoint complianceDecisionPoint;
-    private PolicyConfiguration policyConfiguration;
 
     private static final Log log = LogFactory.getLog(MonitoringManagerImpl.class);
     private static final String OPERATION_MONITOR = "MONITOR";
@@ -68,34 +70,44 @@ public class MonitoringManagerImpl implements MonitoringManager {
         this.policyDAO = PolicyManagementDAOFactory.getPolicyDAO();
         this.monitoringDAO = PolicyManagementDAOFactory.getMonitoringDAO();
         this.complianceDecisionPoint = new ComplianceDecisionPointImpl();
-        this.policyConfiguration =
-                DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getPolicyConfiguration();
     }
 
     @Override
-    public List<ComplianceFeature> checkPolicyCompliance(
-            DeviceIdentifier deviceIdentifier,
-            Object deviceResponse) throws PolicyComplianceException {
+    @Deprecated
+    public List<ComplianceFeature> checkPolicyCompliance(DeviceIdentifier deviceIdentifier, Object deviceResponse)
+            throws PolicyComplianceException {
+        DeviceManagementProviderService service =
+                PolicyManagementDataHolder.getInstance().getDeviceManagementService();
+        Device device;
+        try {
+            device = service.getDevice(deviceIdentifier, false);
+        } catch (DeviceManagementException e) {
+            throw new PolicyComplianceException("Unable tor retrieve device data from DB for " +
+                    deviceIdentifier.getId() + " - " + deviceIdentifier.getType(), e);
+        }
+        return checkPolicyCompliance(device, deviceResponse);
+    }
 
+    @Override
+    public List<ComplianceFeature> checkPolicyCompliance(Device device, Object deviceResponse)
+            throws PolicyComplianceException {
+        DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
         List<ComplianceFeature> complianceFeatures = new ArrayList<>();
         try {
-            DeviceManagementProviderService service =
-                    PolicyManagementDataHolder.getInstance().getDeviceManagementService();
             PolicyManager manager = PolicyManagementDataHolder.getInstance().getPolicyManager();
-            Device device = service.getDevice(deviceIdentifier, false);
-            Policy policy = manager.getAppliedPolicyToDevice(deviceIdentifier);
+            Policy policy = manager.getAppliedPolicyToDevice(device);
             if (policy != null) {
                 PolicyMonitoringManager monitoringService = PolicyManagementDataHolder.getInstance().
-                        getDeviceManagementService().getPolicyMonitoringManager(deviceIdentifier.getType());
+                        getDeviceManagementService().getPolicyMonitoringManager(device.getType());
 
                 NonComplianceData complianceData;
                 // This was retrieved from database because compliance id must be present for other dao operations to
                 // run.
                 try {
                     PolicyManagementDAOFactory.openConnection();
-                    NonComplianceData cmd = monitoringDAO.getCompliance(device.getId(), device.getEnrolmentInfo().getId());
-                    complianceData = monitoringService.checkPolicyCompliance(deviceIdentifier,
-                            policy, deviceResponse);
+                    NonComplianceData cmd = monitoringDAO.getCompliance(device.getId(),
+                            device.getEnrolmentInfo().getId());
+                    complianceData = monitoringService.checkPolicyCompliance(deviceIdentifier, policy, deviceResponse);
                     if (cmd != null) {
                         complianceData.setId(cmd.getId());
                         complianceData.setPolicy(policy);
@@ -109,7 +121,7 @@ public class MonitoringManagerImpl implements MonitoringManager {
                 } catch (MonitoringDAOException e) {
                     throw new PolicyComplianceException(
                             "Unable to add the none compliance features to database for device " +
-                                    deviceIdentifier.getId() + " - " + deviceIdentifier.getType(), e);
+                                    device.getDeviceIdentifier() + " - " + device.getType(), e);
                 } finally {
                     PolicyManagementDAOFactory.closeConnection();
                 }
@@ -133,7 +145,7 @@ public class MonitoringManagerImpl implements MonitoringManager {
                         PolicyManagementDAOFactory.rollbackTransaction();
                         throw new PolicyComplianceException(
                                 "Unable to add the none compliance features to database for device " +
-                                deviceIdentifier.getId() + " - " + deviceIdentifier.getType(), e);
+                                device.getDeviceIdentifier() + " - " + device.getType(), e);
                     } finally {
                         PolicyManagementDAOFactory.closeConnection();
                     }
@@ -167,9 +179,6 @@ public class MonitoringManagerImpl implements MonitoringManager {
                     log.debug("There is no policy applied to this device, hence compliance monitoring was not called.");
                 }
             }
-        } catch (DeviceManagementException e) {
-            throw new PolicyComplianceException("Unable tor retrieve device data from DB for " +
-                                                deviceIdentifier.getId() + " - " + deviceIdentifier.getType(), e);
         } catch (PolicyManagerDAOException | PolicyManagementException e) {
             throw new PolicyComplianceException("Unable tor retrieve policy data from DB for device " +
                                                 deviceIdentifier.getId() + " - " + deviceIdentifier.getType(), e);
@@ -208,26 +217,33 @@ public class MonitoringManagerImpl implements MonitoringManager {
     }
 
     @Override
+    @Deprecated
     public NonComplianceData getDevicePolicyCompliance(DeviceIdentifier deviceIdentifier) throws
             PolicyComplianceException {
+        DeviceManagementProviderService service =
+                PolicyManagementDataHolder.getInstance().getDeviceManagementService();
+        Device device;
+        try {
+            device = service.getDevice(deviceIdentifier, false);
+        } catch (DeviceManagementException e) {
+            throw new PolicyComplianceException("Unable to retrieve device data for " + deviceIdentifier.getId() +
+                    " - " + deviceIdentifier.getType(), e);
+        }
+        return getDevicePolicyCompliance(device);
+    }
+
+    @Override
+    public NonComplianceData getDevicePolicyCompliance(Device device) throws PolicyComplianceException {
         NonComplianceData complianceData;
         try {
             PolicyManagementDAOFactory.openConnection();
-            DeviceManagementProviderService service =
-                    PolicyManagementDataHolder.getInstance().getDeviceManagementService();
-            Device device = service.getDevice(deviceIdentifier, false);
             complianceData = monitoringDAO.getCompliance(device.getId(), device.getEnrolmentInfo().getId());
             List<ComplianceFeature> complianceFeatures =
                     monitoringDAO.getNoneComplianceFeatures(complianceData.getId());
             complianceData.setComplianceFeatures(complianceFeatures);
-
-        } catch (DeviceManagementException e) {
-            throw new PolicyComplianceException("Unable to retrieve device data for " + deviceIdentifier.getId() +
-                    " - " + deviceIdentifier.getType(), e);
-
         } catch (MonitoringDAOException e) {
-            throw new PolicyComplianceException("Unable to retrieve compliance data for " + deviceIdentifier.getId() +
-                    " - " + deviceIdentifier.getType(), e);
+            throw new PolicyComplianceException("Unable to retrieve compliance data for " + device.getType() +
+                    " device " + device.getDeviceIdentifier(), e);
         } catch (SQLException e) {
             throw new PolicyComplianceException("Error occurred while opening a connection to the data source", e);
         } finally {

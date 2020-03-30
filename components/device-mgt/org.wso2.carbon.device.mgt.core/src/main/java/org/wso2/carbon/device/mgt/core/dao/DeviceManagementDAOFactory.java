@@ -96,7 +96,7 @@ public class DeviceManagementDAOFactory {
     private static DataSource dataSource;
     private static String databaseEngine;
     private static final Log log = LogFactory.getLog(DeviceManagementDAOFactory.class);
-    private static ThreadLocal<Connection> currentConnection = new ThreadLocal<Connection>();
+    private static ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
     public static DeviceDAO getDeviceDAO() {
         if (databaseEngine != null) {

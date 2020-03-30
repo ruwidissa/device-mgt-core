@@ -73,6 +73,7 @@ public interface DeviceInformationManager {
      * @param deviceLocation - Device location object.
      * @throws DeviceDetailsMgtException
      */
+    @Deprecated
     void addDeviceLocation(DeviceLocation deviceLocation) throws DeviceDetailsMgtException;
 
     void addDeviceLocation(Device device, DeviceLocation deviceLocation) throws DeviceDetailsMgtException;

@@ -16,7 +16,6 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.policy.mgt.core.mgt;
 
 import org.wso2.carbon.device.mgt.common.Device;
@@ -31,21 +30,27 @@ import java.util.List;
 
 public interface MonitoringManager {
 
+    @Deprecated
     List<ComplianceFeature> checkPolicyCompliance(DeviceIdentifier deviceIdentifier, Object deviceResponse)
             throws PolicyComplianceException;
 
+    List<ComplianceFeature> checkPolicyCompliance(Device device, Object deviceResponse)
+            throws PolicyComplianceException;
 
     boolean isCompliant(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException;
 
+    @Deprecated
     NonComplianceData getDevicePolicyCompliance(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException;
+
+    NonComplianceData getDevicePolicyCompliance(Device device) throws PolicyComplianceException;
 
     void addMonitoringOperation(List<Device> devices) throws PolicyComplianceException;
 
     List<String> getDeviceTypes() throws PolicyComplianceException;
 
     PaginationResult getPolicyCompliance(
-            PaginationRequest paginationRequest, String policyId, boolean complianceStatus, boolean isPending, String fromDate, String toDate)
-            throws PolicyComplianceException;
+            PaginationRequest paginationRequest, String policyId, boolean complianceStatus, boolean isPending,
+            String fromDate, String toDate) throws PolicyComplianceException;
 
     List<ComplianceFeature> getNoneComplianceFeatures(int complianceStatusId)
             throws PolicyComplianceException;

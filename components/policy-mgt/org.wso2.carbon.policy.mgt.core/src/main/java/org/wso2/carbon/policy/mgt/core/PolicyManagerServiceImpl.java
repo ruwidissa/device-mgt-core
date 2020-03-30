@@ -37,6 +37,7 @@ package org.wso2.carbon.policy.mgt.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -216,34 +217,54 @@ public class PolicyManagerServiceImpl implements PolicyManagerService {
     }
 
     @Override
-    public Policy getAppliedPolicyToDevice(
-            DeviceIdentifier deviceIdentifier) throws PolicyManagementException {
+    @Deprecated
+    public Policy getAppliedPolicyToDevice(DeviceIdentifier deviceIdentifier) throws PolicyManagementException {
         return policyManager.getAppliedPolicyToDevice(deviceIdentifier);
     }
 
     @Override
+    public Policy getAppliedPolicyToDevice(Device device) throws PolicyManagementException {
+        return policyManager.getAppliedPolicyToDevice(device);
+    }
+
+    @Override
+    @Deprecated
     public List<ComplianceFeature> checkPolicyCompliance(DeviceIdentifier deviceIdentifier, Object
             deviceResponse) throws PolicyComplianceException {
         return monitoringManager.checkPolicyCompliance(deviceIdentifier, deviceResponse);
     }
 
     @Override
-    public boolean checkCompliance(DeviceIdentifier deviceIdentifier, Object response) throws
-            PolicyComplianceException {
-
-        List<ComplianceFeature> complianceFeatures =
-                monitoringManager.checkPolicyCompliance(deviceIdentifier, response);
-        if(complianceFeatures == null || complianceFeatures.isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
-
+    public List<ComplianceFeature> checkPolicyCompliance(Device device, Object
+            deviceResponse) throws PolicyComplianceException {
+        return monitoringManager.checkPolicyCompliance(device, deviceResponse);
     }
 
     @Override
+    @Deprecated
+    public boolean checkCompliance(DeviceIdentifier deviceIdentifier, Object response) throws
+            PolicyComplianceException {
+        List<ComplianceFeature> complianceFeatures =
+                monitoringManager.checkPolicyCompliance(deviceIdentifier, response);
+        return complianceFeatures == null || complianceFeatures.isEmpty();
+    }
+
+    @Override
+    public boolean checkCompliance(Device device, Object response) throws PolicyComplianceException {
+        List<ComplianceFeature> complianceFeatures =
+                monitoringManager.checkPolicyCompliance(device, response);
+        return complianceFeatures == null || complianceFeatures.isEmpty();
+    }
+
+    @Override
+    @Deprecated
     public NonComplianceData getDeviceCompliance(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException {
         return monitoringManager.getDevicePolicyCompliance(deviceIdentifier);
+    }
+
+    @Override
+    public NonComplianceData getDeviceCompliance(Device device) throws PolicyComplianceException {
+        return monitoringManager.getDevicePolicyCompliance(device);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class PullNotificationSubscriberImpl implements PullNotificationSubscribe
     }
 
     @Override
-    public void execute(DeviceIdentifier deviceIdentifier, Operation operation) throws PullNotificationExecutionFailedException {
+    public void execute(Device device, Operation operation) throws PullNotificationExecutionFailedException {
         try {
             if (!Operation.Status.ERROR.equals(operation.getStatus()) && operation.getCode() != null &&
             OperationCodes.POLICY_MONITOR.equals(operation.getCode())) {
@@ -68,17 +68,17 @@ public class PullNotificationSubscriberImpl implements PullNotificationSubscribe
                 }
                 List<ComplianceFeature> features = getComplianceFeatures(operation.getPayLoad());
                 PullNotificationDataHolder.getInstance().getPolicyManagerService()
-                        .checkCompliance(deviceIdentifier, features);
+                        .checkCompliance(device, features);
 
             } else {
                 PullNotificationDataHolder.getInstance().getDeviceManagementProviderService().updateOperation(
-                        deviceIdentifier, operation);
+                        device, operation);
                 if (OperationCodes.INSTALL_APPLICATION.equals(operation.getCode())
                         && Operation.Status.COMPLETED == operation.getStatus()) {
-                    updateAppSubStatus(deviceIdentifier, operation.getId(), operation.getCode());
+                    updateAppSubStatus(device, operation.getId(), operation.getCode());
                 }
             }
-        } catch (OperationManagementException | DeviceManagementException | ApplicationManagementException e) {
+        } catch (OperationManagementException | ApplicationManagementException e) {
             throw new PullNotificationExecutionFailedException(e);
         } catch (PolicyComplianceException e) {
             throw new PullNotificationExecutionFailedException("Invalid payload format compliant feature", e);
@@ -109,10 +109,9 @@ public class PullNotificationSubscriberImpl implements PullNotificationSubscribe
         return complianceFeatures;
     }
 
-    private void updateAppSubStatus(DeviceIdentifier deviceIdentifier, int operationId, String status)
-            throws DeviceManagementException, ApplicationManagementException {
+    private void updateAppSubStatus(Device device, int operationId, String status)
+            throws ApplicationManagementException {
         ApplicationManager applicationManager = PullNotificationDataHolder.getInstance().getApplicationManager();
-        Device device = PullNotificationDataHolder.getInstance().getDeviceManagementProviderService().getDevice(deviceIdentifier);
         applicationManager.updateSubsStatus(device.getId(), operationId, status);
     }
 }

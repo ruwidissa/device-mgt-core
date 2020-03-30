@@ -843,7 +843,7 @@ public interface DeviceManagementService {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/type/{device-type}/id/{device-id}/rename")
+    @Path("/type/{deviceType}/id/{deviceId}/rename")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             consumes = MediaType.APPLICATION_JSON,
@@ -904,14 +904,14 @@ public interface DeviceManagementService {
                     name = "device-type",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
-            @PathParam("device-type")
+            @PathParam("deviceType")
             @Size(max = 45)
                     String deviceType,
             @ApiParam(
                     name = "device-id",
                     value = "The device identifier of the device.",
                     required = true)
-            @PathParam("device-id")
+            @PathParam("deviceId")
             @Size(max = 45)
                     String deviceId);
 
@@ -919,7 +919,7 @@ public interface DeviceManagementService {
     //DELETE devices/type/virtual_firealarm/id/us06ww93auzp
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/type/{device-type}/id/{device-id}")
+    @Path("/type/{deviceType}/id/{deviceId}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "DELETE",
@@ -974,14 +974,14 @@ public interface DeviceManagementService {
                     name = "device-type",
                     value = "The device type, such as ios, android, or windows.",
                     required = true)
-            @PathParam("device-type")
+            @PathParam("deviceType")
             @Size(max = 45)
                     String deviceType,
             @ApiParam(
                     name = "device-id",
                     value = "The device identifier of the device.",
                     required = true)
-            @PathParam("device-id")
+            @PathParam("deviceId")
             @Size(max = 45)
                     String deviceId);
 
@@ -1923,7 +1923,7 @@ public interface DeviceManagementService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/compliance/{compliance-status}")
+    @Path("/compliance/{complianceStatus}")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -1958,7 +1958,7 @@ public interface DeviceManagementService {
                     value = "Compliance status for devices. If true, devices which are compliant with policies. " +
                             "If false, devices which are not compliant",
                     required = true)
-            @PathParam("compliance-status")
+            @PathParam("complianceStatus")
                     boolean complianceStatus,
             @ApiParam(
                     name = "policy",
@@ -2030,7 +2030,7 @@ public interface DeviceManagementService {
                     int id);
 
     @GET
-    @Path("/{device-type}/applications")
+    @Path("/{deviceType}/applications")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -2076,7 +2076,7 @@ public interface DeviceManagementService {
                     name = "device-type",
                     value = "Device type (platform) of the application",
                     required = true)
-            @PathParam("device-type")
+            @PathParam("deviceType")
                     String deviceType,
             @ApiParam(
                     name = "offset",
@@ -2092,7 +2092,7 @@ public interface DeviceManagementService {
                     int limit);
 
     @GET
-    @Path("/application/{package-name}/versions")
+    @Path("/application/{packageName}/versions")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -2133,6 +2133,6 @@ public interface DeviceManagementService {
                     name = "package-name",
                     value = "The package name of the app.",
                     required = true)
-            @PathParam("package-name")
+            @PathParam("packageName")
                     String packageName);
 }

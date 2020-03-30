@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.policy.mgt.core;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -72,15 +73,27 @@ public interface PolicyManagerService {
 
     int getPolicyCount() throws PolicyManagementException;
 
-    Policy getAppliedPolicyToDevice(
-            DeviceIdentifier deviceIdentifier) throws PolicyManagementException;
+    @Deprecated
+    Policy getAppliedPolicyToDevice(DeviceIdentifier deviceIdentifier) throws PolicyManagementException;
 
+    Policy getAppliedPolicyToDevice(Device device) throws PolicyManagementException;
+
+    @Deprecated
     List<ComplianceFeature> checkPolicyCompliance(DeviceIdentifier deviceIdentifier, Object
             deviceResponse) throws PolicyComplianceException;
 
+    List<ComplianceFeature> checkPolicyCompliance(Device device, Object
+            deviceResponse) throws PolicyComplianceException;
+
+    @Deprecated
     boolean checkCompliance(DeviceIdentifier deviceIdentifier, Object response) throws PolicyComplianceException;
 
+    boolean checkCompliance(Device device, Object response) throws PolicyComplianceException;
+
+    @Deprecated
     NonComplianceData getDeviceCompliance(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException;
+
+    NonComplianceData getDeviceCompliance(Device device) throws PolicyComplianceException;
 
     boolean isCompliant(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException;
 
