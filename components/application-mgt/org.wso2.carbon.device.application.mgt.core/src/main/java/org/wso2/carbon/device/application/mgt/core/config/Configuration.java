@@ -19,7 +19,6 @@ package org.wso2.carbon.device.application.mgt.core.config;
 
 import org.wso2.carbon.device.application.mgt.common.config.MDMConfig;
 import org.wso2.carbon.device.application.mgt.common.config.RatingConfiguration;
-import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 
 import java.util.List;
@@ -38,8 +37,6 @@ public class Configuration {
     private List<Extension> extensions;
 
     private List<LifecycleState> lifecycleStates;
-
-    private UIConfiguration uiConfiguration;
 
     private List<String> appCategories;
 
@@ -74,15 +71,6 @@ public class Configuration {
 
     public void setLifecycleStates(List<LifecycleState> lifecycleStates) {
         this.lifecycleStates = lifecycleStates;
-    }
-
-    @XmlElement(name = "UIConfigs")
-    public UIConfiguration getUiConfiguration() {
-        return uiConfiguration;
-    }
-
-    public void setUiConfiguration(UIConfiguration uiConfiguration) {
-        this.uiConfiguration = uiConfiguration;
     }
 
     @XmlElement(name = "RatingConfig")

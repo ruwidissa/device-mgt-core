@@ -27,6 +27,7 @@ public final class DeviceManagementConstants {
         public static final String DB_CHECK_QUERY = "SELECT * FROM DM_DEVICE";
         public static final String SECURE_VAULT_NS = "http://org.wso2.securevault/configuration";
         public static final String DEVICE_CONFIG_XML_NAME = "cdm-config.xml";
+        public static final String UI_CONFIG_XML_NAME = "mdm-ui-config.xml";
     }
 
     public static final class SecureValueProperties {

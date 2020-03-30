@@ -221,16 +221,16 @@ public class LoginHandler extends HttpServlet {
      * Define username and password static parameters.
      */
     private static void validateLoginRequest(HttpServletRequest req) throws LoginException {
-        String gatewayCarbonPort = System.getProperty("iot.gateway.carbon.https.port");
-        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())){
-            gatewayCarbonPort = System.getProperty("iot.gateway.carbon.http.port");
+        String gatewayCarbonPort = System.getProperty("iot.core.https.port");
+        if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
+            gatewayCarbonPort = System.getProperty("iot.core.http.port");
         }
         username = req.getParameter("username");
         password = req.getParameter("password");
         gatewayUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + req.getServerName() + HandlerConstants.COLON
-                + gatewayCarbonPort + HandlerConstants.UI_CONFIG_ENDPOINT;
+        uiConfigUrl = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
+                + HandlerConstants.COLON + gatewayCarbonPort + HandlerConstants.UI_CONFIG_ENDPOINT;
         if (username == null || password == null) {
             String msg = "Invalid login request. Username or Password is not received for login request.";
             log.error(msg);
