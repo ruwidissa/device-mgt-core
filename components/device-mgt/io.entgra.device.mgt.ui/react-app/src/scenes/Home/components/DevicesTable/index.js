@@ -18,11 +18,11 @@
 
 import React from 'react';
 import axios from 'axios';
-import { Icon, message, notification, Radio, Table, Tag, Tooltip } from 'antd';
+import { Icon, message, notification, Table, Tag, Tooltip } from 'antd';
 import TimeAgo from 'javascript-time-ago';
 // Load locale-specific relative date/time formatting rules.
 import en from 'javascript-time-ago/locale/en';
-import { withConfigContext } from '../../../../../../../../components/ConfigContext';
+import { withConfigContext } from '../../../../components/ConfigContext';
 
 let config = null;
 
@@ -30,6 +30,7 @@ const columns = [
   {
     title: 'Device',
     dataIndex: 'name',
+    width: 100,
   },
   {
     title: 'Type',
@@ -122,7 +123,7 @@ const getTimeAgo = time => {
   return timeAgo.format(time);
 };
 
-class EncryptedDeviceTable extends React.Component {
+class deviceTable extends React.Component {
   constructor(props) {
     super(props);
     config = this.props.context;
@@ -131,17 +132,34 @@ class EncryptedDeviceTable extends React.Component {
       data: [],
       pagination: {},
       loading: false,
-      isEncrypted: true,
+      selectedRows: [],
+      paramsObj: {},
     };
   }
 
+  rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      this.setState({
+        selectedRows: selectedRows,
+      });
+    },
+  };
+
   componentDidMount() {
-    this.fetch();
+    if (this.props.apiUrl) {
+      this.fetch();
+    }
+  }
+
+  // Rerender component when parameters change
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.apiUrl !== this.props.apiUrl) {
+      this.fetch();
+    }
   }
 
   // fetch data from api
   fetch = (params = {}) => {
-    const config = this.props.context;
     this.setState({ loading: true });
     // get current page
     const currentPage = params.hasOwnProperty('page') ? params.page : 1;
@@ -149,29 +167,32 @@ class EncryptedDeviceTable extends React.Component {
     const extraParams = {
       offset: 10 * (currentPage - 1), // calculate the offset
       limit: 10,
-      requireDeviceInfo: true,
-      isEncrypted: this.state.isEncrypted,
     };
 
     const encodedExtraParams = Object.keys(extraParams)
       .map(key => key + '=' + extraParams[key])
       .join('&');
 
-    // send request to the invoker
+    // send request to the invokerss
     axios
-      .get(
-        window.location.origin +
-          config.serverConfig.invoker.uri +
-          config.serverConfig.invoker.deviceMgt +
-          '/reports/encryption-status?' +
-          encodedExtraParams,
-      )
+      .get(this.props.apiUrl + encodedExtraParams)
       .then(res => {
         if (res.status === 200) {
           const pagination = { ...this.state.pagination };
+          if (
+            res.data.data.devices.length &&
+            res.data.data.devices[0].hasOwnProperty('deviceInfo')
+          ) {
+            columns.push({
+              title: 'OS Version',
+              dataIndex: 'deviceInfo',
+              key: 'osVersion',
+              render: deviceInfo => deviceInfo.osVersion,
+            });
+          }
           this.setState({
             loading: false,
-            data: res.data.data.devices,
+            data: res.data.data,
             pagination,
           });
         }
@@ -188,6 +209,7 @@ class EncryptedDeviceTable extends React.Component {
             description: 'Error occurred while trying to load devices.',
           });
         }
+
         this.setState({ loading: false });
       });
   };
@@ -207,52 +229,32 @@ class EncryptedDeviceTable extends React.Component {
     });
   };
 
-  handleModeChange = value => {
-    this.setState(
-      {
-        isEncrypted: value.target.value,
-      },
-      this.fetch,
-    );
-  };
-
   render() {
     const { data, pagination, loading } = this.state;
-
     return (
       <div>
-        <Radio.Group
-          onChange={this.handleModeChange}
-          defaultValue={'true'}
-          style={{ marginBottom: 8, marginRight: 5 }}
-        >
-          <Radio.Button value={'true'}>Enabled Devices</Radio.Button>
-          <Radio.Button value={'false'}>Disabled Devices</Radio.Button>
-        </Radio.Group>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
-          <Table
-            columns={columns}
-            rowKey={record =>
-              record.deviceIdentifier +
-              record.enrolmentInfo.owner +
-              record.enrolmentInfo.ownership
-            }
-            dataSource={data}
-            pagination={{
-              ...pagination,
-              size: 'small',
-              // position: "top",
-              showTotal: (total, range) =>
-                `showing ${range[0]}-${range[1]} of ${total} devices`,
-              // showQuickJumper: true
-            }}
-            loading={loading}
-            onChange={this.handleTableChange}
-          />
-        </div>
+        <Table
+          columns={columns}
+          rowKey={record =>
+            record.deviceIdentifier +
+            record.enrolmentInfo.owner +
+            record.enrolmentInfo.ownership
+          }
+          dataSource={data.devices}
+          pagination={{
+            ...pagination,
+            size: 'small',
+            total: data.count,
+            showTotal: (total, range) =>
+              `showing ${range[0]}-${range[1]} of ${total} devices`,
+          }}
+          loading={loading}
+          onChange={this.handleTableChange}
+          rowSelection={this.rowSelection}
+        />
       </div>
     );
   }
 }
 
-export default withConfigContext(EncryptedDeviceTable);
+export default withConfigContext(deviceTable);

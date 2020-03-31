@@ -46,6 +46,7 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const subPanelpayloadAttributes = {};
+let subFormContainer = {};
 
 class ConfigureProfile extends React.Component {
   constructor(props) {
@@ -65,22 +66,57 @@ class ConfigureProfile extends React.Component {
   setProfileInfo = e => {
     let activePolicies = [];
     let activePolicyFields = {};
+    let activeSubPanels = [];
     const allFields = this.props.form.getFieldsValue();
     this.props.policyFeatureList.map(element => {
       activePolicies.push(element.featureCode);
       let featureData = JSON.parse(element.content);
       Object.keys(featureData).map(key => {
-        let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
-        Object.keys(allFields).map(fieldName => {
-          if (fieldName.match(regex) != null) {
-            activePolicyFields[fieldName] = featureData[key];
-          }
-        });
+        if (element.featureCode in subPanelpayloadAttributes) {
+          Object.entries(subPanelpayloadAttributes[element.featureCode]).map(
+            ([panelKey, payloadAttr]) => {
+              if (key === payloadAttr) {
+                activeSubPanels.push(`${element.featureCode}-${panelKey}`);
+              }
+            },
+          );
+
+          let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
+          Object.keys(allFields).map(fieldName => {
+            if (fieldName.match(regex) != null) {
+              activePolicyFields[fieldName] = featureData[key];
+            }
+          });
+        } else if (element.featureCode in subFormContainer) {
+          let regex = new RegExp(`.+${element.featureCode}-${key}`, 'g');
+          Object.keys(allFields).map(fieldName => {
+            if (fieldName.match(regex) != null) {
+              activePolicyFields[fieldName] = featureData[key];
+              if (
+                !activePolicies.includes(
+                  fieldName.replace(`-${element.featureCode}-${key}`, ''),
+                )
+              ) {
+                activePolicies.push(
+                  fieldName.replace(`-${element.featureCode}-${key}`, ''),
+                );
+              }
+            }
+          });
+        } else {
+          let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
+          Object.keys(allFields).map(fieldName => {
+            if (fieldName.match(regex) != null) {
+              activePolicyFields[fieldName] = featureData[key];
+            }
+          });
+        }
       });
     });
     this.props.form.setFieldsValue(activePolicyFields);
     this.setState({
       activePanelKeys: activePolicies,
+      activeSubPanelKeys: activeSubPanels,
     });
   };
 
@@ -795,6 +831,7 @@ class ConfigureProfile extends React.Component {
                                 </Col>
                                 <Col offset={8} span={1}>
                                   <Switch
+                                    id={`${panel.panelId}_SWITCH`}
                                     checkedChildren="ON"
                                     unCheckedChildren="OFF"
                                     onChange={e =>
@@ -829,6 +866,8 @@ class ConfigureProfile extends React.Component {
                             <div>
                               {Object.values(panel.subFormLists).map(
                                 (form, i) => {
+                                  subFormContainer[`${form.id}`] =
+                                    panel.panelId;
                                   return (
                                     <Form name={form.id} key={i}>
                                       <Form.Item style={{ display: 'none' }}>

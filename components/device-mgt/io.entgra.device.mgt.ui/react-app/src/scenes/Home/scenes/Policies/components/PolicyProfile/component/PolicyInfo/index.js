@@ -46,6 +46,7 @@ const { TextArea } = Input;
 
 const subPanelpayloadAttributes = {};
 const fieldKeys = [];
+let subFormContainer = {};
 
 class PolicyInfo extends React.Component {
   constructor(props) {
@@ -55,6 +56,7 @@ class PolicyInfo extends React.Component {
       data: {},
       policyFeatureList: [],
       activePanelKeys: [],
+      activeSubPanelKeys: [],
       profilePreviewKey: '',
       customInputDataArray: [],
       inputTableDataSources: {},
@@ -65,22 +67,57 @@ class PolicyInfo extends React.Component {
   setProfileInfo = e => {
     let activePolicies = [];
     let activePolicyFields = {};
+    let activeSubPanels = [];
     const allFields = this.props.form.getFieldsValue();
     this.props.policyFeatureList.map(element => {
       activePolicies.push(element.featureCode);
       let featureData = JSON.parse(element.content);
       Object.keys(featureData).map(key => {
-        let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
-        Object.keys(allFields).map(fieldName => {
-          if (fieldName.match(regex) != null) {
-            activePolicyFields[fieldName] = featureData[key];
-          }
-        });
+        if (element.featureCode in subPanelpayloadAttributes) {
+          Object.entries(subPanelpayloadAttributes[element.featureCode]).map(
+            ([panelKey, payloadAttr]) => {
+              if (key === payloadAttr) {
+                activeSubPanels.push(`${element.featureCode}-${panelKey}`);
+              }
+            },
+          );
+
+          let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
+          Object.keys(allFields).map(fieldName => {
+            if (fieldName.match(regex) != null) {
+              activePolicyFields[fieldName] = featureData[key];
+            }
+          });
+        } else if (element.featureCode in subFormContainer) {
+          let regex = new RegExp(`.+${element.featureCode}-${key}`, 'g');
+          Object.keys(allFields).map(fieldName => {
+            if (fieldName.match(regex) != null) {
+              activePolicyFields[fieldName] = featureData[key];
+              if (
+                !activePolicies.includes(
+                  fieldName.replace(`-${element.featureCode}-${key}`, ''),
+                )
+              ) {
+                activePolicies.push(
+                  fieldName.replace(`-${element.featureCode}-${key}`, ''),
+                );
+              }
+            }
+          });
+        } else {
+          let regex = new RegExp(`${element.featureCode}.+${key}`, 'g');
+          Object.keys(allFields).map(fieldName => {
+            if (fieldName.match(regex) != null) {
+              activePolicyFields[fieldName] = featureData[key];
+            }
+          });
+        }
       });
     });
     this.props.form.setFieldsValue(activePolicyFields);
     this.setState({
       activePanelKeys: activePolicies,
+      activeSubPanelKeys: activeSubPanels,
     });
   };
 
@@ -235,7 +272,7 @@ class PolicyInfo extends React.Component {
               {getFieldDecorator(`${columnData.key}${i}`, {
                 initialValue: columnData.others.initialDataIndex,
               })(
-                <Select>
+                <Select disabled>
                   {columnData.others.option.map((option, i) => {
                     return (
                       <Option key={i} value={option.key}>
@@ -285,6 +322,7 @@ class PolicyInfo extends React.Component {
                       onChange={e =>
                         this.handleSelectedPanel(e, item.optional.subPanel)
                       }
+                      disabled
                     >
                       {item.optional.option.map((option, i) => {
                         return (
@@ -332,7 +370,7 @@ class PolicyInfo extends React.Component {
               {getFieldDecorator(`${item.id}`, {
                 initialValue: `${item.optional.option[0].name}`,
               })(
-                <Select>
+                <Select disabled>
                   {item.optional.option.map((option, i) => {
                     return (
                       <Option key={i} value={option.value}>
@@ -413,7 +451,7 @@ class PolicyInfo extends React.Component {
                           valuePropName: 'checked',
                           initialValue: item.optional.ischecked,
                         })(
-                          <Checkbox>
+                          <Checkbox disabled>
                             <span>
                               {item.label}&nbsp;
                               <Tooltip title={item.tooltip} placement="right">
@@ -459,7 +497,7 @@ class PolicyInfo extends React.Component {
                 valuePropName: 'checked',
                 initialValue: item.optional.ischecked,
               })(
-                <Checkbox>
+                <Checkbox disabled>
                   <span>
                     {item.label}&nbsp;
                     <Tooltip title={item.tooltip} placement="right">
@@ -629,9 +667,17 @@ class PolicyInfo extends React.Component {
   };
 
   onPreview = e => {
+    this.setProfileInfo();
     this.setState({
       profilePreviewKey: 'profileInfo',
       isInfoPreview: true,
+    });
+  };
+
+  onCancelPreview = e => {
+    this.setState({
+      profilePreviewKey: 'profileInfo',
+      isInfoPreview: false,
     });
   };
 
@@ -645,16 +691,26 @@ class PolicyInfo extends React.Component {
             <Title level={4}>Profile Information</Title>
           </Col>
           <Col span={16}>
-            <Button type="link" icon="eye" onClick={this.onPreview}>
+            <Button
+              type="link"
+              icon="eye"
+              onClick={this.onPreview}
+              style={{ display: this.state.isInfoPreview ? 'none' : 'inline' }}
+            >
               <Text
                 style={{
                   fontSize: 'small',
-                  display: this.state.isInfoPreview ? 'none' : 'inline',
                 }}
               >
                 (Click to view policy information)
               </Text>
             </Button>
+            <Button
+              type="link"
+              icon="eye-invisible"
+              onClick={this.onCancelPreview}
+              style={{ display: this.state.isInfoPreview ? 'inline' : 'none' }}
+            />
           </Col>
         </Row>
         <Collapse
@@ -670,11 +726,7 @@ class PolicyInfo extends React.Component {
             }}
           >
             <div className="tab-container">
-              <Tabs
-                tabPosition={'left'}
-                size={'large'}
-                onChange={this.setProfileInfo}
-              >
+              <Tabs tabPosition={'left'} size={'large'}>
                 {policyUIConfigurationsList.map((element, i) => {
                   return (
                     <TabPane tab={<span>{element.name}</span>} key={i}>
@@ -720,6 +772,8 @@ class PolicyInfo extends React.Component {
                                   <div>
                                     {Object.values(panel.subFormLists).map(
                                       (form, i) => {
+                                        subFormContainer[`${form.id}`] =
+                                          panel.panelId;
                                         return (
                                           <Form name={form.id} key={i}>
                                             <Form.Item
