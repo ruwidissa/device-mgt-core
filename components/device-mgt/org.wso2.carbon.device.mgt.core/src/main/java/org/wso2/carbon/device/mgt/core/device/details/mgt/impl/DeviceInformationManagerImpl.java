@@ -69,7 +69,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     private static final Log log = LogFactory.getLog(DeviceInformationManagerImpl.class);
     private static final String LOCATION_EVENT_STREAM_DEFINITION = "org.wso2.iot.LocationStream";
     private static final String DEVICE_INFO_EVENT_STREAM_DEFINITION = "org.wso2.iot.DeviceInfoStream";
-    private static final String IS_EVENT_PUBLISHING_ENABED = "isEventPublishingEnabled";
 
     public DeviceInformationManagerImpl() {
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
@@ -183,7 +182,8 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
     private void publishEvents(Device device, DeviceInfo deviceInfo)  {
         String reportingHost = HttpReportingUtil.getReportingHost();
-        if (!StringUtils.isBlank(reportingHost) && isPublishingEnabledForTenant()) {
+        if (!StringUtils.isBlank(reportingHost)
+                && HttpReportingUtil.isPublishingEnabledForTenant()) {
             try {
                 DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
                 deviceDetailsWrapper.setDevice(device);
@@ -218,14 +218,6 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                         + DeviceManagerUtil.getTenantId());
             }
         }
-    }
-
-    private boolean isPublishingEnabledForTenant() {
-        Object configuration = DeviceManagerUtil.getConfiguration(IS_EVENT_PUBLISHING_ENABED);
-        if (configuration != null) {
-            return Boolean.valueOf(configuration.toString());
-        }
-        return false;
     }
 
     @Override
