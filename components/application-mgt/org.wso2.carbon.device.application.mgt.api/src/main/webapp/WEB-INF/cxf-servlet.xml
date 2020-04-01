@@ -25,7 +25,6 @@
 
     <jaxrs:server id="applicationMgtCommonService" address="/">
         <jaxrs:serviceBeans>
-            <ref bean="applicationMgtConfigService"/>
             <ref bean="applicationMgtArtifactService"/>
             <ref bean="swaggerResource"/>
         </jaxrs:serviceBeans>
@@ -53,7 +52,6 @@
     <bean id="swaggerWriter" class="io.swagger.jaxrs.listing.SwaggerSerializers" />
     <bean id="swaggerResource" class="io.swagger.jaxrs.listing.ApiListingResource" />
 
-    <bean id="applicationMgtConfigService" class="org.wso2.carbon.device.application.mgt.api.services.impl.ConfigRetrieveAPIImpl"/>
     <bean id="applicationMgtArtifactService" class="org.wso2.carbon.device.application.mgt.api.services.impl.ArtifactDownloadAPIImpl"/>
     <bean id="jsonProvider" class="org.wso2.carbon.device.application.mgt.addons.JSONMessageHandler"/>
     <bean id="multipartProvider" class="org.wso2.carbon.device.application.mgt.addons.MultipartCustomProvider"/>

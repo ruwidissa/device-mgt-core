@@ -19,7 +19,6 @@ package org.wso2.carbon.device.application.mgt.core.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationStorageManagementException;
@@ -27,7 +26,6 @@ import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManageme
 import org.wso2.carbon.device.application.mgt.common.exception.RequestValidatingException;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
-import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
@@ -44,17 +42,10 @@ import java.util.Map;
 public class AppmDataHandlerImpl implements AppmDataHandler {
 
     private static final Log log = LogFactory.getLog(AppmDataHandlerImpl.class);
-    private UIConfiguration uiConfiguration;
     private LifecycleStateManager lifecycleStateManager;
 
-    public AppmDataHandlerImpl(UIConfiguration config) {
-        this.uiConfiguration = config;
+    public AppmDataHandlerImpl() {
         lifecycleStateManager = DataHolder.getInstance().getLifecycleStateManager();
-    }
-
-    @Override
-    public UIConfiguration getUIConfiguration() {
-        return this.uiConfiguration;
     }
 
     @Override

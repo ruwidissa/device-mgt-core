@@ -18,9 +18,6 @@
 package org.wso2.carbon.device.mgt.core.config;
 
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
-import org.wso2.carbon.device.mgt.core.config.identity.IdentityConfigurations;
-import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
-import org.wso2.carbon.device.mgt.core.config.task.TaskConfiguration;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

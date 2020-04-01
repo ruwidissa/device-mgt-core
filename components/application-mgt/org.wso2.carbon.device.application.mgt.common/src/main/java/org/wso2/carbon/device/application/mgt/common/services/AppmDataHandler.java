@@ -18,7 +18,6 @@
 package org.wso2.carbon.device.application.mgt.common.services;
 
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
-import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.LifecycleManagementException;
 
@@ -26,12 +25,6 @@ import java.io.InputStream;
 import java.util.Map;
 
 public interface AppmDataHandler {
-    /**
-     * Get UI configuration which is defined in the app-manager.xml
-     *
-     * @return {@link UIConfiguration} UI configuration
-     */
-    UIConfiguration getUIConfiguration();
 
     Map<String, LifecycleState> getLifecycleConfiguration() throws LifecycleManagementException;
 

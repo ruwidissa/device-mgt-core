@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+~ Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+~
+~ Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+~ Version 2.0 (the "License"); you may not use this file except
+~ in compliance with the License.
+~ You may obtain a copy of the License at
+~
+~    http://www.apache.org/licenses/LICENSE-2.0
+~
+~ Unless required by applicable law or agreed to in writing,
+~ software distributed under the License is distributed on an
+~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~ KIND, either express or implied.  See the License for the
+~ specific language governing permissions and limitations
+~ under the License.
+-->
+
+<UIConfiguration>
+    <EnableOAuth>true</EnableOAuth>
+    <EnableSSO>false</EnableSSO>
+    <AppRegistration>
+        <Tags>
+            <Tag>application_management</Tag>
+            <Tag>device_management</Tag>
+            <Tag>subscription_management</Tag>
+            <Tag>review_management</Tag>
+        </Tags>
+        <AllowToAllDomains>true</AllowToAllDomains>
+    </AppRegistration>
+    <Scopes>
+        <Scope>perm:app:review:view</Scope>
+        <Scope>perm:app:review:update</Scope>
+        <Scope>perm:app:publisher:view</Scope>
+        <Scope>perm:app:publisher:update</Scope>
+        <Scope>perm:app:store:view</Scope>
+        <Scope>perm:app:subscription:install</Scope>
+        <Scope>perm:app:subscription:uninstall</Scope>
+        <Scope>perm:admin:app:review:update</Scope>
+        <Scope>perm:admin:app:review:view</Scope>
+        <Scope>perm:admin:app:publisher:update</Scope>
+        <Scope>perm:admin:app:review:update</Scope>
+        <Scope>perm:admin:app:subscription:view</Scope>
+        <Scope>perm:device-types:types</Scope>
+        <Scope>perm:enterprise:modify</Scope>
+        <Scope>perm:enterprise:view</Scope>
+        <Scope>perm:android-work:customer</Scope>
+        <Scope>perm:android-work:admin</Scope>
+        <Scope>perm:application-command:modify</Scope>
+        <Scope>perm:sign-csr</Scope>
+        <Scope>perm:admin:devices:view</Scope>
+        <Scope>perm:admin:topics:view</Scope>
+        <Scope>perm:roles:add</Scope>
+        <Scope>perm:roles:add-users</Scope>
+        <Scope>perm:roles:update</Scope>
+        <Scope>perm:roles:permissions</Scope>
+        <Scope>perm:roles:details</Scope>
+        <Scope>perm:roles:view</Scope>
+        <Scope>perm:roles:create-combined-role</Scope>
+        <Scope>perm:roles:delete</Scope>
+        <Scope>perm:dashboard:vulnerabilities</Scope>
+        <Scope>perm:dashboard:non-compliant-count</Scope>
+        <Scope>perm:dashboard:non-compliant</Scope>
+        <Scope>perm:dashboard:by-groups</Scope>
+        <Scope>perm:dashboard:device-counts</Scope>
+        <Scope>perm:dashboard:feature-non-compliant</Scope>
+        <Scope>perm:dashboard:count-overview</Scope>
+        <Scope>perm:dashboard:filtered-count</Scope>
+        <Scope>perm:dashboard:details</Scope>
+        <Scope>perm:get-activity</Scope>
+        <Scope>perm:devices:delete</Scope>
+        <Scope>perm:devices:applications</Scope>
+        <Scope>perm:devices:effective-policy</Scope>
+        <Scope>perm:devices:compliance-data</Scope>
+        <Scope>perm:devices:features</Scope>
+        <Scope>perm:devices:operations</Scope>
+        <Scope>perm:devices:search</Scope>
+        <Scope>perm:devices:details</Scope>
+        <Scope>perm:devices:update</Scope>
+        <Scope>perm:devices:view</Scope>
+        <Scope>perm:view-configuration</Scope>
+        <Scope>perm:manage-configuration</Scope>
+        <Scope>perm:policies:remove</Scope>
+        <Scope>perm:policies:priorities</Scope>
+        <Scope>perm:policies:deactivate</Scope>
+        <Scope>perm:policies:get-policy-details</Scope>
+        <Scope>perm:policies:manage</Scope>
+        <Scope>perm:policies:activate</Scope>
+        <Scope>perm:policies:update</Scope>
+        <Scope>perm:policies:changes</Scope>
+        <Scope>perm:policies:get-details</Scope>
+        <Scope>perm:users:add</Scope>
+        <Scope>perm:users:details</Scope>
+        <Scope>perm:users:count</Scope>
+        <Scope>perm:users:delete</Scope>
+        <Scope>perm:users:roles</Scope>
+        <Scope>perm:users:user-details</Scope>
+        <Scope>perm:users:credentials</Scope>
+        <Scope>perm:users:search</Scope>
+        <Scope>perm:users:is-exist</Scope>
+        <Scope>perm:users:update</Scope>
+        <Scope>perm:users:send-invitation</Scope>
+        <Scope>perm:admin-users:view</Scope>
+        <Scope>perm:admin:devices:update-enrollment</Scope>
+        <Scope>perm:groups:devices</Scope>
+        <Scope>perm:groups:update</Scope>
+        <Scope>perm:groups:add</Scope>
+        <Scope>perm:groups:device</Scope>
+        <Scope>perm:groups:devices-count</Scope>
+        <Scope>perm:groups:remove</Scope>
+        <Scope>perm:groups:groups</Scope>
+        <Scope>perm:groups:groups-view</Scope>
+        <Scope>perm:groups:share</Scope>
+        <Scope>perm:groups:count</Scope>
+        <Scope>perm:groups:roles</Scope>
+        <Scope>perm:groups:devices-remove</Scope>
+        <Scope>perm:groups:devices-add</Scope>
+        <Scope>perm:groups:assign</Scope>
+        <Scope>perm:device-types:configs</Scope>
+        <Scope>perm:device-types:features</Scope>
+        <Scope>perm:device-types:types</Scope>
+        <Scope>perm:applications:install</Scope>
+        <Scope>perm:applications:uninstall</Scope>
+        <Scope>perm:admin-groups:count</Scope>
+        <Scope>perm:admin-groups:view</Scope>
+        <Scope>perm:notifications:mark-checked</Scope>
+        <Scope>perm:notifications:view</Scope>
+        <Scope>perm:admin:certificates:delete</Scope>
+        <Scope>perm:admin:certificates:details</Scope>
+        <Scope>perm:admin:certificates:view</Scope>
+        <Scope>perm:admin:certificates:add</Scope>
+        <Scope>perm:admin:certificates:verify</Scope>
+        <Scope>perm:admin</Scope>
+        <Scope>perm:devicetype:deployment</Scope>
+        <Scope>perm:device-types:events</Scope>
+        <Scope>perm:device-types:events:view</Scope>
+        <Scope>perm:admin:device-type</Scope>
+        <Scope>perm:admin:device-type:view</Scope>
+        <Scope>perm:admin:device-type:configs</Scope>
+        <Scope>perm:device:enroll</Scope>
+        <Scope>perm:geo-service:analytics-view</Scope>
+        <Scope>perm:geo-service:alerts-manage</Scope>
+        <Scope>appm:read</Scope>
+        <Scope>perm:devices:permanent-delete</Scope>
+        <Scope>perm:android:manage-configuration</Scope>
+        <Scope>perm:android:view-configuration</Scope>
+    </Scopes>
+    <SSOConfiguration>
+        <Issuer>device-mgt</Issuer>
+    </SSOConfiguration>
+</UIConfiguration>
+

@@ -21,7 +21,7 @@ package io.entgra.ui.request.interceptor.util;
 public class HandlerConstants {
     public static final String PUBLISHER_APPLICATION_NAME = "application-mgt-publisher";
     public static final String APP_REG_ENDPOINT = "/api-application-registration/register";
-    public static final String UI_CONFIG_ENDPOINT = "/api/application-mgt/v1.0/config/ui-config";
+    public static final String UI_CONFIG_ENDPOINT = "/api/device-mgt/v1.0/configuration/ui-config";
     public static final String TOKEN_ENDPOINT = "/token";
     public static final String INTROSPECT_ENDPOINT = "/oauth2/introspect";
     public static final String LOGIN_PAGE = "/login";

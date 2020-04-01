@@ -66,6 +66,7 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceIm
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
+import org.wso2.carbon.device.mgt.core.ui.config.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.service.EmailSenderService;
@@ -161,6 +162,7 @@ public class DeviceManagementServiceComponent {
             }
             /* Initializing Device Management Configuration */
             DeviceConfigurationManager.getInstance().initConfig();
+            UIConfigurationManager.getInstance().initConfig();
             DeviceManagementConfig config =
                     DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
 

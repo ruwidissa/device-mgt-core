@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
-import org.wso2.carbon.device.application.mgt.common.config.UIConfiguration;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
 import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
 import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
@@ -108,9 +107,7 @@ public class ApplicationManagementServiceComponent {
             DataHolder.getInstance().setApplicationStorageManager(applicationStorageManager);
             bundleContext.registerService(ApplicationStorageManager.class.getName(), applicationStorageManager, null);
 
-            UIConfiguration uiConfiguration = ConfigurationManager.getInstance().
-                    getConfiguration().getUiConfiguration();
-            AppmDataHandler configManager = new AppmDataHandlerImpl(uiConfiguration);
+            AppmDataHandler configManager = new AppmDataHandlerImpl();
             DataHolder.getInstance().setConfigManager(configManager);
             bundleContext.registerService(AppmDataHandler.class.getName(), configManager, null);
 
