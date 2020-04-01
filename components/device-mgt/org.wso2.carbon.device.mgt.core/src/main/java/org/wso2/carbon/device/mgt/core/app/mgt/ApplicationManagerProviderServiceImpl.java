@@ -281,7 +281,7 @@ public class ApplicationManagerProviderServiceImpl implements ApplicationManagem
             DeviceManagementDAOFactory.commitTransaction();
 
             String reportingHost = HttpReportingUtil.getReportingHost();
-            if (!StringUtils.isBlank(reportingHost)) {
+            if (!StringUtils.isBlank(reportingHost) && HttpReportingUtil.isPublishingEnabledForTenant()) {
                 DeviceDetailsWrapper deviceDetailsWrapper = new DeviceDetailsWrapper();
                 deviceDetailsWrapper.setTenantId(tenantId);
                 deviceDetailsWrapper.setDevice(device);
