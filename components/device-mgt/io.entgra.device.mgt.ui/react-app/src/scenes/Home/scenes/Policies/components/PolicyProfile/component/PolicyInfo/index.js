@@ -47,6 +47,8 @@ const { TextArea } = Input;
 const subPanelpayloadAttributes = {};
 const fieldKeys = [];
 let subFormContainer = {};
+let radioSubPanelSwitches = [];
+let radioPanelStatusList = {};
 
 class PolicyInfo extends React.Component {
   constructor(props) {
@@ -61,6 +63,7 @@ class PolicyInfo extends React.Component {
       customInputDataArray: [],
       inputTableDataSources: {},
       isInfoPreview: false,
+      subPanelRadio: {},
     };
   }
 
@@ -68,6 +71,10 @@ class PolicyInfo extends React.Component {
     let activePolicies = [];
     let activePolicyFields = {};
     let activeSubPanels = [];
+    let subPanelRadio = this.state.subPanelRadio;
+    this.setState({
+      subPanelRadio: radioPanelStatusList,
+    });
     const allFields = this.props.form.getFieldsValue();
     this.props.policyFeatureList.map(element => {
       activePolicies.push(element.featureCode);
@@ -110,6 +117,16 @@ class PolicyInfo extends React.Component {
             if (fieldName.match(regex) != null) {
               activePolicyFields[fieldName] = featureData[key];
             }
+            if (
+              radioSubPanelSwitches.includes(
+                `${element.featureCode}-${featureData[key]}`,
+              )
+            ) {
+              let subPanelViewStatus = {
+                [featureData[key]]: true,
+              };
+              Object.assign(subPanelRadio, subPanelViewStatus);
+            }
           });
         }
       });
@@ -118,6 +135,7 @@ class PolicyInfo extends React.Component {
     this.setState({
       activePanelKeys: activePolicies,
       activeSubPanelKeys: activeSubPanels,
+      subPanelRadio,
     });
   };
 
@@ -399,7 +417,7 @@ class PolicyInfo extends React.Component {
               {getFieldDecorator(`${item.id}`, {
                 initialValue: item.optional.initialDataIndex,
               })(
-                <Select>
+                <Select disabled>
                   {this.getOptionForTimeSelectors(
                     item.optional.firstOptionValue,
                     item.optional.lastOptionValue,
@@ -555,6 +573,7 @@ class PolicyInfo extends React.Component {
                     onChange={e =>
                       this.handleRadioPanel(e, item.optional.radio)
                     }
+                    disabled
                   >
                     {item.optional.radio.map((option, i) => {
                       return (
@@ -568,12 +587,14 @@ class PolicyInfo extends React.Component {
               </Form.Item>
               <div className={'sub-panel-container'}>
                 {item.optional.subPanel.map((panel, i) => {
+                  radioSubPanelSwitches.push(`${panelId}-${panel.id}`);
+                  radioPanelStatusList[panel.id] = false;
                   return (
                     <div
                       key={i}
                       id={panel.id}
                       style={
-                        panel.id === item.optional.initialValue
+                        this.state.subPanelRadio[panel.id]
                           ? { display: 'block' }
                           : { display: 'none' }
                       }

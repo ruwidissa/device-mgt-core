@@ -45,7 +45,8 @@ const { TabPane } = Tabs;
 const { Option } = Select;
 const { TextArea } = Input;
 
-const subPanelpayloadAttributes = {};
+const subPanelpayloadAttributesforCheckboxes = {};
+const subPanelpayloadAttributesforSelect = {};
 let formContainers = {};
 
 class ConfigureProfile extends React.Component {
@@ -309,12 +310,14 @@ class ConfigureProfile extends React.Component {
       Object.keys(allFields).map(key => {
         if (key.includes(`${this.state.activePanelKeys[i]}-`)) {
           if (
-            subPanelpayloadAttributes.hasOwnProperty(
+            subPanelpayloadAttributesforCheckboxes.hasOwnProperty(
               `${this.state.activePanelKeys[i]}`,
             )
           ) {
             Object.entries(
-              subPanelpayloadAttributes[this.state.activePanelKeys[i]],
+              subPanelpayloadAttributesforCheckboxes[
+                this.state.activePanelKeys[i]
+              ],
             ).map(([subPanel, subContent]) => {
               subContentsList[subContent] = {};
               if (
@@ -324,6 +327,27 @@ class ConfigureProfile extends React.Component {
                 activeFields.push(key);
               } else if (!key.includes(`-${subPanel}`)) {
                 activeFields.push(key);
+              }
+            });
+          } else if (
+            subPanelpayloadAttributesforSelect.hasOwnProperty(
+              `${this.state.activePanelKeys[i]}`,
+            )
+          ) {
+            Object.entries(
+              subPanelpayloadAttributesforSelect[this.state.activePanelKeys[i]],
+            ).map(([subPanelSwitch, subPanels]) => {
+              if (
+                subPanels.includes(allFields[subPanelSwitch]) &&
+                key.includes(`${subPanelSwitch}-${allFields[subPanelSwitch]}-`)
+              ) {
+                activeFields.push(key);
+              } else {
+                for (let panel of subPanels) {
+                  if (!key.includes(`${subPanelSwitch}-${panel}-`)) {
+                    activeFields.push(key);
+                  }
+                }
               }
             });
           } else {
@@ -341,12 +365,14 @@ class ConfigureProfile extends React.Component {
           Object.entries(values).map(([key, value]) => {
             if (key.includes(`${this.state.activePanelKeys[i]}-`)) {
               if (
-                subPanelpayloadAttributes.hasOwnProperty(
+                subPanelpayloadAttributesforCheckboxes.hasOwnProperty(
                   `${this.state.activePanelKeys[i]}`,
                 )
               ) {
                 Object.entries(
-                  subPanelpayloadAttributes[this.state.activePanelKeys[i]],
+                  subPanelpayloadAttributesforCheckboxes[
+                    this.state.activePanelKeys[i]
+                  ],
                 ).map(([subPanel, contentKey]) => {
                   if (key.includes(`-${subPanel}-`)) {
                     subContentsList[contentKey][
@@ -362,7 +388,8 @@ class ConfigureProfile extends React.Component {
                     ] = value;
                   }
                 });
-              } else if (this.state.activePanelKeys[i] in formContainers) {
+              }
+              if (this.state.activePanelKeys[i] in formContainers) {
                 formContainers[this.state.activePanelKeys[i]].forEach(
                   subFeature => {
                     if (
@@ -386,6 +413,32 @@ class ConfigureProfile extends React.Component {
                     }
                   },
                 );
+              }
+              if (
+                subPanelpayloadAttributesforSelect.hasOwnProperty(
+                  `${this.state.activePanelKeys[i]}`,
+                )
+              ) {
+                Object.keys(
+                  subPanelpayloadAttributesforSelect[
+                    this.state.activePanelKeys[i]
+                  ],
+                ).map(subPanelSwitch => {
+                  if (
+                    key.includes(`${subPanelSwitch}-${values[subPanelSwitch]}-`)
+                  ) {
+                    content[
+                      key.replace(
+                        `${subPanelSwitch}-${values[subPanelSwitch]}-`,
+                        '',
+                      )
+                    ] = value;
+                  } else {
+                    content[
+                      key.replace(`${this.state.activePanelKeys[i]}-`, '')
+                    ] = value;
+                  }
+                });
               } else {
                 content[
                   key.replace(`${this.state.activePanelKeys[i]}-`, '')
@@ -411,7 +464,8 @@ class ConfigureProfile extends React.Component {
   // generate form items
   getPanelItems = (panel, panelId) => {
     const { getFieldDecorator } = this.props.form;
-    const subPanelList = {};
+    const subPanelListforCheckbox = {};
+    const subPanelListforSelect = {};
     return panel.map((item, k) => {
       switch (item.type) {
         case 'select':
@@ -538,6 +592,7 @@ class ConfigureProfile extends React.Component {
               style={{ display: 'block' }}
             >
               {getFieldDecorator(`${item.id}`, {
+                initialValue: null,
                 rules: [
                   {
                     pattern: new RegExp(`${item.optional.rules.regex}`),
@@ -580,17 +635,21 @@ class ConfigureProfile extends React.Component {
                     <div>
                       <div>
                         {item.optional.subPanel.map((panel, i) => {
-                          subPanelList[panel.others.itemSwitch] =
+                          subPanelListforCheckbox[panel.others.itemSwitch] =
                             panel.others.itemPayload;
                           if (
-                            subPanelpayloadAttributes.hasOwnProperty(panelId)
+                            subPanelpayloadAttributesforCheckboxes.hasOwnProperty(
+                              panelId,
+                            )
                           ) {
                             Object.assign(
-                              subPanelpayloadAttributes[panelId],
-                              subPanelList,
+                              subPanelpayloadAttributesforCheckboxes[panelId],
+                              subPanelListforCheckbox,
                             );
                           } else {
-                            subPanelpayloadAttributes[panelId] = subPanelList;
+                            subPanelpayloadAttributesforCheckboxes[
+                              panelId
+                            ] = subPanelListforCheckbox;
                           }
                           return (
                             <div key={i}>
@@ -647,6 +706,8 @@ class ConfigureProfile extends React.Component {
             </Form.Item>
           );
         case 'radioGroup':
+          // eslint-disable-next-line no-case-declarations
+          let subPanelkeys = [];
           return (
             <div>
               <Form.Item
@@ -681,6 +742,13 @@ class ConfigureProfile extends React.Component {
               </Form.Item>
               <div className={'sub-panel-container'}>
                 {item.optional.subPanel.map((panel, i) => {
+                  if (panel.hasOwnProperty('others')) {
+                    subPanelkeys.push(panel.id);
+                    subPanelListforSelect[`${item.id}`] = subPanelkeys;
+                    subPanelpayloadAttributesforSelect[
+                      panelId
+                    ] = subPanelListforSelect;
+                  }
                   return (
                     <div
                       key={i}

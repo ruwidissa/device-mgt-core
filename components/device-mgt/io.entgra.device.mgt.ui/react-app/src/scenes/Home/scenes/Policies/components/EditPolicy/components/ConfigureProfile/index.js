@@ -47,6 +47,9 @@ const { TextArea } = Input;
 
 const subPanelpayloadAttributes = {};
 let subFormContainer = {};
+let radioSubPanelSwitches = [];
+let initialRadioPanels = {};
+let radioPanelStatusList = {};
 
 class ConfigureProfile extends React.Component {
   constructor(props) {
@@ -60,13 +63,20 @@ class ConfigureProfile extends React.Component {
       subPanelpayloadAttributes: {},
       customInputDataArray: [],
       inputTableDataSources: {},
+      subPanelRadio: {},
     };
   }
+
+  componentDidMount() {}
 
   setProfileInfo = e => {
     let activePolicies = [];
     let activePolicyFields = {};
     let activeSubPanels = [];
+    let subPanelRadio = this.state.subPanelRadio;
+    this.setState({
+      subPanelRadio: radioPanelStatusList,
+    });
     const allFields = this.props.form.getFieldsValue();
     this.props.policyFeatureList.map(element => {
       activePolicies.push(element.featureCode);
@@ -109,14 +119,35 @@ class ConfigureProfile extends React.Component {
             if (fieldName.match(regex) != null) {
               activePolicyFields[fieldName] = featureData[key];
             }
+            if (
+              radioSubPanelSwitches.includes(
+                `${element.featureCode}-${featureData[key]}`,
+              )
+            ) {
+              let subPanelViewStatus = {
+                [featureData[key]]: true,
+              };
+              Object.assign(subPanelRadio, subPanelViewStatus);
+            }
           });
         }
       });
     });
     this.props.form.setFieldsValue(activePolicyFields);
+    Object.keys(initialRadioPanels).map(policy => {
+      if (!activePolicies.includes(policy)) {
+        for (let subPanelKey of initialRadioPanels[policy]) {
+          let subPanelViewStatus = {
+            [subPanelKey]: true,
+          };
+          Object.assign(subPanelRadio, subPanelViewStatus);
+        }
+      }
+    });
     this.setState({
       activePanelKeys: activePolicies,
       activeSubPanelKeys: activeSubPanels,
+      subPanelRadio,
     });
   };
 
@@ -417,6 +448,7 @@ class ConfigureProfile extends React.Component {
   getPanelItems = (panel, panelId) => {
     const { getFieldDecorator } = this.props.form;
     const subPanelList = {};
+    let initialRadioOptions = [];
     return panel.map((item, k) => {
       switch (item.type) {
         case 'select':
@@ -652,6 +684,8 @@ class ConfigureProfile extends React.Component {
             </Form.Item>
           );
         case 'radioGroup':
+          initialRadioOptions.push(item.optional.initialValue);
+          initialRadioPanels[panelId] = initialRadioOptions;
           return (
             <div>
               <Form.Item
@@ -686,12 +720,15 @@ class ConfigureProfile extends React.Component {
               </Form.Item>
               <div className={'sub-panel-container'}>
                 {item.optional.subPanel.map((panel, i) => {
+                  radioSubPanelSwitches.push(`${panelId}-${panel.id}`);
+                  radioPanelStatusList[panel.id] = false;
                   return (
                     <div
                       key={i}
                       id={panel.id}
+                      ref={panel.id}
                       style={
-                        panel.id === item.optional.initialValue
+                        this.state.subPanelRadio[panel.id]
                           ? { display: 'block' }
                           : { display: 'none' }
                       }
