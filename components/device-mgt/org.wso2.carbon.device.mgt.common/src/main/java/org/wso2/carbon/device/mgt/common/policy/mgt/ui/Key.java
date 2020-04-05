@@ -14,34 +14,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.mgt.core.ui.config;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import java.util.List;
+package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
-public class AppRegistration {
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
-    private List<String> tags;
-    private boolean isAllowToAllDomains;
+@XmlRootElement(name = "Key")
+public class Key {
 
-    @XmlElementWrapper(name = "Tags")
-    @XmlElement(name = "Tag")
-    public List<String> getTags() {
-        return tags;
+    private String name;
+    private String value;
+
+    @XmlAttribute(name = "name")
+    public String getName() {
+        return name;
     }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @XmlElement(name = "AllowToAllDomains")
-    public boolean isAllowToAllDomains() {
-        return isAllowToAllDomains;
+    @XmlAttribute(name = "value")
+    public String getValue() {
+        return value;
     }
 
-    public void setAllowToAllDomains(boolean allowToAllDomains) {
-        isAllowToAllDomains = allowToAllDomains;
+    public void setValue(String value) {
+        this.value = value;
     }
-
 }

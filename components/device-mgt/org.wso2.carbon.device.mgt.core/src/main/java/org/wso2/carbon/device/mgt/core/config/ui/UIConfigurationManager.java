@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.device.mgt.core.ui.config;
+package org.wso2.carbon.device.mgt.core.config.ui;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
