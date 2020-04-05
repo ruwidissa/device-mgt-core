@@ -33,9 +33,27 @@
  *   specific language governing permissions and limitations
  *   under the License.
  */
+/*
+ *  Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *  Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied. See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
@@ -45,7 +63,6 @@ import org.wso2.carbon.device.mgt.common.EnrolmentInfo.Status;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
-import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.core.dao.DeviceDAO;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
@@ -64,7 +81,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -647,34 +663,58 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public HashMap<Integer, Device> getDevice(DeviceIdentifier deviceIdentifier) throws DeviceManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Device device;
-        HashMap<Integer, Device> deviceHashMap = new HashMap<>();
+    public SingletonMap getDevice(DeviceIdentifier deviceIdentifier)
+            throws DeviceManagementDAOException {
         try {
-            conn = this.getConnection();
-            String sql = "SELECT d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, e.TENANT_ID, " +
-                        "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.DATE_OF_LAST_UPDATE, " +
-                        "e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID FROM DM_ENROLMENT e, (SELECT d.ID, d.DESCRIPTION, d.NAME, " +
-                        "t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION FROM DM_DEVICE d, DM_DEVICE_TYPE t WHERE " +
-                        "t.NAME = ? AND t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION = ? ) d1 WHERE d1.ID = e.DEVICE_ID ORDER BY e.DATE_OF_LAST_UPDATE DESC";
-                stmt = conn.prepareStatement(sql);
+            Connection conn = this.getConnection();
+            String sql = "SELECT d1.ID AS DEVICE_ID, " +
+                         "d1.DESCRIPTION, " +
+                         "d1.NAME AS DEVICE_NAME, " +
+                         "d1.DEVICE_TYPE, " +
+                         "e.TENANT_ID, " +
+                         "d1.DEVICE_IDENTIFICATION, " +
+                         "e.OWNER, " +
+                         "e.OWNERSHIP, " +
+                         "e.STATUS, " +
+                         "e.DATE_OF_LAST_UPDATE, " +
+                         "e.DATE_OF_ENROLMENT, " +
+                         "e.ID AS ENROLMENT_ID " +
+                         "FROM DM_ENROLMENT e, " +
+                         "(SELECT d.ID, " +
+                         "d.DESCRIPTION, " +
+                         "d.NAME, " +
+                         "t.NAME AS DEVICE_TYPE, " +
+                         "d.DEVICE_IDENTIFICATION " +
+                         "FROM DM_DEVICE d, " +
+                         "DM_DEVICE_TYPE t " +
+                         "WHERE t.NAME = ? " +
+                         "AND t.ID = d.DEVICE_TYPE_ID " +
+                         "AND d.DEVICE_IDENTIFICATION = ?) d1 " +
+                         "WHERE d1.ID = e.DEVICE_ID " +
+                         "ORDER BY e.DATE_OF_LAST_UPDATE DESC";
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, deviceIdentifier.getType());
                 stmt.setString(2, deviceIdentifier.getId());
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                device = DeviceManagementDAOUtil.loadDevice(rs);
-                deviceHashMap.put(rs.getInt("TENANT_ID"), device);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    SingletonMap deviceMap = null;
+                    if (rs.next()) {
+                        deviceMap = new SingletonMap(
+                                rs.getInt("TENANT_ID"),
+                                DeviceManagementDAOUtil.loadDevice(rs)
+                        );
+                    }
+                    return deviceMap;
+                }
             }
+
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while listing devices for type " +
-                    "'" + deviceIdentifier.getType() + "'", e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            String msg = "Error occurred while listing devices (with tenant id) for type " +
+                         deviceIdentifier.getType();
+            log.error(msg);
+            throw new DeviceManagementDAOException(msg, e);
         }
-        return deviceHashMap;
     }
 
     @Override
