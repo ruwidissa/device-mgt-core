@@ -15,8 +15,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/*
+ *  Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ *  Entgra (pvt) Ltd. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied. See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
+
 package org.wso2.carbon.certificate.mgt.core.scep;
 
+import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.certificate.mgt.core.internal.CertificateManagementDataHolder;
@@ -29,8 +48,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.HashMap;
-
 public class SCEPManagerImpl implements SCEPManager {
     private static final Log log = LogFactory.getLog(SCEPManagerImpl.class);
     DeviceManagementProviderService dms;
@@ -40,21 +57,26 @@ public class SCEPManagerImpl implements SCEPManager {
     }
 
     @Override
-    public TenantedDeviceWrapper getValidatedDevice(DeviceIdentifier deviceIdentifier) throws SCEPException {
-        TenantedDeviceWrapper tenantedDeviceWrapper = new TenantedDeviceWrapper();
-        try {
-            HashMap<Integer, Device> deviceHashMap = dms.getTenantedDevice(deviceIdentifier);
-            Object[] keySet = deviceHashMap.keySet().toArray();
+    public TenantedDeviceWrapper getValidatedDevice(DeviceIdentifier deviceIdentifier)
+            throws SCEPException {
+        SingletonMap deviceMap;
 
-            if (keySet.length == 0) {
-                throw new SCEPException("Lookup device not found for the device identifier");
+        try {
+            deviceMap = dms.getTenantedDevice(deviceIdentifier, false);
+            if (deviceMap == null) {
+                String msg = "Lookup device not found for the device identifier " + deviceIdentifier.getId() +
+                             " of device type " + deviceIdentifier.getType();
+                log.error(msg);
+                throw new SCEPException(msg);
             }
 
-            Integer tenantId = (Integer) keySet[0];
-            tenantedDeviceWrapper.setDevice(deviceHashMap.get(tenantId));
-            tenantedDeviceWrapper.setTenantId(tenantId);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting device " + deviceIdentifier;
+            log.error(msg);
+            throw new SCEPException(msg, e);
+        }
 
-
+        try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             ctx.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -66,16 +88,22 @@ public class SCEPManagerImpl implements SCEPManager {
                 log.error(msg);
                 throw new SCEPException(msg);
             }
-
+            TenantedDeviceWrapper tenantedDeviceWrapper = new TenantedDeviceWrapper();
+            int tenantId = (int) deviceMap.getKey();
             String tenantDomain = realmService.getTenantManager().getDomain(tenantId);
+
+            tenantedDeviceWrapper.setTenantId(tenantId);
             tenantedDeviceWrapper.setTenantDomain(tenantDomain);
+            tenantedDeviceWrapper.setDevice((Device) deviceMap.getValue());
+
+            return tenantedDeviceWrapper;
+
         } catch (UserStoreException e) {
-            throw new SCEPException("Error occurred while getting the tenant domain.", e);
-        } catch (DeviceManagementException e) {
-            throw new SCEPException("Error occurred while getting device '" + deviceIdentifier + "'.", e);
+            String msg = "Error occurred while getting the tenant domain.";
+            log.error(msg);
+            throw new SCEPException(msg, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-        return tenantedDeviceWrapper;
     }
 }
