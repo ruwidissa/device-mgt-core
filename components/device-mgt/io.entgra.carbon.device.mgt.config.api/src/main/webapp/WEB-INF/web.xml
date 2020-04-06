@@ -48,7 +48,8 @@
     <context-param>
         <param-name>nonSecuredEndPoints</param-name>
         <param-value>
-            /api/device-mgt-config/v1.0/configurations
+            /api/device-mgt-config/v1.0/configurations,
+            /api/device-mgt-config/v1.0/configurations/ui-config
         </param-value>
     </context-param>
 

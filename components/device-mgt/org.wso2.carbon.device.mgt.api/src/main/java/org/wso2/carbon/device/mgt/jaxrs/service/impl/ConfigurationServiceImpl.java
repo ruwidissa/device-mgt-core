@@ -93,24 +93,4 @@ public class ConfigurationServiceImpl implements ConfigurationManagementService 
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
     }
-
-    @GET
-    @Override
-    @Consumes("application/json")
-    @Path("/ui-config")
-    public Response getUiConfig() {
-        UIConfigurationManager uiConfigurationManager = UIConfigurationManager.getInstance();
-        if (uiConfigurationManager == null) {
-            String msg = "IoTS UI configuration manager is not initialized.";
-            log.error(msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-        UIConfiguration uiConfiguration = uiConfigurationManager.getUIConfig();
-        if (uiConfiguration == null) {
-            String msg = "IoTS UI configuration is not defined.";
-            log.error(msg);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-        return Response.status(Response.Status.OK).entity(uiConfiguration).build();
-    }
 }

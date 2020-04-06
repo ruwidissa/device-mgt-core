@@ -194,4 +194,30 @@ public interface DeviceManagementConfigService {
                     value = "The device transfer request",
                     required = true)
                     DeviceTransferRequest deviceTransferRequest);
+
+    @GET
+    @Path("/ui-config")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "get application management UI configuration",
+            notes = "This will get all UI configuration of application management"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully got UI config."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. There doesn't have an defined UI config." +
+                                    "query."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while getting the UI config.",
+                            response = ErrorResponse.class)
+            })
+    Response getUiConfig();
 }
