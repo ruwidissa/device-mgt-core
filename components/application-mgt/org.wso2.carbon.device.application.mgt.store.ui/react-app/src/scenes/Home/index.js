@@ -171,7 +171,7 @@ class Dashboard extends React.Component {
                   title={
                     <span className="submenu-title-wrapper">
                       <Icon type="user" />
-                      {this.config.user}
+                      {this.config.user.username}
                     </span>
                   }
                 >

@@ -34,9 +34,6 @@ class AppList extends React.Component {
       loading: true,
       hasMore: true,
       loadMore: true,
-      forbiddenErrors: {
-        apps: false,
-      },
       totalAppCount: 0,
     };
   }
@@ -101,23 +98,10 @@ class AppList extends React.Component {
         }
       })
       .catch(error => {
-        handleApiError(
-          error,
-          'Error occurred while trying to load apps.',
-          true,
-        );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.apps = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        handleApiError(error, 'Error occurred while trying to load apps.');
+        this.setState({
+          loading: false,
+        });
       });
   };
 
@@ -145,7 +129,7 @@ class AppList extends React.Component {
   };
 
   render() {
-    const { apps, loading, forbiddenErrors, hasMore } = this.state;
+    const { apps, loading, hasMore } = this.state;
 
     return (
       <div>
@@ -158,14 +142,7 @@ class AppList extends React.Component {
           useWindow={true}
         >
           <Row gutter={16}>
-            {forbiddenErrors.apps && (
-              <Result
-                status="403"
-                title="403"
-                subTitle="You don't have permission to view apps."
-              />
-            )}
-            {!forbiddenErrors.apps && apps.length === 0 && (
+            {apps.length === 0 && (
               <Result
                 status="404"
                 title="No apps, yet."
