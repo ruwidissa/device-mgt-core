@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+/* Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
  *
  * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -14,34 +14,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.device.application.mgt.common.config;
+
+package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-public class AppRegistration {
+@XmlRootElement(name = "Table")
+public class Table {
 
-    private List<String> tags;
-    private boolean isAllowToAllDomains;
+    List<Column> columns;
 
-    @XmlElementWrapper(name = "Tags")
-    @XmlElement(name = "Tag")
-    public List<String> getTags() {
-        return tags;
-    }
+    @XmlElementWrapper(name = "Columns")
+    @XmlElement(name = "Column")
+    public List<Column> getColumns() { return columns; }
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    @XmlElement(name = "AllowToAllDomains")
-    public boolean isAllowToAllDomains() {
-        return isAllowToAllDomains;
-    }
-
-    public void setAllowToAllDomains(boolean allowToAllDomains) {
-        isAllowToAllDomains = allowToAllDomains;
-    }
-
+    public void setColumns(List<Column> columns) { this.columns = columns; }
 }

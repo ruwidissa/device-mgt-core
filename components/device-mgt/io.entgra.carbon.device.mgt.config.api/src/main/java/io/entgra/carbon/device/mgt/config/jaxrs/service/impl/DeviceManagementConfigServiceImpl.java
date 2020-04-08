@@ -38,6 +38,8 @@ import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
+import org.wso2.carbon.device.mgt.core.config.ui.UIConfiguration;
+import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
@@ -155,6 +157,26 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         }
+    }
+
+    @GET
+    @Override
+    @Consumes("application/json")
+    @Path("/ui-config")
+    public Response getUiConfig() {
+        UIConfigurationManager uiConfigurationManager = UIConfigurationManager.getInstance();
+        if (uiConfigurationManager == null) {
+            String msg = "IoTS UI configuration manager is not initialized.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+        UIConfiguration uiConfiguration = uiConfigurationManager.getUIConfig();
+        if (uiConfiguration == null) {
+            String msg = "IoTS UI configuration is not defined.";
+            log.error(msg);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+        return Response.status(Response.Status.OK).entity(uiConfiguration).build();
     }
 
     private String parseUriParamsToJSON(String uriParams) {
