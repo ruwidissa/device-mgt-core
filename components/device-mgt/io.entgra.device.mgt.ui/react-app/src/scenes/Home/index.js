@@ -150,6 +150,12 @@ class Home extends React.Component {
                     </Link>
                   </Menu.Item>
                 </SubMenu>
+                <Menu.Item key="deviceLocations">
+                  <Link to="/entgra/device-locations">
+                    <Icon type="environment" />
+                    <span>Device Location</span>
+                  </Link>
+                </Menu.Item>
                 <Menu.Item className="profile" key="Notifications">
                   <Link to="/entgra/notifications">
                     <span>Notifications</span>
