@@ -25,6 +25,7 @@ import org.apache.http.HttpStatus;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
@@ -36,11 +37,12 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
-import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
 import org.wso2.carbon.policy.mgt.common.PolicyPayloadValidator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class RequestValidationUtil {
@@ -472,6 +474,49 @@ public class RequestValidationUtil {
                     new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Request parameter owner should" +
                             " be non empty.").build());
         }
+    }
+
+    /**
+     * Validate if the metaData and metaKey values are non empty & in proper format.
+     *
+     * @param metadata a Metadata instance, which contains user submitted values
+     */
+    public static void validateMetadata(Metadata metadata) {
+        if (StringUtils.isEmpty(metadata.getMetaKey())) {
+            String msg = "Request parameter metaKey should be non empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        String regex = "^[a-zA-Z0-9_.]*$";
+        if (!metadata.getMetaKey().matches(regex)) {
+            String msg = "Request parameter metaKey should only contain period, " +
+                    "underscore and alphanumeric characters.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (metadata.getMetaValue() == null) {
+            String msg = "Request parameter metaValue should be non empty.";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (metadata.getDataType() != null) {
+            for (Metadata.DataType dataType : Metadata.DataType.values()) {
+                if (dataType.name().equals(metadata.getDataType().name())) {
+                    return;
+                }
+            }
+        }
+        String msg = "Request parameter dataType should  only contain one of following:" +
+                Arrays.asList(Metadata.DataType.values());
+        log.error(msg);
+        throw new InputValidationException(
+                new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
     }
 
     public static boolean isNonFilterRequest(String username, String firstName, String lastName, String emailAddress) {
