@@ -36,6 +36,7 @@ import Certificates from './scenes/Home/scenes/Configurations/scenes/Certificate
 import Devices from './scenes/Home/scenes/Devices';
 import ViewPolicy from './scenes/Home/scenes/Policies/scenes/ViewPolicy';
 import EditSelectedPolicy from './scenes/Home/scenes/Policies/scenes/EditSelectedPolicy';
+import DeviceLocations from './scenes/Home/scenes/DeviceLocations';
 
 const routes = [
   {
@@ -111,6 +112,11 @@ const routes = [
       {
         path: '/entgra/notifications',
         component: Notifications,
+        exact: true,
+      },
+      {
+        path: '/entgra/device-locations',
+        component: DeviceLocations,
         exact: true,
       },
     ],
