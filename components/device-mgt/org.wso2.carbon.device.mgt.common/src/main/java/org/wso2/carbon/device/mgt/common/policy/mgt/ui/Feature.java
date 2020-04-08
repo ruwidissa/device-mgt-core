@@ -19,15 +19,13 @@ package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
 
 @XmlRootElement(name = "Feature")
 public class Feature {
 
     private String featureCode;
-    private List<Content> contents;
+    private Content content;
 
     @XmlAttribute(name = "code", required = true)
     public String getFeatureCode() {
@@ -38,13 +36,12 @@ public class Feature {
         this.featureCode = featureCode;
     }
 
-    @XmlElementWrapper(name = "Contents")
     @XmlElement(name = "Content")
-    public List<Content> getContents() {
-        return contents;
+    public Content getContent() {
+        return content;
     }
 
-    public void setContents(List<Content> contents) {
-        this.contents = contents;
+    public void setContent(Content content) {
+        this.content = content;
     }
 }
