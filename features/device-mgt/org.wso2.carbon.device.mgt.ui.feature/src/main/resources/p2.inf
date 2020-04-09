@@ -4,4 +4,3 @@ org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../featur
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/jaggeryapps/uuf-template-app);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.ui_${feature.version}/jaggeryapps/uuf-template-app,target:${installFolder}/../../deployment/server/jaggeryapps/uuf-template-app,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.ui_${feature.version}/jaggery-modules/utils/,target:${installFolder}/../../modules/utils,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.device.mgt.ui_${feature.version}/webapps/entgra.war,target:${installFolder}/../../deployment/server/webapps/entgra.war,overwrite:true);\
