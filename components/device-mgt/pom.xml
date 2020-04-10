@@ -41,7 +41,6 @@
         <module>org.wso2.carbon.device.mgt.analytics.data.publisher</module>
         <module>org.wso2.carbon.device.mgt.url.printer</module>
         <module>org.wso2.carbon.device.mgt.analytics.wsproxy</module>
-        <module>io.entgra.device.mgt.ui</module>
         <module>io.entgra.carbon.device.mgt.config.api</module>
     </modules>
 
