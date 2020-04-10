@@ -22,7 +22,7 @@ import RouteWithSubRoutes from './components/RouteWithSubRoutes';
 import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom';
 import axios from 'axios';
 import { Layout, Spin, Result } from 'antd';
-import ConfigContext from './context/ConfigContext';
+import ConfigContext from './components/ConfigContext';
 
 const { Content } = Layout;
 const loadingView = (
