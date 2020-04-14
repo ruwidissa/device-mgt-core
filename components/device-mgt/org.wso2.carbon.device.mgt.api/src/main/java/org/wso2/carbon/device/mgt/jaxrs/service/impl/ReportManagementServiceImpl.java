@@ -35,7 +35,6 @@ import org.wso2.carbon.device.mgt.jaxrs.service.api.ReportManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 
-import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -266,6 +265,43 @@ public class ReportManagementServiceImpl implements ReportManagementService {
             String msg = "Error occurred while retrieving devices list with provided encryption status";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Path("/{device-type}/ungrouped-devices")
+    public Response getUngroupedDevices(
+            @PathParam("device-type") String deviceType,
+            @QueryParam("groupNames") List<String> groupNames,
+            @DefaultValue("0")
+            @QueryParam("offset") int offset,
+            @DefaultValue("10")
+            @QueryParam("limit") int limit) {
+        try {
+            RequestValidationUtil.validatePaginationParameters(offset, limit);
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            DeviceList deviceList = new DeviceList();
+            request.setDeviceType(deviceType);
+            PaginationResult paginationResult =
+                    DeviceMgtAPIUtils.getReportManagementService().getDeviceNotAssignedToGroups(request, groupNames);
+
+            if (paginationResult.getData().isEmpty()) {
+                String msg = "There is no " + deviceType + "device without groups";
+                return Response.status(Response.Status.NO_CONTENT).entity(msg).build();
+            } else {
+                deviceList.setList((List<Device>) paginationResult.getData());
+                return Response.status(Response.Status.OK).entity(deviceList).build();
+            }
+        } catch (ReportManagementException e) {
+            String msg = "Error occurred while retrieving device list that are not assigned to " +
+                         "groups";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (DeviceTypeNotFoundException e) {
+            String msg = "Error occurred while retrieving devices list. Device type: " + deviceType +
+                         "is not valid";
+            log.error(msg, e);
+            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         }
     }
 }
