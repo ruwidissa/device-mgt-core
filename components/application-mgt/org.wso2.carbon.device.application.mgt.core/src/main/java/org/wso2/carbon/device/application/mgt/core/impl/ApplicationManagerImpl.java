@@ -1801,7 +1801,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             DeviceType deviceType = deviceManagementProviderService.getDeviceType(deviceTypeName);
             if (deviceType == null) {
-                String msg = "Device type doesn't not exist. Hence check the application name existence with valid "
+                String msg = "Device type doesn't exist. Hence check the application name existence with valid "
                         + "device type name.";
                 log.error(msg);
                 throw new BadRequestException(msg);
