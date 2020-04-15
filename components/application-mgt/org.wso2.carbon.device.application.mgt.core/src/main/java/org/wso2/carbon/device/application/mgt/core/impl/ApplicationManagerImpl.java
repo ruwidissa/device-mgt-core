@@ -608,9 +608,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (!StringUtils.isEmpty(filter.getDeviceType())) {
             deviceType = APIUtil.getDeviceTypeData(filter.getDeviceType());
         }
-        if (filter.getLimit() == 0) {
-            filter.setLimit(20);
-        }
 
         if (deviceType == null) {
             deviceType = new DeviceType();
