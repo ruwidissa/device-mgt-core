@@ -67,6 +67,17 @@ public interface ApplicationManager {
             throws ApplicationManagementException;
 
     /**
+     * Check the existence of an application for given application name and the device type.
+     *
+     * @param appName Application name
+     * @param deviceTypeName Device Type name
+     * @return True if application exists for given application name and the device type, otherwise returns False
+     * @throws ApplicationManagementException if error occured while checking the application existence for given
+     * application name and device type or request with invalid device type data.
+     */
+    boolean isExistingAppName(String appName, String deviceTypeName) throws ApplicationManagementException;
+
+    /**
      * Updates an already existing application.
      *
      * @param applicationId ID of the application

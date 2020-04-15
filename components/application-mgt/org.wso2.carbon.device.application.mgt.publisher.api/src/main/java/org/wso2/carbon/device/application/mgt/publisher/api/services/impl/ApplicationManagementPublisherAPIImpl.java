@@ -59,6 +59,7 @@ import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -319,22 +320,22 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             applicationManager.validateBinaryArtifact(binaryFile);
             applicationManager.validateImageArtifacts(iconFile, bannerFile, attachmentList);
 
-            // Created new Ent App
+            // Created new Custom App
             Application application = applicationManager.createCustomApp(customAppWrapper,
                     constructApplicationArtifact(binaryFile, iconFile, bannerFile, attachmentList));
             if (application != null) {
                 return Response.status(Response.Status.CREATED).entity(application).build();
             } else {
-                String msg = "Application creation is failed";
+                String msg = "Custom app creation is failed";
                 log.error(msg);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (BadRequestException e) {
-            String msg = "Found incompatible payload with pub custom creating request.";
+            String msg = "Found incompatible payload with custom app creating request.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while creating the application";
+            String msg = "Error occurred while creating a costom application";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
@@ -381,6 +382,27 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             String msg = "Error occurred while handling the application creating request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    @Override
+    @HEAD
+    @Path("/device-type/{deviceType}/app-name/{appName}")
+    public Response isExistingApplication(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("appName") String appName ){
+        try {
+            ApplicationManager applicationManager = APIUtil.getApplicationManager();
+            if (applicationManager.isExistingAppName(appName, deviceType)) {
+                return Response.status(Response.Status.OK).build();
+            }
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (BadRequestException e) {
+            log.error("Found invalid device type to check application existence.", e);
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        } catch (ApplicationManagementException e) {
+            log.error("Internal Error occurred while checking the application existence.", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 

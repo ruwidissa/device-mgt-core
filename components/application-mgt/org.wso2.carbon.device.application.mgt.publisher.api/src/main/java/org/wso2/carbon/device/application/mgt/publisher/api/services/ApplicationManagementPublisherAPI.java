@@ -53,6 +53,7 @@ import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -713,6 +714,51 @@ public interface ApplicationManagementPublisherAPI {
                     name = "screenshot3",
                     value = "Screen Shots of the uploading application")
             @Multipart(value = "screenshot3") Attachment screenshot3
+    );
+
+    @HEAD
+    @Path("/device-type/{deviceType}/app-name/{appName}")
+    @ApiOperation(
+            httpMethod = "HEAD",
+            value = "Check the application existence",
+            notes = "This API is responsible to check whether application exist or not for the given device type and "
+                    + "application name.",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:app:publisher:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Application exists."),
+                    @ApiResponse(
+                            code = 404,
+                            message = "NOT FOUND. \n Could.t find an application for given device type and application "
+                                    + "name."),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Found invalid device type with the request."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while checking the application existence"
+                                    + " for given application name and device type name the application list.",
+                            response = ErrorResponse.class)
+            })
+    Response isExistingApplication(
+            @ApiParam(
+                    name = "deviceType",
+                    value = "Application compatible device type name",
+                    required = true)
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "appName",
+                    value = "Application name",
+                    required = true)
+            @PathParam("appName") String appName
     );
 
     @PUT

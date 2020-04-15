@@ -22,7 +22,6 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
 import org.wso2.carbon.device.application.mgt.common.SubscriptionType;
 import org.wso2.carbon.device.application.mgt.common.dto.ApplicationDTO;
@@ -31,9 +30,6 @@ import org.wso2.carbon.device.application.mgt.common.dto.ApplicationReleaseDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.DeviceSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationManager;
-import org.wso2.carbon.device.application.mgt.common.services.ApplicationStorageManager;
-import org.wso2.carbon.device.application.mgt.common.services.SubscriptionManager;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -309,80 +305,6 @@ public class DAOUtil {
                 log.warn("Error occurred while closing prepared statement", e);
             }
         }
-    }
-
-    private static volatile ApplicationManager applicationManager;
-    private static volatile ApplicationStorageManager applicationStorageManager;
-    private static volatile SubscriptionManager subscriptionManager;
-
-    public static ApplicationManager getApplicationManager() {
-        if (applicationManager == null) {
-            synchronized (DAOUtil.class) {
-                if (applicationManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    applicationManager =
-                            (ApplicationManager) ctx.getOSGiService(ApplicationManager.class, null);
-                    if (applicationManager == null) {
-                        String msg = "ApplicationDTO Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
-            }
-        }
-        return applicationManager;
-    }
-
-    /**
-     * To get the ApplicationDTO Storage Manager from the osgi context.
-     * @return ApplicationStoreManager instance in the current osgi context.
-     */
-    public static ApplicationStorageManager getApplicationStorageManager() {
-
-        try {
-            if (applicationStorageManager == null) {
-                synchronized (DAOUtil.class) {
-                    if (applicationStorageManager == null) {
-                        applicationStorageManager = ApplicationManagementUtil
-                                .getApplicationStorageManagerInstance();
-                        if (applicationStorageManager == null) {
-                            String msg = "ApplicationDTO Storage Manager service has not initialized.";
-                            log.error(msg);
-                            throw new IllegalStateException(msg);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            String msg = "Error occurred while getting the application store manager";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        return applicationStorageManager;
-    }
-
-
-    /**
-     * To get the Subscription Manager from the osgi context.
-     * @return SubscriptionManager instance in the current osgi context.
-     */
-    public static SubscriptionManager getSubscriptionManager() {
-        if (subscriptionManager == null) {
-            synchronized (DAOUtil.class) {
-                if (subscriptionManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    subscriptionManager =
-                            (SubscriptionManager) ctx.getOSGiService(SubscriptionManager.class, null);
-                    if (subscriptionManager == null) {
-                        String msg = "Subscription Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
-            }
-        }
-
-        return subscriptionManager;
     }
 
     public static DeviceManagementProviderService getDeviceManagementService() {

@@ -237,7 +237,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throws ApplicationManagementException {
         try {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-            ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+            ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
             byte[] content = IOUtils.toByteArray(applicationArtifact.getInstallerStream());
             String md5OfApp = StorageManagementUtil.getMD5(new ByteArrayInputStream(content));
             if (md5OfApp == null) {
@@ -302,7 +302,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @throws ApplicationManagementException if error occurred while deleting application release artifacts.
      */
     private void deleteApplicationArtifacts(List<String> directoryPaths, int tenantId) throws ApplicationManagementException {
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
             applicationStorageManager.deleteAllApplicationReleaseArtifacts(directoryPaths, tenantId);
         } catch (ApplicationStorageManagementException e) {
@@ -328,7 +328,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationReleaseDTO applicationReleaseDTO, ApplicationArtifact applicationArtifact, boolean isNewRelease)
             throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
 
         String uuid = UUID.randomUUID().toString();
         applicationReleaseDTO.setUuid(uuid);
@@ -412,7 +412,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             ApplicationReleaseDTO applicationReleaseDTO, ApplicationArtifact applicationArtifact)
             throws ResourceManagementException, ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
 
         // The application executable artifacts such as apks are uploaded.
         try {
@@ -505,7 +505,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private ApplicationReleaseDTO addImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
             ApplicationArtifact applicationArtifact, int tenantId) throws ResourceManagementException {
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
 
         applicationReleaseDTO.setIconName(applicationArtifact.getIconName());
         applicationReleaseDTO.setBannerName(applicationArtifact.getBannerName());
@@ -542,7 +542,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private ApplicationReleaseDTO updateImageArtifacts(ApplicationReleaseDTO applicationReleaseDTO,
             ApplicationArtifact applicationArtifact, int tenantId) throws ResourceManagementException{
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
 
         if (!StringUtils.isEmpty(applicationArtifact.getIconName())) {
             applicationStorageManager
@@ -786,7 +786,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @throws ApplicationManagementException which throws if error occurs while during application management.
      */
     private Application addAppDataIntoDB(ApplicationDTO applicationDTO, int tenantId) throws ApplicationManagementException {
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         List<String> unrestrictedRoles = applicationDTO.getUnrestrictedRoles();
         ApplicationReleaseDTO applicationReleaseDTO = applicationDTO.getApplicationReleaseDTOs().get(0);
         List<String> categories = applicationDTO.getAppCategories();
@@ -1329,7 +1329,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + applicationId);
         }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         ApplicationDTO applicationDTO = getApplication(applicationId);
         List<ApplicationReleaseDTO> applicationReleaseDTOs = applicationDTO.getApplicationReleaseDTOs();
         for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
@@ -1445,7 +1445,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void deleteApplicationRelease(String releaseUuid)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO
@@ -1791,6 +1791,45 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    @Override
+    public boolean isExistingAppName(String appName, String deviceTypeName) throws ApplicationManagementException {
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        DeviceManagementProviderService deviceManagementProviderService = DataHolder.getInstance()
+                .getDeviceManagementService();
+        try {
+            DeviceType deviceType = deviceManagementProviderService.getDeviceType(deviceTypeName);
+            if (deviceType == null) {
+                String msg = "Device type doesn't exist. Hence check the application name existence with valid "
+                        + "device type name.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            try {
+                ConnectionManagerUtil.openDBConnection();
+                if (applicationDAO.isExistingAppName(appName, deviceType.getId(), tenantId)) {
+                    return true;
+                }
+            } catch (DBConnectionException e) {
+                String msg = "Error occurred while getting DB connection to check the existence of application with "
+                        + "name: " + appName + " and the device type: " + deviceTypeName;
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } catch (ApplicationManagementDAOException e) {
+                String msg = "Error occurred while checking the existence of application with " + "name: " + appName
+                        + "and the  device type: " + deviceTypeName + " in the database";
+                log.error(msg);
+                throw new ApplicationManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while getting the device type data for device type: " + deviceTypeName;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return false;
     }
 
     @Override
@@ -2707,7 +2746,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             CustomAppReleaseWrapper customAppReleaseWrapper, ApplicationArtifact applicationArtifact)
             throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
             ConnectionManagerUtil.beginDBTransaction();
             ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUuid, tenantId);

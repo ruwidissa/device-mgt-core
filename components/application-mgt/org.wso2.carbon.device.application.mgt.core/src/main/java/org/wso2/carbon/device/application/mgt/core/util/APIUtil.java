@@ -87,19 +87,25 @@ public class APIUtil {
      * @return ApplicationStoreManager instance in the current osgi context.
      */
     public static ApplicationStorageManager getApplicationStorageManager() {
-        if (applicationStorageManager == null) {
-            synchronized (APIUtil.class) {
-                if (applicationStorageManager == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    applicationStorageManager = (ApplicationStorageManager) ctx
-                            .getOSGiService(ApplicationStorageManager.class, null);
+
+        try {
+            if (applicationStorageManager == null) {
+                synchronized (DAOUtil.class) {
                     if (applicationStorageManager == null) {
-                        String msg = "ApplicationDTO Storage Manager service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
+                        applicationStorageManager = ApplicationManagementUtil
+                                .getApplicationStorageManagerInstance();
+                        if (applicationStorageManager == null) {
+                            String msg = "ApplicationDTO Storage Manager service has not initialized.";
+                            log.error(msg);
+                            throw new IllegalStateException(msg);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            String msg = "Error occurred while getting the application store manager";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
         return applicationStorageManager;
     }

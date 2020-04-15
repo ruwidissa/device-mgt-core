@@ -29,6 +29,7 @@ import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.core.dao.ApplicationReleaseDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
+import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
 import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
@@ -55,7 +56,7 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
 
     @Override public InputStream getArtifactStream(int tenantId, String uuid, String folderName, String artifactName)
             throws ApplicationManagementException {
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         ApplicationReleaseDAO applicationReleaseDAO = ApplicationManagementDAOFactory.getApplicationReleaseDAO();
         String appReleaseHashValue;
         try {
@@ -91,7 +92,7 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
     @Override
     public InputStream getAgentStream(int tenantId, String deviceType)
             throws ApplicationManagementException {
-        ApplicationStorageManager applicationStorageManager = DAOUtil.getApplicationStorageManager();
+        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
             InputStream inputStream = applicationStorageManager
                     .getFileStream(deviceType, tenantId);
