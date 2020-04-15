@@ -94,7 +94,13 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
     }
 
     @Override
-    public List<ApplicationDTO> getApplications(Filter filter,int deviceTypeId, int tenantId) throws ApplicationManagementDAOException {
+    public List<ApplicationDTO> getApplications(Filter filter, int deviceTypeId, int tenantId) throws
+            ApplicationManagementDAOException {
+        if (filter == null) {
+            String msg = "Filter is not instantiated for tenant "+tenantId;
+            log.error(msg);
+            throw new ApplicationManagementDAOException(msg);
+        }
         if (log.isDebugEnabled()) {
             log.debug("Getting application data from the database");
             log.debug(String.format("Filter: limit=%s, offset=%s", filter.getLimit(), filter.getOffset()));
@@ -131,74 +137,60 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 + "FROM AP_APP "
                 + "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
-                + "INNER JOIN (SELECT ID FROM AP_APP WHERE AP_APP.TENANT_ID = ? LIMIT ? OFFSET ? ) AS app_data ON app_data.ID = AP_APP.ID "
-                + "WHERE AP_APP.TENANT_ID = ?";
-
-        if (filter == null) {
-            String msg = "Filter is not instantiated.";
-            log.error(msg);
-            throw new ApplicationManagementDAOException(msg);
+                + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ";
+        if (!StringUtils.isEmpty(filter.getVersion()) || !StringUtils.isEmpty(filter.getAppReleaseState())
+                || !StringUtils.isEmpty(filter.getAppReleaseType())) {
+            sql += "INNER JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
         }
+        sql += "WHERE AP_APP.TENANT_ID = ? ";
 
         if (!StringUtils.isEmpty(filter.getAppType())) {
-            sql += " AND AP_APP.TYPE = ?";
+            sql += "AND AP_APP.TYPE = ? ";
         }
         if (!StringUtils.isEmpty(filter.getAppName())) {
             sql += " AND LOWER (AP_APP.NAME) ";
             if (filter.isFullMatch()) {
-                sql += "= ?";
+                sql += "= ? ";
             } else {
-                sql += "LIKE ?";
+                sql += "LIKE ? ";
             }
         }
         if (!StringUtils.isEmpty(filter.getSubscriptionType())) {
-            sql += " AND AP_APP.SUB_TYPE = ?";
+            sql += "AND AP_APP.SUB_TYPE = ? ";
         }
         if (filter.getMinimumRating() > 0) {
-            sql += " AND AP_APP.RATING >= ?";
+            sql += "AND AP_APP.RATING >= ? ";
         }
         if (!StringUtils.isEmpty(filter.getVersion())) {
-            sql += " AND AP_APP_RELEASE.VERSION = ?";
+            sql += "AND AP_APP_RELEASE.VERSION = ? ";
         }
         if (!StringUtils.isEmpty(filter.getAppReleaseType())) {
-            sql += " AND AP_APP_RELEASE.RELEASE_TYPE = ?";
+            sql += "AND AP_APP_RELEASE.RELEASE_TYPE = ? ";
         }
         if (!StringUtils.isEmpty(filter.getAppReleaseState())) {
-            sql += " AND AP_APP_RELEASE.CURRENT_STATE = ?";
+            sql += "AND AP_APP_RELEASE.CURRENT_STATE = ? ";
         }
         if (deviceTypeId != -1) {
-            sql += " AND AP_APP.DEVICE_TYPE_ID = ?";
+            sql += "AND AP_APP.DEVICE_TYPE_ID = ? ";
         }
-
-        if (filter.getLimit() == -1) {
-            sql = sql.replace("LIMIT ? OFFSET ?", "");
+        sql += "GROUP BY AP_APP.ID ";
+        if (!StringUtils.isEmpty(filter.getSortBy())) {
+            sql += "ORDER BY ID " + filter.getSortBy() +" ";
         }
-
-        String sortingOrder = "ASC";
-        if (!StringUtils.isEmpty(filter.getSortBy() )) {
-            sortingOrder = filter.getSortBy();
+        if (filter.getLimit() != -1) {
+            sql += " LIMIT ? OFFSET ? ";
         }
-        sql += " ORDER BY APP_ID " + sortingOrder;
-
+        sql += ") AS app_data ON app_data.ID = AP_APP.ID " +
+                "WHERE AP_APP.TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
-            try (PreparedStatement stmt = conn.prepareStatement(sql)){
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndex = 1;
                 stmt.setInt(paramIndex++, tenantId);
-                if (filter.getLimit() != -1) {
-                    if (filter.getLimit() == 0) {
-                        stmt.setInt(paramIndex++, 100);
-                    } else {
-                        stmt.setInt(paramIndex++, filter.getLimit());
-                    }
-                    stmt.setInt(paramIndex++, filter.getOffset());
-                }
-                stmt.setInt(paramIndex++, tenantId);
-
-                if (filter.getAppType() != null && !filter.getAppType().isEmpty()) {
+                if (!StringUtils.isEmpty(filter.getAppType())) {
                     stmt.setString(paramIndex++, filter.getAppType());
                 }
-                if (filter.getAppName() != null && !filter.getAppName().isEmpty()) {
+                if (!StringUtils.isEmpty(filter.getAppName())) {
                     if (filter.isFullMatch()) {
                         stmt.setString(paramIndex++, filter.getAppName().toLowerCase());
                     } else {
@@ -220,10 +212,15 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
                 if (!StringUtils.isEmpty(filter.getAppReleaseState())) {
                     stmt.setString(paramIndex++, filter.getAppReleaseState());
                 }
-                if (deviceTypeId > 0 ) {
-                    stmt.setInt(paramIndex, deviceTypeId);
+                if (deviceTypeId > 0) {
+                    stmt.setInt(paramIndex++, deviceTypeId);
                 }
-                try (ResultSet rs = stmt.executeQuery() ) {
+                if (filter.getLimit() != -1) {
+                    stmt.setInt(paramIndex++, filter.getLimit());
+                    stmt.setInt(paramIndex++, filter.getOffset());
+                }
+                stmt.setInt(paramIndex, tenantId);
+                try (ResultSet rs = stmt.executeQuery()) {
                     return DAOUtil.loadApplications(rs);
                 }
             }

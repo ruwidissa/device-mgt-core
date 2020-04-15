@@ -21,6 +21,7 @@ import java.util.List;
 
 /**
  * Filter represents a criteria that can be used for searching applications.
+ * The default value for limit is 20
  */
 public class Filter {
 
@@ -87,8 +88,9 @@ public class Filter {
 
     /**
      * Limit of the applications
+     * default: 20
      */
-    private int limit;
+    private int limit = 20;
 
     /**
      * Started from
