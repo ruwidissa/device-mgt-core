@@ -18,21 +18,21 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as serviceWorker from './serviceWorker';
+import * as serviceWorker from './services/serviceWorkers/serviceWorker';
 import App from './App';
-import Login from './pages/Login';
-import Dashboard from './pages/dashboard/Dashboard';
-import Apps from './pages/dashboard/apps/Apps';
-import Release from './pages/dashboard/apps/release/Release';
-import AddNewEnterpriseApp from './pages/dashboard/add-new-app/AddNewEnterpriseApp';
-import Mange from './pages/dashboard/manage/Manage';
+import Login from './scenes/Login';
+import Dashboard from './scenes/Home';
+import Apps from './scenes/Home/scenes/Apps';
+import Release from './scenes/Home/scenes/Apps/scenes/Release';
+import AddNewEnterpriseApp from './scenes/Home/scenes/AddNewApp/scenes/Enterprise';
+import Mange from './scenes/Home/scenes/Manage';
 import './index.css';
-import AddNewPublicApp from './pages/dashboard/add-new-app/AddNewPublicApp';
-import AddNewWebClip from './pages/dashboard/add-new-app/AddNewWebClip';
-import AddNewRelease from './pages/dashboard/add-new-release/AddNewRelease';
-import AddNewCustomApp from './pages/dashboard/add-new-app/AddNewCustomApp';
-import ManageAndroidEnterprise from './pages/dashboard/manage/android-enterprise/ManageAndroidEnterprise';
-import Page from './pages/dashboard/manage/android-enterprise/page/Page';
+import AddNewPublicApp from './scenes/Home/scenes/AddNewApp/scenes/Public';
+import AddNewWebClip from './scenes/Home/scenes/AddNewApp/scenes/WebClip';
+import AddNewRelease from './scenes/Home/scenes/AddNewRelease';
+import AddNewCustomApp from './scenes/Home/scenes/AddNewApp/scenes/Custom';
+import ManageAndroidEnterprise from './scenes/Home/scenes/Manage/scenes/AndroidEnterprise';
+import Page from './scenes/Home/scenes/Manage/scenes/AndroidEnterprise/scenes/Page';
 
 const routes = [
   {
