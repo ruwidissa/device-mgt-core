@@ -106,37 +106,24 @@ class App extends React.Component {
   checkUserLoggedIn = config => {
     axios
       .post(
-        window.location.origin + '/publisher-ui-request-handler/user',
-        'platform=publisher',
+        window.location.origin +
+          config.serverConfig.invoker.contextPath +
+          '/user',
       )
       .then(res => {
-        config.user = res.data.data;
+        config.user = {
+          username: res.data.data,
+        };
         const pageURL = window.location.pathname;
         const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
         if (lastURLSegment === 'login') {
           window.location.href = window.location.origin + '/publisher/';
         } else {
-          this.getAndroidEnterpriseToken(config);
+          this.getUserPermissions(config);
         }
       })
       .catch(error => {
-        if (error.hasOwnProperty('response') && error.response.status === 401) {
-          const redirectUrl = encodeURI(window.location.href);
-          const pageURL = window.location.pathname;
-          const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
-          if (lastURLSegment !== 'login') {
-            window.location.href =
-              window.location.origin +
-              `/publisher/login?redirect=${redirectUrl}`;
-          } else {
-            this.getAndroidEnterpriseToken(config);
-          }
-        } else {
-          this.setState({
-            loading: false,
-            error: true,
-          });
-        }
+        this.handleApiError(error, config);
       });
   };
 
@@ -150,6 +137,42 @@ class App extends React.Component {
       window.location.origin +
       '/devicemgt/public/uuf.unit.favicon/img/favicon.png';
     document.getElementsByTagName('head')[0].appendChild(link);
+  };
+
+  getUserPermissions = config => {
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.deviceMgt +
+          '/users/current-user/permissions',
+      )
+      .then(res => {
+        config.user.permissions = res.data.data.permissions;
+        this.getAndroidEnterpriseToken(config);
+      })
+      .catch(error => {
+        this.handleApiError(error, config);
+      });
+  };
+
+  handleApiError = (error, config) => {
+    if (error.hasOwnProperty('response') && error.response.status === 401) {
+      const redirectUrl = encodeURI(window.location.href);
+      const pageURL = window.location.pathname;
+      const lastURLSegment = pageURL.substr(pageURL.lastIndexOf('/') + 1);
+      if (lastURLSegment !== 'login') {
+        window.location.href =
+          window.location.origin + `/publisher/login?redirect=${redirectUrl}`;
+      } else {
+        this.getAndroidEnterpriseToken(config);
+      }
+    } else {
+      this.setState({
+        loading: false,
+        error: true,
+      });
+    }
   };
 
   render() {

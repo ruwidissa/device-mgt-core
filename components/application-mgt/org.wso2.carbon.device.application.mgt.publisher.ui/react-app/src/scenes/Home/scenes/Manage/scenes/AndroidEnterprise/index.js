@@ -17,12 +17,13 @@
  */
 
 import React from 'react';
-import { PageHeader, Breadcrumb, Divider, Icon } from 'antd';
+import { PageHeader, Breadcrumb, Divider, Icon, Result } from 'antd';
 import { Link } from 'react-router-dom';
 import SyncAndroidApps from './components/SyncAndroidApps';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import GooglePlayIframe from './components/GooglePlayIframe';
 import Pages from './components/Pages';
+import Authorized from '../../../../../../components/Authorized/Authorized';
 
 class ManageAndroidEnterprise extends React.Component {
   routes;
@@ -52,10 +53,27 @@ class ManageAndroidEnterprise extends React.Component {
           </div>
         </PageHeader>
         <div style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}>
-          <SyncAndroidApps />
-          <GooglePlayIframe />
-          <Divider />
-          <Pages />
+          <Authorized
+            permission="/permission/admin/device-mgt/enterprise/user/view"
+            yes={
+              <>
+                <SyncAndroidApps />
+                <Authorized
+                  permission="/permission/admin/device-mgt/enterprise/user/modify"
+                  yes={<GooglePlayIframe />}
+                />
+                <Divider />
+                <Pages />
+              </>
+            }
+            no={
+              <Result
+                status="403"
+                title="You don't have permission to view android enterprise configurations."
+                subTitle="Please contact system administrator"
+              />
+            }
+          />
         </div>
       </div>
     );

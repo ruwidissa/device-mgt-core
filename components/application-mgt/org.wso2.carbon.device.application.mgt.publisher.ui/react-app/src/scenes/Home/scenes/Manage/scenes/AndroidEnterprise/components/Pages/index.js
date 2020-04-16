@@ -34,6 +34,7 @@ import './styles.css';
 import { Link } from 'react-router-dom';
 import AddNewPage from './components/AddNewPage';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
+import { isAuthorized } from '../../../../../../../../services/utils/authorizationHandler';
 
 const { Text, Title } = Typography;
 
@@ -47,6 +48,10 @@ class Pages extends React.Component {
       selectedRows: [],
       homePageId: null,
     };
+    this.hasPermissionToManage = isAuthorized(
+      this.props.config.user,
+      '/device-mgt/enterprise/user/view',
+    );
   }
 
   rowSelection = {
@@ -226,34 +231,38 @@ class Pages extends React.Component {
       key: 'actions',
       render: (name, page) => (
         <div>
-          <span className="action">
-            <Button
-              disabled={page.id === this.state.homePageId}
-              className="btn-warning"
-              icon="home"
-              type="link"
-              onClick={() => {
-                this.updateHomePage(page.id);
-              }}
-            >
-              set as homepage
-            </Button>
-          </span>
-          <Divider type="vertical" />
-          <Popconfirm
-            title="Are you sure？"
-            okText="Yes"
-            cancelText="No"
-            onConfirm={() => {
-              this.deletePage(page.id);
-            }}
-          >
-            <span className="action">
-              <Text type="danger">
-                <Icon type="delete" /> delete
-              </Text>
-            </span>
-          </Popconfirm>
+          {this.hasPermissionToManage && (
+            <>
+              <span className="action">
+                <Button
+                  disabled={page.id === this.state.homePageId}
+                  className="btn-warning"
+                  icon="home"
+                  type="link"
+                  onClick={() => {
+                    this.updateHomePage(page.id);
+                  }}
+                >
+                  set as homepage
+                </Button>
+              </span>
+              <Divider type="vertical" />
+              <Popconfirm
+                title="Are you sure？"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={() => {
+                  this.deletePage(page.id);
+                }}
+              >
+                <span className="action">
+                  <Text type="danger">
+                    <Icon type="delete" /> delete
+                  </Text>
+                </span>
+              </Popconfirm>
+            </>
+          )}
         </div>
       ),
     },

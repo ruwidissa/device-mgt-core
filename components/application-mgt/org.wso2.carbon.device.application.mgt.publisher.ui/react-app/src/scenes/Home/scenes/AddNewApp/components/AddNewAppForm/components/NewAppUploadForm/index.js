@@ -31,6 +31,7 @@ import {
   Alert,
 } from 'antd';
 import '@babel/polyfill';
+import Authorized from '../../../../../../../../components/Authorized/Authorized';
 
 const { Text } = Typography;
 
@@ -466,14 +467,16 @@ class NewAppUploadForm extends React.Component {
               {formConfig.installationType !== 'WEB_CLIP' &&
                 formConfig.installationType !== 'CUSTOM' && (
                   <div>
-                    {this.props.forbiddenErrors.supportedOsVersions && (
-                      <Alert
-                        message="You don't have permission to view supported OS versions."
-                        type="warning"
-                        banner
-                        closable
-                      />
-                    )}
+                    <Authorized
+                      permission="/permission/admin/device-mgt/admin/device-type"
+                      no={
+                        <Alert
+                          message="You don't have permission to view supported OS versions."
+                          type="warning"
+                          banner
+                        />
+                      }
+                    />
                     <Form.Item
                       {...formItemLayout}
                       label="Supported OS Versions"

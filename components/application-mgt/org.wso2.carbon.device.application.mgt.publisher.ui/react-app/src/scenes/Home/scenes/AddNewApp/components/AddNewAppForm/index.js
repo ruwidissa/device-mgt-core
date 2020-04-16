@@ -149,18 +149,9 @@ class AddNewAppFormComponent extends React.Component {
           'Error occurred while trying to load supported OS versions.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.supportedOsVersions = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   };
 
@@ -171,7 +162,6 @@ class AddNewAppFormComponent extends React.Component {
       isError,
       supportedOsVersions,
       errorText,
-      forbiddenErrors,
     } = this.state;
     const { formConfig } = this.props;
     return (
@@ -193,7 +183,6 @@ class AddNewAppFormComponent extends React.Component {
                 </div>
                 <div style={{ display: current === 1 ? 'unset' : 'none' }}>
                   <NewAppUploadForm
-                    forbiddenErrors={forbiddenErrors}
                     formConfig={formConfig}
                     supportedOsVersions={supportedOsVersions}
                     onSuccessReleaseData={this.onSuccessReleaseData}

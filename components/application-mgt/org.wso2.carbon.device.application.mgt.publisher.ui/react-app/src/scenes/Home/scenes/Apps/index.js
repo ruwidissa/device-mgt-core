@@ -18,6 +18,8 @@
 
 import React from 'react';
 import AppList from './components/AppList';
+import Authorized from '../../../../components/Authorized/Authorized';
+import { Result } from 'antd';
 
 class Apps extends React.Component {
   routes;
@@ -30,7 +32,17 @@ class Apps extends React.Component {
     return (
       <div>
         <div style={{ background: '#f0f2f5', padding: 24, minHeight: 780 }}>
-          <AppList />
+          <Authorized
+            permission="/permission/admin/app-mgt/publisher/application/view"
+            yes={<AppList />}
+            no={
+              <Result
+                status="403"
+                title="You don't have permission to view apps."
+                subTitle="Please contact system administrator"
+              />
+            }
+          />
         </div>
       </div>
     );

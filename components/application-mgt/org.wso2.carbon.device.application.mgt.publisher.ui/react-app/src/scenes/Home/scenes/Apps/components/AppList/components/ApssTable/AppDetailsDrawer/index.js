@@ -44,6 +44,8 @@ import pSBC from 'shade-blend-color';
 import { withConfigContext } from '../../../../../../../../../components/ConfigContext';
 import ManagedConfigurationsIframe from './components/ManagedConfigurationsIframe';
 import { handleApiError } from '../../../../../../../../../services/utils/errorHandler';
+import Authorized from '../../../../../../../../../components/Authorized/Authorized';
+import { isAuthorized } from '../../../../../../../../../services/utils/authorizationHandler';
 
 const { Meta } = Card;
 const { Text, Title } = Typography;
@@ -100,7 +102,15 @@ class AppDetailsDrawer extends React.Component {
   }
 
   componentDidMount() {
-    this.getCategories();
+    if (
+      isAuthorized(
+        this.props.context.user,
+        '/permission/admin/app-mgt/publisher/application/update',
+      )
+    ) {
+      this.getCategories();
+      this.getTags();
+    }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -130,7 +140,6 @@ class AppDetailsDrawer extends React.Component {
       .then(res => {
         if (res.status === 200) {
           const categories = JSON.parse(res.data.data);
-          this.getTags();
           const globalCategories = categories.map(category => {
             return (
               <Option key={category.categoryName}>
@@ -520,36 +529,48 @@ class AppDetailsDrawer extends React.Component {
           <Spin spinning={loading} delay={500}>
             <div style={{ textAlign: 'center' }}>
               {avatar}
-              <Title editable={{ onChange: this.handleNameSave }} level={2}>
-                {name}
-              </Title>
+              <Authorized
+                permission="/permission/admin/app-mgt/publisher/application/update"
+                yes={
+                  <Title editable={{ onChange: this.handleNameSave }} level={2}>
+                    {name}
+                  </Title>
+                }
+                no={<Title level={2}>{name}</Title>}
+              />
             </div>
             <Divider />
             {/* display manage config button only if the app is public android app*/}
             {app.isAndroidEnterpriseApp &&
               config.androidEnterpriseToken !== null && (
-                <div>
-                  <div>
-                    <Text strong={true}>Set up managed configurations</Text>
-                  </div>
-                  <div style={{ paddingTop: 16 }}>
-                    <Text>
-                      If you are developing apps for the enterprise market, you
-                      may need to satisfy particular requirements set by a
-                      organization&apos;s policies. Managed configurations,
-                      previously known as application restrictions, allow the
-                      organization&apos;s IT admin to remotely specify settings
-                      for apps. This capability is particularly useful for
-                      organization-approved apps deployed to a work profile.
-                    </Text>
-                  </div>
-                  <br />
-                  <ManagedConfigurationsIframe
-                    style={{ paddingTop: 16 }}
-                    packageName={app.packageName}
-                  />
-                  <Divider dashed={true} />
-                </div>
+                <Authorized
+                  permission="/permission/admin/device-mgt/enterprise/user/modify"
+                  yes={
+                    <div>
+                      <div>
+                        <Text strong={true}>Set up managed configurations</Text>
+                      </div>
+                      <div style={{ paddingTop: 16 }}>
+                        <Text>
+                          If you are developing apps for the enterprise market,
+                          you may need to satisfy particular requirements set by
+                          a organization&apos;s policies. Managed
+                          configurations, previously known as application
+                          restrictions, allow the organization&apos;s IT admin
+                          to remotely specify settings for apps. This capability
+                          is particularly useful for organization-approved apps
+                          deployed to a work profile.
+                        </Text>
+                      </div>
+                      <br />
+                      <ManagedConfigurationsIframe
+                        style={{ paddingTop: 16 }}
+                        packageName={app.packageName}
+                      />
+                      <Divider dashed={true} />
+                    </div>
+                  }
+                />
               )}
             <Text strong={true}>Releases </Text>
             <div className="releases-details">
@@ -640,34 +661,44 @@ class AppDetailsDrawer extends React.Component {
 
             {/* display add new release only if app type is enterprise*/}
             {app.type === 'ENTERPRISE' && (
-              <div>
-                <Divider dashed={true} />
-                <div style={{ paddingBottom: 16 }}>
-                  <Text>Add new release for the application</Text>
-                </div>
-                <Link
-                  to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}
-                >
-                  <Button htmlType="button" type="primary" size="small">
-                    Add
-                  </Button>
-                </Link>
-              </div>
+              <Authorized
+                permission="/permission/admin/app-mgt/publisher/application/update"
+                yes={
+                  <div>
+                    <Divider dashed={true} />
+                    <div style={{ paddingBottom: 16 }}>
+                      <Text>Add new release for the application</Text>
+                    </div>
+                    <Link
+                      to={`/publisher/apps/${app.deviceType}/${app.id}/add-release`}
+                    >
+                      <Button htmlType="button" type="primary" size="small">
+                        Add
+                      </Button>
+                    </Link>
+                  </div>
+                }
+              />
             )}
             <Divider dashed={true} />
 
             <Text strong={true}>Description </Text>
-            {!isDescriptionEditEnabled && (
-              <Text
-                style={{
-                  color: config.theme.primaryColor,
-                  cursor: 'pointer',
-                }}
-                onClick={this.enableDescriptionEdit}
-              >
-                <Icon type="edit" />
-              </Text>
-            )}
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/application/update"
+              yes={
+                !isDescriptionEditEnabled && (
+                  <Text
+                    style={{
+                      color: config.theme.primaryColor,
+                      cursor: 'pointer',
+                    }}
+                    onClick={this.enableDescriptionEdit}
+                  >
+                    <Icon type="edit" />
+                  </Text>
+                )
+              }
+            />
 
             {!isDescriptionEditEnabled && (
               <div>{ReactHtmlParser(description)}</div>
@@ -708,14 +739,22 @@ class AppDetailsDrawer extends React.Component {
 
             <Divider dashed={true} />
             <Text strong={true}>Categories </Text>
-            {!isCategoriesEditEnabled && (
-              <Text
-                style={{ color: config.theme.primaryColor, cursor: 'pointer' }}
-                onClick={this.enableCategoriesEdit}
-              >
-                <Icon type="edit" />
-              </Text>
-            )}
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/application/update"
+              yes={
+                !isCategoriesEditEnabled && (
+                  <Text
+                    style={{
+                      color: config.theme.primaryColor,
+                      cursor: 'pointer',
+                    }}
+                    onClick={this.enableCategoriesEdit}
+                  >
+                    <Icon type="edit" />
+                  </Text>
+                )
+              }
+            />
             <br />
             <br />
             {isCategoriesEditEnabled && (
@@ -767,14 +806,22 @@ class AppDetailsDrawer extends React.Component {
 
             <Divider dashed={true} />
             <Text strong={true}>Tags </Text>
-            {!isTagsEditEnabled && (
-              <Text
-                style={{ color: config.theme.primaryColor, cursor: 'pointer' }}
-                onClick={this.enableTagsEdit}
-              >
-                <Icon type="edit" />
-              </Text>
-            )}
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/application/update"
+              yes={
+                !isTagsEditEnabled && (
+                  <Text
+                    style={{
+                      color: config.theme.primaryColor,
+                      cursor: 'pointer',
+                    }}
+                    onClick={this.enableTagsEdit}
+                  >
+                    <Icon type="edit" />
+                  </Text>
+                )
+              }
+            />
             <br />
             <br />
             {isTagsEditEnabled && (
@@ -819,17 +866,22 @@ class AppDetailsDrawer extends React.Component {
                 })}
               </span>
             )}
-
-            <Divider dashed={true} />
-
-            <div className="app-rate">
-              {app.applicationReleases.length > 0 && (
-                <DetailedRating
-                  type="app"
-                  uuid={app.applicationReleases[0].uuid}
-                />
-              )}
-            </div>
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/review/view"
+              yes={
+                <div>
+                  <Divider dashed={true} />
+                  <div className="app-rate">
+                    {app.applicationReleases.length > 0 && (
+                      <DetailedRating
+                        type="app"
+                        uuid={app.applicationReleases[0].uuid}
+                      />
+                    )}
+                  </div>
+                </div>
+              }
+            />
           </Spin>
         </Drawer>
       </div>

@@ -21,6 +21,7 @@ import { PageHeader, Typography, Breadcrumb, Row, Col, Icon } from 'antd';
 import ManageCategories from './components/Categories';
 import ManageTags from './components/Tags';
 import { Link } from 'react-router-dom';
+import Authorized from '../../../../components/Authorized/Authorized';
 
 const { Paragraph } = Typography;
 
@@ -54,12 +55,19 @@ class Manage extends React.Component {
         </PageHeader>
         <div style={{ background: '#f0f2f5', padding: 24, minHeight: 780 }}>
           <Row gutter={16}>
-            <Col sm={24} md={12}>
-              <ManageCategories />
-            </Col>
-            <Col sm={24} md={12}>
-              <ManageTags />
-            </Col>
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/application/update"
+              yes={
+                <>
+                  <Col sm={24} md={12}>
+                    <ManageCategories />
+                  </Col>
+                  <Col sm={24} md={12}>
+                    <ManageTags />
+                  </Col>
+                </>
+              }
+            />
           </Row>
         </div>
       </div>

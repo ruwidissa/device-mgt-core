@@ -295,44 +295,50 @@ class Cluster extends React.Component {
       }
       return (
         <div className="product">
-          <div className="arrow">
-            <button
-              disabled={index === 0}
-              className="btn"
-              onClick={() => {
-                this.swapProduct(index, index - 1);
-              }}
-            >
-              <Icon type="caret-left" theme="filled" />
-            </button>
-          </div>
+          {this.props.hasPermissionToManage && (
+            <div className="arrow">
+              <button
+                disabled={index === 0}
+                className="btn"
+                onClick={() => {
+                  this.swapProduct(index, index - 1);
+                }}
+              >
+                <Icon type="caret-left" theme="filled" />
+              </button>
+            </div>
+          )}
           <div className="product-icon">
             <img src={imageSrc} />
             <Tooltip title={packageId}>
               <div className="title">{packageId}</div>
             </Tooltip>
           </div>
-          <div className="arrow">
-            <button
-              disabled={index === products.length - 1}
-              onClick={() => {
-                this.swapProduct(index, index + 1);
-              }}
-              className="btn btn-right"
-            >
-              <Icon type="caret-right" theme="filled" />
-            </button>
-          </div>
-          <div className="delete-btn">
-            <button
-              className="btn"
-              onClick={() => {
-                this.removeProduct(index);
-              }}
-            >
-              <Icon type="close-circle" theme="filled" />
-            </button>
-          </div>
+          {this.props.hasPermissionToManage && (
+            <>
+              <div className="arrow">
+                <button
+                  disabled={index === products.length - 1}
+                  onClick={() => {
+                    this.swapProduct(index, index + 1);
+                  }}
+                  className="btn btn-right"
+                >
+                  <Icon type="caret-right" theme="filled" />
+                </button>
+              </div>
+              <div className="delete-btn">
+                <button
+                  className="btn"
+                  onClick={() => {
+                    this.removeProduct(index);
+                  }}
+                >
+                  <Icon type="close-circle" theme="filled" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       );
     };
@@ -347,7 +353,7 @@ class Cluster extends React.Component {
               </Title>
             </Col>
             <Col span={8}>
-              {!isTemporary && (
+              {!isTemporary && this.props.hasPermissionToManage && (
                 <div style={{ float: 'right' }}>
                   <Tooltip title="Move Up">
                     <Button
@@ -391,10 +397,12 @@ class Cluster extends React.Component {
             </Col>
           </Row>
           <div className="products-row">
-            <AddAppsToClusterModal
-              addSelectedProducts={this.addSelectedProducts}
-              unselectedProducts={unselectedProducts}
-            />
+            {this.props.hasPermissionToManage && (
+              <AddAppsToClusterModal
+                addSelectedProducts={this.addSelectedProducts}
+                unselectedProducts={unselectedProducts}
+              />
+            )}
             {products.map((product, index) => {
               return (
                 <Product

@@ -17,13 +17,23 @@
  */
 
 import React from 'react';
-import { Divider, Row, Col, Typography, Button, Icon, Tooltip } from 'antd';
+import {
+  Divider,
+  Row,
+  Col,
+  Typography,
+  Button,
+  Icon,
+  Tooltip,
+  Alert,
+} from 'antd';
 import StarRatings from 'react-star-ratings';
 import Reviews from './components/Reviews';
 import '../../../../../../../../App.css';
 import DetailedRating from '../../../../components/DetailedRating';
 import EditRelease from './components/EditRelease';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
+import Authorized from '../../../../../../../../components/Authorized/Authorized';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -33,22 +43,19 @@ class ReleaseView extends React.Component {
     this.state = {};
   }
 
-  componentDidMount() {
-    console.log('mounted: Release view');
-  }
-
   render() {
     const { app, release } = this.props;
     const config = this.props.context;
     const { lifecycle, currentLifecycleStatus } = this.props;
-
-    if (release == null || lifecycle == null) {
+    if (release == null) {
       return null;
     }
-
-    const { isAppUpdatable, isAppInstallable } = lifecycle[
-      currentLifecycleStatus
-    ];
+    let isAppUpdatable,
+      isAppInstallable = false;
+    if (lifecycle != null) {
+      isAppUpdatable = lifecycle[currentLifecycleStatus].isAppUpdatable;
+      isAppInstallable = lifecycle[currentLifecycleStatus].isAppInstallable;
+    }
 
     const platform = app.deviceType;
     const defaultPlatformIcons = config.defaultPlatformIcons;
@@ -93,45 +100,53 @@ class ReleaseView extends React.Component {
               <Divider type="vertical" />
               <Text>Version : {release.version}</Text>
               <br />
-
-              <EditRelease
-                forbiddenErrors={this.props.forbiddenErrors}
-                isAppUpdatable={isAppUpdatable}
-                type={app.type}
-                deviceType={app.deviceType}
-                release={release}
-                updateRelease={this.props.updateRelease}
-                supportedOsVersions={[...this.props.supportedOsVersions]}
+              <Authorized
+                permission="/permission/admin/app-mgt/publisher/application/update"
+                yes={
+                  <EditRelease
+                    isAppUpdatable={isAppUpdatable}
+                    type={app.type}
+                    deviceType={app.deviceType}
+                    release={release}
+                    updateRelease={this.props.updateRelease}
+                    supportedOsVersions={[...this.props.supportedOsVersions]}
+                  />
+                }
               />
             </Col>
             <Col xl={8} md={10} sm={24} xs={24} style={{ float: 'right' }}>
               <div>
-                <Tooltip
-                  title={
-                    isAppInstallable
-                      ? 'Open this app in store'
-                      : "This release isn't in an installable state"
+                <Authorized
+                  permission="/permission/admin/app-mgt/publisher/application/update"
+                  yes={
+                    <Tooltip
+                      title={
+                        isAppInstallable
+                          ? 'Open this app in store'
+                          : "This release isn't in an installable state"
+                      }
+                    >
+                      <Button
+                        style={{ float: 'right' }}
+                        htmlType="button"
+                        type="primary"
+                        icon="shop"
+                        disabled={!isAppInstallable}
+                        onClick={() => {
+                          window.open(
+                            window.location.origin +
+                              '/store/' +
+                              app.deviceType +
+                              '/apps/' +
+                              release.uuid,
+                          );
+                        }}
+                      >
+                        Open in store
+                      </Button>
+                    </Tooltip>
                   }
-                >
-                  <Button
-                    style={{ float: 'right' }}
-                    htmlType="button"
-                    type="primary"
-                    icon="shop"
-                    disabled={!isAppInstallable}
-                    onClick={() => {
-                      window.open(
-                        window.location.origin +
-                          '/store/' +
-                          app.deviceType +
-                          '/apps/' +
-                          release.uuid,
-                      );
-                    }}
-                  >
-                    Open in store
-                  </Button>
-                </Tooltip>
+                />
               </div>
             </Col>
           </Row>
@@ -173,12 +188,27 @@ class ReleaseView extends React.Component {
           </Row>
           <Divider />
           <Text>REVIEWS</Text>
-          <Row>
-            <Col lg={18}>
-              <DetailedRating type="release" uuid={release.uuid} />
-            </Col>
-          </Row>
-          <Reviews type="release" uuid={release.uuid} />
+          <Authorized
+            permission="/permission/admin/app-mgt/publisher/admin/review/view"
+            yes={
+              <div>
+                <Row>
+                  <Col lg={18}>
+                    <DetailedRating type="release" uuid={release.uuid} />
+                  </Col>
+                </Row>
+                <Reviews type="release" uuid={release.uuid} />
+              </div>
+            }
+            no={
+              <Alert
+                message="You don't have permission to view reviews."
+                type="warning"
+                banner
+                closable
+              />
+            }
+          />
         </div>
       </div>
     );

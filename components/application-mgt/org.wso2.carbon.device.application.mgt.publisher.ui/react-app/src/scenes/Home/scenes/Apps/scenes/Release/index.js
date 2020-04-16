@@ -24,6 +24,8 @@ import ReleaseView from './components/ReleaseView';
 import LifeCycle from './components/LifeCycle';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../services/utils/errorHandler';
+import Authorized from '../../../../../../components/Authorized/Authorized';
+import { isAuthorized } from '../../../../../../services/utils/authorizationHandler';
 
 const { Title } = Typography;
 
@@ -41,17 +43,20 @@ class Release extends React.Component {
       currentLifecycleStatus: null,
       lifecycle: null,
       supportedOsVersions: [],
-      forbiddenErrors: {
-        supportedOsVersions: false,
-        lifeCycle: false,
-      },
     };
   }
 
   componentDidMount() {
     const { uuid } = this.props.match.params;
     this.fetchData(uuid);
-    this.getLifecycle();
+    if (
+      isAuthorized(
+        this.props.context.user,
+        '/permission/admin/app-mgt/publisher/application/update',
+      )
+    ) {
+      this.getLifecycle();
+    }
   }
 
   changeCurrentLifecycleStatus = status => {
@@ -92,7 +97,16 @@ class Release extends React.Component {
             uuid: uuid,
           });
           if (config.deviceTypes.mobileTypes.includes(app.deviceType)) {
-            this.getSupportedOsVersions(app.deviceType);
+            if (
+              isAuthorized(
+                config.user,
+                '/permission/admin/device-mgt/admin/device-type',
+              )
+            ) {
+              this.getSupportedOsVersions(app.deviceType);
+            } else {
+              this.setState({ loading: false });
+            }
           }
         }
       })
@@ -128,13 +142,6 @@ class Release extends React.Component {
           'Error occurred while trying to load lifecycle configuration.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.lifeCycle = true;
-          this.setState({
-            forbiddenErrors,
-          });
-        }
       });
   };
 
@@ -161,18 +168,9 @@ class Release extends React.Component {
           'Error occurred while trying to load supported OS versions.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.supportedOsVersions = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   };
 
@@ -193,7 +191,6 @@ class Release extends React.Component {
         </div>
       );
     }
-
     // todo remove uppercase
     return (
       <div>
@@ -221,22 +218,27 @@ class Release extends React.Component {
                 </Skeleton>
               </Card>
             </Col>
-            <Col lg={8} md={24} style={{ padding: 3 }}>
-              <Card lg={8} md={24}>
-                <Skeleton loading={loading} active paragraph={{ rows: 8 }}>
-                  {release !== null && (
-                    <LifeCycle
-                      uuid={release.uuid}
-                      currentStatus={release.currentStatus.toUpperCase()}
-                      changeCurrentLifecycleStatus={
-                        this.changeCurrentLifecycleStatus
-                      }
-                      lifecycle={lifecycle}
-                    />
-                  )}
-                </Skeleton>
-              </Card>
-            </Col>
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/application/update"
+              yes={
+                <Col lg={8} md={24} style={{ padding: 3 }}>
+                  <Card lg={8} md={24}>
+                    <Skeleton loading={loading} active paragraph={{ rows: 8 }}>
+                      {release !== null && (
+                        <LifeCycle
+                          uuid={release.uuid}
+                          currentStatus={release.currentStatus.toUpperCase()}
+                          changeCurrentLifecycleStatus={
+                            this.changeCurrentLifecycleStatus
+                          }
+                          lifecycle={lifecycle}
+                        />
+                      )}
+                    </Skeleton>
+                  </Card>
+                </Col>
+              }
+            />
           </Row>
         </div>
       </div>
