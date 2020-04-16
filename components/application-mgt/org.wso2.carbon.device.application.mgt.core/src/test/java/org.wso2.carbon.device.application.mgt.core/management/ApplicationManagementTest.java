@@ -38,6 +38,7 @@ import org.wso2.carbon.device.application.mgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.dto.ApplicationsDTO;
 import org.wso2.carbon.device.application.mgt.core.impl.ApplicationManagerImpl;
+import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
@@ -60,6 +61,7 @@ public class ApplicationManagementTest extends BaseTestCase {
     public void testAddApplication() throws Exception {
 
         ApplicationDAO applicationDAO = ApplicationManagementDAOFactory.getApplicationDAO();
+        DataHolder.getInstance().setDeviceManagementService(new DeviceManagementProviderServiceImpl());
         ConnectionManagerUtil.beginDBTransaction();
         applicationDAO.createApplication(ApplicationsDTO.getApp1(), -1234);
         ConnectionManagerUtil.commitDBTransaction();

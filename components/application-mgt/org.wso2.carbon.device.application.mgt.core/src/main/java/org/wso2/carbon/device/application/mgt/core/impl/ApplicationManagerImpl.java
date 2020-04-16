@@ -73,7 +73,6 @@ import org.wso2.carbon.device.application.mgt.core.dao.SubscriptionDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.VisibilityDAO;
 import org.wso2.carbon.device.application.mgt.core.dao.common.ApplicationManagementDAOFactory;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
-import org.wso2.carbon.device.application.mgt.core.util.DAOUtil;
 import org.wso2.carbon.device.application.mgt.core.exception.ApplicationManagementDAOException;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.ForbiddenException;
@@ -1057,7 +1056,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
 
         try {
-            DeviceManagementProviderService deviceManagementProviderService = DAOUtil.getDeviceManagementService();
+            DeviceManagementProviderService deviceManagementProviderService = DataHolder.getInstance()
+                    .getDeviceManagementService();
             return deviceManagementProviderService.getDeviceTypeVersion(deviceTypeName, lowestSupportingOsVersion)
                     == null || (highestSupportingOsVersion != null
                     && deviceManagementProviderService.getDeviceTypeVersion(deviceTypeName, highestSupportingOsVersion)
@@ -1565,8 +1565,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         boolean isValidDeviceType = false;
         List<DeviceType> deviceTypes;
         try {
-            deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
-
+            deviceTypes = DataHolder.getInstance().getDeviceManagementService().getDeviceTypes();
             for (DeviceType dt : deviceTypes) {
                 if (dt.getName().equals(deviceType)) {
                     isValidDeviceType = true;

@@ -148,7 +148,7 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += "AND AP_APP.TYPE = ? ";
         }
         if (!StringUtils.isEmpty(filter.getAppName())) {
-            sql += " AND LOWER (AP_APP.NAME) ";
+            sql += "AND LOWER (AP_APP.NAME) ";
             if (filter.isFullMatch()) {
                 sql += "= ? ";
             } else {
@@ -178,10 +178,9 @@ public class GenericApplicationDAOImpl extends AbstractDAOImpl implements Applic
             sql += "ORDER BY ID " + filter.getSortBy() +" ";
         }
         if (filter.getLimit() != -1) {
-            sql += " LIMIT ? OFFSET ? ";
+            sql += "LIMIT ? OFFSET ? ";
         }
-        sql += ") AS app_data ON app_data.ID = AP_APP.ID " +
-                "WHERE AP_APP.TENANT_ID = ?";
+        sql += ") AS app_data ON app_data.ID = AP_APP.ID WHERE AP_APP.TENANT_ID = ?";
         try {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
