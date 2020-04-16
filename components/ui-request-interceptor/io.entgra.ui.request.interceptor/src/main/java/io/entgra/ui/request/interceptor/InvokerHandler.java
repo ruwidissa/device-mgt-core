@@ -36,6 +36,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -55,7 +56,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -72,8 +72,7 @@ public class InvokerHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(InvokerHandler.class);
     private static final long serialVersionUID = -6508020875358160165L;
     private static AuthData authData;
-    private static String serverUrl;
-    private static String platform;
+    private static String apiEndpoint;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
@@ -91,7 +90,7 @@ public class InvokerHandler extends HttpServlet {
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API endpoint.");
+                    log.error("Error occurred while invoking the POST API endpoint.");
                     HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
@@ -119,7 +118,7 @@ public class InvokerHandler extends HttpServlet {
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API endpoint.");
+                    log.error("Error occurred while invoking the GET API endpoint.");
                     HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
@@ -127,6 +126,32 @@ public class InvokerHandler extends HttpServlet {
             }
         } catch (IOException e) {
             log.error("Error occurred when processing GET request.", e);
+        }
+    }
+
+    @Override
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            if (validateRequest(req, resp)) {
+                HttpHead headRequest = new HttpHead(generateBackendRequestURL(req));
+                copyRequestHeaders(req, headRequest, false);
+                headRequest.setHeader(HttpHeaders.AUTHORIZATION, HandlerConstants.BEARER + authData.getAccessToken());
+                ProxyResponse proxyResponse = HandlerUtil.execute(headRequest);
+                if (HandlerConstants.TOKEN_IS_EXPIRED.equals(proxyResponse.getExecutorResponse())) {
+                    proxyResponse = retryRequestWithRefreshedToken(req, resp, headRequest);
+                    if (proxyResponse == null) {
+                        return;
+                    }
+                }
+                if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
+                    log.error("Error occurred while invoking the HEAD API endpoint.");
+                    HandlerUtil.handleError(resp, proxyResponse);
+                    return;
+                }
+                HandlerUtil.handleSuccess(resp, proxyResponse);
+            }
+        } catch (IOException e) {
+            log.error("Error occurred when processing HEAD request.", e);
         }
     }
 
@@ -146,7 +171,7 @@ public class InvokerHandler extends HttpServlet {
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API endpoint.");
+                    log.error("Error occurred while invoking the PUT API endpoint.");
                     HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
@@ -174,7 +199,7 @@ public class InvokerHandler extends HttpServlet {
                     }
                 }
                 if (proxyResponse.getExecutorResponse().contains(HandlerConstants.EXECUTOR_EXCEPTION_PREFIX)) {
-                    log.error("Error occurred while invoking the API endpoint.");
+                    log.error("Error occurred while invoking the DELETE API endpoint.");
                     HandlerUtil.handleError(resp, proxyResponse);
                     return;
                 }
@@ -229,13 +254,7 @@ public class InvokerHandler extends HttpServlet {
      */
     private String generateBackendRequestURL(HttpServletRequest req) {
         StringBuilder urlBuilder = new StringBuilder();
-        String endpointUrl = Arrays.stream(HandlerConstants.SKIPPING_API_CONTEXT)
-                .anyMatch(contextPath -> contextPath.contains(req.getPathInfo())) ?
-                serverUrl :
-                req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
-                        + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
-
-        urlBuilder.append(endpointUrl).append(HandlerConstants.API_COMMON_CONTEXT).append(req.getPathInfo());
+        urlBuilder.append(apiEndpoint).append(HandlerConstants.API_COMMON_CONTEXT).append(req.getPathInfo());
         if (StringUtils.isNotEmpty(req.getQueryString())) {
             urlBuilder.append("?").append(req.getQueryString());
         }
@@ -277,9 +296,19 @@ public class InvokerHandler extends HttpServlet {
      */
     private static boolean validateRequest(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        serverUrl = req.getScheme() + "://" + req.getServerName() + ":" + System.getProperty("iot.gateway.https.port");
-        HttpSession session = req.getSession(false);
+        apiEndpoint = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
+                + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
 
+        if ("reports".equalsIgnoreCase(req.getHeader("appName"))){
+            apiEndpoint = System.getProperty("iot.reporting.event.host");
+            if (StringUtils.isBlank(apiEndpoint)){
+                log.error("Reporting Endpoint is not defined in the iot-server.sh properly.");
+                handleError(resp, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                return false;
+            }
+        }
+
+        HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Unauthorized, You are not logged in. Please log in to the portal");
             handleError(resp, HttpStatus.SC_UNAUTHORIZED);
@@ -287,7 +316,6 @@ public class InvokerHandler extends HttpServlet {
         }
 
         authData = (AuthData) session.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
-        platform = (String) session.getAttribute(HandlerConstants.PLATFORM);
         if (authData == null) {
             log.error("Unauthorized, Access token not found in the current session");
             handleError(resp, HttpStatus.SC_UNAUTHORIZED);
@@ -340,7 +368,7 @@ public class InvokerHandler extends HttpServlet {
             log.debug("refreshing the token");
         }
         HttpPost tokenEndpoint = new HttpPost(
-                serverUrl + HandlerConstants.API_COMMON_CONTEXT + HandlerConstants.TOKEN_ENDPOINT);
+                apiEndpoint + HandlerConstants.API_COMMON_CONTEXT + HandlerConstants.TOKEN_ENDPOINT);
         HttpSession session = req.getSession(false);
         if (session == null) {
             log.error("Couldn't find a session, hence it is required to login and proceed.");

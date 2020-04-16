@@ -42,8 +42,6 @@ public class HandlerConstants {
     public static final String COLON = ":";
     public static final String HTTP_PROTOCOL = "http";
 
-    public static final String[] SKIPPING_API_CONTEXT = {"artifact", "conf"};
-
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;
 }

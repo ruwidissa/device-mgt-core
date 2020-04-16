@@ -32,8 +32,6 @@ import org.wso2.carbon.device.application.mgt.common.dto.ReviewDTO;
 import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -305,19 +303,5 @@ public class DAOUtil {
                 log.warn("Error occurred while closing prepared statement", e);
             }
         }
-    }
-
-    public static DeviceManagementProviderService getDeviceManagementService() {
-//        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-//        DeviceManagementProviderService deviceManagementProviderService =
-//                (DeviceManagementProviderService) ctx.getOSGiService(DeviceManagementProviderService.class, null);
-//        if (deviceManagementProviderService == null) {
-//            String msg = "DeviceImpl Management provider service has not initialized.";
-//            log.error(msg);
-//            throw new IllegalStateException(msg);
-//        }
-       // return deviceManagementProviderService;
-
-        return  new DeviceManagementProviderServiceImpl();
     }
 }

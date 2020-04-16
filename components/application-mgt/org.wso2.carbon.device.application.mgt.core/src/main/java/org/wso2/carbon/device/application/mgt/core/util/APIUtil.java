@@ -43,6 +43,7 @@ import org.wso2.carbon.device.application.mgt.common.wrapper.WebAppWrapper;
 import org.wso2.carbon.device.application.mgt.core.config.ConfigurationManager;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.UnexpectedServerErrorException;
+import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
@@ -197,7 +198,7 @@ public class APIUtil {
             throws BadRequestException, UnexpectedServerErrorException {
         List<DeviceType> deviceTypes;
         try {
-            deviceTypes = DAOUtil.getDeviceManagementService().getDeviceTypes();
+            deviceTypes = DataHolder.getInstance().getDeviceManagementService().getDeviceTypes();
             if (deviceTypeAttr instanceof String) {
                 for (DeviceType dt : deviceTypes) {
                     if (dt.getName().equals(deviceTypeAttr)) {
