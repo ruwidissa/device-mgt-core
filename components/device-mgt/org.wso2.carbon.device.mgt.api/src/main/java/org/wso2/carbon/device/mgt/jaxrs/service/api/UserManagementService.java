@@ -57,6 +57,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.Credential;
 import org.wso2.carbon.device.mgt.jaxrs.beans.EnrollmentInvitation;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.beans.PermissionList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
@@ -164,6 +165,12 @@ import java.util.List;
                         description = "Get activities",
                         key = "perm:get-activity",
                         permissions = {"/device-mgt/devices/owning-device/view"}
+                ),
+                @Scope(
+                        name = "Getting the Permissions of the User",
+                        description = "Getting the Permissions of the User",
+                        key = "perm:user:permission-view",
+                        permissions = {"/login"}
                 )
         }
 )
@@ -1168,4 +1175,50 @@ public interface UserManagementService {
                     required = true,
                     defaultValue = "admin")
             @PathParam("username") String username);
+
+    @GET
+    @Path("/current-user/permissions")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting the permission details of the current user",
+            notes = "A user may granted more than one permission in IoTS. Using this REST API "
+                    + "you can get the permission/permission the current user has granted. ",
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:user:permission-view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched the list of permissions the user "
+                            + "has granted.",
+                    response = PermissionList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.\n",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the "
+                            + "list of roles assigned to the specified user.",
+                    response = ErrorResponse.class)
+    })
+    Response getPermissionsOfUser();
 }

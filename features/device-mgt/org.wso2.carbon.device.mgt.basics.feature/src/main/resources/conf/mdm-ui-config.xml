@@ -145,6 +145,7 @@
         <Scope>perm:devices:permanent-delete</Scope>
         <Scope>perm:android:manage-configuration</Scope>
         <Scope>perm:android:view-configuration</Scope>
+        <Scope>perm:user:permission-view</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

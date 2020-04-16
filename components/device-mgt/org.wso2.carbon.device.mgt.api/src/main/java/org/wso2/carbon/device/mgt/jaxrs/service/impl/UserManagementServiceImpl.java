@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.eclipse.wst.common.uriresolver.internal.util.URIEncoder;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -57,6 +58,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.Credential;
 import org.wso2.carbon.device.mgt.jaxrs.beans.EnrollmentInvitation;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.beans.PermissionList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.UserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.exception.BadRequestException;
@@ -74,6 +76,9 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.UserRealmProxy;
+import org.wso2.carbon.user.mgt.common.UIPermissionNode;
+import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -1029,6 +1034,48 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
     }
 
+    @GET
+    @Override
+    @Path("/current-user/permissions")
+    public Response getPermissionsOfUser() {
+        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        try {
+            UserStoreManager userStoreManager = DeviceMgtAPIUtils.getUserStoreManager();
+            if (!userStoreManager.isExistingUser(username)) {
+                String message = "User by username: " + username + " does not exist for permission retrieval.";
+                log.error(message);
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(message).build()).build();
+            }
+            // Get a list of roles which the user assigned to
+            List<String> roles = getFilteredRoles(userStoreManager, username);
+            List<String> permissions = new ArrayList<>();
+            UserRealm userRealm = DeviceMgtAPIUtils.getUserRealm();
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            // Get permissions for each role
+            for (String roleName : roles) {
+                try {
+                    permissions.addAll(getPermissionsListFromRole(roleName, userRealm, tenantId));
+                } catch (UserAdminException e) {
+                    String message = "Error occurred while retrieving the permissions of role '" + roleName + "'";
+                    log.error(message, e);
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                            .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(message).build())
+                            .build();
+                }
+            }
+            PermissionList permissionList = new PermissionList();
+            permissionList.setList(permissions);
+            return Response.status(Response.Status.OK).entity(permissionList).build();
+        } catch (UserStoreException e) {
+            String message = "Error occurred while trying to retrieve roles of the user '" + username + "'";
+            log.error(message, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(message).build())
+                    .build();
+        }
+    }
+
     private Map<String, String> buildDefaultUserClaims(String firstName, String lastName, String emailAddress,
                                                        boolean isFresh) {
         Map<String, String> defaultUserClaims = new HashMap<>();
@@ -1174,4 +1221,30 @@ public class UserManagementServiceImpl implements UserManagementService {
     private boolean skipSearch(List<String> commonUsers) {
         return commonUsers != null && commonUsers.size() == 0;
     }
+
+    /**
+     * Returns a list of permissions of a given role
+     * @param roleName name of the role
+     * @param tenantId the user's tenetId
+     * @param userRealm user realm of the tenant
+     * @return list of permissions
+     * @throws UserAdminException If unable to get the permissions
+     */
+    private static List<String> getPermissionsListFromRole(String roleName, UserRealm userRealm, int tenantId)
+            throws UserAdminException {
+        org.wso2.carbon.user.core.UserRealm userRealmCore;
+        try {
+            userRealmCore = (org.wso2.carbon.user.core.UserRealm) userRealm;
+        } catch (ClassCastException e) {
+            String message = "Provided UserRealm object is not an instance of org.wso2.carbon.user.core.UserRealm";
+            log.error(message, e);
+            throw new UserAdminException(message, e);
+        }
+        UserRealmProxy userRealmProxy = new UserRealmProxy(userRealmCore);
+        List<String> permissionsList = new ArrayList<>();
+        final UIPermissionNode rolePermissions = userRealmProxy.getRolePermissions(roleName, tenantId);
+        DeviceMgtAPIUtils.iteratePermissions(rolePermissions, permissionsList);
+        return permissionsList;
+    }
+
 }

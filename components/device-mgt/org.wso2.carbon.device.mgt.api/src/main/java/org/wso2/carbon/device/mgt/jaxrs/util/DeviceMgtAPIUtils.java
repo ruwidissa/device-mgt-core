@@ -82,6 +82,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.jdbc.JDBCUserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.common.UIPermissionNode;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -780,5 +781,28 @@ public class DeviceMgtAPIUtils {
         typeVersion.setVersionName(deviceTypeVersion.getVersionName());
         typeVersion.setVersionStatus(deviceTypeVersion.getVersionStatus());
         return typeVersion;
+    }
+
+    /**
+     * Extract permissions from a UiPermissionNode using recursions
+     * @param uiPermissionNode an UiPermissionNode Object to extract permissions
+     * @param list provided list to add permissions
+     */
+    public static void iteratePermissions(UIPermissionNode uiPermissionNode, List<String> list) {
+        // To prevent NullPointer exceptions
+        if (uiPermissionNode == null) {
+            return;
+        }
+        for (UIPermissionNode permissionNode : uiPermissionNode.getNodeList()) {
+            if (permissionNode != null) {
+                if(permissionNode.isSelected()){
+                    list.add(permissionNode.getResourcePath());
+                }
+                if (permissionNode.getNodeList() != null
+                        && permissionNode.getNodeList().length > 0) {
+                    iteratePermissions(permissionNode, list);
+                }
+            }
+        }
     }
 }
