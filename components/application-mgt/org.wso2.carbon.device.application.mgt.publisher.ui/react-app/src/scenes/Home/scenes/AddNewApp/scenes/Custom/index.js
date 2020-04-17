@@ -17,9 +17,10 @@
  */
 
 import React from 'react';
-import { PageHeader, Typography, Breadcrumb, Icon } from 'antd';
+import { PageHeader, Typography, Breadcrumb, Icon, Result } from 'antd';
 import AddNewAppForm from '../../components/AddNewAppForm';
 import { Link } from 'react-router-dom';
+import Authorized from '../../../../../../components/Authorized/Authorized';
 
 const { Paragraph } = Typography;
 
@@ -70,7 +71,17 @@ class AddNewCustomApp extends React.Component {
           </div>
         </PageHeader>
         <div style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}>
-          <AddNewAppForm formConfig={formConfig} />
+          <Authorized
+            permission="/permission/admin/app-mgt/publisher/application/update"
+            yes={<AddNewAppForm formConfig={formConfig} />}
+            no={
+              <Result
+                status="403"
+                title="You don't have permission to add new apps."
+                subTitle="Please contact system administrator"
+              />
+            }
+          />
         </div>
       </div>
     );

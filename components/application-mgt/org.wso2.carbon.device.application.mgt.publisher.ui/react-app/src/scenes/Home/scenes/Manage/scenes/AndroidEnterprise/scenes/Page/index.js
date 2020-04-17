@@ -30,6 +30,7 @@ import {
   Spin,
   Tag,
   Divider,
+  Result,
 } from 'antd';
 import { Link, withRouter } from 'react-router-dom';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
@@ -37,6 +38,8 @@ import axios from 'axios';
 import Cluster from './components/Cluster';
 import EditLinks from './components/EditLinks';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
+import Authorized from '../../../../../../../../components/Authorized/Authorized';
+import { isAuthorized } from '../../../../../../../../services/utils/authorizationHandler';
 
 const { Title } = Typography;
 
@@ -59,6 +62,10 @@ class Page extends React.Component {
       isAddNewClusterVisible: false,
       links: [],
     };
+    this.hasPermissionToManage = isAuthorized(
+      this.props.config.user,
+      '/device-mgt/enterprise/user/view',
+    );
   }
 
   componentDidMount() {
@@ -328,94 +335,121 @@ class Page extends React.Component {
             {/* <Paragraph>Lorem ipsum</Paragraph>*/}
           </div>
         </PageHeader>
-        <Spin spinning={loading}>
-          <div style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}>
-            <Row>
-              <Col md={8} sm={18} xs={24}>
-                <Title editable={{ onChange: this.updatePageName }} level={2}>
-                  {pageName}
-                </Title>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Title level={4}>Links</Title>
-                {links.map(link => {
-                  if (this.pageNames.hasOwnProperty(link.toString())) {
-                    return (
-                      <Tag key={link} color="#87d068">
-                        {this.pageNames[link.toString()]}
-                      </Tag>
-                    );
-                  }
-                  return null;
-                })}
-                <EditLinks
-                  updateLinks={this.updateLinks}
-                  pageId={this.pageId}
-                  selectedLinks={links}
-                  pages={this.pages}
-                />
-              </Col>
-              {/* <Col>*/}
-
-              {/* </Col>*/}
-            </Row>
-
-            <Divider dashed={true} />
-            <Title level={4}>Clusters</Title>
-
-            <div
-              hidden={isAddNewClusterVisible}
-              style={{ textAlign: 'center' }}
-            >
-              <Button
-                type="dashed"
-                shape="round"
-                icon="plus"
-                size="large"
-                onClick={() => {
-                  this.toggleAddNewClusterVisibility(true);
-                }}
+        <Authorized
+          permission="/permission/admin/device-mgt/enterprise/user/view"
+          yes={
+            <Spin spinning={loading}>
+              <div
+                style={{ background: '#f0f2f5', padding: 24, minHeight: 720 }}
               >
-                Add new cluster
-              </Button>
-            </div>
-            <div hidden={!isAddNewClusterVisible}>
-              <Cluster
-                cluster={{
-                  clusterId: 0,
-                  name: 'New Cluster',
-                  products: [],
-                }}
-                orderInPage={clusters.length}
-                isTemporary={true}
-                pageId={this.pageId}
-                applications={applications}
-                addSavedClusterToThePage={this.addSavedClusterToThePage}
-                toggleAddNewClusterVisibility={
-                  this.toggleAddNewClusterVisibility
-                }
-              />
-            </div>
+                <Row>
+                  <Col md={8} sm={18} xs={24}>
+                    <Title
+                      editable={{ onChange: this.updatePageName }}
+                      level={2}
+                    >
+                      {pageName}
+                    </Title>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Title level={4}>Links</Title>
+                    {links.map(link => {
+                      if (this.pageNames.hasOwnProperty(link.toString())) {
+                        return (
+                          <Tag key={link} color="#87d068">
+                            {this.pageNames[link.toString()]}
+                          </Tag>
+                        );
+                      }
+                      return null;
+                    })}
+                    <Authorized
+                      permission="/permission/admin/device-mgt/enterprise/user/modify"
+                      yes={
+                        <EditLinks
+                          updateLinks={this.updateLinks}
+                          pageId={this.pageId}
+                          selectedLinks={links}
+                          pages={this.pages}
+                        />
+                      }
+                    />
+                  </Col>
+                  {/* <Col>*/}
 
-            {clusters.map((cluster, index) => {
-              return (
-                <Cluster
-                  key={cluster.clusterId}
-                  index={index}
-                  orderInPage={cluster.orderInPage}
-                  isTemporary={false}
-                  cluster={cluster}
-                  pageId={this.pageId}
-                  applications={applications}
-                  swapClusters={this.swapClusters}
-                  removeLoadedCluster={this.removeLoadedCluster}
+                  {/* </Col>*/}
+                </Row>
+
+                <Divider dashed={true} />
+                <Title level={4}>Clusters</Title>
+                <Authorized
+                  permission="/permission/admin/device-mgt/enterprise/user/modify"
+                  yes={
+                    <div
+                      hidden={isAddNewClusterVisible}
+                      style={{ textAlign: 'center' }}
+                    >
+                      <Button
+                        type="dashed"
+                        shape="round"
+                        icon="plus"
+                        size="large"
+                        onClick={() => {
+                          this.toggleAddNewClusterVisibility(true);
+                        }}
+                      >
+                        Add new cluster
+                      </Button>
+                    </div>
+                  }
                 />
-              );
-            })}
-          </div>
-        </Spin>
+                <div hidden={!isAddNewClusterVisible}>
+                  <Cluster
+                    cluster={{
+                      clusterId: 0,
+                      name: 'New Cluster',
+                      products: [],
+                    }}
+                    orderInPage={clusters.length}
+                    isTemporary={true}
+                    pageId={this.pageId}
+                    applications={applications}
+                    addSavedClusterToThePage={this.addSavedClusterToThePage}
+                    toggleAddNewClusterVisibility={
+                      this.toggleAddNewClusterVisibility
+                    }
+                  />
+                </div>
+
+                {clusters.map((cluster, index) => {
+                  return (
+                    <Cluster
+                      hasPermissionToManage={this.hasPermissionToManage}
+                      key={cluster.clusterId}
+                      index={index}
+                      orderInPage={cluster.orderInPage}
+                      isTemporary={false}
+                      cluster={cluster}
+                      pageId={this.pageId}
+                      applications={applications}
+                      swapClusters={this.swapClusters}
+                      removeLoadedCluster={this.removeLoadedCluster}
+                    />
+                  );
+                })}
+              </div>
+            </Spin>
+          }
+          no={
+            <Result
+              status="403"
+              title="You don't have permission to view android enterprise configurations."
+              subTitle="Please contact system administrator"
+            />
+          }
+        />
       </div>
     );
   }

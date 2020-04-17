@@ -26,11 +26,11 @@ import {
   Select,
   Button,
   Form,
-  Alert,
 } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
+import Authorized from '../../../../../../../../components/Authorized/Authorized';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -42,11 +42,6 @@ class FiltersForm extends React.Component {
       categories: [],
       tags: [],
       deviceTypes: [],
-      forbiddenErrors: {
-        categories: false,
-        tags: false,
-        deviceTypes: false,
-      },
     };
   }
 
@@ -101,18 +96,9 @@ class FiltersForm extends React.Component {
           'Error occurred while trying to load categories.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.categories = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   };
 
@@ -140,18 +126,9 @@ class FiltersForm extends React.Component {
           'Error occurred while trying to load tags.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.tags = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   };
 
@@ -179,23 +156,14 @@ class FiltersForm extends React.Component {
           'Error occurred while trying to load device types.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.deviceTypes = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   };
 
   render() {
-    const { categories, tags, deviceTypes, forbiddenErrors } = this.state;
+    const { categories, tags, deviceTypes } = this.state;
     const { getFieldDecorator } = this.props.form;
 
     return (
@@ -224,99 +192,85 @@ class FiltersForm extends React.Component {
               </Form.Item>
             </Col>
           </Row>
-          {forbiddenErrors.categories && (
-            <Alert
-              message="You don't have permission to view categories."
-              type="warning"
-              banner
-              closable
-            />
-          )}
-          <Form.Item label="Categories">
-            {getFieldDecorator('categories', {
-              rules: [
-                {
-                  required: false,
-                  message: 'Please select categories',
-                },
-              ],
-            })(
-              <Select
-                mode="multiple"
-                style={{ width: '100%' }}
-                placeholder="Select a Category"
-                onChange={this.handleCategoryChange}
-              >
-                {categories.map(category => {
-                  return (
-                    <Option key={category.categoryName}>
-                      {category.categoryName}
-                    </Option>
-                  );
-                })}
-              </Select>,
-            )}
-          </Form.Item>
-
-          {forbiddenErrors.deviceTypes && (
-            <Alert
-              message="You don't have permission to view device types."
-              type="warning"
-              banner
-              closable
-            />
-          )}
-          <Form.Item label="Device Type">
-            {getFieldDecorator('deviceType', {
-              rules: [
-                {
-                  required: false,
-                  message: 'Please select device types',
-                },
-              ],
-            })(
-              <Select
-                style={{ width: '100%' }}
-                placeholder="Select device types"
-              >
-                {deviceTypes.map(deviceType => {
-                  return (
-                    <Option key={deviceType.name}>{deviceType.name}</Option>
-                  );
-                })}
-                <Option key="ALL">All</Option>
-              </Select>,
-            )}
-          </Form.Item>
-          {forbiddenErrors.tags && (
-            <Alert
-              message="You don't have permission to view tags."
-              type="warning"
-              banner
-              closable
-            />
-          )}
-          <Form.Item label="Tags">
-            {getFieldDecorator('tags', {
-              rules: [
-                {
-                  required: false,
-                  message: 'Please select tags',
-                },
-              ],
-            })(
-              <Select
-                mode="multiple"
-                style={{ width: '100%' }}
-                placeholder="Select tags"
-              >
-                {tags.map(tag => {
-                  return <Option key={tag.tagName}>{tag.tagName}</Option>;
-                })}
-              </Select>,
-            )}
-          </Form.Item>
-
+          <Authorized
+            permission="/permission/admin/app-mgt/publisher/application/update"
+            yes={
+              <div>
+                <Form.Item label="Categories">
+                  {getFieldDecorator('categories', {
+                    rules: [
+                      {
+                        required: false,
+                        message: 'Please select categories',
+                      },
+                    ],
+                  })(
+                    <Select
+                      mode="multiple"
+                      style={{ width: '100%' }}
+                      placeholder="Select a Category"
+                      onChange={this.handleCategoryChange}
+                    >
+                      {categories.map(category => {
+                        return (
+                          <Option key={category.categoryName}>
+                            {category.categoryName}
+                          </Option>
+                        );
+                      })}
+                    </Select>,
+                  )}
+                </Form.Item>
+                <Form.Item label="Tags">
+                  {getFieldDecorator('tags', {
+                    rules: [
+                      {
+                        required: false,
+                        message: 'Please select tags',
+                      },
+                    ],
+                  })(
+                    <Select
+                      mode="multiple"
+                      style={{ width: '100%' }}
+                      placeholder="Select tags"
+                    >
+                      {tags.map(tag => {
+                        return <Option key={tag.tagName}>{tag.tagName}</Option>;
+                      })}
+                    </Select>,
+                  )}
+                </Form.Item>
+              </div>
+            }
+          />
+          <Authorized
+            permission="/permission/admin/device-mgt/admin/device-type/view"
+            yes={
+              <Form.Item label="Device Type">
+                {getFieldDecorator('deviceType', {
+                  rules: [
+                    {
+                      required: false,
+                      message: 'Please select device types',
+                    },
+                  ],
+                })(
+                  <Select
+                    style={{ width: '100%' }}
+                    placeholder="Select device types"
+                  >
+                    {deviceTypes.map(deviceType => {
+                      return (
+                        <Option key={deviceType.name}>{deviceType.name}</Option>
+                      );
+                    })}
+                    <Option key="ALL">All</Option>
+                  </Select>,
+                )}
+              </Form.Item>
+            }
+          />
           <Form.Item label="App Type">
             {getFieldDecorator('appType', {})(
               <Select style={{ width: '100%' }} placeholder="Select app type">

@@ -40,6 +40,7 @@ import { TweenOneGroup } from 'rc-tween-one';
 import pSBC from 'shade-blend-color';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../services/utils/errorHandler';
+import { isAuthorized } from '../../../../../../services/utils/authorizationHandler';
 
 const { Title } = Typography;
 
@@ -62,6 +63,10 @@ class ManageCategories extends React.Component {
 
   componentDidMount() {
     const config = this.props.context;
+    this.hasPermissionToManage = isAuthorized(
+      config.user,
+      '/permission/admin/app-mgt/publisher/admin/application/update',
+    );
     axios
       .get(
         window.location.origin +
@@ -84,18 +89,9 @@ class ManageCategories extends React.Component {
           'Error occured while trying to load categories',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.categories = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   }
 
@@ -157,36 +153,40 @@ class ManageCategories extends React.Component {
         style={{ marginTop: 8 }}
       >
         {categoryName}
-        <Divider type="vertical" />
-        <Tooltip title="edit">
-          <Icon
-            onClick={() => {
-              this.openEditModal(categoryName);
-            }}
-            type="edit"
-          />
-        </Tooltip>
-        <Divider type="vertical" />
-        <Tooltip title="delete">
-          <Popconfirm
-            title="Are you sure delete this category?"
-            onConfirm={() => {
-              if (category.isCategoryDeletable) {
-                this.deleteCategory(categoryName);
-              } else {
-                notification.error({
-                  message: 'Cannot delete "' + categoryName + '"',
-                  description:
-                    'This category is currently used. Please unassign the category from apps.',
-                });
-              }
-            }}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Icon type="delete" />
-          </Popconfirm>
-        </Tooltip>
+        {this.hasPermissionToManage && (
+          <>
+            <Divider type="vertical" />
+            <Tooltip title="edit">
+              <Icon
+                onClick={() => {
+                  this.openEditModal(categoryName);
+                }}
+                type="edit"
+              />
+            </Tooltip>
+            <Divider type="vertical" />
+            <Tooltip title="delete">
+              <Popconfirm
+                title="Are you sure delete this category?"
+                onConfirm={() => {
+                  if (category.isCategoryDeletable) {
+                    this.deleteCategory(categoryName);
+                  } else {
+                    notification.error({
+                      message: 'Cannot delete "' + categoryName + '"',
+                      description:
+                        'This category is currently used. Please unassign the category from apps.',
+                    });
+                  }
+                }}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Icon type="delete" />
+              </Popconfirm>
+            </Tooltip>
+          </>
+        )}
       </Tag>
     );
     return (
@@ -377,18 +377,16 @@ class ManageCategories extends React.Component {
       inputValue,
       tempElements,
       isAddNewVisible,
-      forbiddenErrors,
     } = this.state;
     const categoriesElements = categories.map(this.renderElement);
     const temporaryElements = tempElements.map(this.renderTempElement);
     return (
       <div style={{ marginBottom: 16 }}>
-        {forbiddenErrors.categories && (
+        {!this.hasPermissionToManage && (
           <Alert
-            message="You don't have permission to view categories."
+            message="You don't have permission to add / edit / delete categories."
             type="warning"
             banner
-            closable
           />
         )}
         <Card>
@@ -414,6 +412,7 @@ class ManageCategories extends React.Component {
                         );
                       }}
                       htmlType="button"
+                      disabled={!this.hasPermissionToManage}
                     >
                       Add
                     </Button>

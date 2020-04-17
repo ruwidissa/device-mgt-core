@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { List, Spin, Button, Alert } from 'antd';
+import { List, Spin, Button } from 'antd';
 import './styles.css';
 
 import InfiniteScroll from 'react-infinite-scroller';
@@ -130,14 +130,6 @@ class Reviews extends React.Component {
   render() {
     return (
       <div>
-        {this.state.forbiddenErrors.reviews && (
-          <Alert
-            message="You don't have permission to view reviews."
-            type="warning"
-            banner
-            closable
-          />
-        )}
         <div className="demo-infinite-container">
           <InfiniteScroll
             initialLoad={false}

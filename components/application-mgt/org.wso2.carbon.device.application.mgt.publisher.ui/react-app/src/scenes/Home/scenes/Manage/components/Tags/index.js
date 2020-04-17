@@ -39,6 +39,7 @@ import axios from 'axios';
 import { TweenOneGroup } from 'rc-tween-one';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../services/utils/errorHandler';
+import { isAuthorized } from '../../../../../../services/utils/authorizationHandler';
 
 const { Title } = Typography;
 
@@ -61,6 +62,10 @@ class ManageTags extends React.Component {
 
   componentDidMount() {
     const config = this.props.context;
+    this.hasPermissionToManage = isAuthorized(
+      config.user,
+      '/permission/admin/app-mgt/publisher/admin/application/update',
+    );
     axios
       .get(
         window.location.origin +
@@ -83,18 +88,9 @@ class ManageTags extends React.Component {
           'Error occurred while trying to load tags.',
           true,
         );
-        if (error.hasOwnProperty('response') && error.response.status === 403) {
-          const { forbiddenErrors } = this.state;
-          forbiddenErrors.tags = true;
-          this.setState({
-            forbiddenErrors,
-            loading: false,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
+        this.setState({
+          loading: false,
+        });
       });
   }
 
@@ -151,36 +147,40 @@ class ManageTags extends React.Component {
     const tagElem = (
       <Tag color="#34495e" style={{ marginTop: 8 }}>
         {tagName}
-        <Divider type="vertical" />
-        <Tooltip title="edit">
-          <Icon
-            onClick={() => {
-              this.openEditModal(tagName);
-            }}
-            type="edit"
-          />
-        </Tooltip>
-        <Divider type="vertical" />
-        <Tooltip title="delete">
-          <Popconfirm
-            title="Are you sure delete this tag?"
-            onConfirm={() => {
-              if (tag.isTagDeletable) {
-                this.deleteTag(tagName);
-              } else {
-                notification.error({
-                  message: 'Cannot delete "' + tagName + '"',
-                  description:
-                    'This tag is currently used. Please unassign the tag from apps.',
-                });
-              }
-            }}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Icon type="delete" />
-          </Popconfirm>
-        </Tooltip>
+        {this.hasPermissionToManage && (
+          <>
+            <Divider type="vertical" />
+            <Tooltip title="edit">
+              <Icon
+                onClick={() => {
+                  this.openEditModal(tagName);
+                }}
+                type="edit"
+              />
+            </Tooltip>
+            <Divider type="vertical" />
+            <Tooltip title="delete">
+              <Popconfirm
+                title="Are you sure delete this tag?"
+                onConfirm={() => {
+                  if (tag.isTagDeletable) {
+                    this.deleteTag(tagName);
+                  } else {
+                    notification.error({
+                      message: 'Cannot delete "' + tagName + '"',
+                      description:
+                        'This tag is currently used. Please unassign the tag from apps.',
+                    });
+                  }
+                }}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Icon type="delete" />
+              </Popconfirm>
+            </Tooltip>
+          </>
+        )}
       </Tag>
     );
     return (
@@ -368,18 +368,16 @@ class ManageTags extends React.Component {
       inputValue,
       tempElements,
       isAddNewVisible,
-      forbiddenErrors,
     } = this.state;
     const tagsElements = tags.map(this.renderElement);
     const temporaryElements = tempElements.map(this.renderTempElement);
     return (
       <div style={{ marginBottom: 16 }}>
-        {forbiddenErrors.tags && (
+        {!this.hasPermissionToManage && (
           <Alert
-            message="You don't have permission to view tags."
+            message="You don't have permission to add / edit / delete tags."
             type="warning"
             banner
-            closable
           />
         )}
         <Card>
@@ -405,6 +403,7 @@ class ManageTags extends React.Component {
                         );
                       }}
                       htmlType="button"
+                      disabled={!this.hasPermissionToManage}
                     >
                       Add
                     </Button>

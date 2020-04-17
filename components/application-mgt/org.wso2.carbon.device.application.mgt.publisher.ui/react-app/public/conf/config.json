@@ -6,6 +6,7 @@
   },
   "serverConfig": {
     "invoker": {
+      "contextPath" : "/publisher-ui-request-handler",
       "uri": "/publisher-ui-request-handler/invoke",
       "publisher": "/application-mgt-publisher/v1.0",
       "store": "/application-mgt-store/v1.0",

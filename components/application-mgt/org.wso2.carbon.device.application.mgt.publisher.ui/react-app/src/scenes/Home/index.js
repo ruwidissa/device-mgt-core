@@ -24,6 +24,7 @@ import { Redirect } from 'react-router';
 import './styles.css';
 import { withConfigContext } from '../../components/ConfigContext';
 import Logout from './components/Logout';
+import { isAuthorized } from '../../services/utils/authorizationHandler';
 
 const { Header, Content, Footer } = Layout;
 const { SubMenu } = Menu;
@@ -84,33 +85,36 @@ class Dashboard extends React.Component {
                     Apps
                   </Link>
                 </Menu.Item>
-
-                <SubMenu
-                  title={
-                    <span className="submenu-title-wrapper">
-                      <Icon type="plus" />
-                      Add New App
-                    </span>
-                  }
-                >
-                  <Menu.Item key="add-new-public-app">
-                    <Link to="/publisher/add-new-app/public">Public App</Link>
-                  </Menu.Item>
-                  <Menu.Item key="add-new-enterprise-app">
-                    <Link to="/publisher/add-new-app/enterprise">
-                      Enterprise App
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item key="add-new-web-clip">
-                    <Link to="/publisher/add-new-app/web-clip">Web Clip</Link>
-                  </Menu.Item>
-                  <Menu.Item key="add-new-custom-app">
-                    <Link to="/publisher/add-new-app/custom-app">
-                      Custom App
-                    </Link>
-                  </Menu.Item>
-                </SubMenu>
-
+                {isAuthorized(
+                  this.props.context.user,
+                  '/permission/admin/app-mgt/publisher/application/update',
+                ) && (
+                  <SubMenu
+                    title={
+                      <span className="submenu-title-wrapper">
+                        <Icon type="plus" />
+                        Add New App
+                      </span>
+                    }
+                  >
+                    <Menu.Item key="add-new-public-app">
+                      <Link to="/publisher/add-new-app/public">Public App</Link>
+                    </Menu.Item>
+                    <Menu.Item key="add-new-enterprise-app">
+                      <Link to="/publisher/add-new-app/enterprise">
+                        Enterprise App
+                      </Link>
+                    </Menu.Item>
+                    <Menu.Item key="add-new-web-clip">
+                      <Link to="/publisher/add-new-app/web-clip">Web Clip</Link>
+                    </Menu.Item>
+                    <Menu.Item key="add-new-custom-app">
+                      <Link to="/publisher/add-new-app/custom-app">
+                        Custom App
+                      </Link>
+                    </Menu.Item>
+                  </SubMenu>
+                )}
                 <SubMenu
                   title={
                     <span className="submenu-title-wrapper">
@@ -139,7 +143,7 @@ class Dashboard extends React.Component {
                   title={
                     <span className="submenu-title-wrapper">
                       <Icon type="user" />
-                      {this.config.user}
+                      {this.config.username}
                     </span>
                   }
                 >
