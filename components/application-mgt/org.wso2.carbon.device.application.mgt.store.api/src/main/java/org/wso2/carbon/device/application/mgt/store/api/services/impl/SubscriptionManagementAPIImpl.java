@@ -64,7 +64,7 @@ import java.util.List;
 @Path("/subscription")
 public class SubscriptionManagementAPIImpl implements SubscriptionManagementAPI{
 
-    private static Log log = LogFactory.getLog(SubscriptionManagementAPIImpl.class);
+    private static final Log log = LogFactory.getLog(SubscriptionManagementAPIImpl.class);
 
     @Override
     @POST

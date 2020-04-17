@@ -30,6 +30,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
@@ -314,6 +315,9 @@ public class AnnotationProcessor {
         if (annotation.annotationType().getName().equals(OPTIONS.class.getName())) {
             resource.setHttpVerb(HttpMethod.OPTIONS);
         }
+        if (annotation.annotationType().getName().equals(HEAD.class.getName())) {
+            resource.setHttpVerb(HttpMethod.HEAD);
+        }
         if (annotation.annotationType().getName().equals(DELETE.class.getName())) {
             resource.setHttpVerb(HttpMethod.DELETE);
         }
@@ -329,6 +333,8 @@ public class AnnotationProcessor {
             } else if (annotation.annotationType().getName().equals(POST.class.getName())) {
                 return true;
             } else if (annotation.annotationType().getName().equals(OPTIONS.class.getName())) {
+                return true;
+            } else if (annotation.annotationType().getName().equals(HEAD.class.getName())) {
                 return true;
             } else if (annotation.annotationType().getName().equals(DELETE.class.getName())) {
                 return true;

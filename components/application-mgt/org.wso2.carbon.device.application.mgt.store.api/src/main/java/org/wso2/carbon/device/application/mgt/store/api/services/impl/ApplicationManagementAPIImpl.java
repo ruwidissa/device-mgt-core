@@ -45,7 +45,7 @@ import javax.ws.rs.core.Response;
 @Path("/applications")
 public class ApplicationManagementAPIImpl implements ApplicationManagementAPI {
 
-    private static Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
+    private static final Log log = LogFactory.getLog(ApplicationManagementAPIImpl.class);
 
     @POST
     @Override

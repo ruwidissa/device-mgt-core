@@ -51,7 +51,7 @@ import javax.ws.rs.core.Response;
 @Path("/reviews")
 public class ReviewManagementAPIImpl implements ReviewManagementAPI {
 
-    private static Log log = LogFactory.getLog(ReviewManagementAPIImpl.class);
+    private static final Log log = LogFactory.getLog(ReviewManagementAPIImpl.class);
 
     @Override
     @GET
