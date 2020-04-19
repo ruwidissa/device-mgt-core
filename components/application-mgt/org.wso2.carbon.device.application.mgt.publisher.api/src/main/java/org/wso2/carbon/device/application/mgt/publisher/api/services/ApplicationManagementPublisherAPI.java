@@ -53,7 +53,6 @@ import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -716,10 +715,10 @@ public interface ApplicationManagementPublisherAPI {
             @Multipart(value = "screenshot3") Attachment screenshot3
     );
 
-    @HEAD
+    @GET
     @Path("/device-type/{deviceType}/app-name/{appName}")
     @ApiOperation(
-            httpMethod = "HEAD",
+            httpMethod = "GET",
             value = "Check the application existence",
             notes = "This API is responsible to check whether application exist or not for the given device type and "
                     + "application name.",
@@ -734,11 +733,10 @@ public interface ApplicationManagementPublisherAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Application exists."),
+                            message = "OK. \n Application doesn't exists."),
                     @ApiResponse(
-                            code = 404,
-                            message = "NOT FOUND. \n Could.t find an application for given device type and application "
-                                    + "name."),
+                            code = 409,
+                            message = "CONFLICT. \n Application exists"),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Found invalid device type with the request."),
