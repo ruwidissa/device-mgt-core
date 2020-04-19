@@ -254,7 +254,8 @@ public class InvokerHandler extends HttpServlet {
      */
     private String generateBackendRequestURL(HttpServletRequest req) {
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(apiEndpoint).append(HandlerConstants.API_COMMON_CONTEXT).append(req.getPathInfo());
+        urlBuilder.append(apiEndpoint).append(HandlerConstants.API_COMMON_CONTEXT)
+                .append(req.getPathInfo().replace(" ", "%20"));
         if (StringUtils.isNotEmpty(req.getQueryString())) {
             urlBuilder.append("?").append(req.getQueryString());
         }
