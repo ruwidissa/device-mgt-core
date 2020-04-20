@@ -30,12 +30,13 @@ public class Item {
     private boolean isRequired;
     private String subTitle;
     private ConditionList conditionList;
-    private Notification notification;
     private Checkbox checkbox;
     private Select select;
     private Input input;
     private TimeSelector timeSelector;
     private Table table;
+    private RadioGroup radioGroup;
+    private NotificationList notificationList;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -92,11 +93,6 @@ public class Item {
 
     public void setConditionList(ConditionList conditionList) { this.conditionList = conditionList; }
 
-    @XmlElement(name = "Notification")
-    public Notification getNotification() { return notification; }
-
-    public void setNotification(Notification notification) { this.notification = notification; }
-
     @XmlElement(name = "Checkbox")
     public Checkbox getCheckbox() {
         return checkbox;
@@ -133,4 +129,18 @@ public class Item {
     public Table getTable() { return table; }
 
     public void setTable(Table table) { this.table = table; }
+
+    @XmlElement(name = "RadioGroup")
+    public RadioGroup getRadioGroup() {
+        return radioGroup;
+    }
+
+    public void setRadioGroup(RadioGroup radioGroup) {
+        this.radioGroup = radioGroup;
+    }
+
+    @XmlElement(name = "NotificationList")
+    public NotificationList getNotificationList() { return notificationList; }
+
+    public void setNotificationList(NotificationList notificationList) { this.notificationList = notificationList; }
 }
