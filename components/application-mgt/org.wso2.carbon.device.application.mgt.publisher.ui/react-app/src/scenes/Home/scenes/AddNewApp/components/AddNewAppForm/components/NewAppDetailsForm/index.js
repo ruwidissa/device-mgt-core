@@ -86,10 +86,50 @@ class NewAppDetailsForm extends React.Component {
           application.type = 'WEB_CLIP';
           application.deviceType = 'ALL';
         }
-
-        this.props.onSuccessApplicationData(application);
+        this.validateAppName(name, application.deviceType, application);
       }
     });
+  };
+
+  validateAppName = (name, deviceType, application) => {
+    const config = this.props.context;
+    axios
+      .get(
+        window.location.origin +
+          config.serverConfig.invoker.uri +
+          config.serverConfig.invoker.publisher +
+          `/applications/device-type/${deviceType}/app-name/${name}`,
+      )
+      .then(res => {
+        if (res.status === 200) {
+          this.props.onSuccessApplicationData(application);
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 403) {
+          this.setState({
+            loading: false,
+          });
+        } else if (
+          error.hasOwnProperty('response') &&
+          error.response.status === 409
+        ) {
+          this.props.form.setFields({
+            name: {
+              value: name,
+              errors: [
+                new Error('App name already exists, Please try another'),
+              ],
+            },
+          });
+        } else {
+          handleApiError(
+            error,
+            'Error occurred while trying to validate app name.',
+            true,
+          );
+        }
+      });
   };
 
   componentDidMount() {
@@ -331,6 +371,18 @@ class NewAppDetailsForm extends React.Component {
               )}
 
               {/* app name*/}
+              <Authorized
+                permission="/permission/admin/app-mgt/publisher/application/view"
+                no={
+                  <Alert
+                    message="You don't have permission to compare application names. If you have update permission,
+                    you still can add application but app name should be unique."
+                    type="warning"
+                    banner
+                    closable
+                  />
+                }
+              />
               <Form.Item {...formItemLayout} label="App Name">
                 {getFieldDecorator('name', {
                   rules: [
