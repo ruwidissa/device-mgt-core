@@ -7,8 +7,8 @@
     "footerText": "©2019 entgra.io"
   },
   "serverConfig": {
-    "invokerUri": "/ui-request-handler/invoke/application-mgt-store/v1.0",
     "invoker": {
+      "contextPath" : "/store-ui-request-handler",
       "uri": "/store-ui-request-handler/invoke",
       "publisher": "/application-mgt-publisher/v1.0",
       "store": "/application-mgt-store/v1.0",

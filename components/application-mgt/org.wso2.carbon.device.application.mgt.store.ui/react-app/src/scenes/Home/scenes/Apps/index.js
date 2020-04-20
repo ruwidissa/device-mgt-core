@@ -18,6 +18,8 @@
 
 import React from 'react';
 import AppList from './components/AppList';
+import Authorized from '../../../../components/Authorized';
+import { Result } from 'antd';
 
 class Apps extends React.Component {
   routes;
@@ -32,9 +34,21 @@ class Apps extends React.Component {
       <div>
         <div style={{ background: '#f0f2f5', padding: 24, minHeight: 760 }}>
           {deviceType !== null && (
-            <AppList
-              changeSelectedMenuItem={this.props.changeSelectedMenuItem}
-              deviceType={deviceType}
+            <Authorized
+              permission="/permission/admin/app-mgt/store/application/view"
+              yes={
+                <AppList
+                  changeSelectedMenuItem={this.props.changeSelectedMenuItem}
+                  deviceType={deviceType}
+                />
+              }
+              no={
+                <Result
+                  status="403"
+                  title="403"
+                  subTitle="You don't have permission to view apps."
+                />
+              }
             />
           )}
         </div>
