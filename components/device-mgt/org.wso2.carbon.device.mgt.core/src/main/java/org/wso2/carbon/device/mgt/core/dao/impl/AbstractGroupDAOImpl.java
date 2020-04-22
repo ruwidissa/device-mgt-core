@@ -837,7 +837,9 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
                                                 "ENROLMENT.STATUS " +
                                                 "FROM DM_DEVICE AS DEVICE, DM_DEVICE_TYPE AS DEVICE_TYPE, DM_ENROLMENT " +
                                                 "AS ENROLMENT " +
-                                                "WHERE DEVICE.ID NOT IN " +
+                                                "WHERE DEVICE_TYPE.NAME = ? AND DEVICE" +
+                                                ".ID " +
+                                                "NOT IN " +
                                                 "(SELECT DEVICE_ID " +
                                                 "FROM DM_DEVICE_GROUP_MAP " +
                                                 "WHERE GROUP_ID IN (SELECT ID FROM DM_GROUP WHERE GROUP_NAME NOT IN (",
@@ -846,6 +848,7 @@ public abstract class AbstractGroupDAOImpl implements GroupDAO {
             groupNames.stream().map(e -> "?").forEach(sql::add);
             try (PreparedStatement stmt = connection.prepareStatement(String.valueOf(sql))) {
                 int index = 1;
+                stmt.setString(index++, paginationRequest.getDeviceType());
                 for (String groupName : groupNames) {
                     stmt.setString(index++, groupName);
                 }
