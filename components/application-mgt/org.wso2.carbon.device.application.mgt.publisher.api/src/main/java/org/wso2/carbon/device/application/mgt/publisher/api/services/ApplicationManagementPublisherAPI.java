@@ -787,7 +787,8 @@ public interface ApplicationManagementPublisherAPI {
                                     "ApplicationDTO artifact updating payload contains unacceptable or vulnerable data"),
                     @ApiResponse(
                             code = 404,
-                            message = "NOT FOUND. \n Couldn't found application/application release to update applocation release artifact."),
+                            message = "NOT FOUND. \n Couldn't found application/application release to update "
+                                    + "application release artifact."),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting the application list.",

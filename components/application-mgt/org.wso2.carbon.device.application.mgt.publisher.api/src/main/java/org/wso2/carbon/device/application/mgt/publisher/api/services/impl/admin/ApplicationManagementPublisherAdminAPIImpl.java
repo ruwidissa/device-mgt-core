@@ -46,7 +46,7 @@ import java.util.List;
 @Path("/admin/applications")
 public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationManagementPublisherAdminAPI {
 
-    private static Log log = LogFactory.getLog(ApplicationManagementPublisherAdminAPIImpl.class);
+    private static final Log log = LogFactory.getLog(ApplicationManagementPublisherAdminAPIImpl.class);
 
         @DELETE
         @Consumes(MediaType.WILDCARD)
@@ -56,8 +56,8 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
             ApplicationManager applicationManager = APIUtil.getApplicationManager();
             try {
                 applicationManager.deleteApplicationRelease(releaseUuid);
-                String responseMsg = "Successfully deleted the application release for uuid: " + releaseUuid + "";
-                return Response.status(Response.Status.OK).entity(responseMsg).build();
+                return Response.status(Response.Status.OK)
+                        .entity("Successfully deleted the application release for uuid: " + releaseUuid).build();
             } catch (NotFoundException e) {
                 String msg =
                         "Couldn't found application release which is having application release UUID:" + releaseUuid;
@@ -84,11 +84,10 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.deleteApplication(applicationId);
-            String responseMsg = "Successfully deleted the application which has ID: " + applicationId + "";
-            return Response.status(Response.Status.OK).entity(responseMsg).build();
+            return Response.status(Response.Status.OK)
+                    .entity("Successfully deleted the application which has ID: " + applicationId).build();
         } catch (NotFoundException e) {
-            String msg =
-                    "Couldn't found application release which is having the ID:" + applicationId;
+            String msg = "Couldn't found application release which is having the ID:" + applicationId;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ForbiddenException e) {
@@ -111,15 +110,14 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.deleteTag(tagName);
-            String msg = "Tag " + tagName + " is deleted successfully.";
-            return Response.status(Response.Status.OK).entity(msg).build();
+            return Response.status(Response.Status.OK).entity("Tag " + tagName + " is deleted successfully.").build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while deleting registered tag.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
@@ -136,11 +134,11 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
             return Response.status(Response.Status.OK).entity(categories).build();
         } catch (BadRequestException e) {
             String msg = e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while adding new categories.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
@@ -155,15 +153,15 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.updateCategory(oldCategoryName, newCategoryName);
-            String msg = "Category is updated from " + oldCategoryName + " to " + newCategoryName;
-            return Response.status(Response.Status.OK).entity(msg).build();
+            return Response.status(Response.Status.OK)
+                    .entity("Category is updated from " + oldCategoryName + " to " + newCategoryName).build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while rename registered category.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
@@ -177,15 +175,15 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         ApplicationManager applicationManager = APIUtil.getApplicationManager();
         try {
             applicationManager.deleteCategory(categoryName);
-            String msg = "Category " + categoryName + " is deleted successfully.";
-            return Response.status(Response.Status.OK).entity(msg).build();
+            return Response.status(Response.Status.OK).entity("Category " + categoryName + " is deleted successfully.")
+                    .build();
         } catch (NotFoundException e) {
             String msg = e.getMessage();
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ApplicationManagementException e) {
             String msg = "Error Occurred while deleting registered category.";
-            log.error(msg);
+            log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }

@@ -44,7 +44,7 @@ import javax.ws.rs.core.Response;
 @Path("/admin/subscription")
 public class SubscriptionManagementAdminAPIImpl implements SubscriptionManagementAdminAPI {
 
-    private static Log log = LogFactory.getLog(SubscriptionManagementAdminAPIImpl.class);
+    private static final Log log = LogFactory.getLog(SubscriptionManagementAdminAPIImpl.class);
 
     @GET
     @Consumes("application/json")

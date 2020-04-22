@@ -39,7 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/admin/reviews")
 public class ReviewManagementStoreAdminAPIImpl implements ReviewManagementStoreAdminAPI {
 
-    private static Log log = LogFactory.getLog(ReviewManagementStoreAdminAPIImpl.class);
+    private static final Log log = LogFactory.getLog(ReviewManagementStoreAdminAPIImpl.class);
 
     @Override
     @DELETE
