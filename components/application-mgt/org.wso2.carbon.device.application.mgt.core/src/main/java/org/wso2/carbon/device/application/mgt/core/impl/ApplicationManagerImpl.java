@@ -101,6 +101,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1442,39 +1443,54 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     @Override
-    public void deleteApplicationRelease(String releaseUuid)
-            throws ApplicationManagementException {
+    public void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
+        AtomicBoolean isDeletingApp = new AtomicBoolean(false);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            ApplicationReleaseDTO applicationReleaseDTO = this.applicationReleaseDAO
-                    .getReleaseByUUID(releaseUuid, tenantId);
-            if (applicationReleaseDTO == null) {
-                String msg = "Couldn't find an application release for application release UUID: " + releaseUuid;
+            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            if (applicationDTO == null) {
+                String msg = "Couldn't find an application which has application release UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
 
-            if (!lifecycleStateManager.isDeletableState(applicationReleaseDTO.getCurrentState())) {
-                String msg = "Application state is not in the deletable state. Therefore you are not permitted to "
-                        + "delete the application release.";
-                log.error(msg);
-                throw new ForbiddenException(msg);
+            List<ApplicationReleaseDTO> applicationReleaseDTOS = applicationDTO.getApplicationReleaseDTOs();
+            if (applicationReleaseDTOS.size() == 1) {
+                isDeletingApp.set(true);
             }
-            List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                    .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
-            if (!deviceSubscriptionDTOS.isEmpty()){
-                String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid() +
-                        " either subscribed to device/s or it had subscribed to device/s. Therefore you are not "
-                        + "permitted to delete the application release.";
-                log.error(msg);
-                throw new ForbiddenException(msg);
+
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOS) {
+                if (releaseUuid.equals(applicationReleaseDTO.getUuid())) {
+                    if (!lifecycleStateManager.isDeletableState(applicationReleaseDTO.getCurrentState())) {
+                        String msg =
+                                "Application state is not in the deletable state. Therefore you are not permitted to "
+                                        + "delete the application release.";
+                        log.error(msg);
+                        throw new ForbiddenException(msg);
+                    }
+                    List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
+                            .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
+                    if (!deviceSubscriptionDTOS.isEmpty()) {
+                        String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid()
+                                + " either subscribed to device/s or it had subscribed to device/s. Therefore you are not "
+                                + "permitted to delete the application release.";
+                        log.error(msg);
+                        throw new ForbiddenException(msg);
+                    }
+                    applicationStorageManager.deleteAllApplicationReleaseArtifacts(
+                            Collections.singletonList(applicationReleaseDTO.getAppHashValue()), tenantId);
+                    lifecycleStateDAO.deleteLifecycleStateByReleaseId(applicationReleaseDTO.getId());
+                    applicationReleaseDAO.deleteRelease(applicationReleaseDTO.getId());
+                    break;
+                }
             }
-            applicationStorageManager.deleteAllApplicationReleaseArtifacts(
-                    Collections.singletonList(applicationReleaseDTO.getAppHashValue()), tenantId);
-            lifecycleStateDAO.deleteLifecycleStateByReleaseId(applicationReleaseDTO.getId());
-            applicationReleaseDAO.deleteRelease(applicationReleaseDTO.getId());
+            if (isDeletingApp.get()) {
+                this.applicationDAO.deleteApplicationTags(applicationDTO.getId(), tenantId);
+                this.applicationDAO.deleteAppCategories(applicationDTO.getId(), tenantId);
+                this.applicationDAO.deleteApplication(applicationDTO.getId(), tenantId);
+            }
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
             String msg = "Error occurred while observing the database connection to delete application release which "
