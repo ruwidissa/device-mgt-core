@@ -403,7 +403,7 @@ class EditReleaseModal extends React.Component {
     );
 
     return (
-      <div>
+      <>
         <Tooltip
           title={
             isAppUpdatable
@@ -726,7 +726,7 @@ class EditReleaseModal extends React.Component {
             />
           </Modal>
         </Modal>
-      </div>
+      </>
     );
   }
 }
