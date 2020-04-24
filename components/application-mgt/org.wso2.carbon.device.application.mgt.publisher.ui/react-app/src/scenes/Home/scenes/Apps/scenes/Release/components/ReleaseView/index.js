@@ -34,6 +34,7 @@ import DetailedRating from '../../../../components/DetailedRating';
 import EditRelease from './components/EditRelease';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import Authorized from '../../../../../../../../components/Authorized/Authorized';
+import DeleteRelease from './components/DeleteRelease';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -51,10 +52,12 @@ class ReleaseView extends React.Component {
       return null;
     }
     let isAppUpdatable,
-      isAppInstallable = false;
+      isAppInstallable,
+      isDeletableState = false;
     if (lifecycle != null) {
       isAppUpdatable = lifecycle[currentLifecycleStatus].isAppUpdatable;
       isAppInstallable = lifecycle[currentLifecycleStatus].isAppInstallable;
+      isDeletableState = lifecycle[currentLifecycleStatus].isDeletableState;
     }
 
     const platform = app.deviceType;
@@ -103,14 +106,21 @@ class ReleaseView extends React.Component {
               <Authorized
                 permission="/permission/admin/app-mgt/publisher/application/update"
                 yes={
-                  <EditRelease
-                    isAppUpdatable={isAppUpdatable}
-                    type={app.type}
-                    deviceType={app.deviceType}
-                    release={release}
-                    updateRelease={this.props.updateRelease}
-                    supportedOsVersions={[...this.props.supportedOsVersions]}
-                  />
+                  <>
+                    <EditRelease
+                      isAppUpdatable={isAppUpdatable}
+                      type={app.type}
+                      deviceType={app.deviceType}
+                      release={release}
+                      updateRelease={this.props.updateRelease}
+                      supportedOsVersions={[...this.props.supportedOsVersions]}
+                    />
+                    <Divider type="vertical" />
+                    <DeleteRelease
+                      uuid={release.uuid}
+                      isDeletableState={isDeletableState}
+                    />
+                  </>
                 }
               />
             </Col>
