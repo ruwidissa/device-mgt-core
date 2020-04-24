@@ -35,6 +35,8 @@
 
 package org.wso2.carbon.policy.mgt.core.util;
 
+import com.google.gson.Gson;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -146,13 +148,81 @@ public class PolicyManagerUtil {
         policyOperation.setProfileOperations(createProfileOperations(effectiveFeatures));
         if (policy.getPolicyType() != null &&
                 PolicyManagementConstants.GENERAL_POLICY_TYPE.equals(policy.getPolicyType())) {
-            setCorrectiveActions(effectiveFeatures, policyOperation, policy);
+            String policyPayloadVersion = policy.getPolicyPayloadVersion();
+            float payloadVersion = 0f;
+            if (policyPayloadVersion != null && !StringUtils.isEmpty(policyPayloadVersion)) {
+                payloadVersion = Float.parseFloat(policyPayloadVersion);
+            }
+            if (payloadVersion >= 2.0f) {
+                setMultipleCorrectiveActions(effectiveFeatures, policyOperation, policy);
+            } else {
+                setSingleCorrectiveAction(policy, effectiveFeatures);
+            }
         }
         policyOperation.setPayLoad(policyOperation.getProfileOperations());
         return policyOperation;
     }
 
-    private static void setCorrectiveActions(List<ProfileFeature> features,
+    /**
+     * This method is used for generate single corrective action set for a single policy which is
+     * bind to the policy payload
+     * @param policy regarding policy object
+     * @param effectiveFeatures effective feature list
+     * @throws PolicyTransformException when transforming of the policy have issues
+     */
+    private static void setSingleCorrectiveAction(Policy policy, List<ProfileFeature>
+            effectiveFeatures) throws PolicyTransformException {
+        if (policy.getCorrectiveActions() != null) {
+            for (CorrectiveAction correctiveAction : policy.getCorrectiveActions()) {
+                if (PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE
+                        .equalsIgnoreCase(correctiveAction.getActionType())) {
+                    PolicyAdministratorPoint pap = new PolicyAdministratorPointImpl();
+                    try {
+                        Policy correctivePolicy = pap.getPolicy(correctiveAction.getPolicyId());
+                        if (correctivePolicy == null ||
+                                !(PolicyManagementConstants.CORRECTIVE_POLICY_TYPE
+                                        .equalsIgnoreCase(correctivePolicy.getPolicyType()))) {
+                            String msg = "No corrective policy was found for the policy "
+                                    + policy.getPolicyName() + " and policy ID " + policy.getId();
+                            log.error(msg);
+                            throw new PolicyTransformException(msg);
+                        } else {
+                            List<ProfileOperation> correctiveProfileOperations =
+                                    createProfileOperations(correctivePolicy.getProfile()
+                                            .getProfileFeaturesList());
+                            ProfileFeature correctivePolicyFeature = new ProfileFeature();
+                            correctivePolicyFeature.setProfileId(correctivePolicy.getProfileId());
+                            correctivePolicyFeature.setContent(new Gson()
+                                    .toJson(correctiveProfileOperations));
+                            correctivePolicyFeature.setDeviceType(correctivePolicy
+                                    .getProfile().getDeviceType());
+                            correctivePolicyFeature.setFeatureCode(
+                                    PolicyManagementConstants.CORRECTIVE_POLICY_FEATURE_CODE);
+                            correctivePolicyFeature.setId(correctivePolicy.getId());
+                            effectiveFeatures.add(correctivePolicyFeature);
+                        }
+                    } catch (PolicyManagementException e) {
+                        String msg = "Error occurred while retrieving corrective " +
+                                "policy for policy " + policy.getPolicyName() + " and policy ID " +
+                                policy.getId();
+                        log.error(msg, e);
+                        throw new PolicyTransformException(msg, e);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * This method is use for generate multiple corrective actions per policy which is attached
+     * to the feature of the policy
+     * @param features regarding feature list of the policy
+     * @param policyOperation operation list which to be sent to the device
+     * @param policy regarding policy
+     * @throws PolicyTransformException
+     */
+    private static void setMultipleCorrectiveActions(List<ProfileFeature> features,
                                              PolicyOperation policyOperation, Policy policy)
             throws PolicyTransformException {
         ProfileOperation correctiveProfileOperation = new ProfileOperation();
@@ -190,6 +260,12 @@ public class PolicyManagerUtil {
         }
     }
 
+    /**
+     * This method is using for generate profile operations list which to be sent to the device.
+     * this method is only using multiple corrective actions
+     * @param correctivePolicy regarding corrective policy
+     * @param correctiveOperationList regarding operations list of the corrective policy
+     */
     private static void createCorrectiveProfileOperations(Policy correctivePolicy,
                                                           ProfileOperation correctiveOperationList) {
         ProfileOperation profileOperation = new ProfileOperation();
@@ -222,11 +298,13 @@ public class PolicyManagerUtil {
             profileOperation.setStatus(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Status.PENDING);
             profileOperation.setType(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Type.PROFILE);
             profileOperation.setPayLoad(feature.getContent());
-            for (CorrectiveAction correctiveAction : feature.getCorrectiveActions()) {
-                if (profileOperation.getCorrectiveActionIds() == null) {
-                    profileOperation.setCorrectiveActionIds(new ArrayList<>());
+            if (feature.getCorrectiveActions() != null) {
+                for (CorrectiveAction correctiveAction : feature.getCorrectiveActions()) {
+                    if (profileOperation.getCorrectiveActionIds() == null) {
+                        profileOperation.setCorrectiveActionIds(new ArrayList<>());
+                    }
+                    profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
                 }
-                profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
             }
             profileOperations.add(profileOperation);
         }

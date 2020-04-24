@@ -60,8 +60,7 @@ public class ProfileFeature implements Serializable {
             required = true)
     private String payLoad;
     @ApiModelProperty(name = "correctiveActions",
-            value = "List of corrective actions to be applied when the policy is violated",
-            required = true)
+            value = "List of corrective actions to be applied when the policy is violated")
     private List<CorrectiveAction> correctiveActions;
 
     public int getId() {

@@ -109,6 +109,12 @@ public interface PolicyDAO {
                                          int featureId)
             throws PolicyManagerDAOException;
 
+    /**
+     * This method is used get all corrective actions from DB
+     * @throws PolicyManagerDAOException is thrown when there is an error in deleting corrective actions to database
+     */
+    List<CorrectiveAction> getAllCorrectiveActions() throws PolicyManagerDAOException;
+
     Policy updateUserOfPolicy(List<String> usersToAdd, Policy policy) throws PolicyManagerDAOException;
 
     Policy addPolicyToDevice(List<Device> devices, Policy policy) throws PolicyManagerDAOException;

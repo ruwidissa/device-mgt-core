@@ -161,7 +161,6 @@ skipStep["policy-platform"] = function (policyPayloadObj) {
     currentlyEffected["users"] = policyPayloadObj.users;
     currentlyEffected["groups"] = [];
     currentlyEffected["policyType"] = policyPayloadObj.policyType;
-    currentlyEffected["correctiveActions"] = policyPayloadObj.correctiveActions;
 
     if (policyPayloadObj.deviceGroups) {
         var deviceGroups = policyPayloadObj.deviceGroups;
