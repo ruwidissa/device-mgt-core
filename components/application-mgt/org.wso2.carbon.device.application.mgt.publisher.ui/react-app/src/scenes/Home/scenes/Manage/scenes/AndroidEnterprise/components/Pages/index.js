@@ -49,8 +49,8 @@ class Pages extends React.Component {
       homePageId: null,
     };
     this.hasPermissionToManage = isAuthorized(
-      this.props.config.user,
-      '/device-mgt/enterprise/user/view',
+      this.props.context.user,
+      '/permission/admin/device-mgt/enterprise/user/modify',
     );
   }
 
@@ -63,7 +63,9 @@ class Pages extends React.Component {
   };
 
   componentDidMount() {
-    this.setHomePage();
+    if (this.hasPermissionToView) {
+      this.setHomePage();
+    }
     this.fetch();
   }
 
@@ -273,7 +275,7 @@ class Pages extends React.Component {
     return (
       <div className="layout-pages">
         <Title level={4}>Pages</Title>
-        <AddNewPage />
+        {this.hasPermissionToManage && <AddNewPage />}
         <div style={{ backgroundColor: '#ffffff', borderRadius: 5 }}>
           <Table
             columns={this.columns}
