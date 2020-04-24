@@ -63,15 +63,22 @@ class Page extends React.Component {
       links: [],
     };
     this.hasPermissionToManage = isAuthorized(
-      this.props.config.user,
-      '/device-mgt/enterprise/user/view',
+      this.props.context.user,
+      '/permission/admin/device-mgt/enterprise/user/modify',
+    );
+
+    this.hasPermissionToView = isAuthorized(
+      this.props.context.user,
+      '/permission/admin/device-mgt/enterprise/user/view',
     );
   }
 
   componentDidMount() {
-    this.fetchClusters();
-    this.fetchApplications();
-    this.fetchPages();
+    if (this.hasPermissionToView) {
+      this.fetchClusters();
+      this.fetchApplications();
+      this.fetchPages();
+    }
   }
 
   removeLoadedCluster = clusterId => {
@@ -344,12 +351,17 @@ class Page extends React.Component {
               >
                 <Row>
                   <Col md={8} sm={18} xs={24}>
-                    <Title
-                      editable={{ onChange: this.updatePageName }}
-                      level={2}
-                    >
-                      {pageName}
-                    </Title>
+                    {this.hasPermissionToManage && (
+                      <Title
+                        editable={{ onChange: this.updatePageName }}
+                        level={2}
+                      >
+                        {pageName}
+                      </Title>
+                    )}
+                    {!this.hasPermissionToManage && (
+                      <Title level={2}>{pageName}</Title>
+                    )}
                   </Col>
                 </Row>
                 <Row>
@@ -412,6 +424,7 @@ class Page extends React.Component {
                       name: 'New Cluster',
                       products: [],
                     }}
+                    hasPermissionToManage={true}
                     orderInPage={clusters.length}
                     isTemporary={true}
                     pageId={this.pageId}
