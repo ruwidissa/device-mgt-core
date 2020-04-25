@@ -305,4 +305,45 @@ public interface ApplicationManagementPublisherAdminAPI {
                     required = true)
             @PathParam("categoryName") String categoryName
     );
+
+    @PUT
+    @Consumes("application/json")
+    @Path("/retire/{appId}")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Retire the application with the given UUID",
+            notes = "This will retire the application with the given UUID",
+            tags = "Application Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = SCOPE, value = "perm:admin:app:publisher:update")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully deleted the application identified by UUID.",
+                            response = List.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n Error occurred while deleting the application.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 403,
+                            message = "Don't have permission to delete the application"),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Application not found"),
+            })
+    Response retireApplication(
+            @ApiParam(
+                    name = "UUID",
+                    value = "Unique identifier of the ApplicationDTO",
+                    required = true)
+            @PathParam("appId") int applicationId
+    );
 }

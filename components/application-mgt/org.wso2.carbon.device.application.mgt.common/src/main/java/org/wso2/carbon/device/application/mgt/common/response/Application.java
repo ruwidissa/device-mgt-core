@@ -84,6 +84,12 @@ public class Application {
             value = "Application Rating")
     private double rating;
 
+    @ApiModelProperty(name = "isDeletableApp", value = "Is Deletable Application")
+    private boolean isDeletableApp;
+
+    @ApiModelProperty(name = "isHideableApp", value = "Is Hideable application")
+    private boolean isHideableApp;
+
     @ApiModelProperty(name = "applicationReleases",
             value = "List of application releases",
             required = true)
@@ -155,6 +161,14 @@ public class Application {
     public double getRating() { return rating; }
 
     public void setRating(double rating) { this.rating = rating; }
+
+    public boolean isDeletableApp() { return isDeletableApp; }
+
+    public void setDeletableApp(boolean deletableApp) { isDeletableApp = deletableApp; }
+
+    public boolean isHideableApp() { return isHideableApp; }
+
+    public void setHideableApp(boolean hideableApp) { isHideableApp = hideableApp; }
 
     public boolean isAndroidEnterpriseApp() { return isAndroidEnterpriseApp; }
 
