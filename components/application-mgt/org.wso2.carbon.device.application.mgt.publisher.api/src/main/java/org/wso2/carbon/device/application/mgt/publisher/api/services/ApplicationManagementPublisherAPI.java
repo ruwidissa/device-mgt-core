@@ -165,10 +165,13 @@ public interface ApplicationManagementPublisherAPI {
                             response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 403,
-                            message = "Don't have permission to access the application"),
+                            message = "Forbidden. \n Don't have permission to access the application"),
                     @ApiResponse(
                             code = 404,
-                            message = "Application not found"),
+                            message = "Not Found. \n Application not found"),
+                    @ApiResponse(
+                            code = 409,
+                            message = "Conflict. \n Couldn't find an active application"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application.",
@@ -211,10 +214,13 @@ public interface ApplicationManagementPublisherAPI {
                             response = ApplicationDTO.class),
                     @ApiResponse(
                             code = 403,
-                            message = "Don't have permission to access the application release"),
+                            message = "Forbidden. \n Don't have permission to access the application release"),
                     @ApiResponse(
                             code = 404,
-                            message = "Application release not found"),
+                            message = "Not Found. \n Application release not found"),
+                    @ApiResponse(
+                            code = 409,
+                            message = "Conflict. \n Application release is in the end state of lifecycle flow"),
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n Error occurred while getting relevant application release.",

@@ -313,8 +313,8 @@ public interface ApplicationManagementPublisherAdminAPI {
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
-            value = "Retire the application with the given UUID",
-            notes = "This will retire the application with the given UUID",
+            value = "Retire the application with the given app Id",
+            notes = "This will retire the application with the given app Id",
             tags = "Application Management",
             extensions = {
                     @Extension(properties = {
@@ -326,7 +326,7 @@ public interface ApplicationManagementPublisherAdminAPI {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully deleted the application identified by UUID.",
+                            message = "OK. \n Successfully deleted the application identified by app Id.",
                             response = List.class),
                     @ApiResponse(
                             code = 500,
@@ -341,8 +341,8 @@ public interface ApplicationManagementPublisherAdminAPI {
             })
     Response retireApplication(
             @ApiParam(
-                    name = "UUID",
-                    value = "Unique identifier of the ApplicationDTO",
+                    name = "appId",
+                    value = "Application Id",
                     required = true)
             @PathParam("appId") int applicationId
     );

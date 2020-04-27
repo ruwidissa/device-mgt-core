@@ -116,9 +116,9 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         try {
             Application application = applicationManager.getApplicationById(appId, state);
             if (application == null){
-                String msg = "Could not found an application release which is in " + state + " state.";
+                String msg = "Could not found an active application which has Id: " + appId;
                 log.error(msg);
-                return Response.status(Response.Status.OK).entity(msg).build();
+                return Response.status(Response.Status.CONFLICT).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
@@ -148,7 +148,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             if (application == null){
                 String msg = "Application release is in the end state of the application lifecycle flow.";
                 log.error(msg);
-                return Response.status(Response.Status.OK).entity(msg).build();
+                return Response.status(Response.Status.CONFLICT).entity(msg).build();
             }
             return Response.status(Response.Status.OK).entity(application).build();
         } catch (NotFoundException e) {
