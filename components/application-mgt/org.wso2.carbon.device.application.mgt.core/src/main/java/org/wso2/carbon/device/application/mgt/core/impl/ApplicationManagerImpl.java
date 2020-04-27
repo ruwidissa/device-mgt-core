@@ -597,19 +597,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Override
     public ApplicationList getApplications(Filter filter) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         ApplicationList applicationList = new ApplicationList();
-        List<ApplicationDTO> appDTOs;
         List<Application> applications = new ArrayList<>();
-        List<ApplicationDTO> filteredApplications = new ArrayList<>();
-        DeviceType deviceType = null;
+        DeviceType deviceType;
 
-        //set default values
-        if (!StringUtils.isEmpty(filter.getDeviceType())) {
+        if (StringUtils.isNotBlank(filter.getDeviceType())) {
             deviceType = APIUtil.getDeviceTypeData(filter.getDeviceType());
-        }
-
-        if (deviceType == null) {
+        } else {
             deviceType = new DeviceType();
             deviceType.setId(-1);
         }
@@ -617,52 +611,50 @@ public class ApplicationManagerImpl implements ApplicationManager {
         try {
             ConnectionManagerUtil.openDBConnection();
             validateFilter(filter);
-            appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
+            List<ApplicationDTO> appDTOs = applicationDAO.getApplications(filter, deviceType.getId(), tenantId);
             for (ApplicationDTO applicationDTO : appDTOs) {
-                boolean isSearchingApp = true;
-                List<String> filteringTags = filter.getTags();
-                List<String> filteringCategories = filter.getCategories();
-                List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
-
-                if (!lifecycleStateManager.getEndState().equals(applicationDTO.getStatus())) {
-                    //get application categories, tags and unrestricted roles.
-                    List<String> appUnrestrictedRoles = visibilityDAO
-                            .getUnrestrictedRoles(applicationDTO.getId(), tenantId);
-                    List<String> appCategoryList = applicationDAO.getAppCategories(applicationDTO.getId(), tenantId);
-                    List<String> appTagList = applicationDAO.getAppTags(applicationDTO.getId(), tenantId);
-
-                    //Set application categories, tags and unrestricted roles to the application DTO.
-                    applicationDTO.setUnrestrictedRoles(appUnrestrictedRoles);
-                    applicationDTO.setAppCategories(appCategoryList);
-                    applicationDTO.setTags(appTagList);
-
-                    if ((appUnrestrictedRoles.isEmpty() || hasUserRole(appUnrestrictedRoles, userName)) && (
-                            filteringUnrestrictedRoles == null || filteringUnrestrictedRoles.isEmpty()
-                                    || hasAppUnrestrictedRole(appUnrestrictedRoles, filteringUnrestrictedRoles,
-                                    userName))) {
-                        if (filteringCategories != null && !filteringCategories.isEmpty()) {
-                            isSearchingApp = filteringCategories.stream().anyMatch(appCategoryList::contains);
-                        }
-                        if (filteringTags != null && !filteringTags.isEmpty() && isSearchingApp) {
-                            isSearchingApp = filteringTags.stream().anyMatch(appTagList::contains);
-                        }
-                        if (isSearchingApp) {
-                            filteredApplications.add(applicationDTO);
-                        }
-                    }
+                if (lifecycleStateManager.getEndState().equals(applicationDTO.getStatus())) {
+                    continue;
                 }
 
-                List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs = new ArrayList<>();
-                for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
-                    if (!applicationReleaseDTO.getCurrentState().equals(lifecycleStateManager.getEndState())) {
-                        filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
-                    }
-                }
-                applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
-            }
+                //Set application categories, tags and unrestricted roles to the application DTO.
+                applicationDTO.setUnrestrictedRoles(visibilityDAO
+                        .getUnrestrictedRoles(applicationDTO.getId(), tenantId));
+                applicationDTO.setAppCategories(applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
+                applicationDTO.setTags(applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
 
-            for (ApplicationDTO appDTO : filteredApplications) {
-                applications.add(APIUtil.appDtoToAppResponse(appDTO));
+                if (isFilteringApp(applicationDTO, filter)) {
+                    List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs = new ArrayList<>();
+                    AtomicBoolean isDeletableApp = new AtomicBoolean(true);
+                    for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
+                        String appReleaseCurrentState = applicationReleaseDTO.getCurrentState();
+                        if (!lifecycleStateManager.getEndState().equals(appReleaseCurrentState)) {
+                            if (isDeletableApp.get() && !lifecycleStateManager.isDeletableState(appReleaseCurrentState)) {
+                                isDeletableApp.set(false);
+                            }
+                            filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
+                        }
+                    }
+
+                    applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
+                    Application application = APIUtil.appDtoToAppResponse(applicationDTO);
+
+                    /*
+                     * Load the entire application again if the searched application is either deletable or all the app
+                     * releases are in the end state of the app lifecycle. App has to be reloaded because when searching
+                     * applications it may not contains all the application releases of an application.
+                     */
+                    if (isDeletableApp.get() || filteredApplicationReleaseDTOs.isEmpty()){
+                        ApplicationDTO entireApp = applicationDAO.getApplication(applicationDTO.getId(), tenantId);
+                        if (filteredApplicationReleaseDTOs.isEmpty()){
+                            application.setHideableApp(isHideableApp(entireApp.getApplicationReleaseDTOs()));
+                        }
+                        if (isDeletableApp.get()) {
+                            application.setDeletableApp(isDeletableApp(entireApp.getApplicationReleaseDTOs()));
+                        }
+                    }
+                    applications.add(application);
+                }
             }
 
             Pagination pagination = new Pagination();
@@ -679,18 +671,104 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + "requested filter.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (UserStoreException e) {
-            String msg = "User-store exception while checking whether the user " + userName + " of tenant " + tenantId
-                    + " has the publisher permission";
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
-            String msg = "DAO exception while getting applications for the user " + userName + " of tenant " + tenantId;
+            String msg =
+                    "DAO exception while getting applications of tenant " + tenantId + ". Filter: " + filter.toString();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
         }
+    }
+
+    /**
+     * To check whether the application is filtering app or not
+     *
+     * @param applicationDTO Application DTO object
+     * @param filter Filter
+     * @return false if application doesn't satisfy filters, otherwise returns true.
+     * @throws ApplicationManagementException if error occurred while checking whether user has app unrestricted roles
+     * or filtering roles.
+     */
+    private boolean isFilteringApp(ApplicationDTO applicationDTO, Filter filter) throws ApplicationManagementException {
+        String userName = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        List<String> filteringTags = filter.getTags();
+        List<String> filteringCategories = filter.getCategories();
+        List<String> filteringUnrestrictedRoles = filter.getUnrestrictedRoles();
+
+        List<String> appUnrestrictedRoles = applicationDTO.getUnrestrictedRoles();
+        List<String> appCategoryList = applicationDTO.getAppCategories();
+        List<String> appTagList = applicationDTO.getTags();
+        try {
+            if (!appUnrestrictedRoles.isEmpty() && !hasUserRole(appUnrestrictedRoles, userName)) {
+                return false;
+            }
+            if (filteringUnrestrictedRoles != null && !filteringUnrestrictedRoles.isEmpty() && !hasAppUnrestrictedRole(
+                    appUnrestrictedRoles, filteringUnrestrictedRoles, userName)) {
+                return false;
+            }
+            if (filteringCategories != null && !filteringCategories.isEmpty() && filteringCategories.stream()
+                    .noneMatch(appCategoryList::contains)) {
+                return false;
+            }
+            if (filteringTags != null && !filteringTags.isEmpty() && filteringTags.stream()
+                    .noneMatch(appTagList::contains)) {
+                return false;
+            }
+        } catch (UserStoreException e) {
+            String msg = "User-store exception while checking whether the user " + userName
+                    + " has permission to view application";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return true;
+    }
+
+    /**
+     * To check whether the application is whether hideable or not
+     *
+     * @param applicationReleaseDTOs Application releases
+     * @return true if application releases are in hideable state (i.e Retired), otherwise returns false
+     * @throws ApplicationManagementException if error occurred while getting application release end state.
+     */
+    private boolean isHideableApp(List<ApplicationReleaseDTO> applicationReleaseDTOs)
+            throws ApplicationManagementException {
+        try {
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
+                if (!lifecycleStateManager.getEndState().equals(applicationReleaseDTO.getCurrentState())) {
+                    return false;
+                }
+            }
+        } catch (LifecycleManagementException e) {
+            String msg = "Error occurred while testing application is whether hideable app or not.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return true;
+    }
+
+    /**
+     * To check whether the application is whether deletable or not
+     *
+     * @param applicationReleaseDTOs Application releases
+     * @return true if application releases are in deletable state (i.e Created or Rejected), otherwise returns false
+     * @throws ApplicationManagementException if error occurred while checking whether the application release is in
+     * deletable state or not.
+     */
+    private boolean isDeletableApp(List<ApplicationReleaseDTO> applicationReleaseDTOs)
+            throws ApplicationManagementException {
+        try {
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
+                if (!lifecycleStateManager.isDeletableState(applicationReleaseDTO.getCurrentState())) {
+                    return false;
+                }
+            }
+        } catch (LifecycleManagementException e) {
+            String msg = "Error occurred while testing application is whether deletable app or not.";
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+        return true;
     }
 
     @Override

@@ -686,31 +686,6 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
         }
     }
 
-    @PUT
-    @Path("/retire/{appId}")
-    public Response retireApplication(
-            @PathParam("appId") int applicationId) {
-        ApplicationManager applicationManager = APIUtil.getApplicationManager();
-        try {
-            applicationManager.retireApplication(applicationId);
-            return Response.status(Response.Status.OK)
-                    .entity("Successfully deleted the application for application ID: " + applicationId).build();
-        } catch (NotFoundException e) {
-            String msg =
-                    "Couldn't found application for application id: " + applicationId + " to delete the application";
-            log.error(msg, e);
-            return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
-        } catch (ForbiddenException e) {
-            String msg = "You don't have require permission to delete the application which has ID " + applicationId;
-            log.error(msg, e);
-            return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
-        } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while deleting the application: " + applicationId;
-            log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        }
-    }
-
     @GET
     @Path("/life-cycle/state-changes/{uuid}")
     public Response getLifecycleStates(
