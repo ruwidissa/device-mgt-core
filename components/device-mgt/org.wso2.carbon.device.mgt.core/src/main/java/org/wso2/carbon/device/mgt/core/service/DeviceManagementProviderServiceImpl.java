@@ -83,6 +83,7 @@ import org.wso2.carbon.device.mgt.common.DevicePropertyNotification;
 import org.wso2.carbon.device.mgt.common.DeviceEnrollmentInfoNotification;
 import org.wso2.carbon.device.mgt.common.DeviceNotification;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
@@ -261,20 +262,33 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg);
             throw new DeviceManagementException(msg);
         }
+        DeviceManager deviceManager = this.getDeviceManager(device.getType());
+        if (deviceManager == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Device Manager associated with the device type '" + device.getType() + "' is null. " +
+                          "Therefore, not attempting method 'enrollDevice'");
+            }
+            return false;
+        }
+        EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry(
+                this.getConfiguration(device.getType()));
+        String deviceSerialNumber = null;
+        if (enrollmentConfiguration != null) {
+            deviceSerialNumber = DeviceManagerUtil.getPropertyString(device.getProperties(),
+                                                                     DeviceManagementConstants.Common.SERIAL);
+            if (!DeviceManagerUtil.isDeviceEnrollable(enrollmentConfiguration, deviceSerialNumber)) {
+                String msg = "Serial number based enrollment has been enabled and device having the serial number '"
+                             + deviceSerialNumber + "' is not configured to be enrolled.";
+                log.error(msg);
+                throw new DeviceManagementException(msg);
+            }
+        }
         if (log.isDebugEnabled()) {
             log.debug("Enrolling the device " + device.getId() + "of type '" + device.getType() + "'");
         }
         boolean status = false;
         DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
 
-        DeviceManager deviceManager = this.getDeviceManager(device.getType());
-        if (deviceManager == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Device Manager associated with the device type '" + device.getType() + "' is null. " +
-                        "Therefore, not attempting method 'enrollDevice'");
-            }
-            return false;
-        }
         deviceManager.enrollDevice(device);
         if (deviceManager.isClaimable(deviceIdentifier)) {
             device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.INACTIVE);
@@ -404,6 +418,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         if (status) {
             addDeviceToGroups(deviceIdentifier, device.getEnrolmentInfo().getOwnership());
+            if (enrollmentConfiguration != null) {
+                DeviceManagerUtil.addDeviceToConfiguredGroup(enrollmentConfiguration, deviceSerialNumber,
+                                                             deviceIdentifier);
+            }
             addInitialOperations(deviceIdentifier, device.getType());
             sendNotification(device);
         }

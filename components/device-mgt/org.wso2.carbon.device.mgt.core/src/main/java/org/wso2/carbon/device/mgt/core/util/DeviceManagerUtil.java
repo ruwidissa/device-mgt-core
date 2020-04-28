@@ -14,11 +14,29 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.mgt.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -42,11 +60,14 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
@@ -66,6 +87,7 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.util.DeviceIDHolder;
 import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
+import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
@@ -90,6 +112,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -838,5 +861,169 @@ import java.util.stream.IntStream;
             return null;
         }
         return null;
+    }
+
+    /**
+     * Retrieve the value stored in a property list by passing the Key
+     * @param properties list of property
+     * @param propertyName key of the property to be retrieved
+     * @return value of the retrieved property
+     */
+    public static String getPropertyString(List<Device.Property> properties, String propertyName) {
+        if (properties != null) {
+            for (Device.Property property : properties) {
+                if (property.getName() != null && property.getName().equals(propertyName)) {
+                    return property.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the Enrollment Configuration entry added to the Platform Configuration
+     * @param platformConfiguration which has all the platform configurations added to the tenant
+     * @return enrollment configuration
+     */
+    public static EnrollmentConfiguration getEnrollmentConfigurationEntry(PlatformConfiguration platformConfiguration) {
+        if (platformConfiguration != null) {
+            String enrollmentConfigEntry  = platformConfiguration.getConfiguration().stream()
+                    .filter(configurationEntry -> DeviceManagementConstants.Common.ENROLLMENT_CONFIGURATION
+                            .equals(configurationEntry.getName()))
+                    .findFirst()
+                    .map(configurationEntry -> configurationEntry.getValue().toString()).orElse(null);
+            if (!StringUtils.isBlank(enrollmentConfigEntry)) {
+                Gson gson = new Gson();
+                return gson.fromJson(enrollmentConfigEntry, EnrollmentConfiguration.class);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Validates if the device is allowed to be enrolled based on the device serial number.
+     * Enrollment Configuration which has been added in Platform Configuration has the validation factors.
+     * Validation happens in two ways,
+     * 1. List of Serial Numbers - If this is available checks if the device to be enrolled serial number is
+     * in the given list of serial numbers
+     * 2. List of Serial Numbers against a User - If [1] is missing and this is available checks if the device
+     * to be enrolled serial number is in the list of serial numbers which are against a User
+     * @param enrollmentConfiguration which has the enrollment configurations of a tenant
+     * @param deviceSerialNumber device serial number to be validated
+     * @return a boolean value if the device can be enrolled
+     */
+    public static boolean isDeviceEnrollable(EnrollmentConfiguration enrollmentConfiguration,
+                                             String deviceSerialNumber) {
+        // enrollment configuration has not been set
+        if (enrollmentConfiguration == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Enrollment configuration in platform configuration has not been set "
+                          + "hence device can be enrolled.");
+            }
+            return true;
+        } else {
+            List<String> enrollmentConfigSerialNumbers = enrollmentConfiguration.getSerialNumbers();
+            if (enrollmentConfigSerialNumbers != null && !enrollmentConfigSerialNumbers.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("List of serial numbers '" + enrollmentConfigSerialNumbers.toString() + "' has been"
+                              + " added for enrollment configuration under platform configuration to validate "
+                              + "the serial number '" + deviceSerialNumber + "'.");
+                }
+                return enrollmentConfigSerialNumbers.stream().anyMatch(deviceSerialNumber::equals);
+            } else {
+                String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+                List<EnrollmentConfiguration.UserConfiguration> userConfigurations = enrollmentConfiguration
+                        .getUserConfigurations();
+                if (userConfigurations != null && !userConfigurations.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("List of serial numbers against users has been added for enrollment "
+                                  + "configuration under platform configuration.");
+                    }
+                    return userConfigurations.stream()
+                            .filter(userConfiguration -> username.equals(userConfiguration.getUsername())).findFirst()
+                            .filter(userConfiguration -> userConfiguration.getSerialNumbers().stream()
+                                    .anyMatch(deviceSerialNumber::equals)).isPresent();
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Enrollment configuration has been but configuration does not contain any "
+                                  + "serial number based validation. It may be having the configuration to push "
+                                  + "devices to a specific group after a successful enrollment.");
+                    }
+                    // enrollment configuration has been set only to add device to a specific group and not to
+                    // validate device against serial number
+                    return true;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Add devices to the configured groups.
+     * Enrollment Configuration which has been added in Platform Configuration has this configuration.
+     * @param enrollmentConfiguration which has the group configurations of a tenant
+     * @param deviceSerialNumber serial number of the device
+     * @param deviceIdentifier of the device
+     * @throws DeviceManagementException when there is an error trying to add the device to the specified group
+     */
+    public static void addDeviceToConfiguredGroup(EnrollmentConfiguration enrollmentConfiguration,
+                                                  String deviceSerialNumber,
+                                                  DeviceIdentifier deviceIdentifier) throws DeviceManagementException {
+        // enrollment configuration has not been set
+        if (enrollmentConfiguration == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Enrollment configuration in platform configuration has not been set "
+                          + "hence not adding to any specific group.");
+            }
+        } else {
+            List<EnrollmentConfiguration.GroupConfiguration> groupConfigurations = enrollmentConfiguration
+                    .getGroupConfigurations();
+            if (groupConfigurations != null && !groupConfigurations.isEmpty()) {
+                String groupName = groupConfigurations.stream()
+                        .filter(groupConfiguration -> groupConfiguration.getSerialNumbers()
+                                .stream().anyMatch(deviceSerialNumber::equals))
+                        .findFirst().map(EnrollmentConfiguration.GroupConfiguration::getGroupName).orElse(null);
+                if (log.isDebugEnabled()) {
+                    log.debug("Enrollment configuration having group configuration has been configured under "
+                              + "platform configuration");
+                }
+                if (groupName != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Device identifier '" + deviceIdentifier.getId() + "' of device type '"
+                                  + deviceIdentifier.getType() + "' which has the serial number '" + deviceSerialNumber
+                                  + "' has been configured to be added to the group '" + groupName + "'.");
+                    }
+                    GroupManagementProviderService groupManagementProviderService = DeviceManagementDataHolder
+                            .getInstance().getGroupManagementProviderService();
+                    try {
+                        DeviceGroup deviceGroup = groupManagementProviderService.getGroup(groupName, false);
+                        if (deviceGroup != null) {
+                            List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
+                            deviceIdentifiers.add(deviceIdentifier);
+                            groupManagementProviderService.addDevices(deviceGroup.getGroupId(), deviceIdentifiers);
+                        } else {
+                            log.warn("Group name: " + groupName + " configured for device "
+                                     + deviceIdentifier.toString() + " is invalid because the group does not exist.");
+                        }
+                    } catch (GroupManagementException e) {
+                        String msg = "Error occurred while trying to add the device '" + deviceIdentifier.getId() +
+                                     "' of device type '" + deviceIdentifier.getType() + "' to the group '"
+                                     + groupName + "' which was configured via enrollment configuration of platform "
+                                     + "configuration.";
+                        log.error(msg);
+                        throw new DeviceManagementException(msg, e);
+                    } catch (DeviceNotFoundException e) {
+                        String msg = "Device having device identifier '" + deviceIdentifier.getId()
+                                     + "' of device type '" + deviceIdentifier.getType() + "' could not be found to "
+                                     + "add the device to the group '" + groupName + "' which was configured via "
+                                     + "enrollment configuration of platform " + "configuration.";
+                        log.error(msg);
+                        throw new DeviceManagementException(msg, e);
+                    }
+                }
+
+            }
+        }
+
     }
 }
