@@ -18,9 +18,12 @@
 
 package org.wso2.carbon.device.mgt.common.configuration.mgt;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class EnrollmentConfiguration {
+public class EnrollmentConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 9141110402306622023L;
 
     private List<String> serialNumbers;
     private List<UserConfiguration> userConfigurations;
@@ -52,7 +55,10 @@ public class EnrollmentConfiguration {
         this.groupConfigurations = groupConfigurations;
     }
 
-    public class UserConfiguration {
+    public class UserConfiguration implements Serializable {
+
+        private static final long serialVersionUID = 2787527415452188898L;
+
         private String username;
         private List<String> serialNumbers;
 
@@ -73,7 +79,10 @@ public class EnrollmentConfiguration {
         }
     }
 
-    public class GroupConfiguration {
+    public class GroupConfiguration implements Serializable {
+
+        private static final long serialVersionUID = 6168826487754358181L;
+
         private String groupName;
         private List<String> serialNumbers;
 
