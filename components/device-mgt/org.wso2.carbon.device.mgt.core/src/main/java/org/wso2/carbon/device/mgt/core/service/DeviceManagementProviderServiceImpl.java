@@ -262,6 +262,14 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.error(msg);
             throw new DeviceManagementException(msg);
         }
+        DeviceManager deviceManager = this.getDeviceManager(device.getType());
+        if (deviceManager == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Device Manager associated with the device type '" + device.getType() + "' is null. " +
+                          "Therefore, not attempting method 'enrollDevice'");
+            }
+            return false;
+        }
         EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry(
                 this.getConfiguration(device.getType()));
         String deviceSerialNumber = null;
@@ -281,14 +289,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         boolean status = false;
         DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
 
-        DeviceManager deviceManager = this.getDeviceManager(device.getType());
-        if (deviceManager == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Device Manager associated with the device type '" + device.getType() + "' is null. " +
-                        "Therefore, not attempting method 'enrollDevice'");
-            }
-            return false;
-        }
         deviceManager.enrollDevice(device);
         if (deviceManager.isClaimable(deviceIdentifier)) {
             device.getEnrolmentInfo().setStatus(EnrolmentInfo.Status.INACTIVE);
