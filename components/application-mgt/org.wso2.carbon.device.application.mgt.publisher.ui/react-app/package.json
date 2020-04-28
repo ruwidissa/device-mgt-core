@@ -11,6 +11,7 @@
   "license": "Apache License 2.0",
   "dependencies": {
     "@ant-design/dark-theme": "^0.2.2",
+    "@ant-design/icons": "^4.0.6",
     "@babel/polyfill": "^7.6.0",
     "acorn": "^6.2.0",
     "antd": "^3.23.6",
@@ -25,6 +26,7 @@
     "fetch": "^1.1.0",
     "imagemin": "^6.1.0",
     "keymirror": "^0.1.1",
+    "lodash.debounce": "latest",
     "rc-tween-one": "^2.4.1",
     "react-d3-graph": "^2.1.0",
     "react-highlight-words": "^0.16.0",
@@ -39,8 +41,7 @@
     "redux-thunk": "^2.3.0",
     "shade-blend-color": "^1.0.0",
     "storm-react-diagrams": "^5.2.1",
-    "typescript": "^3.6.4",
-    "lodash.debounce": "latest"
+    "typescript": "^3.6.4"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",

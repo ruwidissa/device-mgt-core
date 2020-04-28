@@ -33,6 +33,8 @@ import {
   Card,
   Badge,
   Tooltip,
+  Dropdown,
+  Menu,
 } from 'antd';
 import DetailedRating from '../../../../DetailedRating';
 import { Link } from 'react-router-dom';
@@ -46,6 +48,9 @@ import ManagedConfigurationsIframe from './components/ManagedConfigurationsIfram
 import { handleApiError } from '../../../../../../../../../services/utils/errorHandler';
 import Authorized from '../../../../../../../../../components/Authorized/Authorized';
 import { isAuthorized } from '../../../../../../../../../services/utils/authorizationHandler';
+import { MoreOutlined } from '@ant-design/icons';
+import DeleteApp from './components/DeleteApp';
+import RetireApp from './components/RetireApp';
 
 const { Meta } = Card;
 const { Text, Title } = Typography;
@@ -485,6 +490,7 @@ class AppDetailsDrawer extends React.Component {
     if (app == null) {
       return null;
     }
+    const { id } = this.props.app;
 
     let avatar = null;
 
@@ -527,6 +533,36 @@ class AppDetailsDrawer extends React.Component {
           visible={visible}
         >
           <Spin spinning={loading} delay={500}>
+            <div className="app-details-drawer">
+              <Dropdown
+                trigger={['click']}
+                overlay={
+                  <Menu>
+                    <Menu.Item key="0">
+                      <DeleteApp id={id} isDeletableApp={app.isDeletableApp} />
+                    </Menu.Item>
+                    <Menu.Item key="1">
+                      <RetireApp id={id} isHideableApp={app.isHideableApp} />
+                    </Menu.Item>
+                    {config.androidEnterpriseToken !== null &&
+                      isAuthorized(
+                        config.user,
+                        '/permission/admin/device-mgt/enterprise/user/modify',
+                      ) && (
+                        <Menu.Item key="2">
+                          <ManagedConfigurationsIframe
+                            isEnabled={app.isAndroidEnterpriseApp}
+                            style={{ paddingTop: 16 }}
+                            packageName={app.packageName}
+                          />
+                        </Menu.Item>
+                      )}
+                  </Menu>
+                }
+              >
+                <MoreOutlined style={{ fontSize: 34 }} />
+              </Dropdown>
+            </div>
             <div style={{ textAlign: 'center' }}>
               {avatar}
               <Authorized
@@ -540,38 +576,6 @@ class AppDetailsDrawer extends React.Component {
               />
             </div>
             <Divider />
-            {/* display manage config button only if the app is public android app*/}
-            {app.isAndroidEnterpriseApp &&
-              config.androidEnterpriseToken !== null && (
-                <Authorized
-                  permission="/permission/admin/device-mgt/enterprise/user/modify"
-                  yes={
-                    <div>
-                      <div>
-                        <Text strong={true}>Set up managed configurations</Text>
-                      </div>
-                      <div style={{ paddingTop: 16 }}>
-                        <Text>
-                          If you are developing apps for the enterprise market,
-                          you may need to satisfy particular requirements set by
-                          a organization&apos;s policies. Managed
-                          configurations, previously known as application
-                          restrictions, allow the organization&apos;s IT admin
-                          to remotely specify settings for apps. This capability
-                          is particularly useful for organization-approved apps
-                          deployed to a work profile.
-                        </Text>
-                      </div>
-                      <br />
-                      <ManagedConfigurationsIframe
-                        style={{ paddingTop: 16 }}
-                        packageName={app.packageName}
-                      />
-                      <Divider dashed={true} />
-                    </div>
-                  }
-                />
-              )}
             <Text strong={true}>Releases </Text>
             <div className="releases-details">
               <List

@@ -35,3 +35,11 @@
     }
 
 }
+
+.app-details-drawer {
+    text-align: right
+}
+
+.btn-view-more {
+    color: rgba(0, 0, 0, 0.65) !important;
+}
