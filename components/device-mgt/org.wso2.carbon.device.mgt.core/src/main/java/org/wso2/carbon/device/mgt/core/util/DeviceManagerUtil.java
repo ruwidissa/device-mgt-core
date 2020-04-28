@@ -1001,6 +1001,9 @@ import java.util.stream.IntStream;
                             List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
                             deviceIdentifiers.add(deviceIdentifier);
                             groupManagementProviderService.addDevices(deviceGroup.getGroupId(), deviceIdentifiers);
+                        } else {
+                            log.warn("Group name: " + groupName + " configured for device "
+                                     + deviceIdentifier.toString() + " is invalid because the group does not exist.");
                         }
                     } catch (GroupManagementException e) {
                         String msg = "Error occurred while trying to add the device '" + deviceIdentifier.getId() +
