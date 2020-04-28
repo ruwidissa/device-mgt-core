@@ -196,10 +196,10 @@ public class ApplicationManagementPublisherAdminAPIImpl implements ApplicationMa
         try {
             applicationManager.retireApplication(applicationId);
             return Response.status(Response.Status.OK)
-                    .entity("Successfully deleted the application for application ID: " + applicationId).build();
+                    .entity("Successfully retired the application which has application ID: " + applicationId).build();
         } catch (NotFoundException e) {
-            String msg =
-                    "Couldn't found application for application id: " + applicationId + " to delete the application";
+            String msg = "Couldn't found application for application id: " + applicationId + " to delete the "
+                    + "application";
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (ForbiddenException e) {
