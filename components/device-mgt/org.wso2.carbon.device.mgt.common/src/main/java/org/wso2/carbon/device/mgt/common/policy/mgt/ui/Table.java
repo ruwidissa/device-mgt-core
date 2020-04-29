@@ -26,10 +26,24 @@ import java.util.List;
 public class Table {
 
     List<Column> columns;
+    TableValidation tableValidation;
+    RowValidation rowValidation;
 
     @XmlElementWrapper(name = "Columns")
     @XmlElement(name = "Column")
     public List<Column> getColumns() { return columns; }
 
     public void setColumns(List<Column> columns) { this.columns = columns; }
+
+    @XmlElement(name = "TableValidation")
+    public TableValidation getTableValidation() { return tableValidation; }
+
+    public void setTableValidation(TableValidation tableValidation) { this.tableValidation = tableValidation; }
+
+    @XmlElement(name = "RowValidation")
+    public RowValidation getRowValidation() { return rowValidation; }
+
+    public void setRowValidation(RowValidation rowValidation) { this.rowValidation = rowValidation; }
+
+
 }

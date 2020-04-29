@@ -18,6 +18,7 @@
 package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "Column")
@@ -25,6 +26,10 @@ public class Column {
 
     private String name;
     private String valueType;
+    private String key;
+    private String value;
+    private Select select;
+    private Input input;
 
     @XmlAttribute(name = "name", required = true)
     public String getName() { return name; }
@@ -35,4 +40,40 @@ public class Column {
     public String getValueType() { return valueType; }
 
     public void setValueType(String valueType) { this.valueType = valueType; }
+
+    @XmlElement(name = "Key")
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    @XmlElement(name = "Value")
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @XmlElement(name = "Select")
+    public Select getSelect() {
+        return select;
+    }
+
+    public void setSelect(Select select) {
+        this.select = select;
+    }
+
+    @XmlElement(name = "Input")
+    public Input getInput() {
+        return input;
+    }
+
+    public void setInput(Input input) {
+        this.input = input;
+    }
 }
