@@ -53,6 +53,12 @@ public class Constants {
 	public static final String DEFAULT_SIMPLE_DATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
 	public static final int DEFAULT_PAGE_LIMIT = 50;
 	public static final String FORWARD_SLASH = "/";
+	public static final String ANDROID = "android";
+	public static final String ANDROID_POLICY_VALIDATOR = "io.entgra.proprietary.platform.android." +
+			"core.polcy.AndroidPolicyPayloadValidator";
+	public static final String IOS = "ios";
+	public static final String WINDOWS = "windows";
+
 
 
 	public final class ErrorMessages {

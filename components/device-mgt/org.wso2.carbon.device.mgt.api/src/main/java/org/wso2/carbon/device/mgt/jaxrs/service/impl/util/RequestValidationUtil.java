@@ -22,12 +22,18 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
-import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
-import org.wso2.carbon.device.mgt.jaxrs.beans.*;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
+import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
+import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
+import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import org.wso2.carbon.policy.mgt.common.PolicyPayloadValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -273,12 +279,67 @@ public class RequestValidationUtil {
         }
     }
 
-    public static void validatePolicyDetails(PolicyWrapper policyWrapper) {
+    public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validatePolicyDetails(PolicyWrapper policyWrapper) {
         if (policyWrapper == null) {
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Policy is empty.").build());
         }
+
+        return validateProfileFeatures(policyWrapper.getProfile().getProfileFeaturesList());
     }
+
+    public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validateProfileFeatures
+            (List<ProfileFeature> profileFeatures) {
+        List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features
+                = new ArrayList<>();
+        String deviceType = null;
+        for (ProfileFeature profileFeature : profileFeatures) {
+            deviceType = profileFeature.getDeviceTypeId();
+            org.wso2.carbon.policy.mgt.common.ProfileFeature feature = new org
+                    .wso2.carbon.policy.mgt.common.ProfileFeature();
+            feature.setContent(profileFeature.getContent());
+            feature.setDeviceType(profileFeature.getDeviceTypeId());
+            feature.setFeatureCode(profileFeature.getFeatureCode());
+            feature.setPayLoad(profileFeature.getPayLoad());
+            features.add(feature);
+        }
+
+        try {
+            Class<?> clz;
+            switch (deviceType) {
+                case Constants.ANDROID:
+                    clz = Class.forName(Constants.ANDROID_POLICY_VALIDATOR);
+                    PolicyPayloadValidator enrollmentNotifier = (PolicyPayloadValidator) clz.newInstance();
+                    return enrollmentNotifier.validate(features);
+
+                default:
+                    log.error("No policy validator found for device type  " + deviceType);
+            }
+        } catch (InstantiationException e) {
+            String msg = "Error when creating an instance of validator related to deviceType " +
+                    deviceType;
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
+                            ());
+        } catch (IllegalAccessException e) {
+            String msg = "Error when accessing an instance of validator related to deviceType " +
+                    deviceType;
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
+                            ());
+        } catch (ClassNotFoundException e) {
+            String msg ="Error when loading an instance of validator related to deviceType " +
+                    deviceType;
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
+                            ());
+        }
+        return null;
+    }
+
 
     public static void validatePolicyIds(List<Integer> policyIds) {
         if (policyIds == null || policyIds.size() == 0) {
