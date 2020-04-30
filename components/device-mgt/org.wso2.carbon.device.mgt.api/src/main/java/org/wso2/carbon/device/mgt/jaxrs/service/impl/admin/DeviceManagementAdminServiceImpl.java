@@ -46,6 +46,8 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
 import org.wso2.carbon.device.mgt.common.general.TenantDetail;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
@@ -62,6 +64,7 @@ import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -242,5 +245,32 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             return Response.status(Response.Status.BAD_REQUEST).entity("This API is available " +
                     "for super tenant admin only.").build();
         }
+    }
+
+
+    @POST
+    @Path("/permissions")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response addPermission(List<String> permissions) {
+        String PERMISSION_PREFIX = "/permission/admin";
+        PermissionManagerService permissionService = DeviceMgtAPIUtils.getPermissionManagerService();
+        org.wso2.carbon.device.mgt.common.permission.mgt.Permission permission = new org
+                .wso2.carbon.device.mgt.common.permission.mgt.Permission();
+
+        for (String path : permissions) {
+            path = PERMISSION_PREFIX + path;
+            permission.setPath(path);
+            permission.setUrl(path);
+            try {
+                permissionService.addPermission(permission);
+            } catch (PermissionManagementException e) {
+                String msg = "Error occurred adding permission";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+        }
+        return Response.status(Response.Status.OK).build();
+
     }
 }

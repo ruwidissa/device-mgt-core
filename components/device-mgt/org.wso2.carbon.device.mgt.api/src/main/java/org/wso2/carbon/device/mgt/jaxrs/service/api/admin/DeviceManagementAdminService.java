@@ -107,6 +107,12 @@ import java.util.List;
                         description = "Getting Details of Device tenants",
                         key = "perm:admin:tenant:view",
                         permissions = {"/device-mgt/devices/tenants/view"}
+                ),
+                @Scope(
+                        name = "Add a permission to the permission tree",
+                        description = "Add a permission to the permission tree",
+                        key = "perm:admin:permissions:add",
+                        permissions = {"/device-mgt/devices/permissions/add"}
                 )
         }
 )
@@ -410,4 +416,49 @@ public interface DeviceManagementAdminService {
                     response = ErrorResponse.class)
     })
     Response getTenants();
+
+
+    @POST
+    @Path("/permissions")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add permission to the tree",
+            notes = "Add permission to the tree.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value =
+                                    "perm:admin:permissions:add")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully update the owner of devices.",
+                    response = DeviceList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching " +
+                            "adding permission to the tree.",
+                    response = ErrorResponse.class)
+    })
+    Response addPermission(List<String> permissions);
+
 }
