@@ -320,21 +320,21 @@ public class RequestValidationUtil {
                     deviceType;
             log.error(msg);
             throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
                             ());
         } catch (IllegalAccessException e) {
             String msg = "Error when accessing an instance of validator related to deviceType " +
                     deviceType;
             log.error(msg);
             throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
                             ());
         } catch (ClassNotFoundException e) {
             String msg ="Error when loading an instance of validator related to deviceType " +
                     deviceType;
             log.error(msg);
             throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build
+                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
                             ());
         }
         return null;
