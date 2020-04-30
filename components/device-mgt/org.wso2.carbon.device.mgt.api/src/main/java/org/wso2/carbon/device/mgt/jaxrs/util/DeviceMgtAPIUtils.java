@@ -46,6 +46,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
@@ -466,6 +467,16 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException("DeviceImpl search manager service is not initialized.");
         }
         return searchManagerService;
+    }
+
+    public static PermissionManagerService getPermissionManagerService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        PermissionManagerService PermissionManagerService =
+                (PermissionManagerService) ctx.getOSGiService(PermissionManagerService.class, null);
+        if (PermissionManagerService == null) {
+            throw new IllegalStateException("Permission manager service is not initialized.");
+        }
+        return PermissionManagerService;
     }
 
     public static GeoLocationProviderService getGeoService() {
