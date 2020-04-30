@@ -316,14 +316,26 @@ public class RequestValidationUtil {
                     log.error("No policy validator found for device type  " + deviceType);
             }
         } catch (InstantiationException e) {
-            log.error("Error when creating an instance of validator related to deviceType " +
-                    deviceType);
+            String msg = "Error when creating an instance of validator related to deviceType " +
+                    deviceType;
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build
+                            ());
         } catch (IllegalAccessException e) {
-            log.error("Error when accessing an instance of validator related to deviceType " +
-                    deviceType);
+            String msg = "Error when accessing an instance of validator related to deviceType " +
+                    deviceType;
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build
+                            ());
         } catch (ClassNotFoundException e) {
-            log.error("Error when loading an instance of validator related to deviceType " +
-                    deviceType);
+            String msg ="Error when loading an instance of validator related to deviceType " +
+                    deviceType;
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(msg).build
+                            ());
         }
         return null;
     }
