@@ -17,10 +17,12 @@
  */
 
 import React from 'react';
-import { Button, Modal, notification, Spin } from 'antd';
+import { Button, Modal, notification, Popover, Spin, Tooltip } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../../../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../../../../../../services/utils/errorHandler';
+import { SettingOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import '../../styles.css';
 
 class ManagedConfigurationsIframe extends React.Component {
   constructor(props) {
@@ -29,6 +31,7 @@ class ManagedConfigurationsIframe extends React.Component {
     this.state = {
       visible: false,
       loading: false,
+      isHintVisible: false,
     };
   }
 
@@ -201,26 +204,69 @@ class ManagedConfigurationsIframe extends React.Component {
       });
   };
 
+  handleHintVisibleChange = visible => {
+    this.setState({ isHintVisible: visible });
+  };
+
   render() {
     return (
       <div>
-        <Button
-          size="small"
-          type="primary"
-          icon="setting"
-          onClick={this.showModal}
-        >
-          Manage
-        </Button>
+        {this.props.isEnabled && (
+          <Button
+            type="link"
+            className="btn-view-more"
+            onClick={this.showModal}
+          >
+            <SettingOutlined /> Managed Configurations
+          </Button>
+        )}
+        {!this.props.isEnabled && (
+          <Tooltip
+            placement="leftTop"
+            title="Managed configurations are available only with android enterprise apps."
+          >
+            <Button type="link" className="btn-view-more" disabled={true}>
+              <SettingOutlined /> Managed Configurations
+            </Button>
+          </Tooltip>
+        )}
         <Modal
           visible={this.state.visible}
           onOk={this.handleOk}
           onCancel={this.handleCancel}
           footer={null}
         >
-          <Spin spinning={this.state.loading}>
-            <div id="manage-config-iframe-container"></div>
-          </Spin>
+          <div>
+            <Popover
+              title={null}
+              trigger="click"
+              visible={this.state.isHintVisible}
+              content={
+                <p>
+                  If you are developing apps for the enterprise market, you may
+                  need to satisfy particular requirements set by a
+                  organization&quot;s policies. Managed configurations,
+                  previously previously known as application restrictions, allow
+                  the organization&quot;s IT admin to remotely specify settings
+                  for apps. This capability is particularly useful for
+                  organization-approved apps deployed to a work profile.
+                </p>
+              }
+              onVisibleChange={this.handleHintVisibleChange}
+              overlayStyle={{ width: 300 }}
+            >
+              <Button
+                size="large"
+                type="link"
+                style={{ marginTop: -56, fontSize: '1.2em' }}
+              >
+                <QuestionCircleOutlined />
+              </Button>
+            </Popover>
+            <Spin spinning={this.state.loading}>
+              <div id="manage-config-iframe-container"></div>
+            </Spin>
+          </div>
         </Modal>
       </div>
     );
