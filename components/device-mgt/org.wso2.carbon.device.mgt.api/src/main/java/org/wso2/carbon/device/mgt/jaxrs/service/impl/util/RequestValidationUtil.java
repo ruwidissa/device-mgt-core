@@ -24,7 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
@@ -33,8 +35,11 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
 import org.wso2.carbon.device.mgt.jaxrs.beans.RoleInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.Scope;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
+import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
 import org.wso2.carbon.policy.mgt.common.PolicyPayloadValidator;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -279,65 +284,115 @@ public class RequestValidationUtil {
         }
     }
 
-    public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validatePolicyDetails(PolicyWrapper policyWrapper) {
+    public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validatePolicyDetails(
+            PolicyWrapper policyWrapper) {
         if (policyWrapper == null) {
+            String msg = "Found an empty policy";
+            log.error(msg);
             throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage("Policy is empty.").build());
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg)
+                            .build());
         }
-
         return validateProfileFeatures(policyWrapper.getProfile().getProfileFeaturesList());
     }
 
     public static List<org.wso2.carbon.policy.mgt.common.ProfileFeature> validateProfileFeatures
             (List<ProfileFeature> profileFeatures) {
-        List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features
-                = new ArrayList<>();
-        String deviceType = null;
-        for (ProfileFeature profileFeature : profileFeatures) {
-            deviceType = profileFeature.getDeviceTypeId();
-            org.wso2.carbon.policy.mgt.common.ProfileFeature feature = new org
-                    .wso2.carbon.policy.mgt.common.ProfileFeature();
-            feature.setContent(profileFeature.getContent());
-            feature.setDeviceType(profileFeature.getDeviceTypeId());
-            feature.setFeatureCode(profileFeature.getFeatureCode());
-            feature.setPayLoad(profileFeature.getPayLoad());
-            features.add(feature);
-        }
 
-        try {
-            Class<?> clz;
-            switch (deviceType) {
+        if (profileFeatures.isEmpty()) {
+            String msg = "Found Empty Policy Feature list to validate.";
+            log.error(msg);
+            throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                    .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        } else {
+            List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features = new ArrayList<>();
+            String deviceType = null;
+            for (ProfileFeature profileFeature : profileFeatures) {
+                if (StringUtils.isBlank(profileFeature.getDeviceTypeId())) {
+                    String msg = "Found an invalid policy feature with empty device type data.";
+                    log.error(msg);
+                    throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                }
+                if (deviceType != null && !deviceType.equals(profileFeature.getDeviceTypeId())) {
+                    String msg = "Found two different device types in profile feature list.";
+                    log.error(msg);
+                    throw new InputValidationException(new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+                }
+                deviceType = profileFeature.getDeviceTypeId();
+                org.wso2.carbon.policy.mgt.common.ProfileFeature feature = new org.wso2.carbon.policy.mgt.common.ProfileFeature();
+                feature.setContent(profileFeature.getContent());
+                feature.setDeviceType(profileFeature.getDeviceTypeId());
+                feature.setFeatureCode(profileFeature.getFeatureCode());
+                feature.setPayLoad(profileFeature.getPayLoad());
+                features.add(feature);
+            }
+
+            try {
+                DeviceType deviceTypeObj = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceType(deviceType);
+                if (deviceTypeObj == null) {
+                    String msg = "Found an unsupported device type to validate profile feature.";
+                    log.error(msg);
+                    throw new InputValidationException(
+                            new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg)
+                                    .build());
+                }
+
+                Class<?> clz;
+                switch (deviceTypeObj.getName()) {
                 case Constants.ANDROID:
                     clz = Class.forName(Constants.ANDROID_POLICY_VALIDATOR);
-                    PolicyPayloadValidator enrollmentNotifier = (PolicyPayloadValidator) clz.newInstance();
+                    PolicyPayloadValidator enrollmentNotifier = (PolicyPayloadValidator) clz.getDeclaredConstructor()
+                            .newInstance();
                     return enrollmentNotifier.validate(features);
-
+                case Constants.IOS:
+                    //todo
+                case Constants.WINDOWS:
+                    //todo
                 default:
                     log.error("No policy validator found for device type  " + deviceType);
+                    break;
+                }
+            } catch (DeviceManagementException e) {
+                String msg = "Error occurred when validating whether device type is valid one or not " + deviceType;
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                                .setMessage(msg).build());
+            } catch (InstantiationException e) {
+                String msg = "Error when creating an instance of validator related to deviceType " + deviceType;
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                                .setMessage(msg).build());
+            } catch (IllegalAccessException e) {
+                String msg = "Error when accessing an instance of validator related to deviceType " + deviceType;
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                                .setMessage(msg).build());
+            } catch (ClassNotFoundException e) {
+                String msg = "Error when loading an instance of validator related to deviceType " + deviceType;
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                                .setMessage(msg).build());
+            } catch (NoSuchMethodException e) {
+                String msg = "Error occurred while constructing validator related to deviceType " + deviceType;
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                                .setMessage(msg).build());
+            } catch (InvocationTargetException e) {
+                String msg = "Error occurred while instantiating validator related to deviceType " + deviceType;
+                log.error(msg, e);
+                throw new InputValidationException(
+                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                                .setMessage(msg).build());
             }
-        } catch (InstantiationException e) {
-            String msg = "Error when creating an instance of validator related to deviceType " +
-                    deviceType;
-            log.error(msg);
-            throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
-                            ());
-        } catch (IllegalAccessException e) {
-            String msg = "Error when accessing an instance of validator related to deviceType " +
-                    deviceType;
-            log.error(msg);
-            throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
-                            ());
-        } catch (ClassNotFoundException e) {
-            String msg ="Error when loading an instance of validator related to deviceType " +
-                    deviceType;
-            log.error(msg);
-            throw new InputValidationException(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(msg).build
-                            ());
+            return features;
         }
-        return null;
     }
 
 
