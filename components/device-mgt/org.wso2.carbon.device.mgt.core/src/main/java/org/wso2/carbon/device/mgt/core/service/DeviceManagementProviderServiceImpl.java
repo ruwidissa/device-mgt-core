@@ -122,7 +122,6 @@ import org.wso2.carbon.device.mgt.common.push.notification.NotificationStrategy;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformVersion;
-import org.wso2.carbon.device.mgt.common.ui.policy.mgt.PolicyConfigurationManager;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.DeviceManagementPluginRepository;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
@@ -242,17 +241,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new DeviceTypeNotFoundException("Device type '" + deviceType + "' not found.");
         }
         return deviceManager.getFeatureManager();
-    }
-
-    @Override
-    public PolicyConfigurationManager getPolicyUIConfigurationManager(String deviceType) throws DeviceTypeNotFoundException {
-        DeviceManager deviceManager = this.getDeviceManager(deviceType);
-        if (deviceManager == null) {
-            String msg = "Device type '" + deviceType + "' not found.";
-            log.error(msg);
-            throw new DeviceTypeNotFoundException(msg);
-        }
-        return deviceManager.getPolicyUIConfigurationManager();
     }
 
     @Override
