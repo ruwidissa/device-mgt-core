@@ -2,7 +2,6 @@ package org.wso2.carbon.device.mgt.common.type.mgt;
 
 import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
-import org.wso2.carbon.device.mgt.common.ui.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
 
@@ -12,7 +11,6 @@ public class DeviceTypeMetaDefinition {
 
     private List<String> properties;
     private List<Feature> features;
-    private List<Policy> policies;
     private boolean claimable;
     private PushNotificationConfig pushNotificationConfig;
     private boolean policyMonitoringEnabled;
@@ -43,14 +41,6 @@ public class DeviceTypeMetaDefinition {
 
     public void setFeatures(List<Feature> features) {
         this.features = features;
-    }
-
-    public List<Policy> getPolicies() {
-        return policies;
-    }
-
-    public void setPolicies(List<Policy> policies) {
-        this.policies = policies;
     }
 
     public boolean isClaimable() {

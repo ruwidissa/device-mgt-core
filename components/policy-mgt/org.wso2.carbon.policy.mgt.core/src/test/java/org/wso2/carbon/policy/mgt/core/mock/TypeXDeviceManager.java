@@ -43,7 +43,6 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
-import org.wso2.carbon.device.mgt.common.ui.policy.mgt.PolicyConfigurationManager;
 
 import java.util.List;
 
@@ -51,11 +50,6 @@ public class TypeXDeviceManager implements DeviceManager {
 
     @Override
     public FeatureManager getFeatureManager() {
-        return null;
-    }
-
-    @Override
-    public PolicyConfigurationManager getPolicyUIConfigurationManager() {
         return null;
     }
 

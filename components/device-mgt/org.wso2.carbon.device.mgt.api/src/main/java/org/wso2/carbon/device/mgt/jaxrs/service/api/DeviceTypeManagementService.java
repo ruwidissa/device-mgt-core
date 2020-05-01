@@ -327,67 +327,6 @@ public interface DeviceTypeManagementService {
             @HeaderParam("If-Modified-Since")
                     String ifModifiedSince);
 
-
-    @GET
-    @Path("/{type}/ui-policy-configurations")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Get Policy details of a Device Type",
-            notes = "Get the json object to generate policy configuration form from xml in plugin",
-            tags = "Device Type Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:policies:get-details")
-                    })
-            }
-    )
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            code = 200,
-                            message = "OK. \n Successfully fetched the policy configurations.",
-                            response = DeviceTypeList.class,
-                            responseHeaders = {
-                                    @ResponseHeader(
-                                            name = "Content-Type",
-                                            description = "The content type of the body"),
-                                    @ResponseHeader(
-                                            name = "ETag",
-                                            description = "Entity Tag of the response resource.\n" +
-                                                    "Used by caches, or in conditional requests."),
-                                    @ResponseHeader(
-                                            name = "Last-Modified",
-                                            description =
-                                                    "Date and time the resource was last modified.\n" +
-                                                            "Used by caches, or in conditional requests."),
-                            }
-                    ),
-                    @ApiResponse(
-                            code = 400,
-                            message = "Bad Request. \n Invalid request.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
-                            code = 404,
-                            message = "Not Found. \n Policy Configurations data for the specified device type was not found.",
-                            response = ErrorResponse.class),
-                    @ApiResponse(
-                            code = 500,
-                            message = "Internal Server Error. \n Server error occurred while fetching the " +
-                                    "list of supported device types.",
-                            response = ErrorResponse.class)
-            }
-    )
-    Response getPolicies(
-            @ApiParam(
-                    name = "type",
-                    value = "The device type name, such as ios, android, windows or fire-alarm.",
-                    required = true)
-            @PathParam("type")
-            @Size(min = 2, max = 45)
-                    String type
-    );
-
     @GET
     @Path("/{type}/configs")
     @ApiOperation(
