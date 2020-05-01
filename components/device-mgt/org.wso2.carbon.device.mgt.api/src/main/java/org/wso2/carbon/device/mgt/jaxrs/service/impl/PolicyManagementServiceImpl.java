@@ -81,7 +81,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     public Response addPolicy(@Valid PolicyWrapper policyWrapper) {
         List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features = RequestValidationUtil
                 .validatePolicyDetails(policyWrapper);
-        if (features != null && features.size() > 0) { // validation failure results;
+        // validation failure results;
+        if (!features.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
         }
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
@@ -220,7 +221,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     public Response updatePolicy(@PathParam("id") int id, @Valid PolicyWrapper policyWrapper) {
         List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features = RequestValidationUtil
                 .validatePolicyDetails(policyWrapper);
-        if (features != null && features.size() > 0) { // validation failure results;
+        // validation failure results;
+        if (!features.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
         }
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
@@ -476,7 +478,8 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
     public Response validatePolicy(List<ProfileFeature> profileFeaturesList) {
         List<org.wso2.carbon.policy.mgt.common.ProfileFeature> features
                 = RequestValidationUtil.validateProfileFeatures(profileFeaturesList);
-        if (features != null && features.size() > 0) { // validation failure results;
+        // validation failure results;
+        if (!features.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
         }
         return Response.status(Response.Status.OK).entity("Valid request").build();
