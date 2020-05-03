@@ -26,6 +26,7 @@ import io.entgra.carbon.device.mgt.config.jaxrs.service.DeviceManagementConfigSe
 import io.entgra.carbon.device.mgt.config.jaxrs.util.DeviceMgtAPIUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
@@ -34,6 +35,9 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfiguratio
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.general.TenantDetail;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
@@ -44,10 +48,14 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -55,10 +63,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Path("/configurations")
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceManagementConfigServiceImpl implements DeviceManagementConfigService {
 
@@ -66,6 +74,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
 
     @Override
     @GET
+    @Path("/configurations")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConfiguration(@HeaderParam("token") String token,
                                      @QueryParam("properties") String properties) {
@@ -162,7 +171,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
     @GET
     @Override
     @Consumes("application/json")
-    @Path("/ui-config")
+    @Path("/configurations/ui-config")
     public Response getUiConfig() {
         UIConfigurationManager uiConfigurationManager = UIConfigurationManager.getInstance();
         if (uiConfigurationManager == null) {
@@ -210,6 +219,78 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             log.error(msg, e);
             throw new DeviceManagementException(msg, e);
         }
+    }
+
+    @Override
+    @Path("/tenants")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTenants() {
+        List<TenantDetail> tenantDetails;
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (tenantId == MultitenantConstants.SUPER_TENANT_ID) {
+            RealmService realmService = DeviceMgtAPIUtils.getRealmService();
+            try {
+                Tenant[] tenants = realmService.getTenantManager().getAllTenants();
+                tenantDetails = new ArrayList<>();
+                Tenant superTenant = new Tenant();
+                superTenant.setId(MultitenantConstants.SUPER_TENANT_ID);
+                superTenant.setDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                superTenant.setAdminName(realmService.getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID)
+                        .getRealmConfiguration().getAdminUserName());
+                superTenant.setActive(true);
+                tenantDetails.add(getTenantDetail(superTenant));
+                if (tenants != null && tenants.length > 0) {
+                    for (Tenant tenant : tenants) {
+                        tenantDetails.add(getTenantDetail(tenant));
+                    }
+                }
+                return Response.status(Response.Status.OK).entity(tenantDetails).build();
+            } catch (UserStoreException e) {
+                String msg = "Error occurred while fetching tenant list";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("This API is available " +
+                    "for super tenant admin only.").build();
+        }
+    }
+
+    private TenantDetail getTenantDetail(Tenant tenant) {
+        TenantDetail tenantDetail = new TenantDetail();
+        tenantDetail.setId(tenant.getId());
+        tenantDetail.setAdminFirstName(tenant.getAdminFirstName());
+        tenantDetail.setAdminFullName(tenant.getAdminFullName());
+        tenantDetail.setAdminLastName(tenant.getAdminLastName());
+        tenantDetail.setAdminName(tenant.getAdminName());
+        tenantDetail.setDomain(tenant.getDomain());
+        tenantDetail.setEmail(tenant.getEmail());
+        return tenantDetail;
+    }
+
+    @POST
+    @Path("/permissions")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response addPermission(List<String> permissions) {
+        PermissionManagerService permissionService = DeviceMgtAPIUtils.getPermissionManagerService();
+        org.wso2.carbon.device.mgt.common.permission.mgt.Permission permission = new org
+                .wso2.carbon.device.mgt.common.permission.mgt.Permission();
+
+        for (String path : permissions) {
+            permission.setPath(path);
+            permission.setUrl(path);
+            try {
+                permissionService.addPermission(permission);
+            } catch (PermissionManagementException e) {
+                String msg = "Error occurred adding permission";
+                log.error(msg, e);
+                return Response.serverError().entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+            }
+        }
+        return Response.status(Response.Status.OK).build();
     }
 
 }

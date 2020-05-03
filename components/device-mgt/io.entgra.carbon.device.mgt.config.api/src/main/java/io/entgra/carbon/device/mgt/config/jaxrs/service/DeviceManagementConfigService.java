@@ -34,16 +34,19 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
+import org.wso2.carbon.device.mgt.common.general.TenantDetail;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @SwaggerDefinition(
         info = @Info(
@@ -53,15 +56,14 @@ import javax.ws.rs.core.Response;
                         @Extension(properties = {
                                 @ExtensionProperty(name = "name", value = "DeviceManagementConfiguration"),
                                 @ExtensionProperty(name = "context",
-                                        value = "/api/device-mgt-config/v1.0/configurations"),
+                                        value = "/api/device-mgt-config/v1.0"),
                         })
                 }
         ),
         tags = {
-                @Tag(name = "device_management", description = "")
+                @Tag(name = "device_management", description = "Device management configuration service")
         }
 )
-@Path("/configurations")
 @Api(value = "Device Management Configuration")
 @Consumes(MediaType.APPLICATION_JSON)
 @Scopes(scopes = {
@@ -76,12 +78,25 @@ import javax.ws.rs.core.Response;
                 description = "",
                 key = "perm:manage-configuration",
                 permissions = {"/device-mgt/platform-configurations/manage"}
+        ),
+        @Scope(
+                name = "Getting Details of Device tenants",
+                description = "Getting Details of Device tenants",
+                key = "perm:admin:tenant:view",
+                permissions = {"/tenants/view"}
+        ),
+        @Scope(
+                name = "Add a permission to the permission tree",
+                description = "Add a permission to the permission tree",
+                key = "perm:admin:permissions:add",
+                permissions = {"/permissions/add"}
         )
 }
 )
 public interface DeviceManagementConfigService {
 
     @GET
+    @Path("/configurations")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "GET",
@@ -140,7 +155,7 @@ public interface DeviceManagementConfigService {
                     String properties);
 
     @PUT
-    @Path("/transfer")
+    @Path("/device/transfer")
     @ApiOperation(
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "PUT",
@@ -196,7 +211,7 @@ public interface DeviceManagementConfigService {
                     DeviceTransferRequest deviceTransferRequest);
 
     @GET
-    @Path("/ui-config")
+    @Path("/configurations/ui-config")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
@@ -220,4 +235,96 @@ public interface DeviceManagementConfigService {
                             response = ErrorResponse.class)
             })
     Response getUiConfig();
+
+    @GET
+    @Path("/tenants")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting Details of tenants",
+            notes = "Get the details of tenants.",
+            response = TenantDetail.class,
+            responseContainer = "List",
+            tags = "Device Management Administrative Service",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = "scope", value ="perm:admin:tenant:view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of tenants.",
+                    response = TenantDetail.class,
+                    responseContainer = "List",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 304,
+                    message = "Not Modified. Empty body because the client already has the latest version of the " +
+                            "requested resource.\n"),
+            @ApiResponse(
+                    code = 401,
+                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the" +
+                            " tenant list.",
+                    response = ErrorResponse.class)
+    })
+    Response getTenants();
+
+    @POST
+    @Path("/permissions")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Add permission to the tree",
+            notes = "Add permission to the tree.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = "scope", value =
+                                    "perm:admin:permissions:add")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. \n Successfully added the permissions.",
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 400,
+                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching " +
+                            "adding permission to the tree.",
+                    response = ErrorResponse.class)
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    Response addPermission(List<String> permissions);
 }

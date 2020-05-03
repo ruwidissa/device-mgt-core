@@ -34,29 +34,33 @@
  */
 package org.wso2.carbon.device.mgt.jaxrs.service.api.admin;
 
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.ExtensionProperty;
-import io.swagger.annotations.Extension;
-import io.swagger.annotations.Tag;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
+import io.swagger.annotations.Info;
 import io.swagger.annotations.ResponseHeader;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.general.TenantDetail;
-import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.constraints.Size;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -101,18 +105,6 @@ import java.util.List;
                         description = "Permanently Delete the device specified by device id",
                         key = "perm:devices:permanent-delete",
                         permissions = {"/device-mgt/admin/devices/permanent-delete"}
-                ),
-                @Scope(
-                        name = "Getting Details of Device tenants",
-                        description = "Getting Details of Device tenants",
-                        key = "perm:admin:tenant:view",
-                        permissions = {"/device-mgt/devices/tenants/view"}
-                ),
-                @Scope(
-                        name = "Add a permission to the permission tree",
-                        description = "Add a permission to the permission tree",
-                        key = "perm:admin:permissions:add",
-                        permissions = {"/device-mgt/devices/permissions/add"}
                 )
         }
 )
@@ -366,99 +358,5 @@ public interface DeviceManagementAdminService {
                     value = "List of device identifiers.",
                     required = true)
                     List<String> deviceIdentifiers);
-
-    @GET
-    @Path("/tenants")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "GET",
-            value = "Getting Details of tenants",
-            notes = "Get the details of tenants.",
-            response = TenantDetail.class,
-            responseContainer = "List",
-            tags = "Device Management Administrative Service",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value =
-                                    "perm:admin:tenant:view")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. \n Successfully fetched the list of tenants.",
-                    response = TenantDetail.class,
-                    responseContainer = "List",
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "ETag",
-                                    description = "Entity Tag of the response resource.\n" +
-                                            "Used by caches, or in conditional requests."),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests."),
-                    }),
-            @ApiResponse(
-                    code = 304,
-                    message = "Not Modified. Empty body because the client already has the latest version of the " +
-                            "requested resource.\n"),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized.\n The unauthorized access to the requested resource.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Server error occurred while fetching the" +
-                            " tenant list.",
-                    response = ErrorResponse.class)
-    })
-    Response getTenants();
-
-
-    @POST
-    @Path("/permissions")
-    @ApiOperation(
-            produces = MediaType.APPLICATION_JSON,
-            httpMethod = "POST",
-            value = "Add permission to the tree",
-            notes = "Add permission to the tree.",
-            tags = "Device Management",
-            extensions = {
-                    @Extension(properties = {
-                            @ExtensionProperty(name = Constants.SCOPE, value =
-                                    "perm:admin:permissions:add")
-                    })
-            }
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. \n Successfully update the owner of devices.",
-                    response = DeviceList.class,
-                    responseHeaders = {
-                            @ResponseHeader(
-                                    name = "Content-Type",
-                                    description = "The content type of the body"),
-                            @ResponseHeader(
-                                    name = "ETag",
-                                    description = "Entity Tag of the response resource.\n" +
-                                            "Used by caches, or in conditional requests."),
-                            @ResponseHeader(
-                                    name = "Last-Modified",
-                                    description = "Date and time the resource was last modified.\n" +
-                                            "Used by caches, or in conditional requests."),
-                    }),
-            @ApiResponse(
-                    code = 400,
-                    message = "The incoming request has more than one selection criteria defined via the query parameters.",
-                    response = ErrorResponse.class),
-            @ApiResponse(
-                    code = 500,
-                    message = "Internal Server Error. \n Server error occurred while fetching " +
-                            "adding permission to the tree.",
-                    response = ErrorResponse.class)
-    })
-    Response addPermission(List<String> permissions);
 
 }

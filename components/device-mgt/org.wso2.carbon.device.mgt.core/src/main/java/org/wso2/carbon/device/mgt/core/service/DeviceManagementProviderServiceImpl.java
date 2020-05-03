@@ -318,14 +318,13 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                         }
                         if ((updateStatus > 0) || EnrolmentInfo.Status.REMOVED.
                                 equals(existingEnrolmentInfo.getStatus())) {
-                            enrollment = enrollmentDAO.
-                                    addEnrollment(existingDevice.getId(), newEnrolmentInfo, tenantId);
+                            enrollment = enrollmentDAO
+                                    .addEnrollment(existingDevice.getId(), newEnrolmentInfo, tenantId);
                             if (enrollment == null ){
                                 DeviceManagementDAOFactory.rollbackTransaction();
                                 throw new DeviceManagementException(
-                                        "Enrollment data persistence is failed in a re-enrollment. Device id : "
-                                                + existingDevice.getId() + " Device Identifier: " + device
-                                                .getDeviceIdentifier());
+                                        "Enrollment data persistence is failed in a re-enrollment. Existing device: "
+                                                + existingDevice.toString() + ", New Device: " + device.toString());
                             }
                             device.setEnrolmentInfo(enrollment);
                             DeviceManagementDAOFactory.commitTransaction();
@@ -339,16 +338,16 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             }
                             status = true;
                         } else {
-                            log.warn("Unable to update device enrollment for device : " + device.getDeviceIdentifier() +
-                                    " belonging to user : " + device.getEnrolmentInfo().getOwner());
+                            log.warn("Unable to update device enrollment for device : " + device.toString());
                         }
                     } catch (DeviceManagementDAOException e) {
                         DeviceManagementDAOFactory.rollbackTransaction();
-                        String msg = "Error occurred while adding enrolment related metadata for device: " + device.getId();
+                        String msg = "Error occurred while adding enrolment related metadata for device: " +
+                                device.toString();
                         log.error(msg, e);
                         throw new DeviceManagementException(msg, e);
                     } catch (Exception e) {
-                        String msg = "Error occurred while enrolling device: " + device.getId();
+                        String msg = "Error occurred while enrolling device: " + device.toString();
                         log.error(msg, e);
                         throw new DeviceManagementException(msg, e);
                     } finally {
@@ -367,8 +366,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     if (enrollment == null ){
                         DeviceManagementDAOFactory.rollbackTransaction();
                         throw new DeviceManagementException(
-                                "Enrollment data persistence is failed in a new enrollment. Device id: " + deviceId
-                                        + " Device Identifier: " + device.getDeviceIdentifier());
+                                "Enrollment data persistence is failed in a new enrollment. Device: " + device.toString());
                     }
                     device.setEnrolmentInfo(enrollment);
                     DeviceManagementDAOFactory.commitTransaction();
@@ -380,8 +378,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 }
             } catch (DeviceManagementDAOException e) {
                 DeviceManagementDAOFactory.rollbackTransaction();
-                String msg = "Error occurred while adding metadata of '" + device.getType() +
-                        "' device carrying the identifier '" + device.getDeviceIdentifier() + "'";
+                String msg = "Error occurred while adding metadata of device: " + device.toString();
                 log.error(msg, e);
                 throw new DeviceManagementException(msg, e);
             } catch (TransactionManagementException e) {
@@ -389,7 +386,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                 log.error(msg, e);
                 throw new DeviceManagementException(msg, e);
             } catch (Exception e) {
-                String msg = "Error occurred while enrolling device: " + device.getId();
+                String msg = "Error occurred while enrolling device: " + device.toString();
                 log.error(msg, e);
                 throw new DeviceManagementException(msg, e);
             } finally {
