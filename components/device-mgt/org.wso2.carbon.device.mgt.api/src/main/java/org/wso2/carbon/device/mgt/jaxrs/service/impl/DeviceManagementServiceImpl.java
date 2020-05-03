@@ -65,6 +65,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
@@ -80,20 +81,22 @@ import org.wso2.carbon.device.mgt.common.search.SearchContext;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
-import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ConfigOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchManagerService;
 import org.wso2.carbon.device.mgt.core.search.mgt.SearchMgtException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceCompliance;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
-import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
+import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ComplianceDeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -1223,6 +1226,52 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String msg = "Error occurred while retrieving version list for app with package name " + packageName;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @PUT
+    @Path("/{deviceType}/{id}/operation")
+    @Override
+    public Response updateOperationStatus(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("id") String deviceId,
+            OperationStatusBean operationStatusBean) {
+        if (log.isDebugEnabled()) {
+            log.debug("Requesting device information from " + deviceId);
+        }
+        if (operationStatusBean == null) {
+            String errorMessage = "Request does not contain the required payload.";
+            log.error(errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build();
+        }
+        DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        try {
+            Device device = DeviceMgtAPIUtils.getDeviceManagementService()
+                    .getDevice(deviceIdentifier, false);
+            DeviceType deviceTypeObj = DeviceManagerUtil.getDeviceType(
+                    deviceType, tenantId);
+            if (deviceTypeObj == null) {
+                String msg = "Error, device of type: " + deviceType + " does not exist";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+            }
+            Operation operation = DeviceMgtAPIUtils.validateOperationStatusBean(operationStatusBean);
+            operation.setId(operationStatusBean.getOperationId());
+            DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
+            return Response.status(Response.Status.OK).entity("OperationStatus updated successfully.").build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred when fetching device " + deviceIdentifier.toString();
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (OperationManagementException e) {
+            String msg = "Error occurred when updating operation of device " + deviceIdentifier;
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (BadRequestException e) {
+            String msg = "Error occured due to invalid request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 }

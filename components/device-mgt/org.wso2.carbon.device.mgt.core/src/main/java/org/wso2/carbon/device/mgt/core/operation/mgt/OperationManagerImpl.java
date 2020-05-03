@@ -1209,4 +1209,51 @@ public class OperationManagerImpl implements OperationManager {
         }
         return operations;
     }
+
+    @Override
+    public boolean isOperationExist(DeviceIdentifier deviceId, int operationId)
+            throws OperationManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Operation Id: " + operationId + " Device Type: " + deviceId.getType() + " Device Identifier: " +
+                    deviceId.getId());
+        }
+        if (!isActionAuthorized(deviceId)) {
+            String msg = "User '" + getUser() + "' is not authorized to access the '" +
+                    deviceId.getType() + "' device, which carries the identifier '" +
+                    deviceId.getId() + "'";
+            log.error(msg);
+            throw new OperationManagementException(msg);
+        }
+        EnrolmentInfo enrolmentInfo = this.getActiveEnrolmentInfo(deviceId);
+        if (enrolmentInfo == null) {
+            String msg = "Device not found for given device identifier: " +
+                    deviceId.getId() + " type: " + deviceId.getType();
+            log.error(msg);
+            throw new OperationManagementException(msg);
+        }
+
+        try {
+            OperationManagementDAOFactory.openConnection();
+            org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation deviceSpecificOperation = operationDAO.
+                    getOperationByDeviceAndId(enrolmentInfo.getId(),
+                            operationId);
+            if (deviceSpecificOperation == null) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (OperationManagementDAOException e) {
+            String msg = "Error occurred while checking if operation with operation id "
+                    + operationId +" exist for " + deviceId.getType() + "' device '" + deviceId.getId() + "'";
+            log.error(msg, e);
+            throw new OperationManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening connection to the data source";
+            log.error(msg, e);
+            throw new OperationManagementException(msg,
+                    e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
 }

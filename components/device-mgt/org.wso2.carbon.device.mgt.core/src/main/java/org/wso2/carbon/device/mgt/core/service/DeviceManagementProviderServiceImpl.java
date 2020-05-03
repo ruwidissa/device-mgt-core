@@ -92,6 +92,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnauthorizedDeviceAccessException;
 import org.wso2.carbon.device.mgt.common.exceptions.UserNotFoundException;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
@@ -1916,9 +1917,17 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                     "Device not found for device id:" + device.getDeviceIdentifier() + " " + "type:" +
                             device.getType());
         }
-        pluginRepository.getOperationManager(device.getType(), this.getTenantId())
-                .updateOperation(enrolmentInfo.getId(), operation);
         try {
+            DeviceIdentifier deviceIdentifier = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
+            if (!pluginRepository.getOperationManager(device.getType(), this.getTenantId())
+                    .isOperationExist(deviceIdentifier, operation.getId())) {
+                String msg = "Operation with operation id: " + operation.getId()
+                        + " does not exist.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+            pluginRepository.getOperationManager(device.getType(), this.getTenantId())
+                    .updateOperation(enrolmentInfo.getId(), operation);
             if (DeviceManagerUtil.isPublishOperationResponseEnabled()) {
                 List<String> permittedOperations = DeviceManagerUtil.getEnabledOperationsForResponsePublish();
                 if (permittedOperations.contains(operation.getCode())
@@ -1943,6 +1952,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             throw new OperationManagementException(msg, e);
         } catch (DataPublisherConfigurationException e) {
             String msg = "Error occurred while publishing event.";
+            log.error(msg, e);
+            throw new OperationManagementException(msg, e);
+        } catch (BadRequestException e) {
+            String msg = "Error occured due to invalid request";
             log.error(msg, e);
             throw new OperationManagementException(msg, e);
         }
@@ -4168,5 +4181,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
+    }
+
+    @Override
+    public boolean isOperationExist(DeviceIdentifier deviceId, int operationId) throws OperationManagementException {
+        return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId())
+                .isOperationExist(deviceId, operationId);
     }
 }

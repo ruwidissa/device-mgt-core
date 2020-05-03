@@ -64,6 +64,7 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OperationRequest;
+import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
 import javax.validation.Valid;
@@ -2135,4 +2136,56 @@ public interface DeviceManagementService {
                     required = true)
             @PathParam("packageName")
                     String packageName);
+
+    @PUT
+    @Path("/{deviceType}/{id}/operation")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "PUT",
+            value = "Update status of a given opeation",
+            notes = "Updates the status of a given operation of a given device in Entgra IoT Server.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:operations")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully updated the operation status.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Error occurred while updating operation status.",
+                            response = ErrorResponse.class)
+            })
+    Response updateOperationStatus(
+            @ApiParam(
+                    name = "device-type",
+                    value = "The device type, such as ios, android, or windows.")
+            @PathParam("deviceType") String deviceType,
+            @ApiParam(
+                    name = "id",
+                    value = "The device identifier")
+            @PathParam("id") String deviceId,
+            OperationStatusBean operationStatusBean);
 }
