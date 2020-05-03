@@ -903,4 +903,14 @@ public interface DeviceManagementProviderService {
     List<String> getAppVersions(String packageName) throws ApplicationManagementException;
 
     int getFunctioningDevicesInSystem() throws DeviceManagementException;
+
+    /**
+     * Check if an operation exists for a given device identifier and operation id
+     *
+     * @param deviceId Device identifier of the device
+     * @param operationId Id of the operation
+     * @return true if operation already exists, else false
+     * @throws {@link OperationManagementException}
+     */
+    boolean isOperationExist(DeviceIdentifier deviceId, int operationId) throws OperationManagementException;
 }

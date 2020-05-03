@@ -60,6 +60,15 @@ public class Constants {
 	public static final String WINDOWS = "windows";
 
 
+	public final class OperationStatus {
+		private OperationStatus () { throw new AssertionError(); }
+		public static final String COMPLETED = "completed";
+		public static final String ERROR = "error";
+		public static final String IN_PROGRESS = "in_progress";
+		public static final String PENDING = "pending";
+		public static final String NOTNOW = "notnow";
+		public static final String REPEATED = "repeated";
+	}
 
 	public final class ErrorMessages {
 		private ErrorMessages () { throw new AssertionError(); }

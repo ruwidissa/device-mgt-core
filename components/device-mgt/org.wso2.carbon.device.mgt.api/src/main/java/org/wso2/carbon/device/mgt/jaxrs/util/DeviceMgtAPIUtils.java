@@ -38,6 +38,7 @@ import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -46,6 +47,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
+import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
@@ -58,6 +60,7 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceTypeVersionWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.OperationStatusBean;
 import org.wso2.carbon.device.mgt.jaxrs.beans.analytics.EventAttributeList;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
@@ -815,5 +818,49 @@ public class DeviceMgtAPIUtils {
                 }
             }
         }
+    }
+
+    /**
+     * This method validates the status of the operation
+     *
+     * @param operationStatusBean {@link OperationStatusBean} object
+     * @return {@link Operation} Returns Operation object with status set.
+     * @throws {@link BadRequestException} If invalid status received
+     */
+    public static Operation validateOperationStatusBean(OperationStatusBean operationStatusBean)
+            throws BadRequestException {
+        Operation operation = new Operation();
+        if (operationStatusBean.getStatus() != null) {
+            switch (operationStatusBean.getStatus().toLowerCase()) {
+                case Constants.OperationStatus.COMPLETED:
+                    operation.setStatus(Operation.Status.COMPLETED);
+                    break;
+                case Constants.OperationStatus.ERROR:
+                    operation.setStatus(Operation.Status.ERROR);
+                    break;
+                case Constants.OperationStatus.IN_PROGRESS:
+                    operation.setStatus(Operation.Status.IN_PROGRESS);
+                    break;
+                case Constants.OperationStatus.PENDING:
+                    operation.setStatus(Operation.Status.PENDING);
+                    break;
+                case Constants.OperationStatus.NOTNOW:
+                    operation.setStatus(Operation.Status.NOTNOW);
+                    break;
+                case Constants.OperationStatus.REPEATED:
+                    operation.setStatus(Operation.Status.REPEATED);
+                    break;
+                default:
+                    String msg = "Invalid operation status. Valid operations: " +
+                            "[IN_PROGRESS, PENDING, COMPLETED, ERROR, REPEATED, NOTNOW]";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+            }
+        } else {
+            String msg = "Payload does not contain status value";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+        return operation;
     }
 }
