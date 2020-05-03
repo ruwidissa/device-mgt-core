@@ -21,23 +21,61 @@ package io.entgra.carbon.device.mgt.config.jaxrs.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * MDMAPIUtils class provides utility function used by CDM REST-API classes.
  */
 public class DeviceMgtAPIUtils {
-    private static Log log = LogFactory.getLog(DeviceMgtAPIUtils.class);
+
+    private static final Log log = LogFactory.getLog(DeviceMgtAPIUtils.class);
+
+    private static DeviceManagementProviderService deviceManagementProviderService = null;
+    private static PermissionManagerService permissionManagerService = null;
+    private static RealmService realmService = null;
 
     public static DeviceManagementProviderService getDeviceManagementService() {
-        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        DeviceManagementProviderService deviceManagementProviderService =
-                (DeviceManagementProviderService) ctx.getOSGiService(DeviceManagementProviderService.class, null);
         if (deviceManagementProviderService == null) {
-            String msg = "DeviceImpl Management provider service has not initialized.";
-            log.error(msg);
-            throw new IllegalStateException(msg);
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            deviceManagementProviderService =
+                    (DeviceManagementProviderService) ctx.getOSGiService(DeviceManagementProviderService.class, null);
+            if (deviceManagementProviderService == null) {
+                String msg = "Device Management provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
         }
         return deviceManagementProviderService;
     }
+
+    public static PermissionManagerService getPermissionManagerService() {
+        if (permissionManagerService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            permissionManagerService =
+                    (PermissionManagerService) ctx.getOSGiService(PermissionManagerService.class, null);
+            if (permissionManagerService == null) {
+                String msg = "Permission Management provider service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return permissionManagerService;
+    }
+
+    public static RealmService getRealmService() {
+        if (realmService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            realmService =
+                    (RealmService) ctx.getOSGiService(RealmService.class, null);
+            if (realmService == null) {
+                String msg = "Realm service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return realmService;
+    }
+
 }

@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.common;
 
+import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.device.mgt.common.app.mgt.Application;
@@ -187,17 +188,7 @@ public class Device implements Serializable {
 
     @Override
     public String toString() {
-        return "device [" +
-                "name=" + name + ";" +
-                "type=" + type + ";" +
-                "description=" + description + ";" +
-                "identifier=" + deviceIdentifier + ";" +
-//                "EnrolmentInfo[" +
-//                "owner=" + enrolmentInfo.getOwner() + ";" +
-//                "ownership=" + enrolmentInfo.getOwnership() + ";" +
-//                "status=" + enrolmentInfo.getStatus() + ";" +
-//                "]" +
-                "]";
+        return new Gson().toJson(this);
     }
 
     @Override
