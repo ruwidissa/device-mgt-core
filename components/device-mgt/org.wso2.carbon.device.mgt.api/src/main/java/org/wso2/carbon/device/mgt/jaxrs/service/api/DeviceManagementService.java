@@ -2188,4 +2188,43 @@ public interface DeviceManagementService {
                     value = "The device identifier")
             @PathParam("id") String deviceId,
             OperationStatusBean operationStatusBean);
+
+    @GET
+    @Path("/filters")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Retrieving filters of device.",
+            notes = "Provides filters in devices of Entgra IoT Server which can be used in UI for filtering.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:view")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the device filters.",
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                          "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                          "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Error occurred while getting the version data.",
+                            response = ErrorResponse.class)
+            })
+    Response getDeviceFilters();
 }

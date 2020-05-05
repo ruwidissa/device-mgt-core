@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceFilters;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.Feature;
@@ -1272,6 +1273,38 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String msg = "Error occured due to invalid request";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Path("/filters")
+    @Override
+    public Response getDeviceFilters() {
+        try {
+            List<String> deviceTypeNames = new ArrayList<>();
+            List<String> ownershipNames = new ArrayList<>();
+            List<String> statusNames = new ArrayList<>();
+            List<DeviceType> deviceTypes = DeviceMgtAPIUtils.getDeviceManagementService().getDeviceTypes();
+            for (DeviceType deviceType : deviceTypes) {
+                deviceTypeNames.add(deviceType.getName());
+            }
+            EnrolmentInfo.OwnerShip[] ownerShips = EnrolmentInfo.OwnerShip.values();
+            for (EnrolmentInfo.OwnerShip ownerShip : ownerShips) {
+                ownershipNames.add(ownerShip.name());
+            }
+            EnrolmentInfo.Status[] statuses = EnrolmentInfo.Status.values();
+            for (EnrolmentInfo.Status status : statuses) {
+                statusNames.add(status.name());
+            }
+            DeviceFilters deviceFilters = new DeviceFilters();
+            deviceFilters.setDeviceTypes(deviceTypeNames);
+            deviceFilters.setOwnerships(ownershipNames);
+            deviceFilters.setStatuses(statusNames);
+            return Response.status(Response.Status.OK).entity(deviceFilters).build();
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred white retrieving device types to be used in device filters.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
     }
 }
