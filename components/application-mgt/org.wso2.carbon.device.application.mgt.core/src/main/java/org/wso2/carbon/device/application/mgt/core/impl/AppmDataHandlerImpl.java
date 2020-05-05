@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.device.application.mgt.core.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.application.mgt.common.config.LifecycleState;
@@ -36,6 +37,8 @@ import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.internal.DataHolder;
 import org.wso2.carbon.device.application.mgt.core.lifecycle.LifecycleStateManager;
 import org.wso2.carbon.device.application.mgt.core.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -90,26 +93,32 @@ public class AppmDataHandlerImpl implements AppmDataHandler {
     }
 
     @Override
-    public InputStream getAgentStream(int tenantId, String deviceType)
-            throws ApplicationManagementException {
+    public InputStream getAgentStream(String tenantDomain, String deviceType) throws ApplicationManagementException {
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         try {
-            InputStream inputStream = applicationStorageManager
-                    .getFileStream(deviceType, tenantId);
-            if (inputStream == null) {
-                String msg = "Couldn't find the file in the file system for device type: " + deviceType;
+            DeviceType deviceTypeObj = DataHolder.getInstance().getDeviceManagementService().getDeviceType(deviceType);
+            if (deviceTypeObj == null) {
+                String msg = "Couldn't find a registered device type called " + deviceType + " in the system.";
                 log.error(msg);
                 throw new NotFoundException(msg);
+            }
+
+            InputStream inputStream = applicationStorageManager.getFileStream(deviceType, tenantDomain);
+            if (inputStream == null) {
+                String msg = "Couldn't find the device type agent in the server. Device type: " + deviceType
+                        + " Tenant Domain: " + tenantDomain;
+                log.error(msg);
+                throw new BadRequestException(msg);
             }
             return inputStream;
         } catch (ApplicationStorageManagementException e) {
             String msg = "Error occurred when getting input stream of the " + deviceType + " agent.";
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
-        } catch (RequestValidatingException e) {
-            String msg = "Error invalid request received with device type: " + deviceType;
+        } catch (DeviceManagementException e) {
+            String msg = " Error occurred when getting device type details. Device type " + deviceType;
             log.error(msg, e);
-            throw new BadRequestException(msg, e);
+            throw new ApplicationManagementException(msg, e);
         }
     }
 }

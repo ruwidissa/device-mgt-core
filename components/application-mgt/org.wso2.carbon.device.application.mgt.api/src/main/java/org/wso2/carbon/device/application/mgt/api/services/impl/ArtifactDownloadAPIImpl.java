@@ -27,14 +27,17 @@ import org.wso2.carbon.device.application.mgt.common.services.AppmDataHandler;
 import org.wso2.carbon.device.application.mgt.core.exception.BadRequestException;
 import org.wso2.carbon.device.application.mgt.core.exception.NotFoundException;
 import org.wso2.carbon.device.application.mgt.core.util.APIUtil;
+import org.wso2.carbon.device.application.mgt.core.util.Constants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -114,17 +117,19 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
     @GET
     @Override
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Path("/{deviceType}/agent/{tenantId}")
-    public Response getAndroidAgent(@PathParam("deviceType") String deviceType,
-                                    @PathParam("tenantId") int tenantId) {
+    @Path("/{deviceType}/agent")
+    public Response getDeviceTypeAgent(@PathParam("deviceType") String deviceType,
+                                    @DefaultValue("carbon.super")
+                                    @QueryParam("tenantDomain") String tenantDomain) {
         AppmDataHandler dataHandler = APIUtil.getDataHandler();
-        try (InputStream fileInputStream = dataHandler.getAgentStream(tenantId, deviceType)) {
+        try (InputStream fileInputStream = dataHandler.getAgentStream(tenantDomain, deviceType)) {
             byte[] content = IOUtils.toByteArray(fileInputStream);
             try (ByteArrayInputStream binaryDuplicate = new ByteArrayInputStream(content)) {
                 Response.ResponseBuilder response = Response
                         .ok(binaryDuplicate, MediaType.APPLICATION_OCTET_STREAM);
                 response.status(Response.Status.OK);
-                response.header("Content-Disposition", "attachment; filename=\"" + deviceType + " agent\"");
+                String fileName = Constants.AGENT_FILE_NAMES.get(deviceType);
+                response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
                 response.header("Content-Length", content.length);
                 return response.build();
             } catch (IOException e) {
@@ -133,15 +138,15 @@ public class ArtifactDownloadAPIImpl implements ArtifactDownloadAPI {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
             }
         } catch (NotFoundException e) {
-            String msg = "Couldn't find an agent for device type: " + deviceType;
+            String msg = "Requesting device type agent for unsupported device type " + deviceType;
             log.error(msg, e);
             return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
         } catch (BadRequestException e){
-            String msg = "Invalid device type received: " + deviceType + ".Valid device type is android";
+            String msg = "Couldn't find the device type agent in the system.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while getting the application release artifact file. ";
+            String msg = "Error occurred while getting the device type agent. ";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (IOException e) {

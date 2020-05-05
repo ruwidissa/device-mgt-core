@@ -116,10 +116,9 @@ public interface ApplicationStorageManager {
      * Get the InputStream of the file which is located in filePath
      *
      * @param deviceType device type name
-     * @param tenantId   local tenant's id
+     * @param tenantDomain   tenant domain name
      * @return {@link InputStream}
      * @throws ApplicationStorageManagementException throws if an error occurs when accessing the file.
      */
-    InputStream getFileStream(String deviceType, int tenantId)
-            throws ApplicationStorageManagementException, RequestValidatingException;
+    InputStream getFileStream(String deviceType, String tenantDomain) throws ApplicationStorageManagementException;
 }
