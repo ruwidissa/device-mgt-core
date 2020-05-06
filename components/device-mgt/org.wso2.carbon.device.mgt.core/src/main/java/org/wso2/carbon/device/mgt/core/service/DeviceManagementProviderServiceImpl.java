@@ -2968,15 +2968,16 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     @Override
     public DeviceType getDeviceType(String deviceType) throws DeviceManagementException {
-        if (deviceType != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Get device type '" + deviceType + "'");
-            }
-        } else {
-            String msg = "Received null deviceType for getDeviceType";
+        if (StringUtils.isBlank(deviceType)) {
+            String msg = "Received either whitespace, empty (\"\") or null value as device type to get device type "
+                    + "details.";
             log.error(msg);
             throw new DeviceManagementException(msg);
         }
+        if (log.isDebugEnabled()) {
+            log.debug("Get device type '" + deviceType + "'");
+        }
+
         try {
             DeviceManagementDAOFactory.openConnection();
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();

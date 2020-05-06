@@ -33,6 +33,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -133,7 +134,7 @@ public interface ArtifactDownloadAPI {
             @PathParam("uuid") String uuid);
 
     @GET
-    @Path("/{deviceType}/agent/{tenantId}")
+    @Path("/{deviceType}/agent")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(
             produces = MediaType.APPLICATION_OCTET_STREAM,
@@ -156,7 +157,7 @@ public interface ArtifactDownloadAPI {
                             message = "Internal Server Error. \n Error occurred while getting the agent.",
                             response = ErrorResponse.class)
             })
-    Response getAndroidAgent(
+    Response getDeviceTypeAgent(
             @ApiParam(
                     name = "deviceType",
                     value = "Device type of the agent.",
@@ -164,8 +165,8 @@ public interface ArtifactDownloadAPI {
                     required = true)
             @PathParam("deviceType") String deviceType,
             @ApiParam(
-                    name = "tenantId",
-                    value = "Tenant Id of the application artifact belongs.",
-                    required = true)
-            @PathParam("tenantId") int tenantId);
+                    name = "tenantDomain",
+                    value = "Tenant Domain of the application artifact belongs.",
+                    defaultValue = "carbon.super")
+            @QueryParam("tenantDomain") String tenantDomain);
 }

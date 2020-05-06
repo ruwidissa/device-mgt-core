@@ -34,11 +34,10 @@ public interface AppmDataHandler {
     /**
      * Get agent apk
      *
-     * @param tenantId   local tenant
+     * @param tenantDomain   tenant domain name
      * @param deviceType device type name
      * @return {@link InputStream}
      * @throws ApplicationManagementException throws if an error occurs when accessing the file.
      */
-    InputStream getAgentStream(int tenantId, String deviceType)
-            throws ApplicationManagementException;
+    InputStream getAgentStream(String tenantDomain, String deviceType) throws ApplicationManagementException;
 }
