@@ -60,6 +60,8 @@ public interface DeviceInformationManager {
      */
     DeviceInfo getDeviceInfo(DeviceIdentifier deviceIdentifier) throws DeviceDetailsMgtException;
 
+    DeviceInfo getDeviceInfo(Device device) throws DeviceDetailsMgtException;
+
     /**
      * This method will return device information for the supplied devices list.
      * @param deviceIdentifiers

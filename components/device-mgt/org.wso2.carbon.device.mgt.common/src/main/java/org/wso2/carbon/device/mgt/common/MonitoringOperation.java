@@ -25,6 +25,7 @@ public class MonitoringOperation {
 
     private String taskName;
     private int recurrentTimes;
+    private boolean responsePersistence = true;
 
     public String getTaskName() {
         return taskName;
@@ -42,5 +43,21 @@ public class MonitoringOperation {
         this.recurrentTimes = recurrentTimes;
     }
 
+    public boolean hasResponsePersistence() {
+        return responsePersistence;
+    }
+
+    public void setResponsePersistence(boolean responsePersistence) {
+        this.responsePersistence = responsePersistence;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MonitoringOperation) {
+            MonitoringOperation op = (MonitoringOperation) obj;
+            return taskName != null && taskName.equals(op.getTaskName());
+        }
+        return false;
+    }
 }
 

@@ -40,6 +40,8 @@ public class EnrolmentInfo implements Serializable {
     @ApiModelProperty(name = "id", value = "ID of the device in the WSO2 EMM device information database.",
                       required = true)
     private int id;
+
+    private boolean isTransferred;
     @ApiModelProperty(name = "dateOfEnrolment", value = "Date of the device enrollment. This value is not necessary.", required = false )
     private Long dateOfEnrolment;
     @ApiModelProperty(name = "dateOfLastUpdate", value = "Date of the device's last update. This value is not necessary.", required = false )
@@ -70,6 +72,14 @@ public class EnrolmentInfo implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public boolean isTransferred() {
+        return isTransferred;
+    }
+
+    public void setTransferred(boolean transferred) {
+        isTransferred = transferred;
     }
 
     public Long getDateOfEnrolment() {

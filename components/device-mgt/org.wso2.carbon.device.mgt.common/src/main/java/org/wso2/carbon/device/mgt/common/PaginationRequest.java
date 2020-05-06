@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.device.mgt.common;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,14 +34,14 @@ public class PaginationRequest {
     private int groupId;
     private String owner;
     private String ownerPattern;
-    private List<String> statusList;
     private String deviceType;
     private String deviceName;
     private String ownership;
     private String ownerRole;
-    private Map<String, Object> property = new HashMap<>();
     private Date since;
     private String filter;
+    private Map<String, Object> property = new HashMap<>();
+    private List<String> statusList = new ArrayList<>();
 
     public PaginationRequest(int start, int rowCount) {
         this.startIndex = start;

@@ -43,14 +43,6 @@ public class DeviceTypeMetaDefinition {
         this.features = features;
     }
 
-    public boolean isClaimable() {
-        return claimable;
-    }
-
-    public void setClaimable(boolean isClaimable) {
-        this.claimable = isClaimable;
-    }
-
     public PushNotificationConfig getPushNotificationConfig() {
         return pushNotificationConfig;
     }

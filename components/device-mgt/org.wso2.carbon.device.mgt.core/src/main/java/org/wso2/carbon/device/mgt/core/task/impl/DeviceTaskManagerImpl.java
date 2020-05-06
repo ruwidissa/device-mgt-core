@@ -32,19 +32,16 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.device.mgt.core.task.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.StartupOperationConfig;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
@@ -54,16 +51,19 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.task.DeviceMgtTaskException;
 import org.wso2.carbon.device.mgt.core.task.DeviceTaskManager;
 import org.wso2.carbon.device.mgt.core.task.Utils;
-import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DeviceTaskManagerImpl implements DeviceTaskManager {
 
-    private static Log log = LogFactory.getLog(DeviceTaskManagerImpl.class);
-    private String deviceType;
+    private static final Log log = LogFactory.getLog(DeviceTaskManagerImpl.class);
+    private final String deviceType;
     static volatile Map<Integer, Map<String, Map<String, Long>>> map = new HashMap<>();
-    private static volatile Map<Integer, List<String>> startupConfigMap = new HashMap<>();
+    private static final Map<Integer, List<String>> startupConfigMap = new HashMap<>();
     private OperationMonitoringTaskConfig operationMonitoringTaskConfig;
     private StartupOperationConfig startupOperationConfig;
 
@@ -118,58 +118,25 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
     public void addOperations() throws DeviceMgtTaskException {
         DeviceManagementProviderService deviceManagementProviderService = DeviceManagementDataHolder.getInstance().
                 getDeviceManagementProvider();
-        try {
-            //list operations for device type
-            List<String> operations = this.getValidOperationNames();
-            if (operations.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No operations are available.");
-                }
-                return;
+        //list operations for device type
+        List<String> operations = this.getValidOperationNames();
+        if (operations.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No operations are available.");
             }
-            List<DeviceIdentifier> validDeviceIdentifiers;
-            List<String> startupOperations;
-            //list devices of device type
-            List<Device> devices = deviceManagementProviderService.getAllDevices(deviceType, false);
+            return;
+        }
 
-            if (!devices.isEmpty()) {
-                if (log.isDebugEnabled() && deviceType != null) {
-                    log.info("Devices exist to add operations and the total number of devices are " + devices.size());
-                }
-                validDeviceIdentifiers = DeviceManagerUtil.getValidDeviceIdentifiers(devices);
-                if (!validDeviceIdentifiers.isEmpty()) {
-                    if (log.isDebugEnabled() && deviceType != null) {
-                        log.debug("Number of valid device identifier size to add operations: " + validDeviceIdentifiers
-                                .size());
-                    }
-                    for (String str : operations) {
-                        CommandOperation operation = new CommandOperation();
-                        operation.setEnabled(true);
-                        operation.setType(Operation.Type.COMMAND);
-                        operation.setCode(str);
-                        deviceManagementProviderService.addOperation(deviceType, operation, validDeviceIdentifiers);
-                    }
-                    startupOperations = getStartupOperations();
-                    if (startupOperations != null && !startupOperations.isEmpty()) {
-                        addStartupOperations(startupOperations, validDeviceIdentifiers,
-                                             deviceManagementProviderService);
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No valid devices are available.");
-                    }
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("No devices are available to perform the operations.");
-                }
+        for (String str : operations) {
+            CommandOperation operation = new CommandOperation();
+            operation.setEnabled(true);
+            operation.setType(Operation.Type.COMMAND);
+            operation.setCode(str);
+            try {
+                deviceManagementProviderService.addTaskOperation(deviceType, operation);
+            } catch (OperationManagementException e) {
+                throw new DeviceMgtTaskException("Error occurred while adding task operations to devices", e);
             }
-        } catch (InvalidDeviceException e) {
-            throw new DeviceMgtTaskException("Invalid DeviceIdentifiers found.", e);
-        } catch (DeviceManagementException e) {
-            throw new DeviceMgtTaskException("Error occurred while retrieving the device list.", e);
-        } catch (OperationManagementException e) {
-            throw new DeviceMgtTaskException("Error occurred while adding the operations to devices", e);
         }
     }
 
@@ -187,7 +154,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
                 mp.put(top.getTaskName(), milliseconds);
             } else {
                 Long lastExecutedTime = mp.get(top.getTaskName());
-                Long evalTime = lastExecutedTime + (frequency * top.getRecurrentTimes());
+                long evalTime = lastExecutedTime + (frequency * top.getRecurrentTimes());
                 if (evalTime <= milliseconds) {
                     opNames.add(top.getTaskName());
                     mp.put(top.getTaskName(), milliseconds);
@@ -230,9 +197,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
     private List<MonitoringOperation> getOperationListforTask() throws DeviceMgtTaskException {
 
         DeviceManagementProviderService deviceManagementProviderService = DeviceManagementDataHolder
-                .getInstance().
-                        getDeviceManagementProvider();
-
+                .getInstance().getDeviceManagementProvider();
         return deviceManagementProviderService.getMonitoringOperationList(
                 deviceType);//Get task list from each device type
     }
@@ -265,9 +230,7 @@ public class DeviceTaskManagerImpl implements DeviceTaskManager {
         } catch (DeviceMgtTaskException e) {
             // ignoring the error, no need to throw, If error occurs, return value will be false.
         }
-
         return false;
-
     }
 
 }

@@ -220,7 +220,6 @@ public class HttpDeviceTypeManagerServiceAndDeviceTypeGeneratorServceTest {
         deviceTypeMetaDefinition = new DeviceTypeMetaDefinition();
         deviceTypeMetaDefinition.setPushNotificationConfig(pushNotificationConfig);
         deviceTypeMetaDefinition.setDescription("This is android_sense");
-        deviceTypeMetaDefinition.setClaimable(true);
         deviceTypeMetaDefinition.setLicense(androidSenseLicense);
         deviceTypeMetaDefinition.setFeatures(features);
     }

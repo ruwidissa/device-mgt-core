@@ -20,7 +20,9 @@ package org.wso2.carbon.device.mgt.core.operation.mgt.dao;
 
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
+import org.wso2.carbon.device.mgt.common.operation.mgt.OperationResponse;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
+import org.wso2.carbon.device.mgt.core.dto.operation.mgt.OperationResponseMeta;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMapping;
 
 import java.util.List;
@@ -54,14 +56,23 @@ public interface OperationDAO {
     void updateEnrollmentOperationsStatus(int enrolmentId, String operationCode, Operation.Status existingStatus,
                                           Operation.Status newStatus) throws OperationManagementDAOException;
 
-    int getExistingOperationID(int enrolmentId, String operationCode) throws OperationManagementDAOException;
+    Map<Integer, Integer> getExistingOperationIDs(Integer[] enrolmentIds, String operationCode)
+            throws OperationManagementDAOException;
 
-    void addOperationResponse(int enrolmentId, int operationId, Object operationResponse)
+    OperationResponseMeta addOperationResponse(int enrolmentId, org.wso2.carbon.device.mgt.common.operation.mgt.Operation operation, String deviceId)
             throws OperationManagementDAOException;
 
     Activity getActivity(int operationId) throws OperationManagementDAOException;
 
     List<Activity> getActivityList(List<Integer> operationIds) throws OperationManagementDAOException;
+
+    void addOperationResponseLarge(OperationResponseMeta responseMeta,
+                                   org.wso2.carbon.device.mgt.common.operation.mgt.Operation operation,
+                                   String deviceId) throws OperationManagementDAOException;
+
+    Map<String, Map<String, List<OperationResponse>>> getLargeOperationResponsesInBulk(List<Integer> operationIds) throws OperationManagementDAOException;
+
+    void populateLargeOperationResponses(List<Activity> activities, List<Integer> largeResponseIDs) throws OperationManagementDAOException;
 
     Activity getActivityByDevice(int operationId, int deviceId) throws OperationManagementDAOException;
 

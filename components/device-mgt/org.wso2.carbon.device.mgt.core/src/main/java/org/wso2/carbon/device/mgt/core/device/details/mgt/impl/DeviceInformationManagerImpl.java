@@ -64,7 +64,7 @@ import java.util.Map;
 
 public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
-    private DeviceDetailsDAO deviceDetailsDAO;
+    private final DeviceDetailsDAO deviceDetailsDAO;
     private DeviceDAO deviceDAO;
     private static final Log log = LogFactory.getLog(DeviceInformationManagerImpl.class);
     private static final String LOCATION_EVENT_STREAM_DEFINITION = "org.wso2.iot.LocationStream";
@@ -117,7 +117,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 addOSVersionValue(device, newDeviceInfo);
                 for (String key : newDeviceInfo.getDeviceDetailsMap().keySet()) {
                     if (previousDeviceProperties.containsKey(key)) {
-                        updatableProps.put(key, newDeviceInfo.getDeviceDetailsMap().get(key));
+                        String val = previousDeviceProperties.get(key);
+                        if (val != null &&!val.equals(newDeviceInfo.getDeviceDetailsMap().get(key))) {
+                            updatableProps.put(key, newDeviceInfo.getDeviceDetailsMap().get(key));
+                        }
                     } else {
                         injectableProps.put(key, newDeviceInfo.getDeviceDetailsMap().get(key));
                     }
@@ -160,20 +163,17 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 );
             }
         } catch (TransactionManagementException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Transactional error occurred while adding the device information.", e);
         } catch (DeviceDetailsMgtDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while adding the device information.", e);
         } catch (DeviceManagementException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while retrieving the device information.", e);
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while updating the last update timestamp of the " +
                     "device", e);
         } catch (DataPublisherConfigurationException e) {
-            DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceDetailsMgtException("Error occurred while publishing the device location information.", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
@@ -226,17 +226,30 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
         if (device == null) {
             return null;
         }
+        return getDeviceInfo(device);
+    }
+
+    @Override
+    public DeviceInfo getDeviceInfo(Device device) throws DeviceDetailsMgtException {
         try {
             DeviceManagementDAOFactory.openConnection();
             DeviceInfo deviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
                     device.getEnrolmentInfo().getId());
+            if (deviceInfo == null) {
+                deviceInfo = new DeviceInfo();
+            }
             deviceInfo.setDeviceDetailsMap(deviceDetailsDAO.getDeviceProperties(device.getId(),
                     device.getEnrolmentInfo().getId()));
+            DeviceLocation location = deviceDetailsDAO.getDeviceLocation(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            if (location != null) {
+                //There are some cases where the device-info is not updated properly. Hence returning a null value.
+                deviceInfo.setLocation(location);
+            }
             return deviceInfo;
-
         } catch (SQLException e) {
-            throw new DeviceDetailsMgtException("SQL error occurred while retrieving device " + deviceId.toString()
-                                                + "'s info from database.", e);
+            throw new DeviceDetailsMgtException("SQL error occurred while retrieving device " +
+                    device.getDeviceIdentifier() + "'s info from database.", e);
         } catch (DeviceDetailsMgtDAOException e) {
             throw new DeviceDetailsMgtException("Exception occurred while retrieving device details.", e);
         } finally {
@@ -263,11 +276,21 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 }
             }
             DeviceManagementDAOFactory.openConnection();
+            DeviceInfo deviceInfo;
             for (Device device : deviceIds) {
-                DeviceInfo deviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
+                deviceInfo = deviceDetailsDAO.getDeviceInformation(device.getId(),
                         device.getEnrolmentInfo().getId());
+                if (deviceInfo == null) {
+                    deviceInfo = new DeviceInfo();
+                }
                 deviceInfo.setDeviceDetailsMap(deviceDetailsDAO.getDeviceProperties(device.getId(),
                         device.getEnrolmentInfo().getId()));
+                DeviceLocation location = deviceDetailsDAO.getDeviceLocation(device.getId(),
+                        device.getEnrolmentInfo().getId());
+                if (location != null) {
+                    //There are some cases where the device-info is not updated properly. Hence returning a null value.
+                    deviceInfo.setLocation(location);
+                }
                 deviceInfos.add(deviceInfo);
             }
         } catch (SQLException e) {
@@ -367,7 +390,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             if (device == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("No device is found upon the device identifier '" + deviceId.getId() +
-                              "' and type '" + deviceId.getType() + "'. Therefore returning null");
+                            "' and type '" + deviceId.getType() + "'. Therefore returning null");
                 }
                 return null;
             }
@@ -401,7 +424,7 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
             throw new DeviceDetailsMgtException("SQL error occurred while retrieving device from database.", e);
         } catch (DeviceDetailsMgtDAOException e) {
             throw new DeviceDetailsMgtException("Exception occurred while retrieving device locations.", e);
-        } finally{
+        } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
     }

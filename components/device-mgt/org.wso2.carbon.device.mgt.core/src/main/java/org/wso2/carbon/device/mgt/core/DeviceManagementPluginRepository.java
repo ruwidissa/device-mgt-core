@@ -56,15 +56,15 @@ import java.util.Map;
 
 public class DeviceManagementPluginRepository implements DeviceManagerStartupListener {
 
-    private Map<DeviceTypeServiceIdentifier, DeviceManagementServiceHolder> providers;
+    private final Map<DeviceTypeServiceIdentifier, DeviceManagementServiceHolder> providers;
     private boolean isInitiated;
     private static final Log log = LogFactory.getLog(DeviceManagementPluginRepository.class);
-    private OperationManagerRepository operationManagerRepository;
+    private final OperationManagerRepository operationManagerRepository;
     private static final long DEFAULT_UPDATE_TIMESTAMP = 900000L;
 
     public DeviceManagementPluginRepository() {
         this.operationManagerRepository = new OperationManagerRepository();
-        providers = Collections.synchronizedMap(new HashMap<DeviceTypeServiceIdentifier, DeviceManagementServiceHolder>());
+        providers = Collections.synchronizedMap(new HashMap<>());
         DeviceManagementServiceComponent.registerStartupListener(this);
     }
 

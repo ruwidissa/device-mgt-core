@@ -102,7 +102,7 @@ public class Utils {
 
         final ProxySelector proxySelector = new ProxySelector() {
             @Override
-            public java.util.List<Proxy> select(URI uri) {
+            public List<Proxy> select(URI uri) {
                 List<Proxy> proxyList = new ArrayList<>();
                 String host = uri.getHost();
 

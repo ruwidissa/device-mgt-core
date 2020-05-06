@@ -61,7 +61,7 @@ public class PolicyOperationDAOImpl extends GenericOperationDAOImpl {
             oos = new ObjectOutputStream(bao);
             oos.writeObject(operation);
 
-            stmt.setObject(6, operation);
+            stmt.setBytes(6, bao.toByteArray());
             stmt.setBoolean(7, operation.isEnabled());
             stmt.executeUpdate();
 

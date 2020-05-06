@@ -33,7 +33,6 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.device.mgt.core.task;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -86,4 +85,3 @@ public class Utils {
     }
 
 }
-

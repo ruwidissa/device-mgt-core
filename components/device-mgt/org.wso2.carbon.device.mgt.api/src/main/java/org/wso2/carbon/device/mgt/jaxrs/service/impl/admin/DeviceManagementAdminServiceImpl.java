@@ -140,7 +140,7 @@ public class DeviceManagementAdminServiceImpl implements DeviceManagementAdminSe
             @QueryParam("owner") String owner,
             List<String> deviceIdentifiers){
         try {
-            if (DeviceMgtAPIUtils.getDeviceManagementService().updateEnrollment(owner, deviceIdentifiers)) {
+            if (DeviceMgtAPIUtils.getDeviceManagementService().updateEnrollment(owner, true, deviceIdentifiers)) {
                 String msg = "Device owner is updated successfully.";
                 return Response.status(Response.Status.OK).entity(msg).build();
             }

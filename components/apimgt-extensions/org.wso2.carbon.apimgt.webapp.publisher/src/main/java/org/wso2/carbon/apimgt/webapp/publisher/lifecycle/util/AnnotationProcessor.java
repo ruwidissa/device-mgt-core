@@ -94,7 +94,7 @@ public class AnnotationProcessor {
     private Class<io.swagger.annotations.Tag> tagClass;
     private Class<io.swagger.annotations.Extension> extensionClass;
     private Class<io.swagger.annotations.ExtensionProperty> extensionPropertyClass;
-    private Class<io.swagger.annotations.ApiOperation> apiOperation;
+    private Class<ApiOperation> apiOperation;
     private Class<org.wso2.carbon.apimgt.annotations.api.Scope> scopeClass;
     private Class<org.wso2.carbon.apimgt.annotations.api.Scopes> scopesClass;
     private Map<String, ApiScope> apiScopes;
@@ -119,8 +119,8 @@ public class AnnotationProcessor {
                     .loadClass(org.wso2.carbon.apimgt.annotations.api.Scope.class.getName());
             scopesClass = (Class<org.wso2.carbon.apimgt.annotations.api.Scopes>) classLoader
                     .loadClass(org.wso2.carbon.apimgt.annotations.api.Scopes.class.getName());
-            apiOperation = (Class<io.swagger.annotations.ApiOperation>)classLoader
-                    .loadClass((io.swagger.annotations.ApiOperation.class.getName()));
+            apiOperation = (Class<ApiOperation>)classLoader
+                    .loadClass((ApiOperation.class.getName()));
         } catch (ClassNotFoundException e) {
             log.error("An error has occurred while loading classes ", e);
         }

@@ -23,15 +23,11 @@ package org.wso2.carbon.device.mgt.core.archival.dao;
  */
 public interface DataDeletionDAO {
 
-    int DEFAULT_RETENTION_PERIOD = 364;
+    void deleteLargeOperationResponses() throws ArchivalDAOException;
 
     void deleteOperationResponses() throws ArchivalDAOException;
 
     void deleteNotifications() throws ArchivalDAOException;
-
-    void deleteCommandOperations() throws ArchivalDAOException;
-
-    void deleteProfileOperations() throws ArchivalDAOException;
 
     void deleteEnrolmentMappings() throws ArchivalDAOException;
 

@@ -37,14 +37,9 @@ public class OperationManagementDAOUtil {
                 log.warn("Error occurred while closing the result set", e);
             }
         }
-        if (stmt != null) {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                log.warn("Error occurred while closing the statement", e);
-            }
-        }
+        cleanupResources(stmt);
     }
+
     public static void cleanupResources(Statement stmt) {
         if (stmt != null) {
             try {

@@ -20,135 +20,548 @@ package org.wso2.carbon.device.mgt.core.archival.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.core.archival.beans.*;
-import org.wso2.carbon.device.mgt.core.archival.dao.*;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAO;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAOException;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAOUtil;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDestinationDAOFactory;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalSourceDAOFactory;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArchivalDAOImpl implements ArchivalDAO {
 
     private static final Log log = LogFactory.getLog(ArchivalDAOImpl.class);
 
-    private int retentionPeriod;
-    private int batchSize = ArchivalDAO.DEFAULT_BATCH_SIZE;
-    private Timestamp currentTimestamp;
+    private final int retentionPeriod;
 
+    private static final String SOURCE_DB =
+            DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getArchivalConfiguration()
+                    .getArchivalTaskConfiguration().getDbConfig().getSourceDB();
 
-    public ArchivalDAOImpl(int retentionPeriod) {
-        this.retentionPeriod = retentionPeriod;
-    }
+    private static final String DESTINATION_DB =
+            DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getArchivalConfiguration()
+                    .getArchivalTaskConfiguration().getDbConfig().getDestinationDB();
 
     public ArchivalDAOImpl(int retentionPeriod, int batchSize) {
         this.retentionPeriod = retentionPeriod;
-        this.batchSize = batchSize;
-        this.currentTimestamp = new Timestamp(new java.util.Date().getTime());
         if (log.isDebugEnabled()) {
-            log.debug("Using batch size of " + this.batchSize + " with retention period " + this.retentionPeriod);
+            log.debug("Using batch size of " + batchSize + " with retention period " + this.retentionPeriod);
         }
     }
 
-    @Override
-    public List<Integer> getAllOperations() throws ArchivalDAOException {
-        List<Integer> operationIds = new ArrayList<>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT ID FROM DM_OPERATION WHERE CREATED_TIMESTAMP < (DATE_SUB(NOW(), INTERVAL "
-                    + this.retentionPeriod + " DAY))";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-            if (log.isDebugEnabled()) {
-                log.debug("Selected Operation Ids from Enrolment OP Mapping");
-            }
-            while (rs.next()) {
-                operationIds.add(rs.getInt("ID"));
-            }
-        } catch (SQLException e) {
-            String msg = "An error occurred while getting a list operation Ids to archive";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(operationIds.size() + " operations found for the archival");
-            log.debug(operationIds.size() + "[" + operationIds.get(0) + "," + operationIds.get(batchSize - 1) + "]");
-        }
-        return operationIds;
-    }
-
-    @Override
-    public List<Integer> getPendingAndInProgressOperations() throws ArchivalDAOException {
-        List<Integer> operationIds = new ArrayList<>();
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "(SELECT DISTINCT\n" +
-                    " OPERATION_ID\n" +
-                    " FROM\n" +
-                    " DM_ENROLMENT_OP_MAPPING\n" +
-                    " WHERE\n" +
-                    " STATUS = 'PENDING'\n" +
-                    " AND CREATED_TIMESTAMP < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL "
-                    + this.retentionPeriod + " DAY))) \n" +
-                    " UNION ALL \n" +
-                    "\t(SELECT DISTINCT\n" +
-                    " OPERATION_ID\n" +
-                    " FROM\n" +
-                    " DM_ENROLMENT_OP_MAPPING\n" +
-                    " WHERE\n" +
-                    " STATUS = 'IN_PROGRESS'\n" +
-                    " AND CREATED_TIMESTAMP < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL " +
-                    "" + this.retentionPeriod + " DAY)))";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-            if (log.isDebugEnabled()) {
-                log.debug("Selected Pending or In Progress Operation IDs");
-            }
-            while (rs.next()) {
-                operationIds.add(rs.getInt("OPERATION_ID"));
-            }
-        } catch (SQLException e) {
-            String msg = "An error occurred while getting a list pending or in progress operation Ids to archive";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug(operationIds.size() + " operations found for the archival");
-            log.debug(operationIds.size() + "[" + operationIds.get(0) + "," + operationIds.get(batchSize - 1) + "]");
-        }
-        return operationIds;
-    }
-
-    @Override
-    public void copyOperationIDsForArchival(List<Integer> operationIds) throws ArchivalDAOException {
+    public List<Integer> getNonRemovableOperationMappingIDs(Timestamp time) throws ArchivalDAOException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<Integer> removableOperationMappingIds = new ArrayList<>();
         try {
             Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_ARCHIVED_OPERATIONS(ID,CREATED_TIMESTAMP) VALUES (?,NOW())";
+            String sql = "SELECT ID FROM DM_ENROLMENT_OP_MAPPING " +
+                    "WHERE UPDATED_TIMESTAMP < UNIX_TIMESTAMP(DATE_SUB(?, INTERVAL ? DAY)) " +
+                    "AND (STATUS != 'COMPLETED' AND STATUS != 'ERROR')";
+
             stmt = conn.prepareStatement(sql);
+            stmt.setTimestamp(1, time);
+            stmt.setInt(2, this.retentionPeriod);
 
-            int count = 0;
-            for (int i = 0; i < operationIds.size(); i++) {
-                stmt.setInt(1, operationIds.get(i));
-                stmt.addBatch();
-
-                if (++count % this.batchSize == 0) {
-                    stmt.executeBatch();
-                }
+            long startTime = System.currentTimeMillis();
+            rs = stmt.executeQuery();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+            while (rs.next()) {
+                removableOperationMappingIds.add(rs.getInt("ID"));
             }
-            stmt.executeBatch();
+
             if (log.isDebugEnabled()) {
-                log.debug(count + " Records copied to the temporary table.");
+                log.debug("Time Elapsed for getting Non Removable Operation Mapping IDs: " + difference);
+                log.debug("Total Non Removable Operation Mapping IDs: " + removableOperationMappingIds.size());
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting Non Removable Operation Mapping IDs. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(stmt, rs);
+        }
+        return removableOperationMappingIds;
+    }
+
+    public int getLargeOperationResponseCount(Timestamp time, List<Integer> nonRemovableMappings)
+            throws ArchivalDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            Connection conn = ArchivalSourceDAOFactory.getConnection();
+            StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS COUNT FROM DM_DEVICE_OPERATION_RESPONSE_LARGE " +
+                    "WHERE RECEIVED_TIMESTAMP < (DATE_SUB( ? , INTERVAL ? DAY))");
+            if (nonRemovableMappings.size() > 0) {
+                sql.append(" AND EN_OP_MAP_ID NOT IN (");
+                for (int i = 0; i < nonRemovableMappings.size(); i++) {
+                    sql.append(nonRemovableMappings.get(i));
+                    if (i != nonRemovableMappings.size() - 1) {
+                        sql.append(",");
+                    }
+                }
+                sql.append(")");
+            }
+
+            stmt = conn.prepareStatement(sql.toString());
+            stmt.setTimestamp(1, time);
+            stmt.setInt(2, this.retentionPeriod);
+
+            long startTime = System.currentTimeMillis();
+            rs = stmt.executeQuery();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            while (rs.next()) {
+                count = rs.getInt("COUNT");
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for getting Large Operation Response Count : " + difference);
+                log.debug("Total Large Operation Responses for Archival : " + count);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while archiving the large operation responses. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(stmt, rs);
+        }
+        return count;
+    }
+
+    public int getOpMappingsCount(Timestamp time) throws ArchivalDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            Connection conn = ArchivalSourceDAOFactory.getConnection();
+            String sql = "SELECT COUNT(ID) AS COUNT FROM DM_ENROLMENT_OP_MAPPING " +
+                    "WHERE UPDATED_TIMESTAMP < UNIX_TIMESTAMP(DATE_SUB( ? , INTERVAL ? DAY))" +
+                    "AND (STATUS = 'COMPLETED' OR STATUS = 'ERROR')";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setTimestamp(1, time);
+            stmt.setInt(2, this.retentionPeriod);
+
+            long startTime = System.currentTimeMillis();
+            rs = stmt.executeQuery();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            while (rs.next()) {
+                count = rs.getInt("COUNT");
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for getting Op Mappings Count : " + difference);
+                log.debug("Total Enrollment Operation Mappings for Archival : " + count);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting Op Mappings Count. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(stmt, rs);
+        }
+        return count;
+    }
+
+    @Override
+    public int getOperationResponseCount(Timestamp time, List<Integer> nonRemovableMappings)
+            throws ArchivalDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        try {
+            Connection conn = ArchivalSourceDAOFactory.getConnection();
+
+            StringBuilder sql = new StringBuilder("SELECT COUNT(*) AS COUNT FROM DM_DEVICE_OPERATION_RESPONSE " +
+                    "WHERE RECEIVED_TIMESTAMP < (DATE_SUB( ? , INTERVAL ? DAY))");
+            if (nonRemovableMappings.size() > 0) {
+                sql.append(" AND EN_OP_MAP_ID NOT IN (");
+                for (int i = 0; i < nonRemovableMappings.size(); i++) {
+                    sql.append(nonRemovableMappings.get(i));
+                    if (i != nonRemovableMappings.size() - 1) {
+                        sql.append(",");
+                    }
+                }
+                sql.append(")");
+            }
+
+            stmt = conn.prepareStatement(sql.toString());
+            stmt.setTimestamp(1, time);
+            stmt.setInt(2, this.retentionPeriod);
+
+            long startTime = System.currentTimeMillis();
+            rs = stmt.executeQuery();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            while (rs.next()) {
+                count = rs.getInt("COUNT");
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for getting Operation Response Count : " + difference);
+                log.debug("Total Operation Responses for Archival : " + count);
+            }
+
+        } catch (SQLException e) {
+            String msg = "Error occurred while archiving the operation response count. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(stmt, rs);
+        }
+        return count;
+    }
+
+    @Override
+    public void transferOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings)
+            throws ArchivalDAOException {
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = ArchivalDestinationDAOFactory.getConnection();
+
+            StringBuilder sql = new StringBuilder("INSERT INTO " + DESTINATION_DB + ".DM_DEVICE_OPERATION_RESPONSE_ARCH " +
+                    "SELECT OPR.ID, OPR.ENROLMENT_ID, OPR.OPERATION_ID, OPR.OPERATION_RESPONSE, OPR.RECEIVED_TIMESTAMP, NOW(), OPR.IS_LARGE_RESPONSE " +
+                    "FROM " + SOURCE_DB + ".DM_DEVICE_OPERATION_RESPONSE OPR " +
+                    "WHERE OPR.RECEIVED_TIMESTAMP < ( DATE_SUB( ? , INTERVAL ? DAY))");
+            if (nonRemovableMappings.size() > 0) {
+                sql.append(" AND EN_OP_MAP_ID NOT IN (");
+                for (int i = 0; i < nonRemovableMappings.size(); i++) {
+                    sql.append(nonRemovableMappings.get(i));
+                    if (i != nonRemovableMappings.size() - 1) {
+                        sql.append(",");
+                    }
+                }
+                sql.append(")");
+            }
+            sql.append(" ORDER BY OPR.RECEIVED_TIMESTAMP LIMIT ?");
+
+            long startTime = System.currentTimeMillis();
+
+            ps = conn.prepareStatement(sql.toString());
+            ps.setTimestamp(1, time);
+            ps.setInt(2, this.retentionPeriod);
+            ps.setInt(3, batchSize);
+
+            int affected = ps.executeUpdate();
+
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Transferring Operation Responses : " + difference);
+                log.debug("Transfer of " + affected + " Operation Responses Completed");
             }
         } catch (SQLException e) {
-            String msg = "Error while copying operation Ids for archival";
-            log.error(msg, e);
+            String msg = "Error occurred while archiving the operation responses. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps);
+        }
+    }
+
+    @Override
+    public void transferLargeOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings)
+            throws ArchivalDAOException {
+
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = ArchivalDestinationDAOFactory.getConnection();
+
+            StringBuilder sql = new StringBuilder("INSERT INTO " + DESTINATION_DB + ".DM_DEVICE_OPERATION_RESPONSE_LARGE_ARCH " +
+                    "SELECT OPR.ID, OPR.OPERATION_RESPONSE, NOW() " +
+                    "FROM " + SOURCE_DB + ".DM_DEVICE_OPERATION_RESPONSE_LARGE OPR " +
+                    "WHERE OPR.RECEIVED_TIMESTAMP < ( DATE_SUB( ? , INTERVAL ? DAY))");
+            if (nonRemovableMappings.size() > 0) {
+                sql.append(" AND EN_OP_MAP_ID NOT IN (");
+                for (int i = 0; i < nonRemovableMappings.size(); i++) {
+                    sql.append(nonRemovableMappings.get(i));
+                    if (i != nonRemovableMappings.size() - 1) {
+                        sql.append(",");
+                    }
+                }
+                sql.append(")");
+            }
+            sql.append(" ORDER BY OPR.RECEIVED_TIMESTAMP LIMIT ?");
+            long startTime = System.currentTimeMillis();
+
+            ps = conn.prepareStatement(sql.toString());
+            ps.setTimestamp(1, time);
+            ps.setInt(2, this.retentionPeriod);
+            ps.setInt(3, batchSize);
+
+            int affected = ps.executeUpdate();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Transferring Large Operation Responses : " + difference);
+                log.debug("Transfer of " + affected + " Large Operation Responses Completed");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while archiving large operation responses. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps);
+        }
+    }
+
+    @Override
+    public void removeLargeOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings)
+            throws ArchivalDAOException {
+        PreparedStatement ps = null;
+
+        Connection conn;
+        try {
+            conn = ArchivalSourceDAOFactory.getConnection();
+
+            StringBuilder sql = new StringBuilder("DELETE FROM DM_DEVICE_OPERATION_RESPONSE_LARGE " +
+                    "WHERE RECEIVED_TIMESTAMP < ( DATE_SUB( ? , INTERVAL ? DAY))");
+            if (nonRemovableMappings.size() > 0) {
+                sql.append(" AND EN_OP_MAP_ID NOT IN (");
+                for (int i = 0; i < nonRemovableMappings.size(); i++) {
+                    sql.append(nonRemovableMappings.get(i));
+                    if (i != nonRemovableMappings.size() - 1) {
+                        sql.append(",");
+                    }
+                }
+                sql.append(")");
+            }
+            sql.append(" ORDER BY RECEIVED_TIMESTAMP LIMIT ?");
+            long startTime = System.currentTimeMillis();
+
+            ps = conn.prepareStatement(sql.toString());
+            ps.setTimestamp(1, time);
+            ps.setInt(2, this.retentionPeriod);
+            ps.setInt(3, batchSize);
+
+            int affected = ps.executeUpdate();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Removing Large Operation Responses : " + difference);
+                log.debug(affected + " Rows deleted from DM_DEVICE_OPERATION_RESPONSE_LARGE");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing the operation responses. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps);
+        }
+    }
+
+    @Override
+    public void removeOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings)
+            throws ArchivalDAOException {
+        PreparedStatement ps = null;
+
+        Connection conn;
+        try {
+            conn = ArchivalSourceDAOFactory.getConnection();
+
+            StringBuilder sql = new StringBuilder("DELETE FROM DM_DEVICE_OPERATION_RESPONSE " +
+                    "WHERE RECEIVED_TIMESTAMP < ( DATE_SUB( ? , INTERVAL ? DAY))");
+            if (nonRemovableMappings.size() > 0) {
+                sql.append(" AND EN_OP_MAP_ID NOT IN (");
+                for (int i = 0; i < nonRemovableMappings.size(); i++) {
+                    sql.append(nonRemovableMappings.get(i));
+                    if (i != nonRemovableMappings.size() - 1) {
+                        sql.append(",");
+                    }
+                }
+                sql.append(")");
+            }
+            sql.append(" ORDER BY RECEIVED_TIMESTAMP LIMIT ?");
+            long startTime = System.currentTimeMillis();
+
+            ps = conn.prepareStatement(sql.toString());
+            ps.setTimestamp(1, time);
+            ps.setInt(2, this.retentionPeriod);
+            ps.setInt(3, batchSize);
+
+            int affected = ps.executeUpdate();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Removing Operation Responses : " + difference);
+                log.debug(affected + " Rows deleted from DM_DEVICE_OPERATION_RESPONSE");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing operation responses. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps);
+        }
+    }
+
+    @Override
+    public void moveNotifications(Timestamp time) throws ArchivalDAOException {
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
+
+        try {
+            Connection conn = ArchivalSourceDAOFactory.getConnection();
+            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
+
+            String sql = "INSERT INTO " + DESTINATION_DB + ".DM_NOTIFICATION_ARCH " +
+                    "SELECT NOTIFICATION_ID, DEVICE_ID, OPERATION_ID, TENANT_ID, STATUS, DESCRIPTION, NOW() " +
+                    "FROM " + SOURCE_DB + ".DM_NOTIFICATION " +
+                    "WHERE LAST_UPDATED_TIMESTAMP < ( DATE_SUB( ? , INTERVAL ? DAY) )";
+
+            ps1 = conn2.prepareStatement(sql);
+            ps1.setTimestamp(1, time);
+            ps1.setInt(2, this.retentionPeriod);
+
+            long startTime = System.currentTimeMillis();
+            int affected = ps1.executeUpdate();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Transfer of operations : " + difference);
+                log.debug(affected + " [NOTIFICATIONS] Records copied to the archival table. Starting deletion");
+            }
+
+            sql = "DELETE FROM DM_NOTIFICATION WHERE LAST_UPDATED_TIMESTAMP < ( DATE_SUB( ? , INTERVAL ? DAY) )";
+
+            ps2 = conn.prepareStatement(sql);
+            ps2.setTimestamp(1, time);
+            ps2.setInt(2, this.retentionPeriod);
+
+            startTime = System.currentTimeMillis();
+            affected = ps2.executeUpdate();
+            endTime = System.currentTimeMillis();
+            difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for deleting operations : " + difference);
+                log.debug(affected + " Rows deleted");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while deleting operations. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps1);
+            ArchivalDAOUtil.cleanupResources(ps2);
+        }
+    }
+
+    @Override
+    public void transferEnrollmentOpMappings(int batchSize, Timestamp time) throws ArchivalDAOException {
+
+        PreparedStatement ps = null;
+
+        try {
+            Connection conn = ArchivalDestinationDAOFactory.getConnection();
+
+            String sql = "INSERT INTO " + DESTINATION_DB + ".DM_ENROLMENT_OP_MAPPING_ARCH " +
+                    "SELECT OPR.ID, OPR.ENROLMENT_ID, OPR.OPERATION_ID, OPR.STATUS, OPR.CREATED_TIMESTAMP, OPR.UPDATED_TIMESTAMP, NOW() " +
+                    "FROM " + SOURCE_DB + ".DM_ENROLMENT_OP_MAPPING OPR " +
+                    "WHERE OPR.UPDATED_TIMESTAMP < UNIX_TIMESTAMP( DATE_SUB( ? , INTERVAL ? DAY)) " +
+                    "AND (STATUS = 'COMPLETED' OR STATUS = 'ERROR') " +
+                    "ORDER BY OPR.UPDATED_TIMESTAMP LIMIT ?";
+
+            ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, time);
+            ps.setInt(2, this.retentionPeriod);
+            ps.setInt(3, batchSize);
+
+            long startTime = System.currentTimeMillis();
+            int affected = ps.executeUpdate();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Transferring Enrollment Operation Mappings : " + difference);
+                log.debug("Transfer of " + affected + " Enrollment Operation Mappings Completed");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while archiving Enrollment Operation Mappings. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps);
+        }
+    }
+
+    @Override
+    public void removeEnrollmentOPMappings(int batchSize, Timestamp time) throws ArchivalDAOException {
+        PreparedStatement ps = null;
+        Connection conn;
+
+        try {
+            conn = ArchivalSourceDAOFactory.getConnection();
+
+            String sql = "DELETE FROM DM_ENROLMENT_OP_MAPPING " +
+                    "WHERE UPDATED_TIMESTAMP < UNIX_TIMESTAMP( DATE_SUB( ? , INTERVAL ? DAY)) " +
+                    "AND (STATUS = 'COMPLETED' OR STATUS = 'ERROR') " +
+                    "ORDER BY UPDATED_TIMESTAMP LIMIT ?";
+
+            ps = conn.prepareStatement(sql);
+            ps.setTimestamp(1, time);
+            ps.setInt(2, this.retentionPeriod);
+            ps.setInt(3, batchSize);
+
+            long startTime = System.currentTimeMillis();
+            int affected = ps.executeUpdate();
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Removing Enrollment Operation Mappings : " + difference);
+                log.debug(affected + " Rows deleted from DM_ENROLMENT_OP_MAPPING");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while removing Enrollment Operation Mappings. " + e.getMessage();
+            throw new ArchivalDAOException(msg, e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(ps);
+        }
+    }
+
+    @Override
+    public void transferOperations() throws ArchivalDAOException {
+        Statement stmt = null;
+        try {
+            Connection conn = ArchivalDestinationDAOFactory.getConnection();
+            stmt = conn.createStatement();
+
+            String sql = "INSERT INTO " + DESTINATION_DB + ".DM_OPERATION_ARCH " +
+                    "SELECT OPR.ID, OPR.TYPE, OPR.CREATED_TIMESTAMP, OPR.RECEIVED_TIMESTAMP, " +
+                    "OPR.OPERATION_CODE, OPR.INITIATED_BY, OPR.OPERATION_DETAILS, OPR.ENABLED, NOW() " +
+                    "FROM   " + SOURCE_DB + ".DM_OPERATION OPR " +
+                    "WHERE OPR.ID NOT IN (SELECT DISTINCT OPERATION_ID FROM " + SOURCE_DB + ".DM_ENROLMENT_OP_MAPPING)";
+
+            long startTime = System.currentTimeMillis();
+            int affected = stmt.executeUpdate(sql);
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
+
+            if (log.isDebugEnabled()) {
+                log.debug("Time Elapsed for Transferring Operations : " + difference);
+                log.debug("Transfer of " + affected + " Operations Completed");
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while archiving Operations. " + e.getMessage();
             throw new ArchivalDAOException(msg, e);
         } finally {
             ArchivalDAOUtil.cleanupResources(stmt);
@@ -156,576 +569,31 @@ public class ArchivalDAOImpl implements ArchivalDAO {
     }
 
     @Override
-    public List<ArchiveOperationResponse> selectOperationResponses() throws ArchivalDAOException {
+    public void removeOperations() throws ArchivalDAOException {
         Statement stmt = null;
-        ResultSet rs = null;
+        Connection conn;
 
-        List<ArchiveOperationResponse> operationResponses = new ArrayList<>();
         try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT \n" +
-                    "    o.ID,\n" +
-                    "    o.ENROLMENT_ID,\n" +
-                    "    o.OPERATION_ID,\n" +
-                    "    o.EN_OP_MAP_ID,\n" +
-                    "    o.OPERATION_RESPONSE,\n" +
-                    "    o.RECEIVED_TIMESTAMP\n" +
-                    "FROM\n" +
-                    "    DM_DEVICE_OPERATION_RESPONSE o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID;";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
+            conn = ArchivalSourceDAOFactory.getConnection();
+            stmt = conn.createStatement();
 
-            while (rs.next()) {
-                ArchiveOperationResponse rep = new ArchiveOperationResponse();
-                rep.setId(rs.getInt("ID"));
-                rep.setEnrolmentId(rs.getInt("ENROLMENT_ID"));
-                rep.setOperationId(rs.getInt("OPERATION_ID"));
-                rep.setOperationResponse(rs.getBytes("OPERATION_RESPONSE"));
-                rep.setReceivedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP"));
-                operationResponses.add(rep);
-            }
+            String sql = "DELETE FROM DM_OPERATION " +
+                    "WHERE ID NOT IN (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING)";
+
+            long startTime = System.currentTimeMillis();
+            int affected = stmt.executeUpdate(sql);
+            long endTime = System.currentTimeMillis();
+            long difference = endTime - startTime;
 
             if (log.isDebugEnabled()) {
-                log.debug("Selecting done for the Operation Response");
-            }
-
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the operation responses";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-
-        return operationResponses;
-
-    }
-
-    @Override
-    public void moveOperationResponses(List<ArchiveOperationResponse> archiveOperationResponse) throws ArchivalDAOException {
-        PreparedStatement stmt2 = null;
-        Statement stmt3 = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-
-
-            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_DEVICE_OPERATION_RESPONSE_ARCH VALUES(?, ?, ?, ?, ?,?)";
-            stmt2 = conn2.prepareStatement(sql);
-
-            int count = 0;
-            for (ArchiveOperationResponse rs : archiveOperationResponse) {
-                stmt2.setInt(1, rs.getId());
-                stmt2.setInt(2, rs.getEnrolmentId());
-                stmt2.setInt(3, rs.getOperationId());
-                stmt2.setBytes(4, (byte[]) rs.getOperationResponse());
-                stmt2.setTimestamp(5, rs.getReceivedTimeStamp());
-                stmt2.setTimestamp(6, this.currentTimestamp);
-                stmt2.addBatch();
-
-                if (++count % batchSize == 0) {
-                    stmt2.executeBatch();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Executing Operation Responses batch " + count);
-                    }
-                }
-            }
-            stmt2.executeBatch();
-            if (log.isDebugEnabled()) {
-                log.debug(count + " [OPERATION_RESPONSES] Records copied to the archival table. Starting deletion");
-            }
-            //try the deletion now
-            sql = "DELETE o.* FROM DM_DEVICE_OPERATION_RESPONSE o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID \n" +
-                    "WHERE\n" +
-                    "    o.OPERATION_ID = da.ID;";
-            stmt3 = conn.createStatement();
-            int affected = stmt3.executeUpdate(sql);
-            if (log.isDebugEnabled()) {
-                log.debug(affected + " Rows deleted");
+                log.debug("Time Elapsed for Removing Operations : " + difference);
+                log.debug(affected + " Rows deleted from DM_OPERATION");
             }
         } catch (SQLException e) {
-            String msg = "Error occurred while archiving the operation responses";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt2);
-            ArchivalDAOUtil.cleanupResources(stmt3);
-        }
-    }
-
-    @Override
-    public List<ArchiveNotification> selectNotifications() throws ArchivalDAOException {
-
-        Statement stmt = null;
-        ResultSet rs = null;
-        List<ArchiveNotification> notifications = new ArrayList<>();
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT \n" +
-                    "    o.NOTIFICATION_ID,\n" +
-                    "    o.DEVICE_ID,\n" +
-                    "    o.OPERATION_ID,\n" +
-                    "    o.TENANT_ID,\n" +
-                    "    o.STATUS,\n" +
-                    "    o.DESCRIPTION\n" +
-                    "FROM\n" +
-                    "    DM_NOTIFICATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID;";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-
-                ArchiveNotification note = new ArchiveNotification();
-                note.setNotificationId(rs.getInt("NOTIFICATION_ID"));
-                note.setDeviceId(rs.getInt("DEVICE_ID"));
-                note.setOperationId(rs.getInt("OPERATION_ID"));
-                note.setTenantId(rs.getInt("TENANT_ID"));
-                note.setStatus(rs.getString("STATUS"));
-                note.setDescription(rs.getString("DESCRIPTION"));
-                notifications.add(note);
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Selecting done for the Notification");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the notifications";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-        return notifications;
-    }
-
-
-    @Override
-    public void moveNotifications(List<ArchiveNotification> archiveNotifications) throws ArchivalDAOException {
-        Statement stmt = null;
-        PreparedStatement stmt2 = null;
-        Statement stmt3 = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-
-            String sql = "INSERT INTO DM_NOTIFICATION_ARCH VALUES(?, ?, ?, ?, ?, ?, ?)";
-            stmt2 = conn2.prepareStatement(sql);
-
-            int count = 0;
-//            while (rs.next()) {
-            for (ArchiveNotification rs : archiveNotifications) {
-                stmt2.setInt(1, rs.getNotificationId());
-                stmt2.setInt(2, rs.getDeviceId());
-                stmt2.setInt(3, rs.getOperationId());
-                stmt2.setInt(4, rs.getTenantId());
-                stmt2.setString(5, rs.getStatus());
-                stmt2.setString(6, rs.getDescription());
-                stmt2.setTimestamp(7, this.currentTimestamp);
-                stmt2.addBatch();
-
-                if (++count % batchSize == 0) {
-                    stmt2.executeBatch();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Executing Notifications batch " + count);
-                    }
-                }
-            }
-            stmt2.executeBatch();
-            if (log.isDebugEnabled()) {
-                log.debug(count + " [NOTIFICATIONS] Records copied to the archival table. Starting deletion");
-            }
-            sql = "DELETE o.* FROM DM_NOTIFICATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID \n" +
-                    "WHERE\n" +
-                    "    o.OPERATION_ID = da.ID;";
-            stmt3 = conn.createStatement();
-            int affected = stmt3.executeUpdate(sql);
-            if (log.isDebugEnabled()) {
-                log.debug(affected + " Rows deleted");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the notifications";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt2);
-            ArchivalDAOUtil.cleanupResources(stmt3);
-        }
-    }
-
-    @Override
-    public List<ArchiveCommandOperation> selectCommandOperations() throws ArchivalDAOException {
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        List<ArchiveCommandOperation> commandOperations = new ArrayList<>();
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT \n" +
-                    "    *\n" +
-                    "FROM\n" +
-                    "    DM_COMMAND_OPERATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID;";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                ArchiveCommandOperation op = new ArchiveCommandOperation();
-                op.setOperationId(rs.getInt("OPERATION_ID"));
-                op.setEnabled(rs.getInt("ENABLED"));
-
-                commandOperations.add(op);
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Selecting done for the Command Operation");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the command operation";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-        return commandOperations;
-    }
-
-    @Override
-    public List<ArchiveProfileOperation> selectProfileOperations() throws ArchivalDAOException {
-        Statement stmt = null;
-        ResultSet rs = null;
-        List<ArchiveProfileOperation> profileOperations = new ArrayList<>();
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT \n" +
-                    "    *\n" +
-                    "FROM\n" +
-                    "    DM_PROFILE_OPERATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID;";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                ArchiveProfileOperation op = new ArchiveProfileOperation();
-
-                op.setOperationId(rs.getInt("OPERATION_ID"));
-                op.setEnabled(rs.getInt("ENABLED"));
-                op.setOperationDetails(rs.getBytes("OPERATION_DETAILS"));
-                profileOperations.add(op);
-
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Selecting done for the Profile Operation");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the profile operation";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-        return profileOperations;
-    }
-
-
-    @Override
-    public List<ArchiveEnrolmentOperationMap> selectEnrolmentMappings() throws ArchivalDAOException {
-        Statement stmt = null;
-        ResultSet rs = null;
-        List<ArchiveEnrolmentOperationMap> operationMaps = new ArrayList<>();
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT \n" +
-                    "    o.ID,\n" +
-                    "    o.ENROLMENT_ID,\n" +
-                    "    o.OPERATION_ID,\n" +
-                    "    o.STATUS,\n" +
-                    "    o.CREATED_TIMESTAMP,\n" +
-                    "    o.UPDATED_TIMESTAMP\n" +
-                    "FROM\n" +
-                    "    DM_ENROLMENT_OP_MAPPING o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID;";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-
-                ArchiveEnrolmentOperationMap eom = new ArchiveEnrolmentOperationMap();
-                eom.setId(rs.getInt("ID"));
-                eom.setEnrolmentId(rs.getInt("ENROLMENT_ID"));
-                eom.setOperationId(rs.getInt("OPERATION_ID"));
-                eom.setStatus(rs.getString("STATUS"));
-                eom.setCreatedTimestamp(rs.getInt("CREATED_TIMESTAMP"));
-                eom.setUpdatedTimestamp(rs.getInt("UPDATED_TIMESTAMP"));
-                operationMaps.add(eom);
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Selecting done for the Enrolment OP Mapping");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the enrolment op mappings";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-
-        return operationMaps;
-    }
-
-    @Override
-    public void moveEnrolmentMappings(List<ArchiveEnrolmentOperationMap> operationMaps) throws ArchivalDAOException {
-        Statement stmt = null;
-        PreparedStatement stmt2 = null;
-        Statement stmt3 = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-
-            String sql = "INSERT INTO DM_ENROLMENT_OP_MAPPING_ARCH VALUES(?, ?, ?, ?, ?, ?, ?)";
-            stmt2 = conn2.prepareStatement(sql);
-
-            int count = 0;
-            for (ArchiveEnrolmentOperationMap rs : operationMaps) {
-                stmt2.setInt(1, rs.getId());
-                stmt2.setInt(2, rs.getEnrolmentId());
-                stmt2.setInt(3, rs.getOperationId());
-                stmt2.setString(4, rs.getStatus());
-                stmt2.setInt(5, rs.getCreatedTimestamp());
-                stmt2.setInt(6, rs.getUpdatedTimestamp());
-                stmt2.setTimestamp(7, this.currentTimestamp);
-                stmt2.addBatch();
-
-                if (++count % batchSize == 0) {
-                    stmt2.executeBatch();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Executing Enrolment Mappings batch " + count);
-                    }
-                }
-            }
-            stmt2.executeBatch();
-            if (log.isDebugEnabled()) {
-                log.debug(count + " [ENROLMENT_OP_MAPPING] Records copied to the archival table. Starting deletion");
-            }
-            sql = "DELETE o.* FROM DM_ENROLMENT_OP_MAPPING o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.OPERATION_ID = da.ID \n" +
-                    "WHERE\n" +
-                    "    o.OPERATION_ID = da.ID;";
-            stmt3 = conn.createStatement();
-            int affected = stmt3.executeUpdate(sql);
-            if (log.isDebugEnabled()) {
-                log.debug(affected + " Rows deleted");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the enrolment op mappings";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt2);
-            ArchivalDAOUtil.cleanupResources(stmt3);
-        }
-    }
-
-    @Override
-    public List<ArchiveOperation> selectOperations() throws ArchivalDAOException {
-        Statement stmt = null;
-        ResultSet rs = null;
-        List<ArchiveOperation> operations = new ArrayList<>();
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            String sql = "SELECT \n" +
-                    "    o.ID,\n" +
-                    "    o.TYPE,\n" +
-                    "    o.CREATED_TIMESTAMP,\n" +
-                    "    o.RECEIVED_TIMESTAMP,\n" +
-                    "    o.OPERATION_CODE,\n" +
-                    "    o.INITIATED_BY,\n" +
-                    "    o.OPERATION_DETAILS,\n" +
-                    "    o.ENABLED \n" +
-                    "FROM\n" +
-                    "    DM_OPERATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.ID = da.ID;";
-            stmt = this.createMemoryEfficientStatement(conn);
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-
-                ArchiveOperation op = new ArchiveOperation();
-                op.setId(rs.getInt("ID"));
-                op.setType(rs.getString("TYPE"));
-                op.setCreatedTimeStamp(rs.getTimestamp("CREATED_TIMESTAMP"));
-                op.setRecievedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP"));
-                op.setOperationCode(rs.getString("OPERATION_CODE"));
-                op.setInitiatedBy(rs.getString("INITIATED_BY"));
-                op.setOperationDetails(rs.getObject("OPERATION_DETAILS"));
-                op.setEnabled(rs.getBoolean("ENABLED"));
-
-                operations.add(op);
-
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Selecting done for the Operation");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the operations";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt, rs);
-        }
-        return operations;
-    }
-
-    @Override
-    public void moveOperations(List<ArchiveOperation> operations) throws ArchivalDAOException {
-        Statement stmt = null;
-        PreparedStatement stmt2 = null;
-        Statement stmt3 = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            Connection conn2 = ArchivalDestinationDAOFactory.getConnection();
-            String sql = "INSERT INTO DM_OPERATION_ARCH VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            stmt2 = conn2.prepareStatement(sql);
-
-            int count = 0;
-            for (ArchiveOperation rs : operations) {
-                stmt2.setInt(1, rs.getId());
-                stmt2.setString(2, rs.getType());
-                stmt2.setTimestamp(3, rs.getCreatedTimeStamp());
-                stmt2.setTimestamp(4, rs.getRecievedTimeStamp());
-                stmt2.setString(5, rs.getOperationCode());
-                stmt2.setString(6, rs.getInitiatedBy());
-                stmt2.setBytes(7, (byte[]) rs.getOperationDetails());
-                stmt2.setBoolean(8, rs.isEnabled());
-
-                stmt2.setTimestamp(9, this.currentTimestamp);
-                stmt2.addBatch();
-
-                if (++count % batchSize == 0) {
-                    stmt2.executeBatch();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Final Execution of Operations batch " + count);
-                    }
-                }
-            }
-            stmt2.executeBatch();
-            if (log.isDebugEnabled()) {
-                log.debug(count + " [OPERATIONS] Records copied to the archival table. Starting deletion");
-            }
-            sql = "DELETE o.* FROM DM_OPERATION o\n" +
-                    "        INNER JOIN\n" +
-                    "    DM_ARCHIVED_OPERATIONS da ON o.ID = da.ID \n" +
-                    "WHERE\n" +
-                    "    o.ID = da.ID;";
-            stmt3 = conn.createStatement();
-            int affected = stmt3.executeUpdate(sql);
-            if (log.isDebugEnabled()) {
-                log.debug(affected + " Rows deleted");
-            }
-        } catch (SQLException e) {
-            String msg = "Error occurred while archiving the operations";
-            log.error(msg, e);
-            throw new ArchivalDAOException(msg, e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt2);
-            ArchivalDAOUtil.cleanupResources(stmt3);
-        }
-    }
-
-    @Override
-    public void truncateOperationIDsForArchival() throws ArchivalDAOException {
-        PreparedStatement stmt = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-            conn.setAutoCommit(false);
-            String sql = "TRUNCATE DM_ARCHIVED_OPERATIONS";
-            stmt = conn.prepareStatement(sql);
-            stmt.executeUpdate();
-
-            conn.commit();
-        } catch (SQLException e) {
-            String msg = "Error occurred while truncating operation Ids";
-            log.error(msg, e);
+            String msg = "Error occurred while removing Operations. " + e.getMessage();
             throw new ArchivalDAOException(msg, e);
         } finally {
             ArchivalDAOUtil.cleanupResources(stmt);
-        }
-    }
-
-    private Statement createMemoryEfficientStatement(Connection conn) throws ArchivalDAOException, SQLException {
-        Statement stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        stmt.setFetchSize(Integer.MIN_VALUE);
-        return stmt;
-    }
-
-    private String buildWhereClause(String[] statuses) {
-        StringBuilder whereClause = new StringBuilder("WHERE ");
-        for (int i = 0; i < statuses.length; i++) {
-            whereClause.append("STATUS ='");
-            whereClause.append(statuses[i]);
-            whereClause.append("' ");
-            if (i != (statuses.length - 1))
-                whereClause.append(" OR ");
-        }
-        return whereClause.toString();
-    }
-
-    private void copyOperationIDsForArchival() throws ArchivalDAOException {
-        PreparedStatement stmt = null;
-        Statement createStmt = null;
-        try {
-            Connection conn = ArchivalSourceDAOFactory.getConnection();
-//            conn.setAutoCommit(false);
-//            String sql = "INSERT INTO DM_ARCHIVED_OPERATIONS(ID,CREATED_TIMESTAMP)" +
-//                    " SELECT DISTINCT op.ID as OPERATION_ID, NOW()" +
-//                    " FROM DM_ENROLMENT_OP_MAPPING AS opm" +
-//                    " LEFT JOIN DM_OPERATION AS op ON opm.OPERATION_ID = op.ID" +
-//                    " WHERE opm.STATUS='ERROR' OR opm.STATUS='COMPLETED'" +
-//                    " AND op.RECEIVED_TIMESTAMP < DATE_SUB(NOW(), INTERVAL ? DAY);";
-//            stmt = conn.prepareStatement(sql);
-//            stmt.setInt(1, this.retentionPeriod);
-//            stmt.addBatch();
-//            stmt.executeBatch();
-//            conn.commit();
-
-            //Create the temporary table first
-//            String sql = "CREATE TEMPORARY TABLE DM_ARCHIVED_OPERATIONS (ID INTEGER NOT NULL," +
-//                    "    CREATED_TIMESTAMP TIMESTAMP NOT NULL, PRIMARY KEY (ID))" ;
-//            createStmt = conn.createStatement();
-//            createStmt.execute(sql);
-//            if(log.isDebugEnabled()) {
-//                log.debug("Temporary table DM_ARCHIVED_OPERATIONS has been created ");
-//            }
-            //Copy eligible operations into DM_ARCHIVED_OPERATIONS
-            String sql = "INSERT INTO DM_ARCHIVED_OPERATIONS(ID,CREATED_TIMESTAMP)" +
-                    " SELECT DISTINCT OPERATION_ID, NOW()" +
-                    " FROM DM_ENROLMENT_OP_MAPPING" +
-                    " WHERE STATUS='ERROR' OR STATUS='COMPLETED' OR STATUS='REPEATED'" +
-                    " AND CREATED_TIMESTAMP < DATE_SUB(NOW(), INTERVAL ? DAY)";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, this.retentionPeriod);
-            int affected = stmt.executeUpdate();
-            log.info(affected + " Eligible operations found for archival");
-        } catch (SQLException e) {
-            throw new ArchivalDAOException("Error occurred while copying operation Ids for archival", e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt);
-            ArchivalDAOUtil.cleanupResources(createStmt);
         }
     }
 }

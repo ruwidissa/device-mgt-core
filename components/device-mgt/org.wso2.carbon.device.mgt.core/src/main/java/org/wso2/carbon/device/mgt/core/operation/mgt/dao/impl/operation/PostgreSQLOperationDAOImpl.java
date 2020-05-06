@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl.operation;
 
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
+import org.wso2.carbon.device.mgt.core.dto.operation.mgt.OperationResponseMeta;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOUtil;
@@ -30,7 +31,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -125,5 +128,64 @@ public class PostgreSQLOperationDAOImpl extends GenericOperationDAOImpl {
             OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }
         return operations;
+    }
+
+    @Override
+    public OperationResponseMeta addOperationResponse(int enrolmentId, org.wso2.carbon.device.mgt.common.operation.mgt.Operation operation,
+            String deviceId) throws OperationManagementDAOException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean isLargeResponse = false;
+        try {
+            Connection connection = OperationManagementDAOFactory.getConnection();
+
+            stmt = connection.prepareStatement("SELECT ID FROM DM_ENROLMENT_OP_MAPPING WHERE ENROLMENT_ID = ? " +
+                    "AND OPERATION_ID = ?");
+            stmt.setInt(1, enrolmentId);
+            stmt.setInt(2, operation.getId());
+
+            rs = stmt.executeQuery();
+            int enPrimaryId = 0;
+            if (rs.next()) {
+                enPrimaryId = rs.getInt("ID");
+            }
+            stmt = connection.prepareStatement("INSERT INTO DM_DEVICE_OPERATION_RESPONSE(OPERATION_ID, ENROLMENT_ID, " +
+                            "EN_OP_MAP_ID, OPERATION_RESPONSE, IS_LARGE_RESPONSE, RECEIVED_TIMESTAMP) VALUES(?, ?, ?, ?, ?, ?)",
+                    new String[]{"id"});
+            stmt.setInt(1, operation.getId());
+            stmt.setInt(2, enrolmentId);
+            stmt.setInt(3, enPrimaryId);
+
+            if (operation.getOperationResponse() != null && operation.getOperationResponse().length() >= 1000) {
+                isLargeResponse = true;
+                stmt.setBytes(4, null);
+            } else {
+                stmt.setString(4, operation.getOperationResponse());
+            }
+            stmt.setBoolean(5, isLargeResponse);
+
+            Timestamp receivedTimestamp = new Timestamp(new Date().getTime());
+            stmt.setTimestamp(6, receivedTimestamp);
+            stmt.executeUpdate();
+
+            rs = stmt.getGeneratedKeys();
+            int opResID = -1;
+            if (rs.next()) {
+                opResID = rs.getInt(1);
+            }
+
+            OperationResponseMeta responseMeta = new OperationResponseMeta();
+            responseMeta.setId(opResID);
+            responseMeta.setEnrolmentId(enrolmentId);
+            responseMeta.setOperationMappingId(enPrimaryId);
+            responseMeta.setReceivedTimestamp(receivedTimestamp);
+            responseMeta.setLargeResponse(isLargeResponse);
+            return responseMeta;
+        } catch (SQLException e) {
+            throw new OperationManagementDAOException("Error occurred while inserting operation response. " +
+                    e.getMessage(), e);
+        } finally {
+            OperationManagementDAOUtil.cleanupResources(stmt, rs);
+        }
     }
 }

@@ -18,14 +18,13 @@
 
 package org.wso2.carbon.device.mgt.core.archival.dao.impl;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.core.archival.dao.DataDeletionDAO;
 import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAOException;
 import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAOUtil;
 import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDestinationDAOFactory;
-import org.wso2.carbon.device.mgt.core.task.impl.ArchivedDataDeletionTask;
+import org.wso2.carbon.device.mgt.core.archival.dao.DataDeletionDAO;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,7 +33,11 @@ import java.sql.SQLException;
 public class DataDeletionDAOImpl implements DataDeletionDAO {
     private static Log log = LogFactory.getLog(DataDeletionDAOImpl.class);
 
-    private int retentionPeriod = DataDeletionDAO.DEFAULT_RETENTION_PERIOD;
+    private int retentionPeriod;
+
+    private static final String DESTINATION_DB =
+            DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getArchivalConfiguration()
+                    .getArchivalTaskConfiguration().getDbConfig().getDestinationDB();
 
     public DataDeletionDAOImpl(int retentionPeriod) {
         this.retentionPeriod = retentionPeriod;
@@ -49,8 +52,27 @@ public class DataDeletionDAOImpl implements DataDeletionDAO {
         try {
             Connection conn = ArchivalDestinationDAOFactory.getConnection();
             conn.setAutoCommit(false);
-            String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE_ARCH " +
+            String sql = "DELETE FROM "+ DESTINATION_DB +".DM_DEVICE_OPERATION_RESPONSE_ARCH " +
                     "WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, this.retentionPeriod);
+            stmt.executeUpdate();
+            conn.commit();
+        } catch (SQLException e) {
+            throw new ArchivalDAOException("Error occurred while deleting operation responses", e);
+        } finally {
+            ArchivalDAOUtil.cleanupResources(stmt);
+        }
+    }
+
+    @Override
+    public void deleteLargeOperationResponses() throws ArchivalDAOException {
+        PreparedStatement stmt = null;
+        try {
+            Connection conn = ArchivalDestinationDAOFactory.getConnection();
+            conn.setAutoCommit(false);
+            String sql = "DELETE FROM "+ DESTINATION_DB +".DM_DEVICE_OPERATION_RESPONSE_LARGE_ARCH " +
+                         "WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, this.retentionPeriod);
             stmt.executeUpdate();
@@ -68,7 +90,7 @@ public class DataDeletionDAOImpl implements DataDeletionDAO {
         try {
             Connection conn = ArchivalDestinationDAOFactory.getConnection();
             conn.setAutoCommit(false);
-            String sql = "DELETE FROM DM_NOTIFICATION_ARCH" +
+            String sql = "DELETE FROM "+ DESTINATION_DB +".DM_NOTIFICATION_ARCH" +
                     "  WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, this.retentionPeriod);
@@ -82,50 +104,12 @@ public class DataDeletionDAOImpl implements DataDeletionDAO {
     }
 
     @Override
-    public void deleteCommandOperations() throws ArchivalDAOException {
-        PreparedStatement stmt = null;
-        try {
-            Connection conn = ArchivalDestinationDAOFactory.getConnection();
-            conn.setAutoCommit(false);
-            String sql = "DELETE FROM DM_COMMAND_OPERATION_ARCH" +
-                    "  WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, this.retentionPeriod);
-            stmt.executeUpdate();
-            conn.commit();
-        } catch (SQLException e) {
-            throw new ArchivalDAOException("Error occurred while deleting command operations", e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt);
-        }
-    }
-
-    @Override
-    public void deleteProfileOperations() throws ArchivalDAOException {
-        PreparedStatement stmt = null;
-        try {
-            Connection conn = ArchivalDestinationDAOFactory.getConnection();
-            conn.setAutoCommit(false);
-            String sql = "DELETE FROM DM_PROFILE_OPERATION_ARCH" +
-                    "  WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, this.retentionPeriod);
-            stmt.executeUpdate();
-            conn.commit();
-        } catch (SQLException e) {
-            throw new ArchivalDAOException("Error occurred while deleting profile operations", e);
-        } finally {
-            ArchivalDAOUtil.cleanupResources(stmt);
-        }
-    }
-
-    @Override
     public void deleteEnrolmentMappings() throws ArchivalDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = ArchivalDestinationDAOFactory.getConnection();
             conn.setAutoCommit(false);
-            String sql = "DELETE FROM DM_ENROLMENT_OP_MAPPING_ARCH WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
+            String sql = "DELETE FROM "+ DESTINATION_DB + ".DM_ENROLMENT_OP_MAPPING_ARCH WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, this.retentionPeriod);
             stmt.executeUpdate();
@@ -143,7 +127,7 @@ public class DataDeletionDAOImpl implements DataDeletionDAO {
         try {
             Connection conn = ArchivalDestinationDAOFactory.getConnection();
             conn.setAutoCommit(false);
-            String sql = "DELETE FROM DM_OPERATION_ARCH WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
+            String sql = "DELETE FROM "+ DESTINATION_DB +".DM_OPERATION_ARCH WHERE ARCHIVED_AT < DATE_SUB(NOW(), INTERVAL ? DAY)";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, this.retentionPeriod);
             stmt.executeUpdate();

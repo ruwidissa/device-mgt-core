@@ -45,6 +45,8 @@ public interface OperationManager {
     Activity addOperation(Operation operation, List<DeviceIdentifier> devices) throws OperationManagementException,
             InvalidDeviceException;
 
+    void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
+
     /**
      * Method to retrieve the list of all operations to a device.
      *
@@ -66,6 +68,17 @@ public interface OperationManager {
      */
     PaginationResult getOperations(DeviceIdentifier deviceId, PaginationRequest request)
             throws OperationManagementException;
+    /**
+     * Method to retrieve the list of operations placed for device with specified status.
+     *
+     * @param deviceId  - Device Identifier of the device
+     * @param status    - Status of the operation
+     * @return A List of operations applied to the given device-id.
+     * @throws OperationManagementException If some unusual behaviour is observed while fetching the
+     *                                      operation list.
+     */
+    List<? extends Operation> getOperations(DeviceIdentifier deviceId, Operation.Status status)
+            throws OperationManagementException;
 
     /**
      * Method to retrieve the list of available operations to a device.
@@ -86,7 +99,7 @@ public interface OperationManager {
 
     void updateOperation(DeviceIdentifier deviceId, Operation operation) throws OperationManagementException;
 
-    void updateOperation(int enrolmentId, Operation operation) throws OperationManagementException;
+    void updateOperation(int enrolmentId, Operation operation, DeviceIdentifier deviceId) throws OperationManagementException;
 
     Operation getOperationByDeviceAndOperationId(DeviceIdentifier deviceId, int operationId)
             throws OperationManagementException;

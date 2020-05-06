@@ -78,8 +78,6 @@ public class DeviceTypeConfiguration {
 
     @XmlElement(name = "DeviceDetails", required = true)
     protected DeviceDetails deviceDetails;
-    @XmlElement(name = "Claimable", required = true)
-    protected Claimable claimable;
     @XmlElement(name = "Features", required = true)
     protected Features features;
     @XmlElement(name = "PolicyUIConfigurations", required = true)
@@ -197,27 +195,6 @@ public class DeviceTypeConfiguration {
     public void setDeviceDetails(DeviceDetails value) {
         this.deviceDetails = value;
     }
-
-    /**
-     * Gets the value of the Claimable property.
-     *
-     * @return possible object is
-     * {@link DeviceDetails }
-     */
-    public Claimable getClaimable() {
-        return claimable;
-    }
-
-    /**
-     * Sets the value of the deviceDetails property.
-     *
-     * @param value allowed object is
-     *              {@link DeviceDetails }
-     */
-    public void setClaimable(Claimable value) {
-        this.claimable = value;
-    }
-
 
     /**
      * Gets the value of the policyMonitoring property.

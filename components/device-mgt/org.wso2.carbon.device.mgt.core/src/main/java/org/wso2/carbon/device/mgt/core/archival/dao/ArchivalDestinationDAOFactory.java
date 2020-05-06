@@ -39,8 +39,7 @@ public class ArchivalDestinationDAOFactory {
     private static final Log log = LogFactory.getLog(OperationManagementDAOFactory.class);
     private static DataSource dataSource;
     private static String databaseEngine;
-    private static int retentionPeriod;
-    private static ThreadLocal<Connection> currentConnection = new ThreadLocal<Connection>();
+    private static ThreadLocal<Connection> currentConnection = new ThreadLocal<>();
 
     public static DataDeletionDAO getDataDeletionDAO() {
         return new DataDeletionDAOImpl(DeviceConfigurationManager.getInstance().getDeviceManagementConfig()
@@ -77,6 +76,16 @@ public class ArchivalDestinationDAOFactory {
         }
     }
 
+    public static void beginTransaction(Connection conn) throws TransactionManagementException {
+        try {
+            conn.setAutoCommit(false);
+//            currentConnection.set(conn);
+        } catch (SQLException e) {
+            throw new TransactionManagementException(
+                    "Error occurred while retrieving config.datasource connection", e);
+        }
+    }
+
     public static void openConnection() throws SQLException {
         currentConnection.set(dataSource.getConnection());
     }
@@ -102,6 +111,16 @@ public class ArchivalDestinationDAOFactory {
         }
     }
 
+    public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                log.error("Error occurred while close the connection");
+            }
+        }
+    }
+
     public static void commitTransaction() {
         try {
             Connection conn = currentConnection.get();
@@ -111,6 +130,21 @@ public class ArchivalDestinationDAOFactory {
                 if (log.isDebugEnabled()) {
                     log.debug("Datasource connection associated with the current thread is null, hence commit " +
                             "has not been attempted");
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while committing the transaction", e);
+        }
+    }
+
+    public static void commitTransaction(Connection conn) {
+        try {
+            if (conn != null) {
+                conn.commit();
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Datasource connection associated with the current thread is null, hence commit " +
+                              "has not been attempted");
                 }
             }
         } catch (SQLException e) {
@@ -153,7 +187,7 @@ public class ArchivalDestinationDAOFactory {
             }
             List<JNDILookupDefinition.JNDIProperty> jndiPropertyList = jndiConfig.getJndiProperties();
             if (jndiPropertyList != null) {
-                Hashtable<Object, Object> jndiProperties = new Hashtable<Object, Object>();
+                Hashtable<Object, Object> jndiProperties = new Hashtable<>();
                 for (JNDILookupDefinition.JNDIProperty prop : jndiPropertyList) {
                     jndiProperties.put(prop.getName(), prop.getValue());
                 }

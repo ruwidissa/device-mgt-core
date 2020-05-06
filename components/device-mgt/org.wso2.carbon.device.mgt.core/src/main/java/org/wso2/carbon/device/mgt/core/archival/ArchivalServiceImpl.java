@@ -18,34 +18,34 @@
 
 package org.wso2.carbon.device.mgt.core.archival;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
-import org.wso2.carbon.device.mgt.core.archival.beans.*;
-import org.wso2.carbon.device.mgt.core.archival.dao.*;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAO;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDAOException;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalDestinationDAOFactory;
+import org.wso2.carbon.device.mgt.core.archival.dao.ArchivalSourceDAOFactory;
+import org.wso2.carbon.device.mgt.core.archival.dao.DataDeletionDAO;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public class ArchivalServiceImpl implements ArchivalService {
-    private static Log log = LogFactory.getLog(ArchivalServiceImpl.class);
+    private static final Log log = LogFactory.getLog(ArchivalServiceImpl.class);
 
-    private ArchivalDAO archivalDAO;
-    private DataDeletionDAO dataDeletionDAO;
+    private final ArchivalDAO archivalDAO;
+    private final DataDeletionDAO dataDeletionDAO;
 
     private static final int EXECUTION_BATCH_SIZE =
             DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getArchivalConfiguration()
                     .getArchivalTaskConfiguration().getBatchSize();
 
-    private static final boolean ARCHIVE_PENDING_OPERATIONS =
+    private static final int ARCHIVAL_LOCK_INTERVAL =
             DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getArchivalConfiguration()
-                    .getArchivalTaskConfiguration().isArchivePendingOperations();
-
-    private String[] NOT_IN_PROGRESS_OPS = new String[]{"COMPLETED", "ERROR", "REPEATED"};
-    private String[] NOT_PENDING_OPS = new String[]{"COMPLETED", "ERROR", "REPEATED", "IN_PROGRESS"};
-    private String[] NOT_PENDING_IN_PROGRESS_OPS = new String[]{"COMPLETED", "ERROR", "REPEATED"};
+                    .getArchivalTaskConfiguration().getArchivalLockInterval();
 
     public ArchivalServiceImpl() {
         this.archivalDAO = ArchivalSourceDAOFactory.getDataPurgingDAO();
@@ -54,187 +54,160 @@ public class ArchivalServiceImpl implements ArchivalService {
 
     @Override
     public void archiveTransactionalRecords() throws ArchivalException {
-        List<Integer> allOperations;
-
         try {
-            ArchivalSourceDAOFactory.openConnection();
-            ArchivalDestinationDAOFactory.openConnection();
+            beginTransactions();
+            Timestamp currentTime = new Timestamp(new Date().getTime());
 
+            //Purge the largest table, DM_DEVICE_OPERATION_RESPONSE
             if (log.isDebugEnabled()) {
-                log.debug("Fetching All Operations");
-            }
-            allOperations = archivalDAO.getAllOperations();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Fetching All Pending Operations");
+                log.debug("## Archiving operation responses");
             }
 
+            int failAttempts;
 
+            List<Integer> nonRemovableMappings = archivalDAO.getNonRemovableOperationMappingIDs(currentTime);
+            int totalLargeOpResCount = archivalDAO.getLargeOperationResponseCount(currentTime, nonRemovableMappings);
+
+            if (totalLargeOpResCount > 0) {
+                int iterationCount = totalLargeOpResCount / EXECUTION_BATCH_SIZE;
+                int residualRecSize = 0;
+                if ((totalLargeOpResCount % EXECUTION_BATCH_SIZE) != 0) {
+                    residualRecSize = totalLargeOpResCount % EXECUTION_BATCH_SIZE;
+                    iterationCount++;
+                }
+                failAttempts = 0;
+                for (int iter = 0; iter < iterationCount; iter++) {
+                    try {
+                        if (iter == (iterationCount - 1)) {
+                            archivalDAO.transferLargeOperationResponses(residualRecSize, currentTime, nonRemovableMappings);
+                            archivalDAO.removeLargeOperationResponses(residualRecSize, currentTime, nonRemovableMappings);
+                        } else {
+                            archivalDAO.transferLargeOperationResponses(EXECUTION_BATCH_SIZE, currentTime, nonRemovableMappings);
+                            archivalDAO.removeLargeOperationResponses(EXECUTION_BATCH_SIZE, currentTime, nonRemovableMappings);
+                        }
+                        commitTransactions();
+                        failAttempts = 0;
+                    } catch (ArchivalDAOException e) {
+                        rollbackTransactions();
+                        if (++failAttempts > 3) {
+                            String msg = "Error occurred while trying to archive Large Operation Responses. Abort archiving.";
+                            log.error(msg, e);
+                            throw new ArchivalException(msg, e);
+                        }
+                        String msg = "Error occurred while trying to archive Large Operation Responses. " +
+                                "Failed attempts: " + failAttempts + " Error: " + e.getMessage();
+                        log.warn(msg);
+                        iter--;
+                    }
+                    Thread.sleep(ARCHIVAL_LOCK_INTERVAL);
+                }
+            }
+
+            int totalOpResCount = archivalDAO.getOperationResponseCount(currentTime, nonRemovableMappings);
+
+            if (totalOpResCount > 0) {
+                int iterationCount = totalOpResCount / EXECUTION_BATCH_SIZE;
+                int residualRecSize = 0;
+                if ((totalOpResCount % EXECUTION_BATCH_SIZE) != 0) {
+                    residualRecSize = totalOpResCount % EXECUTION_BATCH_SIZE;
+                    iterationCount++;
+                }
+                failAttempts = 0;
+                for (int iter = 0; iter < iterationCount; iter++) {
+                    try {
+                        if (iter == (iterationCount - 1)) {
+                            archivalDAO.transferOperationResponses(residualRecSize, currentTime, nonRemovableMappings);
+                            archivalDAO.removeOperationResponses(residualRecSize, currentTime, nonRemovableMappings);
+                        } else {
+                            archivalDAO.transferOperationResponses(EXECUTION_BATCH_SIZE, currentTime, nonRemovableMappings);
+                            archivalDAO.removeOperationResponses(EXECUTION_BATCH_SIZE, currentTime, nonRemovableMappings);
+                        }
+                        commitTransactions();
+                        failAttempts = 0;
+                    } catch (ArchivalDAOException e) {
+                        rollbackTransactions();
+                        if (++failAttempts > 3) {
+                            String msg = "Error occurred while trying to archive Operation Responses. Abort archiving.";
+                            log.error(msg, e);
+                            throw new ArchivalException(msg, e);
+                        }
+                        String msg = "Error occurred while trying to archive Operation Responses. " +
+                                "Failed attempts: " + failAttempts + " Error: " + e.getMessage();
+                        log.warn(msg);
+                        iter--;
+                    }
+                    Thread.sleep(ARCHIVAL_LOCK_INTERVAL);
+                }
+            }
+
+            //Purge the notifications table, DM_NOTIFICATION
+            if (log.isDebugEnabled()) {
+                log.debug("## Archiving notifications");
+            }
+            archivalDAO.moveNotifications(currentTime);
+            commitTransactions();
+            //Purge the enrolment mappings table, DM_ENROLMENT_OP_MAPPING
+            if (log.isDebugEnabled()) {
+                log.debug("## Archiving enrolment mappings");
+            }
+            int opMappingCount = archivalDAO.getOpMappingsCount(currentTime);
+            if (opMappingCount > 0) {
+                int iterationCount = opMappingCount / EXECUTION_BATCH_SIZE;
+                int residualRecSize = 0;
+                if ((opMappingCount % EXECUTION_BATCH_SIZE) != 0) {
+                    residualRecSize = opMappingCount % EXECUTION_BATCH_SIZE;
+                    iterationCount++;
+                }
+                failAttempts = 0;
+                for (int iter = 0; iter < iterationCount; iter++) {
+                    try {
+                        if (iter == (iterationCount - 1)) {
+                            archivalDAO.transferEnrollmentOpMappings(residualRecSize, currentTime);
+                            archivalDAO.removeEnrollmentOPMappings(residualRecSize, currentTime);
+                        } else {
+                            archivalDAO.transferEnrollmentOpMappings(EXECUTION_BATCH_SIZE, currentTime);
+                            archivalDAO.removeEnrollmentOPMappings(EXECUTION_BATCH_SIZE, currentTime);
+                        }
+                        commitTransactions();
+                        failAttempts = 0;
+                    } catch (ArchivalDAOException e) {
+                        rollbackTransactions();
+                        if (++failAttempts > 3) {
+                            String msg = "Error occurred while trying to archive Operation Enrollment Mappings. Abort archiving.";
+                            log.error(msg, e);
+                            throw new ArchivalException(msg, e);
+                        }
+                        String msg = "Error occurred while trying to archive Operation Enrollment Mappings. " +
+                                "Failed attempts: " + failAttempts + " Error: " + e.getMessage();
+                        log.warn(msg);
+                        iter--;
+                    }
+                    Thread.sleep(ARCHIVAL_LOCK_INTERVAL);
+                }
+            }
+
+            //Finally, purge the operations table, DM_OPERATION
+            if (log.isDebugEnabled()) {
+                log.debug("## Archiving operations");
+            }
+
+            archivalDAO.transferOperations();
+            archivalDAO.removeOperations();
+            commitTransactions();
         } catch (ArchivalDAOException e) {
-//            rollbackTransactions();
-            String msg = "Rollback the get all operations and get all pending operations";
+            rollbackTransactions();
+            String msg = "Error occurred while trying to archive data to the six tables";
             log.error(msg, e);
             throw new ArchivalException(msg, e);
-        } catch (SQLException e) {
-            String msg = "An error occurred while connecting to the archival database";
+        } catch (InterruptedException e) {
+            rollbackTransactions();
+            String msg = "Error while halting archival thread to free up table locks.";
             log.error(msg, e);
             throw new ArchivalException(msg, e);
         } finally {
             ArchivalSourceDAOFactory.closeConnection();
             ArchivalDestinationDAOFactory.closeConnection();
         }
-
-        List<Integer> candidates = allOperations;
-        log.info(allOperations.size() + " All Operations.");
-
-        if (!ARCHIVE_PENDING_OPERATIONS) {
-            try {
-                ArchivalSourceDAOFactory.openConnection();
-                ArchivalDestinationDAOFactory.openConnection();
-                List<Integer> pendingAndIPOperations = archivalDAO.getPendingAndInProgressOperations();
-                log.info(pendingAndIPOperations.size() +" P&IP Operations");
-//              Get the diff of operations
-                candidates.removeAll(pendingAndIPOperations);
-            } catch (ArchivalDAOException e) {
-                String msg = "Error occurred while retrieving the pending operations";
-                log.error(msg, e);
-                throw new ArchivalException(msg, e);
-            } catch (SQLException e) {
-                String msg = "An error occurred while connecting to the archival database";
-                log.error(msg, e);
-                throw new ArchivalException(msg, e);
-            } finally {
-                ArchivalSourceDAOFactory.closeConnection();
-                ArchivalDestinationDAOFactory.closeConnection();
-            }
-        }
-
-        int total = candidates.size();
-        int batches = calculateNumberOfBatches(total);
-        log.info(total + " Operations ready for archiving. " + batches + " iterations to be done.");
-        int batchSize = EXECUTION_BATCH_SIZE;
-        if (log.isDebugEnabled()) {
-            log.debug(total + " Operations ready for archiving. " + batches + " iterations to be done.");
-            log.debug(batchSize + " is the batch size");
-        }
-
-        for (int i = 1; i <= batches; i++) {
-            int startIdx = batchSize * (i - 1);
-            int endIdx = batchSize * i;
-            if (i == batches) {
-                endIdx = startIdx + (total % batchSize);
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("\n\n############ Iterating over batch " + i + "[" +
-                        startIdx + "," + endIdx + "] #######");
-            }
-            List<Integer> subList = candidates.subList(startIdx, endIdx);
-
-            if (log.isDebugEnabled()) {
-                log.debug("SubList size is: " + subList.size());
-                if (subList.size() > 0) {
-                    log.debug("First Element is: " + subList.get(0));
-                    log.debug("Last Element is: " + subList.get(subList.size() - 1));
-                }
-            }
-
-            if (log.isDebugEnabled()) {
-                for (Integer val : subList) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Sub List Element: " + val);
-                    }
-                }
-            }
-
-            try {
-                beginTransactions();
-                prepareTempTable(subList);
-                commitTransactions();
-            } catch (Exception e) {
-                rollbackTransactions();
-                String msg = "Error occurred while preparing the operations.";
-                log.error(msg, e);
-                throw new ArchivalException(msg, e);
-            } finally {
-                ArchivalSourceDAOFactory.closeConnection();
-                ArchivalDestinationDAOFactory.closeConnection();
-            }
-
-            List<ArchiveOperationResponse> operationResponses = null;
-            List<ArchiveNotification> notification = null;
-            List<ArchiveCommandOperation> commandOperations = null;
-            List<ArchiveProfileOperation> profileOperations = null;
-            List<ArchiveEnrolmentOperationMap> enrollmentMapping = null;
-            List<ArchiveOperation> operations = null;
-
-            try {
-                openConnection();
-                operationResponses = archivalDAO.selectOperationResponses();
-                notification = archivalDAO.selectNotifications();
-                enrollmentMapping = archivalDAO.selectEnrolmentMappings();
-                operations = archivalDAO.selectOperations();
-
-            } catch (Exception e) {
-                String msg = "Error occurred while retrieving data.";
-                log.error(msg, e);
-                throw new ArchivalException(msg, e);
-            } finally {
-                closeConnection();
-            }
-
-            try {
-                beginTransactions();
-
-                //Purge the largest table, DM_DEVICE_OPERATION_RESPONSE
-                if (log.isDebugEnabled()) {
-                    log.debug("## Archiving operation responses");
-                }
-                archivalDAO.moveOperationResponses(operationResponses);
-
-                //Purge the notifications table, DM_NOTIFICATION
-                if (log.isDebugEnabled()) {
-                    log.debug("## Archiving notifications");
-                }
-                archivalDAO.moveNotifications(notification);
-
-                //Purge the enrolment mappings table, DM_ENROLMENT_OP_MAPPING
-                if (log.isDebugEnabled()) {
-                    log.debug("## Archiving enrolment mappings");
-                }
-                archivalDAO.moveEnrolmentMappings(enrollmentMapping);
-
-                //Finally, purge the operations table, DM_OPERATION
-                if (log.isDebugEnabled()) {
-                    log.debug("## Archiving operations");
-                }
-                archivalDAO.moveOperations(operations);
-                commitTransactions();
-                if (log.isDebugEnabled()) {
-                    log.debug("End of Iteration : " + i);
-                }
-            } catch (ArchivalDAOException e) {
-                rollbackTransactions();
-                String msg = "Error occurred while trying to archive data to the six tables";
-                log.error(msg, e);
-                throw new ArchivalException(msg, e);
-            } finally {
-                ArchivalSourceDAOFactory.closeConnection();
-                ArchivalDestinationDAOFactory.closeConnection();
-            }
-
-        }
-    }
-
-    private void prepareTempTable(List<Integer> subList) throws ArchivalDAOException {
-        //Clean up the DM_ARCHIVED_OPERATIONS table
-        if (log.isDebugEnabled()) {
-            log.debug("## Truncating the temporary table");
-        }
-        archivalDAO.truncateOperationIDsForArchival();
-        if (log.isDebugEnabled()) {
-            log.debug("## Inserting into the temporary table");
-        }
-        archivalDAO.copyOperationIDsForArchival(subList);
     }
 
     private void beginTransactions() throws ArchivalException {
@@ -247,28 +220,6 @@ public class ArchivalServiceImpl implements ArchivalService {
         }
     }
 
-    private void openConnection() throws ArchivalException {
-        try {
-            ArchivalSourceDAOFactory.openConnection();
-        } catch (SQLException e) {
-            String msg = "An error occurred during opening connection";
-            log.error(msg, e);
-            throw new ArchivalException(msg, e);
-        }
-
-    }
-
-    private void closeConnection() throws ArchivalException {
-        try {
-            ArchivalSourceDAOFactory.closeConnection();
-        } catch (Exception e) {
-            String msg = "An error occurred during opening connection";
-            log.error(msg, e);
-            throw new ArchivalException(msg, e);
-        }
-
-    }
-
     private void commitTransactions() {
         ArchivalSourceDAOFactory.commitTransaction();
         ArchivalDestinationDAOFactory.commitTransaction();
@@ -279,21 +230,15 @@ public class ArchivalServiceImpl implements ArchivalService {
         ArchivalDestinationDAOFactory.rollbackTransaction();
     }
 
-    private int calculateNumberOfBatches(int total) {
-        int batches = 0;
-        int batchSize = EXECUTION_BATCH_SIZE;
-        if ((total % batchSize) > 0) {
-            batches = (total / batchSize) + 1;
-        } else {
-            batches = total / batchSize;
-        }
-        return batches;
-    }
-
     @Override
     public void deleteArchivedRecords() throws ArchivalException {
         try {
             ArchivalDestinationDAOFactory.openConnection();
+
+            if (log.isDebugEnabled()) {
+                log.debug("## Deleting Large operation responses");
+            }
+            dataDeletionDAO.deleteLargeOperationResponses();
 
             if (log.isDebugEnabled()) {
                 log.debug("## Deleting operation responses");
@@ -304,16 +249,6 @@ public class ArchivalServiceImpl implements ArchivalService {
                 log.debug("## Deleting notifications ");
             }
             dataDeletionDAO.deleteNotifications();
-
-            if (log.isDebugEnabled()) {
-                log.debug("## Deleting command operations");
-            }
-            dataDeletionDAO.deleteCommandOperations();
-
-            if (log.isDebugEnabled()) {
-                log.debug("## Deleting profile operations ");
-            }
-            dataDeletionDAO.deleteProfileOperations();
 
             if (log.isDebugEnabled()) {
                 log.debug("## Deleting enrolment mappings ");

@@ -40,21 +40,21 @@ import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManager;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManagementException;
 import org.wso2.carbon.device.mgt.common.license.mgt.LicenseManager;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DataSource;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.TableConfig;
-import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Table;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceDetails;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.DeviceTypeConfiguration;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Feature;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.Table;
+import org.wso2.carbon.device.mgt.extensions.device.type.template.config.TableConfig;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceDAODefinition;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.dao.DeviceTypePluginDAOManager;
 import org.wso2.carbon.device.mgt.extensions.device.type.template.exception.DeviceTypeDeployerPayloadException;
@@ -80,7 +80,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -90,19 +90,18 @@ import java.util.List;
 public class DeviceTypeManager implements DeviceManager {
 
     private static final Log log = LogFactory.getLog(DeviceTypeManager.class);
-    private String deviceType;
-    private DeviceTypePluginDAOManager deviceTypePluginDAOManager;
-    private LicenseManager licenseManager;
-    private PlatformConfiguration defaultPlatformConfiguration;
-    private boolean propertiesExist;
-    private boolean requiredDeviceTypeAuthorization;
-    private boolean claimable;
+    private final String deviceType;
+    private final LicenseManager licenseManager;
+    private final PlatformConfiguration defaultPlatformConfiguration;
+    private final boolean requiredDeviceTypeAuthorization;
 
     private static final String PATH_MOBILE_PLUGIN_CONF_DIR =
             CarbonUtils.getEtcCarbonConfigDirPath() + File.separator + "device-mgt-plugin-configs" + File.separator
                     + "mobile";
 
     private FeatureManager featureManager;
+    private boolean propertiesExist;
+    private DeviceTypePluginDAOManager deviceTypePluginDAOManager;
 
     public DeviceTypeManager(DeviceTypeConfigIdentifier deviceTypeConfigIdentifier,
                              DeviceTypeConfiguration deviceTypeConfiguration) {
@@ -134,10 +133,6 @@ public class DeviceTypeManager implements DeviceManager {
         } catch (LicenseManagementException e) {
             String msg = "Error occurred while adding default license for " + deviceType + " devices.";
             throw new DeviceTypeDeployerPayloadException(msg, e);
-        }
-        claimable = false;
-        if (deviceTypeConfiguration.getClaimable() != null ) {
-            claimable = deviceTypeConfiguration.getClaimable().isEnabled();
         }
 
         // Loading default platform configuration
@@ -295,8 +290,7 @@ public class DeviceTypeManager implements DeviceManager {
                 factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
                 factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
                 XMLStreamReader reader = factory.createXMLStreamReader(
-                        new StringReader(new String((byte[]) resource.getContent(), Charset
-                                .forName(DeviceTypePluginConstants.CHARSET_UTF8))));
+                        new StringReader(new String((byte[]) resource.getContent(), StandardCharsets.UTF_8)));
 
                 JAXBContext context = JAXBContext.newInstance(PlatformConfiguration.class);
                 Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -474,11 +468,6 @@ public class DeviceTypeManager implements DeviceManager {
     public boolean setOwnership(DeviceIdentifier deviceId, String ownershipType)
             throws DeviceManagementException {
         return true;
-    }
-
-    @Override
-    public boolean isClaimable(DeviceIdentifier deviceIdentifier) throws DeviceManagementException {
-        return claimable;
     }
 
     @Override

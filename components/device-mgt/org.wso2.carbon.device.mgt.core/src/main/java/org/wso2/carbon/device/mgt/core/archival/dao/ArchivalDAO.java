@@ -18,9 +18,7 @@
 
 package org.wso2.carbon.device.mgt.core.archival.dao;
 
-import org.wso2.carbon.device.mgt.core.archival.beans.*;
-
-import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -28,34 +26,30 @@ import java.util.List;
  */
 public interface ArchivalDAO {
 
-    int DEFAULT_BATCH_SIZE = 1000;
+    List<Integer> getNonRemovableOperationMappingIDs(Timestamp time) throws ArchivalDAOException;
 
-    List<Integer> getAllOperations() throws ArchivalDAOException;
+    int getLargeOperationResponseCount(Timestamp time, List<Integer> nonRemovableMappings) throws ArchivalDAOException;
 
-    List<Integer> getPendingAndInProgressOperations() throws ArchivalDAOException;
+    int getOpMappingsCount(Timestamp time) throws ArchivalDAOException;
 
-    void copyOperationIDsForArchival(List<Integer> operationIds) throws ArchivalDAOException;
+    int getOperationResponseCount(Timestamp time, List<Integer> nonRemovableMappings) throws ArchivalDAOException;
 
-    List<ArchiveOperationResponse> selectOperationResponses() throws ArchivalDAOException;
+    void transferOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings) throws ArchivalDAOException;
 
-    void moveOperationResponses(List<ArchiveOperationResponse> rs) throws ArchivalDAOException;
+    void transferLargeOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings) throws ArchivalDAOException;
 
-    List<ArchiveNotification> selectNotifications() throws ArchivalDAOException;
+    void removeLargeOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings) throws ArchivalDAOException;
 
-    void moveNotifications(List<ArchiveNotification> rs) throws ArchivalDAOException;
+    void removeOperationResponses(int batchSize, Timestamp time, List<Integer> nonRemovableMappings) throws ArchivalDAOException;
 
-    List<ArchiveCommandOperation> selectCommandOperations() throws ArchivalDAOException;
+    void moveNotifications(Timestamp time) throws ArchivalDAOException;
 
-    List<ArchiveProfileOperation> selectProfileOperations() throws ArchivalDAOException;
+    void transferEnrollmentOpMappings(int batchSize, Timestamp time) throws ArchivalDAOException;
 
-    List<ArchiveEnrolmentOperationMap> selectEnrolmentMappings() throws ArchivalDAOException;
+    void removeEnrollmentOPMappings(int batchSize, Timestamp time) throws ArchivalDAOException;
 
-    void moveEnrolmentMappings(List<ArchiveEnrolmentOperationMap> rs) throws ArchivalDAOException;
+    void transferOperations() throws ArchivalDAOException;
 
-    List<ArchiveOperation> selectOperations() throws ArchivalDAOException;
-
-    void moveOperations(List<ArchiveOperation> rs) throws ArchivalDAOException;
-
-    void truncateOperationIDsForArchival() throws ArchivalDAOException;
+    void removeOperations() throws ArchivalDAOException;
 
 }

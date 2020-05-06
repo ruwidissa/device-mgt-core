@@ -269,16 +269,4 @@ public class DeviceAccessAuthorizationServiceImpl implements DeviceAccessAuthori
         permission.setPath(PermissionUtils.getAbsolutePermissionPath(CDM_ADMIN_PERMISSION));
         return PermissionUtils.putPermission(permission);
     }
-
-    public static final class PermissionMethod {
-        public static final String READ = "read";
-        public static final String WRITE = "write";
-        public static final String DELETE = "delete";
-        public static final String ACTION = "action";
-        public static final String UI_EXECUTE = "ui.execute";
-
-        private PermissionMethod() {
-            throw new AssertionError();
-        }
-    }
 }

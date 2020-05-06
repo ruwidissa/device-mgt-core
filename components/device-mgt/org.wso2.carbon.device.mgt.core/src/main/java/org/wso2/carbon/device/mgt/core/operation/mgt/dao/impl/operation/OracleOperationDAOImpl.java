@@ -188,6 +188,7 @@ public class OracleOperationDAOImpl extends GenericOperationDAOImpl {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Activity> activities = new ArrayList<>();
+        List<Integer> largeResponseIDs = new ArrayList<>();
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
             /*String sql = "SELECT opm.ENROLMENT_ID, opm.CREATED_TIMESTAMP, opm.UPDATED_TIMESTAMP, opm.OPERATION_ID,\n"
@@ -224,6 +225,7 @@ public class OracleOperationDAOImpl extends GenericOperationDAOImpl {
                     "    opr.DEVICE_TYPE, " +
                     "    ops.RECEIVED_TIMESTAMP, " +
                     "    ops.ID OP_RES_ID, " +
+                    "    ops.IS_LARGE_RESPONSE, " +
                     "    ops.OPERATION_RESPONSE " +
                     " FROM " +
                     "    (SELECT " +
@@ -301,8 +303,12 @@ public class OracleOperationDAOImpl extends GenericOperationDAOImpl {
 
                     }
                     if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
-                        operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
                         responseId = rs.getInt("OP_RES_ID");
+                        if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                            largeResponseIDs.add(responseId);
+                        } else {
+                            operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
+                        }
                     }
                     activityStatus.setResponses(operationResponses);
                     statusList.add(activityStatus);
@@ -332,8 +338,12 @@ public class OracleOperationDAOImpl extends GenericOperationDAOImpl {
                                 new java.util.Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
                     }
                     if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
-                        operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
                         responseId = rs.getInt("OP_RES_ID");
+                        if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                            largeResponseIDs.add(responseId);
+                        } else {
+                            operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
+                        }
                     }
                     activityStatus.setResponses(operationResponses);
                     activity.getActivityStatus().add(activityStatus);
@@ -343,20 +353,21 @@ public class OracleOperationDAOImpl extends GenericOperationDAOImpl {
 
                 if (rs.getInt("OP_RES_ID") != 0 && responseId != rs.getInt("OP_RES_ID")) {
                     if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
-                        activityStatus.getResponses().add(OperationDAOUtil.getOperationResponse(rs));
                         responseId = rs.getInt("OP_RES_ID");
+                        if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                            largeResponseIDs.add(responseId);
+                        } else {
+                            activityStatus.getResponses().add(OperationDAOUtil.getOperationResponse(rs));
+                        }
                     }
                 }
+            }
+            if(!largeResponseIDs.isEmpty()) {
+                populateLargeOperationResponses(activities, largeResponseIDs);
             }
         } catch (SQLException e) {
             throw new OperationManagementDAOException(
                     "Error occurred while getting the operation details from " + "the database.", e);
-        } catch (ClassNotFoundException e) {
-            throw new OperationManagementDAOException(
-                    "Error occurred while converting the operation response to string.", e);
-        } catch (IOException e) {
-            throw new OperationManagementDAOException(
-                    "IO exception occurred while converting the operations responses.", e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, rs);
         }

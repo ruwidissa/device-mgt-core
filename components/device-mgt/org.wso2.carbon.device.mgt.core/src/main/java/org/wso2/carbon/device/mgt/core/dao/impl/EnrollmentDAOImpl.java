@@ -75,47 +75,21 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
-    public int updateEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
-                                int tenantId) throws DeviceManagementDAOException {
+    public int updateEnrollment(EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             conn = this.getConnection();
-            String sql = "UPDATE DM_ENROLMENT SET OWNERSHIP = ?, STATUS = ?, DATE_OF_LAST_UPDATE = ? WHERE DEVICE_ID = ?" +
-                         " AND OWNER = ? AND TENANT_ID = ? AND ID = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, enrolmentInfo.getOwnership().toString());
-            stmt.setString(2, enrolmentInfo.getStatus().toString());
-            stmt.setTimestamp(3, new Timestamp(new Date().getTime()));
-            stmt.setInt(4, deviceId);
-            stmt.setString(5, enrolmentInfo.getOwner());
-            stmt.setInt(6, tenantId);
-            stmt.setInt(7, enrolmentInfo.getId());
-            int status = stmt.executeUpdate();
-            return status;
-        } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while updating enrolment configuration", e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
-        }
-    }
-
-    @Override
-    public int updateEnrollment(EnrolmentInfo enrolmentInfo) throws DeviceManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = this.getConnection();
-            String sql = "UPDATE DM_ENROLMENT SET OWNERSHIP = ?, STATUS = ?, DATE_OF_LAST_UPDATE = ? WHERE ID = ?";
+            String sql = "UPDATE DM_ENROLMENT SET OWNERSHIP = ?, STATUS = ?, DATE_OF_LAST_UPDATE = ? " +
+                    "WHERE ID = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, enrolmentInfo.getOwnership().toString());
             stmt.setString(2, enrolmentInfo.getStatus().toString());
             stmt.setTimestamp(3, new Timestamp(new Date().getTime()));
             stmt.setInt(4, enrolmentInfo.getId());
-            int status = stmt.executeUpdate();
-            return status;
+            stmt.setInt(5, tenantId);
+            return stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while updating enrolment configuration", e);
         } finally {
@@ -186,28 +160,6 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
-    }
-
-    @Override
-    public boolean setStatus(int enrolmentID, String currentOwner, EnrolmentInfo.Status status,
-                             int tenantId) throws DeviceManagementDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        try {
-            conn = this.getConnection();
-            String sql = "UPDATE DM_ENROLMENT SET STATUS = ? WHERE ID = ? AND OWNER = ? AND TENANT_ID = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, status.toString());
-            stmt.setInt(2, enrolmentID);
-            stmt.setString(3, currentOwner);
-            stmt.setInt(4, tenantId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while setting the status of device enrolment", e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, null);
-        }
-        return true;
     }
 
     private int getCountOfDevicesOfOwner(String owner, int tenantID) throws DeviceManagementDAOException {
@@ -314,7 +266,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         EnrolmentInfo enrolmentInfo = null;
         try {
             conn = this.getConnection();
-            String sql = "SELECT ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, DATE_OF_ENROLMENT, " +
+            String sql = "SELECT ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, IS_TRANSFERRED, DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE DEVICE_ID = ? AND OWNER = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
@@ -334,6 +286,33 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
     }
 
     @Override
+    public EnrolmentInfo getEnrollment(int deviceId, int tenantId) throws DeviceManagementDAOException {
+        Connection conn;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        EnrolmentInfo enrolmentInfo = null;
+        try {
+            conn = this.getConnection();
+            String sql = "SELECT ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, IS_TRANSFERRED, DATE_OF_ENROLMENT, " +
+                    "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE DEVICE_ID = ? AND TENANT_ID = ? " +
+                    "ORDER BY DATE_OF_LAST_UPDATE DESC";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, deviceId);
+            stmt.setInt(2, tenantId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                enrolmentInfo = this.loadEnrolment(rs);
+            }
+            return enrolmentInfo;
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while retrieving the enrolment " +
+                    "information of device '" + deviceId + "'", e);
+        } finally {
+            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+        }
+    }
+
+    @Override
     public List<EnrolmentInfo> getEnrollmentsOfUser(int deviceId, String user, int tenantId)
             throws DeviceManagementDAOException {
         List<EnrolmentInfo> enrolmentInfos = new ArrayList<>();
@@ -343,7 +322,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         EnrolmentInfo enrolmentInfo = null;
         try {
             conn = this.getConnection();
-            String sql = "SELECT ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, DATE_OF_ENROLMENT, " +
+            String sql = "SELECT ID, DEVICE_ID, OWNER, OWNERSHIP, STATUS, IS_TRANSFERRED, DATE_OF_ENROLMENT, " +
                          "DATE_OF_LAST_UPDATE, TENANT_ID FROM DM_ENROLMENT WHERE DEVICE_ID = ? AND OWNER = ? AND TENANT_ID = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, deviceId);
@@ -369,20 +348,21 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         try {
             Connection conn = this.getConnection();
             boolean updateStatus = true;
-            String sql = "UPDATE "
-                    + "DM_ENROLMENT "
-                    + "SET OWNER = ? "
-                    + "WHERE ID = ? AND "
-                    + "TENANT_ID = ?";
+            String sql = "UPDATE DM_ENROLMENT "
+                    + "SET OWNER = ?, IS_TRANSFERRED = ?, DATE_OF_LAST_UPDATE = ? "
+                    + "WHERE ID = ? AND TENANT_ID = ?";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 if (conn.getMetaData().supportsBatchUpdates()) {
                     for (Device device : devices) {
                         ps.setString(1, owner);
-                        ps.setInt(2, device.getId());
-                        ps.setInt(3, tenantId);
+                        ps.setBoolean(2, device.getEnrolmentInfo().isTransferred());
+                        ps.setTimestamp(3, new Timestamp(new Date().getTime()));
+                        ps.setInt(4, device.getEnrolmentInfo().getId());
+                        ps.setInt(5, tenantId);
                         ps.addBatch();
                     }
-                    for (int i : ps.executeBatch()) {
+                    int[] batchResult = ps.executeBatch();
+                    for (int i : batchResult) {
                         if (i == 0 || i == Statement.SUCCESS_NO_INFO || i == Statement.EXECUTE_FAILED) {
                             updateStatus = false;
                             break;
@@ -391,8 +371,9 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
                 } else {
                     for (Device device : devices) {
                         ps.setString(1, owner);
-                        ps.setInt(2, device.getId());
-                        ps.setInt(3, tenantId);
+                        ps.setBoolean(2, device.getEnrolmentInfo().isTransferred());
+                        ps.setInt(3, device.getId());
+                        ps.setInt(4, tenantId);
                         if (ps.executeUpdate() == 0) {
                             updateStatus = false;
                             break;
@@ -415,6 +396,7 @@ public class EnrollmentDAOImpl implements EnrollmentDAO {
         EnrolmentInfo enrolmentInfo = new EnrolmentInfo();
         enrolmentInfo.setOwner(rs.getString("OWNER"));
         enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
+        enrolmentInfo.setTransferred(rs.getBoolean("IS_TRANSFERRED"));
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
         enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
