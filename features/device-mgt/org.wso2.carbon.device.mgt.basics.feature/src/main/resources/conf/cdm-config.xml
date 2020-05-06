@@ -37,9 +37,9 @@
             <Provider>org.wso2.carbon.device.mgt.extensions.push.notification.provider.xmpp.XMPPBasedPushNotificationProvider</Provider>
         </PushNotificationProviders>
     </PushNotificationConfiguration>
-	<PullNotificationConfiguration>
-		<Enabled>false</Enabled>
-	</PullNotificationConfiguration>
+    <PullNotificationConfiguration>
+        <Enabled>false</Enabled>
+    </PullNotificationConfiguration>
     <IdentityConfiguration>
         <ServerUrl>https://localhost:9443</ServerUrl>
         <AdminUsername>admin</AdminUsername>
@@ -100,6 +100,11 @@
         </DataSourceConfiguration>
         <ArchivalTask>
             <Enabled>false</Enabled>
+            <ArchivePendingOperations>false</ArchivePendingOperations>
+            <DBConfig>
+                <SourceDB>DM_DB</SourceDB>
+                <DestinationDB>ARCHIVAL_DB</DestinationDB>
+            </DBConfig>
             <TaskClass>org.wso2.carbon.device.mgt.core.task.impl.ArchivalTask</TaskClass>
             <!-- Cron expression to run the task at specified time -->
             <CronExpression>0 0 0 1/1 * ? *</CronExpression>

@@ -108,10 +108,8 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     private static final Log log = LogFactory.getLog(DeviceManagementProviderServiceTest.class);
     public static final String DEVICE_ID = "9999";
     private static final String ALTERNATE_DEVICE_ID = "1128";
-    private DeviceManagementProviderService providerService;
     private static final String DEVICE_TYPE = "RANDOM_DEVICE_TYPE";
-    private static final String DEVICE_OWNER = "admin";
-    private DeviceDetailsDAO deviceDetailsDAO = DeviceManagementDAOFactory.getDeviceDetailsDAO();
+    private final DeviceDetailsDAO deviceDetailsDAO = DeviceManagementDAOFactory.getDeviceDetailsDAO();
 
     DeviceManagementProviderService deviceMgtService;
 
@@ -253,7 +251,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
             enrolmentInfo.setDateOfLastUpdate(new Date().getTime());
             enrolmentInfo.setOwner("user1");
             enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.BYOD);
-            enrolmentInfo.setStatus(EnrolmentInfo.Status.CREATED);
+            enrolmentInfo.setStatus(EnrolmentInfo.Status.ACTIVE);
 
             Device alternateDevice = TestDataHolder.generateDummyDeviceData(DEVICE_ID, DEVICE_TYPE,
                     enrolmentInfo);
@@ -884,8 +882,8 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
     @Test(dependsOnMethods = {"testReEnrollmentofSameDeviceUnderSameUser"})
     public void testUpdateDevicesStatusWithDeviceID() throws DeviceManagementException {
         if (!isMock()) {
-            boolean status = deviceMgtService.setStatus(new DeviceIdentifier(DEVICE_ID, DEVICE_TYPE), "user1",
-                    EnrolmentInfo.Status.ACTIVE);
+            Device device = TestDataHolder.generateDummyDeviceData("abc");
+            boolean status = deviceMgtService.setStatus(device, EnrolmentInfo.Status.ACTIVE);
             Assert.assertTrue(status);
         }
     }

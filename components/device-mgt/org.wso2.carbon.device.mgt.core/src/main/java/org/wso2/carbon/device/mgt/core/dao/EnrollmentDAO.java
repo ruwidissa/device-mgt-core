@@ -28,17 +28,11 @@ public interface EnrollmentDAO {
 
     EnrolmentInfo addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
 
-    int updateEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
-                         int tenantId) throws DeviceManagementDAOException;
-
-    int updateEnrollment(EnrolmentInfo enrolmentInfo) throws DeviceManagementDAOException;
+    int updateEnrollment(EnrolmentInfo enrolmentInfo, int tenantId) throws DeviceManagementDAOException;
 
     boolean updateEnrollmentStatus(List<EnrolmentInfo> enrolmentInfos) throws DeviceManagementDAOException;
 
     int removeEnrollment(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
-
-    boolean setStatus(int enrolmentId, String currentOwner, Status status,
-                      int tenantId) throws DeviceManagementDAOException;
 
     boolean setStatus(String currentOwner, Status status, int tenantId) throws DeviceManagementDAOException;
 
@@ -47,6 +41,8 @@ public interface EnrollmentDAO {
     Status getStatus(int deviceId, String currentOwner, int tenantId) throws DeviceManagementDAOException;
 
     EnrolmentInfo getEnrollment(int deviceId, String currentUser, int tenantId) throws DeviceManagementDAOException;
+
+    EnrolmentInfo getEnrollment(int deviceId, int tenantId) throws DeviceManagementDAOException;
 
     List<EnrolmentInfo> getEnrollmentsOfUser(int deviceId, String user, int tenantId) throws
                                                                                              DeviceManagementDAOException;

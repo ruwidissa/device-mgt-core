@@ -52,7 +52,6 @@ public class DeviceMgtAPITestHelper {
         deviceType.setName(name != null ? name : DEVICE_TYPE);
 
         DeviceTypeMetaDefinition deviceTypeMetaDefinition = new DeviceTypeMetaDefinition();
-        deviceTypeMetaDefinition.setClaimable(true);
         deviceTypeMetaDefinition.setDescription(DEVICE_TYPE_DESCRIPTION);
 
         PushNotificationConfig pushNotificationConfig =

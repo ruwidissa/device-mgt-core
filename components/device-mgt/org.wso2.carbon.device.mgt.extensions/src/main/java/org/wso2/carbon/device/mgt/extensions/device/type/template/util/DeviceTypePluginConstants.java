@@ -23,6 +23,5 @@ package org.wso2.carbon.device.mgt.extensions.device.type.template.util;
  */
 public class DeviceTypePluginConstants {
     public static final String MEDIA_TYPE_XML = "application/xml";
-    public static final String CHARSET_UTF8 = "UTF8";
     public static final String LANGUAGE_CODE_ENGLISH_US = "en_US";
 }

@@ -123,8 +123,8 @@ public class OperationDAOUtil {
         return operation;
     }
 
-    public static OperationResponse getOperationResponse(ResultSet rs) throws
-            ClassNotFoundException, IOException, SQLException {
+    public static OperationResponse getLargeOperationResponse(ResultSet rs) throws
+                                                                       ClassNotFoundException, IOException, SQLException {
         OperationResponse response = new OperationResponse();
         if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
             response.setReceivedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP").toString());
@@ -154,6 +154,18 @@ public class OperationDAOUtil {
                     log.warn("Error occurred while closing ObjectOutputStream", e);
                 }
             }
+        }
+        return response;
+    }
+
+
+    public static OperationResponse getOperationResponse(ResultSet rs) throws SQLException {
+        OperationResponse response = new OperationResponse();
+        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != (null)) {
+            response.setReceivedTimeStamp(rs.getTimestamp("RECEIVED_TIMESTAMP").toString());
+        }
+        if (rs.getString("OPERATION_RESPONSE") != null) {
+            response.setResponse(rs.getString("OPERATION_RESPONSE"));
         }
         return response;
     }

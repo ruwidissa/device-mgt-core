@@ -238,7 +238,7 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
     @Test(dependsOnMethods = "addProfileOperation")
     public void getOperations() throws DeviceManagementException, OperationManagementException, InvalidDeviceException {
         for (DeviceIdentifier deviceIdentifier : deviceIds) {
-            List operations = this.operationMgtService.getOperations(deviceIdentifier);
+            List<? extends Operation> operations = this.operationMgtService.getOperations(deviceIdentifier);
             Assert.assertEquals(operations.size(), 4, "The operations should be 4, but found only " + operations.size());
         }
     }
@@ -611,14 +611,16 @@ public class OperationManagementTests extends BaseDeviceManagementTest {
 
     private void changeStatus(EnrolmentInfo.Status status) throws DeviceManagementException,
             OperationManagementException {
-        Device device = this.deviceMgmtProvider.getDevice(this.deviceIds.get(1));
+        Device device = this.deviceMgmtProvider.getDevice(this.deviceIds.get(1), false);
         Assert.assertTrue(device != null);
         Assert.assertEquals(device.getType(), DEVICE_TYPE);
         Assert.assertTrue(device.getEnrolmentInfo() != null);
-        device.getEnrolmentInfo().setStatus(status);
         boolean modified = this.deviceMgmtProvider.changeDeviceStatus(this.deviceIds.get(1), status);
-        Assert.assertTrue(modified);
-        device = this.deviceMgmtProvider.getDevice(this.deviceIds.get(1));
+        if (device.getEnrolmentInfo().getStatus() != status) {
+            Assert.assertTrue(modified);
+            device.getEnrolmentInfo().setStatus(status);
+        }
+        device = this.deviceMgmtProvider.getDevice(this.deviceIds.get(1), false);
         Assert.assertEquals(device.getEnrolmentInfo().getStatus(), status);
     }
 

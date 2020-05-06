@@ -150,15 +150,10 @@ public class MonitoringTask implements Task {
                                     deviceType);
                         }
                         for (Device device : devices) {
-
                             EnrolmentInfo.Status status = device.getEnrolmentInfo().getStatus();
-                            if (status.equals(EnrolmentInfo.Status.BLOCKED) ||
-                                    status.equals(EnrolmentInfo.Status.REMOVED) ||
-                                    status.equals(EnrolmentInfo.Status.UNCLAIMED) ||
-                                    status.equals(EnrolmentInfo.Status.DISENROLLMENT_REQUESTED) ||
-                                    status.equals(EnrolmentInfo.Status.SUSPENDED)) {
-                                continue;
-                            } else {
+                            if (status.equals(EnrolmentInfo.Status.ACTIVE) ||
+                                    status.equals(EnrolmentInfo.Status.INACTIVE) ||
+                                    status.equals(EnrolmentInfo.Status.UNREACHABLE)) {
                                 notifiableDevices.add(device);
                             }
                         }

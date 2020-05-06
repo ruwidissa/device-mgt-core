@@ -28,8 +28,28 @@ public class ArchivalTaskConfiguration {
     private String taskClazz;
     private int retentionPeriod;
     private int batchSize;
+    private int archivalLockInterval;
     private PurgingTaskConfiguration purgingTaskConfiguration;
     private boolean archivePendingOperations;
+    private DBConfig dbConfig;
+
+    @XmlElement(name = "ArchivalLockInterval", required = true)
+    public int getArchivalLockInterval() {
+        return archivalLockInterval;
+    }
+
+    public void setArchivalLockInterval(int archivalLockInterval) {
+        this.archivalLockInterval = archivalLockInterval;
+    }
+
+    @XmlElement(name = "DBConfig", required = true)
+    public DBConfig getDbConfig() {
+        return dbConfig;
+    }
+
+    public void setDbConfig(DBConfig dbConfig) {
+        this.dbConfig = dbConfig;
+    }
 
     @XmlElement(name = "Enabled", required = true)
     public boolean isEnabled() {

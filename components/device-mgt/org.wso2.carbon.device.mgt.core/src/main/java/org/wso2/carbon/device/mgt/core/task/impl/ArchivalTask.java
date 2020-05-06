@@ -30,9 +30,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-
 public class ArchivalTask implements Task {
-    private static Log log = LogFactory.getLog(ArchivalTask.class);
+
+    private static final Log log = LogFactory.getLog(ArchivalTask.class);
 
     private ArchivalService archivalService;
 
@@ -72,16 +72,6 @@ public class ArchivalTask implements Task {
         millis -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
 
-        StringBuilder sb = new StringBuilder(64);
-        sb.append(days);
-        sb.append(" Days ");
-        sb.append(hours);
-        sb.append(" Hours ");
-        sb.append(minutes);
-        sb.append(" Minutes ");
-        sb.append(seconds);
-        sb.append(" Seconds");
-
-        return (sb.toString());
+        return (days + " Days " + hours + " Hours " + minutes + " Minutes " + seconds + " Seconds");
     }
 }

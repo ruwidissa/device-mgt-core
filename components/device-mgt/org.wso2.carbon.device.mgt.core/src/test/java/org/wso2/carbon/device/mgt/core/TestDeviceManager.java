@@ -119,11 +119,6 @@ public class TestDeviceManager implements DeviceManager {
     }
 
     @Override
-    public boolean isClaimable(DeviceIdentifier deviceId) throws DeviceManagementException {
-        return false;
-    }
-
-    @Override
     public boolean setStatus(DeviceIdentifier deviceId, String currentOwner, EnrolmentInfo.Status status)
             throws DeviceManagementException {
         return false;

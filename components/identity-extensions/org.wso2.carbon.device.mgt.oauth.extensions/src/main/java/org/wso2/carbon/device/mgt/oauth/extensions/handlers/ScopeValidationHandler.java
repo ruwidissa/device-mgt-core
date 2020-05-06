@@ -23,21 +23,20 @@ import org.wso2.carbon.device.mgt.oauth.extensions.internal.OAuthExtensionsDataH
 import org.wso2.carbon.identity.oauth.cache.CacheEntry;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
-import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
+import org.wso2.carbon.identity.oauth2.dao.TokenManagementDAO;
+import org.wso2.carbon.identity.oauth2.dao.TokenManagementDAOImpl;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.ResourceScopeCacheEntry;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class ScopeValidationHandler extends OAuth2ScopeValidator {
 
     private final static Log log = LogFactory.getLog(ScopeValidationHandler.class);
-    private Map<String, OAuth2ScopeValidator> scopeValidators;
-
-    private final String DEFAULT_PREFIX = "default";
+    private final Map<String, OAuth2ScopeValidator> scopeValidators;
 
     public ScopeValidationHandler() {
         scopeValidators = OAuthExtensionsDataHolder.getInstance().getScopeValidators();
@@ -47,7 +46,7 @@ public class ScopeValidationHandler extends OAuth2ScopeValidator {
 
         //returns true if scope validators are not defined
         if (scopeValidators == null || scopeValidators.isEmpty()) {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("OAuth2 scope validators are not loaded");
             }
             return true;
@@ -57,30 +56,31 @@ public class ScopeValidationHandler extends OAuth2ScopeValidator {
 
         //returns true if scope does not exist for the resource
         if (resourceScope == null) {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Resource '" + resource + "' is not protected with a scope");
             }
             return true;
         }
 
-        String scope[] = resourceScope.split(":");
+        String[] scope = resourceScope.split(":");
         String scopePrefix = scope[0];
 
         OAuth2ScopeValidator scopeValidator = scopeValidators.get(scopePrefix);
 
         if (scopeValidator == null) {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("OAuth2 scope validator cannot be identified for '" + scopePrefix + "' scope prefix");
             }
 
             // loading default scope validator if matching validator is not found
+            String DEFAULT_PREFIX = "default";
             scopeValidator = scopeValidators.get(DEFAULT_PREFIX);
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Loading default scope validator");
             }
 
             if (scopeValidator == null) {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Default scope validator is not available");
                 }
                 return true;
@@ -95,35 +95,29 @@ public class ScopeValidationHandler extends OAuth2ScopeValidator {
 
         String resourceScope = null;
         boolean cacheHit = false;
-        // Check the cache, if caching is enabled.
-        if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-            OAuthCache oauthCache = OAuthCache.getInstance();
-            OAuthCacheKey cacheKey = new OAuthCacheKey(resource);
-            CacheEntry result = oauthCache.getValueFromCache(cacheKey);
 
-            //Cache hit
-            if (result instanceof ResourceScopeCacheEntry) {
-                resourceScope = ((ResourceScopeCacheEntry) result).getScope();
-                cacheHit = true;
-            }
+        OAuthCache oauthCache = OAuthCache.getInstance();
+        OAuthCacheKey cacheKey = new OAuthCacheKey(resource);
+        CacheEntry result = oauthCache.getValueFromCache(cacheKey);
+
+        //Cache hit
+        if (result instanceof ResourceScopeCacheEntry) {
+            resourceScope = ((ResourceScopeCacheEntry) result).getScope();
+            cacheHit = true;
         }
 
-        TokenMgtDAO tokenMgtDAO = new TokenMgtDAO();
         if (!cacheHit) {
+            TokenManagementDAO tokenMgtDAO = new TokenManagementDAOImpl();
             try {
-                resourceScope = tokenMgtDAO.findScopeOfResource(resource);
+                resourceScope = tokenMgtDAO.findTenantAndScopeOfResource(resource).getLeft();
             } catch (IdentityOAuth2Exception e) {
                 log.error("Error occurred while retrieving scope for resource '" + resource + "'");
             }
 
-            if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-                OAuthCache oauthCache = OAuthCache.getInstance();
-                OAuthCacheKey cacheKey = new OAuthCacheKey(resource);
-                ResourceScopeCacheEntry cacheEntry = new ResourceScopeCacheEntry(resourceScope);
-                //Store resourceScope in cache even if it is null (to avoid database calls when accessing resources for
-                //which scopes haven't been defined).
-                oauthCache.addToCache(cacheKey, cacheEntry);
-            }
+            ResourceScopeCacheEntry cacheEntry = new ResourceScopeCacheEntry(resourceScope);
+            //Store resourceScope in cache even if it is null (to avoid database calls when accessing resources for
+            //which scopes haven't been defined).
+            oauthCache.addToCache(cacheKey, cacheEntry);
         }
         return resourceScope;
     }

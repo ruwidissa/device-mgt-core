@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.device.mgt.core.operation.mgt.dao.impl;
 
+import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationEnrolmentMapping;
@@ -39,17 +40,18 @@ import java.util.Map;
 public class OperationMappingDAOImpl implements OperationMappingDAO {
 
     @Override
-    public void addOperationMapping(int operationId, int enrollmentId, boolean isScheduled) throws
+    public void addOperationMapping(Operation operation, Integer deviceId, boolean isScheduled, Device device, Integer tenantId) throws
             OperationManagementDAOException {
         PreparedStatement stmt = null;
         try {
             long time = System.currentTimeMillis() / 1000;
             Connection conn = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_ENROLMENT_OP_MAPPING(ENROLMENT_ID, OPERATION_ID, STATUS, " +
-                    "PUSH_NOTIFICATION_STATUS, CREATED_TIMESTAMP, UPDATED_TIMESTAMP) VALUES (?, ?, ?, ?, ?, ?)";
+                    "PUSH_NOTIFICATION_STATUS, CREATED_TIMESTAMP, UPDATED_TIMESTAMP, OPERATION_CODE, INITIATED_BY, " +
+                         "TYPE, DEVICE_TYPE, DEVICE_ID, DEVICE_IDENTIFICATION, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, enrollmentId);
-            stmt.setInt(2, operationId);
+            stmt.setInt(1, deviceId);
+            stmt.setInt(2, operation.getId());
             stmt.setString(3, Operation.Status.PENDING.toString());
             if (isScheduled) {
                 stmt.setString(4, Operation.PushNotificationStatus.SCHEDULED.toString());
@@ -58,27 +60,36 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
             }
             stmt.setLong(5, time);
             stmt.setLong(6, time);
+            stmt.setString(7, operation.getCode());
+            stmt.setString(8, operation.getInitiatedBy());
+            stmt.setString(9, operation.getType().toString());
+            stmt.setString(10, device.getType());
+            stmt.setInt(11, device.getId());
+            stmt.setString(12, device.getDeviceIdentifier());
+            stmt.setInt(13, tenantId);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while persisting device operation mappings", e);
+            throw new OperationManagementDAOException("Error occurred while persisting device operation mappings. " +
+                    e.getMessage(), e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public void addOperationMapping(int operationId, List<Integer> enrollmentIds, boolean isScheduled) throws
+    public void addOperationMapping(Operation operation, List<Device> devices, boolean isScheduled, Integer tenantId) throws
             OperationManagementDAOException {
         PreparedStatement stmt = null;
         try {
             long time = System.currentTimeMillis() / 1000;
             Connection conn = OperationManagementDAOFactory.getConnection();
             String sql = "INSERT INTO DM_ENROLMENT_OP_MAPPING(ENROLMENT_ID, OPERATION_ID, STATUS, " +
-                    "PUSH_NOTIFICATION_STATUS, CREATED_TIMESTAMP, UPDATED_TIMESTAMP) VALUES (?, ?, ?, ?, ?, ?)";
+                         "PUSH_NOTIFICATION_STATUS, CREATED_TIMESTAMP, UPDATED_TIMESTAMP, OPERATION_CODE, INITIATED_BY, " +
+                         "TYPE, DEVICE_TYPE, DEVICE_ID, DEVICE_IDENTIFICATION, TENANT_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             stmt = conn.prepareStatement(sql);
-            for (int enrollmentId : enrollmentIds) {
-                stmt.setInt(1, enrollmentId);
-                stmt.setInt(2, operationId);
+            for (Device device : devices) {
+                stmt.setInt(1, device.getEnrolmentInfo().getId());
+                stmt.setInt(2, operation.getId());
                 stmt.setString(3, Operation.Status.PENDING.toString());
                 if (isScheduled) {
                     stmt.setString(4, Operation.PushNotificationStatus.SCHEDULED.toString());
@@ -87,11 +98,19 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
                 }
                 stmt.setLong(5, time);
                 stmt.setLong(6, time);
+                stmt.setString(7, operation.getCode());
+                stmt.setString(8, operation.getInitiatedBy());
+                stmt.setString(9, operation.getType().toString());
+                stmt.setString(10, device.getType());
+                stmt.setInt(11, device.getId());
+                stmt.setString(12, device.getDeviceIdentifier());
+                stmt.setInt(13, tenantId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while persisting device operation mappings", e);
+            throw new OperationManagementDAOException("Error occurred while persisting device operation mappings. " +
+                    e.getMessage(), e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -109,14 +128,17 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
             stmt.setInt(2, operationId);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while persisting device operation mappings", e);
+            throw new OperationManagementDAOException("Error occurred while persisting device operation mappings. " +
+                    e.getMessage(), e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, null);
         }
     }
 
     @Override
-    public void updateOperationMapping(int operationId, Integer deviceId, Operation.PushNotificationStatus pushNotificationStatus) throws OperationManagementDAOException {
+    public void updateOperationMapping(int operationId, Integer deviceId,
+                                       Operation.PushNotificationStatus pushNotificationStatus)
+            throws OperationManagementDAOException {
         PreparedStatement stmt = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
@@ -128,7 +150,8 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
             stmt.setInt(3, operationId);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new OperationManagementDAOException("Error occurred while updating device operation mappings", e);
+            throw new OperationManagementDAOException("Error occurred while updating device operation mappings. " +
+                    e.getMessage(), e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -161,7 +184,7 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
             }
         } catch (SQLException e) {
             throw new OperationManagementDAOException("Error occurred while updating device operation mappings as " +
-                    "batch ", e);
+                    "batch . " + e.getMessage(), e);
         } finally {
             OperationManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -172,7 +195,7 @@ public class OperationMappingDAOImpl implements OperationMappingDAO {
                                    long maxDuration, int deviceTypeId) throws OperationManagementDAOException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<OperationEnrolmentMapping> enrolmentOperationMappingList = null;
+        List<OperationEnrolmentMapping> enrolmentOperationMappingList;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
             //We are specifically looking for operation mappings in 'Pending' & 'Repeated' states. Further we want

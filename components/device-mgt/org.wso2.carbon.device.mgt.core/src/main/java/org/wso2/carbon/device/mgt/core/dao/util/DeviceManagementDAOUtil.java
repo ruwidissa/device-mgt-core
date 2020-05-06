@@ -144,6 +144,7 @@ public final class DeviceManagementDAOUtil {
         enrolmentInfo.setId(rs.getInt("ENROLMENT_ID"));
         enrolmentInfo.setOwner(rs.getString("OWNER"));
         enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.valueOf(rs.getString("OWNERSHIP")));
+        enrolmentInfo.setTransferred(rs.getBoolean("IS_TRANSFERRED"));
         enrolmentInfo.setDateOfEnrolment(rs.getTimestamp("DATE_OF_ENROLMENT").getTime());
         enrolmentInfo.setDateOfLastUpdate(rs.getTimestamp("DATE_OF_LAST_UPDATE").getTime());
         enrolmentInfo.setStatus(EnrolmentInfo.Status.valueOf(rs.getString("STATUS")));
@@ -198,7 +199,6 @@ public final class DeviceManagementDAOUtil {
     //This method will retrieve most appropriate device information when there are multiple device enrollments for
     //a single device. Here we'll consider only active status.
     public static Device loadActiveDevice(ResultSet rs, boolean deviceInfoIncluded) throws SQLException {
-        Map<EnrolmentInfo.Status, Device> deviceMap = new HashMap<>();
         Device device = loadDevice(rs);
         if (deviceInfoIncluded) {
             device.setDeviceInfo(loadDeviceInfo(rs));
@@ -209,7 +209,6 @@ public final class DeviceManagementDAOUtil {
     //This method will retrieve most appropriate device information when there are multiple device enrollments for
     //a single device. We'll give the highest priority to active devices.
     public static Device loadMatchingDevice(ResultSet rs, boolean deviceInfoIncluded) throws SQLException {
-        Map<EnrolmentInfo.Status, Device> deviceMap = new HashMap<>();
         Device device = loadDevice(rs);
         if (deviceInfoIncluded) {
             device.setDeviceInfo(loadDeviceInfo(rs));

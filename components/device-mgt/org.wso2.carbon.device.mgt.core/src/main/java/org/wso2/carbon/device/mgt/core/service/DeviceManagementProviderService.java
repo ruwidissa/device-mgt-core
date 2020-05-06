@@ -89,6 +89,7 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
+import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -659,10 +660,7 @@ public interface DeviceManagementProviderService {
 
     boolean setOwnership(DeviceIdentifier deviceId, String ownershipType) throws DeviceManagementException;
 
-    boolean isClaimable(DeviceIdentifier deviceId) throws DeviceManagementException;
-
-    boolean setStatus(DeviceIdentifier deviceId, String currentOwner,
-                      EnrolmentInfo.Status status) throws DeviceManagementException;
+    boolean setStatus(Device device, EnrolmentInfo.Status status) throws DeviceManagementException;
 
     boolean setStatus(String currentOwner, EnrolmentInfo.Status status) throws DeviceManagementException;
 
@@ -672,10 +670,15 @@ public interface DeviceManagementProviderService {
     Activity addOperation(String type, Operation operation,
                           List<DeviceIdentifier> devices) throws OperationManagementException, InvalidDeviceException;
 
+    void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
+
     List<? extends Operation> getOperations(DeviceIdentifier deviceId) throws OperationManagementException;
 
     PaginationResult getOperations(DeviceIdentifier deviceId,
                                    PaginationRequest request) throws OperationManagementException;
+
+    List<? extends Operation> getOperations(DeviceIdentifier deviceId, Operation.Status status)
+            throws OperationManagementException;
 
     List<? extends Operation> getPendingOperations(
             DeviceIdentifier deviceId) throws OperationManagementException;
@@ -805,7 +808,7 @@ public interface DeviceManagementProviderService {
 
     boolean bulkUpdateDeviceStatus(String deviceType, List<String> deviceList, String status) throws DeviceManagementException;
 
-    boolean updateEnrollment(String owner, List<String> deviceIdentifiers)
+    boolean updateEnrollment(String owner, boolean isTransfer, List<String> deviceIdentifiers)
             throws DeviceManagementException, UserNotFoundException, InvalidDeviceException;
 
     boolean addDeviceTypeVersion(DeviceTypeVersion deviceTypeVersion) throws DeviceManagementException;

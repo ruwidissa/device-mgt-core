@@ -14,29 +14,12 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *
- *
- * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://entgra.io) All Rights Reserved.
- *
- * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
 package org.wso2.carbon.device.mgt.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -56,15 +39,15 @@ import org.wso2.carbon.device.mgt.common.ApplicationRegistration;
 import org.wso2.carbon.device.mgt.common.ApplicationRegistrationException;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
-import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
@@ -112,7 +95,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -124,8 +106,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
-
-    public final class DeviceManagerUtil {
+public final class DeviceManagerUtil {
 
     private static final Log log = LogFactory.getLog(DeviceManagerUtil.class);
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
@@ -166,7 +147,7 @@ import java.util.stream.IntStream;
             List<JNDILookupDefinition.JNDIProperty> jndiPropertyList =
                     jndiConfig.getJndiProperties();
             if (jndiPropertyList != null) {
-                Hashtable<Object, Object> jndiProperties = new Hashtable<Object, Object>();
+                Hashtable<Object, Object> jndiProperties = new Hashtable<>();
                 for (JNDILookupDefinition.JNDIProperty prop : jndiPropertyList) {
                     jndiProperties.put(prop.getName(), prop.getValue());
                 }
@@ -186,8 +167,8 @@ import java.util.stream.IntStream;
      * @param isSharedWithAllTenants is this device type shared with all tenants.
      * @return status of the operation
      */
-    public static boolean registerDeviceType(String typeName, int tenantId, boolean isSharedWithAllTenants
-            , DeviceTypeMetaDefinition deviceTypeDefinition)
+    public static boolean registerDeviceType(String typeName, int tenantId, boolean isSharedWithAllTenants,
+                                             DeviceTypeMetaDefinition deviceTypeDefinition)
             throws DeviceManagementException {
         boolean status;
         try {
@@ -210,11 +191,11 @@ import java.util.stream.IntStream;
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceManagementException("Error occurred while registering the device type '"
-                                                        + typeName + "'", e);
+                    + typeName + "'", e);
         } catch (TransactionManagementException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             throw new DeviceManagementException("SQL occurred while registering the device type '"
-                                                        + typeName + "'", e);
+                    + typeName + "'", e);
         } finally {
             DeviceManagementDAOFactory.closeConnection();
         }
@@ -229,7 +210,7 @@ import java.util.stream.IntStream;
      * @return DeviceType which contains info about the device-type.
      */
     public static DeviceType getDeviceType(String typeName, int tenantId) throws DeviceManagementException {
-        DeviceType deviceType = null;
+        DeviceType deviceType;
         try {
             DeviceManagementDAOFactory.openConnection();
             DeviceTypeDAO deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
@@ -316,7 +297,6 @@ import java.util.stream.IntStream;
         return deviceIdentifiers;
     }
 
-
     public static String getServerBaseHttpsUrl() {
         String hostName = "localhost";
         try {
@@ -356,10 +336,6 @@ import java.util.stream.IntStream;
 
     /**
      * returns the tenant Id of the specific tenant Domain
-     *
-     * @param tenantDomain
-     * @return
-     * @throws DeviceManagementException
      */
     public static int getTenantId(String tenantDomain) throws DeviceManagementException {
         try {
@@ -390,14 +366,14 @@ import java.util.stream.IntStream;
                 return deviceManagementConfig.getPaginationConfiguration().getActivityListPageSize();
             } else {
                 throw new OperationManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                    "cdm-config.xml file.");
+                        "cdm-config.xml file.");
             }
         }
         return limit;
     }
 
-    public static PaginationRequest validateOperationListPageSize(PaginationRequest paginationRequest) throws
-                                                                                          OperationManagementException {
+    public static PaginationRequest validateOperationListPageSize(PaginationRequest paginationRequest)
+            throws OperationManagementException {
         if (paginationRequest.getRowCount() == 0) {
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().
                     getDeviceManagementConfig();
@@ -406,14 +382,14 @@ import java.util.stream.IntStream;
                         getOperationListPageSize());
             } else {
                 throw new OperationManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                    "cdm-config.xml file.");
+                        "cdm-config.xml file.");
             }
         }
         return paginationRequest;
     }
 
-    public static PaginationRequest validateNotificationListPageSize(PaginationRequest paginationRequest) throws
-                                                                                       NotificationManagementException {
+    public static PaginationRequest validateNotificationListPageSize(PaginationRequest paginationRequest)
+            throws NotificationManagementException {
         if (paginationRequest.getRowCount() == 0) {
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().
                     getDeviceManagementConfig();
@@ -421,15 +397,15 @@ import java.util.stream.IntStream;
                 paginationRequest.setRowCount(deviceManagementConfig.getPaginationConfiguration().
                         getNotificationListPageSize());
             } else {
-                throw new NotificationManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                          "cdm-config.xml file.");
+                throw new NotificationManagementException("Device-Mgt configuration has not initialized. " +
+                        "Please check the cdm-config.xml file.");
             }
         }
         return paginationRequest;
     }
 
-    public static PaginationRequest validateDeviceListPageSize(PaginationRequest paginationRequest) throws
-                                                                                             DeviceManagementException {
+    public static PaginationRequest validateDeviceListPageSize(PaginationRequest paginationRequest)
+            throws DeviceManagementException {
         if (paginationRequest.getRowCount() == 0) {
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().
                     getDeviceManagementConfig();
@@ -437,24 +413,24 @@ import java.util.stream.IntStream;
                 paginationRequest.setRowCount(deviceManagementConfig.getPaginationConfiguration().
                         getDeviceListPageSize());
             } else {
-                throw new DeviceManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                    "cdm-config.xml file.");
+                throw new DeviceManagementException("Device-Mgt configuration has not initialized. " +
+                        "Please check the cdm-config.xml file.");
             }
         }
         return paginationRequest;
     }
 
-    public static GroupPaginationRequest validateGroupListPageSize(GroupPaginationRequest paginationRequest) throws
-                                                                                                    GroupManagementException {
+    public static GroupPaginationRequest validateGroupListPageSize(GroupPaginationRequest paginationRequest)
+            throws GroupManagementException {
         if (paginationRequest.getRowCount() == 0) {
             DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance()
                     .getDeviceManagementConfig();
             if (deviceManagementConfig != null) {
                 paginationRequest.setRowCount(deviceManagementConfig.getPaginationConfiguration()
-                                                      .getDeviceListPageSize());
+                        .getDeviceListPageSize());
             } else {
-                throw new GroupManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                   "cdm-config.xml file.");
+                throw new GroupManagementException("Device-Mgt configuration has not initialized. " +
+                        "Please check the cdm-config.xml file.");
             }
         }
         return paginationRequest;
@@ -467,8 +443,8 @@ import java.util.stream.IntStream;
             if (deviceManagementConfig != null) {
                 return deviceManagementConfig.getPaginationConfiguration().getDeviceListPageSize();
             } else {
-                throw new DeviceManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                    "cdm-config.xml file.");
+                throw new DeviceManagementException("Device-Mgt configuration has not initialized. " +
+                        "Please check the cdm-config.xml file.");
             }
         }
         return limit;
@@ -480,8 +456,8 @@ import java.util.stream.IntStream;
         if (deviceManagementConfig != null) {
             return deviceManagementConfig.getOperationAnalyticsConfiguration().isPublishLocationResponseEnabled();
         } else {
-            throw new DeviceManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                        "cdm-config.xml file.");
+            throw new DeviceManagementException("Device-Mgt configuration has not initialized. " +
+                    "Please check the cdm-config.xml file.");
         }
     }
 
@@ -491,8 +467,8 @@ import java.util.stream.IntStream;
         if (deviceManagementConfig != null) {
             return deviceManagementConfig.getOperationAnalyticsConfiguration().isPublishDeviceInfoResponseEnabled();
         } else {
-            throw new DeviceManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                "cdm-config.xml file.");
+            throw new DeviceManagementException("Device-Mgt configuration has not initialized. " +
+                    "Please check the cdm-config.xml file.");
         }
     }
 
@@ -503,8 +479,8 @@ import java.util.stream.IntStream;
             return deviceManagementConfig.getOperationAnalyticsConfiguration()
                     .getOperationResponseConfigurations().isEnabled();
         } else {
-            throw new DeviceManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                "cdm-config.xml file.");
+            throw new DeviceManagementException("Device-Mgt configuration has not initialized. " +
+                    "Please check the cdm-config.xml file.");
         }
     }
 
@@ -515,8 +491,8 @@ import java.util.stream.IntStream;
             return deviceManagementConfig.getOperationAnalyticsConfiguration()
                     .getOperationResponseConfigurations().getOperations();
         } else {
-            throw new DeviceManagementException("Device-Mgt configuration has not initialized. Please check the " +
-                                                "cdm-config.xml file.");
+            throw new DeviceManagementException("Device-Mgt configuration has not initialized. " +
+                    "Please check the cdm-config.xml file.");
         }
     }
 
@@ -540,6 +516,7 @@ import java.util.stream.IntStream;
                 errorDeviceIdList.add(deviceIdentifier);
             }
         }
+
         DeviceIDHolder deviceIDHolder = new DeviceIDHolder();
         deviceIDHolder.setValidDeviceIDList(validDeviceIDList);
         deviceIDHolder.setErrorDeviceIdList(errorDeviceIdList);
@@ -553,8 +530,10 @@ import java.util.stream.IntStream;
         if (device == null || device.getDeviceIdentifier() == null ||
                 device.getDeviceIdentifier().isEmpty() || device.getEnrolmentInfo() == null) {
             return false;
-        } else
-            return !EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus());
+        } else if (EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean isDeviceExists(DeviceIdentifier deviceIdentifier) throws DeviceManagementException {
@@ -595,7 +574,7 @@ import java.util.stream.IntStream;
                                         deviceCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
                                 Duration(TimeUnit.SECONDS, deviceCacheExpiry)).setStoreByValue(true).build();
                         if(deviceCacheCapacity > 0 ) {
-                            ((CacheImpl)(manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE))).
+                            ((CacheImpl) manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE)).
                                     setCapacity(deviceCacheCapacity);
                         }
                     } else {
@@ -627,10 +606,10 @@ import java.util.stream.IntStream;
                 initializeDeviceCache();
             }
             if (manager != null) {
-                deviceCache = manager.<DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE);
+                deviceCache = manager.getCache(DeviceManagementConstants.DEVICE_CACHE);
             } else {
-                deviceCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER).
-                        <DeviceCacheKey, Device>getCache(DeviceManagementConstants.DEVICE_CACHE);
+                deviceCache =  Caching.getCacheManager(DeviceManagementConstants.DM_CACHE_MANAGER)
+                        .getCache(DeviceManagementConstants.DEVICE_CACHE);
             }
         }
         return deviceCache;
@@ -645,7 +624,7 @@ import java.util.stream.IntStream;
      */
     @SuppressWarnings("PackageAccessibility")
     public static AppRegistrationCredentials getApplicationRegistrationCredentials(String host, String port,
-                                                                            String username, String password)
+                                                                                   String username, String password)
             throws ApplicationRegistrationException {
         if (host == null || port == null) {
             String msg = "Required gatewayHost or gatewayPort system property is null";

@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.device.mgt.core.operation.mgt.dao;
 
+import org.wso2.carbon.device.mgt.common.Device;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationEnrolmentMapping;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMapping;
@@ -27,10 +29,9 @@ import java.util.Map;
 
 public interface OperationMappingDAO {
 
-    void addOperationMapping(int operationId, int enrollmentId, boolean isScheduled)
-            throws OperationManagementDAOException;
+    void addOperationMapping(Operation operation, Integer deviceId, boolean isScheduled, Device device, Integer tenantId) throws OperationManagementDAOException;
 
-    void addOperationMapping(int operationId, List<Integer> enrollmentIds, boolean isScheduled)
+    void addOperationMapping(Operation operation, List<Device> devices, boolean isScheduled, Integer tenantId)
             throws OperationManagementDAOException;
 
     void removeOperationMapping(int operationId, Integer deviceId) throws OperationManagementDAOException;

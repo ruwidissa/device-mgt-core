@@ -80,17 +80,17 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private static final String NOTIFIER_PROPERTY = "notifierType";
     private static final String NOTIFIER_TYPE_LOCAL = "LOCAL";
 
-    private DeviceManager deviceManager;
+    private final DeviceManager deviceManager;
     private PushNotificationConfig pushNotificationConfig;
     private ProvisioningConfig provisioningConfig;
     private String type;
-    private OperationMonitoringTaskConfig operationMonitoringConfigs;
-    private List<MonitoringOperation> monitoringOperations;
+    private final OperationMonitoringTaskConfig operationMonitoringConfigs;
+    private List<MonitoringOperation> monitoringOperations = new ArrayList<>();
     private PolicyMonitoringManager policyMonitoringManager;
-    private InitialOperationConfig initialOperationConfig;
+    private final InitialOperationConfig initialOperationConfig;
     private StartupOperationConfig startupOperationConfig;
     private PullNotificationSubscriber pullNotificationSubscriber;
-    private DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
+    private final DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
     private DeviceTypePlatformDetails deviceTypePlatformDetails;
     private GeneralConfig generalConfig;
     private boolean isRegistryBasedConfigs = false;
@@ -141,6 +141,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
                     MonitoringOperation monitoringOperation = new MonitoringOperation();
                     monitoringOperation.setTaskName(op.getOperationName());
                     monitoringOperation.setRecurrentTimes(op.getRecurrency());
+                    monitoringOperation.setResponsePersistence(op.getResponsePersistence());
                     monitoringOperations.add(monitoringOperation);
                 }
             }

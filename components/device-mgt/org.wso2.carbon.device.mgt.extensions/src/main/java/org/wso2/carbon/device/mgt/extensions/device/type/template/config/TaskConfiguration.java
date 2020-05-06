@@ -67,6 +67,7 @@ public class TaskConfiguration {
 
         private String operationName;
         private int recurrency;
+        private boolean responsePersistence = true;
 
         @XmlElement(name = "Name", required = true)
         public String getOperationName() {
@@ -86,6 +87,14 @@ public class TaskConfiguration {
             this.recurrency = recurrency;
         }
 
+        @XmlElement(name = "ResponsePersistence")
+        public boolean getResponsePersistence() {
+            return responsePersistence;
+        }
+
+        public void setResponsePersistence(boolean responsePersistence) {
+            this.responsePersistence = responsePersistence;
+        }
     }
 }
 

@@ -74,8 +74,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
             DeviceManagementProviderService service = this.getDeviceManagementProviderService();
             for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
                 Device device = service.getDevice(deviceIdentifier, false);
-                service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                        EnrolmentInfo.Status.UNREACHABLE);
+                service.setStatus(device, EnrolmentInfo.Status.UNREACHABLE);
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while setting the device as unreachable";
@@ -91,8 +90,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
             DeviceManagementProviderService service = this.getDeviceManagementProviderService();
             for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
                 Device device = service.getDevice(deviceIdentifier, false);
-                service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                                  EnrolmentInfo.Status.INACTIVE);
+                service.setStatus(device, EnrolmentInfo.Status.INACTIVE);
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while setting the device as inactive";
@@ -109,8 +107,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
                 DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
                 deviceIdentifier.setId(device.getDeviceIdentifier());
                 deviceIdentifier.setType(device.getType());
-                service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                        EnrolmentInfo.Status.UNREACHABLE);
+                service.setStatus(device, EnrolmentInfo.Status.UNREACHABLE);
             }
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while setting the device as unreachable";
@@ -126,8 +123,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
 
             DeviceManagementProviderService service = this.getDeviceManagementProviderService();
             Device device = service.getDevice(deviceIdentifier, false);
-            service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                    EnrolmentInfo.Status.ACTIVE);
+            service.setStatus(device, EnrolmentInfo.Status.ACTIVE);
 
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while setting the device as reachable for " +
@@ -231,8 +227,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
         try {
             DeviceManagementProviderService service = this.getDeviceManagementProviderService();
             Device device = service.getDevice(deviceIdentifier, false);
-            service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                    EnrolmentInfo.Status.ACTIVE);
+            service.setStatus(device, EnrolmentInfo.Status.ACTIVE);
 
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while marking device as compliance " + deviceIdentifier.getId() + " - " +
@@ -246,11 +241,9 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
     public void deactivateDevice(DeviceIdentifier deviceIdentifier) throws PolicyComplianceException {
 
         try {
-
             DeviceManagementProviderService service = this.getDeviceManagementProviderService();
             Device device = service.getDevice(deviceIdentifier, false);
-            service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                    EnrolmentInfo.Status.INACTIVE);
+            service.setStatus(device, EnrolmentInfo.Status.INACTIVE);
 
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while deactivating the device " + deviceIdentifier.getId() + " - " +
@@ -266,8 +259,7 @@ public class ComplianceDecisionPointImpl implements ComplianceDecisionPoint {
         try {
             DeviceManagementProviderService service = this.getDeviceManagementProviderService();
             Device device = service.getDevice(deviceIdentifier, false);
-            service.setStatus(deviceIdentifier, device.getEnrolmentInfo().getOwner(),
-                    EnrolmentInfo.Status.ACTIVE);
+            service.setStatus(device, EnrolmentInfo.Status.ACTIVE);
 
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while activating the device " + deviceIdentifier.getId() + " - " +

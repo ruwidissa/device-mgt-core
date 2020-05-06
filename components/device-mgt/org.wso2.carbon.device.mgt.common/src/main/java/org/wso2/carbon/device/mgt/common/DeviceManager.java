@@ -184,8 +184,6 @@ public interface DeviceManager {
      */
     boolean setOwnership(DeviceIdentifier deviceId, String ownershipType) throws DeviceManagementException;
 
-    boolean isClaimable(DeviceIdentifier deviceId) throws DeviceManagementException;
-
     boolean setStatus(DeviceIdentifier deviceId, String currentOwner,
                       EnrolmentInfo.Status status) throws DeviceManagementException;
 

@@ -45,7 +45,7 @@ public class TestDataHolder {
     public static Device generateDummyDeviceData(String deviceType) {
         Device device = new Device();
         device.setEnrolmentInfo(generateEnrollmentInfo(new Date().getTime(), new Date().getTime(), OWNER, EnrolmentInfo
-                .OwnerShip.BYOD, EnrolmentInfo.Status.CREATED));
+                .OwnerShip.BYOD, EnrolmentInfo.Status.ACTIVE));
         device.setDescription("Test Description");
         device.setDeviceIdentifier(initialDeviceIdentifier);
         device.setType(deviceType);
@@ -118,7 +118,7 @@ public class TestDataHolder {
             enrolmentInfo.setDateOfLastUpdate(new Date().getTime());
             enrolmentInfo.setOwner(OWNER);
             enrolmentInfo.setOwnership(EnrolmentInfo.OwnerShip.BYOD);
-            enrolmentInfo.setStatus(EnrolmentInfo.Status.CREATED);
+            enrolmentInfo.setStatus(EnrolmentInfo.Status.ACTIVE);
             device.setEnrolmentInfo(enrolmentInfo);
             device.setDescription("Test Description");
             device.setDeviceIdentifier(deviceId.getId());
@@ -131,7 +131,7 @@ public class TestDataHolder {
     public static Device generateDummyDeviceData(DeviceIdentifier deviceIdentifier) {
         Device device = new Device();
         device.setEnrolmentInfo(generateEnrollmentInfo(new Date().getTime(), new Date().getTime(), OWNER, EnrolmentInfo
-                .OwnerShip.BYOD, EnrolmentInfo.Status.CREATED));
+                .OwnerShip.BYOD, EnrolmentInfo.Status.ACTIVE));
         device.setDescription("Test Description");
         device.setDeviceIdentifier(deviceIdentifier.getId());
         device.setType(deviceIdentifier.getType());
