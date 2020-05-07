@@ -20,8 +20,6 @@ package org.wso2.carbon.device.mgt.common.spi;
 import org.wso2.carbon.device.mgt.common.QREnrollmentPayload;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 
-import java.util.Map;
-
 /**
  * This implementation populates device type plugin management service.
  */
