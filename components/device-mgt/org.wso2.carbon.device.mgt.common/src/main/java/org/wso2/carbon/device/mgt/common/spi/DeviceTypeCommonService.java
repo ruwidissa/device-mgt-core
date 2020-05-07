@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.device.mgt.common.spi;
 
+import org.wso2.carbon.device.mgt.common.QREnrollmentPayload;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 
 import java.util.Map;
@@ -32,5 +33,5 @@ public interface DeviceTypeCommonService {
      * @return QR code Map which contains key value pairs to have for the QR String.
      * @throws DeviceManagementException if error occurred while generating the QR String for Ownership
      */
-    Map<String, Object> getEnrollmentQRCode(String ownershipType) throws DeviceManagementException;
+    QREnrollmentPayload getEnrollmentQRCode(String ownershipType) throws DeviceManagementException;
 }
