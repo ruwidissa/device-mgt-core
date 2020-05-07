@@ -46,7 +46,7 @@ import java.util.Map;
  */
 public class PushNotificationSchedulerTask implements Runnable {
 
-    private static Log log = LogFactory.getLog(PushNotificationSchedulerTask.class);
+    private static final Log log = LogFactory.getLog(PushNotificationSchedulerTask.class);
     private final OperationDAO operationDAO = OperationManagementDAOFactory.getOperationDAO();
     private final OperationMappingDAO operationMappingDAO = OperationManagementDAOFactory.getOperationMappingDAO();
     private final DeviceManagementProviderService provider = DeviceManagementDataHolder.getInstance()
