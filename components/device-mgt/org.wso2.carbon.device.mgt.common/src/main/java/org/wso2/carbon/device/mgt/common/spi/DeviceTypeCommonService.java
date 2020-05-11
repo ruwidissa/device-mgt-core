@@ -28,7 +28,8 @@ public interface DeviceTypeCommonService {
     /**
      * To get Enrollment QR code against Ownership type
      *
-     * @return QR code Map which contains key value pairs to have for the QR String.
+     * @return {@link QREnrollmentPayload} object with payload to generate QR, invalidPlatformConfigs
+     * and optionalPlatformConfigs.
      * @throws DeviceManagementException if error occurred while generating the QR String for Ownership
      */
     QREnrollmentPayload getEnrollmentQRCode(String ownershipType) throws DeviceManagementException;
