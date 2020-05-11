@@ -39,6 +39,10 @@ public class QREnrollmentPayload implements Serializable {
             "invalidation occurs.", required = true)
     private List<String> invalidPlatformConfigs;
 
+    @ApiModelProperty(name = "optionalPlatformConfigs", value = "Optional platform configs to show when an " +
+            "values are not set.")
+    private List<String> optionalPlatformConfigs;
+
     public Map<String, Object> getPayload() {
         return payload;
     }
@@ -53,5 +57,13 @@ public class QREnrollmentPayload implements Serializable {
 
     public void setInvalidPlatformConfigs(List<String> invalidPlatformConfigs) {
         this.invalidPlatformConfigs = invalidPlatformConfigs;
+    }
+
+    public List<String> getOptionalPlatformConfigs() {
+        return optionalPlatformConfigs;
+    }
+
+    public void setOptionalPlatformConfigs(List<String> optionalPlatformConfigs) {
+        this.optionalPlatformConfigs = optionalPlatformConfigs;
     }
 }
