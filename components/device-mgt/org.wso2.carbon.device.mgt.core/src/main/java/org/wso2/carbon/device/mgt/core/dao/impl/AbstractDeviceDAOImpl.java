@@ -1912,6 +1912,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 removeEnrollmentDeviceDetail(conn, enrollmentIds);
                 removeEnrollmentDeviceLocation(conn, enrollmentIds);
                 removeEnrollmentDeviceInfo(conn, enrollmentIds);
+                deleteLargePayloadRecords(conn, enrollmentIds);
                 removeDeviceOperationResponse(conn, enrollmentIds);
                 removeEnrollmentOperationMapping(conn, enrollmentIds);
                 if (log.isDebugEnabled()) {
@@ -2398,7 +2399,6 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     private void removeDeviceOperationResponse(Connection conn, List<Integer> enrollmentIds)
             throws DeviceManagementDAOException {
         try {
-            deleteLargePayloadRecords(conn, enrollmentIds);
             String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE WHERE ENROLMENT_ID = ?";
             if (!executeBatchOperation(conn, sql, enrollmentIds)) {
                 String msg = "Failed to remove device operation response of devices with enrollmentIds : "
