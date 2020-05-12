@@ -1894,16 +1894,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
         DeviceManagementProviderService deviceManagementProviderService = DataHolder.getInstance()
                 .getDeviceManagementService();
         try {
-            DeviceType deviceType = deviceManagementProviderService.getDeviceType(deviceTypeName);
-            if (deviceType == null) {
-                String msg = "Device type doesn't exist. Hence check the application name existence with valid "
-                        + "device type name.";
-                log.error(msg);
-                throw new BadRequestException(msg);
+            int deviceTypeId;
+            if (!deviceTypeName.equals(Constants.ALL)) {
+                DeviceType deviceType = deviceManagementProviderService.getDeviceType(deviceTypeName);
+                deviceTypeId = deviceType.getId();
+                if (deviceType == null) {
+                    String msg = "Device type doesn't exist. Hence check the application name existence with valid "
+                            + "device type name.";
+                    log.error(msg);
+                    throw new BadRequestException(msg);
+                }
+            } else {
+                //For web-clips device type = 'ALL'
+                deviceTypeId = 0;
             }
             try {
                 ConnectionManagerUtil.openDBConnection();
-                if (applicationDAO.isExistingAppName(appName, deviceType.getId(), tenantId)) {
+                if (applicationDAO.isExistingAppName(appName, deviceTypeId, tenantId)) {
                     return true;
                 }
             } catch (DBConnectionException e) {
