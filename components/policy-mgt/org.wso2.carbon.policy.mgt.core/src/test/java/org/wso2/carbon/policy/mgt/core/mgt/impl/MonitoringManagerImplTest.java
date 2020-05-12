@@ -316,7 +316,7 @@ public class MonitoringManagerImplTest extends BasePolicyManagementDAOTest{
 
     @Test
     public void testAddMonitoringOperation() throws Exception {
-        monitoringManager.addMonitoringOperation(deviceMgtService.getAllDevices());
+        monitoringManager.addMonitoringOperation(DEVICE_TYPE_E, deviceMgtService.getAllDevices());
     }
 
     @Test

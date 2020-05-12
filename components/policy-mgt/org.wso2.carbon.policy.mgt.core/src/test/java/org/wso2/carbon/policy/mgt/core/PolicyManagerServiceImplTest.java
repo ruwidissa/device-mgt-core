@@ -259,7 +259,7 @@ public class  PolicyManagerServiceImplTest extends BasePolicyManagementDAOTest {
         deviceList.add(device);
 
         MonitoringManager manager = new MonitoringManagerImpl();
-        manager.addMonitoringOperation(deviceList);
+        manager.addMonitoringOperation(DEVICE_TYPE_A, deviceList);
 
         policyManagerService.checkCompliance(new DeviceIdentifier(DEVICE1, DEVICE_TYPE_A), complianceFeatures);
         boolean deviceCompliance = policyManagerService.isCompliant(new DeviceIdentifier(DEVICE1, DEVICE_TYPE_A));
@@ -289,7 +289,7 @@ public class  PolicyManagerServiceImplTest extends BasePolicyManagementDAOTest {
         deviceList.add(device);
 
         MonitoringManager manager = new MonitoringManagerImpl();
-        manager.addMonitoringOperation(deviceList);
+        manager.addMonitoringOperation(DEVICE_TYPE_A, deviceList);
 
         policyManagerService.checkCompliance(new DeviceIdentifier(DEVICE1, DEVICE_TYPE_A), complianceFeatures);
         boolean deviceCompliance = policyManagerService.isCompliant(new DeviceIdentifier(DEVICE1, DEVICE_TYPE_A));

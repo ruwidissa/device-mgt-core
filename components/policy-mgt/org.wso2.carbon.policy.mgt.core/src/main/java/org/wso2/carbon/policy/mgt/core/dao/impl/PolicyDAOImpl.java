@@ -1778,13 +1778,13 @@ public class PolicyDAOImpl implements PolicyDAO {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             conn = this.getConnection();
-            String query = "SELECT * FROM DM_DEVICE_POLICY_APPLIED WHERE TENANT_ID = ?";
+            String query = "SELECT POLICY_ID, ENROLMENT_ID FROM DM_DEVICE_POLICY_APPLIED WHERE TENANT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, tenantId);
             resultSet = stmt.executeQuery();
 
             while (resultSet.next()) {
-                devicePolicyIds.put(resultSet.getInt("DEVICE_ID"), resultSet.getInt("POLICY_ID"));
+                devicePolicyIds.put(resultSet.getInt("ENROLMENT_ID"), resultSet.getInt("POLICY_ID"));
             }
         } catch (SQLException e) {
             throw new PolicyManagerDAOException("Error occurred while getting the applied policy", e);
@@ -1805,7 +1805,7 @@ public class PolicyDAOImpl implements PolicyDAO {
 
         try {
             conn = this.getConnection();
-            String query = "SELECT * FROM DM_DEVICE_POLICY_APPLIED WHERE TENANT_ID = ?";
+            String query = "SELECT POLICY_ID, DEVICE_ID FROM DM_DEVICE_POLICY_APPLIED WHERE TENANT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, tenantId);
             resultSet = stmt.executeQuery();
