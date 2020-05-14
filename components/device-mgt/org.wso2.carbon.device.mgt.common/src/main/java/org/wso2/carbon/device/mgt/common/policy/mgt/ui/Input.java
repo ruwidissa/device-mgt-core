@@ -18,15 +18,16 @@
 package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 @XmlRootElement(name = "Input")
 public class Input {
 
     private String type;
     private String placeholderValue;
-    private String regEx;
-    private String validationMessage;
+    private List<Rule> rules;
 
     @XmlElement(name = "Type")
     public String getType() {
@@ -46,21 +47,9 @@ public class Input {
         this.placeholderValue = placeholderValue;
     }
 
-    @XmlElement(name = "Regex")
-    public String getRegEx() {
-        return regEx;
-    }
+    @XmlElementWrapper(name = "Rules")
+    @XmlElement(name = "Rule")
+    public List<Rule> getRules() { return rules; }
 
-    public void setRegEx(String regEx) {
-        this.regEx = regEx;
-    }
-
-    @XmlElement(name = "ValidationMsg")
-    public String getValidationMessage() {
-        return validationMessage;
-    }
-
-    public void setValidationMessage(String validationMessage) {
-        this.validationMessage = validationMessage;
-    }
+    public void setRules(List<Rule> rules) { this.rules = rules; }
 }
