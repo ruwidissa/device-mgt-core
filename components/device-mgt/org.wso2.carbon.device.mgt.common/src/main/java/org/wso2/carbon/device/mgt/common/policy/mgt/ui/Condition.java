@@ -17,30 +17,25 @@
 
 package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
-@XmlRootElement(name = "Key")
-public class Key {
+@XmlRootElement(name = "Condition")
+public class Condition {
 
-    private String name;
-    private String value;
+    String key;
+    List<String> values;
 
-    @XmlAttribute(name = "name")
-    public String getName() {
-        return name;
-    }
+    @XmlElement(name = "Key")
+    public String getKey() { return key; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setKey(String key) { this.key = key; }
 
-    @XmlAttribute(name = "value")
-    public String getValue() {
-        return value;
-    }
+    @XmlElementWrapper(name = "Values")
+    @XmlElement(name = "Value")
+    public List<String> getValues() { return values; }
 
-    public void setValue(String value) {
-        this.value = value;
-    }
+    public void setValues(List<String> values) { this.values = values; }
 }
