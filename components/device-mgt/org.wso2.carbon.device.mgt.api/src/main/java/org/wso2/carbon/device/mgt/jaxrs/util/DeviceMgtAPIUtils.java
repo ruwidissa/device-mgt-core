@@ -67,6 +67,7 @@ import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.publisher.stub.EventPublisherAdminServiceStub;
 import org.wso2.carbon.event.receiver.stub.EventReceiverAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
+import org.wso2.carbon.identity.claim.metadata.mgt.dto.ClaimPropertyDTO;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
@@ -862,5 +863,19 @@ public class DeviceMgtAPIUtils {
             throw new BadRequestException(msg);
         }
         return operation;
+    }
+
+    /**
+     * This method is used to set property name and value to ClaimPropertyDTO
+     *
+     * @param propertyName Name of the property
+     * @param propertyValue Value of the property
+     * @return {@link ClaimPropertyDTO}
+     */
+    public static ClaimPropertyDTO buildClaimPropertyDTO(String propertyName, String propertyValue) {
+        ClaimPropertyDTO claimPropertyDTO = new ClaimPropertyDTO();
+        claimPropertyDTO.setPropertyName(propertyName);
+        claimPropertyDTO.setPropertyValue(propertyValue);
+        return claimPropertyDTO;
     }
 }
