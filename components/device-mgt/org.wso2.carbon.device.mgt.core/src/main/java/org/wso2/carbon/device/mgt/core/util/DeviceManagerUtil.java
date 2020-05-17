@@ -32,6 +32,7 @@ import org.apache.http.protocol.HTTP;
 import org.w3c.dom.Document;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.caching.impl.CacheImpl;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.analytics.data.publisher.service.EventsPublisherService;
 import org.wso2.carbon.device.mgt.common.AppRegistrationCredentials;
@@ -76,6 +77,7 @@ import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
 import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.user.api.TenantManager;
+import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -1004,5 +1006,19 @@ public final class DeviceManagerUtil {
             }
         }
 
+    }
+
+    public static String[] getRolesOfUser(String userName) throws UserStoreException {
+        UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+        String[] roleList;
+        if (userRealm != null) {
+            userRealm.getUserStoreManager().getRoleNames();
+            roleList = userRealm.getUserStoreManager().getRoleListOfUser(userName);
+        } else {
+            String msg = "User realm is not initiated. Logged in user: " + userName;
+            log.error(msg);
+            throw new UserStoreException(msg);
+        }
+        return roleList;
     }
 }
