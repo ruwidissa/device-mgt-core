@@ -2650,7 +2650,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
         int deviceCount = 0;
         try {
             conn = this.getConnection();
-            String sql = "SELECT COUNT(e.DEVICE_ID) AS DEVICE_COUNT FROM DM_ENROLMENT e WHERE STATUS != 'REMOVED'";
+            String sql = "SELECT COUNT(e.DEVICE_ID) AS DEVICE_COUNT FROM DM_ENROLMENT e WHERE STATUS = 'ACTIVE' " +
+                    "OR STATUS = 'UNREACHABLE'";
             stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
 
