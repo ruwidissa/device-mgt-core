@@ -289,20 +289,20 @@ public class MonitoringManagerImpl implements MonitoringManager {
             PolicyManagementDAOFactory.closeConnection();
         }
 
-        try {
-            PolicyManagementDAOFactory.beginTransaction();
-            if (!firstTimeComplianceData.isEmpty()) {
+        if (!firstTimeComplianceData.isEmpty()) {
+            try {
+                PolicyManagementDAOFactory.beginTransaction();
                 monitoringDAO.addComplianceDetails(firstTimeComplianceData);
                 PolicyManagementDAOFactory.commitTransaction();
+            } catch (MonitoringDAOException e) {
+                PolicyManagementDAOFactory.rollbackTransaction();
+                throw new PolicyComplianceException("Error occurred from monitoring dao.", e);
+            } catch (PolicyManagerDAOException e) {
+                PolicyManagementDAOFactory.rollbackTransaction();
+                throw new PolicyComplianceException("Error occurred reading the applied policies to devices.", e);
+            } finally {
+                PolicyManagementDAOFactory.closeConnection();
             }
-        } catch (MonitoringDAOException e) {
-            PolicyManagementDAOFactory.rollbackTransaction();
-            throw new PolicyComplianceException("Error occurred from monitoring dao.", e);
-        } catch (PolicyManagerDAOException e) {
-            PolicyManagementDAOFactory.rollbackTransaction();
-            throw new PolicyComplianceException("Error occurred reading the applied policies to devices.", e);
-        } finally {
-            PolicyManagementDAOFactory.closeConnection();
         }
 
         if (!notifiableDeviceEnrollments.isEmpty()) {
