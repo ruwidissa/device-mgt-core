@@ -44,7 +44,7 @@ public interface MonitoringManager {
 
     NonComplianceData getDevicePolicyCompliance(Device device) throws PolicyComplianceException;
 
-    void addMonitoringOperation(List<Device> devices) throws PolicyComplianceException;
+    void addMonitoringOperation(String deviceType, List<Device> devices) throws PolicyComplianceException;
 
     List<String> getDeviceTypes() throws PolicyComplianceException;
 

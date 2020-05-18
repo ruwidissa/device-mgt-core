@@ -834,13 +834,14 @@ public class OperationManagerImpl implements OperationManager {
     public void updateOperation(int enrolmentId, Operation operation, DeviceIdentifier deviceId)
             throws OperationManagementException {
         int operationId = operation.getId();
+        boolean isOperationUpdated = false;
         try {
             OperationManagementDAOFactory.beginTransaction();
             if (operation.getStatus() != null) {
                 int failAttempts = 0;
                 while (true) {
                     try {
-                        operationDAO.updateOperationStatus(enrolmentId, operationId,
+                        isOperationUpdated = operationDAO.updateOperationStatus(enrolmentId, operationId,
                                 org.wso2.carbon.device.mgt.core.dto.operation.mgt.
                                         Operation.Status.valueOf(operation.getStatus().
                                         toString()));
@@ -865,7 +866,10 @@ public class OperationManagerImpl implements OperationManager {
                     }
                 }
             }
-            if (operation.getOperationResponse() != null) {
+            if (!isOperationUpdated) {
+                log.warn("Operation " + operationId + "'s status is not updated");
+            }
+            if (isOperationUpdated && operation.getOperationResponse() != null) {
                 OperationMonitoringTaskConfig operationMonitoringTaskConfig = DeviceManagementDataHolder
                         .getInstance().getDeviceManagementProvider().getDeviceMonitoringConfig(deviceId.getType());
                 List<MonitoringOperation> monitoringOperations = operationMonitoringTaskConfig.getMonitoringOperation();
@@ -901,7 +905,7 @@ public class OperationManagerImpl implements OperationManager {
                 }
             }
             OperationResponseMeta responseMeta = null;
-            if (operation.getOperationResponse() != null) {
+            if (isOperationUpdated && operation.getOperationResponse() != null) {
                 int failAttempts = 0;
                 while (true) {
                     try {

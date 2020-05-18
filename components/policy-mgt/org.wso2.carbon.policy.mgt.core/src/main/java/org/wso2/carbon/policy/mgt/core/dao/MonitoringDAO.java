@@ -55,7 +55,7 @@ public interface MonitoringDAO {
 
     List<NonComplianceData> getCompliance(List<Integer> deviceIds) throws MonitoringDAOException;
 
-    List<NonComplianceData> getCompliance() throws MonitoringDAOException;
+    Map<Integer, NonComplianceData> getCompliance() throws MonitoringDAOException;
 
     List<ComplianceData> getAllComplianceDevices(
             PaginationRequest paginationRequest, String policyId, boolean complianceStatus, boolean isPending, String fromDate, String toDate)
@@ -64,9 +64,5 @@ public interface MonitoringDAO {
     List<ComplianceFeature> getNoneComplianceFeatures(int policyComplianceStatusId) throws MonitoringDAOException;
 
     void deleteNoneComplianceData(int policyComplianceStatusId) throws MonitoringDAOException;
-
-    boolean updateAttempts(int deviceId, boolean reset) throws MonitoringDAOException;
-
-    void updateAttempts(List<Integer> deviceId, boolean reset) throws MonitoringDAOException;
 
 }

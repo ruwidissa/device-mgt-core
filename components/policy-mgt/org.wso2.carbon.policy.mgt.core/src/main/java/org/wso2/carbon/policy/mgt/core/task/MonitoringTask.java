@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -40,7 +40,7 @@ import java.util.Map;
 
 public class MonitoringTask implements Task {
 
-    private static Log log = LogFactory.getLog(MonitoringTask.class);
+    private static final Log log = LogFactory.getLog(MonitoringTask.class);
 
     Map<String, String> properties;
     private boolean executeForTenants = false;
@@ -62,10 +62,10 @@ public class MonitoringTask implements Task {
         if (log.isDebugEnabled()) {
             log.debug("Monitoring task started to run.");
         }
-        if(System.getProperty(IS_CLOUD) != null && Boolean.parseBoolean(System.getProperty(IS_CLOUD))){
+        if (System.getProperty(IS_CLOUD) != null && Boolean.parseBoolean(System.getProperty(IS_CLOUD))) {
             executeForTenants = true;
         }
-        if(executeForTenants) {
+        if (executeForTenants) {
             this.executeforAllTenants();
         } else {
             this.executeTask();
@@ -83,10 +83,7 @@ public class MonitoringTask implements Task {
     private boolean isPlatformExist(String deviceType) {
         PolicyMonitoringManager policyMonitoringManager = PolicyManagementDataHolder.getInstance()
                 .getDeviceManagementService().getPolicyMonitoringManager(deviceType);
-        if (policyMonitoringManager != null) {
-            return true;
-        }
-        return false;
+        return policyMonitoringManager != null;
     }
 
     private void executeforAllTenants() {
@@ -116,7 +113,7 @@ public class MonitoringTask implements Task {
         }
     }
 
-    private void executeTask(){
+    private void executeTask() {
 
         MonitoringManager monitoringManager = PolicyManagementDataHolder.getInstance().getMonitoringManager();
         List<String> deviceTypes = new ArrayList<>();
@@ -158,13 +155,14 @@ public class MonitoringTask implements Task {
                             }
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("Following devices selected to send the notification for " + deviceType);
+                            log.debug("Following '" + deviceType + "' devices selected to send the notification " +
+                                    "for policy monitoring");
                             for (Device device : notifiableDevices) {
                                 log.debug(device.getDeviceIdentifier());
                             }
                         }
                         if (!notifiableDevices.isEmpty()) {
-                            monitoringManager.addMonitoringOperation(notifiableDevices);
+                            monitoringManager.addMonitoringOperation(deviceType, notifiableDevices);
                         }
                     }
                 }
@@ -178,4 +176,5 @@ public class MonitoringTask implements Task {
             log.info("No device types registered currently. So did not run the monitoring task.");
         }
     }
+
 }

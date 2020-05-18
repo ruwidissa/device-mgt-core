@@ -49,15 +49,14 @@ public class MonitoringDAOImpl implements MonitoringDAO {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             conn = this.getConnection();
-            String query = "INSERT INTO DM_POLICY_COMPLIANCE_STATUS (DEVICE_ID, POLICY_ID, STATUS, ATTEMPTS, " +
-                    "LAST_REQUESTED_TIME, TENANT_ID) VALUES (?, ?, ?,?, ?, ?) ";
+            String query = "INSERT INTO DM_POLICY_COMPLIANCE_STATUS (DEVICE_ID, POLICY_ID, STATUS, " +
+                    "LAST_REQUESTED_TIME, TENANT_ID) VALUES (?, ?, ?,?, ?) ";
             stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
             stmt.setInt(1, deviceId);
             stmt.setInt(2, policyId);
             stmt.setInt(3, 1);
-            stmt.setInt(4, 1);
-            stmt.setTimestamp(5, currentTimestamp);
-            stmt.setInt(6, tenantId);
+            stmt.setTimestamp(4, currentTimestamp);
+            stmt.setInt(5, tenantId);
             stmt.executeUpdate();
 
             generatedKeys = stmt.getGeneratedKeys();
@@ -90,16 +89,15 @@ public class MonitoringDAOImpl implements MonitoringDAO {
         }
         try {
             conn = this.getConnection();
-            String query = "INSERT INTO DM_POLICY_COMPLIANCE_STATUS (DEVICE_ID, POLICY_ID, STATUS, ATTEMPTS, " +
-                    "LAST_REQUESTED_TIME, TENANT_ID) VALUES (?, ?, ?,?, ?, ?) ";
+            String query = "INSERT INTO DM_POLICY_COMPLIANCE_STATUS (DEVICE_ID, POLICY_ID, STATUS, " +
+                    "LAST_REQUESTED_TIME, TENANT_ID) VALUES (?, ?, ?, ?, ?) ";
             stmt = conn.prepareStatement(query);
             for (Map.Entry<Integer, Integer> map : devicePolicyMap.entrySet()) {
                 stmt.setInt(1, map.getKey());
                 stmt.setInt(2, map.getValue());
                 stmt.setInt(3, 1);
-                stmt.setInt(4, 1);
-                stmt.setTimestamp(5, currentTimestamp);
-                stmt.setInt(6, tenantId);
+                stmt.setTimestamp(4, currentTimestamp);
+                stmt.setInt(5, tenantId);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -119,23 +117,22 @@ public class MonitoringDAOImpl implements MonitoringDAO {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
         if (log.isDebugEnabled()) {
-            for (PolicyDeviceWrapper wrapper : policyDeviceWrapper){
+            for (PolicyDeviceWrapper wrapper : policyDeviceWrapper) {
                 log.debug("Policy Id : " + wrapper.getPolicyId() + " - " + " Device Id : " + wrapper.getDeviceId());
             }
         }
         try {
             conn = this.getConnection();
-            String query = "INSERT INTO DM_POLICY_COMPLIANCE_STATUS (DEVICE_ID, POLICY_ID, STATUS, ATTEMPTS, " +
-                    "LAST_REQUESTED_TIME, TENANT_ID, ENROLMENT_ID) VALUES (?, ?, ?, ?, ?, ?, ?) ";
+            String query = "INSERT INTO DM_POLICY_COMPLIANCE_STATUS (DEVICE_ID, POLICY_ID, STATUS, " +
+                    "LAST_REQUESTED_TIME, TENANT_ID, ENROLMENT_ID) VALUES (?, ?, ?, ?, ?, ?) ";
             stmt = conn.prepareStatement(query);
             for (PolicyDeviceWrapper wrapper : policyDeviceWrapper) {
                 stmt.setInt(1, wrapper.getDeviceId());
                 stmt.setInt(2, wrapper.getPolicyId());
                 stmt.setInt(3, 1);
-                stmt.setInt(4, 1);
-                stmt.setTimestamp(5, currentTimestamp);
-                stmt.setInt(6, tenantId);
-                stmt.setInt(7, wrapper.getEnrolmentId());
+                stmt.setTimestamp(4, currentTimestamp);
+                stmt.setInt(5, tenantId);
+                stmt.setInt(6, wrapper.getEnrolmentId());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -155,8 +152,8 @@ public class MonitoringDAOImpl implements MonitoringDAO {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             conn = this.getConnection();
-            String query = "UPDATE DM_POLICY_COMPLIANCE_STATUS  SET STATUS = 0, LAST_FAILED_TIME = ?, POLICY_ID = ?," +
-                    " ATTEMPTS=0 WHERE  DEVICE_ID = ? AND TENANT_ID = ? AND ENROLMENT_ID = ?";
+            String query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET STATUS = 0, LAST_FAILED_TIME = ?, POLICY_ID = ? " +
+                    "WHERE DEVICE_ID = ? AND TENANT_ID = ? AND ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setTimestamp(1, currentTimestamp);
             stmt.setInt(2, policyId);
@@ -182,8 +179,8 @@ public class MonitoringDAOImpl implements MonitoringDAO {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             conn = this.getConnection();
-            String query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET STATUS = ?, ATTEMPTS=0, LAST_SUCCESS_TIME = ?" +
-                    " WHERE  DEVICE_ID = ? AND TENANT_ID = ? AND ENROLMENT_ID = ?";
+            String query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET STATUS = ?, LAST_SUCCESS_TIME = ?" +
+                    " WHERE DEVICE_ID = ? AND TENANT_ID = ? AND ENROLMENT_ID = ?";
             stmt = conn.prepareStatement(query);
             stmt.setInt(1, 1);
             stmt.setTimestamp(2, currentTimestamp);
@@ -260,9 +257,9 @@ public class MonitoringDAOImpl implements MonitoringDAO {
             while (resultSet.next()) {
                 complianceData.setId(resultSet.getInt("ID"));
                 complianceData.setDeviceId(resultSet.getInt("DEVICE_ID"));
+                complianceData.setEnrolmentId(resultSet.getInt("ENROLMENT_ID"));
                 complianceData.setPolicyId(resultSet.getInt("POLICY_ID"));
                 complianceData.setStatus(resultSet.getBoolean("STATUS"));
-                complianceData.setAttempts(resultSet.getInt("ATTEMPTS"));
                 complianceData.setLastRequestedTime(resultSet.getTimestamp("LAST_REQUESTED_TIME"));
                 complianceData.setLastSucceededTime(resultSet.getTimestamp("LAST_SUCCESS_TIME"));
                 complianceData.setLastFailedTime(resultSet.getTimestamp("LAST_FAILED_TIME"));
@@ -298,7 +295,6 @@ public class MonitoringDAOImpl implements MonitoringDAO {
                 complianceData.setEnrolmentId(resultSet.getInt("ENROLMENT_ID"));
                 complianceData.setPolicyId(resultSet.getInt("POLICY_ID"));
                 complianceData.setStatus(resultSet.getBoolean("STATUS"));
-                complianceData.setAttempts(resultSet.getInt("ATTEMPTS"));
                 complianceData.setLastRequestedTime(resultSet.getTimestamp("LAST_REQUESTED_TIME"));
                 complianceData.setLastSucceededTime(resultSet.getTimestamp("LAST_SUCCESS_TIME"));
                 complianceData.setLastFailedTime(resultSet.getTimestamp("LAST_FAILED_TIME"));
@@ -314,11 +310,11 @@ public class MonitoringDAOImpl implements MonitoringDAO {
     }
 
     @Override
-    public List<NonComplianceData> getCompliance() throws MonitoringDAOException {
+    public Map<Integer, NonComplianceData> getCompliance() throws MonitoringDAOException {
         Connection conn;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
-        List<NonComplianceData> complianceDataList = new ArrayList<>();
+        Map<Integer, NonComplianceData> complianceDataList = new HashMap<>();
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         try {
             conn = this.getConnection();
@@ -327,19 +323,19 @@ public class MonitoringDAOImpl implements MonitoringDAO {
             stmt.setInt(1, tenantId);
 
             resultSet = stmt.executeQuery();
+            NonComplianceData complianceData;
             while (resultSet.next()) {
-                NonComplianceData complianceData = new NonComplianceData();
+                complianceData = new NonComplianceData();
                 complianceData.setId(resultSet.getInt("ID"));
                 complianceData.setDeviceId(resultSet.getInt("DEVICE_ID"));
                 complianceData.setEnrolmentId(resultSet.getInt("ENROLMENT_ID"));
                 complianceData.setPolicyId(resultSet.getInt("POLICY_ID"));
                 complianceData.setStatus(resultSet.getBoolean("STATUS"));
-                complianceData.setAttempts(resultSet.getInt("ATTEMPTS"));
                 complianceData.setLastRequestedTime(resultSet.getTimestamp("LAST_REQUESTED_TIME"));
                 complianceData.setLastSucceededTime(resultSet.getTimestamp("LAST_SUCCESS_TIME"));
                 complianceData.setLastFailedTime(resultSet.getTimestamp("LAST_FAILED_TIME"));
 
-                complianceDataList.add(complianceData);
+                complianceDataList.put(complianceData.getEnrolmentId(), complianceData);
             }
             return complianceDataList;
         } catch (SQLException e) {
@@ -490,68 +486,6 @@ public class MonitoringDAOImpl implements MonitoringDAO {
             PolicyManagementDAOUtil.cleanupResources(stmt, null);
         }
 
-    }
-
-    @Override
-    public boolean updateAttempts(int deviceId, boolean reset) throws MonitoringDAOException {
-        boolean status = false;
-        Connection conn;
-        PreparedStatement stmt = null;
-        Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            conn = this.getConnection();
-            String query = "";
-            if (reset) {
-                query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET ATTEMPTS = 0, LAST_REQUESTED_TIME = ? " +
-                        "WHERE DEVICE_ID = ? AND TENANT_ID = ?";
-            } else {
-                query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET ATTEMPTS = ATTEMPTS + 1, LAST_REQUESTED_TIME = ? " +
-                        "WHERE DEVICE_ID = ? AND TENANT_ID = ?";
-            }
-            stmt = conn.prepareStatement(query);
-            stmt.setTimestamp(1, currentTimestamp);
-            stmt.setInt(2, deviceId);
-            stmt.setInt(3, tenantId);
-            stmt.executeUpdate();
-            status = true;
-        } catch (SQLException e) {
-            throw new MonitoringDAOException("Unable to update the attempts  data in database.", e);
-        } finally {
-            PolicyManagementDAOUtil.cleanupResources(stmt, null);
-        }
-        return status;
-    }
-
-    @Override
-    public void updateAttempts(List<Integer> deviceIds, boolean reset) throws MonitoringDAOException {
-        Connection conn;
-        PreparedStatement stmt = null;
-        Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
-        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            conn = this.getConnection();
-            String query = "";
-            if (reset) {
-                query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET ATTEMPTS = 0, LAST_REQUESTED_TIME = ? " +
-                        "WHERE DEVICE_ID = ? AND TENANT_ID = ?";
-            } else {
-                query = "UPDATE DM_POLICY_COMPLIANCE_STATUS SET ATTEMPTS = ATTEMPTS + 1, LAST_REQUESTED_TIME = ? " +
-                        "WHERE DEVICE_ID = ? AND TENANT_ID = ?";
-            }
-            stmt = conn.prepareStatement(query);
-            for (int deviceId : deviceIds) {
-                stmt.setTimestamp(1, currentTimestamp);
-                stmt.setInt(2, deviceId);
-                stmt.setInt(3, tenantId);
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (SQLException e) {
-            throw new MonitoringDAOException("Unable to update the attempts  data in database.", e);
-        } finally {
-            PolicyManagementDAOUtil.cleanupResources(stmt, null);
-        }
     }
 
     private Connection getConnection() throws MonitoringDAOException {

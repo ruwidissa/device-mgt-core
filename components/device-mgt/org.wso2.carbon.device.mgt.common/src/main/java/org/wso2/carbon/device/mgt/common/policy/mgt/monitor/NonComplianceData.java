@@ -35,7 +35,6 @@ public class NonComplianceData {
     private Timestamp lastRequestedTime;
     private Timestamp lastSucceededTime;
     private Timestamp lastFailedTime;
-    private int attempts;
     private String message;
 
     /**
@@ -83,14 +82,6 @@ public class NonComplianceData {
 
     public void setLastFailedTime(Timestamp lastFailedTime) {
         this.lastFailedTime = lastFailedTime;
-    }
-
-    public int getAttempts() {
-        return attempts;
-    }
-
-    public void setAttempts(int attempts) {
-        this.attempts = attempts;
     }
 
     public int getDeviceId() {

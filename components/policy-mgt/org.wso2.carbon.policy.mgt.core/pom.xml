@@ -18,7 +18,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.devicemgt</groupId>
         <artifactId>policy-mgt</artifactId>
@@ -27,7 +28,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.devicemgt</groupId>
     <artifactId>org.wso2.carbon.policy.mgt.core</artifactId>
     <version>4.1.7-SNAPSHOT</version>
     <packaging>bundle</packaging>
@@ -61,7 +61,7 @@
                             javax.cache,
                             javax.naming,
                             javax.xml.*,
-			    javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
+                            javax.xml.parsers;version="${javax.xml.parsers.import.pkg.version}";resolution:=optional,
                             org.w3c.dom,
                             org.wso2.carbon.policy.mgt.common.*,
                             org.wso2.carbon.user.core.*,
@@ -142,8 +142,8 @@
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.queuing</artifactId>-->
+        <!--<groupId>org.wso2.carbon</groupId>-->
+        <!--<artifactId>org.wso2.carbon.queuing</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -188,6 +188,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.wso2</groupId>
