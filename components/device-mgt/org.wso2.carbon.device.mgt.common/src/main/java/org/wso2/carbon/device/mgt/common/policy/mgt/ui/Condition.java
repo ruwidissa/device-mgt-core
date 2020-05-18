@@ -18,20 +18,24 @@
 package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-@XmlRootElement(name = "ConditionList")
-public class ConditionList {
+@XmlRootElement(name = "Condition")
+public class Condition {
 
-    List<Key> conditions;
+    String key;
+    List<String> values;
 
     @XmlElement(name = "Key")
-    public List<Key> getConditions() {
-        return conditions;
-    }
+    public String getKey() { return key; }
 
-    public void setConditions(List<Key> conditions) {
-        this.conditions = conditions;
-    }
+    public void setKey(String key) { this.key = key; }
+
+    @XmlElementWrapper(name = "Values")
+    @XmlElement(name = "Value")
+    public List<String> getValues() { return values; }
+
+    public void setValues(List<String> values) { this.values = values; }
 }

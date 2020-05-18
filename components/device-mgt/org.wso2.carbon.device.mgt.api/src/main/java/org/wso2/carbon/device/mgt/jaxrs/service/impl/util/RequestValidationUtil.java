@@ -361,35 +361,30 @@ public class RequestValidationUtil {
                         new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                                 .setMessage(msg).build());
             } catch (InstantiationException e) {
-                String msg = "Error when creating an instance of validator related to deviceType " + deviceType;
-                log.error(msg, e);
-                throw new InputValidationException(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                                .setMessage(msg).build());
+                if (log.isDebugEnabled()) {
+                    String msg = "Error when creating an instance of validator related to deviceType " + deviceType;
+                    log.debug(msg, e);
+                }
             } catch (IllegalAccessException e) {
-                String msg = "Error when accessing an instance of validator related to deviceType " + deviceType;
-                log.error(msg, e);
-                throw new InputValidationException(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                                .setMessage(msg).build());
+                if (log.isDebugEnabled()) {
+                    String msg = "Error when accessing an instance of validator related to deviceType " + deviceType;
+                    log.debug(msg, e);
+                }
             } catch (ClassNotFoundException e) {
-                String msg = "Error when loading an instance of validator related to deviceType " + deviceType;
-                log.error(msg, e);
-                throw new InputValidationException(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                                .setMessage(msg).build());
+                if (log.isDebugEnabled()) {
+                    String msg = "Error when loading an instance of validator related to deviceType " + deviceType;
+                    log.debug(msg, e);
+                }
             } catch (NoSuchMethodException e) {
-                String msg = "Error occurred while constructing validator related to deviceType " + deviceType;
-                log.error(msg, e);
-                throw new InputValidationException(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                                .setMessage(msg).build());
+                if (log.isDebugEnabled()) {
+                    String msg = "Error occurred while constructing validator related to deviceType " + deviceType;
+                    log.debug(msg, e);
+                }
             } catch (InvocationTargetException e) {
-                String msg = "Error occurred while instantiating validator related to deviceType " + deviceType;
-                log.error(msg, e);
-                throw new InputValidationException(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                                .setMessage(msg).build());
+                if (log.isDebugEnabled()) {
+                    String msg = "Error occurred while instantiating validator related to deviceType " + deviceType;
+                    log.debug(msg, e);
+                }
             }
             return features;
         }

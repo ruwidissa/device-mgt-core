@@ -69,6 +69,11 @@ public class Constants {
 		public static final String NOTNOW = "notnow";
 		public static final String REPEATED = "repeated";
 	}
+	public static final String DEVICES = "devices";
+	public static final String ATTRIBUTE_DISPLAY_NAME = "DisplayName";
+	public static final String ATTRIBUTE_DESCRIPTION = "Description";
+	public static final String EXTERNAL_DEVICE_CLAIM_DISPLAY_NAME = "Devices";
+	public static final String EXTERNAL_DEVICE_CLAIM_DESCRIPTION = "Device list";
 
 	public final class ErrorMessages {
 		private ErrorMessages () { throw new AssertionError(); }

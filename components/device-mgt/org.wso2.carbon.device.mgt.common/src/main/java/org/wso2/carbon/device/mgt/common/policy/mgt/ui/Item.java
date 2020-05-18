@@ -18,7 +18,9 @@
 package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 @XmlRootElement(name = "Item")
 public class Item {
@@ -29,14 +31,14 @@ public class Item {
     private String value;
     private boolean isRequired;
     private String subTitle;
-    private ConditionList conditionList;
+    private List<Condition> conditions;
     private Checkbox checkbox;
     private Select select;
     private Input input;
     private TimeSelector timeSelector;
     private Table table;
     private RadioGroup radioGroup;
-    private NotificationList notificationList;
+    private List<Notification> notifications;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -88,10 +90,11 @@ public class Item {
 
     public void setSubTitle(String subTitle) { this.subTitle = subTitle; }
 
-    @XmlElement(name = "ConditionList")
-    public ConditionList getConditionList() { return conditionList; }
+    @XmlElementWrapper(name = "Conditions")
+    @XmlElement(name = "Condition")
+    public List<Condition> getConditions() { return conditions; }
 
-    public void setConditionList(ConditionList conditionList) { this.conditionList = conditionList; }
+    public void setConditions(List<Condition> conditions) { this.conditions = conditions; }
 
     @XmlElement(name = "Checkbox")
     public Checkbox getCheckbox() {
@@ -139,8 +142,9 @@ public class Item {
         this.radioGroup = radioGroup;
     }
 
-    @XmlElement(name = "NotificationList")
-    public NotificationList getNotificationList() { return notificationList; }
+    @XmlElementWrapper(name = "Notifications")
+    @XmlElement(name = "Notification")
+    public List<Notification> getNotifications() { return notifications; }
 
-    public void setNotificationList(NotificationList notificationList) { this.notificationList = notificationList; }
+    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
 }

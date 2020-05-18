@@ -29,7 +29,6 @@ public class Content {
     private String key;
     private List<Item> items;
     private List<SubContent> subContents;
-    private ConditionList conditionList;
 
     @XmlAttribute(name = "key", required = true)
     public String getKey() {
@@ -56,12 +55,4 @@ public class Content {
 
     public void setSubContents(List<SubContent> subContents) { this.subContents = subContents; }
 
-    @XmlElement(name = "ConditionList")
-    public ConditionList getConditionList() {
-        return conditionList;
-    }
-
-    public void setConditionList(ConditionList conditionList) {
-        this.conditionList = conditionList;
-    }
 }

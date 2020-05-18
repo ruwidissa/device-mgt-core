@@ -14,33 +14,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.device.mgt.jaxrs.beans.analytics.reporting;
 
-package org.wso2.carbon.device.mgt.common.policy.mgt.ui;
+import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+public class Stream {
 
-@XmlRootElement(name = "Key")
-public class Key {
-
-    private String name;
-    private String value;
-
-    @XmlAttribute(name = "name")
-    public String getName() {
-        return name;
+    String deviceIdentifier;
+    Map<String, String> events;
+    
+    public String getDeviceIdentifier() {
+        return deviceIdentifier;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
     }
 
-    @XmlAttribute(name = "value")
-    public String getValue() {
-        return value;
+    public Map<String, String> getEvents() {
+        return events;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setEvents(Map<String, String> events) {
+        this.events = events;
     }
 }
