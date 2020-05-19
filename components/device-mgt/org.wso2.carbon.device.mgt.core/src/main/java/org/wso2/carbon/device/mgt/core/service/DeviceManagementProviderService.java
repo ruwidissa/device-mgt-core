@@ -916,4 +916,15 @@ public interface DeviceManagementProviderService {
      * @throws {@link OperationManagementException}
      */
     boolean isOperationExist(DeviceIdentifier deviceId, int operationId) throws OperationManagementException;
+
+    /**
+     * Get device list for a given device identifier list
+     *
+     * @param deviceIdentifiers A list of device identifiers
+     * @return A list of devices
+     * @throws {@link DeviceManagementException}
+     * @throws {@link InvalidDeviceException}
+     */
+    List<Device> getDeviceByIdList(List<String> deviceIdentifiers)
+            throws DeviceManagementException;
 }
