@@ -4166,4 +4166,23 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId())
                 .isOperationExist(deviceId, operationId);
     }
+
+    @Override
+    public List<Device> getDeviceByIdList(List<String> deviceIdentifiers) throws DeviceManagementException {
+        int tenantId = this.getTenantId();
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDevicesByIdentifiers(deviceIdentifiers, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
 }

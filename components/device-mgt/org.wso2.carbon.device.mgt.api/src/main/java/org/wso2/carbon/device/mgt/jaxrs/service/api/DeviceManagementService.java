@@ -629,6 +629,52 @@ public interface DeviceManagementService {
             @QueryParam("requireDeviceInfo")
                     boolean requireDeviceInfo);
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/type/any/list")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Getting Details of Devices",
+            notes = "Get the details of devices by specifying the device identifiers.",
+            tags = "Device Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:devices:details")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully fetched the details of the device.",
+                            response = Device.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                            }),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while retrieving the device details.",
+                            response = ErrorResponse.class)
+            })
+    Response getDeviceByIdList(List<String> deviceIds);
+
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
