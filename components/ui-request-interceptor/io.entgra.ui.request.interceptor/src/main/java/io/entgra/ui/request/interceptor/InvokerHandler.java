@@ -300,7 +300,7 @@ public class InvokerHandler extends HttpServlet {
         apiEndpoint = req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.gateway.host")
                 + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
 
-        if ("reports".equalsIgnoreCase(req.getHeader("appName"))){
+        if (HandlerConstants.REPORTS.equalsIgnoreCase(req.getHeader(HandlerConstants.APP_NAME))){
             apiEndpoint = System.getProperty("iot.reporting.webapp.host");
             if (StringUtils.isBlank(apiEndpoint)){
                 log.error("Reporting Endpoint is not defined in the iot-server.sh properly.");
