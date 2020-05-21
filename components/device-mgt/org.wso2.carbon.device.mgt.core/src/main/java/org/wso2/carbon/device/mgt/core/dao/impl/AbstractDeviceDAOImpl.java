@@ -2417,11 +2417,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
     private void removeDeviceLargeOperationResponse(Connection conn, List<Integer> enrollmentIds)
             throws DeviceManagementDAOException {
-        String sql = "DELETE DM_DEVICE_OPERATION_RESPONSE_LARGE " +
-                "FROM DM_DEVICE_OPERATION_RESPONSE_LARGE " +
-                "INNER JOIN DM_DEVICE_OPERATION_RESPONSE ON DM_DEVICE_OPERATION_RESPONSE_LARGE.ID = " +
-                "DM_DEVICE_OPERATION_RESPONSE.ID " +
-                "WHERE ENROLMENT_ID = ?";
+        String sql = "DELETE FROM DM_DEVICE_OPERATION_RESPONSE_LARGE " +
+                "WHERE EXISTS (SELECT ID FROM DM_DEVICE_OPERATION_RESPONSE " +
+                "WHERE DM_DEVICE_OPERATION_RESPONSE.ID = DM_DEVICE_OPERATION_RESPONSE_LARGE.ID " +
+                "AND DM_DEVICE_OPERATION_RESPONSE.ENROLMENT_ID = ?)";
         try {
             if (!executeBatchOperation(conn, sql, enrollmentIds)) {
                 String msg = "Failed to remove device large operation response of devices with " +
