@@ -25,8 +25,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 public class DeviceTypePluginDAOManager {
 
-    private PluginDAO deviceTypePluginDAO;
-    private DeviceTypeDAOHandler deviceTypeDAOHandler;
+    private final PluginDAO deviceTypePluginDAO;
+    private final DeviceTypeDAOHandler deviceTypeDAOHandler;
     private static final String DEFAULT_DATASOURCE_NAME = "jdbc/DM_DS";
 
     public DeviceTypePluginDAOManager(String datasourceName, DeviceDAODefinition deviceDAODefinition) {

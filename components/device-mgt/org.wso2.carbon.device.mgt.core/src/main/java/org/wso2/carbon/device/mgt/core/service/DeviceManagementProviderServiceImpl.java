@@ -273,9 +273,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
                             newEnrolmentInfo.setId(enrolmentInfo.getId());
                             //We are explicitly setting device status only if matching device enrollment is in
                             // removed status.
-                            if (enrolmentInfo.getStatus() == EnrolmentInfo.Status.REMOVED) {
+                            if (enrolmentInfo.getStatus() == EnrolmentInfo.Status.REMOVED &&
+                                    newEnrolmentInfo.getStatus() == null) {
                                 newEnrolmentInfo.setStatus(EnrolmentInfo.Status.ACTIVE);
-                            } else {
+                            } else if (newEnrolmentInfo.getStatus() == null) {
                                 newEnrolmentInfo.setStatus(enrolmentInfo.getStatus());
                             }
                             status = true;

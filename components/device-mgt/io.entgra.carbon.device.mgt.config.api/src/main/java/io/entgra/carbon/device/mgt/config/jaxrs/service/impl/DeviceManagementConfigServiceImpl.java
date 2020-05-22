@@ -112,12 +112,12 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (DeviceNotFoundException e) {
-            log.error(e.getMessage(), e);
+            log.warn(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(e.getMessage()).build()).build();
         } catch (AmbiguousConfigurationException e) {
-            String msg = "Configurations are ambiguous";
-            log.error(msg, e);
+            String msg = "Configurations are ambiguous. " + e.getMessage();
+            log.warn(msg);
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (JsonParseException | JsonMappingException e) {
@@ -126,7 +126,7 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
             return Response.status(Response.Status.BAD_REQUEST).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         } catch (IOException e) {
-            String msg = "Error occurred while parsing query param JSON data";
+            String msg = "Error occurred while parsing query param JSON data.";
             log.error(msg.concat(" ").concat(properties), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
