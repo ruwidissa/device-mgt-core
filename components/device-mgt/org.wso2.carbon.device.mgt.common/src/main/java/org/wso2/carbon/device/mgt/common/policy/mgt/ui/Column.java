@@ -30,6 +30,7 @@ public class Column {
     private String value;
     private Select select;
     private Input input;
+    private Upload upload;
 
     @XmlAttribute(name = "name", required = true)
     public String getName() { return name; }
@@ -75,5 +76,14 @@ public class Column {
 
     public void setInput(Input input) {
         this.input = input;
+    }
+
+    @XmlElement(name = "Upload")
+    public Upload getUpload() {
+        return upload;
+    }
+
+    public void setUpload(Upload upload) {
+        this.upload = upload;
     }
 }

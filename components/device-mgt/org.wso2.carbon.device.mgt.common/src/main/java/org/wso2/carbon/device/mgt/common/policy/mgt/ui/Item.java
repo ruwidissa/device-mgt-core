@@ -39,6 +39,7 @@ public class Item {
     private Table table;
     private RadioGroup radioGroup;
     private List<Notification> notifications;
+    private Upload upload;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -147,4 +148,13 @@ public class Item {
     public List<Notification> getNotifications() { return notifications; }
 
     public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+
+    @XmlElement(name = "Upload")
+    public Upload getUpload() {
+        return upload;
+    }
+
+    public void setUpload(Upload upload) {
+        this.upload = upload;
+    }
 }
