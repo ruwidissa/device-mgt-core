@@ -646,7 +646,6 @@ public final class DeviceManagerUtil {
             apiEndpoint.setEntity(constructApplicationRegistrationPayload());
             HttpResponse response = client.execute(apiEndpoint);
             if (response != null) {
-                log.info("Obtained client credentials: " + response.getStatusLine().getStatusCode());
                 BufferedReader rd = new BufferedReader(
                         new InputStreamReader(response.getEntity().getContent()));
                 StringBuilder result = new StringBuilder();

@@ -151,11 +151,16 @@ public class PropertyBasedPluginDAOImpl implements PluginDAO {
                     "UPDATE DM_DEVICE_PROPERTIES SET PROPERTY_VALUE = ? WHERE  DEVICE_TYPE_NAME = ? AND "
                             + "DEVICE_IDENTIFICATION = ? AND PROPERTY_NAME = ? AND TENANT_ID= ?");
 
+            String propValue;
             for (Device.Property property : device.getProperties()) {
                 if (!deviceProps.contains(property.getName())) {
                     continue;
                 }
-                stmt.setString(1, property.getValue());
+                propValue = property.getValue();
+                if (propValue != null && propValue.length() > 100) {
+                    propValue = "Value too long";
+                }
+                stmt.setString(1, propValue);
                 stmt.setString(2, deviceType);
                 stmt.setString(3, device.getDeviceIdentifier());
                 stmt.setString(4, property.getName());
@@ -253,7 +258,11 @@ public class PropertyBasedPluginDAOImpl implements PluginDAO {
     private String getPropertyValue(List<Device.Property> properties, String propertyName) {
         for (Device.Property property : properties) {
             if (property.getName() != null && property.getName().equals(propertyName)) {
-                return property.getValue();
+                String value = property.getValue();
+                if (value != null && value.length() > 100) {
+                    return "Value too long";
+                }
+                return value;
             }
         }
         return null;
