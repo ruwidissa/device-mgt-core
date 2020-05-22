@@ -325,6 +325,9 @@ function loadDevices(searchType, searchParam) {
                     case 'UNREACHABLE' :
                         html = '<span><i class="fw fw-warning icon-warning"></i> Unreachable</span>';
                         break;
+                    case 'CREATED' :
+                        html = '<span><i class="fw fw-warning icon-warning"></i> Created</span>';
+                        break;
                 }
                 return html;
             }
