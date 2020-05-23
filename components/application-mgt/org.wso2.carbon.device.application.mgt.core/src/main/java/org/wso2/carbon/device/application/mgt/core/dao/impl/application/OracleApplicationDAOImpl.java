@@ -85,14 +85,14 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
                 + "INNER JOIN AP_APP_RELEASE ON "
                 + "AP_APP.ID = AP_APP_RELEASE.AP_APP_ID "
                 + "INNER JOIN (SELECT AP_APP.ID FROM AP_APP ORDER BY ID ";
-        if (!StringUtils.isEmpty(filter.getVersion()) || !StringUtils.isEmpty(filter.getAppReleaseState())
-                || !StringUtils.isEmpty(filter.getAppReleaseType())) {
+        if (StringUtils.isNotEmpty(filter.getVersion()) || StringUtils.isNotEmpty(filter.getAppReleaseState())
+                || StringUtils.isNotEmpty(filter.getAppReleaseType())) {
             sql += "INNER JOIN AP_APP_RELEASE ON AP_APP.ID = AP_APP_RELEASE.AP_APP_ID ";
         }
-        if (!StringUtils.isEmpty(filter.getAppType())) {
+        if (StringUtils.isNotEmpty(filter.getAppType())) {
             sql += "AND AP_APP.TYPE = ? ";
         }
-        if (!StringUtils.isEmpty(filter.getAppName())) {
+        if (StringUtils.isNotEmpty(filter.getAppName())) {
             sql += " AND LOWER (AP_APP.NAME) ";
             if (filter.isFullMatch()) {
                 sql += "= ? ";
@@ -100,26 +100,26 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
                 sql += "LIKE ? ";
             }
         }
-        if (!StringUtils.isEmpty(filter.getSubscriptionType())) {
+        if (StringUtils.isNotEmpty(filter.getSubscriptionType())) {
             sql += "AND AP_APP.SUB_TYPE = ? ";
         }
         if (filter.getMinimumRating() > 0) {
             sql += "AND AP_APP.RATING >= ? ";
         }
-        if (!StringUtils.isEmpty(filter.getVersion())) {
+        if (StringUtils.isNotEmpty(filter.getVersion())) {
             sql += "AND AP_APP_RELEASE.VERSION = ? ";
         }
-        if (!StringUtils.isEmpty(filter.getAppReleaseType())) {
+        if (StringUtils.isNotEmpty(filter.getAppReleaseType())) {
             sql += "AND AP_APP_RELEASE.RELEASE_TYPE = ? ";
         }
-        if (!StringUtils.isEmpty(filter.getAppReleaseState())) {
+        if (StringUtils.isNotEmpty(filter.getAppReleaseState())) {
             sql += "AND AP_APP_RELEASE.CURRENT_STATE = ? ";
         }
         if (deviceTypeId != -1) {
             sql += "AND AP_APP.DEVICE_TYPE_ID = ? ";
         }
         sql += "GROUP BY AP_APP.ID ";
-        if (!StringUtils.isEmpty(filter.getSortBy())) {
+        if (StringUtils.isNotEmpty(filter.getSortBy())) {
             sql += "ORDER BY ID " + filter.getSortBy() + " ";
         }
         if (filter.getLimit() != -1) {
@@ -131,29 +131,29 @@ public class OracleApplicationDAOImpl extends GenericApplicationDAOImpl {
             Connection conn = this.getDBConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 int paramIndex = 1;
-                if (!StringUtils.isEmpty(filter.getAppType())) {
+                if (StringUtils.isNotEmpty(filter.getAppType())) {
                     stmt.setString(paramIndex++, filter.getAppType());
                 }
-                if (!StringUtils.isEmpty(filter.getAppName())) {
+                if (StringUtils.isNotEmpty(filter.getAppName())) {
                     if (filter.isFullMatch()) {
                         stmt.setString(paramIndex++, filter.getAppName().toLowerCase());
                     } else {
                         stmt.setString(paramIndex++, "%" + filter.getAppName().toLowerCase() + "%");
                     }
                 }
-                if (!StringUtils.isEmpty(filter.getSubscriptionType())) {
+                if (StringUtils.isNotEmpty(filter.getSubscriptionType())) {
                     stmt.setString(paramIndex++, filter.getSubscriptionType());
                 }
                 if (filter.getMinimumRating() > 0) {
                     stmt.setInt(paramIndex++, filter.getMinimumRating());
                 }
-                if (!StringUtils.isEmpty(filter.getVersion())) {
+                if (StringUtils.isNotEmpty(filter.getVersion())) {
                     stmt.setString(paramIndex++, filter.getVersion());
                 }
-                if (!StringUtils.isEmpty(filter.getAppReleaseType())) {
+                if (StringUtils.isNotEmpty(filter.getAppReleaseType())) {
                     stmt.setString(paramIndex++, filter.getAppReleaseType());
                 }
-                if (!StringUtils.isEmpty(filter.getAppReleaseState())) {
+                if (StringUtils.isNotEmpty(filter.getAppReleaseState())) {
                     stmt.setString(paramIndex++, filter.getAppReleaseState());
                 }
                 if (deviceTypeId > 0) {

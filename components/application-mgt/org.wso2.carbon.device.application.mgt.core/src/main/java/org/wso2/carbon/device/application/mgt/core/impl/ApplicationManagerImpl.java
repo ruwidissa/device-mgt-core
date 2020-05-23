@@ -618,41 +618,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
 
                 //Set application categories, tags and unrestricted roles to the application DTO.
-                applicationDTO.setUnrestrictedRoles(visibilityDAO
-                        .getUnrestrictedRoles(applicationDTO.getId(), tenantId));
+                applicationDTO
+                        .setUnrestrictedRoles(visibilityDAO.getUnrestrictedRoles(applicationDTO.getId(), tenantId));
                 applicationDTO.setAppCategories(applicationDAO.getAppCategories(applicationDTO.getId(), tenantId));
                 applicationDTO.setTags(applicationDAO.getAppTags(applicationDTO.getId(), tenantId));
 
                 if (isFilteringApp(applicationDTO, filter)) {
+                    boolean isHideableApp = isHideableApp(applicationDTO.getApplicationReleaseDTOs());
+                    boolean isDeletableApp = isDeletableApp(applicationDTO.getApplicationReleaseDTOs());
+
                     List<ApplicationReleaseDTO> filteredApplicationReleaseDTOs = new ArrayList<>();
-                    AtomicBoolean isDeletableApp = new AtomicBoolean(true);
                     for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
-                        String appReleaseCurrentState = applicationReleaseDTO.getCurrentState();
-                        if (!lifecycleStateManager.getEndState().equals(appReleaseCurrentState)) {
-                            if (isDeletableApp.get() && !lifecycleStateManager.isDeletableState(appReleaseCurrentState)) {
-                                isDeletableApp.set(false);
-                            }
-                            filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
+                        if (StringUtils.isNotEmpty(filter.getVersion()) && !filter.getVersion()
+                                .equals(applicationReleaseDTO.getVersion())) {
+                            continue;
                         }
+                        if (StringUtils.isNotEmpty(filter.getAppReleaseState()) && !filter.getAppReleaseState()
+                                .equals(applicationReleaseDTO.getCurrentState())) {
+                            continue;
+                        }
+                        if (StringUtils.isNotEmpty(filter.getAppReleaseType()) && !filter.getAppReleaseType()
+                                .equals(applicationReleaseDTO.getReleaseType())) {
+                            continue;
+                        }
+                        filteredApplicationReleaseDTOs.add(applicationReleaseDTO);
                     }
 
                     applicationDTO.setApplicationReleaseDTOs(filteredApplicationReleaseDTOs);
                     Application application = APIUtil.appDtoToAppResponse(applicationDTO);
-
-                    /*
-                     * Load the entire application again if the searched application is either deletable or all the app
-                     * releases are in the end state of the app lifecycle. App has to be reloaded because when searching
-                     * applications it may not contains all the application releases of an application.
-                     */
-                    if (isDeletableApp.get() || filteredApplicationReleaseDTOs.isEmpty()){
-                        ApplicationDTO entireApp = applicationDAO.getApplication(applicationDTO.getId(), tenantId);
-                        if (filteredApplicationReleaseDTOs.isEmpty()){
-                            application.setHideableApp(isHideableApp(entireApp.getApplicationReleaseDTOs()));
-                        }
-                        if (isDeletableApp.get()) {
-                            application.setDeletableApp(isDeletableApp(entireApp.getApplicationReleaseDTOs()));
-                        }
-                    }
+                    application.setDeletableApp(isDeletableApp);
+                    application.setHideableApp(isHideableApp);
                     applications.add(application);
                 }
             }
