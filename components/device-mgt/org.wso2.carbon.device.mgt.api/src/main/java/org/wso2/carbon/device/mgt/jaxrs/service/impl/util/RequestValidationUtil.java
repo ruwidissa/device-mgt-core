@@ -348,8 +348,12 @@ public class RequestValidationUtil {
                     return enrollmentNotifier.validate(features);
                 case Constants.IOS:
                     //todo
+                    features = new ArrayList<>();
+                    break;
                 case Constants.WINDOWS:
                     //todo
+                    features = new ArrayList<>();
+                    break;
                 default:
                     log.error("No policy validator found for device type  " + deviceType);
                     break;
