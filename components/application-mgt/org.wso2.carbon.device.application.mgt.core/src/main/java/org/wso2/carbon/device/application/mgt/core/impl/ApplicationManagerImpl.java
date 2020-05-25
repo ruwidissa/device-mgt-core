@@ -1405,30 +1405,34 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     + applicationId);
         }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
-        ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
         ApplicationDTO applicationDTO = getApplication(applicationId);
-        List<ApplicationReleaseDTO> applicationReleaseDTOs = applicationDTO.getApplicationReleaseDTOs();
-        for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
-            if (!lifecycleStateManager.isDeletableState(applicationReleaseDTO.getCurrentState())){
-                String msg = "Application release which has application release UUID: " +
-                        applicationReleaseDTO.getUuid() + " is not in a deletable state. Therefore Application "
-                        + "deletion is not permitted. In order to delete the application, all application releases "
-                        + "of the application has to be in a deletable state.";
-                log.error(msg);
-                throw new ForbiddenException(msg);
-            }
-        }
+        deleteApplication(applicationDTO, tenantId);
+    }
 
+    /**
+     * Delete the entire app data and the each app release data and artifacts.
+     *
+     * @param applicationDTO ApplicationDTO object
+     * @param tenantId Tenant Id
+     * @throws ApplicationManagementException if error occurred while deleting application data or app relase data.
+     */
+    private void deleteApplication(ApplicationDTO applicationDTO, int tenantId) throws ApplicationManagementException {
+        List<Integer> deletingAppReleaseIds = new ArrayList<>();
+        List<String> deletingAppHashVals = new ArrayList<>();
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            List<Integer> deletingAppReleaseIds = new ArrayList<>();
-            List<String> deletingAppHashVals = new ArrayList<>();
-            for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOs) {
-                List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                        .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
-                if (!deviceSubscriptionDTOS.isEmpty()){
-                    String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid() +
-                            " either subscribed to device/s or it had subscribed to device/s. Therefore you are not "
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
+                if (!lifecycleStateManager.isDeletableState(applicationReleaseDTO.getCurrentState())){
+                    String msg = "Application release which has application release UUID: " +
+                            applicationReleaseDTO.getUuid() + " is not in a deletable state. Therefore Application "
+                            + "deletion is not permitted. In order to delete the application, all application releases "
+                            + "of the application has to be in a deletable state.";
+                    log.error(msg);
+                    throw new ForbiddenException(msg);
+                }
+                if (!subscriptionDAO.getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId).isEmpty()) {
+                    String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid()
+                            + " either subscribed to device/s or it had subscribed to device/s. Therefore you are not "
                             + "permitted to delete the application release.";
                     log.error(msg);
                     throw new ForbiddenException(msg);
@@ -1436,37 +1440,38 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 deletingAppHashVals.add(applicationReleaseDTO.getAppHashValue());
                 deletingAppReleaseIds.add(applicationReleaseDTO.getId());
             }
-            applicationStorageManager.deleteAllApplicationReleaseArtifacts(deletingAppHashVals, tenantId);
             this.lifecycleStateDAO.deleteLifecycleStates(deletingAppReleaseIds);
             this.applicationReleaseDAO.deleteReleases(deletingAppReleaseIds);
-            this.applicationDAO.deleteApplicationTags(applicationId, tenantId);
-            this.applicationDAO.deleteAppCategories(applicationId, tenantId);
-            this.applicationDAO.deleteApplication(applicationId, tenantId);
+            this.applicationDAO.deleteApplicationTags(applicationDTO.getId(), tenantId);
+            this.applicationDAO.deleteAppCategories(applicationDTO.getId(), tenantId);
+            this.visibilityDAO.deleteAppUnrestrictedRoles(applicationDTO.getId(), tenantId);
+            this.applicationDAO.deleteApplication(applicationDTO.getId(), tenantId);
+            APIUtil.getApplicationStorageManager().deleteAllApplicationReleaseArtifacts(deletingAppHashVals, tenantId);
             ConnectionManagerUtil.commitDBTransaction();
         } catch (DBConnectionException e) {
             String msg = "Error occurred while observing the database connection to delete application which has "
-                    + "application ID: " + applicationId;
+                    + "application ID: " + applicationDTO.getId();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (TransactionManagementException e) {
             String msg = "Database access error is occurred when deleting application which has application ID: "
-                    + applicationId;
+                    + applicationDTO.getId();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred when getting application data for application id: " + applicationId;
+            String msg = "Error occurred when getting application data for application id: " + applicationDTO.getId();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (ApplicationStorageManagementException e) {
             String msg = "Error occurred when deleting application artifacts in the file system. Application id: "
-                    + applicationId;
+                    + applicationDTO.getId();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } catch (LifeCycleManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
             String msg = "Error occured while deleting life-cycle state data of application releases of the application"
-                    + " which has application ID: " + applicationId;
+                    + " which has application ID: " + applicationDTO.getId();
             log.error(msg, e);
             throw new ApplicationManagementException(msg, e);
         } finally {
@@ -1521,22 +1526,34 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void deleteApplicationRelease(String releaseUuid) throws ApplicationManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
         ApplicationStorageManager applicationStorageManager = APIUtil.getApplicationStorageManager();
-        AtomicBoolean isDeletingApp = new AtomicBoolean(false);
+        ApplicationDTO applicationDTO;
         try {
-            ConnectionManagerUtil.beginDBTransaction();
-            ApplicationDTO applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
+            ConnectionManagerUtil.openDBConnection();
+            applicationDTO = this.applicationDAO.getApplication(releaseUuid, tenantId);
             if (applicationDTO == null) {
                 String msg = "Couldn't find an application which has application release UUID: " + releaseUuid;
                 log.error(msg);
                 throw new NotFoundException(msg);
             }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while observing the database connection to get application which has "
+                    + "application release of UUID: " + releaseUuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } catch (ApplicationManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg =
+                    "Error occurred when getting application data which has application release UUID: " + releaseUuid;
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
 
-            List<ApplicationReleaseDTO> applicationReleaseDTOS = applicationDTO.getApplicationReleaseDTOs();
-            if (applicationReleaseDTOS.size() == 1) {
-                isDeletingApp.set(true);
-            }
-
-            for (ApplicationReleaseDTO applicationReleaseDTO : applicationReleaseDTOS) {
+        if (applicationDTO.getApplicationReleaseDTOs().size() == 1) {
+            deleteApplication(applicationDTO, tenantId);
+        } else {
+            for (ApplicationReleaseDTO applicationReleaseDTO : applicationDTO.getApplicationReleaseDTOs()) {
                 if (releaseUuid.equals(applicationReleaseDTO.getUuid())) {
                     if (!lifecycleStateManager.isDeletableState(applicationReleaseDTO.getCurrentState())) {
                         String msg =
@@ -1545,55 +1562,55 @@ public class ApplicationManagerImpl implements ApplicationManager {
                         log.error(msg);
                         throw new ForbiddenException(msg);
                     }
-                    List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
-                            .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
-                    if (!deviceSubscriptionDTOS.isEmpty()) {
-                        String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid()
-                                + " either subscribed to device/s or it had subscribed to device/s. Therefore you are not "
-                                + "permitted to delete the application release.";
-                        log.error(msg);
-                        throw new ForbiddenException(msg);
+                    try {
+                        ConnectionManagerUtil.beginDBTransaction();
+                        List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = subscriptionDAO
+                                .getDeviceSubscriptions(applicationReleaseDTO.getId(), tenantId);
+                        if (!deviceSubscriptionDTOS.isEmpty()) {
+                            String msg = "Application release which has UUID: " + applicationReleaseDTO.getUuid()
+                                    + " either subscribed to device/s or it had subscribed to device/s. Therefore you "
+                                    + "are not permitted to delete the application release.";
+                            log.error(msg);
+                            throw new ForbiddenException(msg);
+                        }
+                        lifecycleStateDAO.deleteLifecycleStateByReleaseId(applicationReleaseDTO.getId());
+                        applicationReleaseDAO.deleteRelease(applicationReleaseDTO.getId());
+                        applicationStorageManager.deleteAllApplicationReleaseArtifacts(
+                                Collections.singletonList(applicationReleaseDTO.getAppHashValue()), tenantId);
+                        ConnectionManagerUtil.commitDBTransaction();
+                    } catch (DBConnectionException e) {
+                        String msg = "Error occurred while observing the database connection to delete application "
+                                + "release which has the UUID:" + releaseUuid;
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (TransactionManagementException e) {
+                        String msg = "Database access error is occurred when deleting application release which has "
+                                + "the UUID: " + releaseUuid;
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (ApplicationManagementDAOException e) {
+                        ConnectionManagerUtil.rollbackDBTransaction();
+                        String msg = "Error occurred while verifying whether application relase has an subscription or "
+                                + "not. Application release UUID: " + releaseUuid;
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (ApplicationStorageManagementException e) {
+                        String msg = "Error occurred when deleting the application release artifact from the file "
+                                + "system. Application release UUID: " + releaseUuid;
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } catch (LifeCycleManagementDAOException e) {
+                        ConnectionManagerUtil.rollbackDBTransaction();
+                        String msg = "Error occurred when deleting lifecycle data for application release UUID: "
+                                + releaseUuid;
+                        log.error(msg, e);
+                        throw new ApplicationManagementException(msg, e);
+                    } finally {
+                        ConnectionManagerUtil.closeDBConnection();
                     }
-                    applicationStorageManager.deleteAllApplicationReleaseArtifacts(
-                            Collections.singletonList(applicationReleaseDTO.getAppHashValue()), tenantId);
-                    lifecycleStateDAO.deleteLifecycleStateByReleaseId(applicationReleaseDTO.getId());
-                    applicationReleaseDAO.deleteRelease(applicationReleaseDTO.getId());
                     break;
                 }
             }
-            if (isDeletingApp.get()) {
-                this.applicationDAO.deleteApplicationTags(applicationDTO.getId(), tenantId);
-                this.applicationDAO.deleteAppCategories(applicationDTO.getId(), tenantId);
-                this.applicationDAO.deleteApplication(applicationDTO.getId(), tenantId);
-            }
-            ConnectionManagerUtil.commitDBTransaction();
-        } catch (DBConnectionException e) {
-            String msg = "Error occurred while observing the database connection to delete application release which "
-                    + "has UUID:" + releaseUuid;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (TransactionManagementException e) {
-            String msg = "Database access error is occurred when deleting application release which has UUID: "
-                    + releaseUuid;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationManagementDAOException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred when application release data for application release UUID: " + releaseUuid;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (ApplicationStorageManagementException e) {
-            String msg = "Error occurred when deleting the application release artifact from the file system. "
-                    + "Application release UUID: " + releaseUuid;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } catch (LifeCycleManagementDAOException e) {
-            ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred when dleting lifecycle data for application release UUID: " + releaseUuid;
-            log.error(msg, e);
-            throw new ApplicationManagementException(msg, e);
-        } finally {
-            ConnectionManagerUtil.closeDBConnection();
         }
     }
 

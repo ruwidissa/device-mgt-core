@@ -146,4 +146,34 @@ public class GenericVisibilityDAOImpl extends AbstractDAOImpl implements Visibil
             throw new VisibilityManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public void deleteAppUnrestrictedRoles(int applicationId, int tenantId) throws VisibilityManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to delete Application unrestricted roles of application which "
+                    + "has application Id " + applicationId);
+        }
+        String sql = "DELETE "
+                + "FROM AP_UNRESTRICTED_ROLE "
+                + "WHERE AP_APP_ID = ? AND "
+                + "TENANT_ID = ?";
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, applicationId);
+                stmt.setInt(2, tenantId);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to delete application unrestricted roles "
+                    + "which has application Id " + applicationId;
+            log.error(msg, e);
+            throw new VisibilityManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing query to delete application unrestricted roles which has"
+                    + " application Id " + applicationId + ". executed query: " + sql;
+            log.error(msg, e);
+            throw new VisibilityManagementDAOException(msg, e);
+        }
+    }
 }
