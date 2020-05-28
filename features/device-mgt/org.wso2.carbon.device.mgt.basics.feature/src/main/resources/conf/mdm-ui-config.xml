@@ -146,6 +146,7 @@
         <Scope>perm:android:manage-configuration</Scope>
         <Scope>perm:android:view-configuration</Scope>
         <Scope>perm:user:permission-view</Scope>
+        <Scope>perm:ios:view-configuration</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
