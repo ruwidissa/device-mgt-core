@@ -875,7 +875,7 @@ public class OperationManagerImpl implements OperationManager {
                 List<MonitoringOperation> monitoringOperations = operationMonitoringTaskConfig.getMonitoringOperation();
                 MonitoringOperation currentMonitoringOperation = null;
                 for (MonitoringOperation monitoringOperation : monitoringOperations) {
-                    if (operation.getCode().equals(monitoringOperation.getTaskName())) {
+                    if (monitoringOperation.getTaskName().equals(operation.getCode())) {
                         currentMonitoringOperation = monitoringOperation;
                         break;
                     }
