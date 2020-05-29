@@ -27,6 +27,7 @@ import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorization
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
@@ -49,6 +50,8 @@ import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.MetadataManagementServiceImpl;
+import org.wso2.carbon.device.mgt.core.metadata.mgt.dao.MetadataManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationManagerImpl;
@@ -172,6 +175,7 @@ public class DeviceManagementServiceComponent {
             GroupManagementDAOFactory.init(dsConfig);
             NotificationManagementDAOFactory.init(dsConfig);
             OperationManagementDAOFactory.init(dsConfig);
+            MetadataManagementDAOFactory.init(dsConfig);
             /*Initialize the device cache*/
             DeviceManagerUtil.initializeDeviceCache();
 
@@ -316,6 +320,10 @@ public class DeviceManagementServiceComponent {
         /* Registering Geo Service */
         GeoLocationProviderService geoService = new GeoLocationProviderServiceImpl();
         bundleContext.registerService(GeoLocationProviderService.class.getName(), geoService, null);
+
+        /* Registering Metadata Service */
+        MetadataManagementService metadataManagementService = new MetadataManagementServiceImpl();
+        bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
 
 	     /* Registering App Management service */
         try {

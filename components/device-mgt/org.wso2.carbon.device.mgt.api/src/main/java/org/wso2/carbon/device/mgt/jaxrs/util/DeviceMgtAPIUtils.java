@@ -46,6 +46,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.MetadataManagementService;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementService;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
@@ -139,6 +140,7 @@ public class DeviceMgtAPIUtils {
     private static char[] keyStorePassword;
 
     private static IntegrationClientService integrationClientService;
+    private static MetadataManagementService metadataManagementService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -433,6 +435,28 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException("Notification Management service not initialized.");
         }
         return notificationManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for MetadataManagementService.
+     *
+     * @return MetadataManagementService instance
+     * @throws IllegalStateException if metadataManagementService cannot be initialized
+     */
+    public static MetadataManagementService getMetadataManagementService() {
+        if (metadataManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (metadataManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    metadataManagementService = (MetadataManagementService) ctx.getOSGiService(
+                            MetadataManagementService.class, null);
+                    if (metadataManagementService == null) {
+                        throw new IllegalStateException("Metadata Management service not initialized.");
+                    }
+                }
+            }
+        }
+        return metadataManagementService;
     }
 
     /**

@@ -33,6 +33,7 @@ public class PaginationConfiguration {
     private int notificationListPageSize;
     private int activityListPageSize;
     private int topicListPageSize;
+    private int metadataListPageSize;
 
     public int getDeviceListPageSize() {
         return deviceListPageSize;
@@ -80,7 +81,7 @@ public class PaginationConfiguration {
     }
 
     public int getTopicListPageSize() {
-        return deviceListPageSize;
+        return topicListPageSize;
     }
 
     @XmlElement(name = "TopicListPageSize", required = true)
@@ -88,5 +89,13 @@ public class PaginationConfiguration {
         this.topicListPageSize = topicListPageSize;
     }
 
+    public int getMetadataListPageSize() {
+        return metadataListPageSize;
+    }
+
+    @XmlElement(name = "MetadataListPageSize", required = true)
+    public void setMetadataListPageSize(int metadataListPageSize) {
+        this.metadataListPageSize = metadataListPageSize;
+    }
 
 }

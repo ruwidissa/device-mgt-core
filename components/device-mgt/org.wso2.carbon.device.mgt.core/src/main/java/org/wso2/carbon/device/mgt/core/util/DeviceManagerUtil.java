@@ -53,6 +53,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
 import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
@@ -450,6 +451,30 @@ public final class DeviceManagerUtil {
             }
         }
         return limit;
+    }
+
+    /**
+     * Validate Metadata pagination request.
+     *
+     * @param paginationRequest {@link PaginationRequest} obtained from the user
+     * @return                  {@link PaginationRequest} object validated/enriched
+     * @throws MetadataManagementException if device management configuration has not initialized
+     */
+    public static PaginationRequest validateMetadataListPageSize(PaginationRequest paginationRequest) throws
+            MetadataManagementException {
+        if (paginationRequest.getRowCount() == 0) {
+            DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance().
+                    getDeviceManagementConfig();
+            if (deviceManagementConfig != null) {
+                paginationRequest.setRowCount(deviceManagementConfig.getPaginationConfiguration().
+                        getMetadataListPageSize());
+            } else {
+                String msg = "Device-Mgt configuration has not initialized. Please check the cdm-config.xml file.";
+                log.error(msg);
+                throw new MetadataManagementException(msg);
+            }
+        }
+        return paginationRequest;
     }
 
     public static boolean isPublishLocationResponseEnabled() throws DeviceManagementException {
