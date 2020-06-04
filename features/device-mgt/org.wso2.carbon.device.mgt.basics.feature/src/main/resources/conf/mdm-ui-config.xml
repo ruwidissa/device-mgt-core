@@ -147,6 +147,7 @@
         <Scope>perm:android:view-configuration</Scope>
         <Scope>perm:user:permission-view</Scope>
         <Scope>perm:ios:view-configuration</Scope>
+        <Scope>perm:ios:manage-configuration</Scope>
         <Scope>perm:windows:view-configuration</Scope>
         <Scope>perm:windows:manage-configuration</Scope>
     </Scopes>
