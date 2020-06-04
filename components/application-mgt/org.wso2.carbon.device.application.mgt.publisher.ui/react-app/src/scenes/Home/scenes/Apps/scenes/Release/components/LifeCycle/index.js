@@ -21,21 +21,21 @@ import {
   Typography,
   Tag,
   Divider,
-  Select,
   Button,
   Modal,
   notification,
+  Steps,
+  Icon,
+  Alert,
 } from 'antd';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './styles.css';
-import LifeCycleDetailsModal from './components/lifeCycleDetailsModal';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
 
 const { Text, Title, Paragraph } = Typography;
-const { Option } = Select;
 
 const modules = {
   toolbar: [
@@ -60,6 +60,8 @@ const formats = [
   'image',
 ];
 
+const { Step } = Steps;
+
 class LifeCycle extends React.Component {
   constructor(props) {
     super(props);
@@ -69,7 +71,21 @@ class LifeCycle extends React.Component {
       reasonText: '',
       isReasonModalVisible: false,
       isConfirmButtonLoading: false,
+      current: 0,
+      lifecycleSteps: [],
     };
+  }
+
+  componentDidMount() {
+    const config = this.props.context;
+    const lifeCycleConfig = config.lifecycle;
+    const lifecycleSteps = Object.keys(lifeCycleConfig).map(config => {
+      return lifeCycleConfig[config];
+    });
+    this.setState({
+      current: lifeCycleConfig[this.props.currentStatus].step,
+      lifecycleSteps,
+    });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -87,12 +103,9 @@ class LifeCycle extends React.Component {
     this.setState({ reasonText: value });
   };
 
-  handleSelectChange = value => {
-    this.setState({ selectedStatus: value });
-  };
-
-  showReasonModal = () => {
+  showReasonModal = lifecycleState => {
     this.setState({
+      selectedStatus: lifecycleState,
       isReasonModalVisible: true,
     });
   };
@@ -105,6 +118,7 @@ class LifeCycle extends React.Component {
 
   addLifeCycle = () => {
     const config = this.props.context;
+    const lifeCycleConfig = config.lifecycle;
     const { selectedStatus, reasonText } = this.state;
     const { uuid } = this.props;
     const data = {
@@ -128,6 +142,7 @@ class LifeCycle extends React.Component {
       .then(res => {
         if (res.status === 201) {
           this.setState({
+            current: lifeCycleConfig[selectedStatus].step,
             isReasonModalVisible: false,
             isConfirmButtonLoading: false,
             currentStatus: selectedStatus,
@@ -149,16 +164,19 @@ class LifeCycle extends React.Component {
       });
   };
 
+  onChange = current => {
+    this.setState({ current });
+  };
+
   render() {
     const {
       currentStatus,
       selectedStatus,
-      isConfirmButtonLoading,
+      current,
+      lifecycleSteps,
     } = this.state;
     const { lifecycle } = this.props;
-    const selectedValue = selectedStatus == null ? [] : selectedStatus;
     let proceedingStates = [];
-
     if (
       lifecycle !== null &&
       lifecycle.hasOwnProperty(currentStatus) &&
@@ -176,43 +194,45 @@ class LifeCycle extends React.Component {
           application. Have a thorough review and approval process before
           directly publishing it to your app store. You can easily transition
           from one state to another. <br />
-          Note: ‘Change State To’ displays only the next states allowed from the
-          current state
         </Paragraph>
-        {lifecycle !== null && <LifeCycleDetailsModal lifecycle={lifecycle} />}
-        <Divider dashed={true} />
-        <Text strong={true}>Current State: </Text>{' '}
-        <Tag color="blue">{currentStatus}</Tag>
-        <br />
-        <br />
-        <Text>Change State to: </Text>
-        <Select
-          placeholder="Select state"
-          style={{ width: 120 }}
-          size="small"
-          onChange={this.handleSelectChange}
-          value={selectedValue}
-          showSearch={true}
-        >
-          {proceedingStates.map(lifecycleState => {
-            return (
-              <Option key={lifecycleState} value={lifecycleState}>
-                {lifecycleState}
-              </Option>
-            );
-          })}
-        </Select>
-        <Button
-          style={{ marginLeft: 10 }}
-          size="small"
-          type="primary"
-          htmlType="button"
-          onClick={this.showReasonModal}
-          loading={isConfirmButtonLoading}
-          disabled={selectedStatus == null}
-        >
-          Change
-        </Button>
+        <Divider />
+        <div>
+          <Steps
+            direction={'vertical'}
+            current={current}
+            onChange={this.onChange}
+            size="small"
+          >
+            {lifecycleSteps.map((step, index) => (
+              <Step
+                key={index}
+                icon={<Icon type={step.icon} />}
+                title={step.title}
+                disabled={current !== step.step}
+                description={
+                  current === step.step && (
+                    <div style={{ width: 400 }}>
+                      <p>{step.text}</p>
+                      {proceedingStates.map(lifecycleState => {
+                        return (
+                          <Button
+                            size={'small'}
+                            style={{ marginRight: 3 }}
+                            onClick={() => this.showReasonModal(lifecycleState)}
+                            key={lifecycleState}
+                            type={'primary'}
+                          >
+                            {lifecycleState}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )
+                }
+              />
+            ))}
+          </Steps>
+        </div>
         <Divider />
         <Modal
           title="Confirm changing lifecycle state"
@@ -228,7 +248,15 @@ class LifeCycle extends React.Component {
             <Tag color="blue">{selectedStatus}</Tag>
           </Text>
           <br />
-          <br />
+          {lifecycle && selectedStatus && lifecycle[selectedStatus].isEndState && (
+            <Alert
+              message="In this state application becomes completely obsolete. Be careful,
+              this process cannot be undone."
+              banner
+              style={{ marginTop: 5 }}
+            />
+          )}
+          <Divider orientation="left">Reason</Divider>
           <ReactQuill
             theme="snow"
             value={this.state.reasonText}
