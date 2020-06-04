@@ -47,7 +47,7 @@
     },
     "IN-REVIEW": {
       "title": "In-Review",
-      "text": "This state can be applied when the application is being reviewed by approvers.\n You can only proceed to one of the following states:",
+      "text": "In this state the application is being reviewed by approvers. You can move from this state to APPROVED state if it is approved by reviewers. Otherwise, you can move the application into either REJECTED state or CREATED state based on the feedback getting by reviewers.",
       "icon": "audit",
       "step": 1
     },
@@ -83,7 +83,7 @@
     },
     "RETIRED": {
       "title": "Retired",
-      "text": "The final state of an application, where no transition of states will be allowed after this.\n You can only proceed to one of the following states:",
+      "text": "The final state of an application, where no transition of states will be allowed after this.",
       "icon": "rest",
       "step": 7
     }

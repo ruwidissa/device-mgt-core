@@ -177,7 +177,6 @@ class LifeCycle extends React.Component {
     } = this.state;
     const { lifecycle } = this.props;
     let proceedingStates = [];
-
     if (
       lifecycle !== null &&
       lifecycle.hasOwnProperty(currentStatus) &&
@@ -211,7 +210,7 @@ class LifeCycle extends React.Component {
                 title={step.title}
                 disabled={current !== step.step}
                 description={
-                  current === step.step ? (
+                  current === step.step && (
                     <div style={{ width: 400 }}>
                       <p>{step.text}</p>
                       {proceedingStates.map(lifecycleState => {
@@ -228,8 +227,6 @@ class LifeCycle extends React.Component {
                         );
                       })}
                     </div>
-                  ) : (
-                    ''
                   )
                 }
               />
@@ -251,17 +248,13 @@ class LifeCycle extends React.Component {
             <Tag color="blue">{selectedStatus}</Tag>
           </Text>
           <br />
-          {lifecycle &&
-          selectedStatus &&
-          lifecycle[selectedStatus].isEndState ? (
+          {lifecycle && selectedStatus && lifecycle[selectedStatus].isEndState && (
             <Alert
               message="In this state application becomes completely obsolete. Be careful,
               this process cannot be undone."
               banner
               style={{ marginTop: 5 }}
             />
-          ) : (
-            <div />
           )}
           <Divider orientation="left">Reason</Divider>
           <ReactQuill
