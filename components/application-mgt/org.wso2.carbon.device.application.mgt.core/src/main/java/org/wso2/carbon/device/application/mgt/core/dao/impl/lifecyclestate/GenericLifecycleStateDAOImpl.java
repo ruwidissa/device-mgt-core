@@ -72,7 +72,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                     + "application. Application release UUID: " + uuid + ". Executed Query: " + sql;
             log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
-        }  
+        }
     }
 
     @Override
@@ -117,7 +117,6 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
 
     @Override
     public List<LifecycleState> getLifecycleStates(int appReleaseId, int tenantId) throws LifeCycleManagementDAOException {
-        List<LifecycleState> lifecycleStates = new ArrayList<>();
         try {
             Connection conn = this.getDBConnection();
             String sql = "SELECT "
@@ -133,9 +132,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
                 stmt.setInt(1,appReleaseId);
                 stmt.setInt(2, tenantId);
                 try (ResultSet rs = stmt.executeQuery()){
-                    while (rs.next()) {
-                        lifecycleStates.add(constructLifecycle(rs));
-                    }
+                    return getLifecycleStates(rs);
                 }
             }
         } catch (DBConnectionException e) {
@@ -149,7 +146,6 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             log.error(msg, e);
             throw new LifeCycleManagementDAOException(msg, e);
         }
-        return lifecycleStates;
     }
 
     @Override
@@ -254,7 +250,7 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
     private LifecycleState constructLifecycle(ResultSet rs) throws LifeCycleManagementDAOException {
         LifecycleState lifecycleState = null;
         try {
-            if (rs !=null && rs.next()) {
+            if (rs.next()) {
                 lifecycleState = new LifecycleState();
                 lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
                 lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
@@ -267,5 +263,32 @@ public class GenericLifecycleStateDAOImpl extends AbstractDAOImpl implements Lif
             throw new LifeCycleManagementDAOException(msg, e);
         }
         return lifecycleState;
+    }
+
+    /**
+     * Get the list of lifecycle states by using Result Set
+     *
+     * @param rs ResultSet object
+     * @return List of life cycle states
+     * @throws LifeCycleManagementDAOException if error occurred while getting lifecycle state data from ResultSet
+     *                                         object
+     */
+    private List<LifecycleState> getLifecycleStates(ResultSet rs) throws LifeCycleManagementDAOException {
+        List<LifecycleState> lifecycleStates = new ArrayList<>();
+        try {
+            while (rs.next()) {
+                LifecycleState lifecycleState = new LifecycleState();
+                lifecycleState.setCurrentState(rs.getString("CURRENT_STATE"));
+                lifecycleState.setPreviousState(rs.getString("PREVIOUS_STATE"));
+                lifecycleState.setUpdatedAt(rs.getTimestamp("UPDATED_AT"));
+                lifecycleState.setUpdatedBy(rs.getString("UPDATED_BY"));
+                lifecycleStates.add(lifecycleState);
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while construct lifecycle state by data which is retrieved from SQL query";
+            log.error(msg, e);
+            throw new LifeCycleManagementDAOException(msg, e);
+        }
+        return lifecycleStates;
     }
 }
