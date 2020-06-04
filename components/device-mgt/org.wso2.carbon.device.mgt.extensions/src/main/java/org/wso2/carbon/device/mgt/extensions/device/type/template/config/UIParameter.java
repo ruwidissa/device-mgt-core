@@ -76,6 +76,13 @@ public class UIParameter {
     @XmlElement(name = "value")
     protected List<String> value;
 
+    @XmlElement(name = "key")
+    protected String key;
+
+    @XmlElementWrapper(name = "Conditions")
+    @XmlElement(name = "Condition")
+    private List<Condition> conditions;
+
     public String getId() {
         return id;
     }
@@ -130,5 +137,22 @@ public class UIParameter {
 
     public void setOptional(boolean optional) {
         this.optional = optional;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public List<Condition> getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(
+            List<Condition> conditions) {
+        this.conditions = conditions;
     }
 }
