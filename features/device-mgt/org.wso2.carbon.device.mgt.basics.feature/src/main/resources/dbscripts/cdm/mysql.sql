@@ -599,6 +599,8 @@ CREATE TABLE IF NOT EXISTS DM_DEVICE_DETAIL (
 )
 ENGINE = InnoDB;
 
+CREATE INDEX IDX_DM_DEVICE_DETAIL_DID_EID ON DM_DEVICE_DETAIL(DEVICE_ID, ENROLMENT_ID);
+
 -- -----------------------------------------------------
 -- Table `DM_DEVICE_TYPE_PLATFORM`
 -- -----------------------------------------------------
