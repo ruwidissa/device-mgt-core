@@ -26,8 +26,8 @@ import java.util.List;
 @XmlRootElement(name = "Condition")
 public class Condition {
 
-    String id;
-    List<String> values;
+    private String id;
+    private List<String> values;
 
     @XmlElement(name = "Id")
     public String getId() {

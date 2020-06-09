@@ -76,12 +76,33 @@ public class UIParameter {
     @XmlElement(name = "value")
     protected List<String> value;
 
+    @XmlElementWrapper(name = "payloadValues")
+    @XmlElement(name = "value")
+    protected List<String> payloadValue;
+
     @XmlElement(name = "key")
     protected String key;
 
     @XmlElementWrapper(name = "Conditions")
     @XmlElement(name = "Condition")
     private List<Condition> conditions;
+
+    @XmlElement(name = "defaultValue")
+    private String defaultValue;
+
+    @XmlElementWrapper(name = "conditionLabels")
+    @XmlElement(name = "conditionLabel")
+    private List<ConditionLabel> conditionLabels;
+
+    @XmlElementWrapper(name = "rules")
+    @XmlElement(name = "rule")
+    private List<Rule> rules;
+
+    @XmlElement(name = "isDisplay")
+    private boolean display;
+
+    @XmlElement(name = "payloadKey")
+    private String payloadKey;
 
     public String getId() {
         return id;
@@ -154,5 +175,54 @@ public class UIParameter {
     public void setConditions(
             List<Condition> conditions) {
         this.conditions = conditions;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public List<ConditionLabel> getConditionLabels() {
+        return conditionLabels;
+    }
+
+    public void setConditionLabels(
+            List<ConditionLabel> conditionLabels) {
+        this.conditionLabels = conditionLabels;
+    }
+
+    public List<String> getPayloadValue() {
+        return payloadValue;
+    }
+
+    public void setPayloadValue(List<String> payloadValue) {
+        this.payloadValue = payloadValue;
+    }
+
+    public List<Rule> getRules() {
+        return rules;
+    }
+
+    public void setRules(List<Rule> rules) {
+        this.rules = rules;
+    }
+
+    public boolean isDisplay() {
+        return display;
+    }
+
+    public void setDisplay(boolean display) {
+        this.display = display;
+    }
+
+    public String getPayloadKey() {
+        return payloadKey;
+    }
+
+    public void setPayloadKey(String payloadKey) {
+        this.payloadKey = payloadKey;
     }
 }
