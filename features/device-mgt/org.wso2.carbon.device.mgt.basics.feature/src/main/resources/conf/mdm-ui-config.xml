@@ -150,6 +150,25 @@
         <Scope>perm:ios:manage-configuration</Scope>
         <Scope>perm:windows:view-configuration</Scope>
         <Scope>perm:windows:manage-configuration</Scope>
+        <Scope>perm:android:lock-devices</Scope>
+        <Scope>perm:android:unlock-devices</Scope>
+        <Scope>perm:android:location</Scope>
+        <Scope>perm:android:clear-password</Scope>
+        <Scope>perm:android:control-camera</Scope>
+        <Scope>perm:android:enterprise-wipe</Scope>
+        <Scope>perm:android:wipe</Scope>
+        <Scope>perm:android:ring</Scope>
+        <Scope>perm:android:applications</Scope>
+        <Scope>perm:android:reboot</Scope>
+        <Scope>perm:android:change-LockTask</Scope>
+        <Scope>perm:android:mute</Scope>
+        <Scope>perm:android:configure-display-message</Scope>
+        <Scope>perm:android:send-app-restrictions</Scope>
+        <Scope>perm:android:file-transfer</Scope>
+        <Scope>perm:android:set-webclip</Scope>
+        <Scope>perm:android:set-password-policy</Scope>
+        <Scope>perm:android:change-lock-code</Scope>
+        <Scope>perm:android:upgrade-firmware</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
