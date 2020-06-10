@@ -42,6 +42,7 @@ public class Item {
     private Upload upload;
     private APITable apiTable;
     private Text text;
+    private InputList inputList;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -176,5 +177,14 @@ public class Item {
 
     public void setText(Text text) {
         this.text = text;
+    }
+
+    @XmlElement(name = "InputList")
+    public InputList getInputList() {
+        return inputList;
+    }
+
+    public void setInputList(InputList inputList) {
+        this.inputList = inputList;
     }
 }
