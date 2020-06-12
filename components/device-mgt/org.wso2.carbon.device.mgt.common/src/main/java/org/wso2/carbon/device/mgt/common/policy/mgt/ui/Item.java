@@ -43,6 +43,7 @@ public class Item {
     private APITable apiTable;
     private Text text;
     private InputList inputList;
+    private String nullableValue;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -62,7 +63,7 @@ public class Item {
         this.tooltip = tooltip;
     }
 
-    @XmlElement(name = "Key")
+    @XmlElement(name = "Key", required = true)
     public String getKey() {
         return key;
     }
@@ -71,7 +72,7 @@ public class Item {
         this.key = key;
     }
 
-    @XmlElement(name = "Value")
+    @XmlElement(name = "Value", required = true)
     public String getValue() {
         return value;
     }
@@ -186,5 +187,14 @@ public class Item {
 
     public void setInputList(InputList inputList) {
         this.inputList = inputList;
+    }
+
+    @XmlElement(name = "NullableValue")
+    public String getNullableValue() {
+        return nullableValue;
+    }
+
+    public void setNullableValue(String nullableValue) {
+        this.nullableValue = nullableValue;
     }
 }
