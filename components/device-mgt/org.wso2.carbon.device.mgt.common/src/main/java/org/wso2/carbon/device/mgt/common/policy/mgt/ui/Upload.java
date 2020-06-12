@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Upload {
     private String placeholderValue;
     private Boolean showContent;
+    private Boolean setFileName;
 
     @XmlElement(name = "Placeholder")
     public String getPlaceholderValue() {
@@ -41,5 +42,14 @@ public class Upload {
 
     public void setShowContent(Boolean showContent) {
         this.showContent = showContent;
+    }
+
+    @XmlElement(name = "SetFileName")
+    public Boolean getSetFileName() {
+        return setFileName;
+    }
+
+    public void setSetFileName(Boolean setFileName) {
+        this.setFileName = setFileName;
     }
 }
