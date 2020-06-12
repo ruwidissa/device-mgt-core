@@ -31,6 +31,7 @@ public class Column {
     private Select select;
     private Input input;
     private Upload upload;
+    private Checkbox checkbox;
 
     @XmlAttribute(name = "name", required = true)
     public String getName() { return name; }
@@ -85,5 +86,14 @@ public class Column {
 
     public void setUpload(Upload upload) {
         this.upload = upload;
+    }
+
+    @XmlElement(name = "Checkbox")
+    public Checkbox getCheckbox() {
+        return checkbox;
+    }
+
+    public void setCheckbox(Checkbox checkbox) {
+        this.checkbox = checkbox;
     }
 }
