@@ -27,6 +27,7 @@ public class Select {
 
     private String valueType;
     private List<Option> options;
+    private String mode;
 
     @XmlElement(name = "ValueType", required = true)
     public String getValueType() {
@@ -45,5 +46,14 @@ public class Select {
 
     public void setOptions(List<Option> options) {
         this.options = options;
+    }
+
+    @XmlElement(name = "Mode")
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 }
