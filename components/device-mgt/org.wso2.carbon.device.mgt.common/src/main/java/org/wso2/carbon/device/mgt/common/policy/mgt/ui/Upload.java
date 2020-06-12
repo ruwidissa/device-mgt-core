@@ -25,6 +25,7 @@ public class Upload {
     private String placeholderValue;
     private Boolean showContent;
     private Boolean setFileName;
+    private String fileTypes;
 
     @XmlElement(name = "Placeholder")
     public String getPlaceholderValue() {
@@ -51,5 +52,14 @@ public class Upload {
 
     public void setSetFileName(Boolean setFileName) {
         this.setFileName = setFileName;
+    }
+
+    @XmlElement(name = "FileTypes")
+    public String getFileTypes() {
+        return fileTypes;
+    }
+
+    public void setFileTypes(String fileTypes) {
+        this.fileTypes = fileTypes;
     }
 }
