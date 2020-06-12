@@ -55,8 +55,7 @@ public class DeviceDetailsRetrieverTask implements Task {
 
     private static Log log = LogFactory.getLog(DeviceDetailsRetrieverTask.class);
     private String deviceType;
-    private boolean executeForTenants = false;
-    private final String IS_CLOUD = "is.cloud";
+    private static final int SUPER_TENANT_ID = -1234;
     private DeviceManagementProviderService deviceManagementProviderService;
 
     @Override
@@ -76,27 +75,7 @@ public class DeviceDetailsRetrieverTask implements Task {
                 .getDeviceMonitoringConfig(deviceType);
         StartupOperationConfig startupOperationConfig = deviceManagementProviderService
                 .getStartupOperationConfig(deviceType);
-
-        if (System.getProperty(IS_CLOUD) != null && Boolean.parseBoolean(System.getProperty(IS_CLOUD))) {
-            executeForTenants = true;
-        }
-        if (executeForTenants) {
-            this.executeForAllTenants(operationMonitoringTaskConfig, startupOperationConfig);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Device details retrieving task started to run.");
-            }
-            DeviceTaskManager deviceTaskManager = new DeviceTaskManagerImpl(deviceType, operationMonitoringTaskConfig,
-                                                                            startupOperationConfig);
-            //pass the configurations also from here, monitoring tasks
-            try {
-                if (deviceManagementProviderService.isDeviceMonitoringEnabled(deviceType)) {
-                    deviceTaskManager.addOperations();
-                }
-            } catch (DeviceMgtTaskException e) {
-                log.error("Error occurred while trying to add the operations to device to retrieve device details.", e);
-            }
-        }
+        this.executeForAllTenants(operationMonitoringTaskConfig, startupOperationConfig);
     }
 
     private void executeForAllTenants(OperationMonitoringTaskConfig operationMonitoringTaskConfig,
@@ -113,24 +92,17 @@ public class DeviceDetailsRetrieverTask implements Task {
             }
 
             for (Integer tenant : tenants) {
+                if (SUPER_TENANT_ID == tenant) {
+                    this.executeTask(operationMonitoringTaskConfig, startupOperationConfig);
+                    continue;
+                }
                 String tenantDomain = DeviceManagementDataHolder.getInstance().
                         getRealmService().getTenantManager().getDomain(tenant);
                 try {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant);
-                    DeviceTaskManager deviceTaskManager = new DeviceTaskManagerImpl(deviceType,
-                                                                                    operationMonitoringTaskConfig,
-                                                                                    startupOperationConfig);
-                    //pass the configurations also from here, monitoring tasks
-                    try {
-                        if (deviceManagementProviderService.isDeviceMonitoringEnabled(deviceType)) {
-                            deviceTaskManager.addOperations();
-                        }
-                    } catch (DeviceMgtTaskException e) {
-                        log.error("Error occurred while trying to add the operations to " +
-                                "device to retrieve device details.", e);
-                    }
+                    this.executeTask(operationMonitoringTaskConfig, startupOperationConfig);
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
@@ -140,6 +112,30 @@ public class DeviceDetailsRetrieverTask implements Task {
         } catch (DeviceManagementException e) {
             log.error("Error occurred while trying to get the available tenants " +
                     "from device manager provider service.", e);
+        }
+    }
+
+    /**
+     * Execute device detail retriever task
+     * @param operationMonitoringTaskConfig which contains monitoring operations and related details
+     * @param startupOperationConfig which contains startup operations and realted details
+     */
+    private void executeTask(OperationMonitoringTaskConfig operationMonitoringTaskConfig,
+                             StartupOperationConfig startupOperationConfig) {
+        DeviceTaskManager deviceTaskManager = new DeviceTaskManagerImpl(deviceType,
+                                                                        operationMonitoringTaskConfig,
+                                                                        startupOperationConfig);
+        if (log.isDebugEnabled()) {
+            log.debug("Device details retrieving task started to run.");
+        }
+        //pass the configurations also from here, monitoring tasks
+        try {
+            if (deviceManagementProviderService.isDeviceMonitoringEnabled(deviceType)) {
+                deviceTaskManager.addOperations();
+            }
+        } catch (DeviceMgtTaskException e) {
+            log.error("Error occurred while trying to add the operations to " +
+                      "device to retrieve device details.", e);
         }
     }
 

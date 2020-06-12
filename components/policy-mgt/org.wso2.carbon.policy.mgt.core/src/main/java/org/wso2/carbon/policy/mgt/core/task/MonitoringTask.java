@@ -42,10 +42,9 @@ public class MonitoringTask implements Task {
 
     private static final Log log = LogFactory.getLog(MonitoringTask.class);
 
-    Map<String, String> properties;
-    private boolean executeForTenants = false;
-    private final String IS_CLOUD = "is.cloud";
+    private static final int SUPER_TENANT_ID = -1234;
 
+    Map<String, String> properties;
 
     @Override
     public void setProperties(Map<String, String> map) {
@@ -62,14 +61,8 @@ public class MonitoringTask implements Task {
         if (log.isDebugEnabled()) {
             log.debug("Monitoring task started to run.");
         }
-        if (System.getProperty(IS_CLOUD) != null && Boolean.parseBoolean(System.getProperty(IS_CLOUD))) {
-            executeForTenants = true;
-        }
-        if (executeForTenants) {
-            this.executeforAllTenants();
-        } else {
-            this.executeTask();
-        }
+
+        this.executeforAllTenants();
     }
 
     /**
@@ -95,6 +88,10 @@ public class MonitoringTask implements Task {
             DeviceManagementProviderService deviceManagementService = new DeviceManagementProviderServiceImpl();
             List<Integer> tenants = deviceManagementService.getDeviceEnrolledTenants();
             for (Integer tenant : tenants) {
+                if (SUPER_TENANT_ID == tenant) {
+                    this.executeTask();
+                    continue;
+                }
                 String tenantDomain = PolicyManagementDataHolder.getInstance().
                         getRealmService().getTenantManager().getDomain(tenant);
                 try {
