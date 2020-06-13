@@ -21,6 +21,7 @@ package org.wso2.carbon.policy.mgt.core.task;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -43,9 +44,6 @@ public class MonitoringTask implements Task {
     private static final Log log = LogFactory.getLog(MonitoringTask.class);
 
     Map<String, String> properties;
-    private boolean executeForTenants = false;
-    private final String IS_CLOUD = "is.cloud";
-
 
     @Override
     public void setProperties(Map<String, String> map) {
@@ -62,14 +60,8 @@ public class MonitoringTask implements Task {
         if (log.isDebugEnabled()) {
             log.debug("Monitoring task started to run.");
         }
-        if (System.getProperty(IS_CLOUD) != null && Boolean.parseBoolean(System.getProperty(IS_CLOUD))) {
-            executeForTenants = true;
-        }
-        if (executeForTenants) {
-            this.executeforAllTenants();
-        } else {
-            this.executeTask();
-        }
+
+        this.executeforAllTenants();
     }
 
     /**
@@ -95,19 +87,18 @@ public class MonitoringTask implements Task {
             DeviceManagementProviderService deviceManagementService = new DeviceManagementProviderServiceImpl();
             List<Integer> tenants = deviceManagementService.getDeviceEnrolledTenants();
             for (Integer tenant : tenants) {
-                String tenantDomain = PolicyManagementDataHolder.getInstance().
-                        getRealmService().getTenantManager().getDomain(tenant);
+                if (MultitenantConstants.SUPER_TENANT_ID == tenant) {
+                    this.executeTask();
+                    continue;
+                }
                 try {
                     PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant, true);
                     this.executeTask();
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             }
-        } catch (UserStoreException e) {
-            log.error("Error occurred while trying to get the available tenants", e);
         } catch (DeviceManagementException e) {
             log.error("Error occurred while trying to get the available tenants from device manager service ", e);
         }

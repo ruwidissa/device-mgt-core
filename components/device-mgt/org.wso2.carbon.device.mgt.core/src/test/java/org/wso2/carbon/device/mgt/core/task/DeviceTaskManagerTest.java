@@ -165,7 +165,6 @@ public class DeviceTaskManagerTest extends BaseDeviceManagementTest {
             description = "Testing device detail retriever task execution for tenants")
     public void testDeviceDetailRetrieverTaskExecuteForAllTenants() throws OperationManagementException {
         DeviceDetailsRetrieverTask deviceDetailsRetrieverTask = new DeviceDetailsRetrieverTask();
-        System.setProperty("is.cloud", "true");
         Map<String, String> map = new HashMap<>();
         map.put("DEVICE_TYPE", TestDataHolder.TEST_DEVICE_TYPE);
         deviceDetailsRetrieverTask.setProperties(map);
