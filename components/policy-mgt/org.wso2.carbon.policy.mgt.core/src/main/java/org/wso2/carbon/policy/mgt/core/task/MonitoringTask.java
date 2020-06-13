@@ -21,6 +21,7 @@ package org.wso2.carbon.policy.mgt.core.task;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -41,8 +42,6 @@ import java.util.Map;
 public class MonitoringTask implements Task {
 
     private static final Log log = LogFactory.getLog(MonitoringTask.class);
-
-    private static final int SUPER_TENANT_ID = -1234;
 
     Map<String, String> properties;
 
@@ -88,23 +87,18 @@ public class MonitoringTask implements Task {
             DeviceManagementProviderService deviceManagementService = new DeviceManagementProviderServiceImpl();
             List<Integer> tenants = deviceManagementService.getDeviceEnrolledTenants();
             for (Integer tenant : tenants) {
-                if (SUPER_TENANT_ID == tenant) {
+                if (MultitenantConstants.SUPER_TENANT_ID == tenant) {
                     this.executeTask();
                     continue;
                 }
-                String tenantDomain = PolicyManagementDataHolder.getInstance().
-                        getRealmService().getTenantManager().getDomain(tenant);
                 try {
                     PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant, true);
                     this.executeTask();
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             }
-        } catch (UserStoreException e) {
-            log.error("Error occurred while trying to get the available tenants", e);
         } catch (DeviceManagementException e) {
             log.error("Error occurred while trying to get the available tenants from device manager service ", e);
         }

@@ -37,6 +37,7 @@ package org.wso2.carbon.device.mgt.core.task.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
@@ -55,7 +56,6 @@ public class DeviceDetailsRetrieverTask implements Task {
 
     private static Log log = LogFactory.getLog(DeviceDetailsRetrieverTask.class);
     private String deviceType;
-    private static final int SUPER_TENANT_ID = -1234;
     private DeviceManagementProviderService deviceManagementProviderService;
 
     @Override
@@ -90,25 +90,19 @@ public class DeviceDetailsRetrieverTask implements Task {
             if (log.isDebugEnabled()) {
                 log.debug("Task is running for " + tenants.size() + " tenants and the device type is " + deviceType);
             }
-
             for (Integer tenant : tenants) {
-                if (SUPER_TENANT_ID == tenant) {
+                if (MultitenantConstants.SUPER_TENANT_ID == tenant) {
                     this.executeTask(operationMonitoringTaskConfig, startupOperationConfig);
                     continue;
                 }
-                String tenantDomain = DeviceManagementDataHolder.getInstance().
-                        getRealmService().getTenantManager().getDomain(tenant);
                 try {
                     PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant);
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenant, true);
                     this.executeTask(operationMonitoringTaskConfig, startupOperationConfig);
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             }
-        } catch (UserStoreException e) {
-            log.error("Error occurred while trying to get the available tenants", e);
         } catch (DeviceManagementException e) {
             log.error("Error occurred while trying to get the available tenants " +
                     "from device manager provider service.", e);
