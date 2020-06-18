@@ -40,7 +40,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -48,9 +47,11 @@ import java.util.regex.Pattern;
 public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
-    private static TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
+    private static final TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
     private static final String PERMISSION_PREFIX = "/permission/admin";
     public static final String AUTHORIZE_PERMISSION = "Authorize-Permission";
+
+    private static InetAddress inetAddress = null;
 
     @Override
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
