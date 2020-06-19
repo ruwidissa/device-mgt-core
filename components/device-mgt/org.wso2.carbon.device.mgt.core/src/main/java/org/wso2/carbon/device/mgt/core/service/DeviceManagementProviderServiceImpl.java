@@ -231,8 +231,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             }
             return false;
         }
-        EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry(
-                this.getConfiguration(device.getType()));
+        EnrollmentConfiguration enrollmentConfiguration = DeviceManagerUtil.getEnrollmentConfigurationEntry();
         String deviceSerialNumber = null;
         if (enrollmentConfiguration != null) {
             deviceSerialNumber = DeviceManagerUtil.getPropertyString(device.getProperties(),
