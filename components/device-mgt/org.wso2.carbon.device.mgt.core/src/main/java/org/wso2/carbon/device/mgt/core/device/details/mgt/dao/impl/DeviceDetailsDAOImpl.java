@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
@@ -421,6 +422,45 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             throw new DeviceDetailsMgtDAOException(errMessage, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
+        }
+    }
+
+    @Override
+    public void addDeviceLocationsInfo(Device device, List<DeviceLocation> deviceLocation,
+                                       int tenantId) throws DeviceDetailsMgtDAOException {
+        Connection conn;
+        String errMessage;
+        String sql = "INSERT INTO " +
+                "DM_DEVICE_HISTORY_LAST_SEVEN_DAYS " +
+                "(DEVICE_ID, DEVICE_ID_NAME, TENANT_ID, DEVICE_TYPE_NAME, LATITUDE, LONGITUDE, SPEED, HEADING, " +
+                "TIMESTAMP, GEO_HASH, DEVICE_OWNER, DEVICE_ALTITUDE, DISTANCE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (DeviceLocation location : deviceLocation) {
+                    stmt.setInt(1, device.getId());
+                    stmt.setString(2, device.getDeviceIdentifier());
+                    stmt.setInt(3, tenantId);
+                    stmt.setString(4, device.getType());
+                    stmt.setDouble(5, location.getLatitude());
+                    stmt.setDouble(6, location.getLongitude());
+                    stmt.setFloat(7, location.getSpeed());
+                    stmt.setFloat(8, location.getBearing());
+                    stmt.setLong(9, System.currentTimeMillis());
+                    stmt.setString(10, GeoHashGenerator.encodeGeohash(location));
+                    stmt.setString(11, device.getEnrolmentInfo().getOwner());
+                    stmt.setDouble(12, location.getAltitude());
+                    stmt.setDouble(13, location.getDistance());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+
+        } catch (SQLException e) {
+            errMessage = "Error occurred while updating the device location information to database.";
+            log.error(errMessage);
+            throw new DeviceDetailsMgtDAOException(errMessage, e);
         }
     }
 
