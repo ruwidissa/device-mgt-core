@@ -4,7 +4,7 @@
     "value": "lightBaseTheme",
     "logo" : "https://entgra.io/assets/images/svg/logo.svg",
     "primaryColor": "rgb(24, 144, 255)",
-    "footerText": "©2019 entgra.io"
+    "footerText": "©2020 entgra.io"
   },
   "serverConfig": {
     "invoker": {
