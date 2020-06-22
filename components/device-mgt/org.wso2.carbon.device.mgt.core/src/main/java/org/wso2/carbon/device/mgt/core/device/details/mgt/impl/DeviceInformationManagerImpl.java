@@ -396,6 +396,35 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
     }
 
     @Override
+    public void addDeviceLocations(Device device, List<DeviceLocation> deviceLocations) throws DeviceDetailsMgtException {
+        try {
+            DeviceLocation mostRecentDeviceLocation = deviceLocations.get(deviceLocations.size()  - 1);
+            mostRecentDeviceLocation.setDeviceId(device.getId());
+            DeviceManagementDAOFactory.beginTransaction();
+            DeviceLocation previousLocation = deviceDetailsDAO.getDeviceLocation(device.getId(),
+                    device.getEnrolmentInfo().getId());
+            if (previousLocation == null) {
+                deviceDetailsDAO.addDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
+            } else {
+                deviceDetailsDAO.updateDeviceLocation(mostRecentDeviceLocation, device.getEnrolmentInfo().getId());
+            }
+
+            deviceDetailsDAO.addDeviceLocationsInfo(device, deviceLocations,
+                    CarbonContext.getThreadLocalCarbonContext().getTenantId());
+
+            DeviceManagementDAOFactory.commitTransaction();
+        } catch (TransactionManagementException e) {
+            throw new DeviceDetailsMgtException("Transactional error occurred while adding the device location " +
+                    "information.", e);
+        } catch (DeviceDetailsMgtDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            throw new DeviceDetailsMgtException("Error occurred while adding the device location information.", e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
     public DeviceLocation getDeviceLocation(DeviceIdentifier deviceId) throws DeviceDetailsMgtException {
         Device device = getDevice(deviceId);
         if (device == null) {
