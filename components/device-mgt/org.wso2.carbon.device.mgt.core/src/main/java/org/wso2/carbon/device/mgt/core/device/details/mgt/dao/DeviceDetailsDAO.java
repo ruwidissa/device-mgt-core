@@ -24,6 +24,7 @@ import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -113,6 +114,16 @@ public interface DeviceDetailsDAO {
      * @throws DeviceDetailsMgtDAOException
      */
     void addDeviceLocationInfo(Device device, DeviceLocation deviceLocation, int tenantId)
+            throws DeviceDetailsMgtDAOException;
+
+    /**
+     * Add device location information to the database
+     * @param device Device object
+     * @param deviceLocation Device Location Object
+     * @param tenantId Tenant Id
+     * @throws DeviceDetailsMgtDAOException
+     */
+    void addDeviceLocationsInfo(Device device, List<DeviceLocation> deviceLocation, int tenantId)
             throws DeviceDetailsMgtDAOException;
 
     void updateDeviceInformation(int deviceId, int enrollmentId, DeviceInfo newDeviceInfo) throws DeviceDetailsMgtDAOException;

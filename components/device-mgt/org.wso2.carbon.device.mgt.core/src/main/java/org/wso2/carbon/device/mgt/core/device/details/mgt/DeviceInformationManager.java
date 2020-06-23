@@ -80,6 +80,9 @@ public interface DeviceInformationManager {
 
     void addDeviceLocation(Device device, DeviceLocation deviceLocation) throws DeviceDetailsMgtException;
 
+    void addDeviceLocations(Device device, List<DeviceLocation> deviceLocations) throws
+            DeviceDetailsMgtException;
+
     /**
      * This method will return the device location with latitude, longitude, address etc..
      * @param deviceIdentifier  - Device identifier, device type.

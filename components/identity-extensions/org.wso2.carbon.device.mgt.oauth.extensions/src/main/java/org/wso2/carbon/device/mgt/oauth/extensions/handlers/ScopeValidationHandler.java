@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.device.mgt.oauth.extensions.handlers;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.oauth.extensions.internal.OAuthExtensionsDataHolder;
@@ -26,6 +27,7 @@ import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.dao.TokenManagementDAO;
 import org.wso2.carbon.identity.oauth2.dao.TokenManagementDAOImpl;
+import org.wso2.carbon.identity.oauth2.dao.TokenMgtDAO;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.model.ResourceScopeCacheEntry;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
@@ -109,7 +111,10 @@ public class ScopeValidationHandler extends OAuth2ScopeValidator {
         if (!cacheHit) {
             TokenManagementDAO tokenMgtDAO = new TokenManagementDAOImpl();
             try {
-                resourceScope = tokenMgtDAO.findTenantAndScopeOfResource(resource).getLeft();
+                Pair<String, Integer> scopeReference = tokenMgtDAO.findTenantAndScopeOfResource(resource);
+                if(scopeReference!=null) {
+                    resourceScope = scopeReference.getLeft();
+                }
             } catch (IdentityOAuth2Exception e) {
                 log.error("Error occurred while retrieving scope for resource '" + resource + "'");
             }
