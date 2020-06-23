@@ -537,6 +537,7 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
     @DELETE
     @Path("/{roleName}")
+    @Consumes(MediaType.WILDCARD)
     @Override
     public Response deleteRole(@PathParam("roleName") String roleName, @QueryParam("user-store") String userStoreName) {
         if (userStoreName != null && !userStoreName.isEmpty()) {
