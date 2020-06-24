@@ -27,6 +27,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManager;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
 import org.wso2.carbon.device.mgt.core.app.mgt.config.AppManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.license.LicenseConfig;
+import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
@@ -48,10 +49,11 @@ import java.util.Map;
 
 public class DeviceManagementDataHolder {
 
-    private static DeviceManagementDataHolder thisInstance = new DeviceManagementDataHolder();
+    private static final DeviceManagementDataHolder thisInstance = new DeviceManagementDataHolder();
     private RealmService realmService;
     private TenantManager tenantManager;
     private DeviceManagementProviderService deviceManagerProvider;
+    private DeviceInformationManager deviceInformationManager;
     private LicenseManager licenseManager;
     private RegistryService registryService;
     private LicenseConfig licenseConfig;
@@ -59,7 +61,7 @@ public class DeviceManagementDataHolder {
     private AppManagementConfig appManagerConfig;
     private OperationManager operationManager;
     private ConfigurationContextService configurationContextService;
-    private HashMap<String,Boolean> requireDeviceAuthorization = new HashMap<>();
+    private final HashMap<String,Boolean> requireDeviceAuthorization = new HashMap<>();
     private DeviceAccessAuthorizationService deviceAccessAuthorizationService;
     private GroupManagementProviderService groupManagementProviderService;
     private TaskService taskService;
@@ -69,10 +71,10 @@ public class DeviceManagementDataHolder {
     private DeviceStatusTaskManagerService deviceStatusTaskManagerService;
     private DeviceTypeGeneratorService deviceTypeGeneratorService;
     private PrivacyComplianceProvider privacyComplianceProvider;
-    private Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
-            new HashMap<DeviceType, DeviceStatusTaskPluginConfig>());
+    private final Map<DeviceType, DeviceStatusTaskPluginConfig> deviceStatusTaskPluginConfigs = Collections.synchronizedMap(
+            new HashMap<>());
 
-    private Map<String, OperationMonitoringTaskConfig> map = new HashMap<>();
+    private final Map<String, OperationMonitoringTaskConfig> map = new HashMap<>();
 
     public Map<String, OperationMonitoringTaskConfig> getMap(){
         return this.map;
@@ -275,5 +277,13 @@ public class DeviceManagementDataHolder {
 
     public void setPrivacyComplianceProvider(PrivacyComplianceProvider privacyComplianceProvider) {
         this.privacyComplianceProvider = privacyComplianceProvider;
+    }
+
+    public DeviceInformationManager getDeviceInformationManager() {
+        return deviceInformationManager;
+    }
+
+    public void setDeviceInformationManager(DeviceInformationManager deviceInformationManager) {
+        this.deviceInformationManager = deviceInformationManager;
     }
 }

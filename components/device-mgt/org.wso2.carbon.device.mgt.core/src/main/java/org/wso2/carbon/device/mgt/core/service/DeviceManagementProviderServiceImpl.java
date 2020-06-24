@@ -63,7 +63,6 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySna
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotificationConfiguration;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifierException;
-import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -103,7 +102,6 @@ import org.wso2.carbon.device.mgt.core.dao.EnrollmentDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceDetailsMgtException;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
-import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeServiceIdentifier;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -149,7 +147,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     private static final String OPERATION_RESPONSE_EVENT_STREAM_DEFINITION = "org.wso2.iot.OperationResponseStream";
     private final DeviceManagementPluginRepository pluginRepository;
-    private final DeviceInformationManager deviceInformationManager;
     private final DeviceDAO deviceDAO;
     private final DeviceTypeDAO deviceTypeDAO;
     private final EnrollmentDAO enrollmentDAO;
@@ -157,8 +154,6 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
     public DeviceManagementProviderServiceImpl() {
         this.pluginRepository = new DeviceManagementPluginRepository();
-        this.deviceInformationManager = new DeviceInformationManagerImpl();
-
         this.deviceDAO = DeviceManagementDAOFactory.getDeviceDAO();
         this.applicationDAO = DeviceManagementDAOFactory.getApplicationDAO();
         this.deviceTypeDAO = DeviceManagementDAOFactory.getDeviceTypeDAO();
@@ -399,6 +394,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         extractDeviceLocationToUpdate(device);
         try {
             if (device.getDeviceInfo() != null) {
+                DeviceInformationManager deviceInformationManager = DeviceManagementDataHolder
+                        .getInstance().getDeviceInformationManager();
                 deviceInformationManager.addDeviceInfo(device, device.getDeviceInfo());
             }
         } catch (DeviceDetailsMgtException e) {
@@ -2838,7 +2835,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         if (log.isDebugEnabled()) {
             log.debug("Add device:" + deviceIdentifier.getId() + " to default group");
         }
-        GroupManagementProviderService groupManagementProviderService = new GroupManagementProviderServiceImpl();
+        GroupManagementProviderService groupManagementProviderService = DeviceManagementDataHolder
+                .getInstance().getGroupManagementProviderService();
         try {
             DeviceGroup defaultGroup = createDefaultGroup(groupManagementProviderService, ownership.toString());
             if (defaultGroup != null) {
@@ -3103,6 +3101,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         DeviceInfo info;
         try {
+            DeviceInformationManager deviceInformationManager = DeviceManagementDataHolder
+                    .getInstance().getDeviceInformationManager();
             info = deviceInformationManager.getDeviceInfo(device);
         } catch (DeviceDetailsMgtException e) {
             String msg = "Error occurred while retrieving advance info of '" + device.getType() +
@@ -3402,6 +3402,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
      * @param device Device object
      */
     private void extractDeviceLocationToUpdate(Device device) {
+        DeviceInformationManager deviceInformationManager = DeviceManagementDataHolder
+                .getInstance().getDeviceInformationManager();
         List<Device.Property> properties = device.getProperties();
         if (properties != null) {
             String latitude = null;

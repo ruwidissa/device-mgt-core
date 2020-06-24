@@ -270,8 +270,7 @@ public class DeviceManagementPluginRepository implements DeviceManagerStartupLis
         return tenantProviders;
     }
 
-    private void registerPushNotificationStrategy(DeviceManagementService deviceManagementService)
-            throws DeviceManagementException {
+    private void registerPushNotificationStrategy(DeviceManagementService deviceManagementService) {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
                 deviceManagementService.getProvisioningConfig().getProviderTenantDomain(), true);
