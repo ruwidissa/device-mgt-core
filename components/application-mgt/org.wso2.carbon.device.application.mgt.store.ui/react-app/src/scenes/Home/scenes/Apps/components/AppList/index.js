@@ -143,11 +143,13 @@ class AppList extends React.Component {
         >
           <Row gutter={16}>
             {apps.length === 0 && (
-              <Result
-                status="404"
-                title="No apps, yet."
-                subTitle="No apps available, yet! When the administration uploads, apps will show up here."
-              />
+              <Col span={24}>
+                <Result
+                  status="404"
+                  title="No apps, yet."
+                  subTitle="No apps available, yet! When the administration uploads, apps will show up here."
+                />
+              </Col>
             )}
             {apps.map(app => (
               <Col key={app.id} xs={12} sm={6} md={6} lg={4} xl={3}>

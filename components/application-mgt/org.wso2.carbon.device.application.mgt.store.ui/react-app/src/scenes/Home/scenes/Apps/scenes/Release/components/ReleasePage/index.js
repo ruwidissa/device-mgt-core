@@ -18,7 +18,8 @@
 
 import React from 'react';
 import '../../../../../../../../App.css';
-import { Skeleton, Typography, Row, Col, Card, Breadcrumb, Icon } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
+import { Skeleton, Typography, Row, Col, Card, Breadcrumb } from 'antd';
 import ReleaseView from './components/ReleaseView';
 import axios from 'axios';
 import { withConfigContext } from '../../../../../../../../components/context/ConfigContext';
@@ -110,7 +111,7 @@ class ReleasePage extends React.Component {
             <Breadcrumb style={{ paddingBottom: 16 }}>
               <Breadcrumb.Item>
                 <Link to={'/store/' + deviceType}>
-                  <Icon type="home" /> {deviceType + ' apps'}{' '}
+                  <HomeOutlined /> {deviceType + ' apps'}{' '}
                 </Link>
               </Breadcrumb.Item>
               <Breadcrumb.Item>{appName}</Breadcrumb.Item>

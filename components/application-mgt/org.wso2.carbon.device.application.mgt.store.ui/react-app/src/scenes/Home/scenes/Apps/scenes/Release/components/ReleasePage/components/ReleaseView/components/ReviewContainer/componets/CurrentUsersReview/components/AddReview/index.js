@@ -17,10 +17,10 @@
  */
 
 import React from 'react';
+import { StarOutlined } from '@ant-design/icons';
 import {
   Drawer,
   Button,
-  Icon,
   Row,
   Col,
   Typography,
@@ -127,7 +127,7 @@ class AddReview extends React.Component {
     return (
       <div>
         <Button type="primary" onClick={this.showDrawer}>
-          <Icon type="star" /> Add a review
+          <StarOutlined /> Add a review
         </Button>
 
         <Drawer
