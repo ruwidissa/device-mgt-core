@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { Icon as LegacyIcon } from '@ant-design/compatible';
 import {
   Drawer,
   Select,
@@ -29,7 +30,6 @@ import {
   Button,
   Spin,
   message,
-  Icon,
   Card,
   Badge,
   Tooltip,
@@ -48,7 +48,11 @@ import ManagedConfigurationsIframe from './components/ManagedConfigurationsIfram
 import { handleApiError } from '../../../../../../../../../services/utils/errorHandler';
 import Authorized from '../../../../../../../../../components/Authorized/Authorized';
 import { isAuthorized } from '../../../../../../../../../services/utils/authorizationHandler';
-import { MoreOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  EditOutlined,
+  MoreOutlined,
+} from '@ant-design/icons';
 import DeleteApp from './components/DeleteApp';
 import RetireApp from './components/RetireApp';
 
@@ -58,7 +62,7 @@ const { Option } = Select;
 
 const IconText = ({ type, text }) => (
   <span>
-    <Icon type={type} style={{ marginRight: 8 }} />
+    <LegacyIcon type={type} style={{ marginRight: 8 }} />
     {text}
   </span>
 );
@@ -603,13 +607,12 @@ class AppDetailsDrawer extends React.Component {
                                       title="Published"
                                       count={
                                         <Tooltip title="Published">
-                                          <Icon
+                                          <CheckCircleOutlined
                                             style={{
                                               backgroundColor: '#52c41a',
                                               borderRadius: '50%',
                                               color: 'white',
                                             }}
-                                            type="check-circle"
                                           />
                                         </Tooltip>
                                       }
@@ -698,7 +701,7 @@ class AppDetailsDrawer extends React.Component {
                     }}
                     onClick={this.enableDescriptionEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }
@@ -754,7 +757,7 @@ class AppDetailsDrawer extends React.Component {
                     }}
                     onClick={this.enableCategoriesEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }
@@ -821,7 +824,7 @@ class AppDetailsDrawer extends React.Component {
                     }}
                     onClick={this.enableTagsEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }

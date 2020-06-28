@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { Row, Typography, Icon } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
+import { Row, Typography } from 'antd';
 import StarRatings from 'react-star-ratings';
 import './styles.css';
 import axios from 'axios';
@@ -118,7 +119,7 @@ class DetailedRating extends React.Component {
           />
           <br />
           <Text type="secondary" className="people-count">
-            <Icon type="team" /> {totalCount} total
+            <TeamOutlined /> {totalCount} total
           </Text>
         </div>
         <div className="bar-containers">

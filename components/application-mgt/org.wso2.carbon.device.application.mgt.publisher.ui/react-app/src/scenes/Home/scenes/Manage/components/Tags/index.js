@@ -17,11 +17,11 @@
  */
 
 import React from 'react';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Card,
   Tag,
   message,
-  Icon,
   Input,
   notification,
   Divider,
@@ -151,11 +151,10 @@ class ManageTags extends React.Component {
           <>
             <Divider type="vertical" />
             <Tooltip title="edit">
-              <Icon
+              <EditOutlined
                 onClick={() => {
                   this.openEditModal(tagName);
                 }}
-                type="edit"
               />
             </Tooltip>
             <Divider type="vertical" />
@@ -176,7 +175,7 @@ class ManageTags extends React.Component {
                 okText="Yes"
                 cancelText="No"
               >
-                <Icon type="delete" />
+                <DeleteOutlined />
               </Popconfirm>
             </Tooltip>
           </>
@@ -390,7 +389,7 @@ class ManageTags extends React.Component {
                 {!isAddNewVisible && (
                   <div style={{ float: 'right' }}>
                     <Button
-                      icon="plus"
+                      icon={<PlusOutlined />}
                       // type="primary"
                       size="small"
                       onClick={() => {
@@ -447,7 +446,7 @@ class ManageTags extends React.Component {
                         onClick={this.showInput}
                         style={{ background: '#fff', borderStyle: 'dashed' }}
                       >
-                        <Icon type="plus" /> New Tag
+                        <PlusOutlined /> New Tag
                       </Tag>
                     )}
                   </TweenOneGroup>

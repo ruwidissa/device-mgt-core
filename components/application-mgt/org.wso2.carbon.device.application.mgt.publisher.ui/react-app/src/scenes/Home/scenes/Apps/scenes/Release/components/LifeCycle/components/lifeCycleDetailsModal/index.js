@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Modal, Button, Tag, List, Typography } from 'antd';
 import pSBC from 'shade-blend-color';
 import { withConfigContext } from '../../../../../../../../../../components/ConfigContext';
@@ -47,7 +48,11 @@ class LifeCycleDetailsModal extends React.Component {
     const { lifecycle } = this.props;
     return (
       <div>
-        <Button size="small" icon="question-circle" onClick={this.showModal}>
+        <Button
+          size="small"
+          icon={<QuestionCircleOutlined />}
+          onClick={this.showModal}
+        >
           Learn more
         </Button>
         <Modal

@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { Icon as LegacyIcon } from '@ant-design/compatible';
 import {
   Typography,
   Tag,
@@ -25,7 +26,6 @@ import {
   Modal,
   notification,
   Steps,
-  Icon,
   Alert,
   Tabs,
 } from 'antd';
@@ -239,7 +239,7 @@ class LifeCycle extends React.Component {
                 {lifecycleSteps.map((step, index) => (
                   <Step
                     key={index}
-                    icon={<Icon type={step.icon} />}
+                    icon={<LegacyIcon type={step.icon} />}
                     title={step.title}
                     disabled={current !== step.step}
                     description={

@@ -17,7 +17,9 @@
  */
 
 import React from 'react';
-import { Card, Button, Steps, Row, Col, Form, Result, Spin } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Card, Button, Steps, Row, Col, Result, Spin } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import NewAppDetailsForm from './components/NewAppDetailsForm';

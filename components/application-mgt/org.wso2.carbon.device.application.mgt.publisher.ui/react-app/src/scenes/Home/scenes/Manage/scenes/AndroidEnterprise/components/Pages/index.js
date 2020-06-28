@@ -18,13 +18,13 @@
 
 import React from 'react';
 import axios from 'axios';
+import { DeleteOutlined, HomeOutlined } from '@ant-design/icons';
 import {
   Tag,
   notification,
   Table,
   Typography,
   Divider,
-  Icon,
   Popconfirm,
   Button,
 } from 'antd';
@@ -239,7 +239,7 @@ class Pages extends React.Component {
                 <Button
                   disabled={page.id === this.state.homePageId}
                   className="btn-warning"
-                  icon="home"
+                  icon={<HomeOutlined />}
                   type="link"
                   onClick={() => {
                     this.updateHomePage(page.id);
@@ -259,7 +259,7 @@ class Pages extends React.Component {
               >
                 <span className="action">
                   <Text type="danger">
-                    <Icon type="delete" /> delete
+                    <DeleteOutlined /> delete
                   </Text>
                 </span>
               </Popconfirm>

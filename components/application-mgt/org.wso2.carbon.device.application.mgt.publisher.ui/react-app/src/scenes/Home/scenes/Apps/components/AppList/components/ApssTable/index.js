@@ -17,7 +17,9 @@
  */
 
 import React from 'react';
-import { Avatar, Table, Tag, Icon, Badge, Alert, Tooltip } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { Avatar, Table, Tag, Badge, Alert, Tooltip } from 'antd';
 import axios from 'axios';
 import pSBC from 'shade-blend-color';
 import './styles.css';
@@ -69,13 +71,12 @@ const columns = [
             }}
             count={
               <Tooltip title="Published">
-                <Icon
+                <CheckCircleOutlined
                   style={{
                     backgroundColor: '#52c41a',
                     borderRadius: '50%',
                     color: 'white',
                   }}
-                  type="check-circle"
                 />
               </Tooltip>
             }
@@ -147,7 +148,7 @@ const columns = [
       }
       return (
         <span style={{ fontSize: 20, color: color, textAlign: 'center' }}>
-          <Icon type={icon} theme={theme} />
+          <LegacyIcon type={icon} theme={theme} />
         </span>
       );
     },

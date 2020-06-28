@@ -17,16 +17,9 @@
  */
 
 import React from 'react';
-import {
-  Divider,
-  Row,
-  Col,
-  Typography,
-  Button,
-  Icon,
-  Tooltip,
-  Alert,
-} from 'antd';
+import { Icon as LegacyIcon } from '@ant-design/compatible';
+import { ShopOutlined } from '@ant-design/icons';
+import { Divider, Row, Col, Typography, Button, Tooltip, Alert } from 'antd';
 import StarRatings from 'react-star-ratings';
 import Reviews from './components/Reviews';
 import '../../../../../../../../App.css';
@@ -98,7 +91,7 @@ class ReleaseView extends React.Component {
               <br />
               <Text>Platform : </Text>
               <span style={{ fontSize: 20, color: color, textAlign: 'center' }}>
-                <Icon type={icon} theme={theme} />
+                <LegacyIcon type={icon} theme={theme} />
               </span>
               <Divider type="vertical" />
               <Text>Version : {release.version}</Text>
@@ -140,7 +133,7 @@ class ReleaseView extends React.Component {
                         style={{ float: 'right' }}
                         htmlType="button"
                         type="primary"
-                        icon="shop"
+                        icon={<ShopOutlined />}
                         disabled={!isAppInstallable}
                         onClick={() => {
                           window.open(

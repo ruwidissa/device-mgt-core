@@ -17,7 +17,9 @@
  */
 
 import React from 'react';
-import { Alert, Button, Col, Form, Input, Row, Select, Spin } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Alert, Button, Col, Input, Row, Select, Spin } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';

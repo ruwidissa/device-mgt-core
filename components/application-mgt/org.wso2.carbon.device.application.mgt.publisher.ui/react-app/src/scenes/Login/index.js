@@ -17,12 +17,13 @@
  */
 
 import React from 'react';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
 import {
   Typography,
   Row,
   Col,
-  Form,
-  Icon,
   Input,
   Button,
   message,
@@ -156,7 +157,7 @@ class NormalLoginForm extends React.Component {
           })(
             <Input
               style={{ height: 32 }}
-              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder="Username"
             />,
           )}
@@ -167,7 +168,7 @@ class NormalLoginForm extends React.Component {
           })(
             <Input
               style={{ height: 32 }}
-              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
               type="password"
               placeholder="Password"
             />,
