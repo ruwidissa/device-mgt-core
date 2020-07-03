@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 import {
   Drawer,
   Select,
@@ -52,6 +51,9 @@ import {
   CheckCircleOutlined,
   EditOutlined,
   MoreOutlined,
+  StarOutlined,
+  UploadOutlined,
+  CheckOutlined,
 } from '@ant-design/icons';
 import DeleteApp from './components/DeleteApp';
 import RetireApp from './components/RetireApp';
@@ -59,13 +61,6 @@ import RetireApp from './components/RetireApp';
 const { Meta } = Card;
 const { Text, Title } = Typography;
 const { Option } = Select;
-
-const IconText = ({ type, text }) => (
-  <span>
-    <LegacyIcon type={type} style={{ marginRight: 8 }} />
-    {text}
-  </span>
-);
 
 const modules = {
   toolbar: [
@@ -636,24 +631,15 @@ class AppDetailsDrawer extends React.Component {
                               description={
                                 <div
                                   style={{
-                                    fontSize: '0.7em',
+                                    fontSize: '0.8em',
                                   }}
                                   className="description-view"
                                 >
-                                  <IconText
-                                    type="check"
-                                    text={release.currentStatus}
-                                  />
+                                  <CheckOutlined /> {release.currentStatus}
                                   <Divider type="vertical" />
-                                  <IconText
-                                    type="upload"
-                                    text={release.releaseType}
-                                  />
+                                  <UploadOutlined /> {release.releaseType}
                                   <Divider type="vertical" />
-                                  <IconText
-                                    type="star-o"
-                                    text={release.rating.toFixed(1)}
-                                  />
+                                  <StarOutlined /> {release.rating.toFixed(1)}
                                 </div>
                               }
                             />

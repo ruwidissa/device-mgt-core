@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 import {
   Typography,
   Tag,
@@ -36,7 +35,7 @@ import './styles.css';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
 import LifeCycleHistory from './components/LifeCycleHistory';
-
+import { EntgraIcon } from 'entgra-icons-react';
 const { Text, Title, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
@@ -216,7 +215,6 @@ class LifeCycle extends React.Component {
     ) {
       proceedingStates = lifecycle[currentStatus].proceedingStates;
     }
-
     return (
       <div>
         <Title level={4}>Manage Lifecycle</Title>
@@ -236,36 +234,38 @@ class LifeCycle extends React.Component {
                 onChange={this.onChange}
                 size="small"
               >
-                {lifecycleSteps.map((step, index) => (
-                  <Step
-                    key={index}
-                    icon={<LegacyIcon type={step.icon} />}
-                    title={step.title}
-                    disabled={current !== step.step}
-                    description={
-                      current === step.step && (
-                        <div style={{ width: 400 }}>
-                          <p>{step.text}</p>
-                          {proceedingStates.map(lifecycleState => {
-                            return (
-                              <Button
-                                size={'small'}
-                                style={{ marginRight: 3 }}
-                                onClick={() =>
-                                  this.showReasonModal(lifecycleState)
-                                }
-                                key={lifecycleState}
-                                type={'primary'}
-                              >
-                                {lifecycleState}
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      )
-                    }
-                  />
-                ))}
+                {lifecycleSteps.map((step, index) => {
+                  return (
+                    <Step
+                      key={index}
+                      icon={<EntgraIcon type={step.icon} />}
+                      title={step.title}
+                      disabled={current !== step.step}
+                      description={
+                        current === step.step && (
+                          <div style={{ width: 400 }}>
+                            <p>{step.text}</p>
+                            {proceedingStates.map(lifecycleState => {
+                              return (
+                                <Button
+                                  size={'small'}
+                                  style={{ marginRight: 3 }}
+                                  onClick={() =>
+                                    this.showReasonModal(lifecycleState)
+                                  }
+                                  key={lifecycleState}
+                                  type={'primary'}
+                                >
+                                  {lifecycleState}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        )
+                      }
+                    />
+                  );
+                })}
               </Steps>
             </div>
           </TabPane>

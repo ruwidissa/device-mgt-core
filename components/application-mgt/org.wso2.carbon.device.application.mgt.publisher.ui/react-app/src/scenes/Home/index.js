@@ -25,9 +25,10 @@ import {
   PlusOutlined,
   SettingOutlined,
   UserOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from '@ant-design/icons';
 
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 import { Layout, Menu, Drawer, Button } from 'antd';
 import { Switch, Link } from 'react-router-dom';
 import RouteWithSubRoutes from '../../components/RouteWithSubRoutes';
@@ -167,10 +168,11 @@ class Dashboard extends React.Component {
         <Layout className="mobile-layout">
           <div className="mobile-menu-button">
             <Button type="link" onClick={this.showMobileNavigationBar}>
-              <LegacyIcon
-                type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'}
-                className="bar-icon"
-              />
+              {this.state.collapsed ? (
+                <MenuFoldOutlined />
+              ) : (
+                <MenuUnfoldOutlined />
+              )}
             </Button>
           </div>
         </Layout>

@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-import { Icon as LegacyIcon } from '@ant-design/compatible';
 import { ShopOutlined } from '@ant-design/icons';
 import { Divider, Row, Col, Typography, Button, Tooltip, Alert } from 'antd';
 import StarRatings from 'react-star-ratings';
@@ -28,6 +27,7 @@ import EditRelease from './components/EditRelease';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import Authorized from '../../../../../../../../components/Authorized/Authorized';
 import DeleteRelease from './components/DeleteRelease';
+import { EntgraIcon } from 'entgra-icons-react';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -57,12 +57,10 @@ class ReleaseView extends React.Component {
     const defaultPlatformIcons = config.defaultPlatformIcons;
     let icon = defaultPlatformIcons.default.icon;
     let color = defaultPlatformIcons.default.color;
-    let theme = defaultPlatformIcons.default.theme;
 
     if (defaultPlatformIcons.hasOwnProperty(platform)) {
       icon = defaultPlatformIcons[platform].icon;
       color = defaultPlatformIcons[platform].color;
-      theme = defaultPlatformIcons[platform].theme;
     }
     let metaData = [];
     try {
@@ -91,7 +89,7 @@ class ReleaseView extends React.Component {
               <br />
               <Text>Platform : </Text>
               <span style={{ fontSize: 20, color: color, textAlign: 'center' }}>
-                <LegacyIcon type={icon} theme={theme} />
+                <EntgraIcon type={icon} />
               </span>
               <Divider type="vertical" />
               <Text>Version : {release.version}</Text>
@@ -154,7 +152,7 @@ class ReleaseView extends React.Component {
             </Col>
           </Row>
           <Divider />
-          <Row className="release-images">
+          <Row className="release-images" style={{ flexFlow: 'nowrap' }}>
             {release.screenshots.map((screenshotUrl, index) => {
               return (
                 <div key={index} className="release-screenshot">
