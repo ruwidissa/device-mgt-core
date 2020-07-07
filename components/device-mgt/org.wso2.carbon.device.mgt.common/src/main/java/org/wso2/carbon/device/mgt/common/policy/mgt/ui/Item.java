@@ -44,6 +44,7 @@ public class Item {
     private Text text;
     private InputList inputList;
     private String nullableValue;
+    private String divider;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -196,5 +197,14 @@ public class Item {
 
     public void setNullableValue(String nullableValue) {
         this.nullableValue = nullableValue;
+    }
+
+    @XmlElement(name = "Divider")
+    public String getDivider() {
+        return divider;
+    }
+
+    public void setDivider(String divider) {
+        this.divider = divider;
     }
 }
