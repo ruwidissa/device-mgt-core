@@ -159,5 +159,16 @@
         <ExtensionClass>org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier</ExtensionClass>
         <NotifyingInternalHost>http://localhost:8280</NotifyingInternalHost>
     </EnrolmentNotificationConfiguration>
+    <DefaultRoles>
+        <Enabled>false</Enabled>
+        <Roles>
+            <Role>
+                <Name>test_role</Name>
+                <Permissions>
+                    <Permission>/permission/admin/Login</Permission>
+                </Permissions>
+            </Role>
+        </Roles>
+    </DefaultRoles>
 </DeviceMgtConfiguration>
 

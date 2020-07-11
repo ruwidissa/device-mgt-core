@@ -18,6 +18,7 @@
 package org.wso2.carbon.device.mgt.core.config;
 
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotificationConfiguration;
+import org.wso2.carbon.device.mgt.common.roles.config.DefaultRoles;
 import org.wso2.carbon.device.mgt.core.config.analytics.OperationAnalyticsConfiguration;
 import org.wso2.carbon.device.mgt.core.config.archival.ArchivalConfiguration;
 import org.wso2.carbon.device.mgt.core.config.cache.CertificateCacheConfiguration;
@@ -60,7 +61,7 @@ public final class DeviceManagementConfig {
     private RemoteSessionConfiguration remoteSessionConfiguration;
     private ArchivalConfiguration archivalConfiguration;
     private EnrollmentNotificationConfiguration enrollmentNotificationConfiguration;
-
+    private DefaultRoles defaultRoles;
 
     @XmlElement(name = "ManagementRepository", required = true)
     public DeviceManagementConfigRepository getDeviceManagementConfigRepository() {
@@ -215,5 +216,10 @@ public final class DeviceManagementConfig {
             EnrollmentNotificationConfiguration enrollmentNotificationConfiguration) {
         this.enrollmentNotificationConfiguration = enrollmentNotificationConfiguration;
     }
+
+    @XmlElement(name = "DefaultRoles", required = true)
+    public DefaultRoles getDefaultRoles() { return defaultRoles; }
+
+    public void setDefaultRoles(DefaultRoles defaultRoles) { this.defaultRoles = defaultRoles; }
 }
 
