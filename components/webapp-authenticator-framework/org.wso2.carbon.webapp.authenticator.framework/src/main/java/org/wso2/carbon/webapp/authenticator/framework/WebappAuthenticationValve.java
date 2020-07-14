@@ -36,6 +36,10 @@ import org.wso2.carbon.webapp.authenticator.framework.authenticator.WebappAuthen
 import org.wso2.carbon.webapp.authenticator.framework.authorizer.WebappTenantAuthorizer;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -43,12 +47,39 @@ import java.util.regex.Pattern;
 public class WebappAuthenticationValve extends CarbonTomcatValve {
 
     private static final Log log = LogFactory.getLog(WebappAuthenticationValve.class);
-    private static TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
+    private static final TreeMap<String, String> nonSecuredEndpoints = new TreeMap<>();
     private static final String PERMISSION_PREFIX = "/permission/admin";
     public static final String AUTHORIZE_PERMISSION = "Authorize-Permission";
 
+    private static InetAddress inetAddress = null;
+
     @Override
     public void invoke(Request request, Response response, CompositeValve compositeValve) {
+        if (response != null) {
+            if (inetAddress == null) {
+                try {
+                    Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+                    while (ifaces.hasMoreElements()) {
+                        NetworkInterface iface = ifaces.nextElement();
+                        if (!iface.isLoopback() && iface.isUp()) {
+                            Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                            while (addresses.hasMoreElements()) {
+                                inetAddress = addresses.nextElement();
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                } catch (SocketException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Unable to get IP address of the node.", e);
+                    }
+                }
+            }
+            if (inetAddress != null) {
+                response.setHeader("IoT-Node-IP", inetAddress.getHostAddress());
+            }
+        }
 
         if ((this.isContextSkipped(request) ||  this.skipAuthentication(request))
                 && (StringUtils.isEmpty(request.getHeader(AUTHORIZE_PERMISSION)))) {

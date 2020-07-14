@@ -95,7 +95,7 @@ public class FCMNotificationStrategy implements NotificationStrategy {
         OutputStream os = null;
         byte[] bytes = getFCMRequest(message, getFCMToken(device.getProperties())).getBytes();
 
-        HttpURLConnection conn;
+        HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(FCM_ENDPOINT).openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
@@ -107,6 +107,9 @@ public class FCMNotificationStrategy implements NotificationStrategy {
         } finally {
             if (os != null) {
                 os.close();
+            }
+            if (conn != null) {
+                conn.disconnect();
             }
         }
         int status = conn.getResponseCode();

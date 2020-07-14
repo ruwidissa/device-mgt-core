@@ -55,10 +55,10 @@ import java.util.Map;
 
 public class GroupManagementProviderServiceImpl implements GroupManagementProviderService {
 
-    private static Log log = LogFactory.getLog(GroupManagementProviderServiceImpl.class);
+    private static final Log log = LogFactory.getLog(GroupManagementProviderServiceImpl.class);
 
-    private GroupDAO groupDAO;
-    private DeviceDAO deviceDAO;
+    private final GroupDAO groupDAO;
+    private final DeviceDAO deviceDAO;
 
     /**
      * Set groupDAO from GroupManagementDAOFactory when class instantiate.
@@ -912,9 +912,21 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             log.debug("Get groups of device " + deviceIdentifier.getId());
         }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        DeviceManagementProviderService managementProviderService = new DeviceManagementProviderServiceImpl();
+        DeviceManagementProviderService managementProviderService = DeviceManagementDataHolder
+                .getInstance().getDeviceManagementProvider();
+        Device device;
         try {
-            Device device = managementProviderService.getDevice(deviceIdentifier, false);
+            device = managementProviderService.getDevice(deviceIdentifier, false);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while retrieving device groups.";
+            log.error(msg, e);
+            throw new GroupManagementException(msg, e);
+        }
+        return getDeviceGroups(requireGroupProps, tenantId, device);
+    }
+
+    private List<DeviceGroup> getDeviceGroups(boolean requireGroupProps, int tenantId, Device device) throws GroupManagementException {
+        try {
             GroupManagementDAOFactory.openConnection();
             List<DeviceGroup> deviceGroups = groupDAO.getGroups(device.getId(), tenantId);
             if (requireGroupProps) {
@@ -925,7 +937,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
                 }
             }
             return deviceGroups;
-        } catch (DeviceManagementException | GroupManagementDAOException | SQLException e) {
+        } catch (GroupManagementDAOException | SQLException e) {
             String msg = "Error occurred while retrieving device groups.";
             log.error(msg, e);
             throw new GroupManagementException(msg, e);
@@ -950,28 +962,7 @@ public class GroupManagementProviderServiceImpl implements GroupManagementProvid
             log.debug("Get groups of device " + device.getDeviceIdentifier());
         }
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        try {
-            GroupManagementDAOFactory.openConnection();
-            List<DeviceGroup> deviceGroups = groupDAO.getGroups(device.getId(), tenantId);
-            if (requireGroupProps) {
-                if (deviceGroups != null && !deviceGroups.isEmpty()) {
-                    for (DeviceGroup group : deviceGroups) {
-                        populateGroupProperties(group, tenantId);
-                    }
-                }
-            }
-            return deviceGroups;
-        } catch (GroupManagementDAOException | SQLException e) {
-            String msg = "Error occurred while retrieving device groups.";
-            log.error(msg, e);
-            throw new GroupManagementException(msg, e);
-        } catch (Exception e) {
-            String msg = "Error occurred in getGroups";
-            log.error(msg, e);
-            throw new GroupManagementException(msg, e);
-        } finally {
-            GroupManagementDAOFactory.closeConnection();
-        }
+        return getDeviceGroups(requireGroupProps, tenantId, device);
     }
 
     /**

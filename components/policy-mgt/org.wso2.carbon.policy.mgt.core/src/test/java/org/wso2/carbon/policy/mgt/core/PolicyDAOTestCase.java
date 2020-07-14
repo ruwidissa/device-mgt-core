@@ -55,6 +55,8 @@ public class PolicyDAOTestCase extends BasePolicyManagementDAOTest {
 
     @BeforeClass
     public void init() throws Exception {
+        log.info("Initializing policy tests");
+        super.initializeServices();
         initDatSource();
         // System.setProperty("GetTenantIDForTest", "Super");
         initiatePrivilegedCaronContext();

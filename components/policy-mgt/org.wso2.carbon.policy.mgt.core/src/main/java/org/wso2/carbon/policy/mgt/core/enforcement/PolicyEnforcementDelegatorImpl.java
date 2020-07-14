@@ -41,15 +41,14 @@ import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMgtConstants;
-import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
 import org.wso2.carbon.policy.mgt.common.PolicyEvaluationException;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.common.PolicyTransformException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
-import org.wso2.carbon.policy.mgt.core.PolicyManagerServiceImpl;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.util.PolicyManagerUtil;
 
@@ -60,8 +59,8 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
 
     private static final Log log = LogFactory.getLog(PolicyEnforcementDelegatorImpl.class);
 
-    private List<Device> devices;
-    private List<Integer> updatedPolicyIds;
+    private final List<Device> devices;
+    private final List<Integer> updatedPolicyIds;
 
     public PolicyEnforcementDelegatorImpl(List<Device> devices, List<Integer> updatedPolicyIds) {
 
@@ -75,7 +74,6 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
         }
         this.devices = devices;
         this.updatedPolicyIds = updatedPolicyIds;
-
     }
 
     @Override
@@ -111,7 +109,8 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
     @Override
     public Policy getEffectivePolicy(DeviceIdentifier identifier) throws PolicyDelegationException {
         try {
-            PolicyManagerService policyManagerService = new PolicyManagerServiceImpl();
+            PolicyManagerService policyManagerService = PolicyManagementDataHolder.getInstance()
+                    .getPolicyManagerService();
             PolicyAdministratorPoint policyAdministratorPoint;
 
             Policy policy = policyManagerService.getPEP().getEffectivePolicy(identifier);
@@ -124,11 +123,7 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
             }
             return policy;
             //return PolicyManagementDataHolder.getInstance().getPolicyEvaluationPoint().getEffectivePolicy(identifier);
-        } catch (PolicyEvaluationException e) {
-            String msg = "Error occurred while retrieving the effective policy for devices.";
-            log.error(msg, e);
-            throw new PolicyDelegationException(msg, e);
-        } catch (PolicyManagementException e) {
+        } catch (PolicyEvaluationException | PolicyManagementException e) {
             String msg = "Error occurred while retrieving the effective policy for devices.";
             log.error(msg, e);
             throw new PolicyDelegationException(msg, e);
@@ -199,7 +194,8 @@ public class PolicyEnforcementDelegatorImpl implements PolicyEnforcementDelegato
      */
     public Policy getAppliedPolicyToDevice(Device device) throws PolicyDelegationException {
         try {
-            PolicyManagerService policyManagerService = new PolicyManagerServiceImpl();
+            PolicyManagerService policyManagerService = PolicyManagementDataHolder.getInstance()
+                    .getPolicyManagerService();
             return policyManagerService.getAppliedPolicyToDevice(device);
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving the applied policy for devices.";
