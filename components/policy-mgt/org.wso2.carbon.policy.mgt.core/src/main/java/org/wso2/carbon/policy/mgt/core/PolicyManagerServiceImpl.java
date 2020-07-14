@@ -69,9 +69,9 @@ public class PolicyManagerServiceImpl implements PolicyManagerService {
 
     private static final Log log = LogFactory.getLog(PolicyManagerServiceImpl.class);
 
-    PolicyAdministratorPoint policyAdministratorPoint;
-    MonitoringManager monitoringManager;
-    private PolicyManager policyManager;
+    private final PolicyAdministratorPoint policyAdministratorPoint;
+    private final MonitoringManager monitoringManager;
+    private final PolicyManager policyManager;
 
     public PolicyManagerServiceImpl() {
         policyAdministratorPoint = new PolicyAdministratorPointImpl();

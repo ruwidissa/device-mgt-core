@@ -40,17 +40,19 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.Feature;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.common.Feature;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
-import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderServiceImpl;
-import org.wso2.carbon.policy.mgt.common.*;
+import org.wso2.carbon.policy.mgt.common.FeatureManagementException;
+import org.wso2.carbon.policy.mgt.common.PIPDevice;
+import org.wso2.carbon.policy.mgt.common.PolicyFilter;
+import org.wso2.carbon.policy.mgt.common.PolicyInformationPoint;
+import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.mgt.FeatureManager;
 import org.wso2.carbon.policy.mgt.core.mgt.PolicyManager;
@@ -68,9 +70,9 @@ public class PolicyInformationPointImpl implements PolicyInformationPoint {
 
     private static final Log log = LogFactory.getLog(PolicyInformationPointImpl.class);
 
-    PolicyManager policyManager;
-    FeatureManager featureManager;
-    DeviceManagementProviderService deviceManagementService;
+    private final PolicyManager policyManager;
+    private final FeatureManager featureManager;
+    private final DeviceManagementProviderService deviceManagementService;
 
     public PolicyInformationPointImpl() {
         deviceManagementService =
@@ -85,8 +87,8 @@ public class PolicyInformationPointImpl implements PolicyInformationPoint {
         Device device;
         DeviceType deviceType = new DeviceType();
         deviceType.setName(deviceIdentifier.getType());
-        DeviceManagementProviderService deviceManagementService = new DeviceManagementProviderServiceImpl();
-        GroupManagementProviderService groupManagementProviderService = new GroupManagementProviderServiceImpl();
+        GroupManagementProviderService groupManagementProviderService = PolicyManagementDataHolder
+                .getInstance().getGroupManagementService();
 
         try {
             device = deviceManagementService.getDevice(deviceIdentifier, false);
@@ -184,11 +186,10 @@ public class PolicyInformationPointImpl implements PolicyInformationPoint {
         }
     }
 
-
     private List<Policy> removeDuplicatePolicies(List<List<Policy>> policies) {
 
-        Map<Integer, Policy> map = new HashMap<Integer, Policy>();
-        List<Policy> finalPolicies = new ArrayList<Policy>();
+        Map<Integer, Policy> map = new HashMap<>();
+        List<Policy> finalPolicies = new ArrayList<>();
         for (List<Policy> policyList : policies) {
             for (Policy policy : policyList) {
                 if (!map.containsKey(policy.getId())) {
@@ -198,10 +199,6 @@ public class PolicyInformationPointImpl implements PolicyInformationPoint {
             }
         }
         return finalPolicies;
-    }
-
-    private DeviceManagementProviderService getDeviceManagementService() {
-        return new DeviceManagementProviderServiceImpl();
     }
 
 }

@@ -133,10 +133,10 @@ import java.util.concurrent.TimeUnit;
 public class DeviceManagementServiceComponent {
 
     private static final Object LOCK = new Object();
-    private static Log log = LogFactory.getLog(DeviceManagementServiceComponent.class);
-    private static List<PluginInitializationListener> listeners = new ArrayList<>();
-    private static List<DeviceManagementService> deviceManagers = new ArrayList<>();
-    private static List<DeviceManagerStartupListener> startupListeners = new ArrayList<>();
+    private static final Log log = LogFactory.getLog(DeviceManagementServiceComponent.class);
+    private static final List<PluginInitializationListener> listeners = new ArrayList<>();
+    private static final List<DeviceManagementService> deviceManagers = new ArrayList<>();
+    private static final List<DeviceManagerStartupListener> startupListeners = new ArrayList<>();
 
     public static void registerPluginInitializationListener(PluginInitializationListener listener) {
         synchronized (LOCK) {
@@ -340,7 +340,10 @@ public class DeviceManagementServiceComponent {
         PermissionManagerService permissionManagerService = PermissionManagerServiceImpl.getInstance();
         bundleContext.registerService(PermissionManagerService.class.getName(), permissionManagerService, null);
 
-        bundleContext.registerService(DeviceInformationManager.class, new DeviceInformationManagerImpl(), null);
+        DeviceInformationManager deviceInformationManager = new DeviceInformationManagerImpl();
+        bundleContext.registerService(DeviceInformationManager.class, deviceInformationManager, null);
+        DeviceManagementDataHolder.getInstance().setDeviceInformationManager(deviceInformationManager);
+
         bundleContext.registerService(SearchManagerService.class, new SearchManagerServiceImpl(), null);
     }
 

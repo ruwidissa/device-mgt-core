@@ -39,6 +39,7 @@ import org.wso2.carbon.device.mgt.core.authorization.DeviceAccessAuthorizationSe
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GroupManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
@@ -112,11 +113,17 @@ public abstract class BasePolicyManagementDAOTest {
         DeviceManagementDataHolder.getInstance().setDeviceAccessAuthorizationService(
                 new DeviceAccessAuthorizationServiceImpl());
         DeviceManagementDataHolder.getInstance().setGroupManagementProviderService(groupMgtService);
+        DeviceManagementDataHolder.getInstance().setDeviceInformationManager(new DeviceInformationManagerImpl());
         DeviceManagementDataHolder.getInstance().setDeviceTaskManagerService(null);
 
         PolicyEvaluationPoint policyEvaluationPoint = new SimplePolicyEvaluationTest();
         PolicyManagementDataHolder.getInstance().setPolicyEvaluationPoint("Simple", policyEvaluationPoint);
         PolicyManagementDataHolder.getInstance().setDeviceManagementService(deviceMgtService);
+        PolicyManagementDataHolder.getInstance().setPolicyManagerService(new PolicyManagerServiceImpl());
+
+        Field groupManagementService = PolicyManagementDataHolder.class.getDeclaredField("groupManagementService");
+        groupManagementService.setAccessible(true);
+        groupManagementService.set(PolicyManagementDataHolder.getInstance(), groupMgtService);
 
         profileManager = new ProfileManagerImpl();
     }

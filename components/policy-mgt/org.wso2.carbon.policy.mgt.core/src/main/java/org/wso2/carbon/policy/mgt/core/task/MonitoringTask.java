@@ -16,7 +16,6 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.policy.mgt.core.task;
 
 import org.apache.commons.logging.Log;
@@ -29,11 +28,9 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
-import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.ntask.core.Task;
 import org.wso2.carbon.policy.mgt.core.internal.PolicyManagementDataHolder;
 import org.wso2.carbon.policy.mgt.core.mgt.MonitoringManager;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +40,8 @@ public class MonitoringTask implements Task {
 
     private static final Log log = LogFactory.getLog(MonitoringTask.class);
 
-    Map<String, String> properties;
-
     @Override
     public void setProperties(Map<String, String> map) {
-        this.properties = map;
     }
 
     @Override
@@ -84,7 +78,8 @@ public class MonitoringTask implements Task {
             log.debug("Monitoring task started to run for all tenants.");
         }
         try {
-            DeviceManagementProviderService deviceManagementService = new DeviceManagementProviderServiceImpl();
+            DeviceManagementProviderService deviceManagementService = PolicyManagementDataHolder
+                    .getInstance().getDeviceManagementService();
             List<Integer> tenants = deviceManagementService.getDeviceEnrolledTenants();
             for (Integer tenant : tenants) {
                 if (MultitenantConstants.SUPER_TENANT_ID == tenant) {
