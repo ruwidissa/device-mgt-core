@@ -72,9 +72,11 @@ import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.DeviceMgtTenantMgtListener;
 import org.wso2.carbon.email.sender.core.service.EmailSenderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -244,6 +246,9 @@ public class DeviceManagementServiceComponent {
             DeviceManagementDataHolder.getInstance().setPrivacyComplianceProvider(privacyComplianceProvider);
             componentContext.getBundleContext().registerService(PrivacyComplianceProvider.class.getName(),
                     privacyComplianceProvider, null);
+
+            componentContext.getBundleContext()
+                    .registerService(TenantMgtListener.class.getName(), new DeviceMgtTenantMgtListener(), null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Device management core bundle has been successfully initialized");
