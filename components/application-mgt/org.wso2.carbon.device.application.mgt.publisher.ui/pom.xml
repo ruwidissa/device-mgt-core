@@ -100,46 +100,6 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.codehaus.mojo</groupId>-->
-<!--                <artifactId>exec-maven-plugin</artifactId>-->
-<!--                <version>1.5.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>npm install (initialize)</id>-->
-<!--                        <goals>-->
-<!--                            <goal>exec</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>initialize</phase>-->
-<!--                        <configuration>-->
-<!--                            <workingDirectory>react-app</workingDirectory>-->
-<!--                            <executable>${npm.executable}</executable>-->
-<!--                            <arguments>-->
-<!--                                <argument>install</argument>-->
-<!--                                <argument>&#45;&#45;silent</argument>-->
-<!--                            </arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>npm run build (compile)</id>-->
-<!--                        <goals>-->
-<!--                            <goal>exec</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>compile</phase>-->
-<!--                        <configuration>-->
-<!--                            <workingDirectory>react-app</workingDirectory>-->
-<!--                            <executable>${npm.executable}</executable>-->
-<!--                            <arguments>-->
-<!--                                <argument>run</argument>-->
-<!--                                <argument>${npm.build.command}</argument>-->
-<!--                            </arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    <workingDirectory>${npm.working.dir}</workingDirectory>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
         </plugins>
     </build>
     <profiles>

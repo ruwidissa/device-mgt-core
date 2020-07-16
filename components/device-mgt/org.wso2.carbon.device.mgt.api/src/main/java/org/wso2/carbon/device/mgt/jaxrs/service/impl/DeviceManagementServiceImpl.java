@@ -38,11 +38,13 @@ package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
 import java.util.LinkedList;
 import java.util.Queue;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceFilters;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
@@ -102,6 +104,10 @@ import org.wso2.carbon.device.mgt.jaxrs.service.api.DeviceManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.InputValidationException;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
+import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
+import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
+import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerService;
 import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -1324,6 +1330,23 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             return Response.status(Response.Status.OK).entity(deviceFilters).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred white retrieving device types to be used in device filters.";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @GET
+    @Path("/{clientId}/{clientSecret}/default-token")
+    @Override
+    public Response getDefaultToken(String clientId, String clientSecret) {
+        JWTClientManagerService jwtClientManagerService = DeviceMgtAPIUtils.getJWTClientManagerService();
+        try {
+            JWTClient jwtClient = jwtClientManagerService.getJWTClient();
+            AccessTokenInfo accessTokenInfo = jwtClient.getAccessToken(clientId, clientSecret,
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername(), "default");
+            return Response.status(Response.Status.OK).entity(accessTokenInfo).build();
+        } catch (JWTClientException e) {
+            String msg = "Error occurred while getting default access token by using given client Id and client secret.";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
