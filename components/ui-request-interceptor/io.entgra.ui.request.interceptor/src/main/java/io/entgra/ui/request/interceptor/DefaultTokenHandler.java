@@ -71,11 +71,11 @@ public class DefaultTokenHandler extends HttpServlet {
                 if (HandlerConstants.HTTP_PROTOCOL.equals(req.getScheme())) {
                     iotsCorePort = System.getProperty("iot.core.http.port");
                 }
+
                 String tokenUrl =
                         req.getScheme() + HandlerConstants.SCHEME_SEPARATOR + System.getProperty("iot.core.host")
-                                + HandlerConstants.COLON + iotsCorePort + "/api/device-mgt/v1.0/devices" + clientId
-                                + HandlerConstants.SCHEME_SEPARATOR + clientSecret + HandlerConstants.SCHEME_SEPARATOR
-                                + "default-token";
+                                + HandlerConstants.COLON + iotsCorePort + "/api/device-mgt/v1.0/devices/" + clientId
+                                + "/" + clientSecret + "/default-token";
 
                 HttpGet defaultTokenRequest = new HttpGet(tokenUrl);
                 defaultTokenRequest
