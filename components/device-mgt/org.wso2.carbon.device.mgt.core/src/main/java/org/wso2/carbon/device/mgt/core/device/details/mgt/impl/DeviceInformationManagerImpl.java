@@ -134,6 +134,20 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 deviceDetailsDAO.addDeviceProperties(injectableProps, device.getId(),
                         device.getEnrolmentInfo().getId());
             }
+
+            if (deviceInfo.getDeviceDetailsMap().containsKey(DeviceManagementConstants
+                    .Payload.DEVICE_INFO_DEVICE_NAME) &&
+                    StringUtils.isNotEmpty(deviceInfo.getDeviceDetailsMap()
+                            .get(DeviceManagementConstants.Payload.DEVICE_INFO_DEVICE_NAME))
+                    && !device.getName().equals(deviceInfo.getDeviceDetailsMap()
+                    .get(DeviceManagementConstants.Payload.DEVICE_INFO_DEVICE_NAME))) {
+                String name = deviceInfo.getDeviceDetailsMap()
+                        .get(DeviceManagementConstants.Payload.DEVICE_INFO_DEVICE_NAME);
+                log.info("Device identifier " + device.getDeviceIdentifier() + ", Device name " +
+                        "changed by user from " + device.getName() + " to " + name);
+                device.setName(name);
+            }
+
             deviceDAO.updateDevice(device, CarbonContext.getThreadLocalCarbonContext().getTenantId());
             DeviceManagementDAOFactory.commitTransaction();
 
@@ -142,8 +156,10 @@ public class DeviceInformationManagerImpl implements DeviceInformationManager {
                 Object[] metaData = {device.getDeviceIdentifier(), device.getType()};
                 Object[] payload = new Object[]{
                         Calendar.getInstance().getTimeInMillis(),
-                        deviceInfo.getDeviceDetailsMap().get("IMEI"),
-                        deviceInfo.getDeviceDetailsMap().get("IMSI"),
+                        deviceInfo.getDeviceDetailsMap().get(DeviceManagementConstants.Payload
+                                .DEVICE_INFO_IMEI),
+                        deviceInfo.getDeviceDetailsMap().get(DeviceManagementConstants.Payload
+                                        .DEVICE_INFO_IMSI),
                         deviceInfo.getDeviceModel(),
                         deviceInfo.getVendor(),
                         deviceInfo.getOsVersion(),

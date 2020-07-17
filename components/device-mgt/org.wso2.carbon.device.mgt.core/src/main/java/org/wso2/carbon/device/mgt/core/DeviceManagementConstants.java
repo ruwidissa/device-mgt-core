@@ -169,4 +169,13 @@ public final class DeviceManagementConstants {
         public static final String DEVICE_INFO_PARAM =  "device-info";
         public static final String APP_USAGE_ENDPOINT = REPORTING_CONTEXT + "/app-usage";
     }
+
+    public static final class Payload {
+        private Payload() {
+            throw new AssertionError();
+        }
+        public static final String DEVICE_INFO_DEVICE_NAME = "DEVICE_NAME";
+        public static final String DEVICE_INFO_IMEI = "IMEI";
+        public static final String DEVICE_INFO_IMSI =  "IMSI";;
+    }
 }
