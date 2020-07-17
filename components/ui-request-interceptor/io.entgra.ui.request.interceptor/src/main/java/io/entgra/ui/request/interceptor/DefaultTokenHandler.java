@@ -40,12 +40,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @MultipartConfig
-@WebServlet(
-        name = "DefaultTokenHandlerServlet",
-        description = "This servlet intercepts the api requests initiated from the user interface to get the default "
-                + "token",
-        urlPatterns = { "/default-credentials/*" }
-        )
+@WebServlet("/default-credentials")
 public class DefaultTokenHandler extends HttpServlet {
     private static final Log log = LogFactory.getLog(DefaultTokenHandler.class);
 
