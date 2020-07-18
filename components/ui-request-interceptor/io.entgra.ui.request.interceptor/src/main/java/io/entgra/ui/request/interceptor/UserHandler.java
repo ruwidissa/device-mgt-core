@@ -56,13 +56,13 @@ public class UserHandler extends HttpServlet {
                             + HandlerConstants.COLON + HandlerUtil.getGatewayPort(req.getScheme());
             HttpSession httpSession = req.getSession(false);
             if (httpSession == null) {
-                sendUnAuthorizeResponse(resp);
+                HandlerUtil.sendUnAuthorizeResponse(resp);
                 return;
             }
 
             AuthData authData = (AuthData) httpSession.getAttribute(HandlerConstants.SESSION_AUTH_DATA_KEY);
             if (authData == null) {
-                sendUnAuthorizeResponse(resp);
+                HandlerUtil.sendUnAuthorizeResponse(resp);
                 return;
             }
 
@@ -91,7 +91,7 @@ public class UserHandler extends HttpServlet {
             if (jTokenResult.isJsonObject()) {
                 JsonObject jTokenResultAsJsonObject = jTokenResult.getAsJsonObject();
                 if (!jTokenResultAsJsonObject.get("active").getAsBoolean()) {
-                    sendUnAuthorizeResponse(resp);
+                    HandlerUtil.sendUnAuthorizeResponse(resp);
                     return;
                 }
                 ProxyResponse proxyResponse = new ProxyResponse();
@@ -105,19 +105,5 @@ public class UserHandler extends HttpServlet {
         } catch (JsonSyntaxException e) {
             log.error("Error occurred while parsing the response. ", e);
         }
-    }
-
-    /**
-     * Send UnAuthorized Response to the user
-     * 
-     * @param resp HttpServletResponse object
-     */
-    private void sendUnAuthorizeResponse(HttpServletResponse resp)
-            throws IOException {
-        ProxyResponse proxyResponse = new ProxyResponse();
-        proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
-        proxyResponse.setExecutorResponse(
-                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
-        HandlerUtil.handleError(resp, proxyResponse);
     }
 }
