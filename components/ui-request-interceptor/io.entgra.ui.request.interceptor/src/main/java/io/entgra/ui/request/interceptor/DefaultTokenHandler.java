@@ -104,10 +104,10 @@ public class DefaultTokenHandler extends HttpServlet {
                     newDefaultAuthData.setClientId(clientId);
                     newDefaultAuthData.setClientSecret(clientSecret);
 
-                    String defaultToken = jTokenResultAsJsonObject.get("access_token").getAsString();
+                    String defaultToken = jTokenResultAsJsonObject.get("accessToken").getAsString();
                     newDefaultAuthData.setAccessToken(defaultToken);
-                    newDefaultAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refresh_token").getAsString());
-                    newDefaultAuthData.setScope(jTokenResultAsJsonObject.get("scope").getAsString());
+                    newDefaultAuthData.setRefreshToken(jTokenResultAsJsonObject.get("refreshToken").getAsString());
+                    newDefaultAuthData.setScope(jTokenResultAsJsonObject.get("scopes").getAsString());
                     httpSession.setAttribute(HandlerConstants.SESSION_DEFAULT_AUTH_DATA_KEY, newDefaultAuthData);
 
                     HandlerUtil.handleSuccess(resp, constructSuccessProxyResponse(defaultToken));

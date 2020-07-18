@@ -1338,7 +1338,7 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
     @GET
     @Path("/{clientId}/{clientSecret}/default-token")
     @Override
-    public Response getDefaultToken(String clientId, String clientSecret) {
+    public Response getDefaultToken(@PathParam("clientId") String clientId, @PathParam("clientSecret") String clientSecret) {
         JWTClientManagerService jwtClientManagerService = DeviceMgtAPIUtils.getJWTClientManagerService();
         try {
             JWTClient jwtClient = jwtClientManagerService.getJWTClient();
