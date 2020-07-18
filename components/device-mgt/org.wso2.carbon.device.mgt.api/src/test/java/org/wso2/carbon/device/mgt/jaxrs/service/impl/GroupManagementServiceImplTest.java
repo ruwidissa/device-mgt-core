@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -42,10 +43,12 @@ import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceToGroupsAssignment;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GroupManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -61,6 +64,8 @@ import java.util.List;
 public class GroupManagementServiceImplTest {
     private GroupManagementService groupManagementService;
     private GroupManagementProviderService groupManagementProviderService;
+    private PolicyManagerService policyManagerService;
+    private DeviceManagementProviderService deviceManagementProviderService;
     private PrivilegedCarbonContext context;
 
     @ObjectFactory
@@ -72,6 +77,8 @@ public class GroupManagementServiceImplTest {
     public void init() {
         groupManagementService = new GroupManagementServiceImpl();
         groupManagementProviderService = Mockito.mock(GroupManagementProviderService.class);
+        this.policyManagerService = Mockito.mock(PolicyManagerService.class, Mockito.RETURNS_MOCKS);
+        this.deviceManagementProviderService = Mockito.mock(DeviceManagementProviderService.class, Mockito.RETURNS_MOCKS);
         context = Mockito.mock(PrivilegedCarbonContext.class);
         Mockito.doReturn("admin").when(context).getUsername();
     }
@@ -298,6 +305,10 @@ public class GroupManagementServiceImplTest {
     public void testAddDevicesToGroup() throws GroupManagementException, DeviceNotFoundException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getPolicyManagementService"))
+                .toReturn(policyManagerService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(deviceManagementProviderService);
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         Mockito.doNothing().when(groupManagementProviderService).addDevices(1, deviceIdentifiers);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).addDevices(2,
@@ -319,6 +330,10 @@ public class GroupManagementServiceImplTest {
     public void testRemoveDevicesFromGroup() throws GroupManagementException, DeviceNotFoundException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getPolicyManagementService"))
+                .toReturn(policyManagerService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(deviceManagementProviderService);
         List<DeviceIdentifier> deviceIdentifiers = new ArrayList<>();
         Mockito.doNothing().when(groupManagementProviderService).removeDevice(1, deviceIdentifiers);
         Mockito.doThrow(new GroupManagementException()).when(groupManagementProviderService).removeDevice(2,
@@ -357,6 +372,10 @@ public class GroupManagementServiceImplTest {
     public void testUpdateDeviceAssigningToGroups() throws GroupManagementException, DeviceNotFoundException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getGroupManagementProviderService"))
                 .toReturn(groupManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getPolicyManagementService"))
+                .toReturn(policyManagerService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
+                .toReturn(deviceManagementProviderService);
         Mockito.reset(groupManagementProviderService);
         DeviceToGroupsAssignment deviceToGroupsAssignment = new DeviceToGroupsAssignment();
         List<Integer> groupIds = new ArrayList<>();
