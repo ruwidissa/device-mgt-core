@@ -930,6 +930,7 @@ public class PolicyManagerImpl implements PolicyManager {
         try {
             device = deviceManagementService.getDevice(deviceIdentifier, false);
         } catch (DeviceManagementException e) {
+            PolicyManagementDAOFactory.rollbackTransaction();
             throw new PolicyManagementException("Error occurred while getting the device details (" +
                     deviceIdentifier.getId() + ")", e);
         }

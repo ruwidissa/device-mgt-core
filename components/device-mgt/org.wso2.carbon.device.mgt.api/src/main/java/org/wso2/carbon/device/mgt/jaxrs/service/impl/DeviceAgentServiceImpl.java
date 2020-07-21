@@ -100,11 +100,8 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
             device.getEnrolmentInfo().setDateOfLastUpdate(System.currentTimeMillis());
             boolean status = dms.enrollDevice(device);
             PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
-            List<DeviceIdentifier> deviceIdentifierList = new ArrayList<>();
             DeviceIdentifier deviceId = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
-            deviceIdentifierList.add(deviceId);
-            Policy effectivePolicy = DeviceMgtAPIUtils.getPolicyManagementService().getPEP().getEffectivePolicy(deviceId);
-            pap.addPolicyToDevice(deviceIdentifierList, effectivePolicy);
+            DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceId);
             pap.publishChanges();
             return Response.status(Response.Status.OK).entity(status).build();
         } catch (DeviceManagementException e) {
@@ -117,9 +114,6 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (PolicyManagementException e) {
             log.error("failed to add designated policies against newly enrolled device.", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (PolicyEvaluationException e) {
-            log.error("failed while retrieving policies for newly enrolled device.", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
