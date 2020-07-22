@@ -17,14 +17,14 @@
  */
 
 import React from 'react';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Typography,
   Row,
   Col,
-  Form,
-  Icon,
   Input,
   Button,
+  Form,
   Checkbox,
   notification,
 } from 'antd';
@@ -36,6 +36,62 @@ const { Title } = Typography;
 const { Text } = Typography;
 
 class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      inValid: false,
+      loading: false,
+    };
+  }
+
+  handleSubmit = values => {
+    this.setState({
+      loading: true,
+      inValid: false,
+    });
+    const parameters = {
+      username: values.username,
+      password: values.password,
+      platform: 'store',
+    };
+
+    const request = Object.keys(parameters)
+      .map(key => key + '=' + parameters[key])
+      .join('&');
+
+    axios
+      .post(window.location.origin + '/store-ui-request-handler/login', request)
+      .then(res => {
+        if (res.status === 200) {
+          let redirectUrl = window.location.origin + '/store';
+          const searchParams = new URLSearchParams(window.location.search);
+          if (searchParams.has('redirect')) {
+            redirectUrl = searchParams.get('redirect');
+          }
+          window.location = redirectUrl;
+        } else {
+          throw new Error();
+        }
+      })
+      .catch(error => {
+        if (error.hasOwnProperty('response') && error.response.status === 401) {
+          this.setState({
+            loading: false,
+            inValid: true,
+          });
+        } else {
+          notification.error({
+            message: 'There was a problem',
+            duration: 10,
+            description: '',
+          });
+          this.setState({
+            loading: false,
+            inValid: false,
+          });
+        }
+      });
+  };
   render() {
     const config = this.props.context;
     return (
@@ -46,7 +102,13 @@ class Login extends React.Component {
             <Col xs={3} sm={3} md={10}></Col>
             <Col xs={18} sm={18} md={4}>
               <Row style={{ marginBottom: 20 }}>
-                <Col style={{ textAlign: 'center' }}>
+                <Col
+                  style={{
+                    display: 'block',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                  }}
+                >
                   <img
                     style={{
                       marginTop: 36,
@@ -57,7 +119,58 @@ class Login extends React.Component {
                 </Col>
               </Row>
               <Title level={2}>Login</Title>
-              <WrappedNormalLoginForm />
+              <Form
+                initialValues={{ remember: true }}
+                onFinish={this.handleSubmit}
+              >
+                <Form.Item
+                  name="username"
+                  rules={[
+                    { required: true, message: 'Please input your username!' },
+                  ]}
+                >
+                  <Input
+                    name="username"
+                    style={{ height: 32 }}
+                    prefix={
+                      <UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />
+                    }
+                    placeholder="Username"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="password"
+                  rules={[
+                    { required: true, message: 'Please input your password!' },
+                  ]}
+                >
+                  <Input.Password
+                    prefix={
+                      <LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />
+                    }
+                    placeholder="Password"
+                  />
+                </Form.Item>
+                {this.state.loading && <Text type="secondary">Loading..</Text>}
+                {this.state.inValid && (
+                  <Text type="danger">Invalid Login Details</Text>
+                )}
+                <br />
+                <a href="">Forgot password</a>
+                <Form.Item name="remember" valuePropName="checked">
+                  <Checkbox>Remember me</Checkbox>
+                </Form.Item>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    block
+                    loading={this.state.loading}
+                  >
+                    Log in
+                  </Button>
+                </Form.Item>
+              </Form>
             </Col>
           </Row>
           <Row>
@@ -68,141 +181,5 @@ class Login extends React.Component {
     );
   }
 }
-
-class NormalLoginForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      inValid: false,
-      loading: false,
-    };
-  }
-
-  handleSubmit = e => {
-    const thisForm = this;
-    const config = this.props.context;
-
-    e.preventDefault();
-    this.props.form.validateFields((err, values) => {
-      thisForm.setState({
-        inValid: false,
-      });
-      if (!err) {
-        thisForm.setState({
-          loading: true,
-        });
-        const parameters = {
-          username: values.username,
-          password: values.password,
-          platform: 'store',
-        };
-
-        const request = Object.keys(parameters)
-          .map(key => key + '=' + parameters[key])
-          .join('&');
-
-        axios
-          .post(window.location.origin + config.serverConfig.loginUri, request)
-          .then(res => {
-            if (res.status === 200) {
-              let redirectUrl = window.location.origin + '/store';
-              const searchParams = new URLSearchParams(window.location.search);
-              if (searchParams.has('redirect')) {
-                redirectUrl = searchParams.get('redirect');
-              }
-              window.location = redirectUrl;
-            }
-          })
-          .catch(function(error) {
-            if (
-              error.hasOwnProperty('response') &&
-              error.response.status === 401
-            ) {
-              thisForm.setState({
-                loading: false,
-                inValid: true,
-              });
-            } else {
-              notification.error({
-                message: 'There was a problem',
-                duration: 10,
-                description: '',
-              });
-              thisForm.setState({
-                loading: false,
-                inValid: false,
-              });
-            }
-          });
-      }
-    });
-  };
-
-  render() {
-    const { getFieldDecorator } = this.props.form;
-    let errorMsg = '';
-    if (this.state.inValid) {
-      errorMsg = <Text type="danger">Invalid Login Details</Text>;
-    }
-    let loading = '';
-    if (this.state.loading) {
-      loading = <Text type="secondary">Loading..</Text>;
-    }
-    return (
-      <Form onSubmit={this.handleSubmit} className="login-form">
-        <Form.Item>
-          {getFieldDecorator('username', {
-            rules: [{ required: true, message: 'Please input your username!' }],
-          })(
-            <Input
-              name="username"
-              style={{ height: 32 }}
-              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-              placeholder="Username"
-            />,
-          )}
-        </Form.Item>
-        <Form.Item>
-          {getFieldDecorator('password', {
-            rules: [{ required: true, message: 'Please input your Password!' }],
-          })(
-            <Input
-              name="password"
-              style={{ height: 32 }}
-              prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-              type="password"
-              placeholder="Password"
-            />,
-          )}
-        </Form.Item>
-        {loading}
-        {errorMsg}
-        <Form.Item>
-          {getFieldDecorator('remember', {
-            valuePropName: 'checked',
-            initialValue: true,
-          })(<Checkbox>Remember me</Checkbox>)}
-          <br />
-          <a className="login-form-forgot" href="">
-            Forgot password
-          </a>
-          <Button
-            loading={this.state.loading}
-            block
-            type="primary"
-            htmlType="submit"
-            className="login-form-button"
-          >
-            Log in
-          </Button>
-        </Form.Item>
-      </Form>
-    );
-  }
-}
-
-const WrappedNormalLoginForm = withConfigContext(
-  Form.create({ name: 'normal_login' })(NormalLoginForm),
-);
 
 export default withConfigContext(Login);

@@ -17,7 +17,17 @@
  */
 
 import React from 'react';
-import { Layout, Menu, Icon, Drawer, Button, Alert } from 'antd';
+import {
+  UploadOutlined,
+  UserOutlined,
+  AndroidFilled,
+  AppleFilled,
+  WindowsFilled,
+  HddFilled,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+} from '@ant-design/icons';
+import { Layout, Menu, Drawer, Button, Alert } from 'antd';
 
 const { Header, Content, Footer } = Layout;
 import { Link } from 'react-router-dom';
@@ -112,23 +122,27 @@ class Dashboard extends React.Component {
   };
 
   render() {
-    const config = this.props.context;
     const { selectedKeys, deviceTypes, forbiddenErrors } = this.state;
-
     const DeviceTypesData = deviceTypes.map(deviceType => {
-      const platform = deviceType.name;
-      const defaultPlatformIcons = config.defaultPlatformIcons;
-      let icon = defaultPlatformIcons.default.icon;
-      let theme = defaultPlatformIcons.default.theme;
-      if (defaultPlatformIcons.hasOwnProperty(platform)) {
-        icon = defaultPlatformIcons[platform].icon;
-        theme = defaultPlatformIcons[platform].theme;
+      let icon;
+      switch (deviceType.name) {
+        case 'android':
+          icon = <AndroidFilled />;
+          break;
+        case 'ios':
+          icon = <AppleFilled />;
+          break;
+        case 'windows':
+          icon = <WindowsFilled />;
+          break;
+        default:
+          icon = <HddFilled />;
       }
       return (
-        <Menu.Item key={platform}>
-          <Link to={'/store/' + platform}>
-            <Icon type={icon} theme={theme} />
-            {platform}
+        <Menu.Item key={deviceType.name}>
+          <Link to={'/store/' + deviceType.name}>
+            {icon}
+            {deviceType.name}
           </Link>
         </Menu.Item>
       );
@@ -161,7 +175,7 @@ class Dashboard extends React.Component {
 
                 <Menu.Item key="web-clip">
                   <Link to="/store/web-clip">
-                    <Icon type="upload" />
+                    <UploadOutlined />
                     Web Clips
                   </Link>
                 </Menu.Item>
@@ -170,7 +184,7 @@ class Dashboard extends React.Component {
                   className="profile"
                   title={
                     <span className="submenu-title-wrapper">
-                      <Icon type="user" />
+                      <UserOutlined />
                       {this.config.user.username}
                     </span>
                   }
@@ -185,10 +199,11 @@ class Dashboard extends React.Component {
         <Layout className="mobile-layout">
           <div className="mobile-menu-button">
             <Button type="link" onClick={this.showMobileNavigationBar}>
-              <Icon
-                type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'}
-                className="bar-icon"
-              />
+              {this.state.collapsed ? (
+                <MenuFoldOutlined />
+              ) : (
+                <MenuUnfoldOutlined />
+              )}
             </Button>
           </div>
         </Layout>
@@ -221,7 +236,7 @@ class Dashboard extends React.Component {
 
             <Menu.Item key="web-clip">
               <Link to="/store/web-clip">
-                <Icon type="upload" />
+                <UploadOutlined />
                 Web Clips
               </Link>
             </Menu.Item>
@@ -236,7 +251,7 @@ class Dashboard extends React.Component {
             <SubMenu
               title={
                 <span className="submenu-title-wrapper">
-                  <Icon type="user" />
+                  <UserOutlined />
                 </span>
               }
             >
