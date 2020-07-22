@@ -17,11 +17,12 @@
  */
 
 import React from 'react';
+import { MinusOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
 import {
   Button,
   Col,
-  Form,
-  Icon,
   Input,
   Row,
   Select,
@@ -280,7 +281,7 @@ class NewAppUploadForm extends React.Component {
     } = this.state;
     const uploadButton = (
       <div>
-        <Icon type="plus" />
+        <PlusOutlined />
         <div className="ant-upload-text">Select</div>
       </div>
     );
@@ -315,7 +316,7 @@ class NewAppUploadForm extends React.Component {
                     >
                       {binaryFiles.length !== 1 && (
                         <Button>
-                          <Icon type="upload" /> Click to upload
+                          <UploadOutlined /> Click to upload
                         </Button>
                       )}
                     </Upload>,
@@ -577,7 +578,7 @@ class NewAppUploadForm extends React.Component {
                               <Button
                                 type="dashed"
                                 shape="circle"
-                                icon="minus"
+                                icon={<MinusOutlined />}
                                 onClick={() => {
                                   metaData.splice(index, 1);
                                   this.setState({
@@ -592,7 +593,7 @@ class NewAppUploadForm extends React.Component {
                     })}
                     <Button
                       type="dashed"
-                      icon="plus"
+                      icon={<PlusOutlined />}
                       onClick={this.addNewMetaData}
                     >
                       Add

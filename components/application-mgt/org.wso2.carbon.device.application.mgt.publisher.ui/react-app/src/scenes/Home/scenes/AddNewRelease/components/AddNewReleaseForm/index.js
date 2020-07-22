@@ -17,7 +17,9 @@
  */
 
 import React from 'react';
-import { Form, notification, Spin, Card, Row, Col } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { notification, Spin, Card, Row, Col } from 'antd';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import { withConfigContext } from '../../../../../../components/ConfigContext';

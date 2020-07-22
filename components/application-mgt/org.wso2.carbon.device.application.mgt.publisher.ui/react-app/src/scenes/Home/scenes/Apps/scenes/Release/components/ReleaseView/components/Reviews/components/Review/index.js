@@ -63,7 +63,7 @@ class SingleReview extends React.Component {
     );
 
     return (
-      <div>
+      <div style={{ width: '100%' }}>
         <List.Item.Meta
           avatar={
             <Avatar

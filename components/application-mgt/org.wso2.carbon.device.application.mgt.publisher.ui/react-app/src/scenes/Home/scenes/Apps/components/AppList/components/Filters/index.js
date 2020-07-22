@@ -17,16 +17,9 @@
  */
 
 import React from 'react';
-import {
-  Card,
-  Col,
-  Row,
-  Typography,
-  Divider,
-  Select,
-  Button,
-  Form,
-} from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Card, Col, Row, Typography, Divider, Select, Button } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
@@ -196,7 +189,8 @@ class FiltersForm extends React.Component {
             permission="/permission/admin/app-mgt/publisher/application/update"
             yes={
               <div>
-                <Form.Item label="Categories">
+                <p>Categories:</p>
+                <Form.Item>
                   {getFieldDecorator('categories', {
                     rules: [
                       {
@@ -221,7 +215,8 @@ class FiltersForm extends React.Component {
                     </Select>,
                   )}
                 </Form.Item>
-                <Form.Item label="Tags">
+                <p>Tags:</p>
+                <Form.Item>
                   {getFieldDecorator('tags', {
                     rules: [
                       {
@@ -244,10 +239,11 @@ class FiltersForm extends React.Component {
               </div>
             }
           />
+          <p>Device Type:</p>
           <Authorized
             permission="/permission/admin/device-mgt/admin/device-type/view"
             yes={
-              <Form.Item label="Device Type">
+              <Form.Item>
                 {getFieldDecorator('deviceType', {
                   rules: [
                     {
@@ -271,7 +267,8 @@ class FiltersForm extends React.Component {
               </Form.Item>
             }
           />
-          <Form.Item label="App Type">
+          <p>App Type:</p>
+          <Form.Item>
             {getFieldDecorator('appType', {})(
               <Select style={{ width: '100%' }} placeholder="Select app type">
                 <Option value="ENTERPRISE">Enterprise</Option>

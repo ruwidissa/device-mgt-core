@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { PageHeader, Typography, Breadcrumb, Row, Col, Icon } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
+import { PageHeader, Typography, Breadcrumb, Row, Col } from 'antd';
 import ManageCategories from './components/Categories';
 import ManageTags from './components/Tags';
 import { Link } from 'react-router-dom';
@@ -40,7 +41,7 @@ class Manage extends React.Component {
           <Breadcrumb style={{ paddingBottom: 16 }}>
             <Breadcrumb.Item>
               <Link to="/publisher/apps">
-                <Icon type="home" /> Home
+                <HomeOutlined /> Home
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Manage</Breadcrumb.Item>
