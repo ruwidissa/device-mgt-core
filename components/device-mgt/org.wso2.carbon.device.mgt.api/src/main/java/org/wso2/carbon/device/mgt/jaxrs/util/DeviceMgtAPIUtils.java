@@ -52,6 +52,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -134,13 +135,14 @@ public class DeviceMgtAPIUtils {
     public static final String DAS_ADMIN_SERVICE_EP = "https://" + DAS_HOST_NAME + ":" + DAS_PORT + "/services/";
     private static SSLContext sslContext;
 
-    private static Log log = LogFactory.getLog(DeviceMgtAPIUtils.class);
+    private static final Log log = LogFactory.getLog(DeviceMgtAPIUtils.class);
     private static KeyStore keyStore;
     private static KeyStore trustStore;
     private static char[] keyStorePassword;
 
     private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
+    private static volatile OTPManagementService otpManagementService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -457,6 +459,29 @@ public class DeviceMgtAPIUtils {
             }
         }
         return metadataManagementService;
+    }
+
+    /**
+     * Initializing and accessing method for OTPManagementService.
+     *
+     * @return OTPManagementService instance
+     * @throws IllegalStateException if OTPManagementService cannot be initialized
+     */
+    public static OTPManagementService getOTPManagementService() {
+        if (otpManagementService == null) {
+            synchronized (DeviceMgtAPIUtils.class) {
+                if (otpManagementService == null) {
+                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+                    otpManagementService = (OTPManagementService) ctx.getOSGiService(OTPManagementService.class, null);
+                    if (otpManagementService == null) {
+                        String msg = "OTP Management service not initialized.";
+                        log.error(msg);
+                        throw new IllegalStateException(msg);
+                    }
+                }
+            }
+        }
+        return otpManagementService;
     }
 
     /**
