@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.entgra.carbon.device.mgt.config.jaxrs.beans.ErrorResponse;
 import io.entgra.carbon.device.mgt.config.jaxrs.service.DeviceManagementConfigService;
 import io.entgra.carbon.device.mgt.config.jaxrs.util.DeviceMgtAPIUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -35,6 +36,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfiguratio
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.general.OneTimeTokenDetails;
 import org.wso2.carbon.device.mgt.common.general.TenantDetail;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagementException;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
@@ -48,22 +50,29 @@ import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.identity.jwt.client.extension.dto.AccessTokenInfo;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
+import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.Tenant;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
@@ -268,6 +277,87 @@ public class DeviceManagementConfigServiceImpl implements DeviceManagementConfig
         tenantDetail.setDomain(tenant.getDomain());
         tenantDetail.setEmail(tenant.getEmail());
         return tenantDetail;
+    }
+
+    /**
+     * This API will add a tenant to the system and can be called by the super tenant only.
+     * @return Returns the
+     */
+    @Path("/tenant")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addTenant(@HeaderParam("one-time-token") String token) {
+
+        TenantMgtAdminService tenantMgtAdminService = null;
+        OneTimeTokenDetails tenantWrapper = null;
+
+        // Request validation
+        String errorMsg = null;
+        Response.Status errorStatus = Response.Status.BAD_REQUEST;
+        if (StringUtils.isEmpty(token)) {
+            errorMsg = "Authentication failure when creating tenant";
+        } else {
+            tenantWrapper = new OneTimeTokenDetails(); //TODO: Call one time token validation API
+            if (tenantWrapper == null) {
+                errorMsg = "One time token is not present in the database";
+            } else {
+                try {
+                    tenantMgtAdminService = new TenantMgtAdminService();
+                    if (tenantMgtAdminService == null) {
+                        errorMsg = "Request can only be made by super admin";
+                        errorStatus = Response.Status.INTERNAL_SERVER_ERROR;
+                    } else {
+                        TenantInfoBean[] tenant = tenantMgtAdminService.retrievePartialSearchTenants(tenantWrapper.getDomain());
+                        if (!PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                .getTenantDomain().equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                            errorMsg = "Request can only be made by super admin";
+                        } else if (tenant != null && tenant.length > 0) {
+                            for (TenantInfoBean tenantInfoBean : tenant) {
+                                if (tenantInfoBean.getTenantDomain().equals(tenantWrapper.getDomain())) {
+                                    errorMsg = "Tenant domain is already in use";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                } catch (Exception e) { // Carbon multi-tenancy is throwing generic exceptions.
+                    errorMsg = "Could not create tenant domain " + tenantWrapper.getDomain();
+                    errorStatus = Response.Status.INTERNAL_SERVER_ERROR;
+                }
+            }
+        }
+
+        if (errorMsg != null) {
+            log.error(errorMsg);
+            return Response.status(errorStatus).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(errorMsg).build()
+            ).build();
+        }
+
+        try {
+            TenantInfoBean tenantInfoBean = new TenantInfoBean();
+            tenantInfoBean.setActive(true);
+            tenantInfoBean.setAdminPassword(tenantWrapper.getPassword());
+            tenantInfoBean.setAdmin(tenantWrapper.getAdminName());
+            tenantInfoBean.setFirstname(tenantWrapper.getAdminFirstName());
+            tenantInfoBean.setLastname(tenantWrapper.getAdminLastName());
+            tenantInfoBean.setEmail(tenantWrapper.getEmail());
+            Calendar calendar = new GregorianCalendar();
+            calendar.setTime(new Date());
+            tenantInfoBean.setCreatedDate(calendar);
+            tenantInfoBean.setTenantDomain(tenantWrapper.getDomain());
+
+            String response = tenantMgtAdminService.addTenant(tenantInfoBean);
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Exception e) { // The underlying API is throwing a generic exception.
+            String msg = "Error while adding tenant";
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        }
+
     }
 
     @POST
