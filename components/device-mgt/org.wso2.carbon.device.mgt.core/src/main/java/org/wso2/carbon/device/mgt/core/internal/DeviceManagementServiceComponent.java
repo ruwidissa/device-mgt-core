@@ -35,6 +35,7 @@ import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagerProviderServiceImpl;
@@ -56,6 +57,8 @@ import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementSe
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationManagerImpl;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.otp.mgt.service.OTPManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.privacy.impl.PrivacyComplianceProviderImpl;
@@ -178,6 +181,7 @@ public class DeviceManagementServiceComponent {
             NotificationManagementDAOFactory.init(dsConfig);
             OperationManagementDAOFactory.init(dsConfig);
             MetadataManagementDAOFactory.init(dsConfig);
+            OTPManagementDAOFactory.init(dsConfig.getJndiLookupDefinition().getJndiName());
             /*Initialize the device cache*/
             DeviceManagerUtil.initializeDeviceCache();
 
@@ -330,7 +334,10 @@ public class DeviceManagementServiceComponent {
         MetadataManagementService metadataManagementService = new MetadataManagementServiceImpl();
         bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
 
-	     /* Registering App Management service */
+        OTPManagementService otpManagementService = new OTPManagementServiceImpl();
+        bundleContext.registerService(OTPManagementService.class.getName(), otpManagementService, null);
+
+        /* Registering App Management service */
         try {
             AppManagementConfigurationManager.getInstance().initConfig();
             AppManagementConfig appConfig =

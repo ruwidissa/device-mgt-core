@@ -45,8 +45,11 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
@@ -1113,6 +1116,53 @@ public class UserManagementServiceImpl implements UserManagementService {
                     .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(message).build())
                     .build();
         }
+    }
+
+    /**
+     * Method used to send an invitation email to a existing user to enroll a device.
+     *
+     * @param otpMailWrapper Username list of the users to be invited
+     */
+    @POST
+    @Path("/one-time-pin")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response sendEmailVerifyingMail(OTPMailWrapper otpMailWrapper) {
+        if (log.isDebugEnabled()) {
+            log.debug("Sending enrollment invitation mail to existing user.");
+        }
+        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        OTPManagementService oms = DeviceMgtAPIUtils.getOTPManagementService();
+        try {
+            String otpToken = oms.createOTPToken(otpMailWrapper);
+            Properties props = new Properties();
+            props.setProperty("first-name", otpMailWrapper.getFirstName());
+            props.setProperty("otp-token", otpToken);
+
+            EmailMetaInfo metaInfo = new EmailMetaInfo(otpMailWrapper.getEmail(), props);
+            dms.sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE,
+                    metaInfo);
+        } catch (DeviceManagementException e) {
+            String msg = "Error occurred while inviting user to enrol their device";
+            if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+                msg = e.getMessage();
+            }
+            log.error(msg, e);
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (ConfigurationManagementException e) {
+            String msg = "Error occurred while sending the email invitations. Mail server not configured.";
+            return Response.serverError().entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (OTPManagementException e) {
+            String msg = "Error occurred while generating and storing the OTP data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        } catch (org.wso2.carbon.device.mgt.common.exceptions.BadRequestException e) {
+            String msg = "Bad Request : Found invalid request payload to create OTP toke.";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+        }
+        return Response.status(Response.Status.OK).entity("Invitation mails have been sent.").build();
     }
 
     private Map<String, String> buildDefaultUserClaims(String firstName, String lastName, String emailAddress,
