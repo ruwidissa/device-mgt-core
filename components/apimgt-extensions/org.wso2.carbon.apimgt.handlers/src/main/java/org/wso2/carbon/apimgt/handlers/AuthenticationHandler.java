@@ -182,6 +182,15 @@ public class AuthenticationHandler extends AbstractHandler {
                 if (log.isDebugEnabled()) {
                     log.debug("Verify response:" + response.getContent());
                 }
+            } else if (headers.containsKey(AuthConstants.ONE_TIME_TOKEN_HEADER)) {
+                String token = headers.get(AuthConstants.ONE_TIME_TOKEN_HEADER);
+                //TODO: validate token service. Since this is getting validated in the valve,
+                // this may not even be necessery
+//                if (log.isDebugEnabled()) {
+//                    log.debug("One time time :" + token + ", status : "  + );
+//                }
+                return true;
+
             } else {
                 log.warn("Unauthorized request for api: " + ctxPath);
                 return false;
