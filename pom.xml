@@ -2249,8 +2249,7 @@
         <googlecode.plist.version>1.21</googlecode.plist.version>
         <net.dongliu.version>2.6.5</net.dongliu.version>
         <frontend.mave.version>1.7.6</frontend.mave.version>
-        <node.version>v10.15.3</node.version>
-        <npm.version>6.9.0</npm.version>
+        <node.version>v12.18.1</node.version>
 
         <maven.checkstyle.vesion>3.1.0</maven.checkstyle.vesion>
         

@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { Modal, Icon, Table, Avatar } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Modal, Table, Avatar } from 'antd';
 import '../../styles.css';
 import { withConfigContext } from '../../../../../../../../../../../../components/ConfigContext';
 
@@ -84,7 +85,7 @@ class AddAppsToClusterModal extends React.Component {
         <div className="btn-add-new-wrapper">
           <div className="btn-add-new">
             <button className="btn" onClick={this.showModal}>
-              <Icon style={{ position: 'relative' }} type="plus" />
+              <PlusOutlined style={{ position: 'relative' }} />
             </button>
           </div>
           <div className="title">Add app</div>

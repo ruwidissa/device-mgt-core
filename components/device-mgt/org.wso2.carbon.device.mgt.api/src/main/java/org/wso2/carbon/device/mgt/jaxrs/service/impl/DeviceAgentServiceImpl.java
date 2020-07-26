@@ -36,6 +36,7 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.ComplianceFeature;
 import org.wso2.carbon.device.mgt.common.policy.mgt.monitor.PolicyComplianceException;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
@@ -50,6 +51,9 @@ import org.wso2.carbon.event.stream.stub.EventStreamAdminServiceStub;
 import org.wso2.carbon.event.stream.stub.types.EventStreamAttributeDto;
 import org.wso2.carbon.event.stream.stub.types.EventStreamDefinitionDto;
 import org.wso2.carbon.identity.jwt.client.extension.exception.JWTClientException;
+import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
+import org.wso2.carbon.policy.mgt.common.PolicyEvaluationException;
+import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.Valid;
@@ -95,6 +99,10 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
             device.getEnrolmentInfo().setDateOfEnrolment(System.currentTimeMillis());
             device.getEnrolmentInfo().setDateOfLastUpdate(System.currentTimeMillis());
             boolean status = dms.enrollDevice(device);
+            PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
+            DeviceIdentifier deviceId = new DeviceIdentifier(device.getDeviceIdentifier(), device.getType());
+            DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceId);
+            pap.publishChanges();
             return Response.status(Response.Status.OK).entity(status).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while enrolling the device, which carries the id '" +
@@ -103,6 +111,9 @@ public class DeviceAgentServiceImpl implements DeviceAgentService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (InvalidConfigurationException e) {
             log.error("failed to add operation", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (PolicyManagementException e) {
+            log.error("failed to add designated policies against newly enrolled device.", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

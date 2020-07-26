@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { SyncOutlined } from '@ant-design/icons';
 import { Button, notification } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
@@ -69,7 +70,7 @@ class SyncAndroidApps extends React.Component {
           loading={loading}
           style={{ marginTop: 16 }}
           type="primary"
-          icon="sync"
+          icon={<SyncOutlined />}
         >
           Sync{loading && 'ing...'}
         </Button>

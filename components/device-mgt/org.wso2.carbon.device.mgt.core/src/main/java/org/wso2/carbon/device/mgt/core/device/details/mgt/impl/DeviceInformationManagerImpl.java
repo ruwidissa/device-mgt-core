@@ -66,7 +66,7 @@ import java.util.Map;
 public class DeviceInformationManagerImpl implements DeviceInformationManager {
 
     private final DeviceDetailsDAO deviceDetailsDAO;
-    private DeviceDAO deviceDAO;
+    private final DeviceDAO deviceDAO;
     private static final Log log = LogFactory.getLog(DeviceInformationManagerImpl.class);
     private static final String LOCATION_EVENT_STREAM_DEFINITION = "org.wso2.iot.LocationStream";
     private static final String DEVICE_INFO_EVENT_STREAM_DEFINITION = "org.wso2.iot.DeviceInfoStream";

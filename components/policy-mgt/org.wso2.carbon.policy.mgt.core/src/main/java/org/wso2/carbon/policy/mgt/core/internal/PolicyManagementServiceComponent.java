@@ -67,7 +67,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 @SuppressWarnings("unused")
 public class PolicyManagementServiceComponent {
 
-    private static Log log = LogFactory.getLog(PolicyManagementServiceComponent.class);
+    private static final Log log = LogFactory.getLog(PolicyManagementServiceComponent.class);
 
     protected void activate(ComponentContext componentContext) {
 
@@ -77,8 +77,10 @@ public class PolicyManagementServiceComponent {
             DataSourceConfig dsConfig = config.getPolicyManagementRepository().getDataSourceConfig();
             PolicyManagementDAOFactory.init(dsConfig);
 
+            PolicyManagerService policyManagerService = new PolicyManagerServiceImpl();
             componentContext.getBundleContext().registerService(
-                    PolicyManagerService.class.getName(), new PolicyManagerServiceImpl(), null);
+                    PolicyManagerService.class.getName(), policyManagerService, null);
+            PolicyManagementDataHolder.getInstance().setPolicyManagerService(policyManagerService);
 
             PolicyConfiguration policyConfiguration =
                     DeviceConfigurationManager.getInstance().getDeviceManagementConfig().getPolicyConfiguration();

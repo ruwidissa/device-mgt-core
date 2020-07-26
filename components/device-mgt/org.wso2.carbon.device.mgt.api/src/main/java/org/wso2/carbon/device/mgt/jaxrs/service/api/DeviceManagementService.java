@@ -2273,4 +2273,58 @@ public interface DeviceManagementService {
                             response = ErrorResponse.class)
             })
     Response getDeviceFilters();
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{clientId}/{clientSecret}/default-token")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting the default token",
+            notes = "Getting the default access token by using given client ID and the client secret value.",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:device:enroll")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully returned the default token details.",
+                            response = Policy.class,
+                            responseHeaders = {
+                                    @ResponseHeader(
+                                            name = "Content-Type",
+                                            description = "The content type of the body"),
+                                    @ResponseHeader(
+                                            name = "ETag",
+                                            description = "Entity Tag of the response resource.\n" +
+                                                    "Used by caches, or in conditional requests."),
+                                    @ResponseHeader(
+                                            name = "Last-Modified",
+                                            description = "Date and time the resource was last modified.\n" +
+                                                    "Used by caches, or in conditional requests.")}),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred while retrieving the default token.",
+                            response = ErrorResponse.class)
+            }
+    )
+    Response getDefaultToken(
+            @ApiParam(
+                    name = "client ID",
+                    value = "Client Id.",
+                    required = true)
+            @PathParam("clientId")
+                    String clientId,
+            @ApiParam(
+                    name = "client secret",
+                    value = "Client Secret",
+                    required = true)
+            @PathParam("clientSecret")
+                    String clientSecret
+    );
 }

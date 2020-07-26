@@ -18,16 +18,18 @@
 
 package org.wso2.carbon.policy.mgt.core.internal;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
+import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.policy.mgt.common.PolicyEvaluationPoint;
 import org.wso2.carbon.policy.mgt.common.PolicyInformationPoint;
+import org.wso2.carbon.policy.mgt.core.PolicyManagerService;
 import org.wso2.carbon.policy.mgt.core.mgt.MonitoringManager;
 import org.wso2.carbon.policy.mgt.core.mgt.PolicyManager;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,16 +37,16 @@ import java.util.Map;
 public class PolicyManagementDataHolder {
 
     private RealmService realmService;
-    private TenantManager tenantManager;
-    private PolicyEvaluationPoint policyEvaluationPoint;
-    private Map<String, PolicyEvaluationPoint> policyEvaluationPoints = new HashMap<>();
+    private final Map<String, PolicyEvaluationPoint> policyEvaluationPoints = new HashMap<>();
     private PolicyInformationPoint policyInformationPoint;
     private DeviceManagementProviderService deviceManagementService;
+    private GroupManagementProviderService groupManagementService;
+    private PolicyManagerService policyManagerService;
     private MonitoringManager monitoringManager;
     private PolicyManager policyManager;
     private TaskService taskService;
 
-    private static PolicyManagementDataHolder thisInstance = new PolicyManagementDataHolder();
+    private static final PolicyManagementDataHolder thisInstance = new PolicyManagementDataHolder();
 
     private PolicyManagementDataHolder() {}
 
@@ -74,18 +76,6 @@ public class PolicyManagementDataHolder {
 
     public void setRealmService(RealmService realmService) {
         this.realmService = realmService;
-        this.setTenantManager(realmService);
-    }
-
-    private void setTenantManager(RealmService realmService) {
-        if (realmService == null) {
-            throw new IllegalStateException("Realm service is not initialized properly");
-        }
-        this.tenantManager = realmService.getTenantManager();
-    }
-
-    public TenantManager getTenantManager() {
-        return tenantManager;
     }
 
     public PolicyEvaluationPoint getPolicyEvaluationPoint() {
@@ -126,5 +116,26 @@ public class PolicyManagementDataHolder {
 
     public void setTaskService(TaskService taskService) {
         this.taskService = taskService;
+    }
+
+    public synchronized GroupManagementProviderService getGroupManagementService() {
+        if (groupManagementService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            groupManagementService = (GroupManagementProviderService)
+                    ctx.getOSGiService(GroupManagementProviderService.class, null);
+            if (groupManagementService == null) {
+                String msg = "GroupImpl Management service has not initialized.";
+                throw new IllegalStateException(msg);
+            }
+        }
+        return groupManagementService;
+    }
+
+    public PolicyManagerService getPolicyManagerService() {
+        return policyManagerService;
+    }
+
+    public void setPolicyManagerService(PolicyManagerService policyManagerService) {
+        this.policyManagerService = policyManagerService;
     }
 }

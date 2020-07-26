@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { PageHeader, Typography, Breadcrumb, Icon, Result } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
+import { PageHeader, Typography, Breadcrumb, Result } from 'antd';
 import AddNewAppForm from '../../components/AddNewAppForm';
 import { Link } from 'react-router-dom';
 import Authorized from '../../../../../../components/Authorized/Authorized';
@@ -58,7 +59,7 @@ class AddNewCustomApp extends React.Component {
           <Breadcrumb style={{ paddingBottom: 16 }}>
             <Breadcrumb.Item>
               <Link to="/publisher/apps">
-                <Icon type="home" /> Home
+                <HomeOutlined /> Home
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Add New Custom App</Breadcrumb.Item>

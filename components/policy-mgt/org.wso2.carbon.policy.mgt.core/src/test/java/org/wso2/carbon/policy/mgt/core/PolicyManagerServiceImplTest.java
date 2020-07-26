@@ -89,6 +89,7 @@ public class  PolicyManagerServiceImplTest extends BasePolicyManagementDAOTest {
     public void addPolicy() throws DeviceManagementException, GroupManagementException, PolicyManagementException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         policyManagerService = new PolicyManagerServiceImpl();
+        PolicyManagementDataHolder.getInstance().setPolicyManagerService(policyManagerService);
         DeviceManagementService deviceManagementService = new TypeXDeviceManagementService(DEVICE_TYPE_A);
         deviceMgtService.registerDeviceType(deviceManagementService);
         operationManager = new OperationManagerImpl(DEVICE_TYPE_A, deviceManagementService);

@@ -93,6 +93,7 @@ public class DeviceAgentServiceTest {
     private static final String AUTHENTICATED_USER = "admin";
     private static final String MONITOR_OPERATION = "POLICY_MONITOR";
     private static Device demoDevice;
+    private PolicyManagerService policyManagerService;
 
     @ObjectFactory
     public IObjectFactory getObjectFactory() {
@@ -108,6 +109,7 @@ public class DeviceAgentServiceTest {
         this.deviceAgentService = new DeviceAgentServiceImpl();
         this.deviceAccessAuthorizationService = Mockito.mock(DeviceAccessAuthorizationServiceImpl.class,
                 Mockito.RETURNS_MOCKS);
+        this.policyManagerService = Mockito.mock(PolicyManagerService.class, Mockito.RETURNS_MOCKS);
         this.privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class, Mockito.RETURNS_MOCKS);
         this.eventStreamAdminServiceStub = Mockito.mock(EventStreamAdminServiceStub.class, Mockito.RETURNS_MOCKS);
         demoDevice = DeviceMgtAPITestHelper.generateDummyDevice(TEST_DEVICE_TYPE, TEST_DEVICE_IDENTIFIER);
@@ -167,6 +169,8 @@ public class DeviceAgentServiceTest {
                 .toReturn(this.deviceManagementProviderService);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser"))
                 .toReturn(AUTHENTICATED_USER);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getPolicyManagementService"))
+                .toReturn(policyManagerService);
         EnrolmentInfo enrolmentInfo = demoDevice.getEnrolmentInfo();
         enrolmentInfo.setStatus(EnrolmentInfo.Status.INACTIVE);
         demoDevice.setEnrolmentInfo(enrolmentInfo);

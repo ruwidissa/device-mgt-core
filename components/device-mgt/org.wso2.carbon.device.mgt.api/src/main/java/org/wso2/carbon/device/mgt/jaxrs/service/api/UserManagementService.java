@@ -35,7 +35,6 @@
 package org.wso2.carbon.device.mgt.jaxrs.service.api;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.ExtensionProperty;
@@ -50,6 +49,7 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
+import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
@@ -1221,4 +1221,50 @@ public interface UserManagementService {
                     response = ErrorResponse.class)
     })
     Response getPermissionsOfUser();
+
+    @POST
+    @Path("/one-time-pin")
+    @ApiOperation(
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "GET",
+            value = "Getting the permission details of the current user",
+            notes = "A user may granted more than one permission in IoTS. Using this REST API "
+                    + "you can get the permission/permission the current user has granted. ",
+            tags = "User Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:user:permission-view")
+                    })
+            }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    code = 200,
+                    message = "OK. \n Successfully fetched the list of permissions the user "
+                            + "has granted.",
+                    response = PermissionList.class,
+                    responseHeaders = {
+                            @ResponseHeader(
+                                    name = "Content-Type",
+                                    description = "The content type of the body"),
+                            @ResponseHeader(
+                                    name = "ETag",
+                                    description = "Entity Tag of the response resource.\n" +
+                                            "Used by caches, or in conditional requests."),
+                            @ResponseHeader(
+                                    name = "Last-Modified",
+                                    description = "Date and time the resource was last modified.\n" +
+                                            "Used by caches, or in conditional requests."),
+                    }),
+            @ApiResponse(
+                    code = 404,
+                    message = "Not Found. \n The specified resource does not exist.\n",
+                    response = ErrorResponse.class),
+            @ApiResponse(
+                    code = 500,
+                    message = "Internal Server Error. \n Server error occurred while fetching the "
+                            + "list of roles assigned to the specified user.",
+                    response = ErrorResponse.class)
+    })
+    Response sendEmailVerifyingMail(OTPMailWrapper otpMailWrapper);
 }

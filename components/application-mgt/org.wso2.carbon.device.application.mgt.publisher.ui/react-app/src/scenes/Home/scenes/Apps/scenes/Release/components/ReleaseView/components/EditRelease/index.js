@@ -18,15 +18,21 @@
 
 import React from 'react';
 import {
+  EditOutlined,
+  MinusOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
   Modal,
   Button,
-  Icon,
   notification,
   Spin,
   Tooltip,
   Upload,
   Input,
-  Form,
   Divider,
   Row,
   Col,
@@ -397,7 +403,7 @@ class EditReleaseModal extends React.Component {
     const config = this.props.context;
     const uploadButton = (
       <div>
-        <Icon type="plus" />
+        <PlusOutlined />
         <div className="ant-upload-text">Select</div>
       </div>
     );
@@ -417,7 +423,7 @@ class EditReleaseModal extends React.Component {
             type="primary"
             onClick={this.showModal}
           >
-            <Icon type="edit" /> Edit
+            <EditOutlined /> Edit
           </Button>
         </Tooltip>
         <Modal
@@ -450,7 +456,7 @@ class EditReleaseModal extends React.Component {
                       >
                         {binaryFiles.length !== 1 && (
                           <Button>
-                            <Icon type="upload" /> Change
+                            <UploadOutlined /> Change
                           </Button>
                         )}
                       </Upload>,
@@ -676,7 +682,7 @@ class EditReleaseModal extends React.Component {
                                 <Button
                                   type="dashed"
                                   shape="circle"
-                                  icon="minus"
+                                  icon={<MinusOutlined />}
                                   onClick={() => {
                                     metaData.splice(index, 1);
                                     this.setState({
@@ -691,7 +697,7 @@ class EditReleaseModal extends React.Component {
                       })}
                       <Button
                         type="dashed"
-                        icon="plus"
+                        icon={<PlusOutlined />}
                         onClick={this.addNewMetaData}
                       >
                         Add

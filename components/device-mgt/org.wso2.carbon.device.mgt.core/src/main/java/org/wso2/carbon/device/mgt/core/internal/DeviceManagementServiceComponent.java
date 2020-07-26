@@ -35,6 +35,7 @@ import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagerProviderServiceImpl;
@@ -56,6 +57,8 @@ import org.wso2.carbon.device.mgt.core.notification.mgt.NotificationManagementSe
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationManagerImpl;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.otp.mgt.service.OTPManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.permission.mgt.PermissionManagerServiceImpl;
 import org.wso2.carbon.device.mgt.core.privacy.PrivacyComplianceProvider;
 import org.wso2.carbon.device.mgt.core.privacy.impl.PrivacyComplianceProviderImpl;
@@ -72,9 +75,11 @@ import org.wso2.carbon.device.mgt.core.task.DeviceTaskManagerService;
 import org.wso2.carbon.device.mgt.core.config.ui.UIConfigurationManager;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagementSchemaInitializer;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.core.util.DeviceMgtTenantMgtListener;
 import org.wso2.carbon.email.sender.core.service.EmailSenderService;
 import org.wso2.carbon.ndatasource.core.DataSourceService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -133,10 +138,10 @@ import java.util.concurrent.TimeUnit;
 public class DeviceManagementServiceComponent {
 
     private static final Object LOCK = new Object();
-    private static Log log = LogFactory.getLog(DeviceManagementServiceComponent.class);
-    private static List<PluginInitializationListener> listeners = new ArrayList<>();
-    private static List<DeviceManagementService> deviceManagers = new ArrayList<>();
-    private static List<DeviceManagerStartupListener> startupListeners = new ArrayList<>();
+    private static final Log log = LogFactory.getLog(DeviceManagementServiceComponent.class);
+    private static final List<PluginInitializationListener> listeners = new ArrayList<>();
+    private static final List<DeviceManagementService> deviceManagers = new ArrayList<>();
+    private static final List<DeviceManagerStartupListener> startupListeners = new ArrayList<>();
 
     public static void registerPluginInitializationListener(PluginInitializationListener listener) {
         synchronized (LOCK) {
@@ -176,6 +181,7 @@ public class DeviceManagementServiceComponent {
             NotificationManagementDAOFactory.init(dsConfig);
             OperationManagementDAOFactory.init(dsConfig);
             MetadataManagementDAOFactory.init(dsConfig);
+            OTPManagementDAOFactory.init(dsConfig.getJndiLookupDefinition().getJndiName());
             /*Initialize the device cache*/
             DeviceManagerUtil.initializeDeviceCache();
 
@@ -244,6 +250,9 @@ public class DeviceManagementServiceComponent {
             DeviceManagementDataHolder.getInstance().setPrivacyComplianceProvider(privacyComplianceProvider);
             componentContext.getBundleContext().registerService(PrivacyComplianceProvider.class.getName(),
                     privacyComplianceProvider, null);
+
+            componentContext.getBundleContext()
+                    .registerService(TenantMgtListener.class.getName(), new DeviceMgtTenantMgtListener(), null);
 
             if (log.isDebugEnabled()) {
                 log.debug("Device management core bundle has been successfully initialized");
@@ -325,7 +334,10 @@ public class DeviceManagementServiceComponent {
         MetadataManagementService metadataManagementService = new MetadataManagementServiceImpl();
         bundleContext.registerService(MetadataManagementService.class.getName(), metadataManagementService, null);
 
-	     /* Registering App Management service */
+        OTPManagementService otpManagementService = new OTPManagementServiceImpl();
+        bundleContext.registerService(OTPManagementService.class.getName(), otpManagementService, null);
+
+        /* Registering App Management service */
         try {
             AppManagementConfigurationManager.getInstance().initConfig();
             AppManagementConfig appConfig =
@@ -340,7 +352,10 @@ public class DeviceManagementServiceComponent {
         PermissionManagerService permissionManagerService = PermissionManagerServiceImpl.getInstance();
         bundleContext.registerService(PermissionManagerService.class.getName(), permissionManagerService, null);
 
-        bundleContext.registerService(DeviceInformationManager.class, new DeviceInformationManagerImpl(), null);
+        DeviceInformationManager deviceInformationManager = new DeviceInformationManagerImpl();
+        bundleContext.registerService(DeviceInformationManager.class, deviceInformationManager, null);
+        DeviceManagementDataHolder.getInstance().setDeviceInformationManager(deviceInformationManager);
+
         bundleContext.registerService(SearchManagerService.class, new SearchManagerServiceImpl(), null);
     }
 

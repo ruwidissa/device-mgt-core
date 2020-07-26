@@ -169,6 +169,7 @@
         <Scope>perm:android:set-password-policy</Scope>
         <Scope>perm:android:change-lock-code</Scope>
         <Scope>perm:android:upgrade-firmware</Scope>
+        <Scope>perm:android:send-notification</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>

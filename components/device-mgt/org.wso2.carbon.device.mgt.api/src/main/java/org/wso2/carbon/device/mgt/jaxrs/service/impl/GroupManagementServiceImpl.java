@@ -25,15 +25,19 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
+import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.GroupPaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupAlreadyExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
-import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupNotExistException;
+import org.wso2.carbon.device.mgt.common.group.mgt.RoleDoesNotExistException;
+import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceGroupList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.DeviceList;
@@ -42,6 +46,10 @@ import org.wso2.carbon.device.mgt.jaxrs.beans.RoleList;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GroupManagementService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
+import org.wso2.carbon.policy.mgt.common.PolicyAdministratorPoint;
+import org.wso2.carbon.policy.mgt.common.PolicyEvaluationException;
+import org.wso2.carbon.policy.mgt.common.PolicyEvaluationPoint;
+import org.wso2.carbon.policy.mgt.common.PolicyManagementException;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -259,6 +267,16 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     public Response addDevicesToGroup(int groupId, List<DeviceIdentifier> deviceIdentifiers) {
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().addDevices(groupId, deviceIdentifiers);
+            PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            for(DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+                Device device = dms.getDevice(deviceIdentifier, false);
+                if(!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
+                    pap.removePolicyUsed(deviceIdentifier);
+                    DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceIdentifier);
+                }
+            }
+            pap.publishChanges();
             return Response.status(Response.Status.OK).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while adding devices to group.";
@@ -266,6 +284,15 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceNotFoundException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (PolicyManagementException e) {
+            log.error("Error occurred while adding policies against device(s).", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+//        } catch (PolicyEvaluationException e) {
+//            log.error("Error occurred while retrieving policies against device(s).", e);
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (DeviceManagementException e) {
+            log.error("Error occurred while retrieving device information.", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -273,6 +300,16 @@ public class GroupManagementServiceImpl implements GroupManagementService {
     public Response removeDevicesFromGroup(int groupId, List<DeviceIdentifier> deviceIdentifiers) {
         try {
             DeviceMgtAPIUtils.getGroupManagementProviderService().removeDevice(groupId, deviceIdentifiers);
+            PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+            for(DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+                Device device = dms.getDevice(deviceIdentifier, false);
+                if(!device.getEnrolmentInfo().getStatus().equals(EnrolmentInfo.Status.REMOVED)) {
+                    pap.removePolicyUsed(deviceIdentifier);
+                    DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceIdentifier);
+                }
+            }
+            pap.publishChanges();
             return Response.status(Response.Status.OK).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while removing devices from group.";
@@ -280,6 +317,12 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceNotFoundException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }catch (PolicyManagementException e) {
+            log.error("Error occurred while adding policies against device(s).", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }catch (DeviceManagementException e) {
+            log.error("Error occurred while retrieving device information.", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -290,6 +333,8 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             deviceIdentifiers.add(deviceToGroupsAssignment.getDeviceIdentifier());
             GroupManagementProviderService service = DeviceMgtAPIUtils.getGroupManagementProviderService();
             List<DeviceGroup> deviceGroups = service.getGroups(deviceToGroupsAssignment.getDeviceIdentifier(), false);
+            PolicyAdministratorPoint pap = DeviceMgtAPIUtils.getPolicyManagementService().getPAP();
+            DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
             for (DeviceGroup group : deviceGroups) {
                 Integer groupId = group.getGroupId();
                 if (deviceToGroupsAssignment.getDeviceGroupIds().contains(groupId)) {
@@ -300,7 +345,12 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             }
             for (int groupId : deviceToGroupsAssignment.getDeviceGroupIds()) {
                 DeviceMgtAPIUtils.getGroupManagementProviderService().addDevices(groupId, deviceIdentifiers);
+                for (DeviceIdentifier deviceIdentifier : deviceIdentifiers) {
+                    pap.removePolicyUsed(deviceIdentifier);
+                    DeviceMgtAPIUtils.getPolicyManagementService().getEffectivePolicy(deviceIdentifier);
+                }
             }
+            pap.publishChanges();
             return Response.status(Response.Status.OK).build();
         } catch (GroupManagementException e) {
             String msg = "Error occurred while assigning device to groups.";
@@ -308,6 +358,9 @@ public class GroupManagementServiceImpl implements GroupManagementService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (DeviceNotFoundException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (PolicyManagementException e) {
+            log.error("Failed to add policies for device assigned to group.", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 

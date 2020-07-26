@@ -18,10 +18,17 @@
 
 import React from 'react';
 import {
+  CaretDownOutlined,
+  CaretLeftFilled,
+  CaretRightFilled,
+  CaretUpOutlined,
+  CloseCircleFilled,
+  DeleteOutlined,
+} from '@ant-design/icons';
+import {
   Button,
   Col,
   Divider,
-  Icon,
   message,
   notification,
   Popconfirm,
@@ -304,7 +311,7 @@ class Cluster extends React.Component {
                   this.swapProduct(index, index - 1);
                 }}
               >
-                <Icon type="caret-left" theme="filled" />
+                <CaretLeftFilled />
               </button>
             )}
           </div>
@@ -324,7 +331,7 @@ class Cluster extends React.Component {
                   }}
                   className="btn btn-right"
                 >
-                  <Icon type="caret-right" theme="filled" />
+                  <CaretRightFilled />
                 </button>
               </div>
               <div className="delete-btn">
@@ -334,7 +341,7 @@ class Cluster extends React.Component {
                     this.removeProduct(index);
                   }}
                 >
-                  <Icon type="close-circle" theme="filled" />
+                  <CloseCircleFilled />
                 </button>
               </div>
             </>
@@ -363,7 +370,7 @@ class Cluster extends React.Component {
                   <Tooltip title="Move Up">
                     <Button
                       type="link"
-                      icon="caret-up"
+                      icon={<CaretUpOutlined />}
                       size="large"
                       onClick={() => {
                         this.props.swapClusters(index, index - 1);
@@ -374,7 +381,7 @@ class Cluster extends React.Component {
                   <Tooltip title="Move Down">
                     <Button
                       type="link"
-                      icon="caret-down"
+                      icon={<CaretDownOutlined />}
                       size="large"
                       onClick={() => {
                         this.props.swapClusters(index, index + 1);
@@ -391,7 +398,7 @@ class Cluster extends React.Component {
                     >
                       <Button
                         type="danger"
-                        icon="delete"
+                        icon={<DeleteOutlined />}
                         shape="circle"
                         htmlType="button"
                       />

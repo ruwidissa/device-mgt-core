@@ -19,7 +19,6 @@
 package io.entgra.ui.request.interceptor.util;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,9 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -232,4 +229,17 @@ public class HandlerUtil {
         }
     }
 
+    /**
+     * Send UnAuthorized Response to the user
+     *
+     * @param resp HttpServletResponse object
+     */
+    public static void sendUnAuthorizeResponse(HttpServletResponse resp)
+            throws IOException {
+        ProxyResponse proxyResponse = new ProxyResponse();
+        proxyResponse.setCode(HttpStatus.SC_UNAUTHORIZED);
+        proxyResponse.setExecutorResponse(
+                HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
+        handleError(resp, proxyResponse);
+    }
 }

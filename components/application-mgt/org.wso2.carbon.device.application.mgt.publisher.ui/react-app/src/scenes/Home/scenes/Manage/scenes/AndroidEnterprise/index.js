@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { PageHeader, Breadcrumb, Divider, Icon, Result } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
+import { PageHeader, Breadcrumb, Divider, Result } from 'antd';
 import { Link } from 'react-router-dom';
 import SyncAndroidApps from './components/SyncAndroidApps';
 import { withConfigContext } from '../../../../../../components/ConfigContext';
@@ -41,7 +42,7 @@ class ManageAndroidEnterprise extends React.Component {
           <Breadcrumb style={{ paddingBottom: 16 }}>
             <Breadcrumb.Item>
               <Link to="/publisher/apps">
-                <Icon type="home" /> Home
+                <HomeOutlined /> Home
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Manage</Breadcrumb.Item>

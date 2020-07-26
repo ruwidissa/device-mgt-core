@@ -72,7 +72,6 @@ public class LoginHandler extends HttpServlet {
             httpSession.setMaxInactiveInterval(Math.toIntExact(HandlerConstants.TIMEOUT));
 
             HttpGet uiConfigEndpoint = new HttpGet(uiConfigUrl);
-            JsonParser jsonParser = new JsonParser();
             ProxyResponse uiConfigResponse = HandlerUtil.execute(uiConfigEndpoint);
             String executorResponse = uiConfigResponse.getExecutorResponse();
             if (!StringUtils.isEmpty(executorResponse) && executorResponse
@@ -88,6 +87,7 @@ public class LoginHandler extends HttpServlet {
                 HandlerUtil.handleError(resp, null);
                 return;
             }
+            JsonParser jsonParser = new JsonParser();
             JsonElement uiConfigJsonElement = jsonParser.parse(uiConfigResponse.getData());
             JsonObject uiConfigJsonObject = null;
             if (uiConfigJsonElement.isJsonObject()) {

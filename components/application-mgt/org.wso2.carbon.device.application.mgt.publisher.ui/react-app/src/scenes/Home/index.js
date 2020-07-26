@@ -17,7 +17,19 @@
  */
 
 import React from 'react';
-import { Layout, Menu, Icon, Drawer, Button } from 'antd';
+
+import {
+  AndroidFilled,
+  AppstoreOutlined,
+  ControlOutlined,
+  PlusOutlined,
+  SettingOutlined,
+  UserOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+} from '@ant-design/icons';
+
+import { Layout, Menu, Drawer, Button } from 'antd';
 import { Switch, Link } from 'react-router-dom';
 import RouteWithSubRoutes from '../../components/RouteWithSubRoutes';
 import { Redirect } from 'react-router';
@@ -81,7 +93,7 @@ class Dashboard extends React.Component {
               >
                 <Menu.Item key="1">
                   <Link to="/publisher/apps">
-                    <Icon type="appstore" />
+                    <AppstoreOutlined />
                     Apps
                   </Link>
                 </Menu.Item>
@@ -92,7 +104,7 @@ class Dashboard extends React.Component {
                   <SubMenu
                     title={
                       <span className="submenu-title-wrapper">
-                        <Icon type="plus" />
+                        <PlusOutlined />
                         Add New App
                       </span>
                     }
@@ -118,21 +130,20 @@ class Dashboard extends React.Component {
                 <SubMenu
                   title={
                     <span className="submenu-title-wrapper">
-                      <Icon type="control" />
+                      <ControlOutlined />
                       Manage
                     </span>
                   }
                 >
                   <Menu.Item key="manage">
                     <Link to="/publisher/manage">
-                      <Icon type="setting" /> General
+                      <SettingOutlined /> General
                     </Link>
                   </Menu.Item>
                   {this.config.androidEnterpriseToken != null && (
                     <Menu.Item key="manage-android-enterprise">
                       <Link to="/publisher/manage/android-enterprise">
-                        <Icon type="android" theme="filled" /> Android
-                        Enterprise
+                        <AndroidFilled /> Android Enterprise
                       </Link>
                     </Menu.Item>
                   )}
@@ -142,7 +153,7 @@ class Dashboard extends React.Component {
                   className="profile"
                   title={
                     <span className="submenu-title-wrapper">
-                      <Icon type="user" />
+                      <UserOutlined />
                       {this.config.username}
                     </span>
                   }
@@ -157,10 +168,11 @@ class Dashboard extends React.Component {
         <Layout className="mobile-layout">
           <div className="mobile-menu-button">
             <Button type="link" onClick={this.showMobileNavigationBar}>
-              <Icon
-                type={this.state.collapsed ? 'menu-fold' : 'menu-unfold'}
-                className="bar-icon"
-              />
+              {this.state.collapsed ? (
+                <MenuFoldOutlined />
+              ) : (
+                <MenuUnfoldOutlined />
+              )}
             </Button>
           </div>
         </Layout>
@@ -194,14 +206,14 @@ class Dashboard extends React.Component {
           >
             <Menu.Item key="1">
               <Link to="/publisher/apps">
-                <Icon type="appstore" />
+                <AppstoreOutlined />
                 Apps
               </Link>
             </Menu.Item>
             <SubMenu
               title={
                 <span className="submenu-title-wrapper">
-                  <Icon type="plus" />
+                  <PlusOutlined />
                   Add New App
                 </span>
               }
@@ -223,7 +235,7 @@ class Dashboard extends React.Component {
             </SubMenu>
             <Menu.Item key="2">
               <Link to="/publisher/manage">
-                <Icon type="control" />
+                <ControlOutlined />
                 Manage
               </Link>
             </Menu.Item>
@@ -238,7 +250,7 @@ class Dashboard extends React.Component {
             <SubMenu
               title={
                 <span className="submenu-title-wrapper">
-                  <Icon type="user" />
+                  <UserOutlined />
                 </span>
               }
             >

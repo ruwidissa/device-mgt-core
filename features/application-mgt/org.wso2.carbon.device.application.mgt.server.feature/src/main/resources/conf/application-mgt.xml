@@ -77,13 +77,13 @@
             <IsAppUpdatable>true</IsAppUpdatable>
             <IsInitialState>true</IsInitialState>
             <IsDeletableState>true</IsDeletableState>
-            <Permission>/app-mgt/life-cycle/application/create</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/create</Permission>
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="In-Review">
-            <Permission>/app-mgt/life-cycle/application/review</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/review</Permission>
             <ProceedingStates>
                 <State>Rejected</State>
                 <State>Approved</State>
@@ -91,7 +91,7 @@
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Approved">
-            <Permission>/app-mgt/life-cycle/application/approve</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/approve</Permission>
             <ProceedingStates>
                 <State>In-Review</State>
                 <State>Published</State>
@@ -99,28 +99,28 @@
         </LifecycleState>
         <LifecycleState name="Rejected">
             <IsDeletableState>true</IsDeletableState>
-            <Permission>/app-mgt/life-cycle/application/reject</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/reject</Permission>
             <ProceedingStates>
                 <State>In-Review</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Published">
             <IsAppInstallable>true</IsAppInstallable>
-            <Permission>/app-mgt/life-cycle/application/publish</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/publish</Permission>
             <ProceedingStates>
                 <State>Blocked</State>
                 <State>Deprecated</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Blocked">
-            <Permission>/app-mgt/life-cycle/application/block</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/block</Permission>
             <ProceedingStates>
                 <State>Published</State>
                 <State>Deprecated</State>
             </ProceedingStates>
         </LifecycleState>
         <LifecycleState name="Deprecated">
-            <Permission>/app-mgt/life-cycle/application/deprecate</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/deprecate</Permission>
             <ProceedingStates>
                 <State>Published</State>
                 <State>Retired</State>
@@ -128,7 +128,7 @@
         </LifecycleState>
         <LifecycleState name="Retired">
             <IsEndState>true</IsEndState>
-            <Permission>/app-mgt/life-cycle/application/retire</Permission>
+            <Permission>/permission/admin/app-mgt/life-cycle/application/retire</Permission>
         </LifecycleState>
     </LifecycleStates>
 

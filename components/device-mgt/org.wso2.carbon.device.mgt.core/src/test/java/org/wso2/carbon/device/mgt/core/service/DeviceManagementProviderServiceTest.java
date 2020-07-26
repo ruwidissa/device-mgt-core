@@ -77,6 +77,7 @@ import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsDAO;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.dao.DeviceDetailsMgtDAOException;
+import org.wso2.carbon.device.mgt.core.device.details.mgt.impl.DeviceInformationManagerImpl;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
@@ -124,6 +125,7 @@ public class DeviceManagementProviderServiceTest extends BaseDeviceManagementTes
         DeviceManagementDataHolder.getInstance().setRegistryService(getRegistryService());
         DeviceManagementDataHolder.getInstance().setDeviceAccessAuthorizationService(new DeviceAccessAuthorizationServiceImpl());
         DeviceManagementDataHolder.getInstance().setGroupManagementProviderService(new GroupManagementProviderServiceImpl());
+        DeviceManagementDataHolder.getInstance().setDeviceInformationManager(new DeviceInformationManagerImpl());
         DeviceManagementDataHolder.getInstance().setDeviceTaskManagerService(null);
         deviceMgtService.registerDeviceType(new TestDeviceManagementService(DEVICE_TYPE,
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
