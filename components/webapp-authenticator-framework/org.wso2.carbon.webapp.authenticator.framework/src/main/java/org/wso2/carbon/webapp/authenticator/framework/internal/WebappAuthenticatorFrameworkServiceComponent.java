@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.certificate.mgt.core.scep.SCEPManager;
 import org.wso2.carbon.certificate.mgt.core.service.CertificateManagementService;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -81,13 +82,14 @@ import java.util.Properties;
  * cardinality="1..1" policy="dynamic"
  * bind="setTenantRegistryLoader"
  * unbind="unsetTenantRegistryLoader"
- * @scr.reference name="org.wso2.carbon.device.manager"
- * interface="org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService"
+ * @scr.reference name="org.wso2.carbon.otp.manager"
+ * interface="org.wso2.carbon.device.mgt.common.spi.OTPManagementService"
  * cardinality="1..1"
  * policy="dynamic"
- * bind="setDeviceManagementService"
- * unbind="unsetDeviceManagementService"
+ * bind="setOTPManagementService"
+ * unbind="unsetOTPManagementService"
  */
+
 public class WebappAuthenticatorFrameworkServiceComponent {
     private static final Log log = LogFactory.getLog(WebappAuthenticatorFrameworkServiceComponent.class);
 
@@ -219,19 +221,17 @@ public class WebappAuthenticatorFrameworkServiceComponent {
         AuthenticatorFrameworkDataHolder.getInstance().setTenantRegistryLoader(null);
     }
 
-    @SuppressWarnings("unused")
-    protected void setDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
+    protected void setOTPManagementService(OTPManagementService otpManagementService) {
         if (log.isDebugEnabled()) {
-            log.debug("Setting ApplicationDTO Management OSGI Manager");
+            log.debug("Setting OTP Management OSGI Service");
         }
-        AuthenticatorFrameworkDataHolder.getInstance().setDeviceManagementService(deviceManagementProviderService);
+        AuthenticatorFrameworkDataHolder.getInstance().setOtpManagementService(otpManagementService);
     }
 
-    @SuppressWarnings("unused")
-    protected void unsetDeviceManagementService(DeviceManagementProviderService deviceManagementProviderService) {
+    protected void unsetOTPManagementService(OTPManagementService otpManagementService) {
         if (log.isDebugEnabled()) {
-            log.debug("Removing ApplicationDTO Management OSGI Manager");
+            log.debug("Removing OTP Management OSGI Service");
         }
-        AuthenticatorFrameworkDataHolder.getInstance().setDeviceManagementService(null);
+        AuthenticatorFrameworkDataHolder.getInstance().setOtpManagementService(null);
     }
 }

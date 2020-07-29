@@ -82,4 +82,65 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
             throw new OTPManagementDAOException(msg, e);
         }
     }
+
+    @Override
+    public OTPMailDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementDAOException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to get an OTP data entry for OTP");
+            log.debug("OTP Details : OTP key : " + oneTimeToken );
+        }
+
+        String sql = "SELECT "
+                + "ID, "
+                + "OTP_TOKEN, "
+                + "TENANT_DOMAIN,"
+                + "EMAIL, "
+                + "EMAIL_TYPE, "
+                + "META_INFO, "
+                + "CREATED_AT, "
+                + "EXPIRY_TIME, "
+                + "IS_EXPIRED, "
+                + "TENANT_CREATED FROM DM_OTP_DATA "
+                + "WHERE OTP_TOKEN = ?";
+
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, oneTimeToken);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        OTPMailDTO otpMailDTO = new OTPMailDTO();
+                        otpMailDTO.setId(rs.getInt("ID"));
+                        otpMailDTO.setOtpToken(rs.getString("OTP_TOKEN"));
+                        otpMailDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
+                        otpMailDTO.setEmail(rs.getString("EMAIL"));
+                        otpMailDTO.setEmailType(rs.getString("EMAIL_TYPE"));
+                        otpMailDTO.setMetaInfo(rs.getString("META_INFO"));
+                        otpMailDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                        otpMailDTO.setExpiryTime(rs.getInt("EXPIRY_TIME"));
+                        otpMailDTO.setExpired(rs.getBoolean("IS_EXPIRED"));
+                        otpMailDTO.setTenantCreated(rs.getBoolean("TENANT_CREATED"));
+                        return otpMailDTO;
+                    }
+                    return null;
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to get OPT data for given OTP. OTP:  "
+                    + oneTimeToken;
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to get OTP data for OTP. One time token: " + oneTimeToken;
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void ExpireOneTimeToken (String oneTimeToken) {
+
+    }
 }

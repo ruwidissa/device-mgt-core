@@ -29,4 +29,14 @@ public interface OTPManagementDAO {
      * @throws OTPManagementDAOException if error occurred whule storing data
      */
     int addOTPData(OTPMailDTO otpMailDTO) throws OTPManagementDAOException;
+
+    /**
+     * Get OTP data for requesting One Time Token
+     * @param oneTimeToken One Time Token
+     * @return {@link OTPMailDTO}
+     * @throws OTPManagementDAOException if error ocured while getting OTP data for requesting one time token
+     */
+    OTPMailDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementDAOException;
+
+    void ExpireOneTimeToken (String oneTimeToken);
 }
