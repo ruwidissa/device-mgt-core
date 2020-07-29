@@ -32,6 +32,9 @@ import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.wso2.carbon.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.UUID;
 
 public class OTPManagementServiceImpl implements OTPManagementService {
@@ -90,6 +93,58 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             String msg = "Error occurred while saving the OTP data. Email address: " + otpMailDTO.getEmail();
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+    @Override
+    public boolean isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException {
+        OTPMailDTO otpMailDTO = getOTPDataByToken(oneTimeToken);
+        if (otpMailDTO == null) {
+            String msg = "Couldn't found OTP data for the requesting OTP " + oneTimeToken + " In the system.";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
+        if (otpMailDTO.isExpired()) {
+            return false;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        Timestamp currentTimestamp = new Timestamp(calendar.getTime().getTime());
+        Timestamp expiredTimestamp = new Timestamp(
+                otpMailDTO.getCreatedAt().getTime() + otpMailDTO.getExpiryTime() * 1000);
+
+        if (currentTimestamp.after(expiredTimestamp)) {
+            //todo update the DB
+            return false;
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Get OTPData from DB
+     * @param oneTimeToken One Time Token
+     * @return {@link OTPMailDTO}
+     * @throws OTPManagementException if error occurred while getting OTP data for given OTP in DB
+     */
+    private OTPMailDTO getOTPDataByToken ( String oneTimeToken) throws OTPManagementException {
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            return otpManagementDAO.getOTPDataByToken(oneTimeToken);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to validate the given OTP.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (OTPManagementDAOException e) {
+            String msg = "Error occurred while getting OTP data from DB. OTP: " + oneTimeToken;
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 

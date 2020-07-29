@@ -20,21 +20,13 @@ package org.wso2.carbon.webapp.authenticator.framework.authenticator;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.util.buf.ByteChunk;
-import org.apache.tomcat.util.buf.MessageBytes;
 import org.wso2.carbon.device.mgt.common.general.OneTimeTokenDetails;
-import org.wso2.carbon.webapp.authenticator.framework.AuthenticationException;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationInfo;
 import org.wso2.carbon.webapp.authenticator.framework.Constants;
-import org.wso2.carbon.webapp.authenticator.framework.Utils.Utils;
-import org.wso2.carbon.webapp.authenticator.framework.authenticator.oauth.OAuth2TokenValidator;
-import org.wso2.carbon.webapp.authenticator.framework.authenticator.oauth.OAuthTokenValidationException;
-import org.wso2.carbon.webapp.authenticator.framework.authenticator.oauth.OAuthValidationResponse;
+import org.wso2.carbon.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 
 import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class OneTimeTokenAuthenticator implements WebappAuthenticator {
     private static final Log log = LogFactory.getLog(OneTimeTokenAuthenticator.class);
@@ -50,6 +42,10 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
     }
 
     public AuthenticationInfo authenticate(org.apache.catalina.connector.Request request, Response response) {
+
+        OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
+                .getOtpManagementService();
+
 
         String token = request.getHeader(Constants.HTTPHeaders.ONE_TIME_TOKEN_HEADER);
 //        DeviceMgtAPIUtils.getDeviceManagementService();//TODO: call token validate service in core

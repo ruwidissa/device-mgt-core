@@ -89,7 +89,6 @@ import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
 import org.wso2.carbon.device.mgt.core.geo.GeoCluster;
 import org.wso2.carbon.device.mgt.core.geo.geoHash.GeoCoordinate;
-import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
 
 import java.sql.SQLException;
 import java.util.Date;

@@ -31,4 +31,6 @@ public interface OTPManagementService {
      * @throws BadRequestException if found and incompatible payload to create OTP token.
      */
     String createOTPToken (OTPMailWrapper otpMailWrapper) throws OTPManagementException, BadRequestException;
+
+    boolean isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
 }
