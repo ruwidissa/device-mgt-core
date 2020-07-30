@@ -20,21 +20,26 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
 import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.wso2.carbon.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.UUID;
 
 public class OTPManagementServiceImpl implements OTPManagementService {
@@ -108,6 +113,11 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         }
 
         if (otpMailDTO.isExpired()) {
+            log.warn("Token is expired. OTP: " + oneTimeToken);
+            return false;
+        }
+        if (otpMailDTO.isTenantCreated()) {
+            log.warn("Tenant is already created for the token. OTP: " + oneTimeToken);
             return false;
         }
 
@@ -117,12 +127,14 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                 otpMailDTO.getCreatedAt().getTime() + otpMailDTO.getExpiryTime() * 1000);
 
         if (currentTimestamp.after(expiredTimestamp)) {
-            //todo update the DB
+            String renewedOTP = UUID.randomUUID().toString();
+            renewOTP(otpMailDTO, renewedOTP);
+            Gson gson = new Gson();
+            OTPMailWrapper otpMailWrapper = gson.fromJson(otpMailDTO.getMetaInfo(), OTPMailWrapper.class);
+            resendUserVerifyingMail(otpMailWrapper.getFirstName(), renewedOTP, otpMailDTO.getEmail());
             return false;
         }
-
         return true;
-
     }
 
     /**
@@ -183,5 +195,59 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * If OTP expired, resend the user verifying mail with renewed OTP
+     * @param firstName First Name of the User
+     * @param renewedOTP Renewed OTP
+     * @param mailAddress Mail Address of the User
+     * @throws OTPManagementException if error occurred while resend the user verifying mail
+     */
+    private void resendUserVerifyingMail(String firstName, String renewedOTP, String mailAddress)
+            throws OTPManagementException {
+        Properties props = new Properties();
+        props.setProperty("first-name", firstName);
+        props.setProperty("otp-token", renewedOTP);
+
+        EmailMetaInfo metaInfo = new EmailMetaInfo(mailAddress, props);
+        try {
+            DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
+                    .sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE, metaInfo);
+        } catch (DeviceManagementException e) {
+            e.printStackTrace();
+            throw new OTPManagementException(e);
+        } catch (ConfigurationManagementException e) {
+            throw new OTPManagementException(e);
+        }
+    }
+
+    /**
+     * Renew the OTP
+     * @param otpMailDTO {@link OTPMailDTO}
+     * @param renewedOTP Renewed OTP
+     * @throws OTPManagementException if error occurred while renew the OTP
+     */
+    private void renewOTP(OTPMailDTO otpMailDTO, String renewedOTP) throws OTPManagementException {
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            this.otpManagementDAO.renewOneTimeToken(otpMailDTO.getId(), renewedOTP);
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while disabling AutoCommit to renew the OTP.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to renew the OTP.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (OTPManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while renew the OTP. OTP: " + renewedOTP;
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
     }
 }
