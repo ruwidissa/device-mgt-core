@@ -24,7 +24,7 @@ import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
 public interface OTPManagementService {
 
     /**
-     * Cretae OTP token and store tenant details in the DB
+     * Create OTP token and store tenant details in the DB
      * @param otpMailWrapper OTP Mail Wrapper object which contains tenant details of registering user
      * @return OTPToken
      * @throws OTPManagementException if error occurs while creating OTP token and storing tenant details.
@@ -32,5 +32,12 @@ public interface OTPManagementService {
      */
     String createOTPToken (OTPMailWrapper otpMailWrapper) throws OTPManagementException, BadRequestException;
 
+    /**
+     * Check the validity of the OTP
+     * @param oneTimeToken OTP
+     * @return Ture if OTP is valid one, otherise returns false
+     * @throws OTPManagementException if error occurred whle verifying validity of the OPT
+     * @throws BadRequestException if found an null value for OTP
+     */
     boolean isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
 }

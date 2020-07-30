@@ -38,5 +38,19 @@ public interface OTPManagementDAO {
      */
     OTPMailDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementDAOException;
 
-    void ExpireOneTimeToken (String oneTimeToken);
+    /**
+     * Expire the OTP
+     * @param oneTimeToken OTP
+     * @throws OTPManagementDAOException if error occurred while updating the OTP validity.
+     */
+    void expireOneTimeToken(String oneTimeToken) throws OTPManagementDAOException;
+
+    /**
+     * Update OTP with renewed OTP
+     * @param id ID
+     * @param oneTimeToken One Time Token
+     * @throws OTPManagementDAOException if error occured while updating OTP
+     */
+    void renewOneTimeToken(int id, String oneTimeToken) throws OTPManagementDAOException;
+
 }

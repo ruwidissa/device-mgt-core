@@ -20,7 +20,6 @@ package org.wso2.carbon.webapp.authenticator.framework.authenticator;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.general.OneTimeTokenDetails;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationInfo;
 import org.wso2.carbon.webapp.authenticator.framework.Constants;
@@ -45,25 +44,21 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
 
         OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
                 .getOtpManagementService();
-
-
-        String token = request.getHeader(Constants.HTTPHeaders.ONE_TIME_TOKEN_HEADER);
-//        DeviceMgtAPIUtils.getDeviceManagementService();//TODO: call token validate service in core
-        OneTimeTokenDetails tokenDetails = new OneTimeTokenDetails();//TODO: use token details
-
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 
         try {
-            authenticationInfo.setTenantDomain(tokenDetails.getDomain());
-            authenticationInfo.setStatus(Status.CONTINUE);
-            //authenticationInfo.setUsername(tokenDetails.get); //TODO: set username
-            //authenticationInfo.setTenantId();//TODO: set tenant Id
-        } catch (Exception e) { // TODO: remove this if not needed
+            if (otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders.ONE_TIME_TOKEN_HEADER))) {
+                authenticationInfo.setStatus(Status.CONTINUE);
+                authenticationInfo.setTenantId(-1);
+            } else {
+                authenticationInfo.setStatus(Status.FAILURE);
+                authenticationInfo.setMessage("Invalid OTP token.");
+            }
+        } catch (Exception e) {
             authenticationInfo.setStatus(Status.FAILURE);
-            authenticationInfo.setMessage("Could not identify tenant domain.");
+            authenticationInfo.setMessage("CToken Validation Failed.");
         }
-
-        return null;
+        return authenticationInfo;
     }
 
     public String getName() {

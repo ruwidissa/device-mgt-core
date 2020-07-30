@@ -140,7 +140,66 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
     }
 
     @Override
-    public void ExpireOneTimeToken (String oneTimeToken) {
+    public void expireOneTimeToken(String oneTimeToken) throws OTPManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to update an OTP data entry for OTP");
+            log.debug("OTP Details : OTP key : " + oneTimeToken );
+        }
 
+        String sql = "UPDATE DM_OTP_DATA "
+                + "SET "
+                + "IS_EXPIRED = ? "
+                + "WHERE OTP_TOKEN = ?";
+
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setBoolean(1, true);
+                stmt.setString(2, oneTimeToken);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update the OTP token validity.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when obtaining database connection for updating the OTP token validity.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public void renewOneTimeToken(int id, String oneTimeToken) throws OTPManagementDAOException {
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to update an OTP data entry for OTP");
+            log.debug("OTP Details : OTP key : " + oneTimeToken );
+        }
+
+        String sql = "UPDATE DM_OTP_DATA "
+                + "SET "
+                + "OTP_TOKEN = ? "
+                + "CREATED_AT = ? "
+                + "WHERE ID = ?";
+
+        try {
+            Connection conn = this.getDBConnection();
+            Calendar calendar = Calendar.getInstance();
+            Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, oneTimeToken);
+                stmt.setTimestamp(2, timestamp);
+                stmt.setInt(3, id);
+                stmt.executeUpdate();
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to update the OTP token validity.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred when obtaining database connection for updating the OTP token validity.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        }
     }
 }
