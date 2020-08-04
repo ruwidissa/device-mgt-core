@@ -142,7 +142,6 @@ public class DeviceMgtAPIUtils {
 
     private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
-    private static volatile OTPManagementService otpManagementService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -459,29 +458,6 @@ public class DeviceMgtAPIUtils {
             }
         }
         return metadataManagementService;
-    }
-
-    /**
-     * Initializing and accessing method for OTPManagementService.
-     *
-     * @return OTPManagementService instance
-     * @throws IllegalStateException if OTPManagementService cannot be initialized
-     */
-    public static OTPManagementService getOTPManagementService() {
-        if (otpManagementService == null) {
-            synchronized (DeviceMgtAPIUtils.class) {
-                if (otpManagementService == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    otpManagementService = (OTPManagementService) ctx.getOSGiService(OTPManagementService.class, null);
-                    if (otpManagementService == null) {
-                        String msg = "OTP Management service not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
-            }
-        }
-        return otpManagementService;
     }
 
     /**

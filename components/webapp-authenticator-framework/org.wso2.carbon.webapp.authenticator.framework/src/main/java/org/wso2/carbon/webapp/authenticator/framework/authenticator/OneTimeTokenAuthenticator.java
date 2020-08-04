@@ -42,11 +42,11 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
 
     public AuthenticationInfo authenticate(org.apache.catalina.connector.Request request, Response response) {
 
-        OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
-                .getOtpManagementService();
         AuthenticationInfo authenticationInfo = new AuthenticationInfo();
 
         try {
+            OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
+                    .getOtpManagementService();
             if (otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders.ONE_TIME_TOKEN_HEADER))) {
                 authenticationInfo.setStatus(Status.CONTINUE);
                 authenticationInfo.setTenantId(-1);
@@ -55,8 +55,10 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
                 authenticationInfo.setMessage("Invalid OTP token.");
             }
         } catch (Exception e) {
+            String msg = "OTP Token Validation Failed.";
+            log.error(msg, e);
             authenticationInfo.setStatus(Status.FAILURE);
-            authenticationInfo.setMessage("CToken Validation Failed.");
+            authenticationInfo.setMessage(msg);
         }
         return authenticationInfo;
     }

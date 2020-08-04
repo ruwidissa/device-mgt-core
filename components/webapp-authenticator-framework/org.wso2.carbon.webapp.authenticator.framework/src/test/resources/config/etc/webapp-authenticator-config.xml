@@ -24,5 +24,9 @@
             <Name>CertificateAuth</Name>
             <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.CertificateAuthenticator</ClassName>
         </Authenticator>
+        <Authenticator>
+            <Name>OTPAuth</Name>
+            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.OneTimeTokenAuthenticator</ClassName>
+        </Authenticator>
 	</Authenticators>
 </WebappAuthenticatorConfig>
