@@ -70,7 +70,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
         OTPMailDTO otpMailDTO = new OTPMailDTO();
         otpMailDTO.setEmail(otpMailWrapper.getEmail());
-        otpMailDTO.setTenantDomain(otpMailWrapper.getTenantDomain());
+        otpMailDTO.setTenantId(otpMailDTO.getTenantId());
+        otpMailDTO.setUsername(otpMailWrapper.getAdminUsername());
         otpMailDTO.setEmailType(otpMailWrapper.getEmailType());
         otpMailDTO.setMetaInfo(metaInfo);
         otpMailDTO.setOtpToken(otpValue);
@@ -104,7 +105,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     }
 
     @Override
-    public boolean isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException {
+    public OTPMailDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException {
         OTPMailDTO otpMailDTO = getOTPDataByToken(oneTimeToken);
         if (otpMailDTO == null) {
             String msg = "Couldn't found OTP data for the requesting OTP " + oneTimeToken + " In the system.";
@@ -114,11 +115,11 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
         if (otpMailDTO.isExpired()) {
             log.warn("Token is expired. OTP: " + oneTimeToken);
-            return false;
+            return null;
         }
         if (otpMailDTO.isTenantCreated()) {
             log.warn("Tenant is already created for the token. OTP: " + oneTimeToken);
-            return false;
+            return null;
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -132,9 +133,9 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             Gson gson = new Gson();
             OTPMailWrapper otpMailWrapper = gson.fromJson(otpMailDTO.getMetaInfo(), OTPMailWrapper.class);
             resendUserVerifyingMail(otpMailWrapper.getFirstName(), renewedOTP, otpMailDTO.getEmail());
-            return false;
+            return null;
         }
-        return true;
+        return otpMailDTO;
     }
 
     /**
@@ -190,8 +191,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             log.error("Received empty or blank email type field with OTP creating payload.");
             return false;
         }
-        if (StringUtils.isBlank(otpMailWrapper.getTenantDomain())) {
-            log.error("Received empty or blank tenant domain field with OTP creating payload.");
+        if (otpMailWrapper.getTenantId() != -1234 && otpMailWrapper.getTenantId() < 1) {
+            log.error("Invalid tenant Id field with OTP creating payload.");
             return false;
         }
         return true;

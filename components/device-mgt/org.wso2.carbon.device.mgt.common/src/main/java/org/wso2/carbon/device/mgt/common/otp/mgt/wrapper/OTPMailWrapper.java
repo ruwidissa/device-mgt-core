@@ -20,18 +20,18 @@ public class OTPMailWrapper {
 
     private String firstName;
     private String lastName;
-    private String tenantDomain;
     private String adminUsername;
+    int tenantId;
     private String adminPassword;
     private String email;
     private String emailType;
 
-    public String getTenantDomain() {
-        return tenantDomain;
+    public int getTenantId() {
+        return tenantId;
     }
 
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getAdminUsername() {

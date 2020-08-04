@@ -19,6 +19,7 @@ package org.wso2.carbon.device.mgt.common.spi;
 
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
 import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
 
 public interface OTPManagementService {
@@ -35,9 +36,9 @@ public interface OTPManagementService {
     /**
      * Check the validity of the OTP
      * @param oneTimeToken OTP
-     * @return Ture if OTP is valid one, otherise returns false
+     * @return The OTP data
      * @throws OTPManagementException if error occurred whle verifying validity of the OPT
      * @throws BadRequestException if found an null value for OTP
      */
-    boolean isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
+    OTPMailDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
 }
