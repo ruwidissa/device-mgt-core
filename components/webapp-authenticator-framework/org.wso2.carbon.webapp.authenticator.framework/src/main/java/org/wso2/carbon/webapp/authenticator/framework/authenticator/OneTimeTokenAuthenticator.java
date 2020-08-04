@@ -20,9 +20,11 @@ package org.wso2.carbon.webapp.authenticator.framework.authenticator;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationInfo;
 import org.wso2.carbon.webapp.authenticator.framework.Constants;
+import org.wso2.carbon.webapp.authenticator.framework.Utils.Utils;
 import org.wso2.carbon.webapp.authenticator.framework.internal.AuthenticatorFrameworkDataHolder;
 
 import java.util.Properties;
@@ -47,9 +49,13 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
         try {
             OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
                     .getOtpManagementService();
-            if (otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders.ONE_TIME_TOKEN_HEADER))) {
+            OTPMailDTO validOTP = otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders
+                    .ONE_TIME_TOKEN_HEADER));
+            if (validOTP != null) {
                 authenticationInfo.setStatus(Status.CONTINUE);
-                authenticationInfo.setTenantId(-1);
+                authenticationInfo.setTenantId(validOTP.getTenantId());
+                authenticationInfo.setTenantDomain(Utils.getTenantDomain(validOTP.getTenantId()));
+                authenticationInfo.setUsername(validOTP.getUsername());
             } else {
                 authenticationInfo.setStatus(Status.FAILURE);
                 authenticationInfo.setMessage("Invalid OTP token.");
