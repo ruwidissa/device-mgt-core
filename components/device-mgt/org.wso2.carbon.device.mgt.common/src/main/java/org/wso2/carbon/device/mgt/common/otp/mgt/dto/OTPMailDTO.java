@@ -23,7 +23,8 @@ public class OTPMailDTO {
 
     int id;
     String otpToken;
-    String tenantDomain;
+    int tenantId;
+    String username;
     String email;
     String emailType;
     String metaInfo;
@@ -31,6 +32,22 @@ public class OTPMailDTO {
     int expiryTime;
     boolean isExpired;
     boolean isTenantCreated;
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public int getId() {
         return id;
@@ -93,10 +110,6 @@ public class OTPMailDTO {
     public void setExpired(boolean expired) {
         isExpired = expired;
     }
-
-    public String getTenantDomain() { return tenantDomain; }
-
-    public void setTenantDomain(String tenantDomain) { this.tenantDomain = tenantDomain; }
 
     public boolean isTenantCreated() { return isTenantCreated; }
 

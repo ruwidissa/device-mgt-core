@@ -47,22 +47,24 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
 
         String sql = "INSERT INTO DM_OTP_DATA "
                 + "(OTP_TOKEN, "
-                + "TENANT_DOMAIN,"
                 + "EMAIL, "
                 + "EMAIL_TYPE, "
                 + "META_INFO, "
-                + "CREATED_AT) VALUES (?, ?, ?, ?, ?, ?)";
+                + "CREATED_AT,"
+                + "TENANT_ID,"
+                + "USERNAME) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conn = this.getDBConnection();
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, otpMailDTO.getOtpToken());
-                stmt.setString(2, otpMailDTO.getTenantDomain());
-                stmt.setString(3, otpMailDTO.getEmail());
-                stmt.setString(4, otpMailDTO.getEmailType());
-                stmt.setString(5, otpMailDTO.getMetaInfo());
-                stmt.setTimestamp(6, timestamp);
+                stmt.setString(2, otpMailDTO.getEmail());
+                stmt.setString(3, otpMailDTO.getEmailType());
+                stmt.setString(4, otpMailDTO.getMetaInfo());
+                stmt.setTimestamp(5, timestamp);
+                stmt.setInt(6, otpMailDTO.getTenantId());
+                stmt.setString(7, otpMailDTO.getUsername());
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -94,14 +96,15 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
         String sql = "SELECT "
                 + "ID, "
                 + "OTP_TOKEN, "
-                + "TENANT_DOMAIN,"
                 + "EMAIL, "
                 + "EMAIL_TYPE, "
                 + "META_INFO, "
                 + "CREATED_AT, "
                 + "EXPIRY_TIME, "
                 + "IS_EXPIRED, "
-                + "TENANT_CREATED FROM DM_OTP_DATA "
+                + "TENANT_CREATED,"
+                + "TENANT_ID, "
+                + "USERNAME FROM DM_OTP_DATA "
                 + "WHERE OTP_TOKEN = ?";
 
         try {
@@ -114,7 +117,6 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                         OTPMailDTO otpMailDTO = new OTPMailDTO();
                         otpMailDTO.setId(rs.getInt("ID"));
                         otpMailDTO.setOtpToken(rs.getString("OTP_TOKEN"));
-                        otpMailDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                         otpMailDTO.setEmail(rs.getString("EMAIL"));
                         otpMailDTO.setEmailType(rs.getString("EMAIL_TYPE"));
                         otpMailDTO.setMetaInfo(rs.getString("META_INFO"));
@@ -122,6 +124,8 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                         otpMailDTO.setExpiryTime(rs.getInt("EXPIRY_TIME"));
                         otpMailDTO.setExpired(rs.getBoolean("IS_EXPIRED"));
                         otpMailDTO.setTenantCreated(rs.getBoolean("TENANT_CREATED"));
+                        otpMailDTO.setTenantId(rs.getInt("TENANT_ID"));
+                        otpMailDTO.setUsername(rs.getString("USERNAME"));
                         return otpMailDTO;
                     }
                     return null;
