@@ -100,5 +100,4 @@ public interface NotificationDAO {
 
 	List<Notification> getNotificationsByStatus(PaginationRequest request, Notification.Status status, int tenantId) throws
 			NotificationManagementException;
-
 }

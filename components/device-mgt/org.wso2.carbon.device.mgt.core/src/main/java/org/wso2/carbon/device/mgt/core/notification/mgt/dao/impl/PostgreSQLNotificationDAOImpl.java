@@ -49,7 +49,7 @@ public class PostgreSQLNotificationDAOImpl extends AbstractNotificationDAOImpl {
                     "SELECT n1.NOTIFICATION_ID, n1.DEVICE_ID, n1.OPERATION_ID, n1.STATUS, n1.DESCRIPTION," +
                     " d.DEVICE_IDENTIFICATION, d.NAME as DEVICE_NAME, t.NAME AS DEVICE_TYPE FROM DM_DEVICE d, DM_DEVICE_TYPE t, (SELECT " +
                     "NOTIFICATION_ID, DEVICE_ID, OPERATION_ID, STATUS, DESCRIPTION FROM DM_NOTIFICATION WHERE " +
-                    "TENANT_ID = ?) n1 WHERE n1.DEVICE_ID = d.ID AND d.DEVICE_TYPE_ID=t.ID AND TENANT_ID = ?";
+                    "TENANT_ID = ?) n1 WHERE n1.DEVICE_ID = d.ID AND d.DEVICE_TYPE_ID=t.ID AND TENANT_ID = ? ORDER BY n1.NOTIFICATION_ID DESC";
 
             sql = sql + " LIMIT ? OFFSET ?";
 
@@ -90,7 +90,7 @@ public class PostgreSQLNotificationDAOImpl extends AbstractNotificationDAOImpl {
                          "DM_DEVICE d, DM_DEVICE_TYPE t, (SELECT NOTIFICATION_ID, DEVICE_ID, " +
                          "OPERATION_ID, STATUS, DESCRIPTION FROM DM_NOTIFICATION WHERE " +
                          "TENANT_ID = ? AND STATUS = ?) n1 WHERE n1.DEVICE_ID = d.ID AND d.DEVICE_TYPE_ID=t.ID " +
-                         "AND TENANT_ID = ?";
+                         "AND TENANT_ID = ? ORDER BY n1.NOTIFICATION_ID DESC";
 
             sql = sql + " LIMIT ? OFFSET ?";
 

@@ -24,7 +24,11 @@ import org.wso2.carbon.device.mgt.common.notification.mgt.NotificationManagement
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.util.NotificationDAOUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +37,7 @@ import java.util.List;
  * This class holds the Oracle implementation of NotificationDAO which can be used to support Oracle db syntax.
  */
 public class OracleNotificationDAOImpl extends AbstractNotificationDAOImpl {
+
     @Override
     public int addNotification(int deviceId, int tenantId, Notification notification) throws
             NotificationManagementException {
@@ -81,7 +86,7 @@ public class OracleNotificationDAOImpl extends AbstractNotificationDAOImpl {
                     "NOTIFICATION_ID, DEVICE_ID, OPERATION_ID, STATUS, DESCRIPTION FROM DM_NOTIFICATION WHERE " +
                     "TENANT_ID = ?) n1 WHERE n1.DEVICE_ID = d.ID AND d.DEVICE_TYPE_ID=t.ID AND TENANT_ID = ?";
 
-            sql = sql + " ORDER BY n1.NOTIFICATION_ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            sql = sql + " ORDER BY n1.NOTIFICATION_ID DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
@@ -122,7 +127,7 @@ public class OracleNotificationDAOImpl extends AbstractNotificationDAOImpl {
                     + "TENANT_ID = ? AND STATUS = ?) n1 WHERE n1.DEVICE_ID = d.ID AND d.DEVICE_TYPE_ID=t.ID "
                     + "AND TENANT_ID = ?";
 
-            sql = sql + " ORDER BY n1.NOTIFICATION_ID OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+            sql = sql + " ORDER BY n1.NOTIFICATION_ID DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, tenantId);
