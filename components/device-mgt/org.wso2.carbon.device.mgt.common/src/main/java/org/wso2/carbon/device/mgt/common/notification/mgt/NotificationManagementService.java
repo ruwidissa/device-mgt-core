@@ -102,5 +102,4 @@ public interface NotificationManagementService {
 
     PaginationResult getNotificationsByStatus(Notification.Status status,
                                    PaginationRequest request) throws NotificationManagementException;
-
 }
