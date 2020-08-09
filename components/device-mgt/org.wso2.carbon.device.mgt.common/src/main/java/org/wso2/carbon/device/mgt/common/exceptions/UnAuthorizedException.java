@@ -19,26 +19,26 @@
 
 package org.wso2.carbon.device.mgt.common.exceptions;
 
-public class BadRequestException extends DeviceManagementException {
+public class UnAuthorizedException extends DeviceManagementException {
     private static final long serialVersionUID = 2304023531260840549L;
 
-    public BadRequestException() {
+    public UnAuthorizedException() {
         super();
     }
 
-    public BadRequestException(String msg) {
+    public UnAuthorizedException(String msg) {
         super(msg);
     }
 
-    public BadRequestException(Throwable cause) {
+    public UnAuthorizedException(Throwable cause) {
         super(cause);
     }
 
-    public BadRequestException(String msg, Exception nestedEx) {
+    public UnAuthorizedException(String msg, Exception nestedEx) {
         super(msg, nestedEx);
     }
 
-    public BadRequestException(String message, Throwable cause) {
+    public UnAuthorizedException(String message, Throwable cause) {
         super(message, cause);
     }
 }

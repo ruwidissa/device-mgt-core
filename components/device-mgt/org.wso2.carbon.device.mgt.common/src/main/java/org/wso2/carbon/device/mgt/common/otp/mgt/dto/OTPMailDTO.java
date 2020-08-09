@@ -31,7 +31,6 @@ public class OTPMailDTO {
     Timestamp createdAt;
     int expiryTime;
     boolean isExpired;
-    boolean isTenantCreated;
 
     public int getTenantId() {
         return tenantId;
@@ -111,7 +110,4 @@ public class OTPMailDTO {
         isExpired = expired;
     }
 
-    public boolean isTenantCreated() { return isTenantCreated; }
-
-    public void setTenantCreated(boolean tenantCreated) { isTenantCreated = tenantCreated; }
 }

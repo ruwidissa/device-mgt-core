@@ -1288,6 +1288,10 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             operation.setId(operationStatusBean.getOperationId());
             DeviceMgtAPIUtils.getDeviceManagementService().updateOperation(device, operation);
             return Response.status(Response.Status.OK).entity("OperationStatus updated successfully.").build();
+        } catch (BadRequestException e) {
+            String msg = "Error occured due to invalid request";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred when fetching device " + deviceIdentifier.toString();
             log.error(msg, e);
@@ -1296,10 +1300,6 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             String msg = "Error occurred when updating operation of device " + deviceIdentifier;
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
-        } catch (BadRequestException e) {
-            String msg = "Error occured due to invalid request";
-            log.error(msg, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         }
     }
 

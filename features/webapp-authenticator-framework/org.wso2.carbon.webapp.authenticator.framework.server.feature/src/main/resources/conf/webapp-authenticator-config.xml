@@ -29,7 +29,7 @@
         </Authenticator>
         <Authenticator>
             <Name>CertificateAuth</Name>
-            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.gitCertificateAuthenticator</ClassName>
+            <ClassName>org.wso2.carbon.webapp.authenticator.framework.authenticator.CertificateAuthenticator</ClassName>
         </Authenticator>
         <Authenticator>
             <Name>OTPAuth</Name>

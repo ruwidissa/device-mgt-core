@@ -18,20 +18,20 @@
 package org.wso2.carbon.device.mgt.common.spi;
 
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
+import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 
 public interface OTPManagementService {
 
     /**
      * Create OTP token and store tenant details in the DB
-     * @param otpMailWrapper OTP Mail Wrapper object which contains tenant details of registering user
-     * @return OTPToken
+     * @param otpWrapper OTP Mail Wrapper object which contains tenant details of registering user
      * @throws OTPManagementException if error occurs while creating OTP token and storing tenant details.
      * @throws BadRequestException if found and incompatible payload to create OTP token.
      */
-    String createOTPToken (OTPMailWrapper otpMailWrapper) throws OTPManagementException, BadRequestException;
+    void sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException;
 
     /**
      * Check the validity of the OTP
