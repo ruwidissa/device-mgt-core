@@ -102,7 +102,6 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                 + "CREATED_AT, "
                 + "EXPIRY_TIME, "
                 + "IS_EXPIRED, "
-                + "TENANT_CREATED,"
                 + "TENANT_ID, "
                 + "USERNAME FROM DM_OTP_DATA "
                 + "WHERE OTP_TOKEN = ?";
@@ -123,7 +122,6 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                         otpMailDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
                         otpMailDTO.setExpiryTime(rs.getInt("EXPIRY_TIME"));
                         otpMailDTO.setExpired(rs.getBoolean("IS_EXPIRED"));
-                        otpMailDTO.setTenantCreated(rs.getBoolean("TENANT_CREATED"));
                         otpMailDTO.setTenantId(rs.getInt("TENANT_ID"));
                         otpMailDTO.setUsername(rs.getString("USERNAME"));
                         return otpMailDTO;

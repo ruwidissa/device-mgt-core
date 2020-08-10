@@ -49,7 +49,6 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;

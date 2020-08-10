@@ -26,19 +26,28 @@ import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
+import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
+import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
+import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
+import org.wso2.carbon.device.mgt.core.config.keymanager.KeyManagerConfigurations;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
-import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPMailWrapper;
+import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.wso2.carbon.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
+import org.wso2.carbon.user.api.Tenant;
+
+import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.OTPProperties;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -56,23 +65,35 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     }
 
     @Override
-    public String createOTPToken(OTPMailWrapper otpMailWrapper) throws OTPManagementException, BadRequestException {
+    public void sendUserVerifyingMail(OTPWrapper otpWrapper) throws OTPManagementException, DeviceManagementException {
 
-        if (!isValidOTPTokenCreatingRequest(otpMailWrapper)){
+        Tenant tenant = validateOTPTokenCreatingRequest(otpWrapper);
+        if (tenant == null){
             String msg = "Found invalid payload with OTP creating request";
             log.error(msg);
             throw new BadRequestException(msg);
         }
 
+        DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance()
+                .getDeviceManagementConfig();
+        KeyManagerConfigurations kmConfig = deviceManagementConfig.getKeyManagerConfigurations();
+        String superTenantUsername = kmConfig.getAdminUsername();
+
+        if (!otpWrapper.getUsername().equals(superTenantUsername)) {
+            String msg = "You don't have required permission to create OTP";
+            log.error(msg);
+            throw new UnAuthorizedException(msg);
+        }
+
         Gson gson = new Gson();
-        String metaInfo = gson.toJson(otpMailWrapper);
+        String metaInfo = gson.toJson(tenant);
         String otpValue = UUID.randomUUID().toString();
 
         OTPMailDTO otpMailDTO = new OTPMailDTO();
-        otpMailDTO.setEmail(otpMailWrapper.getEmail());
-        otpMailDTO.setTenantId(otpMailDTO.getTenantId());
-        otpMailDTO.setUsername(otpMailWrapper.getAdminUsername());
-        otpMailDTO.setEmailType(otpMailWrapper.getEmailType());
+        otpMailDTO.setEmail(otpWrapper.getEmail());
+        otpMailDTO.setTenantId(-1234);
+        otpMailDTO.setUsername(otpWrapper.getUsername());
+        otpMailDTO.setEmailType(otpWrapper.getEmailType());
         otpMailDTO.setMetaInfo(metaInfo);
         otpMailDTO.setOtpToken(otpValue);
 
@@ -84,8 +105,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                 log.error(msg);
                 throw new OTPManagementException(msg);
             }
+            sendMail(tenant.getAdminFirstName(), otpValue, tenant.getEmail());
             ConnectionManagerUtil.commitDBTransaction();
-            return otpValue;
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while disabling AutoCommit.";
             log.error(msg, e);
@@ -117,10 +138,6 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             log.warn("Token is expired. OTP: " + oneTimeToken);
             return null;
         }
-        if (otpMailDTO.isTenantCreated()) {
-            log.warn("Tenant is already created for the token. OTP: " + oneTimeToken);
-            return null;
-        }
 
         Calendar calendar = Calendar.getInstance();
         Timestamp currentTimestamp = new Timestamp(calendar.getTime().getTime());
@@ -131,8 +148,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             String renewedOTP = UUID.randomUUID().toString();
             renewOTP(otpMailDTO, renewedOTP);
             Gson gson = new Gson();
-            OTPMailWrapper otpMailWrapper = gson.fromJson(otpMailDTO.getMetaInfo(), OTPMailWrapper.class);
-            resendUserVerifyingMail(otpMailWrapper.getFirstName(), renewedOTP, otpMailDTO.getEmail());
+            Tenant tenant = gson.fromJson(otpMailDTO.getMetaInfo(), Tenant.class);
+            sendMail(tenant.getAdminFirstName(), renewedOTP, otpMailDTO.getEmail());
             return null;
         }
         return otpMailDTO;
@@ -163,39 +180,63 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
     /**
      * Validate OTP token creating payload
-     * @param otpMailWrapper OTPMailWrapper
+     * @param otpWrapper OTP-Wrapper
      * @return true if its valid payload otherwise returns false
      */
-    private boolean isValidOTPTokenCreatingRequest(OTPMailWrapper otpMailWrapper) {
-        if (StringUtils.isBlank(otpMailWrapper.getFirstName())) {
-            log.error("Received empty or blank first name field with OTP creating payload.");
-            return false;
+    private Tenant validateOTPTokenCreatingRequest(OTPWrapper otpWrapper) {
+
+        Tenant tenant = new Tenant();
+        List<Metadata> properties = otpWrapper.getProperties();
+        for (Metadata property : properties) {
+            switch (property.getMetaKey()) {
+                case OTPProperties.FIRST_NAME:
+                    String firstName = property.getMetaValue();
+                    if (StringUtils.isBlank(firstName)) {
+                        log.error("Received empty or blank first name field with OTP creating payload.");
+                        return null;
+                    }
+                    tenant.setAdminFirstName(firstName);
+                    break;
+                case OTPProperties.LAST_NAME:
+                    String lastName = property.getMetaValue();
+                    if (StringUtils.isBlank(lastName)) {
+                        log.error("Received empty or blank last name field with OTP creating payload.");
+                        return null;
+                    }
+                    tenant.setAdminLastName(lastName);
+                    break;
+                case OTPProperties.TENANT_ADMIN_USERNAME:
+                    String username = property.getMetaValue();
+                    if (StringUtils.isBlank(username)) {
+                        log.error("Received empty or blank admin username field with OTP creating payload.");
+                        return null;
+                    }
+                    tenant.setAdminName(username);
+                    break;
+                case OTPProperties.TENANT_ADMIN_PASSWORD:
+                    String pwd = property.getMetaValue();
+                    if (StringUtils.isBlank(pwd)) {
+                        log.error("Received empty or blank admin password field with OTP creating payload.");
+                        return null;
+                    }
+                    tenant.setAdminPassword(pwd);
+                    break;
+                default:
+                    log.error("Received invalid key with OTP properties for creating OTP.");
+                    return null;
+            }
         }
-        if (StringUtils.isBlank(otpMailWrapper.getLastName())) {
-            log.error("Received empty or blank last name field with OTP creating payload.");
-            return false;
-        }
-        if (StringUtils.isBlank(otpMailWrapper.getAdminUsername())) {
-            log.error("Received empty or blank admin username field with OTP creating payload.");
-            return false;
-        }
-        if (StringUtils.isBlank(otpMailWrapper.getAdminPassword())) {
-            log.error("Received empty or blank admin password field with OTP creating payload.");
-            return false;
-        }
-        if (StringUtils.isBlank(otpMailWrapper.getEmail())) {
+
+        if (StringUtils.isBlank(otpWrapper.getEmail())) {
             log.error("Received empty or blank email field with OTP creating payload.");
-            return false;
+            return null;
         }
-        if (StringUtils.isBlank(otpMailWrapper.getEmailType())) {
+        if (StringUtils.isBlank(otpWrapper.getEmailType())) {
             log.error("Received empty or blank email type field with OTP creating payload.");
-            return false;
+            return null;
         }
-        if (otpMailWrapper.getTenantId() != -1234 && otpMailWrapper.getTenantId() < 1) {
-            log.error("Invalid tenant Id field with OTP creating payload.");
-            return false;
-        }
-        return true;
+        tenant.setEmail(otpWrapper.getEmail());
+        return tenant;
     }
 
     /**
@@ -205,7 +246,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
      * @param mailAddress Mail Address of the User
      * @throws OTPManagementException if error occurred while resend the user verifying mail
      */
-    private void resendUserVerifyingMail(String firstName, String renewedOTP, String mailAddress)
+    private void sendMail(String firstName, String renewedOTP, String mailAddress)
             throws OTPManagementException {
         Properties props = new Properties();
         props.setProperty("first-name", firstName);
@@ -216,8 +257,9 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
                     .sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE, metaInfo);
         } catch (DeviceManagementException e) {
-            e.printStackTrace();
-            throw new OTPManagementException(e);
+            String msg = "Error occurred while inviting user to enrol their device";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
         } catch (ConfigurationManagementException e) {
             throw new OTPManagementException(e);
         }
