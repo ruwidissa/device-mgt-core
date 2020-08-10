@@ -19,7 +19,7 @@ package org.wso2.carbon.device.mgt.common.otp.mgt.dto;
 
 import java.sql.Timestamp;
 
-public class OTPMailDTO {
+public class OneTimePinDTO {
 
     int id;
     String otpToken;

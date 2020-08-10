@@ -20,7 +20,7 @@ package org.wso2.carbon.webapp.authenticator.framework.authenticator;
 import org.apache.catalina.connector.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.webapp.authenticator.framework.AuthenticationInfo;
 import org.wso2.carbon.webapp.authenticator.framework.Constants;
@@ -49,7 +49,7 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
         try {
             OTPManagementService otpManagementService = AuthenticatorFrameworkDataHolder.getInstance()
                     .getOtpManagementService();
-            OTPMailDTO validOTP = otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders
+            OneTimePinDTO validOTP = otpManagementService.isValidOTP(request.getHeader(Constants.HTTPHeaders
                     .ONE_TIME_TOKEN_HEADER));
             if (validOTP != null) {
                 authenticationInfo.setStatus(Status.CONTINUE);

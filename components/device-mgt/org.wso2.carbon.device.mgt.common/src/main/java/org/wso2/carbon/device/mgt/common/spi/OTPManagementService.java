@@ -20,7 +20,7 @@ package org.wso2.carbon.device.mgt.common.spi;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
-import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 
 public interface OTPManagementService {
@@ -40,5 +40,5 @@ public interface OTPManagementService {
      * @throws OTPManagementException if error occurred whle verifying validity of the OPT
      * @throws BadRequestException if found an null value for OTP
      */
-    OTPMailDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
+    OneTimePinDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
 }
