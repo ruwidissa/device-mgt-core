@@ -20,7 +20,7 @@ package org.wso2.carbon.device.mgt.core.otp.mgt.dao.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
-import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OTPMailDTO;
+import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.AbstractDAOImpl;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAO;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
@@ -38,11 +38,11 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
     private static final Log log = LogFactory.getLog(GenericOTPManagementDAOImpl.class);
 
     @Override
-    public int addOTPData(OTPMailDTO otpMailDTO) throws OTPManagementDAOException {
+    public int addOTPData(OneTimePinDTO oneTimePinDTO) throws OTPManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to create an OTP data entry");
             log.debug("OTP Details : ");
-            log.debug("OTP key : " + otpMailDTO.getOtpToken() + " Email : " + otpMailDTO.getEmail());
+            log.debug("OTP key : " + oneTimePinDTO.getOtpToken() + " Email : " + oneTimePinDTO.getEmail());
         }
 
         String sql = "INSERT INTO DM_OTP_DATA "
@@ -58,13 +58,13 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setString(1, otpMailDTO.getOtpToken());
-                stmt.setString(2, otpMailDTO.getEmail());
-                stmt.setString(3, otpMailDTO.getEmailType());
-                stmt.setString(4, otpMailDTO.getMetaInfo());
+                stmt.setString(1, oneTimePinDTO.getOtpToken());
+                stmt.setString(2, oneTimePinDTO.getEmail());
+                stmt.setString(3, oneTimePinDTO.getEmailType());
+                stmt.setString(4, oneTimePinDTO.getMetaInfo());
                 stmt.setTimestamp(5, timestamp);
-                stmt.setInt(6, otpMailDTO.getTenantId());
-                stmt.setString(7, otpMailDTO.getUsername());
+                stmt.setInt(6, oneTimePinDTO.getTenantId());
+                stmt.setString(7, oneTimePinDTO.getUsername());
                 stmt.executeUpdate();
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -75,18 +75,18 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to create an opt entry for email "
-                    + otpMailDTO.getEmail();
+                    + oneTimePinDTO.getEmail();
             log.error(msg, e);
             throw new OTPManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred while executing SQL to create an otp entry for email " + otpMailDTO.getEmail();
+            String msg = "Error occurred while executing SQL to create an otp entry for email " + oneTimePinDTO.getEmail();
             log.error(msg, e);
             throw new OTPManagementDAOException(msg, e);
         }
     }
 
     @Override
-    public OTPMailDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementDAOException {
+    public OneTimePinDTO getOTPDataByToken (String oneTimeToken) throws OTPManagementDAOException {
 
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to get an OTP data entry for OTP");
@@ -113,18 +113,18 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        OTPMailDTO otpMailDTO = new OTPMailDTO();
-                        otpMailDTO.setId(rs.getInt("ID"));
-                        otpMailDTO.setOtpToken(rs.getString("OTP_TOKEN"));
-                        otpMailDTO.setEmail(rs.getString("EMAIL"));
-                        otpMailDTO.setEmailType(rs.getString("EMAIL_TYPE"));
-                        otpMailDTO.setMetaInfo(rs.getString("META_INFO"));
-                        otpMailDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
-                        otpMailDTO.setExpiryTime(rs.getInt("EXPIRY_TIME"));
-                        otpMailDTO.setExpired(rs.getBoolean("IS_EXPIRED"));
-                        otpMailDTO.setTenantId(rs.getInt("TENANT_ID"));
-                        otpMailDTO.setUsername(rs.getString("USERNAME"));
-                        return otpMailDTO;
+                        OneTimePinDTO oneTimePinDTO = new OneTimePinDTO();
+                        oneTimePinDTO.setId(rs.getInt("ID"));
+                        oneTimePinDTO.setOtpToken(rs.getString("OTP_TOKEN"));
+                        oneTimePinDTO.setEmail(rs.getString("EMAIL"));
+                        oneTimePinDTO.setEmailType(rs.getString("EMAIL_TYPE"));
+                        oneTimePinDTO.setMetaInfo(rs.getString("META_INFO"));
+                        oneTimePinDTO.setCreatedAt(rs.getTimestamp("CREATED_AT"));
+                        oneTimePinDTO.setExpiryTime(rs.getInt("EXPIRY_TIME"));
+                        oneTimePinDTO.setExpired(rs.getBoolean("IS_EXPIRED"));
+                        oneTimePinDTO.setTenantId(rs.getInt("TENANT_ID"));
+                        oneTimePinDTO.setUsername(rs.getString("USERNAME"));
+                        return oneTimePinDTO;
                     }
                     return null;
                 }
