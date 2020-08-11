@@ -47,4 +47,6 @@ public class HandlerConstants {
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;
+
+    public static final String OTP_HEADER = "one-time-token";
 }
