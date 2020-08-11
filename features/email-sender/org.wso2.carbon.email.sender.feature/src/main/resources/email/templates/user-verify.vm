@@ -206,7 +206,7 @@ TkSuQmCC"
                 </p>
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     Congratulations!!! Thank you for registering with Entgra cloud. Please click and log in to the
-                    following link to complete your registration with us. Click <a href="$base-url-https/self-register?token=$otp-token">here</a>.
+                    following link to complete your registration with us. Click <a href="$base-url-https/self-register/sign-up?token=$otp-token">here</a>.
                 </p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
