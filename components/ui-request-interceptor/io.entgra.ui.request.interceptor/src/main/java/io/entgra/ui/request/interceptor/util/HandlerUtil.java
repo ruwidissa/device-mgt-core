@@ -34,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.device.application.mgt.common.ProxyResponse;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -203,7 +204,7 @@ public class HandlerUtil {
     }
 
     /**
-     * Get gatway port according to request recieved scheme
+     * Get gateway port according to request received scheme
      * @param scheme https or https
      * @return {@link String} gateway port
      */
@@ -213,6 +214,19 @@ public class HandlerUtil {
             gatewayPort = System.getProperty("iot.gateway.http.port");
         }
         return gatewayPort;
+    }
+
+    /**
+     * Get core port according to request received scheme
+     * @param scheme https or https
+     * @return {@link String} gateway port
+     */
+    public static String getCorePort(String scheme) {
+        String productCorePort = System.getProperty("iot.core.https.port");
+        if (HandlerConstants.HTTP_PROTOCOL.equals(scheme)) {
+            productCorePort = System.getProperty("iot.core.https.por");
+        }
+        return productCorePort;
     }
 
     /**
@@ -241,5 +255,22 @@ public class HandlerUtil {
         proxyResponse.setExecutorResponse(
                 HandlerConstants.EXECUTOR_EXCEPTION_PREFIX + HandlerUtil.getStatusKey(HttpStatus.SC_UNAUTHORIZED));
         handleError(resp, proxyResponse);
+    }
+
+    /**
+     * Generates the target URL for the proxy request.
+     *
+     * @param req incoming {@link HttpServletRequest}
+     * @param apiEndpoint API Endpoint URL
+     * @return Target URL
+     */
+    public static String generateBackendRequestURL(HttpServletRequest req, String apiEndpoint) {
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(apiEndpoint).append(HandlerConstants.API_COMMON_CONTEXT)
+                .append(req.getPathInfo().replace(" ", "%20"));
+        if (StringUtils.isNotEmpty(req.getQueryString())) {
+            urlBuilder.append("?").append(req.getQueryString());
+        }
+        return urlBuilder.toString();
     }
 }
