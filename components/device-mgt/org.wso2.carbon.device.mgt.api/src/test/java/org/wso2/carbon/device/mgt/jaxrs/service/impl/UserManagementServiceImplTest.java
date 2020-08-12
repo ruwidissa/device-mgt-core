@@ -15,6 +15,23 @@
  *   specific language governing permissions and limitations
  *   under the License.
  *
+ *
+ *   Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ *   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing,
+ *   software distributed under the License is distributed on an
+ *   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *   KIND, either express or implied. See the License for the
+ *   specific language governing permissions and limitations
+ *   under the License.
+ *
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
@@ -34,6 +51,10 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
+import org.wso2.carbon.device.mgt.core.otp.mgt.service.OTPManagementServiceImpl;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderServiceImpl;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
@@ -66,9 +87,11 @@ public class UserManagementServiceImplTest {
     private UserStoreManager userStoreManager;
     private UserManagementService userManagementService;
     private DeviceManagementProviderService deviceManagementProviderService;
+    private OTPManagementService otpManagementService;
     private static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
     private UserRealm userRealm;
     private EnrollmentInvitation enrollmentInvitation;
+    private DeviceEnrollmentInvitation deviceEnrollmentInvitation;
     private List<String> userList;
     private static final String TEST_USERNAME = "test";
     private static final String TEST2_USERNAME = "test2";
@@ -86,6 +109,7 @@ public class UserManagementServiceImplTest {
         userStoreManager = Mockito.mock(UserStoreManager.class, Mockito.RETURNS_MOCKS);
         deviceManagementProviderService = Mockito
                 .mock(DeviceManagementProviderServiceImpl.class, Mockito.CALLS_REAL_METHODS);
+        otpManagementService = Mockito.mock(OTPManagementServiceImpl.class, Mockito.CALLS_REAL_METHODS);
         userRealm = Mockito.mock(UserRealm.class);
         RealmConfiguration realmConfiguration = Mockito.mock(RealmConfiguration.class);
         Mockito.doReturn(null).when(realmConfiguration).getSecondaryRealmConfig();
@@ -97,6 +121,8 @@ public class UserManagementServiceImplTest {
         enrollmentInvitation.setRecipients(recipients);
         userList = new ArrayList<>();
         userList.add(TEST_USERNAME);
+        deviceEnrollmentInvitation = new DeviceEnrollmentInvitation();
+        deviceEnrollmentInvitation.setUsernames(userList);
     }
 
     @Test(description = "This method tests the addUser method of UserManagementService")
@@ -205,13 +231,11 @@ public class UserManagementServiceImplTest {
 
     @Test(description = "This method tests the send invitation method of UserManagementService", dependsOnMethods =
             {"testIsUserExists"})
-    public void testSendInvitation() throws ConfigurationManagementException, DeviceManagementException {
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getUserStoreManager"))
-                .toReturn(this.userStoreManager);
-        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
-                .toReturn(this.deviceManagementProviderService);
-        Mockito.doNothing().when(deviceManagementProviderService).sendEnrolmentInvitation(Mockito.any(), Mockito.any());
-        Response response = userManagementService.inviteExistingUsersToEnrollDevice(userList);
+    public void testSendInvitation() throws OTPManagementException {
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getOTPManagementService"))
+                .toReturn(this.otpManagementService);
+        Mockito.doNothing().when(otpManagementService).sendDeviceEnrollmentInvitationMail(Mockito.any());
+        Response response = userManagementService.inviteExistingUsersToEnrollDevice(deviceEnrollmentInvitation);
         Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(),
                 "Inviting existing users to enroll device failed");
     }
@@ -240,7 +264,7 @@ public class UserManagementServiceImplTest {
 
     @Test(description = "This method tests the inviteToEnrollDevice method of UserManagementService",
             dependsOnMethods = "testGetUsers")
-    public void testInviteToEnrollDevice() {
+    public void testInviteToEnrollDevice() throws ConfigurationManagementException, DeviceManagementException {
         URL resourceUrl = ClassLoader.getSystemResource("testng.xml");
         System.setProperty("carbon.home", resourceUrl.getPath());
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getUserStoreManager"))
@@ -248,6 +272,7 @@ public class UserManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser")).toReturn(TEST_USERNAME);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
+        Mockito.doNothing().when(deviceManagementProviderService).sendEnrolmentInvitation(Mockito.any(), Mockito.any());
         EnrollmentInvitation enrollmentInvitation = new EnrollmentInvitation();
         List<String> recipients = new ArrayList<>();
         recipients.add(TEST_USERNAME);
@@ -289,16 +314,22 @@ public class UserManagementServiceImplTest {
 
     @Test(description = "This method tests the behaviour of methods when there is an issue with "
             + "DeviceManagementProviderService", dependsOnMethods = {"testGetUserCount"})
-    public void testNegativeScenarios1() throws ConfigurationManagementException, DeviceManagementException {
+    public void testNegativeScenarios1()
+            throws ConfigurationManagementException, DeviceManagementException, OTPManagementException {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getUserStoreManager"))
                 .toReturn(this.userStoreManager);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getAuthenticatedUser")).toReturn(TEST_USERNAME);
         Mockito.reset(deviceManagementProviderService);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getOTPManagementService"))
+                .toReturn(this.otpManagementService);
+        Mockito.reset(otpManagementService);
         Mockito.doThrow(new DeviceManagementException()).when(deviceManagementProviderService)
                 .sendEnrolmentInvitation(Mockito.any(), Mockito.any());
-        Response response = userManagementService.inviteExistingUsersToEnrollDevice(userList);
+        Mockito.doThrow(new OTPManagementException()).when(otpManagementService)
+                .sendDeviceEnrollmentInvitationMail(Mockito.any());
+        Response response = userManagementService.inviteExistingUsersToEnrollDevice(deviceEnrollmentInvitation);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Invite existing users to enroll device succeeded under erroneous conditions");
         response = userManagementService.inviteToEnrollDevice(enrollmentInvitation);
@@ -346,6 +377,8 @@ public class UserManagementServiceImplTest {
         PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getDeviceManagementService"))
                 .toReturn(this.deviceManagementProviderService);
         Mockito.reset(this.userStoreManager);
+        PowerMockito.stub(PowerMockito.method(DeviceMgtAPIUtils.class, "getOTPManagementService"))
+                .toReturn(this.otpManagementService);
         Mockito.doThrow(new UserStoreException()).when(userStoreManager)
                 .getUserClaimValue(Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.doThrow(new UserStoreException()).when(userStoreManager)
@@ -362,7 +395,7 @@ public class UserManagementServiceImplTest {
         response = userManagementService.inviteToEnrollDevice(enrollmentInvitation);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Invite existing users to enroll device succeeded under erroneous conditions");
-        response = userManagementService.inviteExistingUsersToEnrollDevice(userList);
+        response = userManagementService.inviteExistingUsersToEnrollDevice(deviceEnrollmentInvitation);
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
                 "Invite existing users to enroll device succeeded under erroneous conditions");
     }
