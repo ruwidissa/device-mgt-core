@@ -20,6 +20,7 @@ package org.wso2.carbon.device.mgt.common.spi;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 
@@ -48,4 +49,12 @@ public interface OTPManagementService {
      * @throws OTPManagementException If error occurred while invalidating the OTP
      */
     void invalidateOTP(String oneTimeToken) throws OTPManagementException;
+
+    /**
+     * Create OTP token and send device enrollment invitation
+     * @param deviceEnrollmentInvitation object which contains device enrollment invitation related details
+     * @throws OTPManagementException if error occurred while creating OTP token &/ sending mail
+     */
+    void sendDeviceEnrollmentInvitationMail(DeviceEnrollmentInvitation deviceEnrollmentInvitation)
+            throws OTPManagementException;
 }

@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
@@ -28,6 +29,9 @@ import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.UnAuthorizedException;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentType;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
@@ -41,9 +45,12 @@ import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.wso2.carbon.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.OTPProperties;
 
@@ -82,7 +89,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             Properties props = new Properties();
             props.setProperty("first-name", tenant.getAdminFirstName());
             props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
-            sendMail(props, tenant.getEmail());
+            sendMail(props, tenant.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
             ConnectionManagerUtil.commitDBTransaction();
         } catch (TransactionManagementException e) {
             String msg = "Error occurred while disabling AutoCommit.";
@@ -135,7 +142,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             Properties props = new Properties();
             props.setProperty("first-name", tenant.getAdminFirstName());
             props.setProperty("otp-token", renewedOTP);
-            sendMail(props, oneTimePinDTO.getEmail());
+            sendMail(props, oneTimePinDTO.getEmail(), DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE);
             return null;
         }
         return oneTimePinDTO;
@@ -167,6 +174,47 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             throw new OTPManagementException(msg, e);
         } finally {
             ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
+
+    @Override
+    public void sendDeviceEnrollmentInvitationMail(DeviceEnrollmentInvitation deviceEnrollmentInvitation)
+            throws OTPManagementException {
+        DeviceManagementProviderService dms = DeviceManagementDataHolder.getInstance().getDeviceManagementProvider();
+        StringBuilder enrollmentSteps = new StringBuilder();
+        DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails;
+        for (DeviceEnrollmentType deviceEnrollmentType : deviceEnrollmentInvitation.getDeviceEnrollmentTypes()) {
+            deviceEnrollmentInvitationDetails = dms.getDeviceEnrollmentInvitationDetails(
+                    deviceEnrollmentType.getDeviceType());
+            if (deviceEnrollmentInvitationDetails != null &&
+                deviceEnrollmentInvitationDetails.getEnrollmentDetails() != null) {
+                for (String enrollmentType : deviceEnrollmentType.getEnrollmentType()) {
+                    deviceEnrollmentInvitationDetails.getEnrollmentDetails().stream()
+                            .filter(details -> enrollmentType.equals(details.getEnrollmentType())).findFirst()
+                            .ifPresent(details -> enrollmentSteps.append(details.getEnrollmentSteps()));
+                }
+            }
+        }
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        OneTimePinDTO oneTimePinDTO;
+        Properties props = new Properties();
+        props.setProperty("enrollment-steps", enrollmentSteps.toString());
+        try {
+            for (String username : deviceEnrollmentInvitation.getUsernames()) {
+                String emailAddress = DeviceManagerUtil.getUserClaimValue(
+                        username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS);
+                oneTimePinDTO = createOneTimePin(emailAddress, "test-type", username, null, tenantId);
+                props.setProperty("first-name", DeviceManagerUtil.
+                        getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
+                props.setProperty("username", username);
+                props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
+                sendMail(props, emailAddress, DeviceManagementConstants.EmailAttributes.USER_ENROLLMENT_TEMPLATE);
+            }
+        } catch (UserStoreException e) {
+            String msg = "Error occurred while getting claim values to invite user";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
         }
     }
 
@@ -341,15 +389,16 @@ public class OTPManagementServiceImpl implements OTPManagementService {
      * If OTP expired, resend the user verifying mail with renewed OTP
      * @param props Mail body properties
      * @param mailAddress Mail Address of the User
+     * @param template Mail template to be used
      * @throws OTPManagementException if error occurred while resend the user verifying mail
      */
-    private void sendMail(Properties props, String mailAddress) throws OTPManagementException {
+    private void sendMail(Properties props, String mailAddress, String template) throws OTPManagementException {
         try {
             EmailMetaInfo metaInfo = new EmailMetaInfo(mailAddress, props);
             DeviceManagementDataHolder.getInstance().getDeviceManagementProvider()
-                    .sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.USER_VERIFY_TEMPLATE, metaInfo);
+                    .sendEnrolmentInvitation(template, metaInfo);
         } catch (DeviceManagementException e) {
-            String msg = "Error occurred while inviting user to enrol their device";
+            String msg = "Error occurred while sending email using email template '" + template + "'.";
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
         } catch (ConfigurationManagementException e) {
