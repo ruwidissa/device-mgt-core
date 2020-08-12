@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DBConnectionException;
@@ -41,6 +42,7 @@ import org.wso2.carbon.device.mgt.core.otp.mgt.dao.OTPManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 import org.wso2.carbon.device.mgt.core.otp.mgt.util.ConnectionManagerUtil;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.wso2.carbon.user.api.Tenant;
 
 import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.OTPProperties;
@@ -102,13 +104,18 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
     @Override
     public OneTimePinDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException {
+        if (StringUtils.isBlank(oneTimeToken)){
+            String msg = "Received blank OTP to verify. OTP: " + oneTimeToken;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
         OneTimePinDTO oneTimePinDTO = getOTPDataByToken(oneTimeToken);
         if (oneTimePinDTO == null) {
             String msg = "Couldn't found OTP data for the requesting OTP " + oneTimeToken + " In the system.";
             log.error(msg);
             throw new BadRequestException(msg);
         }
-
         if (oneTimePinDTO.isExpired()) {
             log.warn("Token is expired. OTP: " + oneTimeToken);
             return null;
@@ -197,9 +204,17 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         DeviceManagementConfig deviceManagementConfig = DeviceConfigurationManager.getInstance()
                 .getDeviceManagementConfig();
         KeyManagerConfigurations kmConfig = deviceManagementConfig.getKeyManagerConfigurations();
-        String superTenantUsername = kmConfig.getAdminUsername();
 
-        if (!otpWrapper.getUsername().equals(superTenantUsername)) {
+        if (StringUtils.isBlank(otpWrapper.getUsername())) {
+            String msg = "Received Blank username to create OTP. Username: " + otpWrapper.getUsername();
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
+        String[] superTenantDetails = otpWrapper.getUsername().split("@");
+
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(superTenantDetails[1]) || !superTenantDetails[0]
+                .equals(kmConfig.getAdminUsername())) {
             String msg = "You don't have required permission to create OTP";
             log.error(msg);
             throw new UnAuthorizedException(msg);
@@ -262,11 +277,21 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             log.error(msg);
             throw new BadRequestException(msg);
         }
+
+        EmailValidator validator = EmailValidator.getInstance();
+        if (!validator.isValid(otpWrapper.getEmail())) {
+            String msg = "Found invalid email. Hence please verify the email address and re-try. Email: " + otpWrapper
+                    .getEmail();
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
         if (StringUtils.isBlank(otpWrapper.getEmailType())) {
             String msg = "Received empty or blank email type field with OTP creating payload.";
             log.error(msg);
             throw new BadRequestException(msg);
         }
+        tenant.setDomain(otpWrapper.getEmail().split("@")[1]);
         tenant.setEmail(otpWrapper.getEmail());
         return tenant;
     }
