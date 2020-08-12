@@ -213,8 +213,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
 
         String[] superTenantDetails = otpWrapper.getUsername().split("@");
 
-        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(superTenantDetails[1]) || !superTenantDetails[0]
-                .equals(kmConfig.getAdminUsername())) {
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(superTenantDetails[superTenantDetails.length - 1])
+                || !superTenantDetails[0].equals(kmConfig.getAdminUsername())) {
             String msg = "You don't have required permission to create OTP";
             log.error(msg);
             throw new UnAuthorizedException(msg);
