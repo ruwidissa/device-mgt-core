@@ -14,6 +14,23 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.mgt.core.util;
 
@@ -79,6 +96,7 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
@@ -1046,5 +1064,18 @@ public final class DeviceManagerUtil {
             throw new UserStoreException(msg);
         }
         return roleList;
+    }
+
+    /**
+     * Retrieve the value of the user property from the user profile
+     * @param username of the user
+     * @param claimUri name of the claim
+     * @return value for the claim uri of user
+     * @throws UserStoreException when there is error in retrieving the user store manager
+     */
+    public static String getUserClaimValue(String username, String claimUri) throws UserStoreException {
+        UserStoreManager userStoreManager = CarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                .getUserStoreManager();
+        return userStoreManager.getUserClaimValue(username, claimUri, null);
     }
 }
