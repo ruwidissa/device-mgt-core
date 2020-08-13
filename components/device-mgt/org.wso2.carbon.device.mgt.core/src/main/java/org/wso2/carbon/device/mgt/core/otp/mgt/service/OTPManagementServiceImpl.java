@@ -33,6 +33,7 @@ import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitati
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentType;
 import org.wso2.carbon.device.mgt.common.metadata.mgt.Metadata;
+import org.wso2.carbon.device.mgt.common.otp.mgt.OTPEmailTypes;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
@@ -204,7 +205,8 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             for (String username : deviceEnrollmentInvitation.getUsernames()) {
                 String emailAddress = DeviceManagerUtil.getUserClaimValue(
                         username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS);
-                oneTimePinDTO = createOneTimePin(emailAddress, "test-type", username, null, tenantId);
+                oneTimePinDTO = createOneTimePin(emailAddress, OTPEmailTypes.DEVICE_ENROLLMENT.toString(), username,
+                        null, tenantId);
                 props.setProperty("first-name", DeviceManagerUtil.
                         getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
                 props.setProperty("username", username);

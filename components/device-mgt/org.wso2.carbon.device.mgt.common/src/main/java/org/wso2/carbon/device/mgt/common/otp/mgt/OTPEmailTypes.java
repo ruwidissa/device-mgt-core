@@ -18,5 +18,5 @@
 package org.wso2.carbon.device.mgt.common.otp.mgt;
 
 public enum OTPEmailTypes {
-    USER_VERIFY, ENROLLMENT
+    USER_VERIFY, DEVICE_ENROLLMENT
 }

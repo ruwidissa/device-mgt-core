@@ -364,16 +364,12 @@ public class DeviceMgtAPIUtils {
      */
     public static synchronized OTPManagementService getOTPManagementService() {
         if (otpManagementService == null) {
-            synchronized (DeviceMgtAPIUtils.class) {
-                if (otpManagementService == null) {
-                    PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-                    otpManagementService = (OTPManagementService) ctx.getOSGiService(OTPManagementService.class, null);
-                    if (otpManagementService == null) {
-                        String msg = "OTP Management service has not initialized.";
-                        log.error(msg);
-                        throw new IllegalStateException(msg);
-                    }
-                }
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            otpManagementService = (OTPManagementService) ctx.getOSGiService(OTPManagementService.class, null);
+            if (otpManagementService == null) {
+                String msg = "OTP Management service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
             }
         }
         return otpManagementService;
