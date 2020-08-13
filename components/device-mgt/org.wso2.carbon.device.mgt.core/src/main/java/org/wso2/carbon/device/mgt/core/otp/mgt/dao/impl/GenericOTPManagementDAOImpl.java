@@ -142,7 +142,7 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
     }
 
     @Override
-    public void expireOneTimeToken(String oneTimeToken) throws OTPManagementDAOException {
+    public boolean expireOneTimeToken(String oneTimeToken) throws OTPManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to update an OTP data entry for OTP");
             log.debug("OTP Details : OTP key : " + oneTimeToken );
@@ -158,7 +158,7 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setBoolean(1, true);
                 stmt.setString(2, oneTimeToken);
-                stmt.executeUpdate();
+                return stmt.executeUpdate() == 1;
             }
         } catch (DBConnectionException e) {
             String msg = "Error occurred while obtaining the DB connection to update the OTP token validity.";
@@ -180,7 +180,7 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
 
         String sql = "UPDATE DM_OTP_DATA "
                 + "SET "
-                + "OTP_TOKEN = ? "
+                + "OTP_TOKEN = ?, "
                 + "CREATED_AT = ? "
                 + "WHERE ID = ?";
 
@@ -195,11 +195,47 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
                 stmt.executeUpdate();
             }
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection to update the OTP token validity.";
+            String msg = "Error occurred while obtaining the DB connection to update the OTP token.";
             log.error(msg, e);
             throw new OTPManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred when obtaining database connection for updating the OTP token validity.";
+            String msg = "Error occurred when executing sql query to update the OTP token.";
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean isEmailExist (String email, String emailType) throws OTPManagementDAOException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Request received in DAO Layer to verify whether email was registed with emai type in OTP");
+            log.debug("OTP Details : email : " + email + " email type: " + emailType );
+        }
+
+        String sql = "SELECT "
+                + "ID "
+                + "FROM DM_OTP_DATA "
+                + "WHERE EMAIL = ? AND "
+                + "EMAIL_TYPE = ?";
+
+        try {
+            Connection conn = this.getDBConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, email);
+                stmt.setString(2, emailType);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while obtaining the DB connection to verify email and email type exist in OTP."
+                    + " Email: " + email + "Email Type: " + emailType;
+            log.error(msg, e);
+            throw new OTPManagementDAOException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while executing SQL to verify email and email type exist in OTP. Email: "
+                    + email + "Email Type: " + emailType;
             log.error(msg, e);
             throw new OTPManagementDAOException(msg, e);
         }

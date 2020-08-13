@@ -41,4 +41,11 @@ public interface OTPManagementService {
      * @throws BadRequestException if found an null value for OTP
      */
     OneTimePinDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
+
+    /**
+     * Invalidate the OTP
+     * @param oneTimeToken OTP
+     * @throws OTPManagementException If error occurred while invalidating the OTP
+     */
+    void invalidateOTP(String oneTimeToken) throws OTPManagementException;
 }
