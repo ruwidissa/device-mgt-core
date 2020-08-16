@@ -141,6 +141,35 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         return oneTimePinDTO;
     }
 
+    @Override
+    public void invalidateOTP(String oneTimeToken) throws OTPManagementException {
+        try {
+            ConnectionManagerUtil.beginDBTransaction();
+            if (!otpManagementDAO.expireOneTimeToken(oneTimeToken)) {
+                ConnectionManagerUtil.rollbackDBTransaction();
+                String msg = "Couldn't find OTP entry for OTP: " + oneTimeToken;
+                log.error(msg);
+                throw new OTPManagementException(msg);
+            }
+            ConnectionManagerUtil.commitDBTransaction();
+        } catch (OTPManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while invalidate the OTP: " + oneTimeToken;
+            log.error(msg);
+            throw new OTPManagementException(msg);
+        } catch (TransactionManagementException e) {
+            String msg = "Error occurred while disabling AutoCommit to invalidate OTP.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to invalidate OPT.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+    }
+
 
     /**
      * Create One Time Token
@@ -212,7 +241,6 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         }
 
         String[] superTenantDetails = otpWrapper.getUsername().split("@");
-
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(superTenantDetails[superTenantDetails.length - 1])
                 || !superTenantDetails[0].equals(kmConfig.getAdminUsername())) {
             String msg = "You don't have required permission to create OTP";
@@ -246,15 +274,6 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                         throw new BadRequestException(msg);
                     }
                     tenant.setAdminLastName(lastName);
-                    break;
-                case OTPProperties.TENANT_ADMIN_USERNAME:
-                    String username = property.getMetaValue();
-                    if (StringUtils.isBlank(username)) {
-                        String msg = "Received empty or blank admin username field with OTP creating payload.";
-                        log.error(msg);
-                        throw new BadRequestException(msg);
-                    }
-                    tenant.setAdminName(username);
                     break;
                 case OTPProperties.TENANT_ADMIN_PASSWORD:
                     String pwd = property.getMetaValue();
@@ -291,7 +310,29 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             log.error(msg);
             throw new BadRequestException(msg);
         }
-        tenant.setDomain(otpWrapper.getEmail().split("@")[1]);
+
+        try {
+            ConnectionManagerUtil.openDBConnection();
+            if (otpManagementDAO.isEmailExist(otpWrapper.getEmail(), otpWrapper.getEmailType())) {
+                String msg = "Email is registered to execute the same action. Hence can't proceed.";
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to validate the given email and email type.";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        } catch (OTPManagementDAOException e) {
+            String msg = "Error occurred while executing SQL query to validate the given email and email type.";
+            log.error(msg);
+            throw new DeviceManagementException(msg);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
+        }
+
+        String[] tenantUsernameDetails = otpWrapper.getEmail().split("@");
+        tenant.setAdminName(tenantUsernameDetails[0]);
+        tenant.setDomain(tenantUsernameDetails[tenantUsernameDetails.length - 1]);
         tenant.setEmail(otpWrapper.getEmail());
         return tenant;
     }

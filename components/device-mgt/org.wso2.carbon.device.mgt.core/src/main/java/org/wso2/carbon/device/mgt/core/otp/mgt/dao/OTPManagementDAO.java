@@ -43,7 +43,7 @@ public interface OTPManagementDAO {
      * @param oneTimeToken OTP
      * @throws OTPManagementDAOException if error occurred while updating the OTP validity.
      */
-    void expireOneTimeToken(String oneTimeToken) throws OTPManagementDAOException;
+    boolean expireOneTimeToken(String oneTimeToken) throws OTPManagementDAOException;
 
     /**
      * Update OTP with renewed OTP
@@ -53,4 +53,12 @@ public interface OTPManagementDAO {
      */
     void renewOneTimeToken(int id, String oneTimeToken) throws OTPManagementDAOException;
 
+    /**
+     * To veify whether email and email type exists or not
+     * @param email email
+     * @param emailType email type
+     * @return true if email and email type exists otherwise returns false
+     * @throws OTPManagementDAOException if error occurred while verify existance of the email and email type
+     */
+    boolean isEmailExist (String email, String emailType) throws OTPManagementDAOException;
 }
