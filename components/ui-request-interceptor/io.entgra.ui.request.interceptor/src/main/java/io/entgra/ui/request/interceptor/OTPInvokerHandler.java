@@ -53,7 +53,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 @WebServlet(
-        name = "RequestHandlerServlet",
+        name = "OTPRequestHandlerServlet",
         description = "This servlet intercepts the otp-api requests initiated from the user interface and validate "
                 + "before forwarding to the backend",
         urlPatterns = {
