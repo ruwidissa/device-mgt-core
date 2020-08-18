@@ -14,6 +14,22 @@
    KIND, either express or implied.  See the License for the
    specific language governing permissions and limitations
    under the License.
+
+   Copyright (c) 2019, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+
+   Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+   Version 2.0 (the "License"); you may not use this file except
+   in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.
 *#
 <EmailConfig>
     <Subject>You have been invited to enroll your device in Entgra IoT</Subject>
@@ -206,7 +222,13 @@ TkSuQmCC"
                 </p>
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     You have been invited to enrol your device in Entgra IoT Server.
-                    Click <a href="$base-url-https/devicemgt/device/enroll">here</a> to begin device enrolment.</p>
+                    Click <a href="$base-url-https/endpoint-mgt/device/enroll?otp=$otp-token">here</a> to begin device enrolment.</p>
+
+                <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
+                    Enrollment Steps are as below,
+                </p>
+
+                $enrollment-steps
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     Should you need assistance, please contact your administrator.

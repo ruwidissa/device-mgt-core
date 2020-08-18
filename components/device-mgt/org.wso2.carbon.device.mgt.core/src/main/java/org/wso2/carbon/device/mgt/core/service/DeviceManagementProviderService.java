@@ -14,8 +14,8 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
-/*
+ *
+ *
  *   Copyright (c) 2019, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
  *
  *   Entgra (pvt) Ltd. licenses this file to you under the Apache License,
@@ -31,23 +31,6 @@
  *   KIND, either express or implied. See the License for the
  *   specific language governing permissions and limitations
  *   under the License.
- */
-/*
- *  Copyright (c) 2020, Entgra (pvt) Ltd. (http://entgra.io) All Rights Reserved.
- *
- *  Entgra (pvt) Ltd. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied. See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
  */
 
 package org.wso2.carbon.device.mgt.core.service;
@@ -76,6 +59,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManageme
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceData;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.license.mgt.License;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
@@ -926,4 +910,12 @@ public interface DeviceManagementProviderService {
      */
     List<Device> getDeviceByIdList(List<String> deviceIdentifiers)
             throws DeviceManagementException;
+
+    /**
+     * Retrieve device enrollment details to be sent device enrollment invitation.
+     * This has the relevant enrollment steps of each enrollment types.
+     * @param deviceType Device type of the required device enrollment details
+     * @return enrollment steps of each enrollment types which are provided in the device type xml file
+     */
+    DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails(String deviceType);
 }

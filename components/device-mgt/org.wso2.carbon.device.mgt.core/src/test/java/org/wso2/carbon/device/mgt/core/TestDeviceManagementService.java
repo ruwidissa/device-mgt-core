@@ -37,6 +37,7 @@ import org.wso2.carbon.device.mgt.common.*;
 import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.general.GeneralConfig;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
@@ -140,6 +141,11 @@ public class TestDeviceManagementService implements DeviceManagementService {
 
     @Override
     public DeviceTypePlatformDetails getDeviceTypePlatformDetails() {
+        return null;
+    }
+
+    @Override
+    public DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails() {
         return null;
     }
 }

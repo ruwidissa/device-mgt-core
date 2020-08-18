@@ -48,6 +48,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManager;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.general.GeneralConfig;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.policy.mgt.PolicyMonitoringManager;
 import org.wso2.carbon.device.mgt.common.pull.notification.PullNotificationSubscriber;
 import org.wso2.carbon.device.mgt.common.push.notification.PushNotificationConfig;
@@ -92,6 +93,7 @@ public class DeviceTypeManagerService implements DeviceManagementService {
     private PullNotificationSubscriber pullNotificationSubscriber;
     private final DeviceStatusTaskPluginConfig deviceStatusTaskPluginConfig;
     private DeviceTypePlatformDetails deviceTypePlatformDetails;
+    private DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails;
     private GeneralConfig generalConfig;
     private boolean isRegistryBasedConfigs = false;
     private boolean isScheduled = false;
@@ -116,6 +118,8 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         this.setPolicyMonitoringManager(deviceTypeConfiguration.getPolicyMonitoring());
         this.setPullNotificationSubscriber(deviceTypeConfiguration.getPullNotificationSubscriberConfig());
         this.setGeneralConfig(deviceTypeConfiguration);
+        this.deviceEnrollmentInvitationDetails = new DeviceEnrollmentInvitationDetails();
+        this.setDeviceEnrollmentInvitationDetails(deviceTypeConfiguration);
     }
 
     @Override
@@ -259,6 +263,11 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         return generalConfig;
     }
 
+    @Override
+    public DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails() {
+        return deviceEnrollmentInvitationDetails;
+    }
+
     private void setProvisioningConfig(String tenantDomain, DeviceTypeConfiguration deviceTypeConfiguration) {
         if (deviceTypeConfiguration.getProvisioningConfig() != null) {
             boolean sharedWithAllTenants = deviceTypeConfiguration.getProvisioningConfig().isSharedWithAllTenants();
@@ -352,6 +361,15 @@ public class DeviceTypeManagerService implements DeviceManagementService {
         DeviceTypePlatformDetails deviceTypeVersions = deviceTypeConfiguration.getDeviceTypePlatformDetails();
         if (deviceTypeVersions != null) {
             deviceTypePlatformDetails.setDeviceTypePlatformVersion(deviceTypeVersions.getDeviceTypePlatformVersion());
+        }
+    }
+
+    public void setDeviceEnrollmentInvitationDetails(DeviceTypeConfiguration deviceTypeConfiguration) {
+        DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetailsFromConfig = deviceTypeConfiguration
+                .getDeviceEnrollmentInvitationDetails();
+        if (deviceEnrollmentInvitationDetailsFromConfig != null) {
+            deviceEnrollmentInvitationDetails.setEnrollmentDetails(
+                    deviceEnrollmentInvitationDetailsFromConfig.getEnrollmentDetails());
         }
     }
 }

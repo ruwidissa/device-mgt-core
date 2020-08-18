@@ -49,6 +49,7 @@ import io.swagger.annotations.ResponseHeader;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ActivityList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfo;
 import org.wso2.carbon.device.mgt.jaxrs.beans.BasicUserInfoList;
@@ -74,7 +75,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 @SwaggerDefinition(
         info = @Info(
@@ -893,7 +893,8 @@ public interface UserManagementService {
             @ApiParam(
                     name = "users",
                     value = "List of users",
-                    required = true) List<String> usernames);
+                    required = true)
+            @Valid DeviceEnrollmentInvitation deviceEnrollmentInvitation);
 
     @POST
     @Path("/enrollment-invite")
