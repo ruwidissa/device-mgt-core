@@ -16,7 +16,7 @@
     under the License.
 *#
 <EmailConfig>
-    <Subject>You have been invited to enroll your device in Entgra IoT</Subject>
+    <Subject>Verify email to register with Entgra IoTS</Subject>
     <Body>
     <![CDATA[
     <html>

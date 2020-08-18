@@ -24,6 +24,8 @@ import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitati
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.common.otp.mgt.wrapper.OTPWrapper;
 
+import java.util.Map;
+
 public interface OTPManagementService {
 
     /**
@@ -44,11 +46,14 @@ public interface OTPManagementService {
     OneTimePinDTO isValidOTP(String oneTimeToken) throws OTPManagementException, BadRequestException;
 
     /**
-     * Invalidate the OTP
+     * Invalidate the OTP and send welcome mail
      * @param oneTimeToken OTP
-     * @throws OTPManagementException If error occurred while invalidating the OTP
+     * @param email email address
+     * @param properties email properties to add to email body
+     * @throws OTPManagementException if error occurred while invalidate the OTP or send welcome email
      */
-    void invalidateOTP(String oneTimeToken) throws OTPManagementException;
+    void completeSelfRegistration(String oneTimeToken, String email, Map<String, String> properties)
+            throws OTPManagementException;
 
     /**
      * Create OTP token and send device enrollment invitation
