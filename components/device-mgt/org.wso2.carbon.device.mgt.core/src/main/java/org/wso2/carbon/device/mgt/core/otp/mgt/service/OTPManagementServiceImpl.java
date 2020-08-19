@@ -58,6 +58,7 @@ import static org.wso2.carbon.device.mgt.common.DeviceManagementConstants.OTPPro
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -150,7 +151,26 @@ public class OTPManagementServiceImpl implements OTPManagementService {
     }
 
     @Override
-    public void invalidateOTP(String oneTimeToken) throws OTPManagementException {
+    public void completeSelfRegistration(String oneTimeToken, String email, Map<String, String> properties)
+            throws OTPManagementException {
+        try {
+            invalidateOTP(oneTimeToken);
+            Properties props = new Properties();
+            properties.forEach(props::setProperty);
+            sendMail(props, email, DeviceManagementConstants.EmailAttributes.USER_WELCOME_TEMPLATE);
+        } catch (OTPManagementException e) {
+            String msg = "Error occurred while completing the self registration via OTP";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Invalidate the OTP
+     * @param oneTimeToken OTP
+     * @throws OTPManagementException If error occurred while invalidating the OTP
+     */
+    private void invalidateOTP(String oneTimeToken) throws OTPManagementException {
         try {
             ConnectionManagerUtil.beginDBTransaction();
             if (!otpManagementDAO.expireOneTimeToken(oneTimeToken)) {
