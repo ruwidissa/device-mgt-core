@@ -43,41 +43,38 @@
                     </p>
                 </div>
                 <div>
-                    <h2>Access different portals</h2>
-                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
-                        Your log-in credentials to any of our portals(endpoint-mgt, store, publisher) are the same as the
-                        email (username) and password you provided during the registration for an evaluation account.
-                    </p>
-                    <h3>Endpoint management portal URL: <a href="$base-url-https/endpoint-mgt/">$base-url-https/endpoint-mgt/</a></h3>
+                    <h3>Access different portals</h3>
+                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">Your log-in credentials to any of our portals(endpoint-mgt, store, publisher) are,</p>
+                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;"><b>Username: </b> $portal-username</p>
+                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;"><b>Password: </b> password provided at registration for an evaluation account.</p>
+                    <h4>Endpoint management portal URL: <a href="$base-url-https/endpoint-mgt/">$base-url-https/endpoint-mgt/</a></h4>
                     <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
                         This is the portal used to send operations and policies to devices and overall management of
                         the server.
                     </p>
-                    <h3>Application store portal URL: <a href="$base-url-https/store">$base-url-https/store</a></h3>
+                    <h4>Application store portal URL: <a href="$base-url-https/store">$base-url-https/store</a></h4>
                     <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
                         This is an in-house corporate app store where you can host all your corporate applications.
                         Users may browse apps and install them to their devices if the administrator has made the apps
                         publicly visible to users. Administrator can install, uninstall and update apps in the user
                         device or device groups.
                     </p>
-                    <h3>Application publishing portal URL: <a href="$base-url-https/publisher">$base-url-https/publisher</a></h3>
+                    <h4>Application publishing portal URL: <a href="$base-url-https/publisher">$base-url-https/publisher</a></h4>
                     <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
                         The portal for publishing new applications for internal use. This is the developer view of the
                         enterprise application store that comes with the product.
                     </p>
                 </div>
                 <div>
-                    <h2>Enroll a device</h2>
+                    <h3>Enroll a device</h3>
                     <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">
                         Please find here a set of videos on how to enroll and onboard devices to our Cloud platform.
                         <a href="https://entgra-documentation.gitlab.io/v4.0.0/docs/product-guide/enrollment-guide/enroll-cloud/">[Cloud Enrollment Guide]</a>
                         When enrolling a device, Make sure to use the following log-in format:
                     </p>
-                    <p>
-                        <b>Organisation:</b> $tenant-domain
-                        <b>Username:</b> $email-address
-                        <b>Password:</b> password provided at registration.
-                    </p>
+                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;"><b>Organisation:</b> $tenant-domain</p>
+                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;"><b>Username:</b> $agent-username</p>
+                    <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;"><b>Password:</b> password provided at registration.</p>
                 </div>
                 <div>
                     <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 20px 0px 5px;">

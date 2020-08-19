@@ -157,7 +157,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             invalidateOTP(oneTimeToken);
             Properties props = new Properties();
             properties.forEach(props::setProperty);
-            sendMail(props, email);
+            sendMail(props, email, DeviceManagementConstants.EmailAttributes.USER_WELCOME_TEMPLATE);
         } catch (OTPManagementException e) {
             String msg = "Error occurred while completing the self registration via OTP";
             log.error(msg, e);
