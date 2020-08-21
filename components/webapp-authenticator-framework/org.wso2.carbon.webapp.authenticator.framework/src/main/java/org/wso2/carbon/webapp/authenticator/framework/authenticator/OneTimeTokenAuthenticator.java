@@ -88,5 +88,4 @@ public class OneTimeTokenAuthenticator implements WebappAuthenticator {
         return null;
     }
 
-
 }
