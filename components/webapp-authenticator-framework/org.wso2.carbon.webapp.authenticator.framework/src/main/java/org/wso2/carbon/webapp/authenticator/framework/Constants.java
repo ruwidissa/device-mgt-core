@@ -31,6 +31,7 @@ public final class Constants {
 
         public static final String HEADER_HTTP_ACCEPT = "Accept";
         public static final String HEADER_HTTP_AUTHORIZATION = "Authorization";
+        public static final String ONE_TIME_TOKEN_HEADER = "one-time-token";
     }
 
     public static final class ContentTypes {

@@ -19,7 +19,7 @@
 
 package org.wso2.carbon.device.mgt.common.exceptions;
 
-public class BadRequestException extends Exception {
+public class BadRequestException extends DeviceManagementException {
     private static final long serialVersionUID = 2304023531260840549L;
 
     public BadRequestException() {

@@ -45,8 +45,11 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.OTPManagementException;
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitation;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementException;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.EmailMetaInfo;
@@ -716,46 +719,27 @@ public class UserManagementServiceImpl implements UserManagementService {
         return CredentialManagementResponseBuilder.buildChangePasswordResponse(credentials);
     }
 
-    /**
-     * Method used to send an invitation email to a existing user to enroll a device.
-     *
-     * @param usernames Username list of the users to be invited
-     */
+
     @POST
     @Path("/send-invitation")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response inviteExistingUsersToEnrollDevice(List<String> usernames) {
-        if (log.isDebugEnabled()) {
-            log.debug("Sending enrollment invitation mail to existing user.");
+    public Response inviteExistingUsersToEnrollDevice(DeviceEnrollmentInvitation deviceEnrollmentInvitation) {
+        if (deviceEnrollmentInvitation.getUsernames() == null || deviceEnrollmentInvitation.getUsernames().isEmpty()) {
+            String msg = "Error occurred while validating list of user-names. User-names cannot be empty.";
+            log.error(msg);
+            throw new BadRequestException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg)
+                            .build());
         }
-        DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
+        if (log.isDebugEnabled()) {
+            log.debug("Sending device enrollment invitation mail to existing user/s.");
+        }
+        OTPManagementService oms = DeviceMgtAPIUtils.getOTPManagementService();
         try {
-            for (String username : usernames) {
-                String recipient = getClaimValue(username, Constants.USER_CLAIM_EMAIL_ADDRESS);
-
-                Properties props = new Properties();
-                props.setProperty("first-name", getClaimValue(username, Constants.USER_CLAIM_FIRST_NAME));
-                props.setProperty("username", username);
-
-                EmailMetaInfo metaInfo = new EmailMetaInfo(recipient, props);
-                dms.sendEnrolmentInvitation(DeviceManagementConstants.EmailAttributes.USER_ENROLLMENT_TEMPLATE,
-                        metaInfo);
-            }
-        } catch (DeviceManagementException e) {
-            String msg = "Error occurred while inviting user to enrol their device";
-            if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-                msg = e.getMessage();
-            }
+            oms.sendDeviceEnrollmentInvitationMail(deviceEnrollmentInvitation);
+        } catch (OTPManagementException e) {
+            String msg = "Error occurred while generating OTP and inviting user/s to enroll their device/s.";
             log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        } catch (UserStoreException e) {
-            String msg = "Error occurred while getting claim values to invite user";
-            log.error(msg, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
-        } catch (ConfigurationManagementException e) {
-            String msg = "Error occurred while sending the email invitations. Mail server not configured.";
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
