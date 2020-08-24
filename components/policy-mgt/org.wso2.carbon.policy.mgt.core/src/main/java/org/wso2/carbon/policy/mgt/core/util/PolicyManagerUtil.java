@@ -150,7 +150,7 @@ public class PolicyManagerUtil {
                 PolicyManagementConstants.GENERAL_POLICY_TYPE.equals(policy.getPolicyType())) {
             String policyPayloadVersion = policy.getPolicyPayloadVersion();
             float payloadVersion = 0f;
-            if (policyPayloadVersion != null && !StringUtils.isEmpty(policyPayloadVersion)) {
+            if (!StringUtils.isEmpty(policyPayloadVersion)) {
                 payloadVersion = Float.parseFloat(policyPayloadVersion);
             }
             if (payloadVersion >= 2.0f) {
@@ -229,8 +229,9 @@ public class PolicyManagerUtil {
         correctiveProfileOperation.setCode(PolicyManagementConstants.POLICY_ACTIONS);
         Set<Integer> correctivePolicyIdSet = new HashSet<>();
         try {
+            List<CorrectiveAction> correctiveActions;
             for (ProfileFeature feature : features) {
-                List<CorrectiveAction> correctiveActions = feature.getCorrectiveActions();
+                correctiveActions = feature.getCorrectiveActions();
                 for (CorrectiveAction correctiveAction : correctiveActions) {
                     if (PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE
                             .equals(correctiveAction.getActionType())) {
@@ -242,13 +243,12 @@ public class PolicyManagerUtil {
             PolicyAdministratorPoint pap = new PolicyAdministratorPointImpl();
             List<Policy> allCorrectivePolicies = pap
                     .getPolicies(PolicyManagementConstants.CORRECTIVE_POLICY_TYPE);
-            idLoop:
             for (Integer policyId : correctivePolicyIdSet) {
                 for (Policy correctivePolicy : allCorrectivePolicies) {
                     if (policyId == correctivePolicy.getId()) {
                         createCorrectiveProfileOperations(correctivePolicy, correctiveProfileOperation);
                         policyOperation.getProfileOperations().add(correctiveProfileOperation);
-                        continue idLoop;
+                        break;
                     }
                 }
             }
@@ -287,7 +287,11 @@ public class PolicyManagerUtil {
         correctiveOperationList.setPayLoad(payLoad);
     }
 
-
+    /**
+     * Create list of profile operations
+     * @param effectiveFeatures effective features of the policy
+     * @return List of ProfileOperation
+     */
     public static List<ProfileOperation> createProfileOperations(List<ProfileFeature> effectiveFeatures) {
         List<ProfileOperation> profileOperations = new ArrayList<>();
         for (ProfileFeature feature : effectiveFeatures) {

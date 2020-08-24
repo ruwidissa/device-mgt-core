@@ -594,7 +594,6 @@ $(document).ready(function () {
         }
     });
 
-    //todo
     $('input[type=radio][name=policy-type-radio-btn]').change(function() {
         if ($(this).val() === "CORRECTIVE") {
             $("#select-general-policy-type").addClass("hidden");

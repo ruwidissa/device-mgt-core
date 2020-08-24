@@ -170,14 +170,6 @@ public class PolicyManagerImpl implements PolicyManager {
                 policyDAO.addPolicyCriteriaProperties(policy.getPolicyCriterias());
             }
 
-            /*if (policy.getCorrectiveActions() != null && !policy.getCorrectiveActions().isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding corrective actions for policy " + policy.getPolicyName() +
-                            " having policy id " + policy.getId());
-                }
-                policyDAO.addCorrectiveActionsOfPolicy(policy.getCorrectiveActions(), policy.getId());
-            }*/
-
             if (policy.isActive()) {
                 policyDAO.activatePolicy(policy.getId());
             }
@@ -358,6 +350,13 @@ public class PolicyManagerImpl implements PolicyManager {
         return policy;
     }
 
+    /**
+     * Using for update old type of corrective policies which has single corrective policy
+     * per single general policy
+     * @param policy updating new corrective policy
+     * @param previousPolicy previous corrective policy
+     * @throws PolicyManagerDAOException for errors occur while updating corrective actions
+     */
     private void updateSingleCorrectiveActionList(Policy policy, Policy previousPolicy)
             throws PolicyManagerDAOException {
         List<CorrectiveAction> updatedCorrectiveActions = policy.getCorrectiveActions();
@@ -400,42 +399,30 @@ public class PolicyManagerImpl implements PolicyManager {
         }
 
         if (!correctiveActionsToUpdate.isEmpty()) {
-            try {
-                policyDAO.updateCorrectiveActionsOfPolicy(correctiveActionsToUpdate,
-                        previousPolicy.getId(), -1);
-            } catch (PolicyManagerDAOException e) {
-                String msg = "Error occurred while updating corrective policies of the policy" +
-                        " "+ previousPolicy.getId();
-                log.error(msg, e);
-                throw new PolicyManagerDAOException(msg, e);
-            }
+            policyDAO.updateCorrectiveActionsOfPolicy(correctiveActionsToUpdate,
+                    previousPolicy.getId(), -1);
         }
 
         if (!correctiveActionsToAdd.isEmpty()) {
-            try {
-                policyDAO.addCorrectiveActionsOfPolicy(correctiveActionsToAdd,
-                        previousPolicy.getId(), -1);
-            } catch (PolicyManagerDAOException e) {
-                String msg = "Error occurred while adding new corrective policies to the " +
-                        "policy the policy " + previousPolicy.getId();
-                log.error(msg, e);
-                throw new PolicyManagerDAOException(msg, e);
-            }
+            policyDAO.addCorrectiveActionsOfPolicy(correctiveActionsToAdd,
+                    previousPolicy.getId(), -1);
         }
 
         if (!correctiveActionsToDelete.isEmpty()) {
-            try {
-                policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActionsToDelete,
-                        previousPolicy.getId(), -1);
-            } catch (PolicyManagerDAOException e) {
-                String msg = "Error occurred while deleting corrective actions from the " +
-                        "policy " + previousPolicy.getId();
-                log.error(msg, e);
-                throw new PolicyManagerDAOException(msg, e);
-            }
+            policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActionsToDelete,
+                    previousPolicy.getId(), -1);
         }
     }
 
+    /**
+     * Using for update new type of corrective policies which has multiple corrective policies
+     * per single general policy
+     * @param updatedCorrectiveActionsMap updated corrective actions <FeatureId, CorrectiveActionList>
+     * @param existingCorrectiveActionsMap existing corrective actions <FeatureId, CorrectiveActionList>
+     * @param policy updating policy
+     * @param previousPolicy for errors occur while updating corrective actions
+     * @throws PolicyManagerDAOException
+     */
     private void updateMultipleCorrectiveActions(
             Map<Integer, List<CorrectiveAction>> updatedCorrectiveActionsMap,
             Map<Integer, List<CorrectiveAction>> existingCorrectiveActionsMap,
@@ -496,7 +483,6 @@ public class PolicyManagerImpl implements PolicyManager {
             }
         }
 
-
         for (Integer featureId : existingCorrectiveActionsMap.keySet()) {
             List<CorrectiveAction> existingCorrectiveActions = existingCorrectiveActionsMap
                     .get(featureId);
@@ -521,51 +507,29 @@ public class PolicyManagerImpl implements PolicyManager {
         }
 
         if (!correctiveActionsToUpdate.isEmpty()) {
-            try {
-                for (Integer featureId : correctiveActionsToUpdate.keySet()) {
-                    List<CorrectiveAction> correctiveActions = correctiveActionsToUpdate
-                            .get(featureId);
-                    policyDAO.updateCorrectiveActionsOfPolicy(correctiveActions,
-                            previousPolicy.getId(), featureId);
-                }
-            } catch (PolicyManagerDAOException e) {
-                String msg = "Error occurred while updating corrective policies of the policy" +
-                        " "+ previousPolicy.getId();
-                log.error(msg, e);
-                throw new PolicyManagerDAOException(msg, e);
+            for (Integer featureId : correctiveActionsToUpdate.keySet()) {
+                List<CorrectiveAction> correctiveActions = correctiveActionsToUpdate
+                        .get(featureId);
+                policyDAO.updateCorrectiveActionsOfPolicy(correctiveActions,
+                        previousPolicy.getId(), featureId);
             }
         }
 
         if (!correctiveActionsToAdd.isEmpty()) {
-            try {
-                for (Integer featureId : correctiveActionsToAdd.keySet()) {
-                    List<CorrectiveAction> correctiveActions = correctiveActionsToAdd
-                            .get(featureId);
-                    policyDAO.addCorrectiveActionsOfPolicy(correctiveActions,
-                            previousPolicy.getId(), featureId);
-                }
-
-            } catch (PolicyManagerDAOException e) {
-                String msg = "Error occurred while adding new corrective policies to the " +
-                        "policy the policy " + previousPolicy.getId();
-                log.error(msg, e);
-                throw new PolicyManagerDAOException(msg, e);
+            for (Integer featureId : correctiveActionsToAdd.keySet()) {
+                List<CorrectiveAction> correctiveActions = correctiveActionsToAdd
+                        .get(featureId);
+                policyDAO.addCorrectiveActionsOfPolicy(correctiveActions,
+                        previousPolicy.getId(), featureId);
             }
         }
 
         if (!correctiveActionsToDelete.isEmpty()) {
-            try {
-                for (Integer featureId : correctiveActionsToDelete.keySet()) {
-                    List<CorrectiveAction> correctiveActions = correctiveActionsToDelete
-                            .get(featureId);
-                    policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActions,
-                            previousPolicy.getId(), featureId);
-                }
-            } catch (PolicyManagerDAOException e) {
-                String msg = "Error occurred while deleting corrective actions from the " +
-                        "policy " + previousPolicy.getId();
-                log.error(msg, e);
-                throw new PolicyManagerDAOException(msg, e);
+            for (Integer featureId : correctiveActionsToDelete.keySet()) {
+                List<CorrectiveAction> correctiveActions = correctiveActionsToDelete
+                        .get(featureId);
+                policyDAO.deleteCorrectiveActionsOfPolicy(correctiveActions,
+                        previousPolicy.getId(), featureId);
             }
         }
     }
@@ -908,6 +872,12 @@ public class PolicyManagerImpl implements PolicyManager {
         try {
             Profile profile = profileManager.getProfile(policy.getProfileId());
             policy.setProfile(profile);
+        } catch (ProfileManagementException e) {
+            throw new PolicyManagementException("Error occurred while getting the profile related to policy ID (" +
+                    policyId + ")", e);
+        }
+
+        try {
             PolicyManagementDAOFactory.openConnection();
             List<CorrectiveAction> correctiveActionsOfPolicy = policyDAO
                     .getCorrectiveActionsOfPolicy(policyId);
@@ -922,13 +892,6 @@ public class PolicyManagerImpl implements PolicyManager {
                 policy.setCorrectiveActions(getSingleCorrectiveAction
                         (correctiveActionsOfPolicy, policyId));
             }
-        } catch (ProfileManagementException e) {
-            throw new PolicyManagementException("Error occurred while getting the profile related to policy ID (" +
-                    policyId + ")", e);
-//        } catch (SQLException e) {
-//            throw new PolicyManagementException("Error occurred while opening a connection to the data source", e);
-//        } finally {
-//            PolicyManagementDAOFactory.closeConnection();
         } catch (PolicyManagerDAOException e) {
             String msg = "Error occurred while getting the corrective actions related to policy " +
                     "ID (" + policyId + ")";
@@ -941,8 +904,6 @@ public class PolicyManagerImpl implements PolicyManager {
         } finally {
             PolicyManagementDAOFactory.closeConnection();
         }
-
-
         return policy;
     }
 
@@ -1525,8 +1486,15 @@ public class PolicyManagerImpl implements PolicyManager {
         return policyList;
     }
 
+    /**
+     * Build the list of policies which are included new and old types of corrective actions
+     * @param policyList queried policy list
+     * @param profileList queried profile list
+     * @throws PolicyManagerDAOException when failed to read policies from DB
+     * @throws GroupManagementException when failed to read policy groups from DB
+     */
     private void buildPolicyList(List<Policy> policyList, List<Profile> profileList)
-            throws PolicyManagerDAOException, GroupManagementException, PolicyManagementException {
+            throws PolicyManagerDAOException, GroupManagementException {
         List<CorrectiveAction> allCorrectiveActions = policyDAO.getAllCorrectiveActions();
         for (Policy policy : policyList) {
             String policyPayloadVersion = policy.getPolicyPayloadVersion();
@@ -1594,6 +1562,10 @@ public class PolicyManagerImpl implements PolicyManager {
         }
     }
 
+    /**
+     * Clear corrective action metadata values to avoid sending in payload
+     * @param correctiveAction list of corrective actions
+     */
     private void clearMetaDataValues(CorrectiveAction correctiveAction) {
         correctiveAction.setAssociatedGeneralPolicyId(null); //avoiding send in payload
         correctiveAction.setFeatureId(null); //avoiding send in payload
