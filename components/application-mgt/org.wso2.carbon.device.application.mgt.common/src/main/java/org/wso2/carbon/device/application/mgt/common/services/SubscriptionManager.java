@@ -21,6 +21,7 @@ import org.wso2.carbon.device.application.mgt.common.ExecutionStatus;
 import org.wso2.carbon.device.application.mgt.common.dto.ScheduledSubscriptionDTO;
 import org.wso2.carbon.device.application.mgt.common.exception.ApplicationManagementException;
 import org.wso2.carbon.device.application.mgt.common.exception.SubscriptionManagementException;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
@@ -100,6 +101,18 @@ public interface SubscriptionManager {
      */
     <T> void performEntAppSubscription(String applicationUUID, List<T> params, String subType, String action,
                                        boolean requiresUpdatingExternal) throws ApplicationManagementException;
+
+    /**
+     * Install given application releases for given device. If application is already installed that application skips.
+     * This is used in enterprise app installing policy.
+     *
+     * @param deviceIdentifier Device identifiers
+     * @param releaseUUID UUIs of applicatios
+     * @throws ApplicationManagementException if error occurred while installing given applications into the given
+     * device
+     */
+    void installAppsForDevice(DeviceIdentifier deviceIdentifier, List<String> releaseUUID)
+            throws ApplicationManagementException;
 
     /***
      * This method used to get the app id ,device ids and pass them to DM service method.
