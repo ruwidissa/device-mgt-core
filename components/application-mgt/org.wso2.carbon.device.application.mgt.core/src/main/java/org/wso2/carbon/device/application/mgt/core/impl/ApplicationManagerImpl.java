@@ -2029,8 +2029,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                     appUnrestrictedRoles = applicationUpdateWrapper.getUnrestrictedRoles();
                 } else {
                     List<String> addingRoleList = getDifference(applicationUpdateWrapper.getUnrestrictedRoles(),
-                            applicationDTO.getUnrestrictedRoles());
-                    List<String> removingRoleList = getDifference(applicationDTO.getUnrestrictedRoles(),
+                            appUnrestrictedRoles);
+                    List<String> removingRoleList = getDifference(appUnrestrictedRoles,
                             applicationUpdateWrapper.getUnrestrictedRoles());
                     if (!addingRoleList.isEmpty()) {
                         visibilityDAO.addUnrestrictedRoles(addingRoleList, applicationId, tenantId);
