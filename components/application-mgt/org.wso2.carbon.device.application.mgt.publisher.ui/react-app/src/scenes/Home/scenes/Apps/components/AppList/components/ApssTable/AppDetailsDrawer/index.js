@@ -983,7 +983,7 @@ class AppDetailsDrawer extends React.Component {
                     }}
                     onClick={this.enableUnrestrictedRolesEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }
