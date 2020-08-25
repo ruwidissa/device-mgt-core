@@ -94,6 +94,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -261,7 +262,7 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
             log.error(msg, e);
             throw new SubscriptionManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while retrieving the database connection";
+            String msg = "Error occurred while retrieving the database connection to clean the scheduled subscriptions";
             log.error(msg, e);
             throw new SubscriptionManagementException(msg, e);
         } finally {
@@ -454,6 +455,70 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
         }
     }
 
+    @Override public void installAppsForDevice(DeviceIdentifier deviceIdentifier, List<String> releaseUUIDs)
+            throws ApplicationManagementException {
+
+        int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId(true);
+        Device device;
+        try {
+            device = DataHolder.getInstance().getDeviceManagementService().getDevice(deviceIdentifier, false);
+            if (device == null) {
+                String msg = "Invalid device identifier is received and couldn't find an deveice for the requested "
+                        + "device identifier. Device UUID: " + deviceIdentifier.getId() + " Device Type: "
+                        + deviceIdentifier.getType();
+                log.error(msg);
+                throw new BadRequestException(msg);
+            }
+        } catch (DeviceManagementException e) {
+            String msg = "Error occured while getting device data for given device identifier.Device UUID: "
+                    + deviceIdentifier.getId() + " Device Type: " + deviceIdentifier.getType();
+            log.error(msg, e);
+            throw new ApplicationManagementException(msg, e);
+        }
+
+        List<DeviceIdentifier> appInstallingDevices = new ArrayList<>();
+
+        for (String releaseUUID : releaseUUIDs) {
+            try {
+                ConnectionManagerUtil.openDBConnection();
+                ApplicationDTO applicationDTO = this.applicationDAO.getAppWithRelatedRelease(releaseUUID, tenantId);
+                if (applicationDTO != null) {
+                    List<DeviceSubscriptionDTO> deviceSubscriptionDTOS = this.subscriptionDAO
+                            .getDeviceSubscriptions(applicationDTO.getApplicationReleaseDTOs().get(0).getId(),
+                                    tenantId);
+                    AtomicBoolean isAppSubscribable = new AtomicBoolean(true);
+                    for (DeviceSubscriptionDTO deviceSubscriptionDTO : deviceSubscriptionDTOS) {
+                        if (device.getId() == deviceSubscriptionDTO.getDeviceId() && !deviceSubscriptionDTO
+                                .isUnsubscribed()) {
+                            isAppSubscribable.set(false);
+                            break;
+                        }
+                    }
+                    if (isAppSubscribable.get()) {
+                        appInstallingDevices.add(deviceIdentifier);
+                    }
+                }
+            } catch (DBConnectionException e) {
+                String msg = " Error occurred while getting DB connection to retrieve app data data from DB. Device "
+                        + "UUID: " + deviceIdentifier.getId() + " Device Type: " + deviceIdentifier.getType();
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } catch (ApplicationManagementDAOException e) {
+                String msg = " Error occurred while getting application data from DB. Device UUID: " + deviceIdentifier
+                        .getId() + " Device Type: " + deviceIdentifier.getType();
+                log.error(msg, e);
+                throw new ApplicationManagementException(msg, e);
+            } finally {
+                ConnectionManagerUtil.closeDBConnection();
+            }
+
+            if (!appInstallingDevices.isEmpty()) {
+                performBulkAppOperation(releaseUUID, appInstallingDevices, SubscriptionType.DEVICE.toString(),
+                        SubAction.INSTALL.toString());
+            }
+        }
+    }
+
     /**
      * This method is responsible to update subscription data for google enterprise install.
      *
@@ -584,13 +649,11 @@ public class SubscriptionManagerImpl implements SubscriptionManager {
                 List<DeviceIdentifier> identifiers;
                 if (!deviceIdentifierMap.containsKey(identifier.getType())) {
                     identifiers = new ArrayList<>();
-                    identifiers.add(identifier);
-                    deviceIdentifierMap.put(identifier.getType(), identifiers);
                 } else {
                     identifiers = deviceIdentifierMap.get(identifier.getType());
-                    identifiers.add(identifier);
-                    deviceIdentifierMap.put(identifier.getType(), identifiers);
                 }
+                identifiers.add(identifier);
+                deviceIdentifierMap.put(identifier.getType(), identifiers);
             }
             for (Map.Entry<String, List<DeviceIdentifier>> entry : deviceIdentifierMap.entrySet()) {
                 Activity activity = addAppOperationOnDevices(applicationDTO, new ArrayList<>(entry.getValue()),
