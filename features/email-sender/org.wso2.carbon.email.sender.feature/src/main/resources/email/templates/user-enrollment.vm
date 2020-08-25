@@ -53,7 +53,7 @@
                 </p>
                 <p style="font-size: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     You have been invited to enrol your device in Entgra IoT Server.
-                    Click <a href="$base-url-https/endpoint-mgt/devices/enroll?token=$otp-token">here</a> to begin device enrolment.</p>
+                    Click <a href="$base-url-https/self-register/devices/enroll?token=$otp-token">here</a> to begin device enrolment.</p>
 
                 <p style="font-length: 1em; font-family: Arial, Helvetica; line-height: 170%; color: #666666; margin: 5px 0px;">
                     Enrollment Steps are as below,
