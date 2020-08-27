@@ -24,6 +24,7 @@ public class AuthConstants {
     public static final String MDM_SIGNATURE = "mdm-signature";
     public static final String PROXY_MUTUAL_AUTH_HEADER = "proxy-mutual-auth-header";
     public static final String MUTUAL_AUTH_HEADER = "mutual-auth-header";
+    public static final String ONE_TIME_TOKEN_HEADER = "one-time-token";
     public static final String ENCODED_PEM = "encoded-pem";
     public static final String CALLBACK_URL = "";
     public static final String CLIENT_NAME = "IOT-API-MANAGER";

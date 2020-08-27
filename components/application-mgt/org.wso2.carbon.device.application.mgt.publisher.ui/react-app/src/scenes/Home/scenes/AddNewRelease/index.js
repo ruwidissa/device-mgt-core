@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { Icon, PageHeader, Typography, Breadcrumb } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
+import { PageHeader, Typography, Breadcrumb } from 'antd';
 import AddNewReleaseForm from './components/AddNewReleaseForm';
 import { Link } from 'react-router-dom';
 
@@ -40,7 +41,7 @@ class AddNewRelease extends React.Component {
           <Breadcrumb style={{ paddingBottom: 16 }}>
             <Breadcrumb.Item>
               <Link to="/publisher/apps">
-                <Icon type="home" /> Home
+                <HomeOutlined /> Home
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Add New Release</Breadcrumb.Item>

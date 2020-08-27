@@ -14,6 +14,23 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.device.mgt.jaxrs.util;
@@ -52,6 +69,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.permission.mgt.PermissionManagerService;
 import org.wso2.carbon.device.mgt.common.report.mgt.ReportManagementService;
 import org.wso2.carbon.device.mgt.common.spi.DeviceTypeGeneratorService;
+import org.wso2.carbon.device.mgt.common.spi.OTPManagementService;
 import org.wso2.carbon.device.mgt.core.app.mgt.ApplicationManagementProviderService;
 import org.wso2.carbon.device.mgt.core.device.details.mgt.DeviceInformationManager;
 import org.wso2.carbon.device.mgt.core.dto.DeviceTypeVersion;
@@ -134,13 +152,14 @@ public class DeviceMgtAPIUtils {
     public static final String DAS_ADMIN_SERVICE_EP = "https://" + DAS_HOST_NAME + ":" + DAS_PORT + "/services/";
     private static SSLContext sslContext;
 
-    private static Log log = LogFactory.getLog(DeviceMgtAPIUtils.class);
+    private static final Log log = LogFactory.getLog(DeviceMgtAPIUtils.class);
     private static KeyStore keyStore;
     private static KeyStore trustStore;
     private static char[] keyStorePassword;
 
     private static IntegrationClientService integrationClientService;
     private static MetadataManagementService metadataManagementService;
+    private static OTPManagementService otpManagementService;
 
     static {
         String keyStorePassword = ServerConfiguration.getInstance().getFirstProperty("Security.KeyStore.Password");
@@ -335,6 +354,25 @@ public class DeviceMgtAPIUtils {
             }
         }
         return integrationClientService;
+    }
+
+    /**
+     * Initializing and accessing method for OTPManagementService.
+     *
+     * @return OTPManagementService instance
+     * @throws IllegalStateException if OTPManagementService cannot be initialized
+     */
+    public static synchronized OTPManagementService getOTPManagementService() {
+        if (otpManagementService == null) {
+            PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+            otpManagementService = (OTPManagementService) ctx.getOSGiService(OTPManagementService.class, null);
+            if (otpManagementService == null) {
+                String msg = "OTP Management service has not initialized.";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+        }
+        return otpManagementService;
     }
 
     public static RegistryService getRegistryService() {

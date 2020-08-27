@@ -24,7 +24,12 @@ import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationDAO;
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.NotificationManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.notification.mgt.dao.util.NotificationDAOUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +99,6 @@ public abstract class AbstractNotificationDAOImpl implements NotificationDAO {
             NotificationDAOUtil.cleanupResources(stmt, rs);
         }
         return notification;
-
     }
 
     @Override

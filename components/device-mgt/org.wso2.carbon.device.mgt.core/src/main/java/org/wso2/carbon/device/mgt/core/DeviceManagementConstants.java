@@ -116,6 +116,8 @@ public final class DeviceManagementConstants {
 
         public static final String USER_REGISTRATION_TEMPLATE = "user-registration";
         public static final String USER_ENROLLMENT_TEMPLATE = "user-enrollment";
+        public static final String USER_VERIFY_TEMPLATE = "user-verify";
+        public static final String USER_WELCOME_TEMPLATE = "user-welcome";
         public static final String DEFAULT_ENROLLMENT_TEMPLATE = "default-enrollment-invitation";
     }
 
@@ -141,6 +143,9 @@ public final class DeviceManagementConstants {
 
         public static final String DEFAULT_DEVICE_USER = "Internal/devicemgt-user";
         public static final String DEFAULT_DEVICE_ADMIN = "Internal/devicemgt-admin";
+
+        public static final String CLAIM_EMAIL_ADDRESS = "http://wso2.org/claims/emailaddress";
+        public static final String CLAIM_FIRST_NAME = "http://wso2.org/claims/givenname";
 
         // Permissions that are given for a normal device user.
         public static final Permission[] PERMISSIONS_FOR_DEVICE_USER = {
@@ -168,5 +173,14 @@ public final class DeviceManagementConstants {
         public static final String REPORTING_CONTEXT = "/reporting/api/analyticsadmin/v1.0/event";
         public static final String DEVICE_INFO_PARAM =  "device-info";
         public static final String APP_USAGE_ENDPOINT = REPORTING_CONTEXT + "/app-usage";
+    }
+
+    public static final class Payload {
+        private Payload() {
+            throw new AssertionError();
+        }
+        public static final String DEVICE_INFO_DEVICE_NAME = "DEVICE_NAME";
+        public static final String DEVICE_INFO_IMEI = "IMEI";
+        public static final String DEVICE_INFO_IMSI =  "IMSI";;
     }
 }

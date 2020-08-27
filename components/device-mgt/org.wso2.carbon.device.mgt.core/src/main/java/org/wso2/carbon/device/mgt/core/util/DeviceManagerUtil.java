@@ -14,12 +14,28 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ *
+ * Copyright (c) 2020, Entgra (Pvt) Ltd. (http://www.entgra.io) All Rights Reserved.
+ *
+ * Entgra (Pvt) Ltd. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.wso2.carbon.device.mgt.core.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -80,6 +96,7 @@ import org.wso2.carbon.identity.jwt.client.extension.service.JWTClientManagerSer
 import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
@@ -887,21 +904,15 @@ public final class DeviceManagerUtil {
 
     /**
      * Retrieve the Enrollment Configuration entry added to the Platform Configuration
-     * @param platformConfiguration which has all the platform configurations added to the tenant
      * @return enrollment configuration
      */
-    public static EnrollmentConfiguration getEnrollmentConfigurationEntry(PlatformConfiguration platformConfiguration) {
-        if (platformConfiguration != null) {
-            String enrollmentConfigEntry  = platformConfiguration.getConfiguration().stream()
-                    .filter(configurationEntry -> DeviceManagementConstants.Common.ENROLLMENT_CONFIGURATION
-                            .equals(configurationEntry.getName()))
-                    .findFirst()
-                    .map(configurationEntry -> configurationEntry.getValue().toString()).orElse(null);
-            if (!StringUtils.isBlank(enrollmentConfigEntry)) {
+    public static EnrollmentConfiguration getEnrollmentConfigurationEntry() {
+            Object enrollmentConfigEntry = DeviceManagerUtil.getConfiguration(
+                    DeviceManagementConstants.Common.ENROLLMENT_CONFIGURATION);
+            if (enrollmentConfigEntry != null) {
                 Gson gson = new Gson();
-                return gson.fromJson(enrollmentConfigEntry, EnrollmentConfiguration.class);
+                return gson.fromJson(enrollmentConfigEntry.toString(), EnrollmentConfiguration.class);
             }
-        }
         return null;
     }
 
@@ -911,8 +922,9 @@ public final class DeviceManagerUtil {
      * Validation happens in two ways,
      * 1. List of Serial Numbers - If this is available checks if the device to be enrolled serial number is
      * in the given list of serial numbers
-     * 2. List of Serial Numbers against a User - If [1] is missing and this is available checks if the device
-     * to be enrolled serial number is in the list of serial numbers which are against a User
+     * 2. List of Serial Numbers against a User - If [1] is not configured or the device serial number is not
+     * in the [1] then this checks if the device to be enrolled serial number is in the list of serial numbers
+     * which are against a User
      * @param enrollmentConfiguration which has the enrollment configurations of a tenant
      * @param deviceSerialNumber device serial number to be validated
      * @return a boolean value if the device can be enrolled
@@ -928,36 +940,44 @@ public final class DeviceManagerUtil {
             return true;
         } else {
             List<String> enrollmentConfigSerialNumbers = enrollmentConfiguration.getSerialNumbers();
+            boolean isDeviceEnrollable = false;
             if (enrollmentConfigSerialNumbers != null && !enrollmentConfigSerialNumbers.isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("List of serial numbers '" + enrollmentConfigSerialNumbers.toString() + "' has been"
                               + " added for enrollment configuration under platform configuration to validate "
                               + "the serial number '" + deviceSerialNumber + "'.");
                 }
-                return enrollmentConfigSerialNumbers.stream().anyMatch(deviceSerialNumber::equals);
-            } else {
-                String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-                List<EnrollmentConfiguration.UserConfiguration> userConfigurations = enrollmentConfiguration
-                        .getUserConfigurations();
-                if (userConfigurations != null && !userConfigurations.isEmpty()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("List of serial numbers against users has been added for enrollment "
-                                  + "configuration under platform configuration.");
-                    }
-                    return userConfigurations.stream()
-                            .filter(userConfiguration -> username.equals(userConfiguration.getUsername())).findFirst()
-                            .filter(userConfiguration -> userConfiguration.getSerialNumbers().stream()
-                                    .anyMatch(deviceSerialNumber::equals)).isPresent();
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Enrollment configuration has been but configuration does not contain any "
-                                  + "serial number based validation. It may be having the configuration to push "
-                                  + "devices to a specific group after a successful enrollment.");
-                    }
-                    // enrollment configuration has been set only to add device to a specific group and not to
-                    // validate device against serial number
-                    return true;
+                isDeviceEnrollable = enrollmentConfigSerialNumbers.stream().anyMatch(deviceSerialNumber::equals);
+            }
+            if (isDeviceEnrollable) {
+                return true;
+            }
+            String username = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+            List<EnrollmentConfiguration.UserConfiguration> userConfigurations = enrollmentConfiguration
+                    .getUserConfigurations();
+            if (userConfigurations != null && !userConfigurations.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("List of serial numbers against users has been added for enrollment "
+                              + "configuration under platform configuration.");
                 }
+                return userConfigurations.stream()
+                        .filter(userConfiguration -> username.equals(userConfiguration.getUsername())).findFirst()
+                        .filter(userConfiguration -> userConfiguration.getSerialNumbers().stream()
+                                .anyMatch(deviceSerialNumber::equals)).isPresent();
+            } else {
+                if (enrollmentConfigSerialNumbers != null && !enrollmentConfigSerialNumbers.isEmpty()) {
+                    // serial number of the device is not in the serial number based configuration nor in the serial
+                    // numbers against user based configuration
+                    return false;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Enrollment configuration has been but configuration does not contain any "
+                              + "serial number based validation. It may be having the configuration to push "
+                              + "devices to a specific group after a successful enrollment.");
+                }
+                // enrollment configuration has been set only to add device to a specific group and not to
+                // validate device against serial number
+                return true;
             }
         }
     }
@@ -1044,5 +1064,18 @@ public final class DeviceManagerUtil {
             throw new UserStoreException(msg);
         }
         return roleList;
+    }
+
+    /**
+     * Retrieve the value of the user property from the user profile
+     * @param username of the user
+     * @param claimUri name of the claim
+     * @return value for the claim uri of user
+     * @throws UserStoreException when there is error in retrieving the user store manager
+     */
+    public static String getUserClaimValue(String username, String claimUri) throws UserStoreException {
+        UserStoreManager userStoreManager = CarbonContext.getThreadLocalCarbonContext().getUserRealm()
+                .getUserStoreManager();
+        return userStoreManager.getUserClaimValue(username, claimUri, null);
     }
 }

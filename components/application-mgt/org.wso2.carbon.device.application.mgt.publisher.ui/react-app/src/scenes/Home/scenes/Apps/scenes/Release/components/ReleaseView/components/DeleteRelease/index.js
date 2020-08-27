@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { Modal, Button, Icon, notification } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Modal, Button, notification } from 'antd';
 import axios from 'axios';
 import { handleApiError } from '../../../../../../../../../../services/utils/errorHandler';
 import { withConfigContext } from '../../../../../../../../../../components/ConfigContext';
@@ -77,7 +78,7 @@ class DeleteRelease extends React.Component {
           type="danger"
           onClick={this.showModal}
         >
-          <Icon type="delete" /> Delete
+          <DeleteOutlined /> Delete
         </Button>
       </>
     );

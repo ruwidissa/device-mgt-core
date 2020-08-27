@@ -17,12 +17,12 @@
  */
 
 import React from 'react';
+import { HomeOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   PageHeader,
   Typography,
   Breadcrumb,
   Button,
-  Icon,
   Col,
   Row,
   notification,
@@ -326,7 +326,7 @@ class Page extends React.Component {
           <Breadcrumb style={{ paddingBottom: 16 }}>
             <Breadcrumb.Item>
               <Link to="/publisher/apps">
-                <Icon type="home" /> Home
+                <HomeOutlined /> Home
               </Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Manage</Breadcrumb.Item>
@@ -406,7 +406,7 @@ class Page extends React.Component {
                       <Button
                         type="dashed"
                         shape="round"
-                        icon="plus"
+                        icon={<PlusOutlined />}
                         size="large"
                         onClick={() => {
                           this.toggleAddNewClusterVisibility(true);

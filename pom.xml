@@ -1772,6 +1772,11 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${maven.checkstyle.vesion}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-validator</groupId>
+                <artifactId>commons-validator</artifactId>
+                <version>${apache.validator.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2219,6 +2224,9 @@
         <!--apache osgi mock version-->
         <apache.osgi.mock.version>2.3.2</apache.osgi.mock.version>
 
+        <!--apache validator version-->
+        <apache.validator.version>1.7</apache.validator.version>
+
         <!-- api-mgt handler version properties -->
         <org.apache.synapse.version>2.1.7-wso2v7</org.apache.synapse.version>
         <org.apache.ws.security.wso2.version>1.5.11.wso2v15</org.apache.ws.security.wso2.version>
@@ -2249,11 +2257,10 @@
         <googlecode.plist.version>1.21</googlecode.plist.version>
         <net.dongliu.version>2.6.5</net.dongliu.version>
         <frontend.mave.version>1.7.6</frontend.mave.version>
-        <node.version>v10.15.3</node.version>
-        <npm.version>6.9.0</npm.version>
+        <node.version>v12.18.1</node.version>
 
         <maven.checkstyle.vesion>3.1.0</maven.checkstyle.vesion>
-        
+
         <!--websocket related lib versions-->
         <tomcat.websocket.version>7.0.85</tomcat.websocket.version>
         <javax.websocket.version>1.0</javax.websocket.version>

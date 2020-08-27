@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { notification, Menu, Icon } from 'antd';
+import { LogoutOutlined } from '@ant-design/icons';
+import { notification, Menu } from 'antd';
 import axios from 'axios';
 import { withConfigContext } from '../../../../components/ConfigContext';
 
@@ -70,7 +71,7 @@ class Logout extends React.Component {
     return (
       <Menu>
         <Menu.Item key="1" onClick={this.handleSubmit}>
-          <Icon type="logout" />
+          <LogoutOutlined />
           Logout
         </Menu.Item>
       </Menu>

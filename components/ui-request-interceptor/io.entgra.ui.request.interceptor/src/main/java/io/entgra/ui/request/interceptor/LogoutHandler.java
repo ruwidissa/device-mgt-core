@@ -18,7 +18,6 @@
 
 package io.entgra.ui.request.interceptor;
 
-import io.entgra.ui.request.interceptor.util.HandlerConstants;
 import io.entgra.ui.request.interceptor.util.HandlerUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

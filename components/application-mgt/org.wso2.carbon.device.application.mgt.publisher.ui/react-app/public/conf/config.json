@@ -18,73 +18,69 @@
   },
   "defaultPlatformIcons": {
     "default": {
-      "icon": "global",
-      "color": "#535c68",
-      "theme": "outlined"
+      "icon": "fw-globe",
+      "color": "#535c68"
     },
     "android": {
-      "icon": "android",
-      "color": "#7db343",
-      "theme": "filled"
+      "icon": "fw-android",
+      "color": "#7db343"
     },
     "ios": {
-      "icon": "apple",
-      "color": "#535c68",
-      "theme": "filled"
+      "icon": "fw-apple",
+      "color": "#535c68"
     },
     "windows": {
-      "icon": "windows",
-      "color": "#008cc4",
-      "theme": "filled"
+      "icon": "fw-windows",
+      "color": "#008cc4"
     }
   },
   "lifecycle": {
     "CREATED": {
       "title": "Created",
       "text": "The initial most state of an application.\n You can only proceed to one of the following states:",
-      "icon": "file-text",
+      "icon": "fw-document",
       "step": 0
     },
     "IN-REVIEW": {
       "title": "In-Review",
       "text": "In this state the application is being reviewed by approvers. You can move from this state to APPROVED state if it is approved by reviewers. Otherwise, you can move the application into either REJECTED state or CREATED state based on the feedback getting by reviewers.",
-      "icon": "audit",
+      "icon": "fw-throttling-policy",
       "step": 1
     },
     "APPROVED": {
       "title": "Approved",
       "text": "The approved state is a compulsory state prior to publishing the application.\n You can only proceed to one of the following states:",
-      "icon": "file-done",
+      "icon": "fw-check",
       "step": 2
     },
     "PUBLISHED": {
       "title": "Published",
       "text": "The state which is applied for applications which are qualified for your Corporate App Store. Only the applications of Published state can be installed to your corporate devices.\n You can only proceed to one of the following states:",
-      "icon": "global",
+      "icon": "fw-globe",
       "step": 3
     },
     "BLOCKED": {
       "title": "Blocked",
       "text": "This state allows you to block your application either to publish or deprecate at a future date.\n You can only proceed to one of the following states:",
-      "icon": "exception",
+      "icon": "fw-lock",
       "step": 4
     },
     "DEPRECATED": {
       "title": "Deprecated",
       "text": "The applications which are outdated and no longer suit your app store.\n You can only proceed to one of the following states:",
-      "icon": "file-excel",
+      "icon": "fw-warning",
       "step": 5
     },
     "REJECTED": {
       "title": "Rejected",
       "text": "The Approvers can reject an application due to a faulty of the app or not being in compliance with company policies.\n You can only proceed to one of the following states:",
-      "icon": "frown",
+      "icon": "fw-error",
       "step": 6
     },
     "RETIRED": {
       "title": "Retired",
       "text": "The final state of an application, where no transition of states will be allowed after this.",
-      "icon": "rest",
+      "icon": "fw-delete",
       "step": 7
     }
   },

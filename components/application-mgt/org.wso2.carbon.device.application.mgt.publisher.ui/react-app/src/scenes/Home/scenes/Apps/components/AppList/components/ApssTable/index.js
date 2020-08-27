@@ -17,13 +17,15 @@
  */
 
 import React from 'react';
-import { Avatar, Table, Tag, Icon, Badge, Alert, Tooltip } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
+import { Avatar, Table, Tag, Badge, Alert, Tooltip } from 'antd';
 import axios from 'axios';
 import pSBC from 'shade-blend-color';
 import './styles.css';
 import { withConfigContext } from '../../../../../../../../components/ConfigContext';
 import AppDetailsDrawer from './AppDetailsDrawer';
 import { handleApiError } from '../../../../../../../../services/utils/errorHandler';
+import { EntgraIcon } from 'entgra-icons-react';
 
 let config = null;
 
@@ -69,13 +71,12 @@ const columns = [
             }}
             count={
               <Tooltip title="Published">
-                <Icon
+                <CheckCircleOutlined
                   style={{
                     backgroundColor: '#52c41a',
                     borderRadius: '50%',
                     color: 'white',
                   }}
-                  type="check-circle"
                 />
               </Tooltip>
             }
@@ -139,15 +140,13 @@ const columns = [
       const defaultPlatformIcons = config.defaultPlatformIcons;
       let icon = defaultPlatformIcons.default.icon;
       let color = defaultPlatformIcons.default.color;
-      let theme = defaultPlatformIcons.default.theme;
       if (defaultPlatformIcons.hasOwnProperty(platform)) {
         icon = defaultPlatformIcons[platform].icon;
         color = defaultPlatformIcons[platform].color;
-        theme = defaultPlatformIcons[platform].theme;
       }
       return (
         <span style={{ fontSize: 20, color: color, textAlign: 'center' }}>
-          <Icon type={icon} theme={theme} />
+          <EntgraIcon type={icon} />
         </span>
       );
     },

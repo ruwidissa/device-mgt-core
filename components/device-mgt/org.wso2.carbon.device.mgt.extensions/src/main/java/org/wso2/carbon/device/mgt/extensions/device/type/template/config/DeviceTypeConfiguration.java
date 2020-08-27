@@ -34,6 +34,7 @@
  */
 package org.wso2.carbon.device.mgt.extensions.device.type.template.config;
 
+import org.wso2.carbon.device.mgt.common.invitation.mgt.DeviceEnrollmentInvitationDetails;
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypePlatformDetails;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -107,6 +108,8 @@ public class DeviceTypeConfiguration {
     protected List<String> operations;
     @XmlElement(name = "DeviceTypePlatformDetails", required = true)
     protected DeviceTypePlatformDetails deviceTypePlatformDetails;
+    @XmlElement(name = "DeviceEnrollmentInvitationDetails", required = true)
+    protected DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails;
 
     public DeviceTypePlatformDetails getDeviceTypePlatformDetails() {
         return deviceTypePlatformDetails;
@@ -413,5 +416,22 @@ public class DeviceTypeConfiguration {
      */
     public void setStartupOperations(List<String> startupOperations) {
         this.startupOperations = startupOperations;
+    }
+
+    /**
+     * Gets the value of device enrollment invitation details which has enrollment steps of enrollment types
+     * @return device enrollment invitation details
+     */
+    public DeviceEnrollmentInvitationDetails getDeviceEnrollmentInvitationDetails() {
+        return deviceEnrollmentInvitationDetails;
+    }
+
+    /**
+     * Sets the value of device enrollment invitation details from the relevant device type xml file
+     * @param deviceEnrollmentInvitationDetails {@link DeviceEnrollmentInvitationDetails} object
+     */
+    public void setDeviceEnrollmentInvitationDetails(
+            DeviceEnrollmentInvitationDetails deviceEnrollmentInvitationDetails) {
+        this.deviceEnrollmentInvitationDetails = deviceEnrollmentInvitationDetails;
     }
 }

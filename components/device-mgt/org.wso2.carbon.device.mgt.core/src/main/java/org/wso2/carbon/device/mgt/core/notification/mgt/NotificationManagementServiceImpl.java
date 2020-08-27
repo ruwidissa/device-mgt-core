@@ -234,7 +234,6 @@ public class NotificationManagementServiceImpl implements NotificationManagement
         }
     }
 
-
     @Override
     public List<Notification> getNotificationsByStatus(Notification.Status status)
             throws NotificationManagementException {

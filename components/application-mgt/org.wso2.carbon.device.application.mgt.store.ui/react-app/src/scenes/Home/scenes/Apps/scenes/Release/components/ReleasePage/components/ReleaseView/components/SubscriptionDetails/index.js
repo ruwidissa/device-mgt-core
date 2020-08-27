@@ -18,6 +18,7 @@
 
 import React from 'react';
 import axios from 'axios';
+import { SyncOutlined } from '@ant-design/icons';
 import { Tag, Table, Typography, Button, Alert } from 'antd';
 import TimeAgo from 'javascript-time-ago';
 
@@ -235,7 +236,7 @@ class SubscriptionDetails extends React.Component {
               </Text>
             </div>
             <div style={{ textAlign: 'right', paddingBottom: 6 }}>
-              <Button icon="sync" onClick={this.fetch}>
+              <Button icon={<SyncOutlined />} onClick={this.fetch}>
                 Refresh
               </Button>
             </div>

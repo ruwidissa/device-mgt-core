@@ -30,6 +30,7 @@ public class HandlerConstants {
     public static final String TAGS_KEY = "tags";
     public static final String APP_NAME_KEY = "applicationName";
     public static final String SESSION_AUTH_DATA_KEY = "authInfo";
+    public static final String SESSION_DEFAULT_AUTH_DATA_KEY = "defaultAuthInfo";
     public static final String UI_CONFIG_KEY = "ui-config";
     public static final String PLATFORM = "platform";
     public static final String USERNAME = "username";
@@ -46,4 +47,6 @@ public class HandlerConstants {
 
     public static final int INTERNAL_ERROR_CODE = 500;
     public static final long TIMEOUT = 1200;
+
+    public static final String OTP_HEADER = "one-time-token";
 }

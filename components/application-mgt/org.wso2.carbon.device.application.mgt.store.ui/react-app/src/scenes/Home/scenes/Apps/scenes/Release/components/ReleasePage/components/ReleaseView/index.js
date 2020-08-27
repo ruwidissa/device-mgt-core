@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { DownOutlined } from '@ant-design/icons';
 import {
   Divider,
   Row,
@@ -26,7 +27,6 @@ import {
   Dropdown,
   notification,
   Menu,
-  Icon,
   Tabs,
   Tag,
 } from 'antd';
@@ -216,13 +216,13 @@ class ReleaseView extends React.Component {
                   yes={
                     <Dropdown overlay={menu}>
                       <Button type="primary">
-                        Subscribe <Icon type="down" />
+                        Subscribe <DownOutlined />
                       </Button>
                     </Dropdown>
                   }
                   no={
                     <Button type="primary" disabled={true}>
-                      Subscribe <Icon type="down" />
+                      Subscribe <DownOutlined />
                     </Button>
                   }
                 />

@@ -18,6 +18,7 @@
 
 import React from 'react';
 import {
+  Alert,
   Drawer,
   Select,
   Avatar,
@@ -29,7 +30,6 @@ import {
   Button,
   Spin,
   message,
-  Icon,
   Card,
   Badge,
   Tooltip,
@@ -48,20 +48,20 @@ import ManagedConfigurationsIframe from './components/ManagedConfigurationsIfram
 import { handleApiError } from '../../../../../../../../../services/utils/errorHandler';
 import Authorized from '../../../../../../../../../components/Authorized/Authorized';
 import { isAuthorized } from '../../../../../../../../../services/utils/authorizationHandler';
-import { MoreOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  EditOutlined,
+  MoreOutlined,
+  StarOutlined,
+  UploadOutlined,
+  CheckOutlined,
+} from '@ant-design/icons';
 import DeleteApp from './components/DeleteApp';
 import RetireApp from './components/RetireApp';
 
 const { Meta } = Card;
 const { Text, Title } = Typography;
 const { Option } = Select;
-
-const IconText = ({ type, text }) => (
-  <span>
-    <Icon type={type} style={{ marginRight: 8 }} />
-    {text}
-  </span>
-);
 
 const modules = {
   toolbar: [
@@ -85,6 +85,7 @@ const formats = [
 class AppDetailsDrawer extends React.Component {
   constructor(props) {
     super(props);
+    this.config = this.props.context;
     const drawerWidth = window.innerWidth <= 770 ? '80%' : '40%';
 
     this.state = {
@@ -93,14 +94,18 @@ class AppDetailsDrawer extends React.Component {
       description: null,
       globalCategories: [],
       globalTags: [],
+      globalUnrestrictedRoles: [],
       categories: [],
       tags: [],
+      unrestrictedRoles: [],
       temporaryDescription: null,
       temporaryCategories: [],
       temporaryTags: [],
+      temporaryUnrestrictedRoles: [],
       isDescriptionEditEnabled: false,
       isCategoriesEditEnabled: false,
       isTagsEditEnabled: false,
+      isUnrestrictedRolesEditEnabled: false,
       drawer: null,
       drawerWidth,
     };
@@ -115,31 +120,39 @@ class AppDetailsDrawer extends React.Component {
     ) {
       this.getCategories();
       this.getTags();
+      this.getUnrestrictedRoles();
     }
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.app !== this.props.app) {
-      const { name, description, tags, categories } = this.props.app;
+      const {
+        name,
+        description,
+        tags,
+        categories,
+        unrestrictedRoles,
+      } = this.props.app;
       this.setState({
         name,
         description,
         tags,
         categories,
+        unrestrictedRoles,
         isDescriptionEditEnabled: false,
         isCategoriesEditEnabled: false,
         isTagsEditEnabled: false,
+        isUnrestrictedRolesEditEnabled: false,
       });
     }
   }
 
   getCategories = () => {
-    const config = this.props.context;
     axios
       .get(
         window.location.origin +
-          config.serverConfig.invoker.uri +
-          config.serverConfig.invoker.publisher +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.publisher +
           '/applications/categories',
       )
       .then(res => {
@@ -172,12 +185,11 @@ class AppDetailsDrawer extends React.Component {
   };
 
   getTags = () => {
-    const config = this.props.context;
     axios
       .get(
         window.location.origin +
-          config.serverConfig.invoker.uri +
-          config.serverConfig.invoker.publisher +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.publisher +
           '/applications/tags',
       )
       .then(res => {
@@ -202,17 +214,46 @@ class AppDetailsDrawer extends React.Component {
       });
   };
 
+  getUnrestrictedRoles = () => {
+    axios
+      .get(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.deviceMgt +
+          '/roles',
+      )
+      .then(res => {
+        if (res.status === 200) {
+          const globalUnrestrictedRoles = res.data.data.roles;
+
+          this.setState({
+            globalUnrestrictedRoles,
+            loading: false,
+          });
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to load roles.',
+          true,
+        );
+        this.setState({
+          loading: false,
+        });
+      });
+  };
+
   // change the app name
   handleNameSave = name => {
-    const config = this.props.context;
     const { id } = this.props.app;
     if (name !== this.state.name && name !== '') {
       const data = { name: name };
       axios
         .put(
           window.location.origin +
-            config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.publisher +
+            this.config.serverConfig.invoker.uri +
+            this.config.serverConfig.invoker.publisher +
             '/applications/' +
             id,
           data,
@@ -289,7 +330,6 @@ class AppDetailsDrawer extends React.Component {
 
   // change app categories
   handleCategorySave = () => {
-    const config = this.props.context;
     const { id } = this.props.app;
     const { temporaryCategories, categories } = this.state;
 
@@ -302,8 +342,8 @@ class AppDetailsDrawer extends React.Component {
       axios
         .put(
           window.location.origin +
-            config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.publisher +
+            this.config.serverConfig.invoker.uri +
+            this.config.serverConfig.invoker.publisher +
             '/applications/' +
             id,
           data,
@@ -364,7 +404,6 @@ class AppDetailsDrawer extends React.Component {
 
   // change app tags
   handleTagsSave = () => {
-    const config = this.props.context;
     const { id } = this.props.app;
     const { temporaryTags, tags } = this.state;
 
@@ -377,8 +416,8 @@ class AppDetailsDrawer extends React.Component {
       axios
         .put(
           window.location.origin +
-            config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.publisher +
+            this.config.serverConfig.invoker.uri +
+            this.config.serverConfig.invoker.publisher +
             '/applications/' +
             id,
           data,
@@ -386,6 +425,7 @@ class AppDetailsDrawer extends React.Component {
         .then(res => {
           if (res.status === 200) {
             const app = res.data.data;
+            this.props.onUpdateApp('tags', temporaryTags);
             notification.success({
               message: 'Saved!',
               description: 'App tags updated successfully!',
@@ -417,9 +457,75 @@ class AppDetailsDrawer extends React.Component {
     }
   };
 
+  enableUnrestrictedRolesEdit = () => {
+    this.setState({
+      isUnrestrictedRolesEditEnabled: true,
+      temporaryUnrestrictedRoles: this.state.unrestrictedRoles,
+    });
+  };
+
+  disableUnrestrictedRolesEdit = () => {
+    this.setState({
+      isUnrestrictedRolesEditEnabled: false,
+    });
+  };
+
+  handleUnrestrictedRolesChange = temporaryUnrestrictedRoles => {
+    this.setState({ temporaryUnrestrictedRoles });
+  };
+
+  handleUnrestrictedRolesSave = () => {
+    const { id } = this.props.app;
+    const { temporaryUnrestrictedRoles, unrestrictedRoles } = this.state;
+
+    temporaryUnrestrictedRoles
+      .filter(x => !unrestrictedRoles.includes(x))
+      .concat(
+        unrestrictedRoles.filter(x => !temporaryUnrestrictedRoles.includes(x)),
+      );
+
+    const data = { unrestrictedRoles: temporaryUnrestrictedRoles };
+    axios
+      .put(
+        window.location.origin +
+          this.config.serverConfig.invoker.uri +
+          this.config.serverConfig.invoker.publisher +
+          '/applications/' +
+          id,
+        data,
+      )
+      .then(res => {
+        if (res.status === 200) {
+          const app = res.data.data;
+          this.props.onUpdateApp(
+            'unrestrictedRoles',
+            temporaryUnrestrictedRoles,
+          );
+          notification.success({
+            message: 'Saved!',
+            description: 'App unrestricted roles updated successfully!',
+          });
+          this.setState({
+            loading: false,
+            unrestrictedRoles: app.unrestrictedRoles,
+            isUnrestrictedRolesEditEnabled: false,
+          });
+        }
+      })
+      .catch(error => {
+        handleApiError(
+          error,
+          'Error occurred while trying to update unrestricted roles.',
+          true,
+        );
+        this.setState({
+          loading: false,
+        });
+      });
+  };
+
   // handle description save
   handleDescriptionSave = () => {
-    const config = this.props.context;
     const { id } = this.props.app;
     const { description, temporaryDescription } = this.state;
 
@@ -431,8 +537,8 @@ class AppDetailsDrawer extends React.Component {
       axios
         .put(
           window.location.origin +
-            config.serverConfig.invoker.uri +
-            config.serverConfig.invoker.publisher +
+            this.config.serverConfig.invoker.uri +
+            this.config.serverConfig.invoker.publisher +
             '/applications/' +
             id,
           data,
@@ -470,7 +576,6 @@ class AppDetailsDrawer extends React.Component {
   };
 
   render() {
-    const config = this.props.context;
     const { app, visible, onClose } = this.props;
     const {
       name,
@@ -479,13 +584,17 @@ class AppDetailsDrawer extends React.Component {
       isDescriptionEditEnabled,
       isCategoriesEditEnabled,
       isTagsEditEnabled,
+      isUnrestrictedRolesEditEnabled,
       temporaryDescription,
       temporaryCategories,
       temporaryTags,
+      temporaryUnrestrictedRoles,
       globalCategories,
       globalTags,
+      globalUnrestrictedRoles,
       categories,
       tags,
+      unrestrictedRoles,
     } = this.state;
     if (app == null) {
       return null;
@@ -503,7 +612,7 @@ class AppDetailsDrawer extends React.Component {
           style={{
             marginBottom: 10,
             borderRadius: '28%',
-            backgroundColor: pSBC(0.5, config.theme.primaryColor),
+            backgroundColor: pSBC(0.5, this.config.theme.primaryColor),
           }}
         >
           {avatarLetter}
@@ -544,9 +653,9 @@ class AppDetailsDrawer extends React.Component {
                     <Menu.Item key="1">
                       <RetireApp id={id} isHideableApp={app.isHideableApp} />
                     </Menu.Item>
-                    {config.androidEnterpriseToken !== null &&
+                    {this.config.androidEnterpriseToken !== null &&
                       isAuthorized(
-                        config.user,
+                        this.config.user,
                         '/permission/admin/device-mgt/enterprise/user/modify',
                       ) && (
                         <Menu.Item key="2">
@@ -603,13 +712,12 @@ class AppDetailsDrawer extends React.Component {
                                       title="Published"
                                       count={
                                         <Tooltip title="Published">
-                                          <Icon
+                                          <CheckCircleOutlined
                                             style={{
                                               backgroundColor: '#52c41a',
                                               borderRadius: '50%',
                                               color: 'white',
                                             }}
-                                            type="check-circle"
                                           />
                                         </Tooltip>
                                       }
@@ -633,24 +741,15 @@ class AppDetailsDrawer extends React.Component {
                               description={
                                 <div
                                   style={{
-                                    fontSize: '0.7em',
+                                    fontSize: '0.8em',
                                   }}
                                   className="description-view"
                                 >
-                                  <IconText
-                                    type="check"
-                                    text={release.currentStatus}
-                                  />
+                                  <CheckOutlined /> {release.currentStatus}
                                   <Divider type="vertical" />
-                                  <IconText
-                                    type="upload"
-                                    text={release.releaseType}
-                                  />
+                                  <UploadOutlined /> {release.releaseType}
                                   <Divider type="vertical" />
-                                  <IconText
-                                    type="star-o"
-                                    text={release.rating.toFixed(1)}
-                                  />
+                                  <StarOutlined /> {release.rating.toFixed(1)}
                                 </div>
                               }
                             />
@@ -693,12 +792,12 @@ class AppDetailsDrawer extends React.Component {
                 !isDescriptionEditEnabled && (
                   <Text
                     style={{
-                      color: config.theme.primaryColor,
+                      color: this.config.theme.primaryColor,
                       cursor: 'pointer',
                     }}
                     onClick={this.enableDescriptionEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }
@@ -749,12 +848,12 @@ class AppDetailsDrawer extends React.Component {
                 !isCategoriesEditEnabled && (
                   <Text
                     style={{
-                      color: config.theme.primaryColor,
+                      color: this.config.theme.primaryColor,
                       cursor: 'pointer',
                     }}
                     onClick={this.enableCategoriesEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }
@@ -797,7 +896,7 @@ class AppDetailsDrawer extends React.Component {
                 {categories.map(category => {
                   return (
                     <Tag
-                      color={pSBC(0.3, config.theme.primaryColor)}
+                      color={pSBC(0.3, this.config.theme.primaryColor)}
                       key={category}
                       style={{ marginBottom: 5 }}
                     >
@@ -816,12 +915,12 @@ class AppDetailsDrawer extends React.Component {
                 !isTagsEditEnabled && (
                   <Text
                     style={{
-                      color: config.theme.primaryColor,
+                      color: this.config.theme.primaryColor,
                       cursor: 'pointer',
                     }}
                     onClick={this.enableTagsEdit}
                   >
-                    <Icon type="edit" />
+                    <EditOutlined />
                   </Text>
                 )
               }
@@ -870,6 +969,85 @@ class AppDetailsDrawer extends React.Component {
                 })}
               </span>
             )}
+
+            <Divider dashed={true} />
+            <Text strong={true}>Unrestricted Roles</Text>
+            <Authorized
+              permission="/permission/admin/app-mgt/publisher/application/update"
+              yes={
+                !isUnrestrictedRolesEditEnabled && (
+                  <Text
+                    style={{
+                      color: this.config.theme.primaryColor,
+                      cursor: 'pointer',
+                    }}
+                    onClick={this.enableUnrestrictedRolesEdit}
+                  >
+                    <EditOutlined />
+                  </Text>
+                )
+              }
+            />
+            <br />
+            <br />
+            {!unrestrictedRoles.length && (
+              <Alert
+                message="Application is not restricted to any roles."
+                type="info"
+                showIcon
+              />
+            )}
+            {isUnrestrictedRolesEditEnabled && (
+              <div>
+                <Select
+                  mode="multiple"
+                  style={{ width: '100%' }}
+                  placeholder="Please select unrestricted roles"
+                  onChange={this.handleUnrestrictedRolesChange}
+                  value={temporaryUnrestrictedRoles}
+                >
+                  {globalUnrestrictedRoles.map(unrestrictedRole => {
+                    return (
+                      <Option key={unrestrictedRole}>{unrestrictedRole}</Option>
+                    );
+                  })}
+                </Select>
+                <div style={{ marginTop: 10 }}>
+                  <Button
+                    style={{ marginRight: 10 }}
+                    size="small"
+                    htmlType="button"
+                    onClick={this.disableUnrestrictedRolesEdit}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="small"
+                    type="primary"
+                    htmlType="button"
+                    onClick={this.handleUnrestrictedRolesSave}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </div>
+            )}
+            {!isUnrestrictedRolesEditEnabled && (
+              <span>
+                {unrestrictedRoles.map(unrestrictedRole => {
+                  return (
+                    <Tag
+                      color={this.config.theme.primaryColor}
+                      key={unrestrictedRole}
+                      style={{ marginBottom: 5 }}
+                    >
+                      {unrestrictedRole}
+                    </Tag>
+                  );
+                })}
+              </span>
+            )}
+
             <Authorized
               permission="/permission/admin/app-mgt/publisher/review/view"
               yes={

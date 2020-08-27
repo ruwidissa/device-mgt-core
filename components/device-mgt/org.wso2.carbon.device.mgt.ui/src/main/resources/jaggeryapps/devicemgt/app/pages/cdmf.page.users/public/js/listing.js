@@ -112,10 +112,11 @@ $("a#invite-user-link").click(function () {
  * Function to get selected usernames.
  */
 function getSelectedUsernames() {
-    var usernameList = [];
-    var userList = $("#user-grid").find("tr.DTTT_selected");
-    userList.each(function () {
-        usernameList.push($(this).data('username'));
+    const tbl = $('#user-grid').DataTable();
+    let usernameList = [];
+    let userList = $("#user-grid").find("tr.DTTT_selected");
+    userList.each(function (idx, el) {
+        usernameList.push(tbl.row(el).data().username);
     });
     return usernameList;
 }
