@@ -83,6 +83,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 .validatePolicyDetails(policyWrapper);
         // validation failure results;
         if (!features.isEmpty()) {
+            log.error("Policy feature/s validation failed.");
             return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
         }
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
@@ -223,6 +224,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 .validatePolicyDetails(policyWrapper);
         // validation failure results;
         if (!features.isEmpty()) {
+            log.error("Policy feature/s validation failed.");
             return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
         }
         PolicyManagerService policyManagementService = DeviceMgtAPIUtils.getPolicyManagementService();
@@ -480,6 +482,7 @@ public class PolicyManagementServiceImpl implements PolicyManagementService {
                 = RequestValidationUtil.validateProfileFeatures(profileFeaturesList);
         // validation failure results;
         if (!features.isEmpty()) {
+            log.error("Policy feature/s validation failed.");
             return Response.status(Response.Status.BAD_REQUEST).entity(features).build();
         }
         return Response.status(Response.Status.OK).entity("Valid request").build();
