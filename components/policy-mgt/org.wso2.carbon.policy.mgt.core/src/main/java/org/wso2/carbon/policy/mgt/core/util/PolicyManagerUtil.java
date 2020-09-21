@@ -306,7 +306,7 @@ public class PolicyManagerUtil {
                 for (CorrectiveAction correctiveAction : feature.getCorrectiveActions()) {
                     if (correctiveAction.isReactive()) {
                         if (profileOperation.getReactiveActionIds() == null) {
-                            profileOperation.setCorrectiveActionIds(new ArrayList<>());
+                            profileOperation.setReactiveActionIds(new ArrayList<>());
                         }
                         profileOperation.getReactiveActionIds().add(correctiveAction.getPolicyId());
                     } else {
