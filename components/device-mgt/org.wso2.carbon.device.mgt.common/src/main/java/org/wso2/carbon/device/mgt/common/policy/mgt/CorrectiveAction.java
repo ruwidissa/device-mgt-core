@@ -55,6 +55,12 @@ public class CorrectiveAction implements Serializable {
     )
     private List<ProfileFeature> operations;
 
+    @ApiModelProperty(
+            name = "isReactive",
+            value = "Declare the action as a reactive action"
+    )
+    private boolean isReactive;
+
     private Integer featureId;
 
     private Integer associatedGeneralPolicyId;
@@ -97,5 +103,13 @@ public class CorrectiveAction implements Serializable {
 
     public void setAssociatedGeneralPolicyId(Integer associatedGeneralPolicyId) {
         this.associatedGeneralPolicyId = associatedGeneralPolicyId;
+    }
+
+    public boolean isReactive() {
+        return isReactive;
+    }
+
+    public void setReactive(boolean reactive) {
+        isReactive = reactive;
     }
 }

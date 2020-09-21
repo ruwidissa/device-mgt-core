@@ -280,7 +280,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             String query = "INSERT INTO DM_POLICY_CORRECTIVE_ACTION " +
                            "(ACTION_TYPE, " +
                            "CORRECTIVE_POLICY_ID, " +
-                           "POLICY_ID, FEATURE_ID) VALUES (?, ?, ?, ?)";
+                           "POLICY_ID, FEATURE_ID, IS_REACTIVE) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement insertStmt = conn.prepareStatement(query)) {
                 for (CorrectiveAction correctiveAction : correctiveActions) {
                     insertStmt.setString(1, correctiveAction.getActionType());
@@ -291,6 +291,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     } else {
                         insertStmt.setInt(4, featureId);
                     }
+                    insertStmt.setBoolean(5, correctiveAction.isReactive());
                     insertStmt.addBatch();
                 }
                 insertStmt.executeBatch();
@@ -306,7 +307,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     public List<CorrectiveAction> getCorrectiveActionsOfPolicy(int policyId) throws PolicyManagerDAOException {
         try {
             Connection conn = this.getConnection();
-            String query = "SELECT ACTION_TYPE, CORRECTIVE_POLICY_ID, FEATURE_ID, POLICY_ID " +
+            String query = "SELECT ACTION_TYPE, CORRECTIVE_POLICY_ID, FEATURE_ID, POLICY_ID, IS_REACTIVE " +
                     "FROM DM_POLICY_CORRECTIVE_ACTION " +
                     "WHERE POLICY_ID = ?";
             try (PreparedStatement selectStmt = conn.prepareStatement(query)) {
@@ -324,7 +325,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     public List<CorrectiveAction> getAllCorrectiveActions() throws PolicyManagerDAOException {
         try {
             Connection conn = this.getConnection();
-            String query = "SELECT ACTION_TYPE, CORRECTIVE_POLICY_ID, FEATURE_ID, POLICY_ID " +
+            String query = "SELECT ACTION_TYPE, CORRECTIVE_POLICY_ID, FEATURE_ID, POLICY_ID, IS_REACTIVE " +
                     "FROM DM_POLICY_CORRECTIVE_ACTION ";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 List<CorrectiveAction> correctiveActions = new ArrayList<>();
@@ -353,6 +354,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 correctiveAction.setPolicyId(rs.getInt("CORRECTIVE_POLICY_ID"));
                 correctiveAction.setFeatureId(rs.getInt("FEATURE_ID"));
                 correctiveAction.setAssociatedGeneralPolicyId(rs.getInt("POLICY_ID"));
+                correctiveAction.setReactive(rs.getBoolean("IS_REACTIVE"));
                 correctiveActions.add(correctiveAction);
             }
         }

@@ -304,10 +304,17 @@ public class PolicyManagerUtil {
             profileOperation.setPayLoad(feature.getContent());
             if (feature.getCorrectiveActions() != null) {
                 for (CorrectiveAction correctiveAction : feature.getCorrectiveActions()) {
-                    if (profileOperation.getCorrectiveActionIds() == null) {
-                        profileOperation.setCorrectiveActionIds(new ArrayList<>());
+                    if (correctiveAction.isReactive()) {
+                        if (profileOperation.getReactiveActionIds() == null) {
+                            profileOperation.setCorrectiveActionIds(new ArrayList<>());
+                        }
+                        profileOperation.getReactiveActionIds().add(correctiveAction.getPolicyId());
+                    } else {
+                        if (profileOperation.getCorrectiveActionIds() == null) {
+                            profileOperation.setCorrectiveActionIds(new ArrayList<>());
+                        }
+                        profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
                     }
-                    profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
                 }
             }
             profileOperations.add(profileOperation);
