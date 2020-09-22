@@ -968,6 +968,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                     + ") AS GEOHASH_PREFIX, "
                     + "COUNT(*) AS COUNT, "
                     + "MIN(DEVICE.DEVICE_IDENTIFICATION) AS DEVICE_IDENTIFICATION, "
+                    + "MIN(DEVICE.NAME) AS NAME, "
                     + "MIN(DEVICE_TYPE.NAME) AS TYPE, "
                     + "MIN(DEVICE.LAST_UPDATED_TIMESTAMP) AS LAST_UPDATED_TIMESTAMP, "
                     + "COUNT(DEVICE_LOCATION.GEO_HASH) "
@@ -1004,6 +1005,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         double min_longitude = rs.getDouble("MIN_LONGITUDE");
                         double max_longitude = rs.getDouble("MAX_LONGITUDE");
                         String device_identification = rs.getString("DEVICE_IDENTIFICATION");
+                        String device_name = rs.getString("NAME");
                         String device_type = rs.getString("TYPE");
                         String last_seen = rs.getString("LAST_UPDATED_TIMESTAMP");
                         long count = rs.getLong("COUNT");
@@ -1011,7 +1013,7 @@ public class SQLServerDeviceDAOImpl extends AbstractDeviceDAOImpl {
                         geoClusters.add(new GeoCluster(new GeoCoordinate(latitude, longitude),
                                 new GeoCoordinate(min_latitude, min_longitude),
                                 new GeoCoordinate(max_latitude, max_longitude), count, geohashPrefix,
-                                device_identification, device_type, last_seen));
+                                device_identification, device_name, device_type, last_seen));
                     }
                 }
             }

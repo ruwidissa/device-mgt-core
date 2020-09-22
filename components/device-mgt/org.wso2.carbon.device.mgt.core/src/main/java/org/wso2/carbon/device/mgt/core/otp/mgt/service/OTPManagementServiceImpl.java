@@ -61,6 +61,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class OTPManagementServiceImpl implements OTPManagementService {
 
@@ -82,12 +84,7 @@ public class OTPManagementServiceImpl implements OTPManagementService {
                 otpWrapper.getUsername(), tenant, -1234);
         try {
             ConnectionManagerUtil.beginDBTransaction();
-            if (this.otpManagementDAO.addOTPData(oneTimePinDTO) == -1) {
-                ConnectionManagerUtil.rollbackDBTransaction();
-                String msg = "OTP data saving failed. Please, contact Administrator";
-                log.error(msg);
-                throw new OTPManagementException(msg);
-            }
+            this.otpManagementDAO.addOTPData(Collections.singletonList(oneTimePinDTO));
             Properties props = new Properties();
             props.setProperty("first-name", tenant.getAdminFirstName());
             props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
@@ -98,12 +95,12 @@ public class OTPManagementServiceImpl implements OTPManagementService {
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while getting database connection.";
+            String msg = "Error occurred while getting database connection to add OPT data.";
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
         } catch (OTPManagementDAOException e) {
             ConnectionManagerUtil.rollbackDBTransaction();
-            String msg = "Error occurred while saving the OTP data. Email address: " + oneTimePinDTO.getEmail();
+            String msg = "Error occurred while saving the OTP data for given email" ;
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
         } finally {
@@ -219,24 +216,44 @@ public class OTPManagementServiceImpl implements OTPManagementService {
         }
         int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
         OneTimePinDTO oneTimePinDTO;
+        List<OneTimePinDTO> oneTimePinDTOList = new ArrayList<>();
         Properties props = new Properties();
         props.setProperty("enrollment-steps", enrollmentSteps.toString());
         try {
+            ConnectionManagerUtil.beginDBTransaction();
             for (String username : deviceEnrollmentInvitation.getUsernames()) {
                 String emailAddress = DeviceManagerUtil.getUserClaimValue(
                         username, DeviceManagementConstants.User.CLAIM_EMAIL_ADDRESS);
                 oneTimePinDTO = createOneTimePin(emailAddress, OTPEmailTypes.DEVICE_ENROLLMENT.toString(), username,
                         null, tenantId);
+                oneTimePinDTOList.add(oneTimePinDTO);
                 props.setProperty("first-name", DeviceManagerUtil.
                         getUserClaimValue(username, DeviceManagementConstants.User.CLAIM_FIRST_NAME));
                 props.setProperty("username", username);
                 props.setProperty("otp-token", oneTimePinDTO.getOtpToken());
                 sendMail(props, emailAddress, DeviceManagementConstants.EmailAttributes.USER_ENROLLMENT_TEMPLATE);
             }
+            this.otpManagementDAO.addOTPData(oneTimePinDTOList);
+            ConnectionManagerUtil.commitDBTransaction();
         } catch (UserStoreException e) {
             String msg = "Error occurred while getting claim values to invite user";
             log.error(msg, e);
             throw new OTPManagementException(msg, e);
+        } catch (DBConnectionException e) {
+            String msg = "Error occurred while getting database connection to add OPT data.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "SQL Error occurred when adding OPT data to send device enrollment Invitation.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } catch (OTPManagementDAOException e) {
+            ConnectionManagerUtil.rollbackDBTransaction();
+            String msg = "Error occurred while saving the OTP data.";
+            log.error(msg, e);
+            throw new OTPManagementException(msg, e);
+        } finally {
+            ConnectionManagerUtil.closeDBConnection();
         }
     }
 
