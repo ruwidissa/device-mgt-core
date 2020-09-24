@@ -3051,26 +3051,21 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
-    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
-            throws DeviceManagementException {
-
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from,
+            long to) throws DeviceManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Get device location information");
         }
-
         List<DeviceLocationHistorySnapshot> deviceLocationHistory;
-        String errMessage;
-
         try {
             DeviceManagementDAOFactory.openConnection();
             deviceLocationHistory = deviceDAO.getDeviceLocationInfo(deviceIdentifier, from, to);
-
         } catch (DeviceManagementDAOException e) {
-            errMessage = "Error occurred in getDeviceLocationInfo";
+            String errMessage = "Error occurred in getDeviceLocationInfo";
             log.error(errMessage, e);
             throw new DeviceManagementException(errMessage, e);
         } catch (SQLException e) {
-            errMessage = "Error occurred while opening a connection to the data source";
+            String errMessage = "Error occurred while opening a connection to the data source";
             log.error(errMessage, e);
             throw new DeviceManagementException(errMessage, e);
         } finally {

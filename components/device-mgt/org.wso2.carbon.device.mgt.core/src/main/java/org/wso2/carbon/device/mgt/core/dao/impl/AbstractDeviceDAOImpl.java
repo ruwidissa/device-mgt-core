@@ -1733,6 +1733,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                     " MAX(DEVICE_LOCATION.LONGITUDE) AS MAX_LONGITUDE," +
                     " SUBSTRING(DEVICE_LOCATION.GEO_HASH,1,?) AS GEOHASH_PREFIX, COUNT(*) AS COUNT," +
                     " MIN(DEVICE.DEVICE_IDENTIFICATION) AS DEVICE_IDENTIFICATION," +
+                    " MIN(DEVICE.NAME) AS NAME," +
                     " MIN(DEVICE_TYPE.NAME) AS TYPE, " +
                     " MIN(DEVICE.LAST_UPDATED_TIMESTAMP) AS LAST_UPDATED_TIMESTAMP " +
                     "FROM DM_DEVICE_LOCATION AS DEVICE_LOCATION,DM_DEVICE AS DEVICE, DM_DEVICE_TYPE AS DEVICE_TYPE " +
@@ -1763,13 +1764,14 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 double min_longitude = rs.getDouble("MIN_LONGITUDE");
                 double max_longitude = rs.getDouble("MAX_LONGITUDE");
                 String device_identification = rs.getString("DEVICE_IDENTIFICATION");
+                String device_name = rs.getString("NAME");
                 String device_type = rs.getString("TYPE");
                 String last_seen = rs.getString("LAST_UPDATED_TIMESTAMP");
                 long count = rs.getLong("COUNT");
                 String geohashPrefix = rs.getString("GEOHASH_PREFIX");
                 geoClusters.add(new GeoCluster(new GeoCoordinate(latitude, longitude),
                         new GeoCoordinate(min_latitude, min_longitude), new GeoCoordinate(max_latitude, max_longitude),
-                        count, geohashPrefix, device_identification, device_type, last_seen));
+                        count, geohashPrefix, device_identification, device_name, device_type, last_seen));
             }
         } catch (SQLException e) {
             throw new DeviceManagementDAOException("Error occurred while retrieving information of  " +
@@ -1828,40 +1830,45 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
-            throws DeviceManagementDAOException {
-
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from,
+            long to) throws DeviceManagementDAOException {
         List<DeviceLocationHistorySnapshot> deviceLocationHistories = new ArrayList<>();
+        String sql = "SELECT "
+                + "DEVICE_ID, "
+                + "TENANT_ID, "
+                + "DEVICE_ID_NAME, "
+                + "DEVICE_TYPE_NAME, "
+                + "LATITUDE, "
+                + "LONGITUDE, "
+                + "SPEED, "
+                + "HEADING, "
+                + "TIMESTAMP, "
+                + "GEO_HASH, "
+                + "DEVICE_OWNER, "
+                + "DEVICE_ALTITUDE, "
+                + "DISTANCE "
+                + "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS "
+                + "WHERE "
+                + "DEVICE_ID_NAME = ? AND "
+                + "DEVICE_TYPE_NAME = ? AND "
+                + "TIMESTAMP BETWEEN ? AND ?";
         try {
-            conn = this.getConnection();
-
-            String sql =
-                    "SELECT DEVICE_ID, TENANT_ID, DEVICE_ID_NAME, DEVICE_TYPE_NAME, LATITUDE, LONGITUDE, SPEED, " +
-                            "HEADING, TIMESTAMP, GEO_HASH, DEVICE_OWNER, DEVICE_ALTITUDE, DISTANCE " +
-                            "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS " +
-                            "WHERE DEVICE_ID_NAME = ? " +
-                            "AND DEVICE_TYPE_NAME = ? " +
-                            "AND TIMESTAMP >= ? " +
-                            "AND TIMESTAMP <= ?";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, deviceIdentifier.getId());
-            stmt.setString(2, deviceIdentifier.getType());
-            stmt.setLong(3, from);
-            stmt.setLong(4, to);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, deviceIdentifier.getId());
+                stmt.setString(2, deviceIdentifier.getType());
+                stmt.setLong(3, from);
+                stmt.setLong(4, to);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+                    }
+                }
             }
         } catch (SQLException e) {
-            String errMessage = "Error occurred while obtaining the DB connection to get device location information";
-            log.error(errMessage, e);
-            throw new DeviceManagementDAOException(errMessage, e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            String msg = "Error occurred while obtaining the DB connection to get device location information";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         }
         return deviceLocationHistories;
     }

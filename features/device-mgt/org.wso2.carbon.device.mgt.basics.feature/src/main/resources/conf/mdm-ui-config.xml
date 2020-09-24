@@ -148,6 +148,8 @@
         <Scope>perm:user:permission-view</Scope>
         <Scope>perm:ios:view-configuration</Scope>
         <Scope>perm:ios:manage-configuration</Scope>
+        <Scope>perm:ios:dep-view</Scope>
+        <Scope>perm:ios:dep-add</Scope>
         <Scope>perm:windows:view-configuration</Scope>
         <Scope>perm:windows:manage-configuration</Scope>
         <Scope>perm:android:lock-devices</Scope>
