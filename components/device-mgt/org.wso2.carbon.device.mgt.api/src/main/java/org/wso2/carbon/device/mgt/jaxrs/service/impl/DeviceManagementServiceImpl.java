@@ -504,15 +504,13 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
         return Response.status(Response.Status.OK).entity(device).build();
     }
 
-    @Path("/{deviceType}/{deviceId}/location-history")
     @GET
-    public Response getDeviceLocationInfo(@PathParam("deviceType") String deviceType,
-                                          @PathParam("deviceId") String deviceId,
-                                          @QueryParam("from") long from, @QueryParam("to") long to) {
-
-        String errorMessage;
-        DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
-
+    @Path("/{deviceType}/{deviceId}/location-history")
+    public Response getDeviceLocationInfo(
+            @PathParam("deviceType") String deviceType,
+            @PathParam("deviceId") String deviceId,
+            @QueryParam("from") long from,
+            @QueryParam("to") long to) {
         try {
             RequestValidationUtil.validateDeviceIdentifier(deviceType, deviceId);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
@@ -520,81 +518,81 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     DeviceMgtAPIUtils.getDeviceAccessAuthorizationService();
             String authorizedUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             DeviceIdentifier deviceIdentifier = new DeviceIdentifier(deviceId, deviceType);
-            deviceIdentifier.setId(deviceId);
-            deviceIdentifier.setType(deviceType);
 
             if (!deviceAccessAuthorizationService.isUserAuthorized(deviceIdentifier, authorizedUser)) {
                 String msg = "User '" + authorizedUser + "' is not authorized to retrieve the given device id '" +
                         deviceId + "'";
                 log.error(msg);
-                return Response.status(Response.Status.UNAUTHORIZED).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(401l).setMessage(msg).build()).build();
+                return Response.status(Response.Status.UNAUTHORIZED).entity(new ErrorResponse.ErrorResponseBuilder()
+                        .setCode(Response.Status.UNAUTHORIZED.getStatusCode()).setMessage(msg).build()).build();
             }
             if (from == 0 || to == 0) {
-                errorMessage = "Invalid values for from/to";
-                log.error(errorMessage);
-                return Response.status(Response.Status.BAD_REQUEST).entity(
-                        new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
+                String msg = "Invalid values for from/to";
+                log.error(msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.ErrorResponseBuilder()
+                        .setCode(Response.Status.BAD_REQUEST.getStatusCode()).setMessage(msg)).build();
             }
 
-            List<List<DeviceLocationHistorySnapshot>> locationHistorySnapshotList = new ArrayList<>();
             // Get the location history snapshots for the given period
-            List<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshots = dms.getDeviceLocationInfo(deviceIdentifier, from, to);
+            List<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshots = dms
+                    .getDeviceLocationInfo(deviceIdentifier, from, to);
 
             OperationMonitoringTaskConfig operationMonitoringTaskConfig = dms.getDeviceMonitoringConfig(deviceType);
             int taskFrequency = operationMonitoringTaskConfig.getFrequency();
             int operationRecurrentTimes = 0;
 
             List<MonitoringOperation> monitoringOperations = operationMonitoringTaskConfig.getMonitoringOperation();
-            for (MonitoringOperation monitoringOperation :
-                    monitoringOperations) {
+            for (MonitoringOperation monitoringOperation : monitoringOperations) {
                 if (monitoringOperation.getTaskName().equals("DEVICE_LOCATION")) {
                     operationRecurrentTimes = monitoringOperation.getRecurrentTimes();
                     break;
                 }
             }
+
             // Device Location operation frequency in milliseconds. Adding 100000 ms as an error
             long operationFrequency = taskFrequency * operationRecurrentTimes + 100000;
+            Queue<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshotsQueue = new LinkedList<>(
+                    deviceLocationHistorySnapshots);
+            List<List<DeviceLocationHistorySnapshot>> locationHistorySnapshotList = new ArrayList<>();
 
-            Queue<DeviceLocationHistorySnapshot> deviceLocationHistorySnapshotsQueue = new LinkedList<>(deviceLocationHistorySnapshots);
-
-            while (deviceLocationHistorySnapshotsQueue.size() > 0) {
+            while (!deviceLocationHistorySnapshotsQueue.isEmpty()) {
                 List<DeviceLocationHistorySnapshot> snapshots = new ArrayList<>();
                 // Make a copy of remaining snapshots
-                List<DeviceLocationHistorySnapshot> cachedSnapshots = new ArrayList<>(deviceLocationHistorySnapshotsQueue);
+                List<DeviceLocationHistorySnapshot> cachedSnapshots = new ArrayList<>(
+                        deviceLocationHistorySnapshotsQueue);
 
                 for (int i = 0; i < cachedSnapshots.size(); i++) {
                     DeviceLocationHistorySnapshot currentSnapshot = deviceLocationHistorySnapshotsQueue.poll();
                     snapshots.add(currentSnapshot);
-                    if (deviceLocationHistorySnapshotsQueue.size() > 0) {
+                    if (!deviceLocationHistorySnapshotsQueue.isEmpty()) {
                         DeviceLocationHistorySnapshot nextSnapshot = deviceLocationHistorySnapshotsQueue.peek();
-                        if (nextSnapshot.getUpdatedTime().getTime() - currentSnapshot.getUpdatedTime().getTime() > operationFrequency) {
+                        if (nextSnapshot.getUpdatedTime().getTime() - currentSnapshot.getUpdatedTime().getTime()
+                                > operationFrequency) {
                             break;
                         }
                     }
                 }
                 locationHistorySnapshotList.add(snapshots);
             }
+            DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
             deviceLocationHistory.setLocationHistorySnapshots(locationHistorySnapshotList);
-
-
+            return Response.status(Response.Status.OK).entity(deviceLocationHistory).build();
         } catch (DeviceManagementException e) {
-            errorMessage = "Error occurred while fetching the device information.";
-            log.error(errorMessage, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
+            String msg = "Error occurred while fetching the device information.";
+            log.error(msg, e);
+            return Response.serverError().entity(new ErrorResponse.ErrorResponseBuilder()
+                    .setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).setMessage(msg).build()).build();
         } catch (DeviceAccessAuthorizationException e) {
-            errorMessage = "Error occurred while checking the device authorization.";
-            log.error(errorMessage, e);
-            return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(500l).setMessage(errorMessage).build()).build();
-        } catch (InputValidationException e){
-            errorMessage = "Invalid device Id or device type";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(
-                    new ErrorResponse.ErrorResponseBuilder().setCode(400l).setMessage(errorMessage)).build();
+            String msg = "Error occurred while checking the device authorization.";
+            log.error(msg, e);
+            return Response.serverError().entity(new ErrorResponse.ErrorResponseBuilder()
+                    .setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).setMessage(msg).build()).build();
+        } catch (InputValidationException e) {
+            String msg = "Invalid device Id or device type";
+            log.error(msg, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.ErrorResponseBuilder()
+                    .setCode(Response.Status.BAD_REQUEST.getStatusCode()).setMessage(msg)).build();
         }
-        return Response.status(Response.Status.OK).entity(deviceLocationHistory).build();
     }
 
     @GET

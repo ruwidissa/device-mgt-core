@@ -1830,40 +1830,45 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
-    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from, long to)
-            throws DeviceManagementDAOException {
-
-        Connection conn;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from,
+            long to) throws DeviceManagementDAOException {
         List<DeviceLocationHistorySnapshot> deviceLocationHistories = new ArrayList<>();
+        String sql = "SELECT "
+                + "DEVICE_ID, "
+                + "TENANT_ID, "
+                + "DEVICE_ID_NAME, "
+                + "DEVICE_TYPE_NAME, "
+                + "LATITUDE, "
+                + "LONGITUDE, "
+                + "SPEED, "
+                + "HEADING, "
+                + "TIMESTAMP, "
+                + "GEO_HASH, "
+                + "DEVICE_OWNER, "
+                + "DEVICE_ALTITUDE, "
+                + "DISTANCE "
+                + "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS "
+                + "WHERE "
+                + "DEVICE_ID_NAME = ? AND "
+                + "DEVICE_TYPE_NAME = ? AND "
+                + "TIMESTAMP BETWEEN ? AND ?";
         try {
-            conn = this.getConnection();
-
-            String sql =
-                    "SELECT DEVICE_ID, TENANT_ID, DEVICE_ID_NAME, DEVICE_TYPE_NAME, LATITUDE, LONGITUDE, SPEED, " +
-                            "HEADING, TIMESTAMP, GEO_HASH, DEVICE_OWNER, DEVICE_ALTITUDE, DISTANCE " +
-                            "FROM DM_DEVICE_HISTORY_LAST_SEVEN_DAYS " +
-                            "WHERE DEVICE_ID_NAME = ? " +
-                            "AND DEVICE_TYPE_NAME = ? " +
-                            "AND TIMESTAMP >= ? " +
-                            "AND TIMESTAMP <= ?";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, deviceIdentifier.getId());
-            stmt.setString(2, deviceIdentifier.getType());
-            stmt.setLong(3, from);
-            stmt.setLong(4, to);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+            Connection conn = this.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, deviceIdentifier.getId());
+                stmt.setString(2, deviceIdentifier.getType());
+                stmt.setLong(3, from);
+                stmt.setLong(4, to);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        deviceLocationHistories.add(DeviceManagementDAOUtil.loadDeviceLocation(rs));
+                    }
+                }
             }
         } catch (SQLException e) {
-            String errMessage = "Error occurred while obtaining the DB connection to get device location information";
-            log.error(errMessage, e);
-            throw new DeviceManagementDAOException(errMessage, e);
-        } finally {
-            DeviceManagementDAOUtil.cleanupResources(stmt, rs);
+            String msg = "Error occurred while obtaining the DB connection to get device location information";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         }
         return deviceLocationHistories;
     }
