@@ -85,18 +85,5 @@ function onRequest(context) {
     var enrollmentApps = policyModule.getStoreAppsForPolicy();
     context["storeApps"] = JSON.stringify(enrollmentApps["content"]);
 
-    var correctivePolicies = policyModule.getAllPoliciesByType("CORRECTIVE")["content"];
-    if (correctivePolicies) {
-        var i;
-        for (i = 0; i < correctivePolicies.length; i++) {
-            if (correctivePolicies[i].id.toString() === policyId) {
-                correctivePolicies.splice(i, 1);
-                break;
-            }
-        }
-    }
-
-    context["correctivePolicies"] = JSON.stringify(correctivePolicies);
-
     return context;
 }

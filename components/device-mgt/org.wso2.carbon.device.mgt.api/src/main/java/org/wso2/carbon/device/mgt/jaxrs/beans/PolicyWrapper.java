@@ -50,6 +50,12 @@ import java.util.List;
 public class PolicyWrapper {
 
     @ApiModelProperty(
+            name = "payloadVersion",
+            value = "Payload version of the Policy")
+    @Size(max = 45)
+    private String payloadVersion;
+
+    @ApiModelProperty(
             name = "policyName",
             value = "The name of the policy",
             required = true)
@@ -126,11 +132,17 @@ public class PolicyWrapper {
     @NotNull
     private String policyType;
 
-    @ApiModelProperty(
-            name = "correctiveActions",
-            value = "List of corrective actions to be applied when the policy is violated"
-    )
+    @ApiModelProperty(name = "correctiveActions",
+            value = "List of corrective actions to be applied when the policy is violated")
     private List<CorrectiveAction> correctiveActions;
+
+    public String getPayloadVersion() {
+        return payloadVersion;
+    }
+
+    public void setPayloadVersion(String payloadVersion) {
+        this.payloadVersion = payloadVersion;
+    }
 
     public String getPolicyType() {
         return policyType;

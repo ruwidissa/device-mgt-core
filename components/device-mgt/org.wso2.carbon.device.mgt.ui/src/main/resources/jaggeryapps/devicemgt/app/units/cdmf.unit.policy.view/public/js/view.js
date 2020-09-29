@@ -69,30 +69,6 @@ var displayPolicy = function (policyPayloadObj) {
         $("#policy-roles").text(policyPayloadObj.roles.toString().split(",").join(", "));
     }
 
-    if ("GENERAL" === policyPayloadObj.policyType &&
-            policyPayloadObj.correctiveActions && policyPayloadObj.correctiveActions.length > 0) {
-        policyPayloadObj.correctiveActions.forEach(function (correctiveAction) {
-            if ("POLICY" === correctiveAction.actionType) {
-                $("#corrective-action-type-policy-id").html(correctiveAction.policyId);
-                var correctivePolicies = $("#logged-in-user").data("corrective-policies");
-                if (correctivePolicies) {
-                    var i;
-                    for (i = 0; i < correctivePolicies.length; i++) {
-                        if (correctiveAction.policyId === correctivePolicies[i].id) {
-                            $("#corrective-action-policy-id-missing-msg").addClass("hidden");
-                            break;
-                        }
-                    }
-                }
-               return true;
-            }
-        });
-        $("#policy-corrective-actions-list").removeClass("hidden");
-    } else {
-        $("#policy-corrective-actions-list").addClass("hidden");
-    }
-
-
     var policyId = policyPayloadObj["id"];
     var deviceType = policy["platform"];
     var policyOperations = $("#policy-operations");

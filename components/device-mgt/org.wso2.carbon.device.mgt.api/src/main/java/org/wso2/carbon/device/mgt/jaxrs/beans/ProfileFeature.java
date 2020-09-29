@@ -21,8 +21,10 @@ package org.wso2.carbon.device.mgt.jaxrs.beans;
 import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 
 import java.io.Serializable;
+import java.util.List;
 
 @ApiModel(value = "ProfileFeature", description = "This class carries all information related to profile "
         + "features")
@@ -57,6 +59,9 @@ public class ProfileFeature implements Serializable {
             value = "The payload which is submitted to each feature",
             required = true)
     private String payLoad;
+    @ApiModelProperty(name = "correctiveActions",
+            value = "List of corrective actions to be applied when the policy is violated")
+    private List<CorrectiveAction> correctiveActions;
 
     public int getId() {
         return id;
@@ -108,5 +113,13 @@ public class ProfileFeature implements Serializable {
 
     public void setContent(Object content) {
         this.content = content;
+    }
+
+    public List<CorrectiveAction> getCorrectiveActions() {
+        return correctiveActions;
+    }
+
+    public void setCorrectiveActions(List<CorrectiveAction> correctiveActions) {
+        this.correctiveActions = correctiveActions;
     }
 }
