@@ -20,15 +20,16 @@ package org.wso2.carbon.device.mgt.core.otp.mgt.dao;
 import org.wso2.carbon.device.mgt.common.otp.mgt.dto.OneTimePinDTO;
 import org.wso2.carbon.device.mgt.core.otp.mgt.exception.OTPManagementDAOException;
 
+import java.util.List;
+
 public interface OTPManagementDAO {
 
     /**
      * Save OTP token data and tenant details of registering user
-     * @param oneTimePinDTO OTPMailDTO
-     * @return  Primary key of the newly adding data raw
+     * @param oneTimePinDTOList OTPMailDTO
      * @throws OTPManagementDAOException if error occurred whule storing data
      */
-    int addOTPData(OneTimePinDTO oneTimePinDTO) throws OTPManagementDAOException;
+    void addOTPData(List<OneTimePinDTO> oneTimePinDTOList) throws OTPManagementDAOException;
 
     /**
      * Get OTP data for requesting One Time Token

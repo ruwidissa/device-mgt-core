@@ -32,17 +32,20 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 
 public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPManagementDAO {
 
     private static final Log log = LogFactory.getLog(GenericOTPManagementDAOImpl.class);
 
     @Override
-    public int addOTPData(OneTimePinDTO oneTimePinDTO) throws OTPManagementDAOException {
+    public void addOTPData(List<OneTimePinDTO> oneTimePinDTOList) throws OTPManagementDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Request received in DAO Layer to create an OTP data entry");
             log.debug("OTP Details : ");
-            log.debug("OTP key : " + oneTimePinDTO.getOtpToken() + " Email : " + oneTimePinDTO.getEmail());
+            for(OneTimePinDTO oneTimePinDTO: oneTimePinDTOList){
+                log.debug("OTP key : " + oneTimePinDTO.getOtpToken() + " Email : " + oneTimePinDTO.getEmail());
+            }
         }
 
         String sql = "INSERT INTO DM_OTP_DATA "
@@ -57,29 +60,25 @@ public class GenericOTPManagementDAOImpl extends AbstractDAOImpl implements OTPM
             Connection conn = this.getDBConnection();
             Calendar calendar = Calendar.getInstance();
             Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
-            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setString(1, oneTimePinDTO.getOtpToken());
-                stmt.setString(2, oneTimePinDTO.getEmail());
-                stmt.setString(3, oneTimePinDTO.getEmailType());
-                stmt.setString(4, oneTimePinDTO.getMetaInfo());
-                stmt.setTimestamp(5, timestamp);
-                stmt.setInt(6, oneTimePinDTO.getTenantId());
-                stmt.setString(7, oneTimePinDTO.getUsername());
-                stmt.executeUpdate();
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
-                    }
-                    return -1;
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (OneTimePinDTO oneTimePinDTO : oneTimePinDTOList) {
+                    stmt.setString(1, oneTimePinDTO.getOtpToken());
+                    stmt.setString(2, oneTimePinDTO.getEmail());
+                    stmt.setString(3, oneTimePinDTO.getEmailType());
+                    stmt.setString(4, oneTimePinDTO.getMetaInfo());
+                    stmt.setTimestamp(5, timestamp);
+                    stmt.setInt(6, oneTimePinDTO.getTenantId());
+                    stmt.setString(7, oneTimePinDTO.getUsername());
+                    stmt.addBatch();
                 }
+                stmt.executeBatch();
             }
         } catch (DBConnectionException e) {
-            String msg = "Error occurred while obtaining the DB connection to create an opt entry for email "
-                    + oneTimePinDTO.getEmail();
+            String msg = "Error occurred while obtaining the DB connection to create an opt entry.";
             log.error(msg, e);
             throw new OTPManagementDAOException(msg, e);
         } catch (SQLException e) {
-            String msg = "Error occurred while executing SQL to create an otp entry for email " + oneTimePinDTO.getEmail();
+            String msg = "Error occurred while executing SQL to create an otp entry";
             log.error(msg, e);
             throw new OTPManagementDAOException(msg, e);
         }

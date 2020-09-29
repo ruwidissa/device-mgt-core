@@ -20,24 +20,20 @@ package org.wso2.carbon.device.application.mgt.core.util;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.service.GroupManagementProviderService;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Utility methods used in the Application Management.
  */
 public class HelperUtil {
 
-    private static Log log = LogFactory.getLog(HelperUtil.class);
+    private static final Log log = LogFactory.getLog(HelperUtil.class);
 
     private static DeviceManagementProviderService deviceManagementProviderService;
     private static GroupManagementProviderService groupManagementProviderService;
 
-    public static DeviceManagementProviderService getDeviceManagementProviderService() {
+    public static synchronized DeviceManagementProviderService getDeviceManagementProviderService() {
         if (deviceManagementProviderService == null) {
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             deviceManagementProviderService = (DeviceManagementProviderService) ctx
@@ -51,7 +47,7 @@ public class HelperUtil {
         return deviceManagementProviderService;
     }
 
-    public static GroupManagementProviderService getGroupManagementProviderService() {
+    public static synchronized GroupManagementProviderService getGroupManagementProviderService() {
         if (groupManagementProviderService == null) {
             PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
             groupManagementProviderService = (GroupManagementProviderService) ctx

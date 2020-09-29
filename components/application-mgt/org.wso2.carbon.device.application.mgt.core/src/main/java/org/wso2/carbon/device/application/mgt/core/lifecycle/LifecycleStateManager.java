@@ -38,7 +38,7 @@ import java.util.Map;
 public class LifecycleStateManager {
 
     private Map<String, LifecycleState> lifecycleStates;
-    private static Log log = LogFactory.getLog(LifecycleStateManager.class);
+    private static final Log log = LogFactory.getLog(LifecycleStateManager.class);
 
     public void init(List<LifecycleState> states) throws LifecycleManagementException {
         lifecycleStates = new HashMap<>();
@@ -48,7 +48,8 @@ public class LifecycleStateManager {
             }
             lifecycleStates.put(lifecycleState.getName().toUpperCase(), lifecycleState);
             try {
-                PermissionUtils.putPermission(lifecycleState.getPermission());
+                PermissionUtils
+                        .putPermission(PermissionUtils.ADMIN_PERMISSION_REGISTRY_PATH + lifecycleState.getPermission());
             } catch (PermissionManagementException e) {
                 String msg = "Error when adding permission " + lifecycleState.getPermission() + "  related to the "
                         + "state: " + lifecycleState.getName();
