@@ -19,6 +19,8 @@
 package org.wso2.carbon.device.mgt.common.geo.service;
 
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 
 import java.util.List;
 
@@ -69,4 +71,45 @@ public interface GeoLocationProviderService {
     List<GeoFence> getTrafficAlerts(DeviceIdentifier identifier, String owner) throws GeoLocationBasedServiceException;
 
     List<GeoFence> getTrafficAlerts() throws GeoLocationBasedServiceException;
+
+    /**
+     * Create new GeoFence
+     * @param geofenceData fence data
+     * @return true if the fence creation success
+     * @throws GeoLocationBasedServiceException error occurs while creating a geofence
+     */
+    boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException;
+
+    /**
+     * Get geofence by ID
+     * @param fenceId id of the fence which should be retrieved
+     * @return Extracted geofence data
+     * @throws GeoLocationBasedServiceException error occurs while retrieving a geofence
+     */
+    GeofenceData getGeofence(int fenceId) throws GeoLocationBasedServiceException;
+
+    /**
+     * Get paginated geofence list
+     * @param request Pagination Request
+     * @return List of Geofences retrieved
+     * @throws GeoLocationBasedServiceException error occurs while retrieving geofences
+     */
+    List<GeofenceData> getGeofence(PaginationRequest request) throws GeoLocationBasedServiceException;
+
+    /**
+     * Delete Geofence with ID
+     * @param fenceId Id of the fence which should be deleted
+     * @return true if deletion success. false if not record found for the used Id
+     * @throws GeoLocationBasedServiceException
+     */
+    boolean deleteGeofenceData(int fenceId) throws GeoLocationBasedServiceException;
+
+    /**
+     * Update a Geofence. Will not be updated tenantId and owner
+     * @param geofenceData Bean with updated geofence data
+     * @param fenceId Id of the fence which should be updated
+     * @return true if update success. false if not a record found for the used Id
+     * @throws GeoLocationBasedServiceException
+     */
+    boolean updateGeofence(GeofenceData geofenceData, int fenceId) throws GeoLocationBasedServiceException;
 }

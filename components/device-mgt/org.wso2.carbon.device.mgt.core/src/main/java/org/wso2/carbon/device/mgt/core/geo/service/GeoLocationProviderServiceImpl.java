@@ -37,11 +37,19 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationProviderService;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
 import org.wso2.carbon.device.mgt.common.geo.service.AlertAlreadyExistException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
+import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
+import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
@@ -68,6 +76,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +121,12 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     private static final String TRUST_MANAGER_TYPE = "SunX509"; //Default Trust Manager Type
 
     private static final String SSLV3 = "SSLv3";
+
+    private final GeofenceDAO geofenceDAO;
+
+    public GeoLocationProviderServiceImpl() {
+        this.geofenceDAO = DeviceManagementDAOFactory.getGeofenceDAO();
+    }
 
     @Override
     public List<GeoFence> getWithinAlerts(DeviceIdentifier identifier, String owner) throws GeoLocationBasedServiceException {
@@ -1230,5 +1245,119 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             throw new IllegalStateException(msg);
         }
         return jwtClientManagerService;
+    }
+
+    @Override
+    public boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException {
+        try {
+            geofenceData.setTenantId(DeviceManagementDAOUtil.getTenantId());
+            geofenceData.setOwner(PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername());
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving tenant Id";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        }
+
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            return geofenceDAO.saveGeofence(geofenceData) > 0;
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to begin transaction for saving geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while saving geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.commitTransaction();
+        }
+    }
+
+    @Override
+    public GeofenceData getGeofence(int fenceId) throws GeoLocationBasedServiceException {
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return geofenceDAO.getGeofence(fenceId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving Geofence data with ID "+fenceId;
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed to open the DB connection to retrieve Geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public List<GeofenceData> getGeofence(PaginationRequest request) throws GeoLocationBasedServiceException {
+        int tenantId;
+        try {
+            tenantId = DeviceManagementDAOUtil.getTenantId();
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving tenant id while get geofence data";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        }
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving geofence data for the tenant " + tenantId);
+            }
+            DeviceManagementDAOFactory.openConnection();
+            return geofenceDAO.getGeofencesOfTenant(request, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving geofence data for the tenant " + tenantId;
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Failed to open the DB connection to retrieve Geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public boolean deleteGeofenceData(int fenceId) throws GeoLocationBasedServiceException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            return geofenceDAO.deleteGeofenceById(fenceId) > 0;
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while deleting geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to begin transaction to delete geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.commitTransaction();
+        }
+    }
+
+    @Override
+    public boolean updateGeofence(GeofenceData geofenceData, int fenceId)
+            throws GeoLocationBasedServiceException {
+        try {
+            DeviceManagementDAOFactory.beginTransaction();
+            return geofenceDAO.updateGeofence(geofenceData, fenceId) > 0;
+        } catch (TransactionManagementException e) {
+            String msg = "Failed to begin transaction for saving geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } catch (DeviceManagementDAOException e) {
+            DeviceManagementDAOFactory.rollbackTransaction();
+            String msg = "Error occurred while saving geofence";
+            log.error(msg, e);
+            throw new GeoLocationBasedServiceException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.commitTransaction();
+        }
     }
 }

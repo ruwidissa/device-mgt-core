@@ -30,6 +30,7 @@ import org.wso2.carbon.device.mgt.common.notification.mgt.Notification;
 import org.wso2.carbon.device.mgt.core.dto.DeviceType;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ApplicationWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.OldPasswordResetWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.PolicyWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.beans.ProfileFeature;
@@ -524,4 +525,30 @@ public class RequestValidationUtil {
                 && StringUtils.isEmpty(emailAddress);
     }
 
+    public static void validateGeofenceData(GeofenceWrapper geofenceWrapper) {
+        if (geofenceWrapper.getFenceName() == null || geofenceWrapper.getFenceName().trim().isEmpty()) {
+            String msg = "Geofence name should not be null or empty";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getLatitude() < -90 || geofenceWrapper.getLatitude() > 90) {
+            String msg = "Latitude should be a value between -90 and 90";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getLongitude() < -180 || geofenceWrapper.getLongitude() > 180) {
+            String msg = "Longitude should be a value between -180 and 180";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getRadius() < 1) {
+            String msg = "Minimum radius of the fence should be 1m";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+    }
 }

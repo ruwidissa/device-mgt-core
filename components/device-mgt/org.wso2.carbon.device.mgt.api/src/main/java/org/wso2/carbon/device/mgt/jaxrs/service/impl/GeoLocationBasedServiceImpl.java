@@ -29,9 +29,12 @@ import org.wso2.carbon.analytics.dataservice.commons.SortType;
 import org.wso2.carbon.analytics.datasource.commons.Record;
 import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
+import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.PaginationResult;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.geo.service.*;
@@ -42,7 +45,10 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.GeoHashLength
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceList;
+import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
+import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtAPIUtils;
 import org.wso2.carbon.device.mgt.jaxrs.util.DeviceMgtUtil;
@@ -576,5 +582,143 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         eventBean.setTimestamp(record.getTimestamp());
         eventBean.setValues(record.getValues());
         return eventBean;
+    }
+
+    @Path("/geo-fence")
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response createGeofence(GeofenceWrapper geofenceWrapper) {
+        RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+        try {
+            GeofenceData geofenceData = new GeofenceData();
+            geofenceData.setFenceName(geofenceWrapper.getFenceName());
+            geofenceData.setDescription(geofenceWrapper.getDescription());
+            geofenceData.setLatitude(geofenceWrapper.getLatitude());
+            geofenceData.setLongitude(geofenceWrapper.getLongitude());
+            geofenceData.setRadius(geofenceWrapper.getRadius());
+
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (!geoService.createGeofence(geofenceData)) {
+                String msg = "Failed to create geofence";
+                log.error(msg);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            }
+            return Response.status(Response.Status.CREATED).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to create geofence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Path("/geo-fence/{fenceId}")
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getGeofence(@PathParam("fenceId") int fenceId) {
+        try {
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            GeofenceData geofenceData = geoService.getGeofence(fenceId);
+            if (geofenceData == null) {
+                String msg = "No valid Geofence found for ID " + fenceId;
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            return Response.status(Response.Status.OK).entity(getMappedResponseBean(geofenceData)).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Server error occurred while retrieving Geofence for Id " + fenceId;
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    /**
+     * Wrap geofence data retrieved from DB into Response Bean
+     * @param geofenceData retrieved data fromDB
+     * @return Response bean with geofence data
+     */
+    private GeofenceWrapper getMappedResponseBean(GeofenceData geofenceData) {
+        GeofenceWrapper geofenceWrapper = new GeofenceWrapper();
+        geofenceWrapper.setId(geofenceData.getId());
+        geofenceWrapper.setFenceName(geofenceData.getFenceName());
+        geofenceWrapper.setDescription(geofenceData.getDescription());
+        geofenceWrapper.setLatitude(geofenceData.getLatitude());
+        geofenceWrapper.setLongitude(geofenceData.getLongitude());
+        geofenceWrapper.setRadius(geofenceData.getRadius());
+        return geofenceWrapper;
+    }
+
+    @Path("/geo-fence")
+    @GET
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response getGeofence(@QueryParam("offset") int offset,
+                                @DefaultValue("10")
+                                @QueryParam("limit") int limit) {
+        try {
+            PaginationRequest request = new PaginationRequest(offset, limit);
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            List<GeofenceData> geofence = geoService.getGeofence(request);
+            List<GeofenceWrapper> geofenceList = new ArrayList<>();
+            for (GeofenceData geofenceData : geofence) {
+                geofenceList.add(getMappedResponseBean(geofenceData));
+            }
+            PaginationResult paginationResult = new PaginationResult();
+            paginationResult.setData(geofenceList);
+            paginationResult.setRecordsTotal(geofenceList.size());
+            return Response.status(Response.Status.OK).entity(paginationResult).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to retrieve geofence data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+
+    @Path("/geo-fence/{fenceId}")
+    @DELETE
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response deleteGeofence(@PathParam("fenceId") int fenceId) {
+        try {
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (!geoService.deleteGeofenceData(fenceId)) {
+                String msg = "No valid Geofence found for ID " + fenceId;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            return Response.status(Response.Status.OK).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to delete geofence data";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
+    }
+
+    @Path("/geo-fence/{fenceId}")
+    @PUT
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response updateGeofence(GeofenceWrapper geofenceWrapper, @PathParam("fenceId") int fenceId) {
+        RequestValidationUtil.validateGeofenceData(geofenceWrapper);
+        try {
+            GeofenceData geofenceData = new GeofenceData();
+            geofenceData.setFenceName(geofenceWrapper.getFenceName());
+            geofenceData.setDescription(geofenceWrapper.getDescription());
+            geofenceData.setLatitude(geofenceWrapper.getLatitude());
+            geofenceData.setLongitude(geofenceWrapper.getLongitude());
+            geofenceData.setRadius(geofenceWrapper.getRadius());
+
+            GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
+            if (!geoService.updateGeofence(geofenceData, fenceId)) {
+                String msg = "No valid Geofence found for ID " + fenceId;
+                log.error(msg);
+                return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
+            }
+            return Response.status(Response.Status.CREATED).build();
+        } catch (GeoLocationBasedServiceException e) {
+            String msg = "Failed to create geofence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+        }
     }
 }
