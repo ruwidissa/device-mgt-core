@@ -172,6 +172,7 @@
         <Scope>perm:android:change-lock-code</Scope>
         <Scope>perm:android:upgrade-firmware</Scope>
         <Scope>perm:android:send-notification</Scope>
+        <Scope>perm:geo-service:geo-fence</Scope>
     </Scopes>
     <SSOConfiguration>
         <Issuer>device-mgt</Issuer>
