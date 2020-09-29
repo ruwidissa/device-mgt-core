@@ -68,6 +68,7 @@ public final class PolicyManagementConstants {
     public static final String POLICY_FEATURE_CODE = "POLICY_ACTION";
     public static final String POLICY_ACTIONS = "POLICY_ACTIONS";
     public static final String CORRECTIVE_POLICY_FEATURE_CODE = "CORRECTIVE_POLICY";
+    public static final String GEOFENCE_POLICY = "GEOFENCE_POLICY";
 
     /**
      Caller would reference the constants using PolicyManagementConstants.DEVICE_CONFIG_XML_NAME,
