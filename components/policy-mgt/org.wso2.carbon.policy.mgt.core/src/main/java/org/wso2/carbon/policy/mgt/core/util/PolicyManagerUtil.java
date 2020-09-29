@@ -181,23 +181,23 @@ public class PolicyManagerUtil {
     private static void transformGeoFencePolicy(List<ProfileFeature> effectiveFeatures,
                                                   PolicyOperation policyOperation, Policy policy) throws PolicyTransformException {
         String payload = null;
+        int fenceId = -1;
         for (ProfileFeature effectiveFeature : effectiveFeatures) {
             if (effectiveFeature.getFeatureCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
                 payload = effectiveFeature.getContent().toString();
                 break;
             }
         }
-        for (ProfileOperation profileOperation : policyOperation.getProfileOperations()) {
-            int fenceId = -1;
-            try {
-                if (profileOperation.getCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
-                    JsonParser jsonParser = new JsonParser();
-                    if (payload != null) {
+        if (payload != null) {
+            for (ProfileOperation profileOperation : policyOperation.getProfileOperations()) {
+                try {
+                    if (profileOperation.getCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
+                        JsonParser jsonParser = new JsonParser();
                         JsonElement parsedPayload = jsonParser.parse(payload);
                         JsonObject jsonPayload = parsedPayload.getAsJsonObject();
                         GeoLocationProviderServiceImpl geoLocationProviderService = new GeoLocationProviderServiceImpl();
                         if (jsonPayload.get("fenceId") == null) {
-                            String msg = "No valid fence Id found in operation payload";
+                            String msg = "No valid fence Id found in saved policy payload";
                             log.error(msg);
                             throw new PolicyTransformException(msg);
                         }
@@ -216,12 +216,17 @@ public class PolicyManagerUtil {
                             profileOperation.setPayLoad(operationPayload.toString());
                         }
                     }
+                } catch (GeoLocationBasedServiceException e) {
+                    String msg = "Error occurred while retrieving geofence with fence Id " + fenceId
+                            + " for the policy with Id "+policy.getId();
+                    log.error(msg);
+                    throw new PolicyTransformException(msg);
                 }
-            } catch (GeoLocationBasedServiceException e) {
-                String msg = "Error occurred while retrieving geofence with fence Id " + fenceId
-                        + " for the policy with Id "+policy.getId();
-                log.error(msg);
-                throw new PolicyTransformException(msg);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                String msg = "No Geofence feature attached with the policy " + policy.getId();
+                log.debug(msg);
             }
         }
     }
