@@ -59,6 +59,7 @@ import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
+import org.wso2.carbon.device.mgt.common.MDMAppConstants;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -69,6 +70,7 @@ import org.wso2.carbon.device.mgt.common.app.mgt.ApplicationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.AmbiguousConfigurationException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
+import org.wso2.carbon.device.mgt.common.configuration.mgt.CorrectiveActionConfig;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DeviceConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.DevicePropertyInfo;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.EnrollmentConfiguration;
@@ -80,6 +82,7 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySna
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotificationConfiguration;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifier;
 import org.wso2.carbon.device.mgt.common.enrollment.notification.EnrollmentNotifierException;
+import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
@@ -129,6 +132,7 @@ import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
+import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
 import org.wso2.carbon.email.sender.core.EmailContext;
@@ -140,6 +144,7 @@ import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -4206,5 +4211,61 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
         return dms.getDeviceEnrollmentInvitationDetails();
+    }
+
+    @Override
+    public void triggerCorrectiveActions(String deviceIdentifier, String featureCode, List<String> actions,
+            List<ConfigurationEntry> configList) throws DeviceManagementException, DeviceNotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Triggering Corrective action. Device Identifier: " + deviceIdentifier);
+        }
+
+        if (configList == null || configList.isEmpty()) {
+            String msg = "Platform config is not configured";
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
+
+        Device device = getDevice(deviceIdentifier, false);
+        if (device == null) {
+            String msg = "Couldn't find and device for device identifier " + deviceIdentifier;
+            log.error(msg);
+            throw new DeviceNotFoundException(msg);
+        }
+        EnrolmentInfo enrolmentInfo = device.getEnrolmentInfo();
+
+        for (String action : actions) {
+            for (ConfigurationEntry config : configList) {
+                if (config.getName().equals(featureCode)) {
+                    CorrectiveActionConfig correctiveActionConfig = (CorrectiveActionConfig) config.getValue();
+                    if (correctiveActionConfig.getActionTypes().contains(action)) {
+                        if (DeviceManagementConstants.CorrectiveActions.E_MAIL.equals(action)) {
+                            Properties props = new Properties();
+                            props.setProperty("mail-subject", correctiveActionConfig.getMailSubject());
+                            props.setProperty("feature-code", featureCode);
+                            props.setProperty("device-id", deviceIdentifier);
+                            props.setProperty("device-name", device.getName());
+                            props.setProperty("device-owner", enrolmentInfo.getOwner());
+                            props.setProperty("custom-mail-body", correctiveActionConfig.getMailBody());
+                            try {
+                                for (String mailAddress : correctiveActionConfig.getMailReceivers()) {
+                                    EmailMetaInfo metaInfo = new EmailMetaInfo(mailAddress, props);
+                                    sendEnrolmentInvitation(
+                                            DeviceManagementConstants.EmailAttributes.POLICY_VIOLATE_TEMPLATE,
+                                            metaInfo);
+                                }
+                            } catch (ConfigurationManagementException e) {
+                                String msg = "Error occurred while sending the mail.";
+                                log.error(msg);
+                                throw new DeviceManagementException(msg, e);
+                            }
+                        }
+                    } else {
+                        log.warn("Corrective action: " + action + " is not configured in the platform configuration "
+                                + "for policy " + featureCode);
+                    }
+                }
+            }
+        }
     }
 }

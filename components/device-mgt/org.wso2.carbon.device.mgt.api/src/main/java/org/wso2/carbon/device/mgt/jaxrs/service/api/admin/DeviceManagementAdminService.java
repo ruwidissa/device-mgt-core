@@ -57,8 +57,10 @@ import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -358,5 +360,64 @@ public interface DeviceManagementAdminService {
                     value = "List of device identifiers.",
                     required = true)
                     List<String> deviceIdentifiers);
+
+    @POST
+    @Path("/{deviceId}/{featureCode}/")
+    @ApiOperation(
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON,
+            httpMethod = "POST",
+            value = "Removing Multiple Policies",
+            notes = "Delete one or more than one policy using this API.",
+            tags = "Device Policy Management",
+            extensions = {
+                    @Extension(properties = {
+                            @ExtensionProperty(name = Constants.SCOPE, value = "perm:android:enroll")
+                    })
+            }
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            code = 200,
+                            message = "OK. \n Successfully removed the policy."),
+                    @ApiResponse(
+                            code = 400,
+                            message = "Bad Request. \n Invalid request or validation error.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 404,
+                            message = "Not Found. \n The specified resource does not exist.",
+                            response = ErrorResponse.class),
+                    @ApiResponse(
+                            code = 415,
+                            message = "Unsupported media type. \n The format of the requested entity was not " +
+                                    "supported.\n "
+                                    + "supported format."),
+                    @ApiResponse(
+                            code = 500,
+                            message = "Internal Server Error. \n " +
+                                    "Server error occurred whilst bulk removing policies.",
+                            response = ErrorResponse.class)
+            })
+    Response triggerCorrectiveActions(
+            @ApiParam(
+                    name = "deviceId",
+                    value = "Device Identifier.",
+                    required = true)
+            @PathParam("deviceId")
+                    String deviceId,
+            @ApiParam(
+                    name = "featureCode",
+                    value = "Policy Feature Code.",
+                    required = true)
+            @PathParam("featureCode")
+                    String featureCode,
+            @ApiParam(
+                    name = "actions",
+                    value = "The list of actions to trigger when policy violated.",
+                    required = true)
+                    List<String> actions
+    );
 
 }
