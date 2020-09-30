@@ -53,7 +53,7 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "CREATED_TIMESTAMP, " +
                     "OWNER, " +
                     "TENANT_ID) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, geofenceData.getFenceName());
                 stmt.setString(2, geofenceData.getDescription());
