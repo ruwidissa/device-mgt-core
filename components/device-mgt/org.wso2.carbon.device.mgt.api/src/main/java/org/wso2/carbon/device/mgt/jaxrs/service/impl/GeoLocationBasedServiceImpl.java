@@ -597,6 +597,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             geofenceData.setLatitude(geofenceWrapper.getLatitude());
             geofenceData.setLongitude(geofenceWrapper.getLongitude());
             geofenceData.setRadius(geofenceWrapper.getRadius());
+            geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
+            geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
 
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.createGeofence(geofenceData)) {
@@ -644,6 +646,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
         geofenceWrapper.setLatitude(geofenceData.getLatitude());
         geofenceWrapper.setLongitude(geofenceData.getLongitude());
         geofenceWrapper.setRadius(geofenceData.getRadius());
+        geofenceWrapper.setGeoJson(geofenceData.getGeoJson());
+        geofenceWrapper.setFenceShape(geofenceData.getFenceShape());
         return geofenceWrapper;
     }
 

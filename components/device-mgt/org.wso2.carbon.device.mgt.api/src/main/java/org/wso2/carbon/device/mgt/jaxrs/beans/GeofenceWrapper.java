@@ -41,21 +41,28 @@ public class GeofenceWrapper {
 
     @ApiModelProperty(
             name = "latitude",
-            value = "Latitude of center of the geo fence",
-            required = true)
+            value = "Latitude of center of the geo fence")
     private double latitude;
 
     @ApiModelProperty(
             name = "longitude",
-            value = "Longitude of center of the geo fence",
-            required = true)
+            value = "Longitude of center of the geo fence")
     private double longitude;
 
     @ApiModelProperty(
             name = "radius",
-            value = "Radius from the center",
-            required = true)
+            value = "Radius from the center")
     private float radius;
+
+    @ApiModelProperty(
+            name = "geoJson",
+            value = "JSON data set of the polygon fence")
+    private String geoJson;
+
+    @ApiModelProperty(
+            name = "fenceShape",
+            value = "Shape of the fence")
+    private String fenceShape;
 
     public int getId() {
         return id;
@@ -103,5 +110,21 @@ public class GeofenceWrapper {
 
     public void setRadius(float radius) {
         this.radius = radius;
+    }
+
+    public String getGeoJson() {
+        return geoJson;
+    }
+
+    public void setGeoJson(String geoJson) {
+        this.geoJson = geoJson;
+    }
+
+    public String getFenceShape() {
+        return fenceShape;
+    }
+
+    public void setFenceShape(String fenceShape) {
+        this.fenceShape = fenceShape;
     }
 }
