@@ -362,14 +362,14 @@ public interface DeviceManagementAdminService {
                     List<String> deviceIdentifiers);
 
     @POST
-    @Path("/{deviceId}/{featureCode}/")
+    @Path("/{deviceId}/{featureCode}")
     @ApiOperation(
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON,
             httpMethod = "POST",
-            value = "Removing Multiple Policies",
-            notes = "Delete one or more than one policy using this API.",
-            tags = "Device Policy Management",
+            value = "Trigger the given corrective action",
+            notes = "When violation happens it is possible to trigger a corrective action.",
+            tags = "Device Management",
             extensions = {
                     @Extension(properties = {
                             @ExtensionProperty(name = Constants.SCOPE, value = "perm:android:enroll")
@@ -380,7 +380,7 @@ public interface DeviceManagementAdminService {
             value = {
                     @ApiResponse(
                             code = 200,
-                            message = "OK. \n Successfully removed the policy."),
+                            message = "OK. \n Successfully triggered the action."),
                     @ApiResponse(
                             code = 400,
                             message = "Bad Request. \n Invalid request or validation error.",
@@ -397,7 +397,7 @@ public interface DeviceManagementAdminService {
                     @ApiResponse(
                             code = 500,
                             message = "Internal Server Error. \n " +
-                                    "Server error occurred whilst bulk removing policies.",
+                                    "Server error occurred while triggering the corrective action.",
                             response = ErrorResponse.class)
             })
     Response triggerCorrectiveActions(
@@ -415,7 +415,7 @@ public interface DeviceManagementAdminService {
                     String featureCode,
             @ApiParam(
                     name = "actions",
-                    value = "The list of actions to trigger when policy violated.",
+                    value = "The list of actions to trigger when violation happens.",
                     required = true)
                     List<String> actions
     );
