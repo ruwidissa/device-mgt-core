@@ -526,26 +526,36 @@ public class RequestValidationUtil {
     }
 
     public static void validateGeofenceData(GeofenceWrapper geofenceWrapper) {
+        boolean isGeoJsonExists = false;
         if (geofenceWrapper.getFenceName() == null || geofenceWrapper.getFenceName().trim().isEmpty()) {
             String msg = "Geofence name should not be null or empty";
             log.error(msg);
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
-        if (geofenceWrapper.getLatitude() < -90 || geofenceWrapper.getLatitude() > 90) {
+        if (!geofenceWrapper.getGeoJson().trim().isEmpty()) {
+            isGeoJsonExists = true;
+        }
+        if ((geofenceWrapper.getLatitude() < -90 || geofenceWrapper.getLatitude() > 90) && !isGeoJsonExists) {
             String msg = "Latitude should be a value between -90 and 90";
             log.error(msg);
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
-        if (geofenceWrapper.getLongitude() < -180 || geofenceWrapper.getLongitude() > 180) {
+        if ((geofenceWrapper.getLongitude() < -180 || geofenceWrapper.getLongitude() > 180) && !isGeoJsonExists) {
             String msg = "Longitude should be a value between -180 and 180";
             log.error(msg);
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
-        if (geofenceWrapper.getRadius() < 1) {
+        if (geofenceWrapper.getRadius() < 1 && !isGeoJsonExists) {
             String msg = "Minimum radius of the fence should be 1m";
+            log.error(msg);
+            throw new InputValidationException(
+                    new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
+        }
+        if (geofenceWrapper.getFenceShape().trim().isEmpty()) {
+            String msg = "Fence shape should not be empty";
             log.error(msg);
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());

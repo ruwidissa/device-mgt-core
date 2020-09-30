@@ -48,6 +48,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "LATITUDE, " +
                     "LONGITUDE, " +
                     "RADIUS, " +
+                    "GEO_JSON, " +
+                    "FENCE_SHAPE, " +
                     "CREATED_TIMESTAMP, " +
                     "OWNER, " +
                     "TENANT_ID) " +
@@ -58,9 +60,11 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                 stmt.setDouble(3, geofenceData.getLatitude());
                 stmt.setDouble(4, geofenceData.getLongitude());
                 stmt.setFloat(5, geofenceData.getRadius());
-                stmt.setTimestamp(6, new Timestamp(new Date().getTime()));
-                stmt.setString(7, geofenceData.getOwner());
-                stmt.setInt(8, geofenceData.getTenantId());
+                stmt.setString(6, geofenceData.getGeoJson());
+                stmt.setString(7, geofenceData.getFenceShape());
+                stmt.setTimestamp(8, new Timestamp(new Date().getTime()));
+                stmt.setString(9, geofenceData.getOwner());
+                stmt.setInt(10, geofenceData.getTenantId());
                 return stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -82,6 +86,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "LATITUDE, " +
                     "LONGITUDE, " +
                     "RADIUS, " +
+                    "GEO_JSON, " +
+                    "FENCE_SHAPE, " +
                     "OWNER, " +
                     "TENANT_ID " +
                     "FROM DM_GEOFENCE " +
@@ -116,6 +122,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "LATITUDE, " +
                     "LONGITUDE, " +
                     "RADIUS, " +
+                    "GEO_JSON, " +
+                    "FENCE_SHAPE, " +
                     "OWNER, " +
                     "TENANT_ID " +
                     "FROM DM_GEOFENCE " +
@@ -163,6 +171,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "LATITUDE = ?, " +
                     "LONGITUDE = ?, " +
                     "RADIUS = ? " +
+                    "GEO_JSON = ? " +
+                    "FENCE_SHAPE = ? " +
                     "WHERE ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, geofenceData.getFenceName());
@@ -170,7 +180,9 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                 stmt.setDouble(3, geofenceData.getLatitude());
                 stmt.setDouble(4, geofenceData.getLongitude());
                 stmt.setFloat(5, geofenceData.getRadius());
-                stmt.setInt(6, fenceId);
+                stmt.setString(6, geofenceData.getGeoJson());
+                stmt.setString(7, geofenceData.getFenceShape());
+                stmt.setInt(8, fenceId);
                 return stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -194,6 +206,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
             geofenceData.setLatitude(rst.getDouble("LATITUDE"));
             geofenceData.setLongitude(rst.getDouble("LONGITUDE"));
             geofenceData.setRadius(rst.getFloat("RADIUS"));
+            geofenceData.setGeoJson(rst.getString("GEO_JSON"));
+            geofenceData.setFenceShape(rst.getString("FENCE_SHAPE"));
             geofenceData.setOwner(rst.getString("OWNER"));
             geofenceData.setTenantId(rst.getInt("TENANT_ID"));
             geofenceDataList.add(geofenceData);

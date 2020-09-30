@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.device.mgt.common.geo.service;
 
-import org.apache.commons.lang.StringUtils;
-
 public class GeofenceData {
     private int id;
     private String fenceName;
@@ -29,6 +27,8 @@ public class GeofenceData {
     private float radius;
     private int tenantId;
     private String owner;
+    private String geoJson;
+    private String fenceShape;
 
     public int getId() {
         return id;
@@ -92,5 +92,21 @@ public class GeofenceData {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public String getGeoJson() {
+        return geoJson;
+    }
+
+    public void setGeoJson(String geoJson) {
+        this.geoJson = geoJson;
+    }
+
+    public String getFenceShape() {
+        return fenceShape;
+    }
+
+    public void setFenceShape(String fenceShape) {
+        this.fenceShape = fenceShape;
     }
 }
