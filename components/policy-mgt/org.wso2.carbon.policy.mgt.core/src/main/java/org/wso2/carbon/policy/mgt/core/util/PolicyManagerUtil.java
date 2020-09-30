@@ -304,6 +304,9 @@ public class PolicyManagerUtil {
                     if (PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE
                             .equals(correctiveAction.getActionType())) {
                         correctivePolicyIdSet.add(correctiveAction.getPolicyId());
+                    } else if (PolicyManagementConstants.EMAIL_CORRECTIVE_ACTION_TYPE
+                            .equals(correctiveAction.getActionType())) {
+                        createEmailCorrectiveActions(correctiveProfileOperation);
                     }
                     //Add check for another action type in future implementation
                 }
@@ -326,6 +329,20 @@ public class PolicyManagerUtil {
             log.error(msg, e);
             throw new PolicyTransformException(msg, e);
         }
+    }
+
+    private static void createEmailCorrectiveActions(ProfileOperation correctiveProfileOperation) {
+        ProfileOperation profileOperation = new ProfileOperation();
+        profileOperation.setId(PolicyManagementConstants.EMAIL_ACTION_ID);
+        profileOperation.setCode(PolicyManagementConstants.EMAIL_FEATURE_CODE);
+        profileOperation.setEnabled(true);
+        profileOperation.setStatus(Operation.Status.PENDING);
+        profileOperation.setType(Operation.Type.PROFILE);
+        List<ProfileOperation> profileOperations = new ArrayList<>();
+        profileOperation.setPayLoad(profileOperations);
+        List<ProfileOperation> payLoad = new ArrayList<>();
+        payLoad.add(profileOperation);
+        correctiveProfileOperation.setPayLoad(payLoad);
     }
 
     /**
@@ -376,12 +393,20 @@ public class PolicyManagerUtil {
                         if (profileOperation.getReactiveActionIds() == null) {
                             profileOperation.setReactiveActionIds(new ArrayList<>());
                         }
-                        profileOperation.getReactiveActionIds().add(correctiveAction.getPolicyId());
+                        if (correctiveAction.getActionType().equals(PolicyManagementConstants.EMAIL_CORRECTIVE_ACTION_TYPE)) {
+                            profileOperation.getReactiveActionIds().add(PolicyManagementConstants.EMAIL_ACTION_ID);
+                        } else if (correctiveAction.getActionType().equals(PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE)){
+                            profileOperation.getReactiveActionIds().add(correctiveAction.getPolicyId());
+                        }
                     } else {
                         if (profileOperation.getCorrectiveActionIds() == null) {
                             profileOperation.setCorrectiveActionIds(new ArrayList<>());
                         }
-                        profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
+                        if (correctiveAction.getActionType().equals(PolicyManagementConstants.EMAIL_CORRECTIVE_ACTION_TYPE)) {
+                            profileOperation.getCorrectiveActionIds().add(PolicyManagementConstants.EMAIL_ACTION_ID);
+                        } else if (correctiveAction.getActionType().equals(PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE)){
+                            profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
+                        }
                     }
                 }
             }
