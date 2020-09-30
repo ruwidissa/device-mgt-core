@@ -1839,6 +1839,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
     }
 
     @Override
+    public void addTaskOperation(String type, List<Device> devices, Operation operation)
+            throws OperationManagementException {
+        pluginRepository.getOperationManager(type, this.getTenantId()).addTaskOperation(devices, operation);
+    }
+
+    @Override
     public List<? extends Operation> getOperations(DeviceIdentifier deviceId) throws OperationManagementException {
         return pluginRepository.getOperationManager(deviceId.getType(), this.getTenantId()).getOperations(deviceId);
     }
@@ -4212,4 +4218,26 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         DeviceManagementService dms = pluginRepository.getDeviceManagementService(deviceType, tenantId);
         return dms.getDeviceEnrollmentInvitationDetails();
     }
+
+    @Override
+    public List<Device> getDevicesByIdentifiersAndStatuses(List<String> deviceIdentifiers,
+                                                           List<EnrolmentInfo.Status> statuses)
+            throws DeviceManagementException {
+        int tenantId = this.getTenantId();
+        try {
+            DeviceManagementDAOFactory.openConnection();
+            return deviceDAO.getDevicesByIdentifiersAndStatuses(deviceIdentifiers, statuses, tenantId);
+        } catch (DeviceManagementDAOException e) {
+            String msg = "Error occurred while retrieving device list.";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } catch (SQLException e) {
+            String msg = "Error occurred while opening a connection to the data source";
+            log.error(msg, e);
+            throw new DeviceManagementException(msg, e);
+        } finally {
+            DeviceManagementDAOFactory.closeConnection();
+        }
+    }
+
 }

@@ -25,6 +25,7 @@ import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationResponse;
+import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.OperationResponseMeta;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationMapping;
@@ -429,6 +430,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
             while (rs.next()) {
                 if (enrolmentId == 0) {
                     activity = new Activity();
+                    activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
                     activity.setType(Activity.Type.valueOf(rs.getString("OPERATION_TYPE")));
                     activity.setCreatedTimeStamp(new java.util.Date(rs.getLong(("CREATED_TIMESTAMP")) * 1000).toString());
                     activity.setCode(rs.getString("OPERATION_CODE"));
