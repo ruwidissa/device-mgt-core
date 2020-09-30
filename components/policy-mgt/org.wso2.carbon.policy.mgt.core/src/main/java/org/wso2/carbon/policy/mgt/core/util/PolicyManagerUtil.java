@@ -331,6 +331,10 @@ public class PolicyManagerUtil {
         }
     }
 
+    /**
+     * Transform email type corrective actions
+     * @param correctiveProfileOperation Email type corrective operation
+     */
     private static void createEmailCorrectiveActions(ProfileOperation correctiveProfileOperation) {
         ProfileOperation profileOperation = new ProfileOperation();
         profileOperation.setId(PolicyManagementConstants.EMAIL_ACTION_ID);
