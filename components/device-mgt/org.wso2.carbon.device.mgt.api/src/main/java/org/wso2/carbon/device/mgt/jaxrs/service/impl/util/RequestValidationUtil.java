@@ -533,7 +533,7 @@ public class RequestValidationUtil {
             throw new InputValidationException(
                     new ErrorResponse.ErrorResponseBuilder().setCode(HttpStatus.SC_BAD_REQUEST).setMessage(msg).build());
         }
-        if (!geofenceWrapper.getGeoJson().trim().isEmpty()) {
+        if (geofenceWrapper.getGeoJson() != null && !geofenceWrapper.getGeoJson().trim().isEmpty()) {
             isGeoJsonExists = true;
         }
         if ((geofenceWrapper.getLatitude() < -90 || geofenceWrapper.getLatitude() > 90) && !isGeoJsonExists) {
