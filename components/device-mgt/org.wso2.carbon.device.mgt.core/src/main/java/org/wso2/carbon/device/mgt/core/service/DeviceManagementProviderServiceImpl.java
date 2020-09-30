@@ -2744,24 +2744,16 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             return false; //New status is similar to current
         }
         int tenantId = this.getTenantId();
-        switch (newStatus) {
-            case ACTIVE:
+        if (EnrolmentInfo.Status.REMOVED == newStatus) {
+            isDeviceUpdated = disenrollDevice(deviceIdentifier);
+        } else {
+            enrolmentInfo = device.getEnrolmentInfo();
+            if (enrolmentInfo.getStatus() != newStatus) {
+                enrolmentInfo.setStatus(newStatus);
                 isDeviceUpdated = updateEnrollment(deviceId, enrolmentInfo, tenantId);
-                break;
-            case INACTIVE:
-                enrolmentInfo = device.getEnrolmentInfo();
-                if (enrolmentInfo.getStatus() != newStatus) {
-                    enrolmentInfo.setStatus(newStatus);
-                    isDeviceUpdated = updateEnrollment(deviceId, enrolmentInfo, tenantId);
-                } else {
-                    isDeviceUpdated = false;
-                }
-                break;
-            case REMOVED:
-                isDeviceUpdated = disenrollDevice(deviceIdentifier);
-                break;
-            default:
-                throw new DeviceManagementException("Invalid status retrieved. Status : " + newStatus);
+            } else {
+                isDeviceUpdated = false;
+            }
         }
         return isDeviceUpdated;
     }
