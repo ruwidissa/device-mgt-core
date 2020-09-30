@@ -37,6 +37,10 @@ package org.wso2.carbon.policy.mgt.core.util;
 
 import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -45,12 +49,15 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationEntry;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.ConfigurationManagementException;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration;
 import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfigurationManagementService;
+import org.wso2.carbon.device.mgt.common.geo.service.GeoLocationBasedServiceException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.common.policy.mgt.CorrectiveAction;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.policy.PolicyConfiguration;
 import org.wso2.carbon.device.mgt.core.config.tenant.PlatformConfigurationManagementServiceImpl;
+import org.wso2.carbon.device.mgt.core.geo.service.GeoLocationProviderServiceImpl;
 import org.wso2.carbon.device.mgt.core.operation.mgt.PolicyOperation;
 import org.wso2.carbon.device.mgt.core.operation.mgt.ProfileOperation;
 import org.wso2.carbon.device.mgt.common.policy.mgt.Policy;
@@ -143,7 +150,7 @@ public class PolicyManagerUtil {
         List<ProfileFeature> effectiveFeatures = policy.getProfile().getProfileFeaturesList();
         PolicyOperation policyOperation = new PolicyOperation();
         policyOperation.setEnabled(true);
-        policyOperation.setType(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Type.POLICY);
+        policyOperation.setType(Operation.Type.POLICY);
         policyOperation.setCode(PolicyOperation.POLICY_OPERATION_CODE);
         policyOperation.setProfileOperations(createProfileOperations(effectiveFeatures));
         if (policy.getPolicyType() != null &&
@@ -155,12 +162,73 @@ public class PolicyManagerUtil {
             }
             if (payloadVersion >= 2.0f) {
                 setMultipleCorrectiveActions(effectiveFeatures, policyOperation, policy);
+                transformGeoFencePolicy(effectiveFeatures, policyOperation, policy);
             } else {
                 setSingleCorrectiveAction(policy, effectiveFeatures);
             }
         }
         policyOperation.setPayLoad(policyOperation.getProfileOperations());
         return policyOperation;
+    }
+
+    /**
+     * Transform geofence policy payload
+     * @param effectiveFeatures feature list of the policy
+     * @param policyOperation operation object
+     * @param policy related policy object
+     * @throws PolicyTransformException if any error occurs while transforming geo fence policy
+     */
+    private static void transformGeoFencePolicy(List<ProfileFeature> effectiveFeatures,
+                                                  PolicyOperation policyOperation, Policy policy) throws PolicyTransformException {
+        String payload = null;
+        int fenceId = -1;
+        for (ProfileFeature effectiveFeature : effectiveFeatures) {
+            if (effectiveFeature.getFeatureCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
+                payload = effectiveFeature.getContent().toString();
+                break;
+            }
+        }
+        if (payload != null) {
+            for (ProfileOperation profileOperation : policyOperation.getProfileOperations()) {
+                try {
+                    if (profileOperation.getCode().equals(PolicyManagementConstants.GEOFENCE_POLICY)) {
+                        JsonParser jsonParser = new JsonParser();
+                        JsonElement parsedPayload = jsonParser.parse(payload);
+                        JsonObject jsonPayload = parsedPayload.getAsJsonObject();
+                        GeoLocationProviderServiceImpl geoLocationProviderService = new GeoLocationProviderServiceImpl();
+                        if (jsonPayload.get("fenceId") == null) {
+                            String msg = "No valid fence Id found in saved policy payload";
+                            log.error(msg);
+                            throw new PolicyTransformException(msg);
+                        }
+                        fenceId = jsonPayload.get("fenceId").getAsInt();
+                        if (log.isDebugEnabled()) {
+                            log.debug("Retrieving geofence with ID " + fenceId);
+                        }
+                        GeofenceData geofence = geoLocationProviderService.getGeofence(fenceId);
+                        if (geofence != null) {
+                            JsonObject operationPayload = new JsonObject();
+                            operationPayload.addProperty("fenceId", geofence.getId());
+                            operationPayload.addProperty("latitude", geofence.getLatitude());
+                            operationPayload.addProperty("longitude", geofence.getLongitude());
+                            operationPayload.addProperty("radius", geofence.getRadius());
+                            operationPayload.addProperty("name", geofence.getFenceName());
+                            profileOperation.setPayLoad(operationPayload.toString());
+                        }
+                    }
+                } catch (GeoLocationBasedServiceException e) {
+                    String msg = "Error occurred while retrieving geofence with fence Id " + fenceId
+                            + " for the policy with Id "+policy.getId();
+                    log.error(msg);
+                    throw new PolicyTransformException(msg);
+                }
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                String msg = "No Geofence feature attached with the policy " + policy.getId();
+                log.debug(msg);
+            }
+        }
     }
 
     /**
@@ -236,6 +304,9 @@ public class PolicyManagerUtil {
                     if (PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE
                             .equals(correctiveAction.getActionType())) {
                         correctivePolicyIdSet.add(correctiveAction.getPolicyId());
+                    } else if (PolicyManagementConstants.EMAIL_CORRECTIVE_ACTION_TYPE
+                            .equals(correctiveAction.getActionType())) {
+                        createEmailCorrectiveActions(correctiveProfileOperation);
                     }
                     //Add check for another action type in future implementation
                 }
@@ -247,17 +318,35 @@ public class PolicyManagerUtil {
                 for (Policy correctivePolicy : allCorrectivePolicies) {
                     if (policyId == correctivePolicy.getId()) {
                         createCorrectiveProfileOperations(correctivePolicy, correctiveProfileOperation);
-                        policyOperation.getProfileOperations().add(correctiveProfileOperation);
                         break;
                     }
                 }
             }
+            policyOperation.getProfileOperations().add(correctiveProfileOperation);
         } catch (PolicyManagementException e) {
             String msg = "Error occurred while retrieving corrective policy for policy " +
                     policy.getPolicyName() + " and policy ID " + policy.getId();
             log.error(msg, e);
             throw new PolicyTransformException(msg, e);
         }
+    }
+
+    /**
+     * Transform email type corrective actions
+     * @param correctiveProfileOperation Email type corrective operation
+     */
+    private static void createEmailCorrectiveActions(ProfileOperation correctiveProfileOperation) {
+        ProfileOperation profileOperation = new ProfileOperation();
+        profileOperation.setId(PolicyManagementConstants.EMAIL_ACTION_ID);
+        profileOperation.setCode(PolicyManagementConstants.EMAIL_FEATURE_CODE);
+        profileOperation.setEnabled(true);
+        profileOperation.setStatus(Operation.Status.PENDING);
+        profileOperation.setType(Operation.Type.PROFILE);
+        List<ProfileOperation> profileOperations = new ArrayList<>();
+        profileOperation.setPayLoad(profileOperations);
+        List<ProfileOperation> payLoad = new ArrayList<>();
+        payLoad.add(profileOperation);
+        correctiveProfileOperation.setPayLoad(payLoad);
     }
 
     /**
@@ -272,8 +361,8 @@ public class PolicyManagerUtil {
         profileOperation.setId(correctivePolicy.getId());
         profileOperation.setCode(PolicyManagementConstants.POLICY_FEATURE_CODE);
         profileOperation.setEnabled(true);
-        profileOperation.setStatus(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Status.PENDING);
-        profileOperation.setType(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Type.PROFILE);
+        profileOperation.setStatus(Operation.Status.PENDING);
+        profileOperation.setType(Operation.Type.PROFILE);
         List<ProfileOperation> profileOperations = createProfileOperations(correctivePolicy
                 .getProfile().getProfileFeaturesList());
         profileOperation.setPayLoad(profileOperations);
@@ -299,8 +388,8 @@ public class PolicyManagerUtil {
             profileOperation.setCode(feature.getFeatureCode());
             profileOperation.setEnabled(true);
             profileOperation.setId(feature.getId());
-            profileOperation.setStatus(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Status.PENDING);
-            profileOperation.setType(org.wso2.carbon.device.mgt.common.operation.mgt.Operation.Type.PROFILE);
+            profileOperation.setStatus(Operation.Status.PENDING);
+            profileOperation.setType(Operation.Type.PROFILE);
             profileOperation.setPayLoad(feature.getContent());
             if (feature.getCorrectiveActions() != null) {
                 for (CorrectiveAction correctiveAction : feature.getCorrectiveActions()) {
@@ -308,12 +397,20 @@ public class PolicyManagerUtil {
                         if (profileOperation.getReactiveActionIds() == null) {
                             profileOperation.setReactiveActionIds(new ArrayList<>());
                         }
-                        profileOperation.getReactiveActionIds().add(correctiveAction.getPolicyId());
+                        if (correctiveAction.getActionType().equals(PolicyManagementConstants.EMAIL_CORRECTIVE_ACTION_TYPE)) {
+                            profileOperation.getReactiveActionIds().add(PolicyManagementConstants.EMAIL_ACTION_ID);
+                        } else if (correctiveAction.getActionType().equals(PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE)){
+                            profileOperation.getReactiveActionIds().add(correctiveAction.getPolicyId());
+                        }
                     } else {
                         if (profileOperation.getCorrectiveActionIds() == null) {
                             profileOperation.setCorrectiveActionIds(new ArrayList<>());
                         }
-                        profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
+                        if (correctiveAction.getActionType().equals(PolicyManagementConstants.EMAIL_CORRECTIVE_ACTION_TYPE)) {
+                            profileOperation.getCorrectiveActionIds().add(PolicyManagementConstants.EMAIL_ACTION_ID);
+                        } else if (correctiveAction.getActionType().equals(PolicyManagementConstants.POLICY_CORRECTIVE_ACTION_TYPE)){
+                            profileOperation.getCorrectiveActionIds().add(correctiveAction.getPolicyId());
+                        }
                     }
                 }
             }
