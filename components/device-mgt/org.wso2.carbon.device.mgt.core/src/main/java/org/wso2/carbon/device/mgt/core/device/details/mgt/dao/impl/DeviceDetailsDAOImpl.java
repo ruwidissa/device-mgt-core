@@ -447,7 +447,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
                     stmt.setDouble(6, location.getLongitude());
                     stmt.setFloat(7, location.getSpeed());
                     stmt.setFloat(8, location.getBearing());
-                    stmt.setLong(9, System.currentTimeMillis());
+                    stmt.setLong(9, location.getUpdatedTime().getTime());
                     stmt.setString(10, GeoHashGenerator.encodeGeohash(location));
                     stmt.setString(11, device.getEnrolmentInfo().getOwner());
                     stmt.setDouble(12, location.getAltitude());

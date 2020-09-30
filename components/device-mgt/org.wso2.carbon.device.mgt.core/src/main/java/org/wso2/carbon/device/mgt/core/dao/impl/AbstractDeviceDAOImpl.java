@@ -1851,7 +1851,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 + "WHERE "
                 + "DEVICE_ID_NAME = ? AND "
                 + "DEVICE_TYPE_NAME = ? AND "
-                + "TIMESTAMP BETWEEN ? AND ?";
+                + "TIMESTAMP BETWEEN ? AND ? "
+                + "ORDER BY timestamp";
         try {
             Connection conn = this.getConnection();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {

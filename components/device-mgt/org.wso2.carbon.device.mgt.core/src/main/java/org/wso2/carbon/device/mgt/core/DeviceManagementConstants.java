@@ -99,6 +99,12 @@ public final class DeviceManagementConstants {
         public static final String POLICY_REVOKE_OPERATION_CODE = OperationMgtConstants.OperationCodes.POLICY_REVOKE;
     }
 
+    public static final class CorrectiveActions {
+        private CorrectiveActions() {throw new AssertionError();}
+
+        public static final String E_MAIL = "MAIL";
+    }
+
     public static final class EmailAttributes {
         private EmailAttributes() {
             throw new AssertionError();
@@ -117,6 +123,7 @@ public final class DeviceManagementConstants {
         public static final String USER_REGISTRATION_TEMPLATE = "user-registration";
         public static final String USER_ENROLLMENT_TEMPLATE = "user-enrollment";
         public static final String USER_VERIFY_TEMPLATE = "user-verify";
+        public static final String POLICY_VIOLATE_TEMPLATE = "policy-violating-notifier";
         public static final String USER_WELCOME_TEMPLATE = "user-welcome";
         public static final String DEFAULT_ENROLLMENT_TEMPLATE = "default-enrollment-invitation";
     }
