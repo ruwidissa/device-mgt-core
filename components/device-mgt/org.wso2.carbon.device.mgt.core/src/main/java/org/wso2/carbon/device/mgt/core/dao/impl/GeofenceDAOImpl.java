@@ -170,8 +170,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
                     "DESCRIPTION = ?, " +
                     "LATITUDE = ?, " +
                     "LONGITUDE = ?, " +
-                    "RADIUS = ? " +
-                    "GEO_JSON = ? " +
+                    "RADIUS = ?, " +
+                    "GEO_JSON = ?, " +
                     "FENCE_SHAPE = ? " +
                     "WHERE ID = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
