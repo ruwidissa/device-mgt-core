@@ -4220,6 +4220,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             log.debug("Triggering Corrective action. Device Identifier: " + deviceIdentifier);
         }
 
+        if (StringUtils.isBlank(featureCode)){
+            String msg = "Found a Blan feature code: " + featureCode;
+            log.error(msg);
+            throw new BadRequestException(msg);
+        }
         if (configList == null || configList.isEmpty()) {
             String msg = "Platform config is not configured";
             log.error(msg);
@@ -4236,7 +4241,7 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
 
         for (String action : actions) {
             for (ConfigurationEntry config : configList) {
-                if (config.getName().equals(featureCode)) {
+                if (featureCode.equals(config.getName())) {
                     CorrectiveActionConfig correctiveActionConfig = (CorrectiveActionConfig) config.getValue();
                     if (correctiveActionConfig.getActionTypes().contains(action)) {
                         if (DeviceManagementConstants.CorrectiveActions.E_MAIL.equals(action)) {
