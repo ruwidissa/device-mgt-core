@@ -711,7 +711,8 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             geofenceData.setLatitude(geofenceWrapper.getLatitude());
             geofenceData.setLongitude(geofenceWrapper.getLongitude());
             geofenceData.setRadius(geofenceWrapper.getRadius());
-
+            geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
+            geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.updateGeofence(geofenceData, fenceId)) {
                 String msg = "No valid Geofence found for ID " + fenceId;
