@@ -34,6 +34,7 @@
  */
 package org.wso2.carbon.device.mgt.core.service;
 
+import com.google.gson.Gson;
 import org.apache.commons.collections.map.SingletonMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -59,7 +60,6 @@ import org.wso2.carbon.device.mgt.common.DeviceTransferRequest;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.common.FeatureManager;
 import org.wso2.carbon.device.mgt.common.InitialOperationConfig;
-import org.wso2.carbon.device.mgt.common.MDMAppConstants;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
@@ -132,7 +132,6 @@ import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementServiceComponent;
 import org.wso2.carbon.device.mgt.core.internal.PluginInitializationListener;
 import org.wso2.carbon.device.mgt.core.operation.mgt.CommandOperation;
-import org.wso2.carbon.device.mgt.core.report.mgt.Constants;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.email.sender.core.ContentProviderInfo;
 import org.wso2.carbon.email.sender.core.EmailContext;
@@ -144,7 +143,6 @@ import org.wso2.carbon.stratos.common.beans.TenantInfoBean;
 import org.wso2.carbon.tenant.mgt.services.TenantMgtAdminService;
 import org.wso2.carbon.user.api.UserStoreException;
 
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -4242,7 +4240,8 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         for (String action : actions) {
             for (ConfigurationEntry config : configList) {
                 if (featureCode.equals(config.getName())) {
-                    CorrectiveActionConfig correctiveActionConfig = (CorrectiveActionConfig) config.getValue();
+                    CorrectiveActionConfig correctiveActionConfig = new Gson()
+                            .fromJson((String) config.getValue(), CorrectiveActionConfig.class);
                     if (correctiveActionConfig.getActionTypes().contains(action)) {
                         if (DeviceManagementConstants.CorrectiveActions.E_MAIL.equals(action)) {
                             Properties props = new Properties();
