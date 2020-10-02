@@ -678,10 +678,9 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     }
 
 
-    @Path("/geo-fence/{fenceId}")
     @DELETE
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Override
+    @Path("/geo-fence/{fenceId}")
     public Response deleteGeofence(@PathParam("fenceId") int fenceId) {
         try {
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();

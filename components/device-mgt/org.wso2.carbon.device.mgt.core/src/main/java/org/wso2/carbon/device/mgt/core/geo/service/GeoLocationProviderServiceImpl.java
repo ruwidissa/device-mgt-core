@@ -1327,7 +1327,12 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     public boolean deleteGeofenceData(int fenceId) throws GeoLocationBasedServiceException {
         try {
             DeviceManagementDAOFactory.beginTransaction();
-            return geofenceDAO.deleteGeofenceById(fenceId) > 0;
+            if (geofenceDAO.deleteGeofenceById(fenceId) > 0) {
+                DeviceManagementDAOFactory.commitTransaction();
+                return true;
+            }
+            DeviceManagementDAOFactory.rollbackTransaction();
+            return false;
         } catch (DeviceManagementDAOException e) {
             String msg = "Error occurred while deleting geofence";
             log.error(msg, e);
@@ -1337,7 +1342,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
         } finally {
-            DeviceManagementDAOFactory.commitTransaction();
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 
