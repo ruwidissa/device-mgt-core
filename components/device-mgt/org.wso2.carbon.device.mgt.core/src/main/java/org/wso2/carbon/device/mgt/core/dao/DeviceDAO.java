@@ -527,7 +527,7 @@ public interface DeviceDAO {
     List<GeoCluster> findGeoClusters(String deviceType, GeoCoordinate southWest, GeoCoordinate northEast,
                                      int geohashLength,int tenantId) throws DeviceManagementDAOException;
 
-    /***
+    /**
      * This method is used to identify whether given device ids are exist or not.
      *
      * @param deviceIdentifiers List of device identifiers.
@@ -537,6 +537,18 @@ public interface DeviceDAO {
      * fails.
      */
     List<Device> getDevicesByIdentifiers(List<String> deviceIdentifiers, int tenantId)
+            throws DeviceManagementDAOException;
+
+    /**
+     * This method is used to retrieve devices with specified device identifiers filtered with statuses.
+     *
+     * @param deviceIdentifiers List of device identifiers.
+     * @param tenantId tenant id.
+     * @return returns list of device ids that matches with device identifiers.
+     * @throws DeviceManagementDAOException throws {@link DeviceManagementDAOException} if connections establishment
+     * fails.
+     */
+    List<Device> getDevicesByIdentifiersAndStatuses(List<String> deviceIdentifiers, List<EnrolmentInfo.Status> statuses, int tenantId)
             throws DeviceManagementDAOException;
 
     /***

@@ -1830,6 +1830,64 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
     }
 
     @Override
+    public List<Device> getDevicesByIdentifiersAndStatuses(List<String> deviceIdentifiers,
+                                                           List<EnrolmentInfo.Status> statuses, int tenantId)
+            throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            int index = 1;
+            int counter = 0;
+            List<Device> devices = new ArrayList<>();
+
+            StringJoiner statusJoiner = new StringJoiner(",", "e.STATUS IN (", ") ");
+            while (counter < statuses.size()) {
+                statusJoiner.add("?");
+                counter++;
+            }
+
+            StringJoiner joiner = new StringJoiner(",",
+                    "SELECT "
+                            + "d1.ID AS DEVICE_ID, d1.DESCRIPTION, d1.NAME AS DEVICE_NAME, d1.DEVICE_TYPE, "
+                            + "d1.DEVICE_IDENTIFICATION, e.OWNER, e.OWNERSHIP, e.STATUS, e.IS_TRANSFERRED, "
+                            + "e.DATE_OF_LAST_UPDATE, e.DATE_OF_ENROLMENT, e.ID AS ENROLMENT_ID "
+                            + "FROM "
+                            + "DM_ENROLMENT e, "
+                            + "(SELECT d.ID, d.DESCRIPTION, d.NAME, t.NAME AS DEVICE_TYPE, d.DEVICE_IDENTIFICATION "
+                            + "FROM DM_DEVICE d, DM_DEVICE_TYPE t "
+                            + "WHERE "
+                            + "t.ID = d.DEVICE_TYPE_ID AND d.DEVICE_IDENTIFICATION IN (",
+                    ") AND d.TENANT_ID = ?) d1 "
+                            + "WHERE d1.ID = e.DEVICE_ID AND " + statusJoiner.toString()
+                            + "AND TENANT_ID = ? ORDER BY e.DATE_OF_LAST_UPDATE DESC, e.STATUS ASC");
+
+            counter = 0;
+            while (counter < deviceIdentifiers.size()) {
+                joiner.add("?");
+                counter++;
+            }
+            String query = joiner.toString();
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                for (String identifier : deviceIdentifiers) {
+                    ps.setString(index++, identifier);
+                }
+                ps.setInt(index++, tenantId);
+                for (EnrolmentInfo.Status status : statuses) {
+                    ps.setString(index++, status.toString());
+                }
+                ps.setInt(index, tenantId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        devices.add(DeviceManagementDAOUtil.loadDevice(rs));
+                    }
+                }
+            }
+            return devices;
+        } catch (SQLException e) {
+            throw new DeviceManagementDAOException("Error occurred while obtaining the DB connection to get devices for"
+                    + " given device identifiers and statuses.", e);
+        }
+    }
+
     public List<DeviceLocationHistorySnapshot> getDeviceLocationInfo(DeviceIdentifier deviceIdentifier, long from,
             long to) throws DeviceManagementDAOException {
         List<DeviceLocationHistorySnapshot> deviceLocationHistories = new ArrayList<>();

@@ -24,15 +24,15 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
-import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
-import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
 import org.wso2.carbon.device.mgt.common.MonitoringOperation;
 import org.wso2.carbon.device.mgt.common.OperationMonitoringTaskConfig;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
-import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
+import org.wso2.carbon.device.mgt.common.exceptions.InvalidDeviceException;
+import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroupConstants;
 import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
 import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
@@ -227,67 +227,21 @@ public class OperationManagerImpl implements OperationManager {
                                     + operationCode);
                         }
                         Activity activity = new Activity();
-                        //Send the operation statuses only for admin triggered operations
-                        String deviceType = validDeviceIds.get(0).getType();
                         activity.setActivityStatus(this.getActivityStatus(deviceValidationResult,
                                 deviceAuthorizationResult));
                         return activity;
                     }
                 }
 
-                int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-                int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
-                operationDto.setId(operationId);
-
-                boolean isScheduled = false;
-                NotificationStrategy notificationStrategy = getNotificationStrategy();
-
-                // check whether device list is greater than batch size notification strategy has enable to send push
-                // notification using scheduler task
-                if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
-                        getPushNotificationConfiguration().getSchedulerBatchSize() <= authorizedDeviceIds.size() &&
-                        notificationStrategy != null) {
-                    isScheduled = notificationStrategy.getConfig().isScheduled();
-                }
-                int failAttempts = 0;
-                while (true) {
-                    try {
-                        operationMappingDAO.addOperationMapping(operationDto,
-                                new ArrayList<>(enrolments.values()), isScheduled, tenantId);
-                        OperationManagementDAOFactory.commitTransaction();
-                        break;
-                    } catch (OperationManagementDAOException e) {
-                        OperationManagementDAOFactory.rollbackTransaction();
-                        if (++failAttempts > 3) {
-                            String msg = "Error occurred while updating operation mapping. Operation ID: " +
-                                    operationId;
-                            log.error(msg, e);
-                            throw new OperationManagementException(msg, e);
-                        }
-                        log.warn("Unable to update operation status. Operation ID: " + operationId +
-                                ", Attempt: " + failAttempts + ", Error: " + e.getMessage());
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException ignore) {
-                            break;
-                        }
-                    }
-                }
-                if (!isScheduled && notificationStrategy != null) {
-                    for (Device d : enrolments.values()) {
-                        this.sendNotification(operation, d);
-                    }
-                }
+                persistsOperation(operation, operationDto, enrolments);
 
                 Activity activity = new Activity();
-                activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
+                activity.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operation.getId());
                 activity.setCode(operationCode);
                 activity.setCreatedTimeStamp(new Date().toString());
                 activity.setType(Activity.Type.valueOf(operationDto.getType().toString()));
                 //For now set the operation statuses only for admin triggered operations
                 if (!isScheduledOperation) {
-                    //Get the device-type from 1st valid DeviceIdentifier. We know the 1st element is definitely there.
-                    String deviceType = validDeviceIds.get(0).getType();
                     activity.setActivityStatus(this.getActivityStatus(deviceValidationResult,
                             deviceAuthorizationResult));
                 }
@@ -298,6 +252,46 @@ public class OperationManagerImpl implements OperationManager {
         } catch (OperationManagementDAOException e) {
             OperationManagementDAOFactory.rollbackTransaction();
             throw new OperationManagementException("Error occurred while adding operation", e);
+        } catch (TransactionManagementException e) {
+            throw new OperationManagementException("Error occurred while initiating the transaction", e);
+        } finally {
+            OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    @Override
+    public void addTaskOperation(List<Device> devices, Operation operation) throws OperationManagementException {
+        try {
+            OperationManagementDAOFactory.beginTransaction();
+            operation.setInitiatedBy(SYSTEM);
+            org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto =
+                    OperationDAOUtil.convertOperation(operation);
+            String operationCode = operationDto.getCode();
+            Map<Integer, Device> enrolments = new HashMap<>();
+            for (Device device : devices) {
+                enrolments.put(device.getEnrolmentInfo().getId(), device);
+            }
+            if (operationDto.getControl() ==
+                    org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation.Control.NO_REPEAT) {
+                Map<Integer, Integer> pendingOperationIDs = operationDAO
+                        .getExistingOperationIDs(enrolments.keySet().toArray(new Integer[0]), operationCode);
+                Device device;
+                for (Integer enrolmentId : pendingOperationIDs.keySet()) {
+                    operation.setId(pendingOperationIDs.get(enrolmentId));
+                    device = enrolments.get(enrolmentId);
+                    this.sendNotification(operation, device);
+                    //No need to keep this enrollment as it has a pending operation
+                    enrolments.remove(enrolmentId);
+                }
+                if (enrolments.size() == 0) {
+                    //No operations to be add. All are repeated.
+                    return;
+                }
+            }
+            persistsOperation(operation, operationDto, enrolments);
+        } catch (OperationManagementDAOException e) {
+            OperationManagementDAOFactory.rollbackTransaction();
+            throw new OperationManagementException("Error occurred while adding task operation", e);
         } catch (TransactionManagementException e) {
             throw new OperationManagementException("Error occurred while initiating the transaction", e);
         } finally {
@@ -356,49 +350,7 @@ public class OperationManagerImpl implements OperationManager {
                         break;
                     }
                 }
-
-                int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
-                operationDto.setId(operationId);
-
-                boolean isScheduled = false;
-                NotificationStrategy notificationStrategy = getNotificationStrategy();
-
-                // check whether device list is greater than batch size notification strategy has enable to send push
-                // notification using scheduler task
-                if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
-                        getPushNotificationConfiguration().getSchedulerBatchSize() <= enrolments.size() &&
-                        notificationStrategy != null) {
-                    isScheduled = notificationStrategy.getConfig().isScheduled();
-                }
-                int failAttempts = 0;
-                while (true) {
-                    try {
-                        operationMappingDAO.addOperationMapping(operationDto,
-                                new ArrayList<>(enrolments.values()), isScheduled, tenantId);
-                        OperationManagementDAOFactory.commitTransaction();
-                        break;
-                    } catch (OperationManagementDAOException e) {
-                        OperationManagementDAOFactory.rollbackTransaction();
-                        if (++failAttempts > 3) {
-                            String msg = "Error occurred while updating operation mapping. Operation ID: " +
-                                    operationId;
-                            log.error(msg, e);
-                            throw new OperationManagementException(msg, e);
-                        }
-                        log.warn("Unable to update operation status. Operation ID: " + operationId +
-                                ", Attempt: " + failAttempts + ", Error: " + e.getMessage());
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException ignore) {
-                            break;
-                        }
-                    }
-                }
-                if (!isScheduled && notificationStrategy != null) {
-                    for (Device device : enrolments.values()) {
-                        this.sendNotification(operation, device);
-                    }
-                }
+                persistsOperation(operation, operationDto, enrolments);
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ignore) {
@@ -415,6 +367,57 @@ public class OperationManagerImpl implements OperationManager {
         } finally {
             DeviceManagementDAOFactory.closeConnection();
             OperationManagementDAOFactory.closeConnection();
+        }
+    }
+
+    private void persistsOperation(Operation operation,
+                                   org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation operationDto,
+                                   Map<Integer, Device> enrolments)
+            throws OperationManagementDAOException, OperationManagementException {
+
+        int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
+        int operationId = this.lookupOperationDAO(operation).addOperation(operationDto);
+        operationDto.setId(operationId);
+        operation.setId(operationId);
+
+        boolean isScheduled = false;
+        NotificationStrategy notificationStrategy = getNotificationStrategy();
+
+        // check whether device list is greater than batch size notification strategy has enable to send push
+        // notification using scheduler task
+        if (DeviceConfigurationManager.getInstance().getDeviceManagementConfig().
+                getPushNotificationConfiguration().getSchedulerBatchSize() <= enrolments.size() &&
+                notificationStrategy != null) {
+            isScheduled = notificationStrategy.getConfig().isScheduled();
+        }
+        int failAttempts = 0;
+        while (true) {
+            try {
+                operationMappingDAO.addOperationMapping(operationDto,
+                        new ArrayList<>(enrolments.values()), isScheduled, tenantId);
+                OperationManagementDAOFactory.commitTransaction();
+                break;
+            } catch (OperationManagementDAOException e) {
+                OperationManagementDAOFactory.rollbackTransaction();
+                if (++failAttempts > 3) {
+                    String msg = "Error occurred while updating operation mapping. Operation ID: " +
+                            operationId;
+                    log.error(msg, e);
+                    throw new OperationManagementException(msg, e);
+                }
+                log.warn("Unable to update operation status. Operation ID: " + operationId +
+                        ", Attempt: " + failAttempts + ", Error: " + e.getMessage());
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignore) {
+                    break;
+                }
+            }
+        }
+        if (!isScheduled && notificationStrategy != null) {
+            for (Device device : enrolments.values()) {
+                this.sendNotification(operation, device);
+            }
         }
     }
 

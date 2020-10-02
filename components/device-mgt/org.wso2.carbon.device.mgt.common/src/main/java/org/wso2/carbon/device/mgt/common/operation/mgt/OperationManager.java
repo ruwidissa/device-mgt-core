@@ -45,6 +45,8 @@ public interface OperationManager {
     Activity addOperation(Operation operation, List<DeviceIdentifier> devices) throws OperationManagementException,
             InvalidDeviceException;
 
+    void addTaskOperation(List<Device> devices, Operation operation) throws OperationManagementException;
+
     void addTaskOperation(String deviceType, Operation operation) throws OperationManagementException;
 
     /**
