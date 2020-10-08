@@ -2750,14 +2750,10 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         if (EnrolmentInfo.Status.REMOVED == newStatus) {
             isDeviceUpdated = disenrollDevice(deviceIdentifier);
         } else {
-            enrolmentInfo = device.getEnrolmentInfo();
-            if (enrolmentInfo.getStatus() != newStatus) {
-                enrolmentInfo.setStatus(newStatus);
-                isDeviceUpdated = updateEnrollment(deviceId, enrolmentInfo, tenantId);
-            } else {
-                isDeviceUpdated = false;
-            }
+            enrolmentInfo.setStatus(newStatus);
+            isDeviceUpdated = updateEnrollment(deviceId, enrolmentInfo, tenantId);
         }
+        this.removeDeviceFromCache(deviceIdentifier);
         return isDeviceUpdated;
     }
 
@@ -2793,15 +2789,12 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
         }
         boolean isUpdatedEnrollment = false;
         try {
-            DeviceManagementDAOFactory.openConnection();
+            DeviceManagementDAOFactory.beginTransaction();
             int updatedRows = enrollmentDAO.updateEnrollment(enrolmentInfo, tenantId);
+            DeviceManagementDAOFactory.commitTransaction();
             if (updatedRows > 0) {
                 isUpdatedEnrollment = true;
             }
-        } catch (SQLException e) {
-            String msg = "Error occurred while opening a connection to the data source";
-            log.error(msg, e);
-            throw new DeviceManagementException(msg, e);
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred while updating the enrollment information device for" +
@@ -3319,6 +3312,11 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.beginTransaction();
             success = deviceDAO.setEnrolmentStatusInBulk(deviceType, status, getTenantId(), deviceList);
             DeviceManagementDAOFactory.commitTransaction();
+            if (success) {
+                for (String id : deviceList) {
+                    this.removeDeviceFromCache(new DeviceIdentifier(id, deviceType));
+                }
+            }
         } catch (DeviceManagementDAOException e) {
             DeviceManagementDAOFactory.rollbackTransaction();
             String msg = "Error occurred in while updating status of devices :" + deviceType + " status : " + status;
