@@ -33,15 +33,6 @@ public class DeviceInfo implements Serializable {
 
     private static final long serialVersionUID = 1998101733L;
 
-//    @ApiModelProperty(name = "deviceId", value = "Device Id.", required = false)
-//    private int deviceId;
-//
-//    @ApiModelProperty(name = "deviceType", value = "Type of the device.", required = true)
-//    private String deviceType;
-//
-//    @ApiModelProperty(name = "deviceId", value = "Device identifier.", required = true)
-//    private DeviceIdentifier deviceIdentifier;
-
     @ApiModelProperty(name = "IMEI", value = "IMEI number of the device.", required = true)
     private String IMEI;
 

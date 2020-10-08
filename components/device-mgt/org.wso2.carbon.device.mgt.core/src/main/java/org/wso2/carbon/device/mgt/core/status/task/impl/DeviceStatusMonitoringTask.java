@@ -75,7 +75,7 @@ public class DeviceStatusMonitoringTask implements Task {
         Device device;
         try {
             operationEnrolmentMappings = this.getOperationEnrolmentMappings();
-            if (operationEnrolmentMappings.size() > 0) {
+            if (!operationEnrolmentMappings.isEmpty()) {
                 lastActivities = this.getLastDeviceActivities();
             }
         } catch (DeviceStatusTaskException e) {
@@ -107,7 +107,7 @@ public class DeviceStatusMonitoringTask implements Task {
             }
         }
 
-        if (enrolmentInfoTobeUpdated.size() > 0) {
+        if (!enrolmentInfoTobeUpdated.isEmpty()) {
             try {
                 this.updateDeviceStatus(enrolmentInfoTobeUpdated);
             } catch (DeviceStatusTaskException e) {

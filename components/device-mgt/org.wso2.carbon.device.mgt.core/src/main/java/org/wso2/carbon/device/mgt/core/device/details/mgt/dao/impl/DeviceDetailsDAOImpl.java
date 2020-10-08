@@ -41,7 +41,7 @@ import java.util.Map;
 
 public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
 
-    private static Log log = LogFactory.getLog(DeviceDetailsDAOImpl.class);
+    private static final Log log = LogFactory.getLog(DeviceDetailsDAOImpl.class);
 
     @Override
     public void addDeviceInformation(int deviceId, int enrolmentId, DeviceInfo deviceInfo)
@@ -168,8 +168,6 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
             rs = stmt.executeQuery();
 
             if (rs.next()) {
-//                deviceInfo.setIMEI(rs.getString("IMEI"));
-//                deviceInfo.setIMSI(rs.getString("IMSI"));
                 deviceInfo = new DeviceInfo();
                 deviceInfo.setDeviceModel(rs.getString("DEVICE_MODEL"));
                 deviceInfo.setVendor(rs.getString("VENDOR"));
@@ -180,9 +178,7 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
                 deviceInfo.setInternalAvailableMemory(rs.getDouble("INTERNAL_AVAILABLE_MEMORY"));
                 deviceInfo.setExternalTotalMemory(rs.getDouble("EXTERNAL_TOTAL_MEMORY"));
                 deviceInfo.setExternalAvailableMemory(rs.getDouble("EXTERNAL_AVAILABLE_MEMORY"));
-//                deviceInfo.setOperator(rs.getString("OPERATOR"));
                 deviceInfo.setConnectionType(rs.getString("CONNECTION_TYPE"));
-//                deviceInfo.setMobileSignalStrength(rs.getDouble("MOBILE_SIGNAL_STRENGTH"));
                 deviceInfo.setSsid(rs.getString("SSID"));
                 deviceInfo.setCpuUsage(rs.getDouble("CPU_USAGE"));
                 deviceInfo.setTotalRAMMemory(rs.getDouble("TOTAL_RAM_MEMORY"));
@@ -190,7 +186,6 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
                 deviceInfo.setPluggedIn(rs.getBoolean("PLUGGED_IN"));
                 deviceInfo.setUpdatedTime(new java.util.Date(rs.getLong("UPDATE_TIMESTAMP")));
             }
-
             return deviceInfo;
         } catch (SQLException e) {
             throw new DeviceDetailsMgtDAOException("Error occurred while fetching the details of the registered devices.", e);
@@ -508,21 +503,5 @@ public class DeviceDetailsDAOImpl implements DeviceDetailsDAO {
     private Connection getConnection() throws SQLException {
         return DeviceManagementDAOFactory.getConnection();
     }
-
-
-//    @Override
-//    public void addDeviceApplications(DeviceApplication deviceApplication) throws DeviceDetailsMgtDAOException {
-//
-//    }
-//
-//    @Override
-//    public DeviceApplication getDeviceApplications(int deviceId) throws DeviceDetailsMgtDAOException {
-//        return null;
-//    }
-//
-//    @Override
-//    public void deleteDeviceApplications(int deviceId) throws DeviceDetailsMgtDAOException {
-//
-//    }
 }
 
