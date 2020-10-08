@@ -25,13 +25,16 @@ import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.DeviceStatusTaskPluginConfig;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
+import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.core.cache.impl.DeviceCacheManagerImpl;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
 import org.wso2.carbon.device.mgt.core.operation.mgt.OperationEnrolmentMapping;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOFactory;
+import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.status.task.DeviceStatusTaskException;
 import org.wso2.carbon.ntask.core.Task;
 
@@ -98,6 +101,19 @@ public class DeviceStatusMonitoringTask implements Task {
                     enrolmentInfo.setId(mapping.getEnrolmentId());
                     enrolmentInfo.setStatus(newStatus);
                 } else {
+                    DeviceManagementProviderService dmps = DeviceManagementDataHolder.getInstance()
+                            .getDeviceManagementProvider();
+                    try {
+                        Device updatedDevice = dmps
+                                .getDevice(device.getDeviceIdentifier(), device.getDeviceInfo().getUpdatedTime(), true);
+                        if (updatedDevice != null) {
+                            device = updatedDevice;
+                        }
+                    } catch (DeviceManagementException e) {
+                        log.error(
+                                "Error occurred while getting the updated device information which has device identifier: "
+                                        + device.getDeviceIdentifier());
+                    }
                     enrolmentInfo = device.getEnrolmentInfo();
                     enrolmentInfo.setStatus(newStatus);
                     device.setEnrolmentInfo(enrolmentInfo);
