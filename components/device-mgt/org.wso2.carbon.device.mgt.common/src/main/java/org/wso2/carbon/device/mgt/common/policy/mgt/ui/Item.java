@@ -45,7 +45,6 @@ public class Item {
     private InputList inputList;
     private String nullableValue;
     private String divider;
-    private APISelect apiSelect;
 
     @XmlElement(name = "Label")
     public String getLabel() {
@@ -207,14 +206,5 @@ public class Item {
 
     public void setDivider(String divider) {
         this.divider = divider;
-    }
-
-    @XmlElement(name = "APISelect")
-    public APISelect getApiSelect() {
-        return apiSelect;
-    }
-
-    public void setApiSelect(APISelect apiSelect) {
-        this.apiSelect = apiSelect;
     }
 }
