@@ -213,6 +213,8 @@ public class PolicyManagerUtil {
                             operationPayload.addProperty("longitude", geofence.getLongitude());
                             operationPayload.addProperty("radius", geofence.getRadius());
                             operationPayload.addProperty("name", geofence.getFenceName());
+                            operationPayload.addProperty("fenceShape", geofence.getFenceShape());
+                            operationPayload.addProperty("geoJson", geofence.getGeoJson());
                             profileOperation.setPayLoad(operationPayload.toString());
                         }
                     }
