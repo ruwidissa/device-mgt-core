@@ -64,6 +64,7 @@ import org.wso2.carbon.device.mgt.common.device.details.DeviceInfo;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocation;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
+import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceTypeNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.InvalidConfigurationException;
@@ -510,7 +511,8 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             @PathParam("deviceType") String deviceType,
             @PathParam("deviceId") String deviceId,
             @QueryParam("from") long from,
-            @QueryParam("to") long to) {
+            @QueryParam("to") long to,
+            @QueryParam("type") String type) {
         try {
             RequestValidationUtil.validateDeviceIdentifier(deviceType, deviceId);
             DeviceManagementProviderService dms = DeviceMgtAPIUtils.getDeviceManagementService();
@@ -555,17 +557,32 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
                     deviceLocationHistorySnapshots);
             List<List<DeviceLocationHistorySnapshot>> locationHistorySnapshotList = new ArrayList<>();
 
+            List<Object> pathsArray = new ArrayList<>();
+            DeviceLocationHistorySnapshotWrapper snapshotWrapper = new DeviceLocationHistorySnapshotWrapper();
             while (!deviceLocationHistorySnapshotsQueue.isEmpty()) {
                 List<DeviceLocationHistorySnapshot> snapshots = new ArrayList<>();
                 // Make a copy of remaining snapshots
                 List<DeviceLocationHistorySnapshot> cachedSnapshots = new ArrayList<>(
                         deviceLocationHistorySnapshotsQueue);
 
+                List<Object> locationPoint = new ArrayList<>();
                 for (int i = 0; i < cachedSnapshots.size(); i++) {
                     DeviceLocationHistorySnapshot currentSnapshot = deviceLocationHistorySnapshotsQueue.poll();
                     snapshots.add(currentSnapshot);
+                    if (currentSnapshot != null) {
+                        locationPoint.add(currentSnapshot.getLatitude());
+                        locationPoint.add(currentSnapshot.getLongitude());
+                        locationPoint.add(currentSnapshot.getUpdatedTime());
+                        pathsArray.add(new ArrayList<>(locationPoint));
+                        locationPoint.clear();
+                    }
                     if (!deviceLocationHistorySnapshotsQueue.isEmpty()) {
                         DeviceLocationHistorySnapshot nextSnapshot = deviceLocationHistorySnapshotsQueue.peek();
+                        locationPoint.add(nextSnapshot.getLatitude());
+                        locationPoint.add(nextSnapshot.getLongitude());
+                        locationPoint.add(nextSnapshot.getUpdatedTime());
+                        pathsArray.add(new ArrayList<>(locationPoint));
+                        locationPoint.clear();
                         if (nextSnapshot.getUpdatedTime().getTime() - currentSnapshot.getUpdatedTime().getTime()
                                 > operationFrequency) {
                             break;
@@ -576,7 +593,21 @@ public class DeviceManagementServiceImpl implements DeviceManagementService {
             }
             DeviceLocationHistory deviceLocationHistory = new DeviceLocationHistory();
             deviceLocationHistory.setLocationHistorySnapshots(locationHistorySnapshotList);
-            return Response.status(Response.Status.OK).entity(deviceLocationHistory).build();
+            if (type != null) {
+                if (type.equals("path")) {
+                    snapshotWrapper.setPathSnapshot(pathsArray);
+                } else if (type.equals("full")) {
+                    snapshotWrapper.setFullSnapshot(deviceLocationHistory);
+                } else {
+                    String msg = "Invalid type, use either 'path' or 'full'";
+                    log.error(msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse.ErrorResponseBuilder()
+                            .setCode(Response.Status.BAD_REQUEST.getStatusCode()).setMessage(msg)).build();
+                }
+            } else {
+                snapshotWrapper.setFullSnapshot(deviceLocationHistory);
+            }
+            return Response.status(Response.Status.OK).entity(snapshotWrapper).build();
         } catch (DeviceManagementException e) {
             String msg = "Error occurred while fetching the device information.";
             log.error(msg, e);

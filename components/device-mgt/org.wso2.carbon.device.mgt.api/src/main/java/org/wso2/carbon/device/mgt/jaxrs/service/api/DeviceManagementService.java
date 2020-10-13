@@ -551,7 +551,12 @@ public interface DeviceManagementService {
                     value = "Define the time to finish getting the geo location history of the device in " +
                             "milliseconds.",
                     required = true)
-            @QueryParam("to") long to);
+            @QueryParam("to") long to,
+            @ApiParam(
+                    name = "type",
+                    value = "Defines how the output should be.",
+                    required = true)
+            @QueryParam("type") String type);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
