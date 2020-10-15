@@ -34,7 +34,7 @@ public interface GeofenceDAO {
      * @return created row count
      * @throws DeviceManagementDAOException error occurs while saving the data
      */
-    int saveGeofence(GeofenceData geofenceData) throws DeviceManagementDAOException;
+    GeofenceData saveGeofence(GeofenceData geofenceData) throws DeviceManagementDAOException;
 
     /**
      * Retrieve a geofence record for specified Id
@@ -51,7 +51,26 @@ public interface GeofenceDAO {
      * @return List of geofences retrieved
      * @throws DeviceManagementDAOException error occurs while reading the data
      */
-    List<GeofenceData> getGeofencesOfTenant(PaginationRequest request, int tenantId)
+    List<GeofenceData> getGeoFencesOfTenant(PaginationRequest request, int tenantId)
+            throws DeviceManagementDAOException;
+
+    /**
+     * Search geofence by fence name of a specific tenant
+     * @param fenceName searching name
+     * @param tenantId searching tenant
+     * @return list of found fences
+     * @throws DeviceManagementDAOException
+     */
+    List<GeofenceData> getGeoFencesOfTenant(String fenceName, int tenantId)
+            throws DeviceManagementDAOException;
+
+    /**
+     * Get all fences of the specific tenant
+     * @param tenantId tenant id of the fences
+     * @return list of the fences owned by the tenant
+     * @throws DeviceManagementDAOException
+     */
+    List<GeofenceData> getGeoFencesOfTenant(int tenantId)
             throws DeviceManagementDAOException;
 
     /**

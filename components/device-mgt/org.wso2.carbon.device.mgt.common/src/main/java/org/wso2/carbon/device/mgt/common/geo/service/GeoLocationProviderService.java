@@ -86,7 +86,7 @@ public interface GeoLocationProviderService {
      * @return Extracted geofence data
      * @throws GeoLocationBasedServiceException error occurs while retrieving a geofence
      */
-    GeofenceData getGeofence(int fenceId) throws GeoLocationBasedServiceException;
+    GeofenceData getGeoFences(int fenceId) throws GeoLocationBasedServiceException;
 
     /**
      * Get paginated geofence list
@@ -94,13 +94,28 @@ public interface GeoLocationProviderService {
      * @return List of Geofences retrieved
      * @throws GeoLocationBasedServiceException error occurs while retrieving geofences
      */
-    List<GeofenceData> getGeofence(PaginationRequest request) throws GeoLocationBasedServiceException;
+    List<GeofenceData> getGeoFences(PaginationRequest request) throws GeoLocationBasedServiceException;
+
+    /**
+     * Search geo fences using the fence name
+     * @param name searching name of the fence
+     * @return list of fences found for the specific name
+     * @throws GeoLocationBasedServiceException  for errors occur while querying geo fences
+     */
+    List<GeofenceData> getGeoFences(String name) throws GeoLocationBasedServiceException;
+
+    /**
+     * Get all geo fences of the tenant
+     * @return list of the all geo fences of the tenant
+     * @throws GeoLocationBasedServiceException for errors occur while querying geo fences
+     */
+    List<GeofenceData> getGeoFences() throws GeoLocationBasedServiceException;
 
     /**
      * Delete Geofence with ID
      * @param fenceId Id of the fence which should be deleted
      * @return true if deletion success. false if not record found for the used Id
-     * @throws GeoLocationBasedServiceException
+     * @throws GeoLocationBasedServiceException  for errors occur while deleting geo fences
      */
     boolean deleteGeofenceData(int fenceId) throws GeoLocationBasedServiceException;
 
@@ -109,7 +124,7 @@ public interface GeoLocationProviderService {
      * @param geofenceData Bean with updated geofence data
      * @param fenceId Id of the fence which should be updated
      * @return true if update success. false if not a record found for the used Id
-     * @throws GeoLocationBasedServiceException
+     * @throws GeoLocationBasedServiceException  for errors occur while updating geo fences
      */
     boolean updateGeofence(GeofenceData geofenceData, int fenceId) throws GeoLocationBasedServiceException;
 }

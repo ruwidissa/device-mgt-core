@@ -124,6 +124,7 @@ public final class DeviceManagementConstants {
         public static final String DAS_HOST_NAME = "${iot.analytics.host}";
         public static final String DEFAULT_HTTP_PROTOCOL = "https";
         public static final String DAS_URL = DEFAULT_HTTP_PROTOCOL + "://" + DAS_HOST_NAME + ":" + DAS_PORT;
+        public static final String FENCE_NAME = "name";
     }
 
     public static final class OTPProperties {
