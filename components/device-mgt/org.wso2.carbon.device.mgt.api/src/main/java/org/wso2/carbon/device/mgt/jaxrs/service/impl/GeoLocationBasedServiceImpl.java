@@ -29,9 +29,9 @@ import org.wso2.carbon.analytics.dataservice.commons.SortType;
 import org.wso2.carbon.analytics.datasource.commons.Record;
 import org.wso2.carbon.analytics.datasource.commons.exception.AnalyticsException;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
@@ -45,7 +45,6 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.GeoHashLength
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
-import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceList;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -621,7 +620,7 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     public Response getGeofence(@PathParam("fenceId") int fenceId) {
         try {
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
-            GeofenceData geofenceData = geoService.getGeofence(fenceId);
+            GeofenceData geofenceData = geoService.getGeoFences(fenceId);
             if (geofenceData == null) {
                 String msg = "No valid Geofence found for ID " + fenceId;
                 return Response.status(Response.Status.NOT_FOUND).entity(msg).build();
@@ -656,25 +655,37 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
     @Consumes("application/json")
     @Produces("application/json")
     public Response getGeofence(@QueryParam("offset") int offset,
-                                @DefaultValue("10")
-                                @QueryParam("limit") int limit) {
+                                @QueryParam("limit") int limit,
+                                @QueryParam("name") String name) {
         try {
-            PaginationRequest request = new PaginationRequest(offset, limit);
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
-            List<GeofenceData> geofence = geoService.getGeofence(request);
-            List<GeofenceWrapper> geofenceList = new ArrayList<>();
-            for (GeofenceData geofenceData : geofence) {
-                geofenceList.add(getMappedResponseBean(geofenceData));
+            if (offset != 0 && limit != 0) {
+                PaginationRequest request = new PaginationRequest(offset, limit);
+                if (name != null && !name.isEmpty()) {
+                    request.setProperty(DeviceManagementConstants.GeoServices.FENCE_NAME, name);
+                }
+                return getResponse(geoService.getGeoFences(request));
             }
-            PaginationResult paginationResult = new PaginationResult();
-            paginationResult.setData(geofenceList);
-            paginationResult.setRecordsTotal(geofenceList.size());
-            return Response.status(Response.Status.OK).entity(paginationResult).build();
+            if (name != null && !name.isEmpty()) {
+                return getResponse(geoService.getGeoFences(name));
+            }
+            return getResponse(geoService.getGeoFences());
         } catch (GeoLocationBasedServiceException e) {
             String msg = "Failed to retrieve geofence data";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         }
+    }
+
+    private Response getResponse(List<GeofenceData> fencesList) {
+        List<GeofenceWrapper> geofenceList = new ArrayList<>();
+        for (GeofenceData geofenceData : fencesList) {
+            geofenceList.add(getMappedResponseBean(geofenceData));
+        }
+        PaginationResult paginationResult = new PaginationResult();
+        paginationResult.setData(geofenceList);
+        paginationResult.setRecordsTotal(geofenceList.size());
+        return Response.status(Response.Status.OK).entity(paginationResult).build();
     }
 
 

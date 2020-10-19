@@ -67,6 +67,7 @@ import org.wso2.carbon.device.mgt.common.configuration.mgt.PlatformConfiguration
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceNotFoundException;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
+import org.wso2.carbon.device.mgt.common.geo.service.GeofenceData;
 import org.wso2.carbon.device.mgt.common.group.mgt.DeviceGroup;
 import org.wso2.carbon.device.mgt.common.group.mgt.GroupManagementException;
 import org.wso2.carbon.device.mgt.common.exceptions.MetadataManagementException;
@@ -75,6 +76,7 @@ import org.wso2.carbon.device.mgt.common.operation.mgt.OperationManagementExcept
 import org.wso2.carbon.device.mgt.common.type.mgt.DeviceTypeMetaDefinition;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.cache.DeviceCacheKey;
+import org.wso2.carbon.device.mgt.core.cache.GeoCacheKey;
 import org.wso2.carbon.device.mgt.core.config.DeviceConfigurationManager;
 import org.wso2.carbon.device.mgt.core.config.DeviceManagementConfig;
 import org.wso2.carbon.device.mgt.core.config.datasource.DataSourceConfig;
@@ -132,6 +134,7 @@ public final class DeviceManagerUtil {
     public static final String GENERAL_CONFIG_RESOURCE_PATH = "general";
 
     private  static boolean isDeviceCacheInitialized = false;
+    private static boolean isGeoFenceCacheInitialized = false;
 
     public static Document convertToDocument(File file) throws DeviceManagementException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -641,6 +644,44 @@ public final class DeviceManagerUtil {
         }
     }
 
+    public static void initializeGeofenceCache() {
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        int geoCacheExpiry = config.getGeoFenceCacheConfiguration().getExpiryTime();
+        long geoCacheCapacity = config.getGeoFenceCacheConfiguration().getCapacity();
+        CacheManager manager = getCacheManager();
+        if (config.getGeoFenceCacheConfiguration().isEnabled()) {
+            if(!isGeoFenceCacheInitialized) {
+                isGeoFenceCacheInitialized = true;
+                if (manager != null) {
+                    if (geoCacheExpiry > 0) {
+                        manager.<GeoCacheKey, GeofenceData>createCacheBuilder(DeviceManagementConstants.GEOFENCE_CACHE).
+                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                                        geoCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
+                                Duration(TimeUnit.SECONDS, geoCacheExpiry)).setStoreByValue(true).build();
+                        if(geoCacheCapacity > 0 ) {
+                            ((CacheImpl) manager.<GeoCacheKey, GeofenceData>getCache(DeviceManagementConstants.GEOFENCE_CACHE)).
+                                    setCapacity(geoCacheCapacity);
+                        }
+                    } else {
+                        manager.<GeoCacheKey, GeofenceData>getCache(DeviceManagementConstants.GEOFENCE_CACHE);
+                    }
+                } else {
+                    if (geoCacheExpiry > 0) {
+                        Caching.getCacheManager().
+                                <GeoCacheKey, GeofenceData>createCacheBuilder(DeviceManagementConstants.GEOFENCE_CACHE).
+                                setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                                        geoCacheExpiry)).setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.
+                                Duration(TimeUnit.SECONDS, geoCacheExpiry)).setStoreByValue(true).build();
+                        ((CacheImpl)(manager.<GeoCacheKey, GeofenceData>getCache(DeviceManagementConstants.GEOFENCE_CACHE))).
+                                setCapacity(geoCacheCapacity);
+                    } else {
+                        Caching.getCacheManager().<GeoCacheKey, GeofenceData>getCache(DeviceManagementConstants.GEOFENCE_CACHE);
+                    }
+                }
+            }
+        }
+    }
+
     public static Cache<DeviceCacheKey, Device> getDeviceCache() {
         DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
         CacheManager manager = getCacheManager();
@@ -657,6 +698,24 @@ public final class DeviceManagerUtil {
             }
         }
         return deviceCache;
+    }
+
+    public static Cache<GeoCacheKey, GeofenceData> getGeoCache() {
+        DeviceManagementConfig config = DeviceConfigurationManager.getInstance().getDeviceManagementConfig();
+        CacheManager manager = getCacheManager();
+        Cache<GeoCacheKey, GeofenceData> geoCache = null;
+        if (config.getGeoFenceCacheConfiguration().isEnabled()) {
+            if(!isGeoFenceCacheInitialized) {
+                initializeGeofenceCache();
+            }
+            if (manager != null) {
+                geoCache = manager.getCache(DeviceManagementConstants.GEOFENCE_CACHE);
+            } else {
+                geoCache =  Caching.getCacheManager(DeviceManagementConstants.GEOFENCE_CACHE)
+                        .getCache(DeviceManagementConstants.GEOFENCE_CACHE);
+            }
+        }
+        return geoCache;
     }
 
     /**
