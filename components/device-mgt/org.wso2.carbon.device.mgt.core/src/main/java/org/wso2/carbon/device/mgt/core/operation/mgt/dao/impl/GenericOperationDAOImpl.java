@@ -1090,7 +1090,7 @@ public class GenericOperationDAOImpl implements OperationDAO {
         ResultSet rs = null;
         try {
             Connection conn = OperationManagementDAOFactory.getConnection();
-            String sql = "SELECT COUNT(*) AS COUNT " +
+            String sql = "SELECT COUNT(DISTINCT(OPERATION_ID)) AS COUNT " +
                     "FROM DM_ENROLMENT_OP_MAPPING AS m " +
                     "        INNER JOIN " +
                     "    DM_OPERATION dp ON dp.ID = m.OPERATION_ID " +

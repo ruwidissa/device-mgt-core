@@ -285,20 +285,20 @@ public class MySQLOperationDAOImpl extends GenericOperationDAOImpl {
                     "LEFT JOIN " +
                     "    DM_DEVICE_OPERATION_RESPONSE opr ON opr.EN_OP_MAP_ID = eom.ID " +
                     "INNER JOIN " +
-                    "    (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING ORDER BY OPERATION_ID ASC limit ? , ? ) eom_ordered " +
+                    "    (SELECT DISTINCT OPERATION_ID FROM DM_ENROLMENT_OP_MAPPING WHERE INITIATED_BY = ? " +
+                    "       ORDER BY OPERATION_ID ASC limit ? , ? ) eom_ordered " +
                     "       ON eom_ordered.OPERATION_ID = eom.OPERATION_ID " +
                     "WHERE " +
                     "    eom.UPDATED_TIMESTAMP > ? " +
                     "        AND eom.TENANT_ID = ? " +
-                    "        AND eom.INITIATED_BY = ? " +
                     "ORDER BY eom.OPERATION_ID, eom.UPDATED_TIMESTAMP";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, offset);
-                stmt.setInt(2, limit);
-                stmt.setLong(3, timestamp);
-                stmt.setInt(4, tenantId);
-                stmt.setString(5, user);
+                stmt.setString(1, user);
+                stmt.setInt(2, offset);
+                stmt.setInt(3, limit);
+                stmt.setLong(4, timestamp);
+                stmt.setInt(5, tenantId);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     ActivityHolder activityHolder = OperationDAOUtil.getActivityHolder(rs);
