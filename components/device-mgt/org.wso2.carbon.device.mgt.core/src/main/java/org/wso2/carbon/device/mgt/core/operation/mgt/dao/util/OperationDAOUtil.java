@@ -20,6 +20,11 @@ package org.wso2.carbon.device.mgt.core.operation.mgt.dao.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.operation.mgt.Activity;
+import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityHolder;
+import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityMapper;
+import org.wso2.carbon.device.mgt.common.operation.mgt.ActivityStatus;
 import org.wso2.carbon.device.mgt.common.operation.mgt.OperationResponse;
 import org.wso2.carbon.device.mgt.core.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.CommandOperation;
@@ -27,12 +32,17 @@ import org.wso2.carbon.device.mgt.core.dto.operation.mgt.ConfigOperation;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.Operation;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.PolicyOperation;
 import org.wso2.carbon.device.mgt.core.dto.operation.mgt.ProfileOperation;
+import org.wso2.carbon.device.mgt.core.operation.mgt.dao.OperationManagementDAOException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class OperationDAOUtil {
     private static final Log log = LogFactory.getLog(OperationDAOUtil.class);
@@ -178,8 +188,113 @@ public class OperationDAOUtil {
         operation.setActivityId(DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId);
     }
 
-
     public static String getActivityId(int operationId) {
         return DeviceManagementConstants.OperationAttributes.ACTIVITY + operationId;
+    }
+
+    public static ActivityHolder getActivityHolder(ResultSet rs) throws OperationManagementDAOException {
+        Map<Integer, ActivityMapper> activityInfo = new TreeMap<>();
+        List<Integer> largeResponseIDs = new ArrayList<>();
+        List<Activity> activities = new ArrayList<>();
+        try {
+            while (rs.next()) {
+                ActivityMapper activityMapper = activityInfo.get(rs.getInt("OPERATION_ID"));
+                if (activityMapper != null) {
+                    ActivityStatus activityStatus = activityMapper.getActivityStatusMap()
+                            .get(rs.getInt("ENROLMENT_ID"));
+                    if (activityStatus == null) {
+
+                        activityStatus = new ActivityStatus();
+                        DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+                        deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
+                        deviceIdentifier.setType(rs.getString("DEVICE_TYPE"));
+
+                        activityStatus.setDeviceIdentifier(deviceIdentifier);
+                        activityStatus.setStatus(ActivityStatus.Status.valueOf(rs.getString("STATUS")));
+
+                        if (rs.getInt("UPDATED_TIMESTAMP") != 0) {
+                            activityStatus.setUpdatedTimestamp(
+                                    new java.util.Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
+                        }
+                        if (rs.getTimestamp("RECEIVED_TIMESTAMP") != null) {
+                            if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                                largeResponseIDs.add(rs.getInt("OP_RES_ID"));
+                            } else {
+                                List<OperationResponse> operationResponses = new ArrayList<>();
+                                operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
+                                activityStatus.setResponses(operationResponses);
+                            }
+                        }
+                        activityMapper.getActivityStatusMap().put(rs.getInt("ENROLMENT_ID"), activityStatus);
+                    } else {
+                        if (rs.getInt("OP_RES_ID") != 0 && rs.getTimestamp("RECEIVED_TIMESTAMP") != null) {
+                            if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                                largeResponseIDs.add(rs.getInt("OP_RES_ID"));
+                            } else {
+                                activityStatus.getResponses().add(OperationDAOUtil.getOperationResponse(rs));
+                            }
+                        }
+                    }
+                } else {
+                    Activity activity = new Activity();
+                    List<ActivityStatus> statusList = new ArrayList<>();
+                    ActivityStatus activityStatus = new ActivityStatus();
+
+                    activity.setType(Activity.Type.valueOf(rs.getString("TYPE")));
+                    activity.setCreatedTimeStamp(
+                            new java.util.Date(rs.getLong(("CREATED_TIMESTAMP")) * 1000).toString());
+                    activity.setCode(rs.getString("OPERATION_CODE"));
+                    activity.setInitiatedBy(rs.getString("INITIATED_BY"));
+
+                    DeviceIdentifier deviceIdentifier = new DeviceIdentifier();
+                    deviceIdentifier.setId(rs.getString("DEVICE_IDENTIFICATION"));
+                    deviceIdentifier.setType(rs.getString("DEVICE_TYPE"));
+                    activityStatus.setDeviceIdentifier(deviceIdentifier);
+
+                    activityStatus.setStatus(ActivityStatus.Status.valueOf(rs.getString("STATUS")));
+
+                    List<OperationResponse> operationResponses = new ArrayList<>();
+                    if (rs.getInt("UPDATED_TIMESTAMP") != 0) {
+                        activityStatus.setUpdatedTimestamp(
+                                new java.util.Date(rs.getLong(("UPDATED_TIMESTAMP")) * 1000).toString());
+
+                    }
+                    if (rs.getTimestamp("RECEIVED_TIMESTAMP") != null) {
+                        if (rs.getBoolean("IS_LARGE_RESPONSE")) {
+                            largeResponseIDs.add(rs.getInt("OP_RES_ID"));
+                        } else {
+                            operationResponses.add(OperationDAOUtil.getOperationResponse(rs));
+                        }
+                    }
+                    activityStatus.setResponses(operationResponses);
+                    statusList.add(activityStatus);
+                    activity.setActivityStatus(statusList);
+                    activity.setActivityId(getActivityId(rs.getInt("OPERATION_ID")));
+
+                    ActivityMapper newActivityMapper = new ActivityMapper();
+                    Map<Integer, ActivityStatus> activityStatusMap = new TreeMap<>();
+                    activityStatusMap.put(rs.getInt("ENROLMENT_ID"), activityStatus);
+
+                    newActivityMapper.setActivity(activity);
+                    newActivityMapper.setActivityStatusMap(activityStatusMap);
+                    activityInfo.put(rs.getInt("OPERATION_ID"), newActivityMapper);
+                }
+            }
+
+            activityInfo.values().forEach(holder -> {
+                List<ActivityStatus> activityStatuses = new ArrayList<>(holder.getActivityStatusMap().values());
+                holder.getActivity().setActivityStatus(activityStatuses);
+                activities.add(holder.getActivity());
+            });
+
+            ActivityHolder activityHolder = new ActivityHolder();
+            activityHolder.setActivityList(activities);
+            activityHolder.setLargeResponseIDs(largeResponseIDs);
+            return activityHolder;
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting activity data from the result set.";
+            log.error(msg, e);
+            throw new OperationManagementDAOException(msg, e);
+        }
     }
 }
