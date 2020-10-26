@@ -376,9 +376,8 @@ public class GenericOperationDAOImpl implements OperationDAO {
                         for (Map.Entry<String, List<OperationResponse>> deviceOpRes : deviceOpResponseMap.entrySet()) {
                             for (ActivityStatus status : activityStatuses) {
                                 if (deviceOpRes.getKey().equalsIgnoreCase(status.getDeviceIdentifier().getId())) {
-                                    if(status.getResponses()==null){
-                                        List<OperationResponse> responses = new ArrayList<>();
-                                        status.setResponses(responses);
+                                    if (status.getResponses() == null) {
+                                        status.setResponses(new ArrayList<>());
                                     }
                                     status.getResponses().addAll(deviceOpRes.getValue());
                                 }
