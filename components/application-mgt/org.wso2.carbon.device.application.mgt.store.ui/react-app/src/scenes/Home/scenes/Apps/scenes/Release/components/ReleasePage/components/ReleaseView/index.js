@@ -294,14 +294,9 @@ class ReleaseView extends React.Component {
               <Divider />
               <ReviewContainer uuid={release.uuid} />
             </TabPane>
-            <Authorized
-              permission="/permission/admin/app-mgt/store/admin/subscription/view"
-              yes={
-                <TabPane tab="Subscription Details" key="2">
-                  <SubscriptionDetails uuid={release.uuid} />
-                </TabPane>
-              }
-            />
+            <TabPane tab="Subscription Details" key="2">
+              <SubscriptionDetails uuid={release.uuid} />
+            </TabPane>
           </Tabs>
         </div>
       </div>
