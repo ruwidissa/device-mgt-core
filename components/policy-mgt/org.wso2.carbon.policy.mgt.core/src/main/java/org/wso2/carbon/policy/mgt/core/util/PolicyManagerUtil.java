@@ -40,7 +40,6 @@ import org.apache.commons.lang.StringUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -205,7 +204,7 @@ public class PolicyManagerUtil {
                         if (log.isDebugEnabled()) {
                             log.debug("Retrieving geofence with ID " + fenceId);
                         }
-                        GeofenceData geofence = geoLocationProviderService.getGeofence(fenceId);
+                        GeofenceData geofence = geoLocationProviderService.getGeoFences(fenceId);
                         if (geofence != null) {
                             JsonObject operationPayload = new JsonObject();
                             operationPayload.addProperty("fenceId", geofence.getId());

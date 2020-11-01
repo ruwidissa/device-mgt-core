@@ -965,9 +965,18 @@ public interface GeoLocationBasedService {
                     response = Response.class)
     })
     Response getGeofence(
+            @ApiParam(
+                    name = "offset",
+                    value = "The starting pagination index for the complete list of qualified items.")
             @QueryParam("offset") int offset,
-            @DefaultValue("10")
-            @QueryParam("limit") int limit);
+            @ApiParam(
+                    name = "limit",
+                    value = "Provide how many device details you require from the starting pagination index/offset.")
+            @QueryParam("limit") int limit,
+            @ApiParam(
+                    name = "name",
+                    value = "Geo Fence name")
+            @QueryParam("name") String name);
 
 
     @DELETE

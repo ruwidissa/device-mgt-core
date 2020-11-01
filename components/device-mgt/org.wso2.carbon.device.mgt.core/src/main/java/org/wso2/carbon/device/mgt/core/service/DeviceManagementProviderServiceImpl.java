@@ -150,6 +150,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -613,44 +614,46 @@ public class DeviceManagementProviderServiceImpl implements DeviceManagementProv
             DeviceManagementDAOFactory.closeConnection();
         }
 
-        try {
-            DeviceCacheKey deviceCacheKey;
-            for (Device device : existingDevices) {
-                if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
-                    String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
-                            + " is not dis-enrolled to permanently delete the device";
-                    log.error(msg);
-                    throw new InvalidDeviceException(msg);
-                }
-                deviceCacheKey = new DeviceCacheKey();
-                deviceCacheKey.setDeviceId(device.getDeviceIdentifier());
-                deviceCacheKey.setDeviceType(device.getType());
-                deviceCacheKey.setTenantId(tenantId);
-                deviceCacheKeyList.add(deviceCacheKey);
-                deviceIds.add(device.getId());
-                validDeviceIdentifiers.add(device.getDeviceIdentifier());
-                enrollmentIds.add(device.getEnrolmentInfo().getId());
-                if (deviceIdentifierMap.containsKey(device.getType())) {
-                    deviceIdentifierMap.get(device.getType()).add(device.getDeviceIdentifier());
-                } else {
-                    deviceIdentifierMap.put(device.getType(), Collections.singletonList(device.getDeviceIdentifier()));
-                    DeviceManager deviceManager = this.getDeviceManager(device.getType());
-                    if (deviceManager == null) {
-                        log.error("Device Manager associated with the device type '" + device.getType() +
-                                "' is null. Therefore, not attempting method 'deleteDevice'");
-                        return false;
-                    }
-                    deviceManagerMap.put(device.getType(), deviceManager);
-                }
-            }
-            if (deviceIds.isEmpty()) {
-                String msg = "No device IDs found for the device identifiers '" + deviceIdentifiers + "'";
+        DeviceCacheKey deviceCacheKey;
+        for (Device device : existingDevices) {
+            if (!EnrolmentInfo.Status.REMOVED.equals(device.getEnrolmentInfo().getStatus())) {
+                String msg = "Device " + device.getDeviceIdentifier() + " of type " + device.getType()
+                        + " is not dis-enrolled to permanently delete the device";
                 log.error(msg);
                 throw new InvalidDeviceException(msg);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Permanently deleting the details of devices : " + validDeviceIdentifiers);
+            deviceCacheKey = new DeviceCacheKey();
+            deviceCacheKey.setDeviceId(device.getDeviceIdentifier());
+            deviceCacheKey.setDeviceType(device.getType());
+            deviceCacheKey.setTenantId(tenantId);
+            deviceCacheKeyList.add(deviceCacheKey);
+            deviceIds.add(device.getId());
+            validDeviceIdentifiers.add(device.getDeviceIdentifier());
+            enrollmentIds.add(device.getEnrolmentInfo().getId());
+            if (deviceIdentifierMap.containsKey(device.getType())) {
+                deviceIdentifierMap.get(device.getType()).add(device.getDeviceIdentifier());
+            } else {
+                deviceIdentifierMap.put(device.getType(),
+                        new ArrayList<>(Collections.singletonList(device.getDeviceIdentifier())));
+                DeviceManager deviceManager = this.getDeviceManager(device.getType());
+                if (deviceManager == null) {
+                    log.error("Device Manager associated with the device type '" + device.getType()
+                            + "' is null. Therefore, not attempting method 'deleteDevice'");
+                    return false;
+                }
+                deviceManagerMap.put(device.getType(), deviceManager);
             }
+        }
+        if (deviceIds.isEmpty()) {
+            String msg = "No device IDs found for the device identifiers '" + deviceIdentifiers + "'";
+            log.error(msg);
+            throw new InvalidDeviceException(msg);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Permanently deleting the details of devices : " + validDeviceIdentifiers);
+        }
+
+        try {
             DeviceManagementDAOFactory.beginTransaction();
             //deleting device from the core
             deviceDAO.deleteDevices(validDeviceIdentifiers, new ArrayList<>(deviceIds), enrollmentIds);
