@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.device.mgt.jaxrs.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.analytics.api.AnalyticsDataAPI;
@@ -35,6 +38,9 @@ import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationException;
 import org.wso2.carbon.device.mgt.common.geo.service.*;
@@ -45,6 +51,8 @@ import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.GeoHashLength
 import org.wso2.carbon.device.mgt.core.geo.geoHash.geoHashStrategy.ZoomGeoHashLengthStrategy;
 import org.wso2.carbon.device.mgt.core.service.DeviceManagementProviderService;
 import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
+import org.wso2.carbon.device.mgt.jaxrs.beans.EventAction;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.service.api.GeoLocationBasedService;
 import org.wso2.carbon.device.mgt.jaxrs.service.impl.util.RequestValidationUtil;
@@ -598,19 +606,39 @@ public class GeoLocationBasedServiceImpl implements GeoLocationBasedService {
             geofenceData.setRadius(geofenceWrapper.getRadius());
             geofenceData.setGeoJson(geofenceWrapper.getGeoJson());
             geofenceData.setFenceShape(geofenceWrapper.getFenceShape());
-
+            geofenceData.setGroupIds(geofenceWrapper.getGroupIds());
+            geofenceData.setEventConfig(mapRequestEvent(geofenceWrapper.getEventConfig()));
             GeoLocationProviderService geoService = DeviceMgtAPIUtils.getGeoService();
             if (!geoService.createGeofence(geofenceData)) {
                 String msg = "Failed to create geofence";
                 log.error(msg);
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                        new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
-            return Response.status(Response.Status.CREATED).build();
+            return Response.status(Response.Status.CREATED).entity("Geo Fence record created successfully").build();
         } catch (GeoLocationBasedServiceException e) {
             String msg = "Failed to create geofence";
             log.error(msg, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
+        } catch (EventConfigurationException e) {
+            String msg = "Failed to create event configuration for Geo Fence";
+            log.error(msg, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
         }
+    }
+
+    private List<EventConfig> mapRequestEvent(List<org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig> eventConfig) {
+        List<EventConfig> savingEventList = new ArrayList<>();
+        for (org.wso2.carbon.device.mgt.jaxrs.beans.EventConfig event : eventConfig) {
+            EventConfig savingConfig = new EventConfig();
+            savingConfig.setEventLogic(event.getEventLogic());
+            String eventJson = new Gson().toJson(event.getActions());
+            savingConfig.setActions(eventJson);
+            savingEventList.add(savingConfig);
+        }
+        return savingEventList;
     }
 
     @Path("/geo-fence/{fenceId}")

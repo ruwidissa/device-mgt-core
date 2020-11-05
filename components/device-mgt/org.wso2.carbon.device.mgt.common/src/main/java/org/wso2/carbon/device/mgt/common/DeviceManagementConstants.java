@@ -136,4 +136,10 @@ public final class DeviceManagementConstants {
         public static final String TENANT_ADMIN_PASSWORD = "tenant-admin-password";
     }
 
+    public static final class EventServices {
+        private EventServices() { throw new AssertionError(); }
+
+        public static final String GEOFENCE = "GEOFENCE";
+    }
+
 }

@@ -21,6 +21,7 @@ package org.wso2.carbon.device.mgt.common.geo.service;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
 import org.wso2.carbon.device.mgt.common.PaginationResult;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
 
 import java.util.List;
 
@@ -78,7 +79,7 @@ public interface GeoLocationProviderService {
      * @return true if the fence creation success
      * @throws GeoLocationBasedServiceException error occurs while creating a geofence
      */
-    boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException;
+    boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException, EventConfigurationException;
 
     /**
      * Get geofence by ID

@@ -62,6 +62,7 @@ import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorization
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistory;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshot;
 import org.wso2.carbon.device.mgt.common.device.details.DeviceLocationHistorySnapshotWrapper;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.BadRequestException;
 import org.wso2.carbon.device.mgt.common.exceptions.DeviceManagementException;
 import org.wso2.carbon.device.mgt.common.authorization.DeviceAccessAuthorizationService;
@@ -565,6 +566,15 @@ public class DeviceMgtAPIUtils {
             throw new IllegalStateException("Geo Service has not been initialized.");
         }
         return geoService;
+    }
+
+    public static EventConfigurationProviderService getEventConfigService() {
+        PrivilegedCarbonContext ctx = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        EventConfigurationProviderService eventService = (EventConfigurationProviderService) ctx.getOSGiService(EventConfigurationProviderService.class, null);
+        if (eventService == null) {
+            throw new IllegalStateException("Event configuration service has not been initialized.");
+        }
+        return eventService;
     }
 
     public static AnalyticsDataAPI getAnalyticsDataAPI() {

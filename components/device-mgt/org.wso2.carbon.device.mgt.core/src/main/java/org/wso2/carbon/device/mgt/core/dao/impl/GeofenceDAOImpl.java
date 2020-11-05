@@ -85,8 +85,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     @Override
     public GeofenceData getGeofence(int fenceId) throws DeviceManagementDAOException {
         try {
-            GeofenceData geofenceData = null;
             Connection conn = this.getConnection();
+            GeofenceData geofenceData = null;
             String sql = "SELECT " +
                     "ID, " +
                     "FENCE_NAME, " +
@@ -121,9 +121,9 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     public List<GeofenceData> getGeoFencesOfTenant(PaginationRequest request, int tenantId)
             throws DeviceManagementDAOException {
         try {
+            Connection conn = this.getConnection();
             boolean isNameProvided = false;
             List<GeofenceData> geofenceData;
-            Connection conn = this.getConnection();
             String sql = "SELECT " +
                     "ID, " +
                     "FENCE_NAME, " +
@@ -201,8 +201,8 @@ public class GeofenceDAOImpl implements GeofenceDAO {
     public List<GeofenceData> getGeoFencesOfTenant(int tenantId)
             throws DeviceManagementDAOException {
         try {
-            List<GeofenceData> geofenceData;
             Connection conn = this.getConnection();
+            List<GeofenceData> geofenceData;
             String sql = "SELECT " +
                     "ID, " +
                     "FENCE_NAME, " +
@@ -272,6 +272,29 @@ public class GeofenceDAOImpl implements GeofenceDAO {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while updating Geofence record with id " + fenceId;
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
+        }
+    }
+
+    @Override
+    public boolean createGeofenceGroupMapping(GeofenceData geofenceData, List<Integer> groupIds) throws DeviceManagementDAOException {
+        try {
+            Connection conn = this.getConnection();
+            String sql = "INSERT INTO DM_GEOFENCE_GROUP_MAPPING(" +
+                    "FENCE_ID, " +
+                    "GROUP_ID) " +
+                    "VALUES (?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                for (Integer groupId : groupIds) {
+                    stmt.setInt(1, geofenceData.getId());
+                    stmt.setInt(2, groupId);
+                    stmt.addBatch();
+                }
+                return stmt.executeBatch().length > 0;
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while creating geofence group mapping records";
             log.error(msg, e);
             throw new DeviceManagementDAOException(msg, e);
         }

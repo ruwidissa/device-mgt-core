@@ -89,4 +89,6 @@ public interface GeofenceDAO {
      * @throws DeviceManagementDAOException error occurs while updating the data
      */
     int updateGeofence(GeofenceData geofenceData, int fenceId) throws DeviceManagementDAOException;
+
+    boolean createGeofenceGroupMapping(GeofenceData geofenceData, List<Integer> groupIds) throws DeviceManagementDAOException;
 }

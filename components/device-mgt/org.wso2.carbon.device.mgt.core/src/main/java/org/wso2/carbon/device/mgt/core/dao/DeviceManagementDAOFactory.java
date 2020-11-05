@@ -29,6 +29,7 @@ import org.wso2.carbon.device.mgt.core.config.datasource.JNDILookupDefinition;
 import org.wso2.carbon.device.mgt.core.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.DeviceTypeDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.EnrollmentDAOImpl;
+import org.wso2.carbon.device.mgt.core.dao.impl.EventConfigDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.GeofenceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.GenericDeviceDAOImpl;
 import org.wso2.carbon.device.mgt.core.dao.impl.device.OracleDeviceDAOImpl;
@@ -152,6 +153,10 @@ public class DeviceManagementDAOFactory {
 
     public static GeofenceDAO getGeofenceDAO() {
         return new GeofenceDAOImpl();
+    }
+
+    public static EventConfigDAO getEventConfigDAO() {
+        return new EventConfigDAOImpl();
     }
 
     public static void init(DataSourceConfig config) {

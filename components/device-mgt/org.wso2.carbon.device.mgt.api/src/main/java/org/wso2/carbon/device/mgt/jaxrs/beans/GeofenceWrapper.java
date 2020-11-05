@@ -20,6 +20,8 @@ package org.wso2.carbon.device.mgt.jaxrs.beans;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.List;
+
 public class GeofenceWrapper {
 
     @ApiModelProperty(
@@ -63,6 +65,13 @@ public class GeofenceWrapper {
             name = "fenceShape",
             value = "Shape of the fence")
     private String fenceShape;
+
+    @ApiModelProperty(
+            name = "eventConfig",
+            value = "Event configuration of the geofence")
+    private List<EventConfig> eventConfig;
+
+    private List<Integer> groupIds;
 
     public int getId() {
         return id;
@@ -126,5 +135,21 @@ public class GeofenceWrapper {
 
     public void setFenceShape(String fenceShape) {
         this.fenceShape = fenceShape;
+    }
+
+    public List<EventConfig> getEventConfig() {
+        return eventConfig;
+    }
+
+    public void setEventConfig(List<EventConfig> eventConfig) {
+        this.eventConfig = eventConfig;
+    }
+
+    public List<Integer> getGroupIds() {
+        return groupIds;
+    }
+
+    public void setGroupIds(List<Integer> groupIds) {
+        this.groupIds = groupIds;
     }
 }

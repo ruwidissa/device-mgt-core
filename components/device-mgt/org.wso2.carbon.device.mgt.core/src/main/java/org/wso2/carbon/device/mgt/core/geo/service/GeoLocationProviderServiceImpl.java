@@ -32,12 +32,17 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.Even;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.Utils;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
+import org.wso2.carbon.device.mgt.common.DeviceManagementConstants;
 import org.wso2.carbon.device.mgt.common.DeviceManagementConstants.GeoServices;
 import org.wso2.carbon.device.mgt.common.PaginationRequest;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfig;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationException;
+import org.wso2.carbon.device.mgt.common.event.config.EventConfigurationProviderService;
 import org.wso2.carbon.device.mgt.common.exceptions.TransactionManagementException;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
 import org.wso2.carbon.device.mgt.common.geo.service.GeoFence;
@@ -51,6 +56,7 @@ import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
 import org.wso2.carbon.device.mgt.core.dao.GeofenceDAO;
 import org.wso2.carbon.device.mgt.core.dao.util.DeviceManagementDAOUtil;
 import org.wso2.carbon.device.mgt.core.internal.DeviceManagementDataHolder;
+import org.wso2.carbon.device.mgt.core.util.DeviceManagerUtil;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
 import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
 import org.wso2.carbon.identity.jwt.client.extension.JWTClient;
@@ -1248,7 +1254,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
     }
 
     @Override
-    public boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException {
+    public boolean createGeofence(GeofenceData geofenceData) throws GeoLocationBasedServiceException, EventConfigurationException {
         int tenantId;
         try {
             tenantId = DeviceManagementDAOUtil.getTenantId();
@@ -1265,7 +1271,8 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             geofenceData = geofenceDAO.saveGeofence(geofenceData);
             GeoCacheManagerImpl.getInstance()
                     .addFenceToCache(geofenceData, geofenceData.getId(), tenantId);
-            return true;
+            geofenceDAO.createGeofenceGroupMapping(geofenceData, geofenceData.getGroupIds());
+            DeviceManagementDAOFactory.commitTransaction();
         } catch (TransactionManagementException e) {
             String msg = "Failed to begin transaction for saving geofence";
             log.error(msg, e);
@@ -1276,7 +1283,25 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
         } finally {
-            DeviceManagementDAOFactory.commitTransaction();
+            DeviceManagementDAOFactory.closeConnection();
+        }
+
+        try {
+            EventConfigurationProviderService eventConfigService = DeviceManagerUtil.getEventConfigService();
+            for (EventConfig eventConfig : geofenceData.getEventConfig()) {
+                eventConfig.setEventSource(DeviceManagementConstants.EventServices.GEOFENCE);
+            }
+            return eventConfigService.createEventOfDeviceGroup(geofenceData.getEventConfig(),
+                    geofenceData.getGroupIds(), tenantId);
+        } catch (EventConfigurationException e) {
+            String msg = "Failed to store Geofence event configurations";
+            log.error(msg, e);
+            if (log.isDebugEnabled()) {
+                log.debug("Deleting the geofence record with ID " + geofenceData.getId()
+                        + " since the associated event or event group mapping couldn't save successfully");
+            }
+            this.deleteGeofenceData(geofenceData.getId());
+            throw new EventConfigurationException(msg, e);
         }
     }
 
@@ -1460,7 +1485,9 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
 
         try {
             DeviceManagementDAOFactory.beginTransaction();
-            if (geofenceDAO.updateGeofence(geofenceData, fenceId) > 0) {
+            int updatedRowCount = geofenceDAO.updateGeofence(geofenceData, fenceId);
+            DeviceManagementDAOFactory.commitTransaction();
+            if (updatedRowCount > 0) {
                 GeoCacheManagerImpl.getInstance().updateGeoFenceInCache(geofenceData, fenceId, tenantId);
                 return true;
             }
@@ -1475,7 +1502,7 @@ public class GeoLocationProviderServiceImpl implements GeoLocationProviderServic
             log.error(msg, e);
             throw new GeoLocationBasedServiceException(msg, e);
         } finally {
-            DeviceManagementDAOFactory.commitTransaction();
+            DeviceManagementDAOFactory.closeConnection();
         }
     }
 }

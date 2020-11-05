@@ -33,6 +33,7 @@ import io.swagger.annotations.Tag;
 import org.wso2.carbon.apimgt.annotations.api.Scope;
 import org.wso2.carbon.apimgt.annotations.api.Scopes;
 import org.wso2.carbon.device.mgt.common.geo.service.Alert;
+import org.wso2.carbon.device.mgt.jaxrs.beans.ErrorResponse;
 import org.wso2.carbon.device.mgt.jaxrs.beans.GeofenceWrapper;
 import org.wso2.carbon.device.mgt.jaxrs.util.Constants;
 
@@ -872,14 +873,15 @@ public interface GeoLocationBasedService {
             @ApiResponse(
                     code = 400,
                     message = "Bad Request. \n Invalid Geofence data found.",
-                    response = Response.class),
+                    response = ErrorResponse.class),
             @ApiResponse(
                     code = 401,
-                    message = "Unauthorized. \n Unauthorized request."),
+                    message = "Unauthorized. \n Unauthorized request.",
+                    response = ErrorResponse.class),
             @ApiResponse(
                     code = 500,
                     message = "Internal Server Error. \n Error on retrieving stats",
-                    response = Response.class)
+                    response = ErrorResponse.class)
     })
     Response createGeofence(@ApiParam(name = "fence", value = "Geo fence data")GeofenceWrapper geofenceWrapper);
 
