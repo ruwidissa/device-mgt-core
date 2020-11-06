@@ -334,7 +334,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
         } catch (ApplicationManagementException e) {
-            String msg = "Error occurred while creating a costom application";
+            String msg = "Error occurred while creating a custom application";
             log.error(msg, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
         } catch (RequestValidatingException e) {
@@ -716,7 +716,7 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                     .changeLifecycleState(applicationUuid, lifecycleChanger);
             return Response.status(Response.Status.CREATED).entity(applicationRelease).build();
         } catch (BadRequestException e) {
-            String msg = "Request payload contains invalid data, hence veryfy the request payload.";
+            String msg = "Request payload contains invalid data, hence verify the request payload.";
             log.error(msg, e);
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (ForbiddenException e) {
@@ -1005,10 +1005,10 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
             }
 
             if (attachmentList != null && !attachmentList.isEmpty()) {
-                Map<String, InputStream> scrrenshotData = new TreeMap<>();
+                Map<String, InputStream> screenshotData = new TreeMap<>();
                 for (Attachment sc : attachmentList) {
                     dataHandler = sc.getDataHandler();
-                    String screenshotrFileName = dataHandler.getName();
+                    String screenshotFileName = dataHandler.getName();
                     InputStream screenshotStream = dataHandler.getInputStream();
                     if (screenshotStream == null) {
                         String msg =
@@ -1017,16 +1017,16 @@ public class ApplicationManagementPublisherAPIImpl implements ApplicationManagem
                         log.error(msg);
                         throw new BadRequestException(msg);
                     }
-                    if (screenshotrFileName == null) {
+                    if (screenshotFileName == null) {
                         String msg =
                                 "Screenshot file name retrieving is failed for one screenshot. Hence can't proceed. "
                                         + "Please verify the screenshots.";
                         log.error(msg);
                         throw new BadRequestException(msg);
                     }
-                    scrrenshotData.put(screenshotrFileName, screenshotStream);
+                    screenshotData.put(screenshotFileName, screenshotStream);
                 }
-                applicationArtifact.setScreenshots(scrrenshotData);
+                applicationArtifact.setScreenshots(screenshotData);
             }
             return applicationArtifact;
         } catch (IOException e) {
